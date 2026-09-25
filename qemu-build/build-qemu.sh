@@ -7,7 +7,7 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/common.sh"
 STEP=${1:-all}
 case "$STEP" in all|deps|clone|configure|build|dist) ;; *) fail 'Unknown build step.' ;; esac
 init_log "build-$STEP"
-[[ ! "$BUILD_ROOT" =~ [[:space:]:] ]] || fail 'QEMU rejects spaces/colons; use Build-Qemu.ps1.'
+[[ ! "$WORK" =~ [[:space:]:] ]] || fail 'QEMU rejects spaces/colons in the work tree; set OME_QEMU_BUILD_WORK (Build-Qemu.ps1 does this).'
 
 install_deps() {
     local packages=()
@@ -59,7 +59,7 @@ configure_qemu() {
     cmp -s <(pacman -Q) "$OUT/pacman-lock.txt" || fail 'Package state changed; run deps then clean/reconfigure.'
     mkdir -p -- "$OUT/build"
     local fingerprint
-    fingerprint=$( { input_hashes; source_tree; cat "$OUT/pacman-lock.txt"; printf '%s\n' "$BUILD_ROOT"; } | sha256sum)
+    fingerprint=$( { input_hashes; source_tree; cat "$OUT/pacman-lock.txt"; printf '%s\n' "$WORK"; } | sha256sum)
     if [[ -f "$OUT/build/build.ninja" && -f "$OUT/configure.fingerprint" ]]; then
         [[ "$fingerprint" == "$(cat "$OUT/configure.fingerprint")" ]] || fail 'Inputs changed; use -Clean (also -IncludeSource for changed patches).'
         printf 'Configuration is current.\n'

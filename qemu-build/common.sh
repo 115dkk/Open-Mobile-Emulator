@@ -3,12 +3,20 @@
 # Copyright (C) 2026 Open Mobile Emulator contributors
 set -euo pipefail
 
-# Keep the logical SUBST path: QEMU configure rejects whitespace in paths.
-# https://gitlab.com/qemu-project/qemu/-/raw/v11.1.1/configure
 BUILD_ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -L)
-OUT="$BUILD_ROOT/out"
-DIST="$BUILD_ROOT/dist"
-SOURCE="$BUILD_ROOT/src/qemu"
+# QEMU configure rejects whitespace in source/build paths, and Meson resolves a
+# SUBST drive back to the real path (os.path.realpath), which breaks
+# "meson subprojects download" with "path is on mount 'C:', start on mount 'Z:'".
+# So the work tree (src, out, dist) may live outside the repository:
+# Build-Qemu.ps1 sets OME_QEMU_BUILD_WORK to a whitespace-free directory.
+# https://gitlab.com/qemu-project/qemu/-/raw/v11.1.1/configure
+WORK="$BUILD_ROOT"
+if [[ -n "${OME_QEMU_BUILD_WORK:-}" ]]; then
+    WORK=$(cygpath -u -- "$OME_QEMU_BUILD_WORK")
+fi
+OUT="$WORK/out"
+DIST="$WORK/dist"
+SOURCE="$WORK/src/qemu"
 # shellcheck source=pins.env
 source "$BUILD_ROOT/pins.env"
 export LC_ALL=C

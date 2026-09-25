@@ -36,7 +36,7 @@ Flags were checked in the installed launcher and [MSYS2 documentation][terminals
 
 [QEMU configure][configure] rejects spaces in source/build paths. For this
 repository the wrapper temporarily associates a free drive letter with
-`qemu-build` using [SUBST][subst], removes that association on exit, and remembers
+- The repository path contains whitespace, which QEMU configure rejects, and Meson resolves a SUBST drive back to the real path. `Build-Qemu.ps1` therefore keeps the work tree (`src`, `out`, `dist`) under `%LOCALAPPDATA%\OpenMobileEmulator\qemu-build` (override with `-WorkRoot` or `OME_QEMU_BUILD_WORK`) and creates a junction `qemu-build\out` pointing at it for the launcher.
 the letter under `out/` for repeat builds. It never relocates the repository.
 If that letter becomes occupied, free it or use `-Clean`; do not change the
 absolute build path under an existing Ninja build. For manual UCRT64 use, work
@@ -168,4 +168,4 @@ cross-check was https://packages.msys2.org/package/mingw-w64-ucrt-x86_64-qemu .
 [virgl]: https://packages.msys2.org/package/mingw-w64-ucrt-x86_64-virglrenderer
 [epoxy]: https://packages.msys2.org/package/mingw-w64-ucrt-x86_64-libepoxy
 [terminals]: https://www.msys2.org/docs/terminals/
-[subst]: https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/subst
+- The repository path contains whitespace, which QEMU configure rejects, and Meson resolves a SUBST drive back to the real path. `Build-Qemu.ps1` therefore keeps the work tree (`src`, `out`, `dist`) under `%LOCALAPPDATA%\OpenMobileEmulator\qemu-build` (override with `-WorkRoot` or `OME_QEMU_BUILD_WORK`) and creates a junction `qemu-build\out` pointing at it for the launcher.
