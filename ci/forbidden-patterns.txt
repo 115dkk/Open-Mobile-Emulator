@@ -1,0 +1,25 @@
+# R1: file-name patterns that must never be committed.
+# One glob per line; matched against the path relative to the repository root
+# and against the bare file name (case-insensitive). Lines starting with # are comments.
+# Exceptions are listed path-by-path in ci/allowlist.txt.
+libndk_translation*
+libhoudini*
+houdini*
+libberberis*
+*.sfs
+*.img
+*.iso
+*.qcow2
+*.vdi
+*.vhd
+*.vhdx
+*.vmdk
+GmsCore*
+Phonesky*
+libwvdrm*
+libwidevine*
+*.apk
+*.xapk
+*.apks
+*.aab
+*.obb

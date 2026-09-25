@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# D8: the guest presents itself as a plain x86_64 tablet and nothing more.
+# These values are the ONLY device-identity properties this project ever sets
+# (R7). M0 and M1 run with Bliss OS defaults; this file is applied by the guest
+# overlay from P3 onward. No other ro.* value is touched.
+ro.product.model=OME Tablet
+ro.product.brand=OME
+ro.product.manufacturer=OME
+ro.product.device=ome_x86_64
+ro.product.name=ome_x86_64

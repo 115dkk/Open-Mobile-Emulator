@@ -1,0 +1,32 @@
+Open Mobile Emulator
+Copyright (C) 2026 Open Mobile Emulator contributors
+
+This product is licensed under the GNU General Public License, version 2 or
+(at your option) any later version. See LICENSE for the full text.
+
+Two separately licensed works live in this repository:
+
+1. Host code (everything except the directories listed in item 2): GPL-2.0-or-later.
+2. Guest overlay and translator bundle templates under `guest/overlay/` and
+   `translator/bundle-template/`: derived from the Android Open Source Project and
+   kept under the Apache License, Version 2.0, with change notices at the top of
+   each modified file. These files are copied into a guest image and never link
+   with the host code.
+
+This repository does not contain, and its releases do not redistribute, any of
+the following third-party binaries. The installer downloads them from their
+official publishers on the user's machine and verifies SHA-256 checksums listed
+in `manifests/artifacts.json`:
+
+- Bliss OS guest images (Bliss Labs, SourceForge project `blissos-x86`)
+- Google Mobile Services and the ARM native bridge (`libndk_translation`) that
+  ship inside those images
+- Any game or application package
+
+QEMU (GPL-2.0-only) is run as a separate process and controlled over QMP. This
+project does not link against, include headers from, or copy source from QEMU.
+When a custom QEMU build is released, the exact corresponding source is offered
+alongside it as required by the GPL; see `qemu-build/`.
+
+"Android" is a trademark of Google LLC. This project is not affiliated with or
+endorsed by Google, Bliss Labs, or any game publisher.

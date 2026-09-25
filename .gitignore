@@ -1,0 +1,52 @@
+# --- R1: proprietary or bulky binaries never enter the repository ---
+libndk_translation*
+libhoudini*
+houdini*
+libberberis*
+*.sfs
+*.img
+*.iso
+*.qcow2
+*.vdi
+*.vhd
+*.vhdx
+*.vmdk
+GmsCore*
+Phonesky*
+libwvdrm*
+libwidevine*
+*.apk
+*.xapk
+*.apks
+*.aab
+*.obb
+
+# --- build outputs and local state ---
+qemu-build/out/
+qemu-build/dist/
+qemu-build/src/
+qemu-build/*.lock.txt
+tests/fixtures/**/build/
+*.o
+*.obj
+*.exe
+*.dll
+*.pdb
+*.log
+*.ppm
+*.tmp
+.artifacts/
+.vm/
+.local/
+
+# --- editors and OS ---
+.vs/
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# --- Claude Code local settings ---
+.claude/settings.local.json

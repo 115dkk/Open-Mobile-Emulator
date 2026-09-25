@@ -1,0 +1,5 @@
+# R1 exceptions: exact repository-relative paths (forward slashes) that may match
+# a forbidden pattern because their license is clear and they are self-made.
+# Each entry needs a trailing comment naming the license and origin.
+# Self-built fixtures are produced by tests/fixtures/build.ps1 and are NOT committed;
+# this list is kept so the CI check has an explicit, reviewable exception mechanism.

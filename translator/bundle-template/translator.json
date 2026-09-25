@@ -1,0 +1,21 @@
+{
+  "name": "",
+  "version": "",
+  "provider": "",
+  "android_api": 0,
+  "host_arch": "x86_64",
+  "guest_abis": [],
+  "bridge_lib": "",
+  "props": {
+    "ro.dalvik.vm.native.bridge": "",
+    "ro.dalvik.vm.isa.arm": "x86",
+    "ro.dalvik.vm.isa.arm64": "x86_64",
+    "ro.enable.native.bridge.exec": "1",
+    "ro.product.cpu.abilist": "",
+    "ro.product.cpu.abilist64": "",
+    "ro.product.cpu.abilist32": ""
+  },
+  "source_url": "",
+  "source_sha256": "",
+  "license": ""
+}
