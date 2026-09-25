@@ -1,5 +1,5 @@
 diff --git a/scripts/symlink-install-tree.py b/scripts/symlink-install-tree.py
-index b725638..fd65a4b 100644
+index b725638..8babbb2 100644
 --- a/scripts/symlink-install-tree.py
 +++ b/scripts/symlink-install-tree.py
 @@ -17,6 +17,9 @@ def destdir_join(d1: str, d2: str) -> str:
@@ -12,7 +12,7 @@ index b725638..fd65a4b 100644
  for source, dest in json.loads(out).items():
      bundle_dest = destdir_join('qemu-bundle', dest)
      path = os.path.dirname(bundle_dest)
-@@ -25,10 +28,23 @@ def destdir_join(d1: str, d2: str) -> str:
+@@ -25,10 +28,24 @@ def destdir_join(d1: str, d2: str) -> str:
      except BaseException as e:
          print(f'error making directory {path}', file=sys.stderr)
          raise e
@@ -22,7 +22,8 @@ index b725638..fd65a4b 100644
          os.symlink(source, bundle_dest)
      except BaseException as e:
          if not isinstance(e, OSError) or e.errno != errno.EEXIST:
-+            if os.name == 'nt' and isinstance(e, OSError) and                     getattr(e, 'winerror', None) == 1314:
++            if (os.name == 'nt' and isinstance(e, OSError)
++                    and getattr(e, 'winerror', None) == 1314):
 +                # Open Mobile Emulator: an unprivileged Windows user without
 +                # Developer Mode cannot create symbolic links.  The qemu-bundle
 +                # tree only serves running QEMU from the build directory and
