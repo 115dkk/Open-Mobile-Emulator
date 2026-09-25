@@ -15,7 +15,8 @@ inside the repository becomes a junction to the work tree's out\ so the launcher
 still finds qemu-build\out\bin\qemu-system-x86_64.exe.
 Does not change Windows virtualization settings.
 .PARAMETER Step
-all, deps, clone, configure, build or dist. Individual steps require prior outputs.
+all, deps, clone, configure, build, dist, thirdparty or sourceoffer. Individual steps
+require prior outputs; thirdparty and sourceoffer need a finished dist.
 .PARAMETER Clean
 Removes the generated out and dist directories in the work tree before running.
 .PARAMETER IncludeSource
@@ -29,7 +30,7 @@ pwsh -File .\qemu-build\Build-Qemu.ps1 -Clean -IncludeSource
 #>
 [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
 param(
-    [ValidateSet('all', 'deps', 'clone', 'configure', 'build', 'dist')]
+    [ValidateSet('all', 'deps', 'clone', 'configure', 'build', 'dist', 'thirdparty', 'sourceoffer')]
     [string]$Step = 'all',
     [switch]$Clean,
     [switch]$IncludeSource,

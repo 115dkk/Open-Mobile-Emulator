@@ -5,7 +5,7 @@ set -euo pipefail
 # shellcheck source=common.sh
 source "$(dirname -- "${BASH_SOURCE[0]}")/common.sh"
 STEP=${1:-all}
-case "$STEP" in all|deps|clone|configure|build|dist) ;; *) fail 'Unknown build step.' ;; esac
+case "$STEP" in all|deps|clone|configure|build|dist|thirdparty|sourceoffer) ;; *) fail 'Unknown build step.' ;; esac
 init_log "build-$STEP"
 [[ ! "$WORK" =~ [[:space:]:] ]] || fail 'QEMU rejects spaces/colons in the work tree; set OME_QEMU_BUILD_WORK (Build-Qemu.ps1 does this).'
 
@@ -29,7 +29,7 @@ clone_source() {
     [[ "$actual" == "$(git -C "$SOURCE" rev-parse "$QEMU_TAG^{commit}")" ]] || fail 'HEAD does not match tag.'
     [[ -z "$QEMU_COMMIT" || "$actual" == "$QEMU_COMMIT" ]] || fail 'Pinned commit mismatch; review upstream.'
     printf '%s\n' "$actual" > "$OUT/qemu-commit.txt"
-    git -C "$SOURCE" diff --quiet || fail 'Unstaged QEMU edits; refusing to patch.'
+    git -C "$SOURCE" diff --quiet --ignore-submodules || fail 'Unstaged QEMU edits; refusing to patch.'
     shopt -s nullglob
     for patch in "$BUILD_ROOT"/patches/*.patch; do
         if git -C "$SOURCE" apply --reverse --check --index "$patch" 2>/dev/null; then
@@ -174,4 +174,6 @@ case "$STEP" in
     configure) configure_qemu ;;
     build) build_qemu ;;
     dist) copy_runtime ;;
+    thirdparty) bash "$BUILD_ROOT/make-third-party.sh" ;;
+    sourceoffer) bash "$BUILD_ROOT/make-source-offer.sh" ;;
 esac

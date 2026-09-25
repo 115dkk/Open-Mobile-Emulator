@@ -30,11 +30,18 @@ init_log() {
     printf '\n[%s] %s\n' "$(date -u +%FT%TZ)" "$1"
 }
 
+# Inputs that determine the binary: the pins, the patches and the configure options
+# recorded at configure time. The build scripts themselves are deliberately not
+# hashed; the source tree (build-tree.txt) and package lock cover what they do,
+# and hashing them forced a full rebuild after editing a wrapper comment.
 input_hashes() (
     cd -- "$BUILD_ROOT"
-    sha256sum -- pins.env common.sh build-qemu.sh Build-Qemu.ps1 make-source-offer.sh make-third-party.sh
+    sha256sum -- pins.env
     shopt -s nullglob
     for patch in patches/*.patch; do sha256sum -- "$patch"; done
+    if [[ -f "$OUT/configure-options.txt" ]]; then
+        (cd -- "$OUT" && sha256sum -- configure-options.txt)
+    fi
 )
 
 require_source() {
@@ -42,7 +49,11 @@ require_source() {
     [[ -f "$OUT/qemu-commit.txt" ]] || fail 'Missing clone provenance; run clone.'
     [[ "$(git -C "$SOURCE" rev-parse HEAD)" == "$(cat "$OUT/qemu-commit.txt")" ]] || fail 'Source HEAD changed.'
     [[ -z "$QEMU_COMMIT" || "$(cat "$OUT/qemu-commit.txt")" == "$QEMU_COMMIT" ]] || fail 'Pinned commit mismatch.'
-    git -C "$SOURCE" diff --quiet || fail 'Unstaged source edits are not permitted.'
+    # --ignore-submodules: without it "git diff" spawns "git status" inside every
+    # submodule (roms/edk2 and its nested openssl tree) and those processes were seen
+    # deadlocking on each other's index.lock for hours on Windows. Submodule state is
+    # checked separately and explicitly by verify_submodules.
+    git -C "$SOURCE" diff --quiet --ignore-submodules || fail 'Unstaged source edits are not permitted.'
     [[ -z "$(git -C "$SOURCE" ls-files --others --exclude-standard)" ]] || fail 'Untracked QEMU source files must not affect the build.'
 }
 
