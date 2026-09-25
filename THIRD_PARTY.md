@@ -8,14 +8,24 @@ Components that a release **ships** (binaries inside the installer):
 <!-- BEGIN GENERATED -->
 | Component | Version | License | Source | Notes |
 |---|---|---|---|---|
-| QEMU | (pinned in `qemu-build/pins.env`) | GPL-2.0-only | https://gitlab.com/qemu-project/qemu | Separate process; source offer per R4 |
-| EDK2 OVMF firmware | (bundled with QEMU build) | BSD-2-Clause-Patent | https://github.com/tianocore/edk2 | UEFI firmware for the guest |
-| virglrenderer | (MSYS2 package, pinned) | MIT | https://gitlab.freedesktop.org/virgl/virglrenderer | GL passthrough |
-| libepoxy | (MSYS2 package, pinned) | MIT | https://github.com/anholt/libepoxy | GL dispatch |
-| SDL2 | (MSYS2 package, pinned) | Zlib | https://www.libsdl.org | Display and input |
-| GLib | (MSYS2 package, pinned) | LGPL-2.1-or-later | https://gitlab.gnome.org/GNOME/glib | QEMU dependency |
-| libslirp | (MSYS2 package, pinned) | BSD-3-Clause | https://gitlab.freedesktop.org/slirp/libslirp | User-mode networking |
-| pixman | (MSYS2 package, pinned) | MIT | https://gitlab.freedesktop.org/pixman/pixman | QEMU dependency |
+| QEMU | v11.1.1 (c3d48b7d1e89604920e5b81b91140c2ad39a1943) | See bundled COPYING | https://gitlab.com/qemu-project/qemu | Separate process; corresponding source offer |
+| QEMU firmware/data | Same QEMU source pin | See pc-bios and roms notices in source offer | https://gitlab.com/qemu-project/qemu | Includes EDK2 and installed ROM/keymap data; review individual licenses before release |
+| mingw-w64-ucrt-x86_64-SDL2 | 2.32.10-1 | spdx:Zlib | https://libsdl.org/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
+| mingw-w64-ucrt-x86_64-bzip2 | 1.0.8-4 | custom | https://sourceware.org/bzip2/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
+| mingw-w64-ucrt-x86_64-gettext-runtime | 1.0-1 | spdx:GPL-3.0-or-later AND LGPL-2.1-or-later | https://www.gnu.org/software/gettext/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
+| mingw-w64-ucrt-x86_64-glib2 | 2.90.0-1 | spdx:LGPL-2.1-or-later | https://gitlab.gnome.org/GNOME/glib | Copied UCRT64 DLL; upstream URL from pacman -Qi |
+| mingw-w64-ucrt-x86_64-libepoxy | 1.5.10-7 | spdx:MIT | https://github.com/anholt/libepoxy | Copied UCRT64 DLL; upstream URL from pacman -Qi |
+| mingw-w64-ucrt-x86_64-libffi | 3.8.0-1 | spdx:MIT | https://sourceware.org/libffi | Copied UCRT64 DLL; upstream URL from pacman -Qi |
+| mingw-w64-ucrt-x86_64-libgcc | 16.2.0-4 | spdx:GPL-3.0-or-later WITH GCC-exception-3.1 AND GFDL-1.3-or-later | https://gcc.gnu.org | Copied UCRT64 DLL; upstream URL from pacman -Qi |
+| mingw-w64-ucrt-x86_64-libiconv | 1.19-1 | spdx:LGPL-2.1-or-later  documentation:spdx:GPL-3.0-or-later | https://www.gnu.org/software/libiconv/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
+| mingw-w64-ucrt-x86_64-libslirp | 4.9.3-1 | spdx:BSD-3-Clause | https://gitlab.freedesktop.org/slirp/libslirp | Copied UCRT64 DLL; upstream URL from pacman -Qi |
+| mingw-w64-ucrt-x86_64-libwinpthread | 14.0.0.r420.g61d40c4c0-1 | spdx:MIT AND BSD-3-Clause-Clear | https://www.mingw-w64.org/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
+| mingw-w64-ucrt-x86_64-ncurses | 6.6-4 | spdx:MIT | https://www.gnu.org/software/ncurses/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
+| mingw-w64-ucrt-x86_64-pcre2 | 10.48-3 | spdx:BSD-3-Clause | https://pcre.org/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
+| mingw-w64-ucrt-x86_64-pixman | 0.46.4-3 | spdx:MIT | https://gitlab.freedesktop.org/pixman/pixman | Copied UCRT64 DLL; upstream URL from pacman -Qi |
+| mingw-w64-ucrt-x86_64-virglrenderer | 1.3.0-1 | spdx:MIT | https://docs.mesa3d.org/drivers/virgl/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
+| mingw-w64-ucrt-x86_64-zlib | 1.3.2-2 | spdx:Zlib | https://www.zlib.net/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
+| mingw-w64-ucrt-x86_64-zstd | 1.5.7-2 | spdx:BSD-3-Clause OR GPL-2.0-or-later | https://facebook.github.io/zstd/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
 <!-- END GENERATED -->
 
 Components that a release **does not ship** and the installer fetches from the
