@@ -1,0 +1,31 @@
+#!/usr/bin/env sh
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+
+set -eu
+
+HOOK_DIR=$(CDPATH= cd "$(dirname "$0")" && pwd)
+if ! REPO_ROOT=$(git -C "$HOOK_DIR/.." rev-parse --show-toplevel 2>/dev/null); then
+    echo 'pre-commit: cannot locate the Git repository; commit blocked.' >&2
+    exit 1
+fi
+
+if command -v pwsh >/dev/null 2>&1; then
+    PWSH=$(command -v pwsh)
+elif command -v pwsh.exe >/dev/null 2>&1; then
+    PWSH=$(command -v pwsh.exe)
+else
+    echo 'pre-commit: PowerShell 7 (pwsh or pwsh.exe) is required; commit blocked.' >&2
+    exit 1
+fi
+
+cd "$REPO_ROOT"
+if ! "$PWSH" -NoProfile -File "$REPO_ROOT/ci/Check-Forbidden.ps1" -Staged; then
+    echo 'pre-commit: R1 forbidden-file check failed; commit blocked.' >&2
+    exit 1
+fi
+
+if ! "$PWSH" -NoProfile -File "$REPO_ROOT/ci/Check-SpdxHeaders.ps1" -Staged; then
+    echo 'pre-commit: R5 SPDX-header check failed; commit blocked.' >&2
+    exit 1
+fi

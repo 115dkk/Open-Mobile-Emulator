@@ -1,0 +1,42 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install Pester
+        shell: pwsh
+        run: Install-Module Pester -Force -SkipPublisherCheck -MinimumVersion 5.5.0 -Scope CurrentUser
+      - name: Run policy checks and tests
+        shell: pwsh
+        run: pwsh -NoProfile -File ci/Invoke-AllChecks.ps1
+
+  forbidden-patterns-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check forbidden files
+        shell: pwsh
+        run: pwsh -NoProfile -File ci/Check-Forbidden.ps1
+      - name: Check artifact manifest
+        shell: pwsh
+        run: pwsh -NoProfile -File ci/Check-Manifest.ps1
