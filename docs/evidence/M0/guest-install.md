@@ -139,9 +139,16 @@ still holds the GRUB background (`first-boot-00-host-display-nomodeset-garbled.p
 The guest reports `wm size` 1280x800 at density 160, so Android is drawing a
 1280x800 frame into the 1024x768 GOP framebuffer left by GRUB, and the pitch does
 not match. `adb screencap` is correct, so M0 evidence uses adb for screenshots and
-`adb shell input` for taps. Aligning the GOP mode with the guest (GRUB
-`gfxpayload`/`video=` or a 1280x800 firmware mode) is an M0 follow-up; M1 moves to
-`virtio-vga-gl` where the guest drives the mode itself.
+`adb shell input` for taps.
+
+**Fix found later the same evening:** with `-Gpu virgl` (`-device virtio-vga-gl
+-display sdl,gl=on`) and the same `nomodeset HWACCEL=0` entry, the host window and
+QMP `screendump` are correct (`first-boot-08-host-display-virtio-vga-gl-nomodeset.png`,
+the lock screen at 1024x768). The guest still renders with SwiftShader
+(`ro.hardware.egl=swiftshader`, SurfaceFlinger `GLES: Google SwiftShader`), so this
+is only a display-path change, but it makes the standard-VGA device unnecessary
+for M0. QMP is slow to answer during the first seconds of a GL display start
+(the main loop is busy creating the GL context); use timeouts of 5 s there.
 
 adb needed no guest-side setup: `ro.adb.secure=0`, the daemon listens on TCP 5555
 out of the box (`service.adb.tcp.port` is empty, so the port comes from the image's

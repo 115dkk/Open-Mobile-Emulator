@@ -25,5 +25,11 @@
   own model there, and `max` resolves to the TCG definition (AMD vendor, TCG
   feature set); Bliss 16.9.7 hung after its init banner with it. The launcher
   defaults to `Skylake-Client-v4`.
-- Verified GPU and driver combinations: none yet. See `docs/evidence/M1/`.
+- Verified GPU and driver combinations: NVIDIA GeForce RTX 2080 SUPER, driver
+  32.0.16.1664, Windows 11 22621, distribution QEMU 11.1.0, virgl through
+  `-device virtio-vga-gl -display sdl,gl=on` (2026-09-25, `docs/evidence/M1/whpx-boot.md`).
+  Not verified: any Intel or AMD GPU (the development host has no integrated GPU),
+  the GTK display, and the custom QEMU build.
+- With a virgl (GL) scanout, QMP `screendump` answers `no surface` in QEMU 11.1.0;
+  guest screenshots come from `adb screencap` until a host-side capture exists.
 - Multi-instance, macros, and scripted automation are not part of v1 (D9).

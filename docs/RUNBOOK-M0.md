@@ -36,10 +36,18 @@ plus ext4 root, GRUB EFI, then reboot into the disk:
 
 ```powershell
 pwsh -File launcher/Stop-Guest.ps1 -Name default
-pwsh -File launcher/Start-Guest.ps1 -Name default -Gpu std
+pwsh -File launcher/Start-Guest.ps1 -Name default -Gpu virgl
 ```
-First boot takes minutes. Finish the setup wizard without a Google account.
-Turn on adb over network in the guest (see `docs/GUEST_INSTALL.md`).
+At the installed GRUB menu pick `VM Options ->` and then, for the M0 software
+rendering harness, `... Vbox/VMWare - No HW Acceleration` (`nomodeset HWACCEL=0`);
+for the M1 GPU path pick `... QEMU/KVM - Virgl - SW-FFMPEG`. The plain default
+entry hangs. GRUB remembers the last choice (`savedefault`), so later boots need no
+keystroke until a different entry is chosen. `-Gpu virgl` is used for both because
+`-Gpu std` shows a garbled host window with the nomodeset entry (the guest still
+renders in software with that entry; see `docs/evidence/M0/guest-install.md`).
+First boot takes under a minute to adb; the setup wizard was completed on
+2026-09-25 without a Google account, and adb over the loopback forward works
+without any guest setting (see `docs/GUEST_INSTALL.md`).
 
 Two behaviours to expect, both recorded in `docs/evidence/M0/guest-install.md`:
 

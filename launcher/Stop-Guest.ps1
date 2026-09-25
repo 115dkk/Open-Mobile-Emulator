@@ -11,7 +11,9 @@ forces termination only after the timeout. Repeated calls are safe.
 .PARAMETER Name
 Guest name below OME_HOME\vm.
 .PARAMETER TimeoutSec
-Seconds to wait after system_powerdown before forcing termination.
+Seconds to wait after the power-off request before forcing termination.
+.PARAMETER AdbSerial
+adb serial of the guest for the graceful power-off (adb reboot -p). Empty skips adb.
 .EXAMPLE
 ./Stop-Guest.ps1 -Name default
 .EXAMPLE
@@ -22,7 +24,9 @@ param(
     [string]$Name = 'default',
 
     [ValidateRange(0, 3600)]
-    [int]$TimeoutSec = 30
+    [int]$TimeoutSec = 30,
+
+    [string]$AdbSerial = '127.0.0.1:5555'
 )
 
 Set-StrictMode -Version Latest
@@ -70,12 +74,33 @@ catch {
     Write-Warning "Could not determine the recorded QMP port; using 4444. $($_.Exception.Message)"
 }
 
-try {
-    [void](Invoke-OmeQmp -Command 'system_powerdown' -Port $qmpPort)
-    Write-Host "Sent system_powerdown to guest '$Name'."
+# Android treats the ACPI power button as a key press (screen off or power menu),
+# not as a shutdown request, so an adb power-off comes first when the guest is
+# reachable. QEMU exits on the guest's power-off by itself (2026-09-25 evidence).
+$adbRequested = $false
+$adb = Find-OmeAdb
+if ($null -ne $adb -and -not [string]::IsNullOrWhiteSpace($AdbSerial)) {
+    try {
+        $state = (& $adb -s $AdbSerial get-state 2>$null | Out-String).Trim()
+        if ($state -ceq 'device') {
+            & $adb -s $AdbSerial reboot -p 2>$null | Out-Null
+            $adbRequested = $true
+            Write-Host "Requested power-off through adb ($AdbSerial)."
+        }
+    }
+    catch {
+        Write-Warning "adb power-off request failed; falling back to ACPI. $($_.Exception.Message)"
+    }
 }
-catch {
-    Write-Warning "QMP powerdown request failed; waiting for PID $processId before forcing it. $($_.Exception.Message)"
+
+if (-not $adbRequested) {
+    try {
+        [void](Invoke-OmeQmp -Command 'system_powerdown' -Port $qmpPort)
+        Write-Host "Sent system_powerdown to guest '$Name'."
+    }
+    catch {
+        Write-Warning "QMP powerdown request failed; waiting for PID $processId before forcing it. $($_.Exception.Message)"
+    }
 }
 
 $deadline = [DateTimeOffset]::Now.AddSeconds($TimeoutSec)
