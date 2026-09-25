@@ -34,14 +34,18 @@ The wrapper runs `msys2_shell.cmd -ucrt64 -defterm -no-start -here -c
 "./build-qemu.sh <step>"`, streaming output and propagating the exit code.
 Flags were checked in the installed launcher and [MSYS2 documentation][terminals].
 
-[QEMU configure][configure] rejects spaces in source/build paths. For this
-repository the wrapper temporarily associates a free drive letter with
-- The repository path contains whitespace, which QEMU configure rejects, and Meson resolves a SUBST drive back to the real path. `Build-Qemu.ps1` therefore keeps the work tree (`src`, `out`, `dist`) under `%LOCALAPPDATA%\OpenMobileEmulator\qemu-build` (override with `-WorkRoot` or `OME_QEMU_BUILD_WORK`) and creates a junction `qemu-build\out` pointing at it for the launcher.
-the letter under `out/` for repeat builds. It never relocates the repository.
-If that letter becomes occupied, free it or use `-Clean`; do not change the
-absolute build path under an existing Ninja build. For manual UCRT64 use, work
-through a whitespace-free path and set `OME_REPOSITORY_ROOT` to the actual repo
-root when generating third-party notices.
+[QEMU configure][configure] rejects spaces in source/build paths, and Meson
+resolves a SUBST drive letter back to the real path (its `subprojects download`
+then fails with "path is on mount 'C:', start on mount 'Z:'"). The wrapper
+therefore keeps the work tree (`src`, `out`, `dist`) outside the repository
+when the repository path contains whitespace: by default under
+`%LOCALAPPDATA%\OpenMobileEmulator\qemu-build`, overridable with `-WorkRoot`
+or the `OME_QEMU_BUILD_WORK` environment variable. After a run it creates a
+junction `qemu-build\out` pointing at the work tree's `out\` so the launcher
+finds `qemu-build\outin\qemu-system-x86_64.exe`. Do not change the work
+tree path under an existing Ninja build; use `-Clean` first. For manual UCRT64
+use, export `OME_QEMU_BUILD_WORK` yourself and set `OME_REPOSITORY_ROOT` to the
+repository root when generating third-party notices.
 
 Steps can be run separately with `-Step deps|clone|configure|build|dist`.
 Each requires previous step outputs. `all` also generates the third-party
@@ -168,4 +172,3 @@ cross-check was https://packages.msys2.org/package/mingw-w64-ucrt-x86_64-qemu .
 [virgl]: https://packages.msys2.org/package/mingw-w64-ucrt-x86_64-virglrenderer
 [epoxy]: https://packages.msys2.org/package/mingw-w64-ucrt-x86_64-libepoxy
 [terminals]: https://www.msys2.org/docs/terminals/
-- The repository path contains whitespace, which QEMU configure rejects, and Meson resolves a SUBST drive back to the real path. `Build-Qemu.ps1` therefore keeps the work tree (`src`, `out`, `dist`) under `%LOCALAPPDATA%\OpenMobileEmulator\qemu-build` (override with `-WorkRoot` or `OME_QEMU_BUILD_WORK`) and creates a junction `qemu-build\out` pointing at it for the launcher.
