@@ -60,6 +60,22 @@ reset. It is emitted whenever QEMU reads the full vCPU state under WHPX
 QEMU's copy of the FPU/AVX state, not a guest fault; the guest kept running and
 rendering. It becomes fatal only on a reset (write-back), which the launcher avoids.
 
+### Input through QMP under virgl
+
+`input-send-event` with `abs` axes (0..32767, scaled from the guest's 1280x800)
+and `btn` events: a swipe from (640,700) to (640,200) in ten steps opened the
+notification shade from the lock screen, and the guest cursor sat at the end
+point (`virgl-03-qmp-swipe-opened-shade.png`). A single press/release at
+(200,100) put the cursor exactly there over the probe activity
+(`virgl-04-qmp-tap-cursor-on-probe.png`). `dumpsys input` lists `QEMU QEMU USB
+Keyboard` (`KEYBOARD | ALPHAKEY | EXTERNAL`); the tablet is the pointer seen above.
+The arm64 probe APK started in 357 ms under virgl with the same
+`ndk_translation 0.2.3` log lines as under SwiftShader.
+
+Audio: the guest reports `Devices: speaker(2)` in `dumpsys audio` and
+`ro.hardware.audio.primary=x86`; whether sound reaches the `dsound` backend has
+not been checked by ear yet.
+
 Host GPU coverage: only the NVIDIA GeForce RTX 2080 SUPER (driver 32.0.16.1664)
 was available. This host's i5-12600KF has no integrated GPU, so the Intel entry of
 the M1 completion criteria has to come from another machine and is listed in
