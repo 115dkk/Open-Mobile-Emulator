@@ -287,8 +287,9 @@ PRODUCT/
 | RAM | 64 GB |
 | GPU | NVIDIA GeForce RTX 2080 SUPER, 드라이버 32.0.16.1664 |
 | OS | Windows 11 Education 22621 |
-| Hyper-V | 켜짐(하이퍼바이저 동작 중), `HypervisorPlatform`은 꺼짐(활성화 예정) |
+| Hyper-V | 켜짐(하이퍼바이저 동작 중). `HypervisorPlatform`은 2026-09-25 13:12에 `dism.exe`로 켬(종료 코드 3010, 재부팅 필요). PowerShell 7의 `Enable-WindowsOptionalFeature`는 이 PC에서 0x80040154로 실패하므로 dism.exe를 쓴다 |
 | 도구 | git 2.55, gh 2.96, PowerShell 7.6.6, adb 37.0.1(Android SDK platform-tools), NDK 27/28, build-tools 35/36, JDK 17, winget |
-| 없음 | QEMU(winget `SoftwareFreedomConservancy.QEMU` 11.1.0으로 설치), MSYS2(winget `MSYS2.MSYS2`로 설치), VirtualBox |
+| 설치함(2026-09-25) | QEMU 11.1.0 → `C:\Program Files\qemu` (winget `SoftwareFreedomConservancy.QEMU`), MSYS2 20260611 → `C:\msys64` (winget `MSYS2.MSYS2`) |
+| 없음 | VirtualBox |
 
 개발용 도구(QEMU, MSYS2) 설치는 winget으로 하고, 이는 제품의 네트워크 목록(R10)이 아니라 개발 환경 준비다.

@@ -10,7 +10,7 @@ Recorded 2026-09-25. Update when any row changes.
 | RAM | 64 GB |
 | GPU | NVIDIA GeForce RTX 2080 SUPER, driver 32.0.16.1664 |
 | OS | Windows 11 Education 10.0.22621 |
-| Hypervisor | Hyper-V enabled and running. `HypervisorPlatform` (WHPX) was disabled at the start; enablement with user consent is recorded in `whpx-enable.log` |
+| Hypervisor | Hyper-V enabled and running. `HypervisorPlatform` (WHPX) was disabled at the start; enablement with user consent is recorded in `whpx-enable.md` (dism.exe, exit 3010, reboot pending) |
 | Tools | PowerShell 7.6.6, adb 37.0.1, NDK 27.2 / 28.2, build-tools 35 / 36, JDK 17 |
 
 ## Harness
@@ -33,7 +33,7 @@ VirtualBox onto the same WHPX path, and because the QEMU path carries over to M1
 ## Evidence files in this folder
 
 - `environment.md` (this file)
-- `whpx-enable.log` (R9 consent record and command output)
+- `whpx-enable.md` (R9 consent record and command output)
 - `metrics.md` (M0 step 7, pending)
 - `bridge-props.txt`, `cpuinfo.txt` (M0 step 4, pending)
 - Screenshots per scenario step (M0 step 6, pending)
