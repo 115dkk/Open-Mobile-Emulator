@@ -1,0 +1,38 @@
+diff --git a/scripts/symlink-install-tree.py b/scripts/symlink-install-tree.py
+index b725638..fd65a4b 100644
+--- a/scripts/symlink-install-tree.py
++++ b/scripts/symlink-install-tree.py
+@@ -17,6 +17,9 @@ def destdir_join(d1: str, d2: str) -> str:
+ introspect = os.environ.get('MESONINTROSPECT')
+ out = subprocess.run([*shlex.split(introspect), '--installed'],
+                      stdout=subprocess.PIPE, check=True).stdout
++# Open Mobile Emulator: set once the first symbolic link is refused for lack
++# of privilege on Windows (WinError 1314), so the warning is printed once.
++symlinks_unavailable = False
+ for source, dest in json.loads(out).items():
+     bundle_dest = destdir_join('qemu-bundle', dest)
+     path = os.path.dirname(bundle_dest)
+@@ -25,10 +28,23 @@ def destdir_join(d1: str, d2: str) -> str:
+     except BaseException as e:
+         print(f'error making directory {path}', file=sys.stderr)
+         raise e
++    if symlinks_unavailable:
++        continue
+     try:
+         os.symlink(source, bundle_dest)
+     except BaseException as e:
+         if not isinstance(e, OSError) or e.errno != errno.EEXIST:
++            if os.name == 'nt' and isinstance(e, OSError) and                     getattr(e, 'winerror', None) == 1314:
++                # Open Mobile Emulator: an unprivileged Windows user without
++                # Developer Mode cannot create symbolic links.  The qemu-bundle
++                # tree only serves running QEMU from the build directory and
++                # the test suite; "ninja install" does not depend on it, so
++                # skip the bundle instead of failing configure.
++                print('warning: skipping the qemu-bundle tree: creating '
++                      'symbolic links needs Developer Mode or administrator '
++                      'rights on Windows (WinError 1314)', file=sys.stderr)
++                symlinks_unavailable = True
++                continue
+             if os.name == 'nt':
+                 print('Please enable Developer Mode to support soft link '
+                       'without Administrator permission')

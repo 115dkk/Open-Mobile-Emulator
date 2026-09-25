@@ -1,6 +1,12 @@
 # QEMU patches
 
-No patches are supplied yet. An empty patch directory is supported.
+## Current patches
+
+| File | Upstream file | Purpose | QEMU pin | Evidence |
+|---|---|---|---|---|
+| `0001-symlink-install-tree-skip-without-symlink-privilege.patch` | `scripts/symlink-install-tree.py` | On Windows an unprivileged user without Developer Mode cannot create symbolic links (WinError 1314), and the postconf script that builds the `qemu-bundle` tree made `meson setup` fail. The patch prints one warning and skips the bundle in that case; `ninja install` does not use the bundle. Written for OME (GPL-2.0-or-later, same as upstream file). | v11.1.1 | `docs/evidence/M1/custom-qemu-build.md` |
+
+An empty patch directory is also supported.
 
 Add reviewed patches as `0001-description.patch`, `0002-description.patch`, etc.
 The clone step processes `*.patch` in lexical order, checks before applying, and
