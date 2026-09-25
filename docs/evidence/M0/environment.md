@@ -28,7 +28,7 @@ VirtualBox onto the same WHPX path, and because the QEMU path carries over to M1
 | Source | SourceForge `blissos-x86`, `Official/BlissOS16/Gapps/Generic/` |
 | Size | 2,429,550,592 bytes |
 | SHA-256 (published `.iso.sha256`) | `17137711fb42236640ac6fe4421fcb3bd15710065fcf75c20807c018f42e3751` |
-| SHA-256 (computed locally) | pending download |
+| SHA-256 (computed locally, 2026-09-25, `sha256sum`) | `17137711fb42236640ac6fe4421fcb3bd15710065fcf75c20807c018f42e3751` (match) |
 
 ## Evidence files in this folder
 

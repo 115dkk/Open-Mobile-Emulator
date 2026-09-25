@@ -36,7 +36,7 @@ Claude Code는 이 절의 사실을 다시 조사하지 않아도 된다. 다만
 - 구글 Android Emulator의 Google APIs x86_64 시스템 이미지(API 34~37)에는 Berberis 기반의 비공개 ARM64 변환기가 `libndk_translation.so`로 들어 있다. 순수 AOSP 이미지에는 네이티브 브리지가 없다.
 - 상류 AOSP Berberis(Apache 2.0)는 RISC-V 백엔드만 공개했다. 오픈소스 ARM64 백엔드는 Digitalis(`github.com/DigitalisX64/digitalis`, AOSP 16 기준, 바이너리 번들 빌드 제공)가 유일하며 초기 단계다.
 - AEHD(Android Emulator Hypervisor Driver)는 2026-12-31 종료 예정이다. 하이퍼바이저는 WHPX로 확정한다.
-- 윈도우용 QEMU 배포본(qemu.weilnetz.de)은 GPU 가속이 꺼져 있다. virgl을 쓰려면 MSYS2로 직접 빌드해야 하며, WHPX + virtio-vga-gl + virglrenderer로 Bliss를 돌린 선례가 2023년부터 있다.
+- 윈도우용 QEMU 배포본(qemu.weilnetz.de)은 GPU 가속이 꺼져 있다고 알려져 있었으나, 2026-09-25에 설치한 배포본 11.1.0(설치기 `qemu-w64-setup-20260811.exe`, 빌드 `v11.1.0-12130-ge470268ff4`)은 `virtio-vga-gl` 장치와 `sdl`, `gtk` 디스플레이, `whpx` 가속, `dsound` 오디오를 모두 포함하고, `-device virtio-vga-gl -display sdl,gl=on`으로 기동해 QMP `query-display-options`가 `gl: on`을 돌려주는 것을 확인했다(`docs/evidence/M1/dist-qemu-probe.md`). 따라서 M0과 M1 실험은 배포본으로 진행할 수 있다. 자체 빌드(`qemu-build/`)는 R4의 소스 묶음과 패치 적용을 위한 릴리스 경로로 유지한다. WHPX + virtio-vga-gl + virglrenderer로 Bliss를 돌린 선례는 2023년부터 있다.
 - QEMU 상류에는 rutabaga_gfx를 통한 gfxstream 장치(`virtio-gpu-rutabaga`)가 있으나 문서가 리눅스 호스트 전제다. 윈도우 호스트 gfxstream은 출시 후 과제다.
 - EmberbirdOS(`github.com/IamAzmathullaShaikh/EmberbirdOS`)는 같은 설계를 문서화했지만 2026-09-24 기준 어떤 게스트도 빌드하지 못했고 VM도 부팅하지 못했다. 설계 결정과 라이선스 경계 분석만 참고하고 코드는 기대하지 않는다.
 

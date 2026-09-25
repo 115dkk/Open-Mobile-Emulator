@@ -16,10 +16,11 @@
       "size_bytes": 2429550592,
       "sha256": "17137711fb42236640ac6fe4421fcb3bd15710065fcf75c20807c018f42e3751",
       "sha256_source": "https://downloads.sourceforge.net/project/blissos-x86/Official/BlissOS16/Gapps/Generic/Bliss-v16.9.7-x86_64-OFFICIAL-gapps-20241011.iso.sha256",
-      "sha256_verified_locally": false,
+      "sha256_verified_locally": true,
       "license": "Mixed. AOSP and Bliss components Apache-2.0; bundled Google Mobile Services and libndk_translation are proprietary and are not redistributed by this project.",
       "provenance_note": "Official Bliss OS 16.9.7 (Android 13) Generic GApps x86_64 build, published 2024-10-11 by Bliss Labs on the SourceForge project blissos-x86 under Official/BlissOS16/Gapps/Generic. Chosen per CLAUDE.md M0 step 1 (generic build, not Go/Surface/Zenith). Includes Google libndk_translation as the ARM native bridge.",
-      "fetched_by": "installer"
+      "fetched_by": "installer",
+      "sha256_verified_note": "Computed with sha256sum on 2026-09-25 after downloading from the manifest URL; matched the publisher .iso.sha256 and size_bytes."
     }
   ]
 }
