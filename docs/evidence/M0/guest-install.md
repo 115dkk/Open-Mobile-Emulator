@@ -201,3 +201,26 @@ Afterwards `settings get global device_provisioned` and
 `settings get secure user_setup_complete` both read `1` and Launcher3
 (`QuickstepLauncher`) is in the foreground. No Wi-Fi screen appeared (the guest sees
 a wired `eth0`), and no Bliss-specific screen appeared.
+
+## Reboot through `-action reboot=shutdown` and data persistence
+
+`adb reboot` from the provisioned guest ended the QEMU process within 0.5 s (no
+`Unexpected VP exit code`, only the three harmless `failed to get xsave state`
+lines from the final register sync). `Start-Guest.ps1 -Name default` brought the
+installed GRUB back, and the menu's default had moved to `VM Options ->`: the
+entries carry `savedefault`, so the last booted entry (the `nomodeset HWACCEL=0`
+one) becomes the default and the timeout would boot it again without keystrokes.
+That removes the need to edit the guest's `grub.cfg` for the M0 harness; note
+that booting any other entry by hand moves the default again (an operator slip
+during this test booted `Debug QEMU/KVM - Virgl` once, which then became the
+saved default; inside the submenu press Home before counting Down presses).
+
+Persistence after the reboot, second boot of the installed disk:
+
+| Check | Result |
+|---|---|
+| `adb` reports `device` | 26 s after the GRUB entry (first boot: 42 s) |
+| `sys.boot_completed=1` | 29 s |
+| `/data/local/tmp/ome-marker.txt` written before the reboot | present, content intact |
+| `pm list packages org.ome.arm64probe` | still installed |
+| `settings get secure user_setup_complete` | `1` (wizard not shown again) |

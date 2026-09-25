@@ -74,6 +74,15 @@ The [graphics troubleshooting page][graphics] also has older `HWC=drmfb`,
 `HWC=none` and `GRALLOC=none` examples and identifies `HWC=drm` as standard for
 Android 9 and earlier. They are not promoted to Bliss 16 defaults here.
 
+## `savedefault` already persists the last entry (observed 2026-09-25)
+
+Every entry in the installed `grub.cfg` runs `savedefault`, and the ESP's
+`grubenv` is writable, so the entry booted last becomes the default at the next
+boot. After booting `VM Options -> ... No HW Acceleration` once, the following boot
+highlighted `VM Options ->` by default (`docs/evidence/M0/guest-install.md`). For
+the M0 harness no `grub.cfg` edit is needed; the editing procedure below stays
+for settings that are not menu entries (for example `video=`).
+
 ## Edit once, then persist only a proven setting
 
 1. At the installed GRUB menu, highlight the entry and press `e`. Edit only the

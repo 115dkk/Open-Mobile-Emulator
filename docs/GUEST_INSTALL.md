@@ -75,6 +75,13 @@ The expected bridge implementation is supported by [the FAQ][hardware].
 
 ## Network ADB
 
+**Verified 2026-09-25 on Bliss 16.9.7:** nothing has to be enabled. The image's
+adbd listens on TCP 5555 from the first boot (`ro.adb.secure=0`, no authorization
+prompt), so `adb connect 127.0.0.1:5555` through the launcher's loopback
+`hostfwd` reported `device` 42 s after the GRUB entry was chosen, before the
+setup wizard had been touched. `adb root` also works on this userdebug build.
+The original research notes follow.
+
 1. Look under `Settings > System > Developer Options` for ADB over Wi-Fi/network.
    This path is in [Bliss Bass remote-management docs][adb-bass]. **UNVERIFIED:**
    The page does not state applicability to Bliss OS 16 or exact toggle label.
