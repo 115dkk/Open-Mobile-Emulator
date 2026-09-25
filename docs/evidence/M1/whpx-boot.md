@@ -27,7 +27,7 @@ file collects the M1 step 4 and step 5 items.
 |---|---|
 | `query-status` | Works throughout; during the first seconds of a GL display start the main loop is busy and answers late, so callers need timeouts of about 5 s there. |
 | `screendump` (PPM, converted by the launcher) | Correct with `virtio-vga-gl` once Android is up. Garbled with `-device VGA` + `nomodeset` (guest 1280x800 into a 1024x768 GOP frame). Calling it repeatedly while GRUB draws on the GL display twice left QMP unresponsive (the QEMU process survived and the guest kept running); the launcher should not screendump during the firmware and GRUB phase in GL mode. |
-| `system_powerdown` | Delivered, but Android treats the ACPI power button as a key press and does not shut down; `Stop-Guest.ps1` waited 30 s and force-killed. `Stop-Guest.ps1` now sends `adb reboot -p` first and keeps ACPI as the fallback. |
+| `system_powerdown` | Delivered, but Android treats the ACPI power button as a key press and does not shut down; `Stop-Guest.ps1` waited 30 s and force-killed. `Stop-Guest.ps1` now sends `adb reboot -p` first and keeps ACPI as the fallback; tested on the virgl guest: "Requested power-off through adb", QEMU gone and "stopped normally" after 1.5 s, no force-kill. |
 | `system_reset` | Do not use (WHPX reset failure above). |
 | `input-send-event` latency (`Measure-OmeQmpLatency`, 50 iterations, guest at the setup wizard) | min 0.79 ms, average 1.02 ms, max 2.60 ms. Fine for M2 key mapping. |
 | `send-key` | Drove GRUB (`down`, `home`, `e`, `esc`, `ret`, `f10`-free), the dialog installer and cfdisk including shifted characters (`shift`+`m`, `shift`+`w`). |
@@ -55,10 +55,10 @@ sdl,show-cursor=on,gl=on`, WHPX, `Skylake-Client-v4`). Command line:
 | GRUB navigation | Done blind (`send-key` only, no `screendump`) because screendumps during the firmware and GRUB phase on the GL display wedged QMP twice. The entry was reached with `home`, four `down`, Enter, `home`, Enter after a 13 s key-holding phase. |
 
 `failed to get xsave state: No error` appeared 21 times in this run without any
-reset. It is emitted whenever QEMU reads the full vCPU state under WHPX
-(`whpx_get_registers(cpu, WHPX_LEVEL_FULL_STATE)`), so it is a warning about
-QEMU's copy of the FPU/AVX state, not a guest fault; the guest kept running and
-rendering. It becomes fatal only on a reset (write-back), which the launcher avoids.
+reset. The message comes from `whpx_get_xsave_state`, which QEMU calls when it
+reads a vCPU's full register state; what triggered those reads in this run was
+not identified. The guest kept running and rendering throughout. The failure is
+fatal only when the state is written back on a reset, which the launcher avoids.
 
 ### Input through QMP under virgl
 
