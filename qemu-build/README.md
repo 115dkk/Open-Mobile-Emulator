@@ -42,7 +42,7 @@ when the repository path contains whitespace: by default under
 `%LOCALAPPDATA%\OpenMobileEmulator\qemu-build`, overridable with `-WorkRoot`
 or the `OME_QEMU_BUILD_WORK` environment variable. After a run it creates a
 junction `qemu-build\out` pointing at the work tree's `out\` so the launcher
-finds `qemu-build\outin\qemu-system-x86_64.exe`. Do not change the work
+finds `qemu-build\out\bin\qemu-system-x86_64.exe`. Do not change the work
 tree path under an existing Ninja build; use `-Clean` first. For manual UCRT64
 use, export `OME_QEMU_BUILD_WORK` yourself and set `OME_REPOSITORY_ROOT` to the
 repository root when generating third-party notices.
