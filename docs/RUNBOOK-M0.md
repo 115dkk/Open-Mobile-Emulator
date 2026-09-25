@@ -6,12 +6,18 @@ Every command runs from the repository root in PowerShell 7. Data lives under
 
 ## 0. Host
 
+M0 runs on the distribution QEMU. The launcher prefers a custom build under
+`qemu-build\out\bin` when one exists, so pin the choice for the whole session:
+
 ```powershell
+$env:OME_QEMU_DIR = 'C:\Program Files\qemu'
 pwsh -File launcher/Check-Host.ps1
 ```
-Expect: `HypervisorPlatform Enabled`, QEMU 11.1.0 found under `C:\Program Files\qemu`,
-firmware found, adb found, "Ready for M0: yes". If WHPX still shows Disabled, the
-reboot has not happened or the enable failed; see `logs\whpx-enable*.log` in `OME_HOME`.
+Expect: `HypervisorPlatform Enabled`, `Reboot pending No`, QEMU 11.1.0 found under
+`C:\Program Files\qemu` (source `env`), firmware found, adb found, "Ready for M0: yes".
+The feature reads Enabled as soon as `dism.exe` finishes, so the "Reboot pending"
+row is what tells you whether the enable has actually taken effect. If it still
+says Yes, reboot first. Enable history is in `docs/evidence/M0/whpx-enable.md`.
 
 ## 1. Artifact
 

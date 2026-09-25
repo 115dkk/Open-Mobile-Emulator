@@ -118,15 +118,15 @@ PRODUCT/
     artifacts.json          외부 산출물 URL과 SHA-256 (R2)
     device-profile.prop     게스트 기기 프로필 (D8)
   launcher/                 PowerShell 7 스크립트 (M0, M1)
-    Check-Host.ps1
-    Get-Artifacts.ps1
-    New-GuestDisk.ps1
-    Start-Guest.ps1
-    Invoke-GuestTest.ps1
+    OME.Common.psm1         공용 모듈(경로, 매니페스트, QEMU/펌웨어/adb 탐색, QMP, adb 대기)
+    Check-Host.ps1  Get-Artifacts.ps1  New-GuestDisk.ps1  Start-Guest.ps1  Stop-Guest.ps1
+    Invoke-GuestTest.ps1  Get-GameApk.ps1  Enable-Whpx.ps1  Install-DevTools.ps1
   qemu-build/               MSYS2 빌드 스크립트와 패치 (M1)
-    build-qemu.sh
-    patches/
-    pins.env                QEMU 커밋, 라이브러리 버전 고정
+    Build-Qemu.ps1  build-qemu.sh  common.sh  make-source-offer.sh  make-third-party.sh
+    patches/                QEMU 소스 패치(소스 묶음에 포함)
+    pins.env                QEMU 태그와 커밋, MSYS2 패키지 목록 고정
+    out/                    빌드 산출물(무시 경로). 저장소 경로에 공백이 있어 실제 작업 트리는
+                            %LOCALAPPDATA%\OpenMobileEmulator\qemu-build이고 out은 junction
   guest/
     kernel-cmdline.md       Bliss 부팅 인자 실험 기록
     overlay/                게스트에 넣을 자체 스크립트 (블롭 없음)
@@ -135,7 +135,9 @@ PRODUCT/
   host/                     프런트엔드 (M2, 스택은 D7)
   installer/                설치기 (M3)
   ci/
-    allowlist.txt  forbidden-patterns.txt  workflows/
+    allowlist.txt  forbidden-patterns.txt  Check-*.ps1  Invoke-AllChecks.ps1  Install-Hooks.ps1
+  .githooks/pre-commit      R1, R5 검사 (ci/Install-Hooks.ps1로 활성화)
+  .github/workflows/ci.yml  GitHub Actions
   docs/
     KNOWN_LIMITATIONS.md  NETWORK.md  evidence/M0  evidence/M1 ...
   tests/

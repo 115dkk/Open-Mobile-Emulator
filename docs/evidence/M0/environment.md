@@ -17,6 +17,8 @@ Recorded 2026-09-25. Update when any row changes.
 
 Distribution QEMU for Windows (winget `SoftwareFreedomConservancy.QEMU` 11.1.0),
 `-accel whpx`, standard VGA with software rendering. See `launcher/Start-Guest.ps1 -Gpu std`.
+The launcher would prefer a custom build under `qemu-build\out\bin` once it exists, so
+M0 sessions set `OME_QEMU_DIR` to `C:\Program Files\qemu` explicitly (runbook step 0).
 Chosen over VirtualBox because Hyper-V is active on this host, which forces
 VirtualBox onto the same WHPX path, and because the QEMU path carries over to M1.
 

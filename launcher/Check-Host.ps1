@@ -6,8 +6,8 @@
 .SYNOPSIS
 Reports whether this Windows host is ready to run Open Mobile Emulator.
 .DESCRIPTION
-Reads CPU, memory, hypervisor, optional feature, QEMU, firmware, adb, and disk
-state without changing the computer. The process always exits with code zero.
+Reads CPU, memory, hypervisor, optional feature, pending-reboot, QEMU, firmware,
+adb, and disk state without changing the computer. The process always exits with code zero.
 .PARAMETER Json
 Writes a JSON report instead of a formatted table.
 .EXAMPLE
@@ -135,6 +135,25 @@ try {
         Add-CheckRow -Check 'adb' -Status 'Found' -Details "$adb; $adbVersion"
     }
 
+    # A feature reads Enabled as soon as dism finishes, before the reboot that makes
+    # it usable, so readiness also requires that Windows reports no pending reboot.
+    $rebootPending = $false
+    $rebootDetails = ''
+    try {
+        $cbsPending = Test-Path -LiteralPath 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending'
+        $wuPending = Test-Path -LiteralPath 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired'
+        $rebootPending = $cbsPending -or $wuPending
+        $rebootDetails = @(
+            $(if ($cbsPending) { 'Component Based Servicing' }),
+            $(if ($wuPending) { 'Windows Update' })
+        ) -ne $null -join '; '
+    }
+    catch {
+        $errors.Add("Reboot pending: $($_.Exception.Message)")
+        $rebootDetails = $_.Exception.Message
+    }
+    Add-CheckRow -Check 'Reboot pending' -Status $(if ($rebootPending) { 'Yes' } else { 'No' }) -Details $rebootDetails
+
     $omeHomePath = Get-OmeHome
     Add-CheckRow -Check 'OME_HOME' -Status 'Configured' -Details $omeHomePath
     $freeDiskGb = 0.0
@@ -150,6 +169,7 @@ try {
     }
 
     $ready = ($featureStates['HypervisorPlatform'] -ceq 'Enabled') -and
+        (-not $rebootPending) -and
         ($null -ne $qemu) -and
         ($null -ne $firmware) -and
         ($freeDiskGb -ge 40)

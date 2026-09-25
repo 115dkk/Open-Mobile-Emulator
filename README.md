@@ -26,6 +26,7 @@ in progress. Nothing here is usable by end users yet.
 ## Quick start (developers, Windows 11)
 
 ```powershell
+pwsh -File ci/Install-Hooks.ps1             # once per clone: pre-commit runs the R1 and R5 checks
 pwsh -File launcher/Check-Host.ps1          # reports host readiness, changes nothing
 pwsh -File launcher/Get-Artifacts.ps1       # downloads and verifies the guest ISO
 pwsh -File launcher/New-GuestDisk.ps1       # creates the qcow2 and boots the installer
