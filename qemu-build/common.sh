@@ -100,12 +100,15 @@ verify_dist() {
     cmp -s "$OUT/dist.sha256" "$DIST/qemu/SHA256SUMS" || fail 'Distribution inventory changed.'
 }
 
+# Checks that every firmware submodule is initialised at its pinned commit and that
+# the inventory matches the clone-time record. It deliberately does not run
+# "git status" inside the submodules: on Windows that recursion into roms/edk2 and
+# its nested openssl tree deadlocked on index.lock for hours, and the source offer
+# archives each submodule's HEAD with "git archive", so working-tree dirt inside a
+# submodule could not reach the archive anyway.
 verify_submodules() {
     local status
     status=$(git -C "$SOURCE" submodule status --recursive)
     [[ ! "$status" =~ (^|$'\n')[-+U] ]] || fail 'Firmware submodules do not match their pins.'
     cmp -s <(printf '%s\n' "$status") "$OUT/submodules-lock.txt" || fail 'Firmware submodule inventory changed.'
-    git -C "$SOURCE" submodule foreach --quiet --recursive '
-        test -z "$(git status --porcelain)" || exit 1
-    ' || fail 'Firmware submodule has local changes.'
 }
