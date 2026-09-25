@@ -50,3 +50,6 @@ Desktop.ini
 
 # --- Claude Code local settings ---
 .claude/settings.local.json
+
+# Pester -CI output
+testResults.xml
