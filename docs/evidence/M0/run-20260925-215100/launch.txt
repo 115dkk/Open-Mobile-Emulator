@@ -1,0 +1,8 @@
+ERROR: monkey failed with exit code 252: args: [-p, com.epidgames.trickcalrevive, -c, android.intent.category.LAUNCHER, 1]
+ arg: "-p"
+ arg: "com.epidgames.trickcalrevive"
+ arg: "-c"
+ arg: "android.intent.category.LAUNCHER"
+ arg: "1"
+data="com.epidgames.trickcalrevive"
+data="android.intent.category.LAUNCHER"

@@ -104,10 +104,29 @@ logs and driver details and report it (M1 stop condition). Do not cycle through
 undocumented patches to conceal the failure. Stop on native-bridge library
 crashes or an application's emulator rejection as required by the project.
 
-## Experiments (empty until actually run)
+## What the 16.9.7 ISO's own GRUB menu uses (read on 2026-09-25)
+
+The ISO's `VM Options ->` submenu carries two virtual-machine entries. Their
+parameters were read from the GRUB edit screen
+(`docs/evidence/M0/install-03-grub-entry-qemu-virgl.png`, `install-04-grub-entry-no-hw-accel.png`):
+
+| Entry | Parameters after `quiet` | Matches candidate |
+|---|---|---|
+| `Live - QEMU/KVM - Virgl - SW-FFMPEG` | `HWC=drm_minigbm GRALLOC=minigbm_arcvm` | M1-1 |
+| `Live - Vbox/VMWare - No HW Acceleration` | `nomodeset HWACCEL=0` | M0-1 and M0-2 together |
+
+The linux line is `linux $kd/kernel root=/dev/ram0 $src $@`, so these are the only
+graphics-related additions the ISO authors ship for VMs. M0 uses the second set
+with standard VGA; M1 starts from the first set with `virtio-vga-gl`.
+
+## Experiments
 
 | Date | Harness | GPU device | Kernel cmdline additions | Result |
 |---|---|---|---|---|
+| 2026-09-25 | Distribution QEMU 11.1.0, `-accel whpx,kernel-irqchip=off`, `-cpu max`, q35, 6 GiB, 4 vCPU | `VGA` | ISO default entry (`Live PC-Mode (Default)`), then `Installation`; none added | Hang after the init banner in both entries; no adb for 10 min. Cause is the CPU model, not the command line: under WHPX `max` is the TCG model (AMD vendor, TCG feature set). Details in `docs/evidence/M0/guest-install.md`. |
+| 2026-09-25 | Same, `-cpu Skylake-Client-v4` | `VGA` | `Installation` entry, none added | Installer text UI after 16 s. Installation completed from this boot. |
+| 2026-09-25 | Same, installed disk | `VGA` | installed default entry (`quiet` only; kernel modesets `bochs-drm`) | Hang in early userspace: idle CPU, no DHCP after 2 min, adb SYNs unanswered. |
+| 2026-09-25 | Same, installed disk | `VGA` | `quiet nomodeset HWACCEL=0` (installed `VM Options` entry) | Boots. adb `device` after 42 s, setup wizard on screen, arm64 probe APK runs. Host window shows a garbled 1024x768 frame (pitch mismatch with the guest's 1280x800), `adb screencap` is correct. This is the M0 setting; see `docs/evidence/M0/guest-install.md`. |
 
 [qemu]: https://docs.blissos.org/installation/install-in-a-virtual-machine/install-in-qemu/
 [advanced]: https://docs.blissos.org/installation/install-in-a-virtual-machine/advanced-qemu-config/

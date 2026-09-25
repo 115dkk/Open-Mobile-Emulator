@@ -39,6 +39,9 @@ Describe 'Get-OmeQemuArguments' {
 
         $arguments | Should -Contain 'OME default'
         $arguments | Should -Contain 'whpx,kernel-irqchip=off'
+        $arguments | Should -Contain 'Skylake-Client-v4'
+        $arguments | Should -Not -Contain 'max'
+        $arguments | Should -Contain 'reboot=shutdown'
         $arguments | Should -Contain 'VGA'
         $arguments | Should -Contain 'sdl,show-cursor=on'
         $arguments | Should -Contain 'dsound,id=snd0'

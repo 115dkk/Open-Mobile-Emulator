@@ -13,5 +13,17 @@
   product never changes this setting by itself (R9).
 - Games that detect and block emulators are out of scope. No evasion is
   implemented (R7).
+- A guest-initiated reboot does not work under WHPX with QEMU 11.1.0: QEMU logs
+  `failed to get xsave state` for every vCPU and then `WHPX: Unexpected VP exit
+  code 4`, and the VM stays paused with QMP unreachable. Seen with `-cpu max` and
+  `-cpu Skylake-Client-v4` on 2026-09-25 (`docs/evidence/M0/guest-install.md`).
+  The launcher therefore starts QEMU with `-action reboot=shutdown`: a reboot
+  inside Android ends the QEMU process, and it has to be started again
+  (`launcher/Start-Guest.ps1`; the M2 supervisor will do this automatically).
+  QMP `system_reset` has the same problem, so it is not used either.
+- `-cpu max` must not be used with WHPX. QEMU answers the guest's CPUID from its
+  own model there, and `max` resolves to the TCG definition (AMD vendor, TCG
+  feature set); Bliss 16.9.7 hung after its init banner with it. The launcher
+  defaults to `Skylake-Client-v4`.
 - Verified GPU and driver combinations: none yet. See `docs/evidence/M1/`.
 - Multi-instance, macros, and scripted automation are not part of v1 (D9).

@@ -41,6 +41,15 @@ pwsh -File launcher/Start-Guest.ps1 -Name default -Gpu std
 First boot takes minutes. Finish the setup wizard without a Google account.
 Turn on adb over network in the guest (see `docs/GUEST_INSTALL.md`).
 
+Two behaviours to expect, both recorded in `docs/evidence/M0/guest-install.md`:
+
+- The launcher's CPU model is `Skylake-Client-v4`. Do not pass `-Cpu max`: under
+  WHPX it is the TCG model and Bliss hangs after the init banner.
+- A reboot from inside the guest (installer `Reboot`, Android restart, `adb reboot`)
+  ends the QEMU process because the launcher passes `-action reboot=shutdown`;
+  a real reset wedges QEMU 11.1.0 under WHPX. Run `Start-Guest.ps1` again.
+  Do not use QMP `system_reset` for the same reason.
+
 ## 3. Bridge and CPU evidence (M0 step 4)
 
 ```powershell

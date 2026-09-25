@@ -53,3 +53,6 @@ Desktop.ini
 
 # Pester -CI output
 testResults.xml
+
+# Large raw logs collected by Invoke-GuestTest stay local; summaries and excerpts are committed
+docs/evidence/**/logcat-tail.txt

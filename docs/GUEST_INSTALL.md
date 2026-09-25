@@ -1,8 +1,33 @@
 # Bliss OS 16 guest installation under QEMU/UEFI
 
-Research date: 2026-09-25. This is an operator checklist from official docs,
-not a recording of an installation we ran. **UNVERIFIED:** Exact screens of the
-selected Bliss 16.9.x ISO have not been observed. The docs mix installer generations.
+Research date: 2026-09-25; verified the same evening against the project's
+`Bliss-v16.9.7-x86_64-OFFICIAL-gapps-20241011.iso` on QEMU 11.1.0 + WHPX. The
+screen-by-screen record with screenshots is `docs/evidence/M0/guest-install.md`;
+this file is the operator checklist. Items still marked **UNVERIFIED** were not
+exercised by that run.
+
+## Observed sequence (16.9.7, UEFI, empty virtio disk)
+
+1. GRUB menu of the ISO: pick `Installation` (5th entry) within the timeout, or
+   the default Live entry boots. Use `-cpu Skylake-Client-v4` or another named
+   model; `-cpu max` hangs after the init banner under WHPX.
+2. `Choose Partition` asks for an ESP first. On an empty disk press the `c`
+   hotkey, then Enter, to open partitioning (a bare Enter on the first line
+   produced "This is not an EFI System Partition").
+3. Keep cfdisk, choose the `gpt` label. `New`: clear the prefilled size and type
+   `512M`; `Type`: `EFI System` (first entry in the list). `New` again on the free
+   space with the default size, type `Linux filesystem`. `Write`, type `yes`, `Quit`.
+4. The installer restarts itself and lists `vda1` and `vda2`. Select `vda1` as
+   ESP, format `fat32`, keep label `ESP`, confirm `Yes` (default button is `No`).
+5. Select `vda2` to install, format `ext4`, keep label `BlissOS`, confirm `Yes`.
+6. "Prepare for OTA update?" answer `No` (default is `Yes`).
+7. `Choose EFI Boot`: `Grub2 EFI Bootloader`.
+8. The copy writes about 2.3 GB and took about one minute. No writable-`/system`
+   prompt appeared. `Congratulations!` offers `Run BlissOS-16.9.7` or `Reboot`.
+9. Do not use `Reboot` under WHPX (see `docs/KNOWN_LIMITATIONS.md`); stop QEMU and
+   start it again without the CD-ROM.
+
+The original research checklist follows for the items it still covers.
 
 ## Before starting
 

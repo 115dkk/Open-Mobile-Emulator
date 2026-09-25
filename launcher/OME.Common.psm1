@@ -1056,7 +1056,7 @@ function Get-OmeQemuArguments {
         [ValidateSet('whpx', 'tcg')]
         [string]$Accel = 'whpx',
 
-        [string]$Cpu = 'max',
+        [string]$Cpu = 'Skylake-Client-v4',
 
         [ValidateRange(128, 1048576)]
         [int]$MemoryMB = 6144,
@@ -1089,7 +1089,7 @@ function Get-OmeQemuArguments {
     $arguments.Add('-machine')
     $arguments.Add('q35')
     $arguments.Add('-accel')
-    # UNVERIFIED: The required WHPX kernel-irqchip setting was not launched because this host must reboot first.
+    # kernel-irqchip=off with WHPX boots Bliss 16.9.7 on this host (docs/evidence/M0/guest-install.md).
     $arguments.Add($(if ($Accel -ceq 'whpx') { 'whpx,kernel-irqchip=off' } else { 'tcg,thread=multi' }))
     $arguments.Add('-cpu')
     $arguments.Add($Cpu)
@@ -1145,6 +1145,12 @@ function Get-OmeQemuArguments {
 
     $arguments.Add('-qmp')
     $arguments.Add("tcp:127.0.0.1:$QmpPort,server=on,wait=off")
+    # A guest-initiated reset under WHPX fails in QEMU 11.1 ("failed to get xsave state",
+    # then "WHPX: Unexpected VP exit code 4") and leaves the VM paused with QMP unreachable,
+    # observed with both -cpu max and Skylake-Client-v4 (docs/evidence/M0/guest-install.md).
+    # Turning the reset into a QEMU exit lets the launcher (or the M2 supervisor) restart it.
+    $arguments.Add('-action')
+    $arguments.Add('reboot=shutdown')
     $arguments.Add('-rtc')
     $arguments.Add('base=utc')
     foreach ($extraArgument in $ExtraArgs) {

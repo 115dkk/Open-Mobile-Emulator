@@ -53,7 +53,10 @@ param(
     [ValidateSet('whpx', 'tcg')]
     [string]$Accel = 'whpx',
 
-    [string]$Cpu = 'max',
+    # Not 'max': under WHPX QEMU answers CPUID from its own model, and 'max' is the TCG
+    # definition there (AMD vendor, TCG feature set). Bliss 16.9.7 hung after the init
+    # banner with it and booted with this named model (docs/evidence/M0/guest-install.md).
+    [string]$Cpu = 'Skylake-Client-v4',
 
     [ValidateRange(128, 1048576)]
     [int]$MemoryMB = 6144,
