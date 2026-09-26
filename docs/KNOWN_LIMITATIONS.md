@@ -38,8 +38,16 @@
   16.9.7: the guest's `media.swcodec` process aborts with `gralloc-mapper is
   missing` on the first decoded frame, under both the virgl and the
   software-rendering boot entries (2026-09-26, `docs/evidence/M0/swcodec-gralloc-abort-virgl.txt`).
-  The tested game skips its intro on a tap and otherwise runs; Bliss's
-  `FFMPEG_CODEC=1 FFMPEG_PREFER_C2=1` boot options are an untested alternative.
+  The tested game skips its intro on a tap and otherwise runs. Bliss's ffmpeg
+  codec2 service (`FFMPEG_CODEC2_PREFER=1` on the kernel line; `init.sh` reads
+  that name, not the shipped menu's `FFMPEG_PREFER_C2`) decodes without a
+  crash but the frames still do not reach the game's texture, so the video
+  stays black either way (`docs/evidence/M0/findings-20260926.md`).
+- QEMU's generated EDID offers the guest a single 75 Hz mode, which pins
+  SurfaceFlinger's vsync to 13.3 ms and held the tested game at 38 fps. The
+  launcher passes `edid=off` on the virgl device so the guest falls back to a
+  60 Hz mode (58 fps measured). Guests that need the EDID's resolution list
+  lose it; `xres`/`yres` on the device still set the default mode.
 - The translator aborted once with `ndk_translation: Cannot process signal 11`
   while a native thread attached to the JVM (`docs/evidence/M0/crash-ndk-translation-1/`),
   after 170 s of a launch that was otherwise idle on a download prompt. It did
