@@ -27,7 +27,7 @@ Does not run adb install even when Apk paths are supplied.
 .PARAMETER SkipLaunch
 Does not launch the package; samples whatever is already running. Use this to
 sample a session in progress: relaunching a running game through monkey ended
-the game process on 2026-09-26 (docs/evidence/M0/metrics.md).
+the game process on 2026-09-26 (docs/evidence/M0/findings-20260926.md).
 .PARAMETER SettleSec
 Seconds to wait after launching the app before sampling.
 .EXAMPLE
