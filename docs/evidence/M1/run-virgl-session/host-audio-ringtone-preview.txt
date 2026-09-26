@@ -1,0 +1,21 @@
+# Host audio session peak of qemu-system-x86_64.exe (pid 2344, -audiodev dsound) on the host's default render endpoint, read with WASAPI IAudioMeterInformation through pycaw, 2026-09-26.
+# Guest: ringtone picker (android.intent.action.RINGTONE_PICKER, 'Sounds'), 'Bell Phone' tapped at 18:11:57, 'Andromeda' at 18:12:01; each tap plays a preview on STREAM_RING.
+# The endpoint_peak column includes every process on the endpoint (a browser was playing on the host at the time).
+
+# endpoint: CABLE Input(VB-Audio Virtual Cable)
+# sessions on the endpoint: ['firefox.exe', 'steam.exe', 'msedgewebview2.exe', 'qemu-system-x86_64.exe', 'ChatGPT.exe', '(system)']
+time	endpoint_peak	qemu-system-x86_64.exe:2344
+18:11:55	0.378	0.000
+18:11:56	0.248	0.000
+18:11:57	0.272	0.148
+18:11:58	0.260	0.191
+18:11:59	0.186	0.010
+18:12:00	0.236	0.001
+18:12:01	0.541	0.269
+18:12:02	0.431	0.261
+18:12:03	0.399	0.001
+18:12:04	0.400	0.269
+18:12:05	0.382	0.261
+18:12:06	0.320	0.021
+    Type     Id Active Client Session Port Id S  Flags   Format Chn mask  SRate ST Usg CT  G db  L dB  R dB  VS dB   Server FrmCnt  FrmRdy F Underruns  Flushed   Latency
+       S     58     no   1048      65      16 S  0x600 00000001 00000003  44100  1   d  4   -17    -6    -6     0  000050FA   4146       0 f         0        0   unavail

@@ -1,0 +1,8 @@
+# endpoint: CABLE Input(VB-Audio Virtual Cable)
+# sessions on the endpoint: ['firefox.exe', 'steam.exe', 'msedgewebview2.exe', 'qemu-system-x86_64.exe', 'KakaoTalk.exe', '(system)']
+time	endpoint_peak	qemu-system-x86_64.exe:2344
+18:55:37	0.200	0.071
+18:55:38	0.190	0.071
+18:55:39	0.183	0.070
+18:55:40	0.188	0.073
+18:55:41	0.179	0.071

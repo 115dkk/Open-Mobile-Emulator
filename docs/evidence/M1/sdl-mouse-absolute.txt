@@ -1,0 +1,22 @@
+# SDL window mouse path (host mouse -> SDL -> QEMU usb-tablet -> guest), 2026-09-26 18:17
+# QEMU 11.1.0 distribution build, '-display sdl,show-cursor=on,gl=on', '-device usb-tablet'; guest 1280x800, QEMU window client area 1280x800 with its origin at screen (640,300).
+# The host cursor was moved with SetCursorPos to three screen points inside exposed parts of the QEMU window (another window covered most of it), while 'getevent -l -t /dev/input/event2' (QEMU QEMU USB Tablet) ran in the guest.
+# Every ABS value equals floor(client_x * 32767 / 1280) and floor(client_y * 32767 / 800): the SDL path scales client coordinates by 32767/size, same as the QMP input-send-event path. The fourth report is the cursor being restored to its previous position (client 920,603).
+# Posted WM_MOUSEMOVE messages (PostMessage with synthetic lParam) did not produce guest events; only real cursor movement does.
+
+[    7663.923757] EV_ABS       ABS_X                000069ff            
+[    7663.923757] EV_ABS       ABS_Y                00001fff            
+[    7663.923757] EV_SYN       SYN_REPORT           00000000            
+[    7665.140306] EV_ABS       ABS_X                000023ff            
+[    7665.140306] EV_ABS       ABS_Y                00006e65            
+[    7665.140306] EV_SYN       SYN_REPORT           00000000            
+[    7666.330708] EV_ABS       ABS_X                000073ff            
+[    7666.330708] EV_ABS       ABS_Y                00003fff            
+[    7666.330708] EV_SYN       SYN_REPORT           00000000            
+[    7667.551652] EV_ABS       ABS_X                00005bff            
+[    7667.551652] EV_ABS       ABS_Y                0000607a            
+[    7667.551652] EV_SYN       SYN_REPORT           00000000            
+18:17:58.635 SetCursorPos screen (1700,500) = client (1060,200); expected ABS_X 27135 ABS_Y 8191
+18:17:59.855 SetCursorPos screen (1000,990) = client (360,690); expected ABS_X 9215 ABS_Y 28261
+18:18:01.068 SetCursorPos screen (1800,700) = client (1160,400); expected ABS_X 29695 ABS_Y 16383
+18:18:02.269 cursor restored to screen (1560,903) = client (920,603); ABS_X 23551 ABS_Y 24698

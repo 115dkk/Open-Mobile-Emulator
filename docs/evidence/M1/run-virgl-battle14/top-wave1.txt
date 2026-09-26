@@ -1,0 +1,10 @@
+Tasks: 180 total,   2 running, 178 sleeping,   0 stopped,   0 zombie
+  Mem:  8120712K total,  7794228K used,   326484K free,   103492K buffers
+ Swap:  4222764K total,        0K used,  4222764K free,  4812100K cached
+400%cpu 104%user   0%nice  44%sys 252%idle   0%iow   0%irq   0%sirq   0%host
+  PID %CPU  RES[ARGS]
+  855  0.0 158M zygote64
+  856  0.0 149M zygote
+  901  0.0 6.1M wificond
+ 1588  0.0  83M webview_zygote
+  702  0.0 9.2M vold --blkid_context=u:r:blkid:s0 --blkid_untrusted_context=u:r:blkid_untrusted:s0 --fsck_context=u:r:fsck:s0 --fsck_untrusted_context=u:r:fsck_untrusted:s0

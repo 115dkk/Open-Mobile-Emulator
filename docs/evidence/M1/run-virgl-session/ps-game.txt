@@ -1,0 +1,7 @@
+# Game process on the virgl boot (QEMU pid 2344 started 16:10:04, edid=off, 8 GiB), sampled 2026-09-26T18:05:12.4271936+09:00
+  PID  PPID     ELAPSED STIME    RSS NAME                       
+ 3213   855    01:54:33 16:10:38 2549000 com.epidgames.trickcalrevive
+ 3741  3213    01:53:43 16:11:28 73036 com.epidgames.trickcalrevive
+
+ 18:05:12 up  1:54,  0 users,  load average: 1.88, 2.00, 2.04
+6897.73 18082.27

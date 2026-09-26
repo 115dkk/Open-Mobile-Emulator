@@ -1,0 +1,6 @@
+Tasks: 177 total,   1 running, 176 sleeping,   0 stopped,   0 zombie
+  Mem:  8120712K total,  7735932K used,   384780K free,   113288K buffers
+ Swap:  4222764K total,        0K used,  4222764K free,  4814208K cached
+400%cpu 104%user   4%nice  52%sys 240%idle   0%iow   0%irq   0%sirq   0%host
+  PID USER         PR  NI VIRT  RES  SHR S[%CPU] %MEM     TIME+ ARGS
+ 9589 u0_a287      10 -10  37G 2.3G 827M S  148  30.3   7:13.79 com.epidgames.trickcalrevive

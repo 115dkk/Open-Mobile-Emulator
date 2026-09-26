@@ -1,0 +1,4 @@
+host CPU % (3 x 2 s): 34.0, 41.9, 30.7
+           TOTAL PSS:  2045170            TOTAL RSS:  2473160      TOTAL SWAP (KB):        0
+MemFree:          384420 kB
+MemAvailable:    4883280 kB

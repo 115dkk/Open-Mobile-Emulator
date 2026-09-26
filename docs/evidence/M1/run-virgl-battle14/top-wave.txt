@@ -1,0 +1,12 @@
+Tasks: 178 total,   1 running, 177 sleeping,   0 stopped,   0 zombie
+  Mem:  8120712K total,  7789184K used,   331528K free,   103676K buffers
+ Swap:  4222764K total,        0K used,  4222764K free,  4812544K cached
+400%cpu 104%user   0%nice  40%sys 256%idle   0%iow   0%irq   0%sirq   0%host
+  PID USER         PR  NI VIRT  RES  SHR S[%CPU] %MEM     TIME+ ARGS
+ 3213 u0_a287      10 -10  37G 2.4G 853M S  132  31.7 149:50.40 com.epidgames.trickcalrevive
+  878 root         -3  -8  11G  91M  50M S  8.0   1.1  13:03.88 surfaceflinger
+ 7582 root         20   0    0    0    0 I  4.0   0.0   0:02.66 [kworker/u8:1-events_unbound]
+ 8133 root         20   0  10G 5.0M 4.3M R  0.0   0.0   0:00.01 top -b -n 1 -m 8
+ 8059 root         20   0    0    0    0 I  0.0   0.0   0:00.15 [kworker/u8:2-events_unbound]
+ 7854 root         20   0    0    0    0 I  0.0   0.0   0:00.73 [kworker/0:0-events]
+ 7657 root         20   0    0    0    0 I  0.0   0.0   0:00.38 [kworker/0:2-events]

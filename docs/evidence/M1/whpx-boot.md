@@ -76,6 +76,42 @@ Audio: the guest reports `Devices: speaker(2)` in `dumpsys audio` and
 `ro.hardware.audio.primary=x86`; whether sound reaches the `dsound` backend has
 not been checked by ear yet.
 
+### Audio and the SDL mouse path, measured on 2026-09-26
+
+Audio reaches the host. The peak meter of QEMU's audio session on the host's
+default render endpoint (WASAPI `IAudioMeterInformation`, read with pycaw)
+went from 0.000 to 0.15 to 0.27 while the guest's ringtone picker played
+previews, and to 0.06 to 0.10 while the game played its lobby music and a
+battle (`run-virgl-session/host-audio-ringtone-preview.txt`,
+`host-audio-game.txt`, `run-virgl-battle14/host-audio-battle.txt`). Two
+observations for the product:
+
+- Bliss 16.9.7 boots with the media stream at index 5 of 15, which AudioFlinger
+  applies as -33 dB to every media track (`G db` column in `dumpsys
+  media.audio_flinger`). At that setting the game's music arrived on the host
+  as 0.000 to 0.002 peak, in practice silence. `cmd media_session volume
+  --stream 3 --set 15` in the guest brought the track to 0 dB and the host peak
+  to 0.06 to 0.10. The launcher or the M2 wizard should set the guest media
+  volume once after the first boot; the guest's own controls (ALSA `Master`,
+  HDA amplifier, game sliders) were already at maximum.
+- The endpoint on this host is a virtual cable (`CABLE Input`), so the by-ear
+  check depends on the user's routing; the session meter is the objective
+  evidence.
+
+Mouse through the SDL window: with the host cursor moved over the QEMU window
+(`SetCursorPos`, three points) while `getevent` watched the guest's `QEMU QEMU
+USB Tablet`, every report was exactly `floor(client_x * 32767 / 1280)`,
+`floor(client_y * 32767 / 800)`: the SDL path scales window-client coordinates
+by 32767/size, the same mapping as QMP `input-send-event`
+(`sdl-mouse-absolute.txt`). Synthetic `WM_MOUSEMOVE` messages posted to the
+window produced nothing, so host-side automation of the SDL window needs real
+cursor movement or the QMP path.
+
+Keyboard through the SDL window: no separate measurement. The Google account
+was added on 2026-09-26 by typing the credentials into the QEMU window
+(`../M0/google-account-added.txt`), and QMP `send-key` drives the same
+`usb-kbd` device (step 5 above).
+
 Host GPU coverage: only the NVIDIA GeForce RTX 2080 SUPER (driver 32.0.16.1664)
 was available. This host's i5-12600KF has no integrated GPU, so the Intel entry of
 the M1 completion criteria has to come from another machine and is listed in

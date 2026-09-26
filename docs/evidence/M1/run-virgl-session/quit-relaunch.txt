@@ -1,0 +1,12 @@
+# In-game quit and relaunch on the virgl boot (edid=off, 8 GiB), 2026-09-26. Host clock.
+18:34:36 Back on the lobby opened 게임 종료; tapping 종료
+18:34:40 game processes after quit: '' (empty = gone, after 3 s)
+      topResumedActivity=ActivityRecord{e730f70 u0 com.android.launcher3/.uioverrides.QuickstepLauncher} t35}
+18:34:40 relaunch: monkey -p com.epidgames.trickcalrevive -c android.intent.category.LAUNCHER 1
+## Network stats: elapsed time=30ms (0ms mobile, 0ms wifi, 30ms not connected)
+ 9006       00:45 com.epidgames.trickcalrevive
+ 9098       00:44 com.epidgames.trickcalrevive
+18:35:56 screenshots s46 (+45 s) s47 (+75 s)
+18:36:21 title screen with the same account number [11617632] (screenshot-relaunch-title.png); tap
+18:36:41 lobby with the attendance popup (screenshot-relaunch-lobby-attendance.png); no Play Games "Add account" page since the Google account exists
+Unity SystemInfo on this launch: 'CPU = x86-64, Cores = 2, Memory = 7930mb', 'ARM big.LITTLE configuration: 2 big (mask: 0x3)'. Crash buffer: media.swcodec abort at 18:34:47 (intro video, known); no translator abort on this relaunch.

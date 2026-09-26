@@ -1,0 +1,29 @@
+# Host audio session peak of qemu-system-x86_64.exe (pid 2344, -audiodev dsound, hda-duplex) while the game ran in the lobby, 2026-09-26. Read with WASAPI IAudioMeterInformation (pycaw) on the host's default render endpoint; the endpoint column includes a browser playing on the host.
+# The game's own sound settings were master 100, BGM 100, SFX 100, voice 100 (m1-game-settings-sound.png). Its AAudio track in AudioFlinger was active the whole time (Id 57, client 3213, 24 kHz float stereo).
+#
+# 1. Guest media volume at the Bliss default, index 5 of 15. AudioFlinger applied -33 dB to the track ("G db" column) and the host saw 0.000 to 0.002:
+time	endpoint_peak	qemu-system-x86_64.exe:2344
+18:08:30	0.395	0.000
+18:08:31	0.380	0.000
+18:08:32	0.289	0.000
+18:08:33	0.451	0.000
+18:10:35	0.360	0.000
+18:10:36	0.468	0.000
+18:19:07	0.022	0.002
+18:19:08	0.010	0.002
+18:19:09	0.005	0.002
+18:19:10	0.002	0.002
+   Type     Id Active Client Session Port Id S  Flags   Format Chn mask  SRate ST Usg CT  G db  L dB  R dB  VS dB   Server FrmCnt  FrmRdy F Underruns  Flushed   Latency
+           57    yes   3213      57      15 A  0x000 00000005 00000003  24000  3   1  2   -33     0     0     0  0B2DEF60   1920r   1920 A         0        0   unavail
+#
+# 2. After 'cmd media_session volume --stream 3 --set 15' in the guest (18:19:55). Track gain 0 dB, host peak 0.055 to 0.101 with the lobby music:
+time	endpoint_peak	qemu-system-x86_64.exe:2344
+18:20:03	0.280	0.091
+18:20:04	0.376	0.092
+18:20:05	0.296	0.055
+18:20:06	0.436	0.058
+18:20:07	0.439	0.081
+18:20:08	0.489	0.101
+           57    yes   3213      57      15 A  0x000 00000005 00000003  24000  3   1  2     0     0     0     0  0B370360   1920r   1920 A         0        0   unavail
+#
+# Guest side throughout: /proc/asound/card0/pcm0p/sub0/status RUNNING with hw_ptr advancing, ALSA 'Master' 74/74 unmuted, HDA codec node 0x02 Amp-Out 0x4a/0x4a, STREAM_MUSIC not muted.
