@@ -60,8 +60,10 @@ were reviewed. The fourth column is the real 1-3 battle on the 60 Hz mode.
 
 virgl wins on every row. Raising the guest to 8 GiB (launcher default since
 2026-09-26, user approval up to 16 GiB) lifted free memory from about 100 MB to
-1.46 GB and cut the game's CPU share from 88 % to about 60 %, but the presented
-frame rate stayed at 38 fps with a steady 26.5 ms frame interval. That ceiling
+1.46 GB; its CPU figures are not comparable with the battle columns because
+that run stayed on the stage list, and the 60 Hz battle's higher CPU share is
+the expected cost of presenting 58 frames instead of 38. The frame rate at
+8 GiB stayed at 38 fps with a steady 26.5 ms frame interval. That ceiling
 was the guest's 75 Hz display mode from QEMU's generated EDID: the game's frame
 fits in one 60 Hz vsync but not in one 75 Hz vsync, so it landed on every
 second 75 Hz vsync. With the EDID disabled the guest driver falls back to a
