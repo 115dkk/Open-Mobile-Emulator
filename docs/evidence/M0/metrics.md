@@ -39,25 +39,35 @@ replayed after a perfect clear; same stage type, one more enemy wave.
 | Post-download loading | pass after reboot; one thread busy | 48 % | 1,122 | 21.1 / 22.8 | 6.31 | | `step-06` | `run-virgl-loading-stall/`, `gfxinfo` 3 frames total |
 | Guest account, story, quit and relaunch | done once, under the software harness (above); the account carried over to this boot | | | | | | `step-43`, `step-44` | |
 | Battle 1-2 | pass | 88 % | 2,010 | 18.9 / 22.8 | 6.38 | 38.1 fps setup (p50 27 ms, p90 33.5, max 45.8), 38.5 fps wave (p50 26.5 ms, p90 30.7, max 46) | `step-45`, `step-46` | `run-virgl-battle/sf-latency-*.txt` |
-| Battle 1-3 with `-m 8192` (fourth boot, 15:36) | pass | 60 to 64 % | 1,901 | 14.3 / n.a. | 7.17 | 38.2 fps setup (p50 26.2 ms, p90 28.6, max 45.2), 37.8 fps wave (p50 26.7 ms, p90 30.8, max 43) | `step-49`, `step-50` | `run-virgl-8g-battle/`; guest MemFree 1.46 GB, MemAvailable 4.85 GB during the wave |
+| Stage list screen (animated map) with `-m 8192` (fourth boot, 15:36); stage 1-3 was locked, so the taps meant for it did nothing and no battle ran | measured, not a battle | 60 to 64 % | 1,901 | 14.3 / n.a. | 7.17 | 38.2 fps and 37.8 fps in two 10 s windows (p50 26.2 to 26.7 ms, p90 28.6 to 30.8, max 45.2) | `step-49`, `step-50` (both show the stage list) | `run-virgl-8g-battle/`; guest MemFree 1.46 GB, MemAvailable 4.85 GB |
+| Title, lobby and stage list screen with `-m 8192` and `-global virtio-vga-gl.edid=off` (seventh boot, 16:10; guest mode 1280x800 at 60 Hz); stage 1-3 still locked, no battle ran | measured, not a battle | 92 % | | | | 58.4 fps title (p50 16.8 ms), 57.9 fps lobby (p50 16.7 ms, p99 35.9), 58.5 fps and 58.4 fps stage list (p50 16.9 to 17 ms, p90 20, max 24.2) | `step-51`, `step-52` (both show the stage list) | `run-virgl-60hz-battle/sf-latency-*.txt` (`setup` and `wave` files are the stage list); MemFree 1.55 GB |
 
 ## Comparison (M1 completion criterion: battle frames and host CPU at least as good as the M0 harness)
 
-| Measure | Software harness (M0) | virgl (M1) |
-|---|---|---|
-| Battle presented frame rate | 12 to 13 fps | 38 fps |
-| Frame time p50 | 71 to 95 ms | 27 ms |
-| Game process CPU (`top`, 4 vCPU) | 320 to 336 % | 88 % |
-| Host CPU (whole PC) | 28 to 34 % | 19 % |
-| Game PSS | 2.6 to 2.9 GB | 2.0 GB |
-| Guest free memory (6 GB guest) | 80 to 115 MB free, 2.1 GB cached | 282 MB free, 2.8 GB cached |
+| Measure | Software harness (M0), battle 1-1 | virgl, 6 GiB, 75 Hz EDID, battle 1-2 | virgl, 8 GiB, 75 Hz, stage list screen | virgl, 8 GiB, 60 Hz (`edid=off`), title / lobby / stage list |
+|---|---|---|---|---|
+| Presented frame rate | 12 to 13 fps | 38 fps | 38 fps | 58 fps |
+| Frame time p50 | 71 to 95 ms | 27 ms | 26 ms | 17 ms |
+| Game process CPU (`top`, 4 vCPU) | 320 to 336 % | 88 % | 60 to 64 % | 92 % |
+| Host CPU (whole PC) | 28 to 34 % | 19 % | 14 % | not sampled |
+| Game PSS | 2.6 to 2.9 GB | 2.0 GB | 1.9 GB | not sampled |
+| Guest free memory | 80 to 115 MB free (6 GiB) | 282 MB free (6 GiB) | 1.46 GB free (8 GiB) | 1.55 GB free (8 GiB) |
+
+The 8 GiB and 60 Hz columns are not battle measurements: stage 1-3 turned out
+to be locked and the scripted taps stayed on the stage list, which was only
+noticed when the screenshots were reviewed. The 75 Hz versus 60 Hz comparison
+holds because both columns measure the same screens; a 60 Hz battle number is
+still owed.
 
 virgl wins on every row. Raising the guest to 8 GiB (launcher default since
 2026-09-26, user approval up to 16 GiB) lifted free memory from about 100 MB to
 1.46 GB and cut the game's CPU share from 88 % to about 60 %, but the presented
-frame rate stayed at 38 fps with a steady 26.5 ms frame interval. Memory was a
-source of stutter, not of the frame-rate ceiling; the ceiling is examined in
-`findings-20260926.md` (frame pacing against the display refresh).
+frame rate stayed at 38 fps with a steady 26.5 ms frame interval. That ceiling
+was the guest's 75 Hz display mode from QEMU's generated EDID: the game's frame
+fits in one 60 Hz vsync but not in one 75 Hz vsync, so it landed on every
+second 75 Hz vsync. With the EDID disabled the guest driver falls back to a
+60 Hz mode and the game presents 58 fps everywhere measured, on a 59 Hz host
+monitor. Details in `findings-20260926.md`.
 
 ## Idle baseline (2026-09-25, `run-20260925-215100`, no game installed)
 

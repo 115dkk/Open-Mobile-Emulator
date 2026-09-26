@@ -56,7 +56,7 @@ Describe 'Get-OmeQemuArguments' {
         $arguments | Should -Contain 'tcg,thread=multi'
         $arguments | Should -Contain "file=$isoPath,media=cdrom,if=none,id=cd0"
         $arguments | Should -Contain 'ide-cd,drive=cd0,bootindex=0,bus=ide.0'
-        $arguments | Should -Contain 'virtio-vga-gl'
+        $arguments | Should -Contain 'virtio-vga-gl,edid=off'
         $arguments | Should -Contain 'sdl,show-cursor=on,gl=on'
     }
 

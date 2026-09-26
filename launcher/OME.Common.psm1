@@ -1115,7 +1115,11 @@ function Get-OmeQemuArguments {
     switch ($Gpu) {
         'std' { $arguments.Add('VGA') }
         'virtio' { $arguments.Add('virtio-vga') }
-        'virgl' { $arguments.Add('virtio-vga-gl') }
+        # edid=off: QEMU's generated EDID advertises a 75 Hz mode, which pins the
+        # guest's vsync to 13.3 ms and the tested game to 38 fps. Without the EDID the
+        # guest driver falls back to a 60 Hz CVT mode and the game presents 58 fps on
+        # a 60 Hz host monitor (docs/evidence/M0/findings-20260926.md, 2026-09-26).
+        'virgl' { $arguments.Add('virtio-vga-gl,edid=off') }
     }
 
     $displayValue = "$Display,show-cursor=on"
