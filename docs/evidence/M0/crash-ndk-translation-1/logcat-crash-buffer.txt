@@ -1,0 +1,151 @@
+--------- beginning of crash
+09-26 10:09:43.805   921  4436 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-26 10:09:43.805   921  4436 F DEBUG   : Build fingerprint: 'Android-x86/bliss_x86_64/x86_64:13/TQ3A.230901.001.C1/152:userdebug/test-keys'
+09-26 10:09:43.805   921  4436 F DEBUG   : Revision: '0'
+09-26 10:09:43.805   921  4436 F DEBUG   : ABI: 'x86_64'
+09-26 10:09:43.805   921  4436 F DEBUG   : Timestamp: 2026-09-26 10:09:43.725248000+0900
+09-26 10:09:43.806   921  4436 F DEBUG   : Process uptime: 289s
+09-26 10:09:43.806   921  4436 F DEBUG   : Cmdline: media.swcodec oid.media.swcodec/bin/mediaswcodec
+09-26 10:09:43.806   921  4436 F DEBUG   : pid: 921, tid: 4436, name: oid.avc.decoder  >>> media.swcodec <<<
+09-26 10:09:43.806   921  4436 F DEBUG   : uid: 1046
+09-26 10:09:43.806   921  4436 F DEBUG   : signal 0 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-26 10:09:43.806   921  4436 F DEBUG   : Abort message: 'gralloc-mapper is missing'
+09-26 10:09:43.806   921  4436 F DEBUG   :     rax 0000000000000000  rbx 0000000000000399  rcx 0000770670bad69f  rdx 0000000000000006
+09-26 10:09:43.806   921  4436 F DEBUG   :     r8  7e485b1a10109ada  r9  7e485b1a10109ada  r10 00007703d80edcc0  r11 0000000000000203
+09-26 10:09:43.806   921  4436 F DEBUG   :     r12 00000000000000f0  r13 0000000000000180  r14 00007703d80edcb8  r15 0000000000001154
+09-26 10:09:43.806   921  4436 F DEBUG   :     rdi 0000000000000399  rsi 0000000000001154
+09-26 10:09:43.806   921  4436 F DEBUG   :     rbp 00007703f054e950  rsp 00007703d80edcb0  rip 0000770670bad69f
+09-26 10:09:43.806   921  4436 F DEBUG   : backtrace:
+09-26 10:09:43.806   921  4436 F DEBUG   :       #00 pc 000000000005f69f  /apex/com.android.runtime/lib64/bionic/libc.so (abort+191) (BuildId: 1b2a39e43caba588eb8ce2a331dc4eef)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #01 pc 00000000000069aa  /system/lib64/liblog.so (__android_log_default_aborter+10) (BuildId: f0538d632eee5d6820b96914c8a1657c)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #02 pc 0000000000007562  /system/lib64/liblog.so (__android_log_assert+370) (BuildId: f0538d632eee5d6820b96914c8a1657c)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #03 pc 0000000000042164  /system/lib64/libui.so (android::GraphicBufferMapper::GraphicBufferMapper()+388) (BuildId: 935fd18f1b4d7962a8045574ebb96ebf)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #04 pc 0000000000040341  /system/lib64/libui.so (android::GraphicBufferAllocator::GraphicBufferAllocator()+81) (BuildId: 935fd18f1b4d7962a8045574ebb96ebf)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #05 pc 00000000000521f2  /system/lib64/libcodec2_vndk.so (android::C2AllocatorGralloc::Impl::newGraphicAllocation(unsigned int, unsigned int, unsigned int, C2MemoryUsage const&, std::__1::shared_ptr<C2GraphicAllocation>*)+162) (BuildId: 27e5d41c39499c71672755718c25f390)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #06 pc 00000000000527c4  /system/lib64/libcodec2_vndk.so (android::C2AllocatorGralloc::newGraphicAllocation(unsigned int, unsigned int, unsigned int, C2MemoryUsage, std::__1::shared_ptr<C2GraphicAllocation>*)+36) (BuildId: 27e5d41c39499c71672755718c25f390)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #07 pc 00000000000584f9  /system/lib64/libcodec2_vndk.so (C2BasicGraphicBlockPool::fetchGraphicBlock(unsigned int, unsigned int, unsigned int, C2MemoryUsage, std::__1::shared_ptr<C2GraphicBlock>*)+169) (BuildId: 27e5d41c39499c71672755718c25f390)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #08 pc 0000000000010d7b  /system/lib64/libcodec2_soft_common.so (android::SimpleC2Component::BlockingBlockPool::fetchGraphicBlock(unsigned int, unsigned int, unsigned int, C2MemoryUsage, std::__1::shared_ptr<C2GraphicBlock>*)+91) (BuildId: 734bcb27864061a28ead987fcd36947a)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #09 pc 000000000002b293  /system/lib64/libcodec2_soft_avcdec.so (android::C2SoftAvcDec::ensureDecoderState(std::__1::shared_ptr<C2BlockPool> const&)+211) (BuildId: c5266e2d31c7a9717a433b56eff88072)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #10 pc 0000000000029bd8  /system/lib64/libcodec2_soft_avcdec.so (android::C2SoftAvcDec::process(std::__1::unique_ptr<C2Work, std::__1::default_delete<C2Work> > const&, std::__1::shared_ptr<C2BlockPool> const&)+984) (BuildId: c5266e2d31c7a9717a433b56eff88072)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #11 pc 000000000000f362  /system/lib64/libcodec2_soft_common.so (android::SimpleC2Component::processQueue()+2962) (BuildId: 734bcb27864061a28ead987fcd36947a)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #12 pc 000000000000e2ad  /system/lib64/libcodec2_soft_common.so (android::SimpleC2Component::WorkHandler::onMessageReceived(android::sp<android::AMessage> const&)+173) (BuildId: 734bcb27864061a28ead987fcd36947a)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #13 pc 000000000001b4eb  /apex/com.android.media.swcodec/lib64/libstagefright_foundation.so (android::AHandler::deliverMessage(android::sp<android::AMessage> const&)+59) (BuildId: 801f77c75e7663391860535e32b8d2a3)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #14 pc 000000000002150e  /apex/com.android.media.swcodec/lib64/libstagefright_foundation.so (android::AMessage::deliver()+206) (BuildId: 801f77c75e7663391860535e32b8d2a3)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #15 pc 000000000001c88d  /apex/com.android.media.swcodec/lib64/libstagefright_foundation.so (android::ALooper::loop()+701) (BuildId: 801f77c75e7663391860535e32b8d2a3)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #16 pc 0000000000013e55  /system/lib64/libutils.so (android::Thread::_threadLoop(void*)+325) (BuildId: 20ad4edc59f23af991744a87e8f5ccf9)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #17 pc 00000000000ccd8a  /apex/com.android.runtime/lib64/bionic/libc.so (__pthread_start(void*)+58) (BuildId: 1b2a39e43caba588eb8ce2a331dc4eef)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #18 pc 0000000000060cd7  /apex/com.android.runtime/lib64/bionic/libc.so (__start_thread+55) (BuildId: 1b2a39e43caba588eb8ce2a331dc4eef)
+09-26 10:12:32.928  4439  4600 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-26 10:12:32.928  4439  4600 F DEBUG   : Build fingerprint: 'Android-x86/bliss_x86_64/x86_64:13/TQ3A.230901.001.C1/152:userdebug/test-keys'
+09-26 10:12:32.928  4439  4600 F DEBUG   : Revision: '0'
+09-26 10:12:32.928  4439  4600 F DEBUG   : ABI: 'x86_64'
+09-26 10:12:32.928  4439  4600 F DEBUG   : Timestamp: 2026-09-26 10:12:32.848225900+0900
+09-26 10:12:32.928  4439  4600 F DEBUG   : Process uptime: 170s
+09-26 10:12:32.928  4439  4600 F DEBUG   : Cmdline: media.swcodec oid.media.swcodec/bin/mediaswcodec
+09-26 10:12:32.928  4439  4600 F DEBUG   : pid: 4439, tid: 4600, name: oid.avc.decoder  >>> media.swcodec <<<
+09-26 10:12:32.928  4439  4600 F DEBUG   : uid: 1046
+09-26 10:12:32.928  4439  4600 F DEBUG   : signal 0 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-26 10:12:32.928  4439  4600 F DEBUG   : Abort message: 'gralloc-mapper is missing'
+09-26 10:12:32.928  4439  4600 F DEBUG   :     rax 0000000000000000  rbx 0000000000001157  rcx 0000728346a6569f  rdx 0000000000000006
+09-26 10:12:32.928  4439  4600 F DEBUG   :     r8  351f094540cc0e11  r9  351f094540cc0e11  r10 00007280acec3cc0  r11 0000000000000203
+09-26 10:12:32.928  4439  4600 F DEBUG   :     r12 00000000000000f0  r13 0000000000000180  r14 00007280acec3cb8  r15 00000000000011f8
+09-26 10:12:32.928  4439  4600 F DEBUG   :     rdi 0000000000001157  rsi 00000000000011f8
+09-26 10:12:32.928  4439  4600 F DEBUG   :     rbp 00007280c66d6190  rsp 00007280acec3cb0  rip 0000728346a6569f
+09-26 10:12:32.928  4439  4600 F DEBUG   : backtrace:
+09-26 10:12:32.928  4439  4600 F DEBUG   :       #00 pc 000000000005f69f  /apex/com.android.runtime/lib64/bionic/libc.so (abort+191) (BuildId: 1b2a39e43caba588eb8ce2a331dc4eef)
+09-26 10:12:32.928  4439  4600 F DEBUG   :       #01 pc 00000000000069aa  /system/lib64/liblog.so (__android_log_default_aborter+10) (BuildId: f0538d632eee5d6820b96914c8a1657c)
+09-26 10:12:32.928  4439  4600 F DEBUG   :       #02 pc 0000000000007562  /system/lib64/liblog.so (__android_log_assert+370) (BuildId: f0538d632eee5d6820b96914c8a1657c)
+09-26 10:12:32.928  4439  4600 F DEBUG   :       #03 pc 0000000000042164  /system/lib64/libui.so (android::GraphicBufferMapper::GraphicBufferMapper()+388) (BuildId: 935fd18f1b4d7962a8045574ebb96ebf)
+09-26 10:12:32.928  4439  4600 F DEBUG   :       #04 pc 0000000000040341  /system/lib64/libui.so (android::GraphicBufferAllocator::GraphicBufferAllocator()+81) (BuildId: 935fd18f1b4d7962a8045574ebb96ebf)
+09-26 10:12:32.928  4439  4600 F DEBUG   :       #05 pc 00000000000521f2  /system/lib64/libcodec2_vndk.so (android::C2AllocatorGralloc::Impl::newGraphicAllocation(unsigned int, unsigned int, unsigned int, C2MemoryUsage const&, std::__1::shared_ptr<C2GraphicAllocation>*)+162) (BuildId: 27e5d41c39499c71672755718c25f390)
+09-26 10:12:32.928  4439  4600 F DEBUG   :       #06 pc 00000000000527c4  /system/lib64/libcodec2_vndk.so (android::C2AllocatorGralloc::newGraphicAllocation(unsigned int, unsigned int, unsigned int, C2MemoryUsage, std::__1::shared_ptr<C2GraphicAllocation>*)+36) (BuildId: 27e5d41c39499c71672755718c25f390)
+09-26 10:12:32.928  4439  4600 F DEBUG   :       #07 pc 00000000000584f9  /system/lib64/libcodec2_vndk.so (C2BasicGraphicBlockPool::fetchGraphicBlock(unsigned int, unsigned int, unsigned int, C2MemoryUsage, std::__1::shared_ptr<C2GraphicBlock>*)+169) (BuildId: 27e5d41c39499c71672755718c25f390)
+09-26 10:12:32.928  4439  4600 F DEBUG   :       #08 pc 0000000000010d7b  /system/lib64/libcodec2_soft_common.so (android::SimpleC2Component::BlockingBlockPool::fetchGraphicBlock(unsigned int, unsigned int, unsigned int, C2MemoryUsage, std::__1::shared_ptr<C2GraphicBlock>*)+91) (BuildId: 734bcb27864061a28ead987fcd36947a)
+09-26 10:12:32.928  4439  4600 F DEBUG   :       #09 pc 000000000002b293  /system/lib64/libcodec2_soft_avcdec.so (android::C2SoftAvcDec::ensureDecoderState(std::__1::shared_ptr<C2BlockPool> const&)+211) (BuildId: c5266e2d31c7a9717a433b56eff88072)
+09-26 10:12:32.928  4439  4600 F DEBUG   :       #10 pc 0000000000029bd8  /system/lib64/libcodec2_soft_avcdec.so (android::C2SoftAvcDec::process(std::__1::unique_ptr<C2Work, std::__1::default_delete<C2Work> > const&, std::__1::shared_ptr<C2BlockPool> const&)+984) (BuildId: c5266e2d31c7a9717a433b56eff88072)
+09-26 10:12:32.928  4439  4600 F DEBUG   :       #11 pc 000000000000f362  /system/lib64/libcodec2_soft_common.so (android::SimpleC2Component::processQueue()+2962) (BuildId: 734bcb27864061a28ead987fcd36947a)
+09-26 10:12:32.928  4439  4600 F DEBUG   :       #12 pc 000000000000e2ad  /system/lib64/libcodec2_soft_common.so (android::SimpleC2Component::WorkHandler::onMessageReceived(android::sp<android::AMessage> const&)+173) (BuildId: 734bcb27864061a28ead987fcd36947a)
+09-26 10:12:32.928  4439  4600 F DEBUG   :       #13 pc 000000000001b4eb  /apex/com.android.media.swcodec/lib64/libstagefright_foundation.so (android::AHandler::deliverMessage(android::sp<android::AMessage> const&)+59) (BuildId: 801f77c75e7663391860535e32b8d2a3)
+09-26 10:12:32.928  4439  4600 F DEBUG   :       #14 pc 000000000002150e  /apex/com.android.media.swcodec/lib64/libstagefright_foundation.so (android::AMessage::deliver()+206) (BuildId: 801f77c75e7663391860535e32b8d2a3)
+09-26 10:12:32.928  4439  4600 F DEBUG   :       #15 pc 000000000001c88d  /apex/com.android.media.swcodec/lib64/libstagefright_foundation.so (android::ALooper::loop()+701) (BuildId: 801f77c75e7663391860535e32b8d2a3)
+09-26 10:12:32.928  4439  4600 F DEBUG   :       #16 pc 0000000000013e55  /system/lib64/libutils.so (android::Thread::_threadLoop(void*)+325) (BuildId: 20ad4edc59f23af991744a87e8f5ccf9)
+09-26 10:12:32.928  4439  4600 F DEBUG   :       #17 pc 00000000000ccd8a  /apex/com.android.runtime/lib64/bionic/libc.so (__pthread_start(void*)+58) (BuildId: 1b2a39e43caba588eb8ce2a331dc4eef)
+09-26 10:12:32.928  4439  4600 F DEBUG   :       #18 pc 0000000000060cd7  /apex/com.android.runtime/lib64/bionic/libc.so (__start_thread+55) (BuildId: 1b2a39e43caba588eb8ce2a331dc4eef)
+09-26 10:13:30.925  3841  3841 E AndroidRuntime: FATAL EXCEPTION: main
+09-26 10:13:30.925  3841  3841 E AndroidRuntime: Process: com.epidgames.trickcalrevive, PID: 3841
+09-26 10:13:30.925  3841  3841 E AndroidRuntime: android.app.RemoteServiceException$ForegroundServiceDidNotStartInTimeException: Context.startForegroundService() did not then call Service.startForeground(): ServiceRecord{b623ce3 u0 com.epidgames.trickcalrevive/.patch.TrickcalPatchService}
+09-26 10:13:30.925  3841  3841 E AndroidRuntime: 	at android.app.ActivityThread.generateForegroundServiceDidNotStartInTimeException(ActivityThread.java:2005)
+09-26 10:13:30.925  3841  3841 E AndroidRuntime: 	at android.app.ActivityThread.throwRemoteServiceException(ActivityThread.java:1979)
+09-26 10:13:30.925  3841  3841 E AndroidRuntime: 	at android.app.ActivityThread.-$$Nest$mthrowRemoteServiceException(Unknown Source:0)
+09-26 10:13:30.925  3841  3841 E AndroidRuntime: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2241)
+09-26 10:13:30.925  3841  3841 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+09-26 10:13:30.925  3841  3841 E AndroidRuntime: 	at android.os.Looper.loopOnce(Looper.java:201)
+09-26 10:13:30.925  3841  3841 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:288)
+09-26 10:13:30.925  3841  3841 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:7965)
+09-26 10:13:30.925  3841  3841 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+09-26 10:13:30.925  3841  3841 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:548)
+09-26 10:13:30.925  3841  3841 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:942)
+09-26 10:14:58.179  4624  5182 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-26 10:14:58.179  4624  5182 F DEBUG   : Build fingerprint: 'Android-x86/bliss_x86_64/x86_64:13/TQ3A.230901.001.C1/152:userdebug/test-keys'
+09-26 10:14:58.179  4624  5182 F DEBUG   : Revision: '0'
+09-26 10:14:58.179  4624  5182 F DEBUG   : ABI: 'x86_64'
+09-26 10:14:58.179  4624  5182 F DEBUG   : Timestamp: 2026-09-26 10:14:58.155451000+0900
+09-26 10:14:58.179  4624  5182 F DEBUG   : Process uptime: 146s
+09-26 10:14:58.179  4624  5182 F DEBUG   : Cmdline: media.swcodec oid.media.swcodec/bin/mediaswcodec
+09-26 10:14:58.179  4624  5182 F DEBUG   : pid: 4624, tid: 5182, name: oid.avc.decoder  >>> media.swcodec <<<
+09-26 10:14:58.179  4624  5182 F DEBUG   : uid: 1046
+09-26 10:14:58.179  4624  5182 F DEBUG   : signal 0 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-26 10:14:58.179  4624  5182 F DEBUG   : Abort message: 'gralloc-mapper is missing'
+09-26 10:14:58.179  4624  5182 F DEBUG   :     rax 0000000000000000  rbx 0000000000001210  rcx 000073719ce7469f  rdx 0000000000000006
+09-26 10:14:58.179  4624  5182 F DEBUG   :     r8  16b1c39c04d29dfd  r9  16b1c39c04d29dfd  r10 0000736efb400cc0  r11 0000000000000203
+09-26 10:14:58.179  4624  5182 F DEBUG   :     r12 00000000000000f0  r13 0000000000000180  r14 0000736efb400cb8  r15 000000000000143e
+09-26 10:14:58.179  4624  5182 F DEBUG   :     rdi 0000000000001210  rsi 000000000000143e
+09-26 10:14:58.179  4624  5182 F DEBUG   :     rbp 0000736f14571110  rsp 0000736efb400cb0  rip 000073719ce7469f
+09-26 10:14:58.179  4624  5182 F DEBUG   : backtrace:
+09-26 10:14:58.179  4624  5182 F DEBUG   :       #00 pc 000000000005f69f  /apex/com.android.runtime/lib64/bionic/libc.so (abort+191) (BuildId: 1b2a39e43caba588eb8ce2a331dc4eef)
+09-26 10:14:58.179  4624  5182 F DEBUG   :       #01 pc 00000000000069aa  /system/lib64/liblog.so (__android_log_default_aborter+10) (BuildId: f0538d632eee5d6820b96914c8a1657c)
+09-26 10:14:58.179  4624  5182 F DEBUG   :       #02 pc 0000000000007562  /system/lib64/liblog.so (__android_log_assert+370) (BuildId: f0538d632eee5d6820b96914c8a1657c)
+09-26 10:14:58.179  4624  5182 F DEBUG   :       #03 pc 0000000000042164  /system/lib64/libui.so (android::GraphicBufferMapper::GraphicBufferMapper()+388) (BuildId: 935fd18f1b4d7962a8045574ebb96ebf)
+09-26 10:14:58.179  4624  5182 F DEBUG   :       #04 pc 0000000000040341  /system/lib64/libui.so (android::GraphicBufferAllocator::GraphicBufferAllocator()+81) (BuildId: 935fd18f1b4d7962a8045574ebb96ebf)
+09-26 10:14:58.179  4624  5182 F DEBUG   :       #05 pc 00000000000521f2  /system/lib64/libcodec2_vndk.so (android::C2AllocatorGralloc::Impl::newGraphicAllocation(unsigned int, unsigned int, unsigned int, C2MemoryUsage const&, std::__1::shared_ptr<C2GraphicAllocation>*)+162) (BuildId: 27e5d41c39499c71672755718c25f390)
+09-26 10:14:58.179  4624  5182 F DEBUG   :       #06 pc 00000000000527c4  /system/lib64/libcodec2_vndk.so (android::C2AllocatorGralloc::newGraphicAllocation(unsigned int, unsigned int, unsigned int, C2MemoryUsage, std::__1::shared_ptr<C2GraphicAllocation>*)+36) (BuildId: 27e5d41c39499c71672755718c25f390)
+09-26 10:14:58.179  4624  5182 F DEBUG   :       #07 pc 00000000000584f9  /system/lib64/libcodec2_vndk.so (C2BasicGraphicBlockPool::fetchGraphicBlock(unsigned int, unsigned int, unsigned int, C2MemoryUsage, std::__1::shared_ptr<C2GraphicBlock>*)+169) (BuildId: 27e5d41c39499c71672755718c25f390)
+09-26 10:14:58.179  4624  5182 F DEBUG   :       #08 pc 0000000000010d7b  /system/lib64/libcodec2_soft_common.so (android::SimpleC2Component::BlockingBlockPool::fetchGraphicBlock(unsigned int, unsigned int, unsigned int, C2MemoryUsage, std::__1::shared_ptr<C2GraphicBlock>*)+91) (BuildId: 734bcb27864061a28ead987fcd36947a)
+09-26 10:14:58.179  4624  5182 F DEBUG   :       #09 pc 000000000002b293  /system/lib64/libcodec2_soft_avcdec.so (android::C2SoftAvcDec::ensureDecoderState(std::__1::shared_ptr<C2BlockPool> const&)+211) (BuildId: c5266e2d31c7a9717a433b56eff88072)
+09-26 10:14:58.179  4624  5182 F DEBUG   :       #10 pc 0000000000029bd8  /system/lib64/libcodec2_soft_avcdec.so (android::C2SoftAvcDec::process(std::__1::unique_ptr<C2Work, std::__1::default_delete<C2Work> > const&, std::__1::shared_ptr<C2BlockPool> const&)+984) (BuildId: c5266e2d31c7a9717a433b56eff88072)
+09-26 10:14:58.179  4624  5182 F DEBUG   :       #11 pc 000000000000f362  /system/lib64/libcodec2_soft_common.so (android::SimpleC2Component::processQueue()+2962) (BuildId: 734bcb27864061a28ead987fcd36947a)
+09-26 10:14:58.179  4624  5182 F DEBUG   :       #12 pc 000000000000e2ad  /system/lib64/libcodec2_soft_common.so (android::SimpleC2Component::WorkHandler::onMessageReceived(android::sp<android::AMessage> const&)+173) (BuildId: 734bcb27864061a28ead987fcd36947a)
+09-26 10:14:58.179  4624  5182 F DEBUG   :       #13 pc 000000000001b4eb  /apex/com.android.media.swcodec/lib64/libstagefright_foundation.so (android::AHandler::deliverMessage(android::sp<android::AMessage> const&)+59) (BuildId: 801f77c75e7663391860535e32b8d2a3)
+09-26 10:14:58.179  4624  5182 F DEBUG   :       #14 pc 000000000002150e  /apex/com.android.media.swcodec/lib64/libstagefright_foundation.so (android::AMessage::deliver()+206) (BuildId: 801f77c75e7663391860535e32b8d2a3)
+09-26 10:14:58.180  4624  5182 F DEBUG   :       #15 pc 000000000001c88d  /apex/com.android.media.swcodec/lib64/libstagefright_foundation.so (android::ALooper::loop()+701) (BuildId: 801f77c75e7663391860535e32b8d2a3)
+09-26 10:14:58.180  4624  5182 F DEBUG   :       #16 pc 0000000000013e55  /system/lib64/libutils.so (android::Thread::_threadLoop(void*)+325) (BuildId: 20ad4edc59f23af991744a87e8f5ccf9)
+09-26 10:14:58.180  4624  5182 F DEBUG   :       #17 pc 00000000000ccd8a  /apex/com.android.runtime/lib64/bionic/libc.so (__pthread_start(void*)+58) (BuildId: 1b2a39e43caba588eb8ce2a331dc4eef)
+09-26 10:14:58.180  4624  5182 F DEBUG   :       #18 pc 0000000000060cd7  /apex/com.android.runtime/lib64/bionic/libc.so (__start_thread+55) (BuildId: 1b2a39e43caba588eb8ce2a331dc4eef)
+09-26 10:16:57.504  4775  5269 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 5269 (Thread-29), pid 4775 (.trickcalrevive)
+09-26 10:16:57.756  5321  5321 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-26 10:16:57.756  5321  5321 F DEBUG   : Build fingerprint: 'Android-x86/bliss_x86_64/x86_64:13/TQ3A.230901.001.C1/152:userdebug/test-keys'
+09-26 10:16:57.756  5321  5321 F DEBUG   : Revision: '0'
+09-26 10:16:57.756  5321  5321 F DEBUG   : ABI: 'x86_64'
+09-26 10:16:57.756  5321  5321 F DEBUG   : Timestamp: 2026-09-26 10:16:57.573351700+0900
+09-26 10:16:57.756  5321  5321 F DEBUG   : Process uptime: 165s
+09-26 10:16:57.756  5321  5321 F DEBUG   : Cmdline: com.epidgames.trickcalrevive
+09-26 10:16:57.756  5321  5321 F DEBUG   : pid: 4775, tid: 5269, name: Thread-29  >>> com.epidgames.trickcalrevive <<<
+09-26 10:16:57.756  5321  5321 F DEBUG   : uid: 10287
+09-26 10:16:57.756  5321  5321 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-26 10:16:57.756  5321  5321 F DEBUG   : Abort message: 'Cannot process signal 11'
+09-26 10:16:57.756  5321  5321 F DEBUG   :     rax 0000000000000000  rbx 00000000000012a7  rcx 000076b4761f569f  rdx 0000000000000006
+09-26 10:16:57.756  5321  5321 F DEBUG   :     r8  000000000001e000  r9  000000000001e000  r10 000076b15b01b3a0  r11 0000000000000207
+09-26 10:16:57.756  5321  5321 F DEBUG   :     r12 000076b1f436af00  r13 0000000000000001  r14 000076b15b01b398  r15 0000000000001495
+09-26 10:16:57.756  5321  5321 F DEBUG   :     rdi 00000000000012a7  rsi 0000000000001495
+09-26 10:16:57.756  5321  5321 F DEBUG   :     rbp 000076b1f436af14  rsp 000076b15b01b390  rip 000076b4761f569f
+09-26 10:16:57.756  5321  5321 F DEBUG   : backtrace:
+09-26 10:16:57.757  5321  5321 F DEBUG   :       #00 pc 000000000005f69f  /apex/com.android.runtime/lib64/bionic/libc.so (abort+191) (BuildId: 1b2a39e43caba588eb8ce2a331dc4eef)
+09-26 10:16:57.757  5321  5321 F DEBUG   :       #01 pc 00000000008423d4  /apex/com.android.art/lib64/libart.so (art::Runtime::Abort(char const*)+1444) (BuildId: 4a6216871c78ffd3d846b3e17bc4fef4)
+09-26 10:16:57.757  5321  5321 F DEBUG   :       #02 pc 0000000000019cfc  /system/lib64/libbase.so (android::base::SetAborter(std::__1::function<void (char const*)>&&)::$_3::__invoke(char const*)+60) (BuildId: 9335a3052c0ad43b3680057cf90b0afe)
+09-26 10:16:57.757  5321  5321 F DEBUG   :       #03 pc 0000000000007562  /system/lib64/liblog.so (__android_log_assert+370) (BuildId: f0538d632eee5d6820b96914c8a1657c)
+09-26 10:16:57.757  5321  5321 F DEBUG   :       #04 pc 0000000000195efa  /system/lib64/libndk_translation.so (ndk_translation::(anonymous namespace)::HandleHostSignal(int, siginfo*, void*)+746) (BuildId: d3af002d2acfb5c696fcd4a22fa3d8f1)
+09-26 10:16:57.757  5321  5321 F DEBUG   :       #05 pc 0000000000002ed7  /apex/com.android.art/lib64/libsigchain.so (art::SignalChain::Handler(int, siginfo*, void*)+359) (BuildId: e4120e0a5f6b7cc84b8bc4c24e4b1ff3)
+09-26 10:16:57.757  5321  5321 F DEBUG   :       #06 pc 000000000005bc60  /apex/com.android.runtime/lib64/bionic/libc.so (__restore_rt+0) (BuildId: 1b2a39e43caba588eb8ce2a331dc4eef)
+09-26 10:16:57.757  5321  5321 F DEBUG   :       #07 pc 000000000019f0c1  /system/lib64/libndk_translation.so (ndk_translation::ToGuestJNIEnv(_JNIEnv*)+7873) (BuildId: d3af002d2acfb5c696fcd4a22fa3d8f1)
+09-26 10:16:57.757  5321  5321 F DEBUG   :       #08 pc 00000000001a6221  /system/lib64/libndk_translation.so (ndk_translation::(anonymous namespace)::DoJavaVMTrampoline_AttachCurrentThread(void const*, ndk_translation::ProcessState*)+161) (BuildId: d3af002d2acfb5c696fcd4a22fa3d8f1)
+09-26 10:16:57.757  5321  5321 F DEBUG   :       #09 pc 00000000002d8eee  /memfd:exec (deleted)

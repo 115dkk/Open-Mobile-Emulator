@@ -24,6 +24,10 @@ Evidence output directory.
 Maximum time to wait for Android boot completion.
 .PARAMETER SkipInstall
 Does not run adb install even when Apk paths are supplied.
+.PARAMETER SkipLaunch
+Does not launch the package; samples whatever is already running. Use this to
+sample a session in progress: relaunching a running game through monkey ended
+the game process on 2026-09-26 (docs/evidence/M0/metrics.md).
 .PARAMETER SettleSec
 Seconds to wait after launching the app before sampling.
 .EXAMPLE
@@ -43,6 +47,7 @@ param(
     [int]$BootTimeoutSec = 600,
 
     [switch]$SkipInstall,
+    [switch]$SkipLaunch,
 
     [ValidateRange(0, 86400)]
     [int]$SettleSec = 90
@@ -240,13 +245,19 @@ else {
     }
 }
 
-Save-TextSample -Step 'app launch' -FileName 'launch.txt' -Action {
-    $response = Invoke-AdbText -Arguments @('-s', $Serial, 'shell', 'monkey', '-p', $Package, '-c', 'android.intent.category.LAUNCHER', '1')
-    $text = "Exit code: $($response.ExitCode)`nSTDOUT:`n$($response.StdOut)`nSTDERR:`n$($response.StdErr)"
-    if ($response.ExitCode -ne 0) {
-        throw "monkey failed with exit code $($response.ExitCode): $($response.StdErr.Trim())"
+if ($SkipLaunch) {
+    Set-Content -LiteralPath ([IO.Path]::Combine($OutDir, 'launch.txt')) -Value 'Skipped by -SkipLaunch.' -Encoding utf8
+    Add-TestResult -Step 'app launch' -Status Skipped -File 'launch.txt' -Details 'SkipLaunch selected'
+}
+else {
+    Save-TextSample -Step 'app launch' -FileName 'launch.txt' -Action {
+        $response = Invoke-AdbText -Arguments @('-s', $Serial, 'shell', 'monkey', '-p', $Package, '-c', 'android.intent.category.LAUNCHER', '1')
+        $text = "Exit code: $($response.ExitCode)`nSTDOUT:`n$($response.StdOut)`nSTDERR:`n$($response.StdErr)"
+        if ($response.ExitCode -ne 0) {
+            throw "monkey failed with exit code $($response.ExitCode): $($response.StdErr.Trim())"
+        }
+        $text
     }
-    $text
 }
 
 if ($SettleSec -gt 0) {

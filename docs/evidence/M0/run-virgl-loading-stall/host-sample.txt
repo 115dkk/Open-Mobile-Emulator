@@ -1,0 +1,6 @@
+CPU counter: \\Processor(_Total)\\% Processor Time
+CPU samples percent: 16.84, 19.48, 26.93
+CPU average percent: 21.08
+Physical memory total GB: 63.78
+Physical memory free GB: 40.98
+Physical memory used GB: 22.8

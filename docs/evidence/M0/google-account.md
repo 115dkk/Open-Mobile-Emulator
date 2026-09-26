@@ -35,3 +35,18 @@ Settings, then confirm Play services sign-in state; record the result here.
 Quoting note for the runbook: `adb shell sqlite3 db "select ..."` loses its
 quotes between PowerShell, adb and the guest shell; redirecting a pushed `.sql`
 file into `sqlite3` avoids the problem.
+
+## 2026-09-26: what the game does without a Google account
+
+- The game (version 10644) calls Google Play Games sign-in when the player
+  taps 시작 on the terms screen and again on every later launch. On this
+  uncertified guest with no account, Play Games answers with an error code
+  (`Play Games Plugin 2.1.0 ... ERROR: Returning an error code`) and the system
+  "Add account" page (`gms/.auth.uiflows.minutemaid.MinuteMaidActivity`, "Sign
+  in") opens on top of the game (`step-09-google-sign-in-opened.png`,
+  `step-40-relaunch-title-loading.png`). Back returns to the game.
+- The game then offers Google, Apple and Guest login (`step-10-login-methods.png`).
+  Guest login created account 11617632 and the M0 scenario ran on it.
+- Still open, for after the user registers the GSF ID above: add the account
+  in guest Settings, relaunch the game, and record whether Play Games sign-in
+  succeeds (and whether the attempt stops opening the "Add account" page).

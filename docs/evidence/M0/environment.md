@@ -30,6 +30,18 @@ No HW Acceleration` (`quiet nomodeset HWACCEL=0`). The plain default entry hangs
 standard VGA. Guest disk: `%LOCALAPPDATA%\OpenMobileEmulator\vm\default\disk.qcow2`,
 32 GiB, GPT, vda1 512 MiB ESP (fat32), vda2 ext4. Details: `guest-install.md`.
 
+Two harnesses were used on 2026-09-26, both on the same disk and the same QEMU
+command line (`Start-Guest.ps1 -Name default -Gpu virgl`, `virtio-vga-gl`,
+`sdl,gl=on`); only the GRUB entry differs, and the rows in `metrics.md` say which:
+
+| Harness | GRUB entry (`/proc/cmdline` tail) | Guest GL | Display |
+|---|---|---|---|
+| M0 software rendering | `quiet nomodeset HWACCEL=0` | `Google SwiftShader 4.1.0.7`, OpenGL ES 3.0 | 1024x768, density 160 |
+| M1 GPU path | `quiet HWC=drm_minigbm GRALLOC=minigbm_arcvm` | `Mesa 24.0.8 virgl (NVIDIA GeForce RTX 2080 SUPER)`, OpenGL ES 3.2 | 1280x800, density 160 |
+
+The entry is switched without a keystroke by rewriting `/boot/grub/grubenv` on
+vda2 from the running guest (`findings-20260926.md`, `nomodeset-boot-via-grubenv.txt`).
+
 ## Guest image
 
 | Item | Value |

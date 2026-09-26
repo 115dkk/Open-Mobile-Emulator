@@ -1,0 +1,77 @@
+--------- beginning of crash
+09-26 10:09:43.805   921  4436 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-26 10:09:43.805   921  4436 F DEBUG   : Build fingerprint: 'Android-x86/bliss_x86_64/x86_64:13/TQ3A.230901.001.C1/152:userdebug/test-keys'
+09-26 10:09:43.805   921  4436 F DEBUG   : Revision: '0'
+09-26 10:09:43.805   921  4436 F DEBUG   : ABI: 'x86_64'
+09-26 10:09:43.805   921  4436 F DEBUG   : Timestamp: 2026-09-26 10:09:43.725248000+0900
+09-26 10:09:43.806   921  4436 F DEBUG   : Process uptime: 289s
+09-26 10:09:43.806   921  4436 F DEBUG   : Cmdline: media.swcodec oid.media.swcodec/bin/mediaswcodec
+09-26 10:09:43.806   921  4436 F DEBUG   : pid: 921, tid: 4436, name: oid.avc.decoder  >>> media.swcodec <<<
+09-26 10:09:43.806   921  4436 F DEBUG   : uid: 1046
+09-26 10:09:43.806   921  4436 F DEBUG   : signal 0 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-26 10:09:43.806   921  4436 F DEBUG   : Abort message: 'gralloc-mapper is missing'
+09-26 10:09:43.806   921  4436 F DEBUG   :     rax 0000000000000000  rbx 0000000000000399  rcx 0000770670bad69f  rdx 0000000000000006
+09-26 10:09:43.806   921  4436 F DEBUG   :     r8  7e485b1a10109ada  r9  7e485b1a10109ada  r10 00007703d80edcc0  r11 0000000000000203
+09-26 10:09:43.806   921  4436 F DEBUG   :     r12 00000000000000f0  r13 0000000000000180  r14 00007703d80edcb8  r15 0000000000001154
+09-26 10:09:43.806   921  4436 F DEBUG   :     rdi 0000000000000399  rsi 0000000000001154
+09-26 10:09:43.806   921  4436 F DEBUG   :     rbp 00007703f054e950  rsp 00007703d80edcb0  rip 0000770670bad69f
+09-26 10:09:43.806   921  4436 F DEBUG   : backtrace:
+09-26 10:09:43.806   921  4436 F DEBUG   :       #00 pc 000000000005f69f  /apex/com.android.runtime/lib64/bionic/libc.so (abort+191) (BuildId: 1b2a39e43caba588eb8ce2a331dc4eef)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #01 pc 00000000000069aa  /system/lib64/liblog.so (__android_log_default_aborter+10) (BuildId: f0538d632eee5d6820b96914c8a1657c)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #02 pc 0000000000007562  /system/lib64/liblog.so (__android_log_assert+370) (BuildId: f0538d632eee5d6820b96914c8a1657c)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #03 pc 0000000000042164  /system/lib64/libui.so (android::GraphicBufferMapper::GraphicBufferMapper()+388) (BuildId: 935fd18f1b4d7962a8045574ebb96ebf)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #04 pc 0000000000040341  /system/lib64/libui.so (android::GraphicBufferAllocator::GraphicBufferAllocator()+81) (BuildId: 935fd18f1b4d7962a8045574ebb96ebf)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #05 pc 00000000000521f2  /system/lib64/libcodec2_vndk.so (android::C2AllocatorGralloc::Impl::newGraphicAllocation(unsigned int, unsigned int, unsigned int, C2MemoryUsage const&, std::__1::shared_ptr<C2GraphicAllocation>*)+162) (BuildId: 27e5d41c39499c71672755718c25f390)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #06 pc 00000000000527c4  /system/lib64/libcodec2_vndk.so (android::C2AllocatorGralloc::newGraphicAllocation(unsigned int, unsigned int, unsigned int, C2MemoryUsage, std::__1::shared_ptr<C2GraphicAllocation>*)+36) (BuildId: 27e5d41c39499c71672755718c25f390)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #07 pc 00000000000584f9  /system/lib64/libcodec2_vndk.so (C2BasicGraphicBlockPool::fetchGraphicBlock(unsigned int, unsigned int, unsigned int, C2MemoryUsage, std::__1::shared_ptr<C2GraphicBlock>*)+169) (BuildId: 27e5d41c39499c71672755718c25f390)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #08 pc 0000000000010d7b  /system/lib64/libcodec2_soft_common.so (android::SimpleC2Component::BlockingBlockPool::fetchGraphicBlock(unsigned int, unsigned int, unsigned int, C2MemoryUsage, std::__1::shared_ptr<C2GraphicBlock>*)+91) (BuildId: 734bcb27864061a28ead987fcd36947a)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #09 pc 000000000002b293  /system/lib64/libcodec2_soft_avcdec.so (android::C2SoftAvcDec::ensureDecoderState(std::__1::shared_ptr<C2BlockPool> const&)+211) (BuildId: c5266e2d31c7a9717a433b56eff88072)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #10 pc 0000000000029bd8  /system/lib64/libcodec2_soft_avcdec.so (android::C2SoftAvcDec::process(std::__1::unique_ptr<C2Work, std::__1::default_delete<C2Work> > const&, std::__1::shared_ptr<C2BlockPool> const&)+984) (BuildId: c5266e2d31c7a9717a433b56eff88072)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #11 pc 000000000000f362  /system/lib64/libcodec2_soft_common.so (android::SimpleC2Component::processQueue()+2962) (BuildId: 734bcb27864061a28ead987fcd36947a)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #12 pc 000000000000e2ad  /system/lib64/libcodec2_soft_common.so (android::SimpleC2Component::WorkHandler::onMessageReceived(android::sp<android::AMessage> const&)+173) (BuildId: 734bcb27864061a28ead987fcd36947a)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #13 pc 000000000001b4eb  /apex/com.android.media.swcodec/lib64/libstagefright_foundation.so (android::AHandler::deliverMessage(android::sp<android::AMessage> const&)+59) (BuildId: 801f77c75e7663391860535e32b8d2a3)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #14 pc 000000000002150e  /apex/com.android.media.swcodec/lib64/libstagefright_foundation.so (android::AMessage::deliver()+206) (BuildId: 801f77c75e7663391860535e32b8d2a3)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #15 pc 000000000001c88d  /apex/com.android.media.swcodec/lib64/libstagefright_foundation.so (android::ALooper::loop()+701) (BuildId: 801f77c75e7663391860535e32b8d2a3)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #16 pc 0000000000013e55  /system/lib64/libutils.so (android::Thread::_threadLoop(void*)+325) (BuildId: 20ad4edc59f23af991744a87e8f5ccf9)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #17 pc 00000000000ccd8a  /apex/com.android.runtime/lib64/bionic/libc.so (__pthread_start(void*)+58) (BuildId: 1b2a39e43caba588eb8ce2a331dc4eef)
+09-26 10:09:43.806   921  4436 F DEBUG   :       #18 pc 0000000000060cd7  /apex/com.android.runtime/lib64/bionic/libc.so (__start_thread+55) (BuildId: 1b2a39e43caba588eb8ce2a331dc4eef)
+09-26 10:05:01.063  1064  1064 D CompatConfig: No directory /apex/com.android.media.swcodec/etc/compatconfig, skipping
+09-26 10:05:01.458  1064  1064 D PackageManager: Directories scanned as system partitions: [/system:0, /system/vendor:524288, /odm:4194304, /oem:262144, /system/product:1048576, /system/system_ext:2097152, /apex/com.android.wifi:8388608, /apex/com.android.uwb:8388608, /apex/com.android.tzdata:8388608, /apex/com.android.tethering:8388608, /apex/com.android.sdkext:8388608, /apex/com.android.scheduling:8388608, /apex/com.android.runtime:8388608, /apex/com.android.resolv:8388608, /apex/com.android.permission:8388608, /apex/com.android.os.statsd:8388608, /apex/com.android.ondevicepersonalization:8388608, /apex/com.android.neuralnetworks:8388608, /apex/com.android.mediaprovider:8388608, /apex/com.android.media.swcodec:8388608, /apex/com.android.media:8388608, /apex/com.android.ipsec:8388608, /apex/com.android.i18n:8388608, /apex/com.android.extservices:8388608, /apex/com.android.conscrypt:8388608, /apex/com.android.cellbroadcast:8388608, /apex/com.android.btservices:8388608, /apex/com.android.art:8388608, /apex/com.android.appsearch:8388608, /apex/com.android.adservices:8388608, /apex/com.android.adbd:8388608]
+09-26 10:09:43.655  3841  4357 D MediaCodecList: codecHandlesFormat: no format, so no extra checks
+09-26 10:09:43.656  3841  4357 D MediaCodecList: codecHandlesFormat: no format, so no extra checks
+09-26 10:09:43.657  3841  4431 D CCodec  : allocate(c2.android.avc.decoder)
+09-26 10:09:43.670  3841  4431 I CCodec  : Created component [c2.android.avc.decoder]
+09-26 10:09:43.674  3841  4431 D CCodecConfig: read media type: video/avc
+09-26 10:09:43.678  3841  4431 D CCodecConfig: ignoring local param raw.size (0xd2001800) as it is already supported
+09-26 10:09:43.678  3841  4431 D CCodecConfig: ignoring local param default.color (0x5200180b) as it is already supported
+09-26 10:09:43.679  3841  4431 I CCodecConfig: query failed after returning 12 values (BAD_INDEX)
+09-26 10:09:43.679  3841  4431 D CCodecConfig: c2 config diff is Dict {
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::u32 coded.pl.level = 20496
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::u32 coded.pl.profile = 20481
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::u32 coded.vui.color.matrix = 0
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::u32 coded.vui.color.primaries = 0
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::u32 coded.vui.color.range = 2
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::u32 coded.vui.color.transfer = 0
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::u32 default.color.matrix = 0
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::u32 default.color.primaries = 0
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::u32 default.color.range = 0
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::u32 default.color.transfer = 0
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::u32 input.buffers.max-size.value = 2097152
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::u32 input.delay.value = 0
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   string input.media-type.value = "video/avc"
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::u32 output.delay.value = 8
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   string output.media-type.value = "video/raw"
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::u32 raw.color.matrix = 0
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::u32 raw.color.primaries = 0
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::u32 raw.color.range = 2
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::u32 raw.color.transfer = 0
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::u32 raw.max-size.height = 240
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::u32 raw.max-size.width = 320
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::u32 raw.pixel-format.value = 35
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::i32 raw.rotation.flip = 0
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::i32 raw.rotation.value = 0
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::u32 raw.sar.height = 1
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::u32 raw.sar.width = 1
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::u32 raw.size.height = 240
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2::u32 raw.size.width = 320
+09-26 10:09:43.679  3841  4431 D CCodecConfig:   c2:

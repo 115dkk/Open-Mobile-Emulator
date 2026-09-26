@@ -1,0 +1,1 @@
+09-26 10:12:32.843  4439  4600 E vndksupport: Could not load /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl-2.1.so from sphal namespace: dlopen failed: "/system/lib64/arm64/libbase.so" is for EM_AARCH64 (183) instead of EM_X86_64 (62).

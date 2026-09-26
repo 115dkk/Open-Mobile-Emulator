@@ -1,0 +1,57 @@
+Applications Memory Usage (in Kilobytes):
+Uptime: 239005 Realtime: 239005
+
+** MEMINFO in pid 3841 [com.epidgames.trickcalrevive] **
+                   Pss  Private  Private     Swap      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap     7484     6384        0        0    11756    21144    13812     2656
+  Dalvik Heap     4666     4456        0        0    13280     7733     5800     1933
+ Dalvik Other     3260     3120        0        0     6064                           
+        Stack     1318     1176        0        0     1468                           
+       Ashmem       73        0        0        0     3952                           
+    Other dev      141        0      140        0      464                           
+     .so mmap    86180    21916    55220        0   158412                           
+    .jar mmap     1168        0       16        0    29324                           
+    .apk mmap    29898        0    24612        0    48248                           
+    .ttf mmap      284        0      192        0      376                           
+    .dex mmap      759        0      736        0     1408                           
+    .oat mmap      615        0        4        0    14252                           
+    .art mmap     1141      744        0        0    19804                           
+   Other mmap    43094    25516     3228        0    69752                           
+      Unknown     5263     4960        0        0     6056                           
+        TOTAL   185344    68272    84148        0   384616    28877    19612     4589
+ 
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     5200                          33084
+         Native Heap:     6384                          11756
+                Code:   102700                         252148
+               Stack:     1176                           1468
+            Graphics:        0                              0
+       Private Other:    36960
+              System:    32924
+             Unknown:                                   86160
+ 
+           TOTAL PSS:   185344            TOTAL RSS:   384616      TOTAL SWAP (KB):        0
+ 
+ Objects
+               Views:        9         ViewRootImpl:        1
+         AppContexts:       14           Activities:        1
+              Assets:       16        AssetManagers:        0
+       Local Binders:       42        Proxy Binders:       43
+       Parcel memory:       15         Parcel count:       62
+    Death Recipients:        4      OpenSSL Sockets:       14
+            WebViews:        0
+ 
+ SQL
+         MEMORY_USED:      334
+  PAGECACHE_OVERFLOW:      117          MALLOC_SIZE:       46
+ 
+ DATABASES
+      pgsz     dbsz   Lookaside(b)          cache  Dbname
+         4       56            123      58/113/21  /data/user/0/com.epidgames.trickcalrevive/databases/com.google.android.datatransport.events
+         4       28             31         1/29/4  /data/user/0/com.epidgames.trickcalrevive/databases/airbridge.db
+         4       28             48        17/16/4  /data/user/0/com.epidgames.trickcalrevive/databases/airbridge.db (2)
+

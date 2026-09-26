@@ -81,9 +81,12 @@ and refuses on mismatch. APKs land in `OME_HOME\apks\com.epidgames.trickcalreviv
 ## 5. Install, run, measure (M0 steps 6 and 7)
 
 ```powershell
-$apks = Get-ChildItem "$env:LOCALAPPDATA\OpenMobileEmulator\apks\com.epidgames.trickcalrevive\*.apk" | ForEach-Object FullName
-pwsh -File launcher/Invoke-GuestTest.ps1 -Name default -Apk $apks -SettleSec 120
+$apks = @(Get-ChildItem "$env:LOCALAPPDATA\OpenMobileEmulator\apks\com.epidgames.trickcalrevive\*.apk" | ForEach-Object FullName)
+& ./launcher/Invoke-GuestTest.ps1 -Name default -Apk $apks -SettleSec 120
 ```
+Call the script in-process (`&`), not through `pwsh -File`: `-File` flattens the
+array into separate positional arguments and the second path lands in
+`-BootTimeoutSec` (seen 2026-09-26).
 Then play the scenario by hand (first run and resource download, guest account,
 tutorial battle, one voiced story episode, 10-minute session, quit and relaunch),
 taking a screenshot at each step:
@@ -92,10 +95,34 @@ taking a screenshot at each step:
 Import-Module ./launcher/OME.Common.psm1
 Save-OmeQmpScreenshot -OutFile docs/evidence/M0/step-<n>-<name>.png
 ```
-Re-run `Invoke-GuestTest.ps1 -SkipInstall` during battle and during story to get
-`top`, `gfxinfo`, `meminfo` samples; copy the numbers into `docs/evidence/M0/metrics.md`.
+Re-run `Invoke-GuestTest.ps1 -SkipInstall -SkipLaunch` during battle and during
+story to get `top`, `meminfo` and host samples; copy the numbers into
+`docs/evidence/M0/metrics.md`. Always pass `-SkipLaunch` while the game runs: the
+`monkey` relaunch made Android kill the game on 2026-09-26 (foreground-service
+timeout, `findings-20260926.md`). `dumpsys gfxinfo` counts only the Android view
+frames of a Unity game (three frames for a whole battle), so the frame rate comes
+from SurfaceFlinger instead:
+
+```powershell
+$layer = (adb -s 127.0.0.1:5555 shell dumpsys SurfaceFlinger --list | Select-String 'SurfaceView\[com.epidgames.trickcalrevive.*\(BLAST\)').Line.Trim()
+adb -s 127.0.0.1:5555 shell dumpsys SurfaceFlinger --latency-clear
+Start-Sleep 10
+adb -s 127.0.0.1:5555 shell dumpsys SurfaceFlinger --latency "`"$layer`""   # column 2 = present time (ns) per frame
+```
+Under a virgl scanout `Save-OmeQmpScreenshot` answers `no surface`; take
+screenshots with `adb -s 127.0.0.1:5555 exec-out screencap -p > file.png`.
 Watch `logcat-bridge-errors.txt` for `dlopen failed`, `SIGILL`, `ndk_translation`
 (stop condition).
+
+To repeat the scenario on the other GRUB entry without touching the menu,
+rewrite the saved default from the running guest (needs `adb root`):
+
+```powershell
+adb -s 127.0.0.1:5555 shell mount -t ext4 -o rw,noatime /dev/block/vda2 /data/local/tmp/root
+# push a 1024-byte grubenv ("# GRUB Environment Block\ndefault=<entry>\n" padded with '#')
+# over /data/local/tmp/root/boot/grub/grubenv, sync, then Stop-Guest / Start-Guest
+```
+Entry strings are listed in `docs/evidence/M0/findings-20260926.md`.
 
 ## 6. Google sign-in path (M0 step 8)
 

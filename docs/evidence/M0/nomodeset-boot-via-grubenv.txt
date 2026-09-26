@@ -1,0 +1,12 @@
+# Second boot via grubenv switch, 2026-09-26T10:41:54.9612875+09:00
+# grubenv default= was rewritten from the running guest (vda2 mounted at /data/local/tmp/root), no GRUB keystroke.
+cmdline: 
+stack_depot_disable=on cgroup_disable=pressure BOOT_IMAGE=/android-2024-10-11/kernel stack_depot_disable=on cgroup_disable=pressure root=/dev/ram0 quiet nomodeset HWACCEL=0
+GLES: 
+GLES: Google Inc., Google SwiftShader, OpenGL ES 3.0 SwiftShader 4.1.0.7
+wm size: 
+Physical size: 1024x768
+wm density: 
+Physical density: 160
+native bridge: 
+libndk_translation.so

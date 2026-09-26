@@ -7,7 +7,9 @@
   "min_android": "8.0",
   "signer_sha1": "e44ffeb582e01d533416db1304e5c2e41f3156c0",
   "signer_note": "Public information as of 2025; compared by launcher/Get-GameApk.ps1 before a pulled APK is accepted.",
-  "status": "M0 target, not yet verified",
+  "status": "M0 scenario passed 2026-09-26 on Bliss 16.9.7 / libndk_translation 0.2.3 (version 10644): install, 5.1 GB download, guest account, prologue story with voice, tutorial battle, 37-minute session, quit and relaunch. Software-rendering harness 12 to 13 fps in battle; virgl 38 fps. In-app video is black (guest codec abort); details in docs/evidence/M0/metrics.md and findings-20260926.md.",
+  "verified_version": "10644",
+  "verified_on": "2026-09-26",
   "translator_required": true,
   "notes": "Uses Google Play Billing. Publisher runs official guides for other emulators, so no aggressive emulator blocking is expected (CLAUDE.md 1.1)."
 }

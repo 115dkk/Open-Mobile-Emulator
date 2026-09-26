@@ -32,4 +32,24 @@
   the GTK display, and the custom QEMU build.
 - With a virgl (GL) scanout, QMP `screendump` answers `no surface` in QEMU 11.1.0;
   guest screenshots come from `adb screencap` until a host-side capture exists.
+- In-app video (H.264 through Android's software codec) plays black on Bliss
+  16.9.7: the guest's `media.swcodec` process aborts with `gralloc-mapper is
+  missing` on the first decoded frame, under both the virgl and the
+  software-rendering boot entries (2026-09-26, `docs/evidence/M0/swcodec-gralloc-abort-virgl.txt`).
+  The tested game skips its intro on a tap and otherwise runs; Bliss's
+  `FFMPEG_CODEC=1 FFMPEG_PREFER_C2=1` boot options are an untested alternative.
+- The translator aborted once with `ndk_translation: Cannot process signal 11`
+  while a native thread attached to the JVM (`docs/evidence/M0/crash-ndk-translation-1/`),
+  after 170 s of a launch that was otherwise idle on a download prompt. It did
+  not recur across the following launches and a 37-minute session. This is
+  inside the proprietary translator and cannot be fixed here; it is tracked as a
+  stability risk until it is seen again or ruled out.
+- On this uncertified guest without a Google account, a game that calls Google
+  Play Games sign-in at start-up opens the system "Add account" page every
+  launch; Back returns to the game, which then offers its own login methods.
+- The tested game's attribution SDK (`airbridge.io`) could not complete a TLS
+  handshake from the development host's network at all, guest or host. The game
+  retried in the background and was not blocked by it. Product networking is
+  unaffected (R10), but a host network that filters such domains will show the
+  same retries in `logcat`.
 - Multi-instance, macros, and scripted automation are not part of v1 (D9).

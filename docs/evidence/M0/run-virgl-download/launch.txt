@@ -1,0 +1,20 @@
+Exit code: 0
+STDOUT:
+  bash arg: -p
+  bash arg: com.epidgames.trickcalrevive
+  bash arg: -c
+  bash arg: android.intent.category.LAUNCHER
+  bash arg: 1
+Events injected: 1
+## Network stats: elapsed time=55ms (0ms mobile, 0ms wifi, 55ms not connected)
+
+STDERR:
+args: [-p, com.epidgames.trickcalrevive, -c, android.intent.category.LAUNCHER, 1]
+ arg: "-p"
+ arg: "com.epidgames.trickcalrevive"
+ arg: "-c"
+ arg: "android.intent.category.LAUNCHER"
+ arg: "1"
+data="com.epidgames.trickcalrevive"
+data="android.intent.category.LAUNCHER"
+
