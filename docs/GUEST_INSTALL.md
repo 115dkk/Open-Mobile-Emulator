@@ -104,8 +104,9 @@ The original research notes follow.
 ## Account limitations
 
 The guest is not Google-certified. Play sign-in and purchases are not guaranteed.
-Follow the project's separate manual registration procedure. No automatic account
-registration or certification bypass belongs here.
+Follow the project's separate manual registration procedure (`docs/GOOGLE_ACCOUNT.md`,
+validated on 2026-09-26: account added, Play Games and Play Store worked). No automatic
+account registration or certification bypass belongs here.
 
 [usb]: https://docs.blissos.org/installation/install-from-bootable-usb/
 [qemu]: https://docs.blissos.org/installation/install-in-a-virtual-machine/install-in-qemu/
