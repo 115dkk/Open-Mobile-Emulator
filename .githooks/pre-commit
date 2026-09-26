@@ -29,3 +29,8 @@ if ! "$PWSH" -NoProfile -File "$REPO_ROOT/ci/Check-SpdxHeaders.ps1" -Staged; the
     echo 'pre-commit: R5 SPDX-header check failed; commit blocked.' >&2
     exit 1
 fi
+
+if ! "$PWSH" -NoProfile -File "$REPO_ROOT/ci/Check-UnsafeScope.ps1"; then
+    echo 'pre-commit: ADR-0002 unsafe-scope check failed; commit blocked.' >&2
+    exit 1
+fi
