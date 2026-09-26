@@ -10,6 +10,11 @@ on disk and are attached by the user by hand.
 | Google emulator image for blob extraction | `dl.google.com` | image builder only (P3), never the installed product | HTTPS | `vendor_google_emu-x86` flow (R3) |
 | Self-update | `api.github.com`, `github.com`, `objects.githubusercontent.com` | product (M2 item 7) | HTTPS | Release lookup and signed asset download, user-initiated |
 
+Not used on purpose: the Tauri installer's WebView2 bootstrapper download
+(`go.microsoft.com` and its redirects). `host/app/tauri.conf.json` sets
+`webviewInstallMode` to `skip`; the product requires the WebView2 runtime that
+Windows 11 ships with, and the installer says so instead of downloading it.
+
 Local-only sockets (not network endpoints):
 
 | Purpose | Address |

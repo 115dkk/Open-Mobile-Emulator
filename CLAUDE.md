@@ -52,7 +52,7 @@ Claude Code는 이 절의 사실을 다시 조사하지 않아도 된다. 다만
 | D4 | ARM 변환기는 게스트에 포함된 구글 libndk_translation. 교체 가능한 부품으로 취급하며 `translator/` 계약(6절)을 지킨다. | 계약 변경은 사용자 승인 |
 | D5 | QEMU는 별도 프로세스로 실행하고 QMP 소켓으로 제어한다. QEMU 코드를 링크하거나 복사하지 않는다. | 변경 불가 |
 | D6 | 자체 코드 라이선스는 GPL-2.0-or-later. 이유는 상용 에뮬레이터 업체가 이 코드를 가져가 비공개로 최적화해 되파는 일을 막기 위해서다(사용자 결정 2026-09-25). 게스트 오버레이(`guest/overlay/`)와 변환기 번들 템플릿처럼 AOSP 파생 파일은 원 라이선스 Apache-2.0을 유지하며, `or-later` 덕분에 두 부분이 만나도 GPL-3.0 아래에서 결합할 수 있다. | 사용자 승인 |
-| D7 | 프런트엔드 언어와 프레임워크는 M2 진입 시 사용자가 정한다. M0, M1은 PowerShell 7 스크립트로만 만든다. | 사용자 결정 |
+| D7 | 프런트엔드는 **Tauri 2 + Rust**(사용자 결정 2026-09-26, 근거는 `docs/DECISION-frontend.md` 8절). 지능은 Rust 크레이트가 갖고 Tauri 껍데기와 웹뷰는 얇게 둔다. `unsafe`는 윈도우 전용 크레이트의 ffi 모듈에만 허용하고 나머지 크레이트는 전부 `forbid`한다(`docs/adr/0002-unsafe-policy.md`). M0, M1은 PowerShell 7 스크립트로만 만들었다. | 사용자 승인 |
 | D8 | 기기 프로필은 평범한 x86_64 태블릿으로 두고, 그 이상의 위장이나 탐지 회피 기능은 만들지 않는다. | 변경 불가 |
 | D9 | v1에는 멀티 인스턴스, 매크로, 스크립트 자동화 기능을 넣지 않는다. | 사용자 승인 |
 
@@ -132,7 +132,7 @@ PRODUCT/
     overlay/                게스트에 넣을 자체 스크립트 (블롭 없음)
     build/                  Android-Generic 기반 자체 빌드 (2차)
   translator/               6절 계약, 설치 스크립트, 스모크 테스트
-  host/                     프런트엔드 (M2, 스택은 D7)
+  host/                     M2 제품 껍데기: Rust 워크스페이스(crates/), Tauri 껍데기(app/), 웹뷰(ui/). 구조는 docs/ARCHITECTURE.md
   installer/                설치기 (M3)
   ci/
     allowlist.txt  forbidden-patterns.txt  Check-*.ps1  Invoke-AllChecks.ps1  Install-Hooks.ps1
@@ -273,7 +273,7 @@ PRODUCT/
 ## 8. 사용자가 정해야 할 것
 
 1. ~~제품 이름(R6를 지키는 이름).~~ 정함: Open Mobile Emulator (2026-09-25).
-2. 프런트엔드 스택(M2 진입 시). M2는 사용자가 스택과 아키텍처를 정할 때까지 시작하지 않는다.
+2. ~~프런트엔드 스택(M2 진입 시).~~ 정함: Tauri 2 + Rust, 웹뷰는 React 19 + TypeScript (2026-09-26). 아키텍처는 `docs/ARCHITECTURE.md`, 용어는 `CONTEXT.md`, 결정 기록은 `docs/adr/`.
 3. 코드 서명 인증서 여부와 예산(M3).
 4. ~~트릭컬 APK 출처~~ 정함: 본인 기기에서 `adb pull` (2026-09-25).
 5. ~~M0 하네스~~ 정함: 배포판 QEMU + WHPX + 표준 VGA (2026-09-25). 이 PC는 Hyper-V가 켜져 있어 VirtualBox도 WHPX 위에서만 돌고, VirtualBox는 설치되어 있지 않다. WHPX(`HypervisorPlatform`) 활성화는 사용자가 동의했고 Claude가 UAC 승격으로 한 번 실행하며, 재부팅은 사용자가 한다(R9).
@@ -292,6 +292,7 @@ PRODUCT/
 | Hyper-V | 켜짐(하이퍼바이저 동작 중). `HypervisorPlatform`은 2026-09-25 13:12에 `dism.exe`로 켬(종료 코드 3010, 재부팅 필요). PowerShell 7의 `Enable-WindowsOptionalFeature`는 이 PC에서 0x80040154로 실패하므로 dism.exe를 쓴다 |
 | 도구 | git 2.55, gh 2.96, PowerShell 7.6.6, adb 37.0.1(Android SDK platform-tools), NDK 27/28, build-tools 35/36, JDK 17, winget |
 | 설치함(2026-09-25) | QEMU 11.1.0 → `C:\Program Files\qemu` (winget `SoftwareFreedomConservancy.QEMU`), MSYS2 20260611 → `C:\msys64` (winget `MSYS2.MSYS2`) |
+| M2 툴체인(2026-09-26 확인) | Rust 1.97.0 MSVC(rustup stable), tauri-cli 2.11.4(`cargo tauri`), cargo-deny 0.20.2, Node 24.1.0, npm 11.12.1, VS Build Tools 2022/2026 + Windows 11 SDK 26100, WebView2 런타임 153(윈도우 내장). `host/target`과 `host/ui/node_modules`는 무시 경로다. 저장소 경로의 공백이 어떤 도구를 깨면 qemu-build처럼 junction으로 `%LOCALAPPDATA%\OpenMobileEmulator` 아래로 뺀다 |
 | 없음 | VirtualBox |
 | WHPX 확인 사항(2026-09-25 저녁) | `-cpu max`는 쓰지 않는다. WHPX에서는 QEMU가 게스트 CPUID를 자기 모델로 답하고 `max`는 TCG 정의(AMD 벤더)라 Bliss가 init 배너 뒤에서 멈춘다. 런처 기본값은 `Skylake-Client-v4`. 게스트 주도 리셋(재부팅, QMP `system_reset`)은 QEMU 11.1.0 WHPX에서 xsave 상태 오류로 VM이 멈추므로 런처는 `-action reboot=shutdown`으로 QEMU를 끝내고 다시 띄운다. 표준 VGA에서는 `nomodeset HWACCEL=0` 항목만 부팅한다. 근거는 `docs/evidence/M0/guest-install.md` |
 | 게스트 메모리(2026-09-26 사용자 결정) | 런처 기본값 8192 MiB, 최대 16 GiB까지 승인. 6144 MiB에서는 트릭컬 전투 중 게스트 여유 메모리가 80~115 MB까지 떨어졌다(`docs/evidence/M0/metrics.md`) |

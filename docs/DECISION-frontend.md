@@ -387,3 +387,25 @@ Rust 툴체인에는 안드로이드 타깃 네 개와 UEFI 타깃이 이미 추
   https://raw.githubusercontent.com/mpv-player/mpv/master/DOCS/man/options.rst
 - 실측: 이 PC의 `%LOCALAPPDATA%\OpenMobileEmulator\qemu-build\out\bin`(QEMU 크기),
   `E:\EqualizerAPO-XT\build-Editor-x64\release`(Qt 배포 크기), PATH와 레지스트리, vswhere(호스트 준비 상태)
+
+## 8. 결정 (2026-09-26)
+
+사용자는 Tauri 2 + Rust를 골랐다. 이유는 세 가지다. 첫째, 다른 프로세스의 HWND를 받아
+제 창에 표시하는 일은 사용자의 MacType Control Center(Tauri)에서 이미 해 본 일이라 결격
+사유가 아니다. 남는 문제는 창 크기가 바뀔 때 QEMU 창이 한 박자 늦게 따라오는 지연인데,
+이것은 코드로 풀 문제다. 둘째, 백엔드를 짤 때 C++가 Rust보다 낫다고 볼 근거가 없다.
+셋째, 그렇다면 Rust 백엔드가 주는 이점만으로 Tauri가 앞선다.
+
+6절의 질문은 이렇게 정리된다.
+
+| 질문 | 결정 |
+|---|---|
+| 1. Qt와 Tauri 중 택일 | Tauri 2 + Rust. 스택 무관 스파이크는 하지 않고 M2 안에서 Rust로 바로 잰다 |
+| 2. Widgets인지 Quick인지, Qt 재사용 여부 | 해당 없음 |
+| 3. 업데이트 서명 검증 | Tauri updater 플러그인의 minisign 서명 검증을 쓴다. 이 검증은 끌 수 없다 |
+| 4. 설치기 | Tauri 번들러의 NSIS(perMachine)로 간다. Inno Setup과 Velopack은 쓰지 않는다 |
+
+같은 날 덧붙인 지침이 둘 있다. Tauri 껍데기와 웹뷰에는 지능을 주지 않고 Rust 크레이트가
+지능을 갖는다. `unsafe`는 사용자의 두 앱(MacType Control Center, UAC 원격 승인기)과 같은
+방식으로 윈도우 전용 크레이트의 ffi 모듈에만 허용하고 나머지는 전부 `forbid`한다. 두 앱에서
+가져온 방법론의 목록과 웹뷰 스택, 아키텍처는 `docs/ARCHITECTURE.md`와 `docs/adr/`에 있다.

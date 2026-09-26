@@ -22,6 +22,11 @@ libwidevine*
 *.obb
 
 # --- build outputs and local state ---
+host/target/
+host/node_modules/
+host/ui/dist/
+host/app/gen/schemas/
+host/app/target/
 qemu-build/out/
 qemu-build/dist/
 qemu-build/src/
