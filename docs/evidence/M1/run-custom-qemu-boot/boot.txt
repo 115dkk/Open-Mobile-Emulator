@@ -1,0 +1,32 @@
+# Bliss guest booted on the custom QEMU v11.1.1 bundle (ANGLE included), 2026-09-26
+launcher picks: C:\Open Mobile Emulator\qemu-build\out\bin\qemu-system-x86_64.exe (source custom-build, version 11.1.1)
+19:57:53 sys.boot_completed=1 after 34 s
+QEMU pid 32604 path C:\Open Mobile Emulator\qemu-build\out\bin\qemu-system-x86_64.exe
+GLES: Mesa, virgl (NVIDIA GeForce RTX 2080 SUPER/PCIe/SSE2), OpenGL ES 3.2 Mesa 24.0.8
+      present offset:         0 ns	     VSYNC period:  16678174 ns
+Physical size: 1280x800
+libndk_translation.so
+stderr (qemu-default-20260926-195719724.stderr.log) distinct lines:
+C:\Open Mobile Emulator\qemu-build\out\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+C:\Open Mobile Emulator\qemu-build\out\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+adb screencap 336035 bytes
+
+19:58:21 game launch on the custom build: monkey -p com.epidgames.trickcalrevive 1
+ 3120       02:09 com.epidgames.trickcalrevive
+ 3577       01:40 com.epidgames.trickcalrevive
+ActivityRecord{44f5333 u0 com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity}#95
+92dc46e com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity#98
+---
+---
+---
+20:01:07 the guest had gone to the lock screen with the display dimmed; waking it and dismissing the keyguard
+SurfaceView[com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity](BLAST)#121
+ 3120       03:25 com.epidgames.trickcalrevive
+ 3577       02:56 com.epidgames.trickcalrevive
+SF 1: frames 127 over 2.18 s = 57.8 fps; frame time p50 17.1 ms, p90 21.4, p99 25.1, max 25.2
+SF 2: frames 70 over 1.19 s = 58.2 fps; frame time p50 16.6 ms, p90 23.1, p99 31.3, max 31.3
+time	endpoint_peak	qemu-system-x86_64.exe:32604
+20:01:48	0.469	0.150
+09-26 20:01:13.765   907  4162 F DEBUG   : Cmdline: media.swcodec oid.media.swcodec/bin/mediaswcodec
+09-26 20:01:13.765   907  4162 F DEBUG   : signal 0 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-26 20:01:09.034  3120  3599 I Unity   : SystemInfo CPU = x86-64, Cores = 2, Memory = 7930mb

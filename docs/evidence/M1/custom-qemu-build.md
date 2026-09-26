@@ -154,6 +154,21 @@ of the rebuilt binary: three starts with `-m 256 -S -device virtio-vga-gl
 Bliss guest on the custom build is the next check; M0 and M1 evidence stays on
 the distribution QEMU (`OME_QEMU_DIR`, runbook step 0).
 
+Guest boot on the custom build (19:57, `run-custom-qemu-boot/boot.txt`): with
+`OME_QEMU_DIR` unset the launcher picked `qemu-build\out\bin` (source
+`custom-build`, version 11.1.1) and `Start-Guest.ps1 -Name default -Gpu virgl`
+brought Bliss to `sys.boot_completed` in 34 s, the same as the distribution
+build: Mesa virgl on the RTX 2080 SUPER, VSYNC period 16.68 ms (60 Hz mode from
+`edid=off`), 1280x800, native bridge on, adb up. The custom build's stderr holds
+only the two CPUID warnings; the `failed to get xsave state` lines that the
+distribution snapshot prints on every boot do not appear with v11.1.1. The
+tested game then started on this build (after the guest was woken from its
+lock screen with `input keyevent 224; wm dismiss-keyguard`): its asset-loading
+screens presented at 57.8 and 58.2 fps (p50 16.6 to 17.1 ms), the game's audio
+at 0.15 peak on the host session of the custom `qemu-system-x86_64.exe`, the
+usual `media.swcodec` abort on the intro video and nothing else in the crash
+buffer (`run-custom-qemu-boot/boot.txt`, `sf-latency-*.txt`, `host-audio.txt`).
+
 Two build-script observations from the rebuild, not fixed today: MSYS2 bash
 failed to fork right after the `all` step finished its install
 (`dofork: child -1 - CreateProcessW failed ... errno 13`, exit 254), so the
