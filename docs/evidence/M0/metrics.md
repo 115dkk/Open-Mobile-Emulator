@@ -93,7 +93,7 @@ Measured while completing the M1 checklist (`docs/evidence/M1/completion-checkli
 | Battle 1-5 | pass, 3 stars, four waves | | | | not measured | `docs/evidence/M1/run-virgl-session/screenshot-stage-1-5-victory.png` |
 | Battle 1-3 replay, 2-processor cpuinfo (control) | pass | 136 to 140 % | 2,037 | 26 to 29 | 47.9 / 54.0 / 53.6 / 52.5 fps in four fixed windows (p90 27 to 35 ms) | `docs/evidence/M1/run-virgl-battle13-cores2-control/` |
 | Battle 1-3 replay, 4-processor cpuinfo (experiment) | pass | 144 to 148 % | 2,045 | 31 to 42 | 47.6 / 53.3 / 49.0 / 50.4 fps, same windows (p90 33 to 35 ms) | `docs/evidence/M1/run-virgl-battle13-cores4/` |
-| 10-minute session | pass: one process from 16:10:38 to the 18:34:36 in-game quit (2 h 24 min), no crash | | | | | `docs/evidence/M1/run-virgl-session/` |
+| 10-minute session | pass: one process from 16:10:38 to the 18:34:36 in-game quit (2 h 24 min), no crash | | | | | `docs/evidence/M1/run-virgl-session/ps-game.txt` (1 h 54 min sample at 18:05, crash buffer) and `quit-relaunch.txt` (the quit time) |
 | Quit and relaunch | pass: 종료 ended the process in 3 s; relaunch to the title with the same account number, then the lobby | | | | | `docs/evidence/M1/run-virgl-session/quit-relaunch.txt` |
 | Voiced story | not reachable: theater locked at player level 6, no story scene on 1-4 or 1-5 | | | | | checklist |
 | Host audio (QEMU session peak, 0 to 1) | 0.06 to 0.10 in the lobby and in battle after the guest media volume was set to 15 of 15; 0.000 to 0.002 at the default 5 of 15 | | | | | `docs/evidence/M1/run-virgl-session/host-audio-game.txt` |

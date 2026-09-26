@@ -48,7 +48,7 @@ to d fall in the wave 2 set-up and fight; the screenshots in each run folder sho
 | guest CPU (400 % = all vCPUs) | 104 % user + 44 to 52 % sys | 96 to 100 % user + 48 to 52 % sys |
 | host CPU, whole PC | 31 to 42 % | 26 to 29 % |
 | game PSS | 2.05 GB | 2.04 GB |
-| host audio peak (QEMU session) | 0.06 to 0.075 | 0.07 |
+| host audio peak (QEMU session) | 0.06 to 0.075 | not measured in the redone control run |
 
 The 16:30 measurement in `docs/evidence/M0/run-virgl-60hz-battle/` (58.5 fps, p90 20.6 ms,
 "active wave with no overlay") was taken at a quieter moment of the same stage; these two
