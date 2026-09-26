@@ -40,3 +40,46 @@ jobs:
       - name: Check artifact manifest
         shell: pwsh
         run: pwsh -NoProfile -File ci/Check-Manifest.ps1
+
+  host:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: host
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up pinned Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: host/.node-version
+          cache: npm
+          cache-dependency-path: host/package-lock.json
+      - name: Select repository Rust toolchain
+        run: rustup show active-toolchain
+      - name: Install webview dependencies
+        run: npm ci
+      - name: Check host and webview
+        run: node tools/quality.mjs
+
+  host-licenses:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Check host dependency licenses
+        uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25 # v2
+        with:
+          rust-version: '1.97.0'
+          manifest-path: host/Cargo.toml
+          arguments: --locked --all-features --workspace
+          command: check
+          command-arguments: licenses
+      - name: Check host dependency advisories
+        uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25 # v2
+        with:
+          rust-version: '1.97.0'
+          manifest-path: host/Cargo.toml
+          arguments: --locked --all-features --workspace
+          command: check
+          command-arguments: advisories

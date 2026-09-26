@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-guest-disk-create"
+description = "Enables the guest_disk_create command without any pre-configured scope."
+commands.allow = ["guest_disk_create"]
+
+[[permission]]
+identifier = "deny-guest-disk-create"
+description = "Denies the guest_disk_create command without any pre-configured scope."
+commands.deny = ["guest_disk_create"]

@@ -154,7 +154,7 @@ try {
     foreach ($extension in @(
             '.ps1', '.psm1', '.psd1', '.sh', '.bash', '.py', '.c', '.h',
             '.cpp', '.hpp', '.rs', '.cs', '.java', '.kt', '.js', '.ts',
-            '.yml', '.yaml'
+            '.tsx', '.mjs', '.css', '.toml', '.yml', '.yaml'
         )) {
         [void]$checkedExtensions.Add($extension)
     }

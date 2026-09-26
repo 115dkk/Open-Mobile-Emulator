@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-whpx-enable"
+description = "Enables the whpx_enable command without any pre-configured scope."
+commands.allow = ["whpx_enable"]
+
+[[permission]]
+identifier = "deny-whpx-enable"
+description = "Denies the whpx_enable command without any pre-configured scope."
+commands.deny = ["whpx_enable"]

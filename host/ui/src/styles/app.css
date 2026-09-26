@@ -1,0 +1,184 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
+/* Copyright (C) 2026 Open Mobile Emulator contributors */
+/* Minimal first screen. Every color and size comes from tokens.css. */
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: var(--type-body);
+  -webkit-font-smoothing: antialiased;
+  word-break: keep-all;
+}
+
+.app-page {
+  box-sizing: border-box;
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: var(--space-10) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  background: var(--bg);
+  color: var(--text);
+  font: var(--type-body);
+  word-break: keep-all;
+}
+
+.app-page p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+/* Header */
+
+.app-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.app-title {
+  margin: 0;
+  font: var(--type-title);
+  text-wrap: balance;
+}
+
+.app-phase,
+.app-loading {
+  color: var(--muted);
+}
+
+/* Status row */
+
+.app-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--space-3);
+  row-gap: var(--space-1);
+}
+
+.app-status-dot {
+  --app-dot-color: var(--muted);
+  flex: none;
+  width: 10px;
+  height: 10px;
+  /* The halo sits outside the 10px box; margin keeps it clear of the page edge and the text. */
+  margin: var(--space-1);
+  border-radius: 50%;
+  background-color: var(--app-dot-color);
+  box-shadow: 0 0 0 var(--space-1) color-mix(in srgb, var(--app-dot-color) 25%, transparent);
+}
+
+.app-status-dot-stopped { --app-dot-color: var(--muted); }
+.app-status-dot-starting { --app-dot-color: var(--accent); }
+.app-status-dot-running { --app-dot-color: var(--success); }
+.app-status-dot-stopping,
+.app-status-dot-restarting { --app-dot-color: var(--warning); }
+.app-status-dot-failed { --app-dot-color: var(--danger); }
+
+/* Starting pulses the halo; the word next to the dot carries the same state without motion. */
+.app-status-dot-starting {
+  animation: app-dot-pulse 1.4s var(--ease-standard) infinite alternate;
+}
+
+@keyframes app-dot-pulse {
+  from { box-shadow: 0 0 0 var(--space-1) color-mix(in srgb, var(--app-dot-color) 25%, transparent); }
+  to { box-shadow: 0 0 0 var(--space-1) color-mix(in srgb, var(--app-dot-color) 8%, transparent); }
+}
+
+.app-status-state {
+  font-weight: 600;
+}
+
+.app-status-next {
+  color: var(--muted);
+}
+
+/* Notice */
+
+.app-notice {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.app-notice-message {
+  color: var(--text);
+}
+
+.app-notice-next {
+  color: var(--muted);
+}
+
+/* Actions */
+
+.app-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.app-button {
+  box-sizing: border-box;
+  min-width: var(--target-min);
+  min-height: var(--target-min);
+  padding: 0 var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  font: var(--type-body);
+  font-weight: 600;
+  cursor: pointer;
+  transition-property: background-color, transform;
+  transition-duration: var(--motion-fast);
+  transition-timing-function: var(--ease-standard);
+}
+
+.app-button-secondary {
+  background-color: var(--surface-raised);
+  border-color: var(--line);
+  color: var(--text);
+}
+
+.app-button-secondary:hover:not(:disabled) {
+  background-color: var(--accent-soft);
+}
+
+.app-button-primary {
+  background-color: var(--accent);
+  color: var(--on-accent);
+}
+
+.app-button-primary:hover:not(:disabled) {
+  background-color: var(--accent-hover);
+}
+
+.app-button:active:not(:disabled) {
+  transform: scale(.96);
+}
+
+.app-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.app-button:disabled {
+  opacity: var(--disabled-opacity);
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-button {
+    transition: none;
+  }
+
+  .app-status-dot-starting {
+    animation: none;
+  }
+}

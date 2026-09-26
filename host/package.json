@@ -1,0 +1,46 @@
+{
+  "name": "open-mobile-emulator",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "GPL-2.0-or-later",
+  "engines": {
+    "node": ">=24.1.0 <25"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "build:qa": "tsc -b && vite build --mode qa",
+    "preview": "vite preview --host 127.0.0.1",
+    "lint": "eslint ui --max-warnings 0",
+    "typecheck": "tsc -b --pretty false",
+    "test:ui": "vitest run",
+    "tauri": "tauri",
+    "quality": "node tools/quality.mjs"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "2.11.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.11.5",
+    "typescript": "6.0.3",
+    "vite": "8.2.2",
+    "@vitejs/plugin-react": "6.1.1",
+    "eslint": "10.10.0",
+    "@eslint/js": "10.0.1",
+    "typescript-eslint": "8.70.0",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "eslint-plugin-react-refresh": "0.5.6",
+    "vitest": "4.1.11",
+    "@testing-library/react": "16.3.3",
+    "@testing-library/jest-dom": "7.0.1",
+    "@testing-library/user-event": "14.6.7",
+    "jsdom": "29.1.1",
+    "@playwright/test": "1.63.0",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "@types/node": "24.13.3"
+  }
+}

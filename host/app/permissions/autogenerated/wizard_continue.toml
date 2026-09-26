@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-wizard-continue"
+description = "Enables the wizard_continue command without any pre-configured scope."
+commands.allow = ["wizard_continue"]
+
+[[permission]]
+identifier = "deny-wizard-continue"
+description = "Denies the wizard_continue command without any pre-configured scope."
+commands.deny = ["wizard_continue"]

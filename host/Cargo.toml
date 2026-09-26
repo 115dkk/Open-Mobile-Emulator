@@ -1,0 +1,60 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+#
+# M2 host workspace. Module placement: docs/ARCHITECTURE.md. Lint policy: docs/adr/0002-unsafe-policy.md.
+# Every crate below forbids unsafe code through these workspace lints; ome-platform-win alone
+# lowers the lint to deny and allows it in its private ffi modules.
+
+[workspace]
+resolver = "3"
+members = [
+    "crates/ome-platform-win",
+    "crates/ome-guest-config",
+    "crates/ome-qmp",
+    "crates/ome-supervisor",
+    "crates/ome-artifacts",
+    "crates/ome-host-check",
+    "crates/ome-adb",
+    "crates/ome-window-host",
+    "crates/ome-keymap",
+    "crates/ome-wizard",
+    "crates/ome-diagnostics",
+    "crates/ome-runtime",
+    "crates/ome-setup",
+    "app",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.97"
+license = "GPL-2.0-or-later"
+repository = "https://github.com/115dkk/Open-Mobile-Emulator"
+publish = false
+
+[workspace.dependencies]
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.145"
+thiserror = "2.0.17"
+sha2 = "0.10.9"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+unsafe_op_in_unsafe_fn = "deny"
+missing_debug_implementations = "warn"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+dbg_macro = "deny"
+todo = "deny"
+unimplemented = "deny"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "debuginfo"
+overflow-checks = true
+
+[profile.dev]
+debug = 1
+debug-assertions = true

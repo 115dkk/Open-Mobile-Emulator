@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "id": "trickcal-default",
+  "name": "Default keymap",
+  "note": "Positions are placeholders to be tuned in M2.",
+  "bindings": [
+    {
+      "key": "Space",
+      "action": {
+        "kind": "tap",
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "key": "ArrowLeft",
+      "action": {
+        "kind": "swipe",
+        "from": [0.65, 0.5],
+        "to": [0.35, 0.5],
+        "durationMs": 240
+      }
+    },
+    {
+      "key": "ArrowRight",
+      "action": {
+        "kind": "swipe",
+        "from": [0.35, 0.5],
+        "to": [0.65, 0.5],
+        "durationMs": 240
+      }
+    }
+  ]
+}

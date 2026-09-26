@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Open Mobile Emulator mark: a phone outline holding a play triangle. Own work, no third-party marks (R6). -->
+  <rect x="0" y="0" width="512" height="512" rx="112" fill="#14171b"/>
+  <rect x="164" y="72" width="184" height="368" rx="40" fill="none" stroke="#5fa8f5" stroke-width="28"/>
+  <rect x="220" y="96" width="72" height="12" rx="6" fill="#5fa8f5"/>
+  <path d="M232 196 L232 316 L332 256 Z" fill="#5fa8f5"/>
+</svg>

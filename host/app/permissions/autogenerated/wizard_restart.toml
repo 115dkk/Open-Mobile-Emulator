@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-wizard-restart"
+description = "Enables the wizard_restart command without any pre-configured scope."
+commands.allow = ["wizard_restart"]
+
+[[permission]]
+identifier = "deny-wizard-restart"
+description = "Denies the wizard_restart command without any pre-configured scope."
+commands.deny = ["wizard_restart"]

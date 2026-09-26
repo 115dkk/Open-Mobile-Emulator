@@ -69,6 +69,13 @@ if ($spdxResult -ne 0) {
     $failed = $true
 }
 
+$unsafeScopeResult = Invoke-PolicyCheck `
+    -Name 'Check-UnsafeScope' `
+    -ScriptPath (Join-Path $PSScriptRoot 'Check-UnsafeScope.ps1')
+if ($unsafeScopeResult -ne 0) {
+    $failed = $true
+}
+
 $pesterModule = Get-Module -ListAvailable Pester |
     Where-Object { $_.Version.Major -eq 5 } |
     Sort-Object Version -Descending |

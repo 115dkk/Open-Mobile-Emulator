@@ -1,0 +1,112 @@
+[
+  {
+    "kind": "hostCheckRefresh"
+  },
+  {
+    "kind": "wizardContinue"
+  },
+  {
+    "kind": "wizardSkip"
+  },
+  {
+    "kind": "wizardRestart"
+  },
+  {
+    "kind": "whpxEnable"
+  },
+  {
+    "kind": "artifactDownloadStart"
+  },
+  {
+    "kind": "artifactDownloadCancel"
+  },
+  {
+    "kind": "guestDiskCreate",
+    "sizeGib": 32
+  },
+  {
+    "kind": "guestStart"
+  },
+  {
+    "kind": "guestStop"
+  },
+  {
+    "kind": "guestRestart"
+  },
+  {
+    "kind": "stageRectChanged",
+    "rect": {
+      "x": 10.0,
+      "y": 20.0,
+      "width": 1280.0,
+      "height": 720.0,
+      "scaleFactor": 1.25
+    }
+  },
+  {
+    "kind": "screenshotSave"
+  },
+  {
+    "kind": "appInstallPick"
+  },
+  {
+    "kind": "appUninstall",
+    "package": "com.example.app"
+  },
+  {
+    "kind": "appLaunch",
+    "package": "com.example.app"
+  },
+  {
+    "kind": "keymapSetActive",
+    "id": "trickcal-default"
+  },
+  {
+    "kind": "keymapSetEnabled",
+    "enabled": true
+  },
+  {
+    "kind": "keymapDelete",
+    "id": "custom"
+  },
+  {
+    "kind": "displayPresetApply",
+    "id": "hd-720"
+  },
+  {
+    "kind": "stageFitSet",
+    "fit": "oneToOne"
+  },
+  {
+    "kind": "settingsSave",
+    "settings": {
+      "memoryMib": 8192,
+      "vcpus": 4,
+      "gpuMode": "virgl",
+      "closeAction": "minimizeToTray",
+      "showFps": false,
+      "autoUpdateCheck": true
+    }
+  },
+  {
+    "kind": "updateCheck"
+  },
+  {
+    "kind": "updateInstall"
+  },
+  {
+    "kind": "diagnosticsExport"
+  },
+  {
+    "kind": "openLogsFolder"
+  },
+  {
+    "kind": "openScreenshotsFolder"
+  },
+  {
+    "kind": "openRegistrationPage"
+  },
+  {
+    "kind": "guestWindowToFront"
+  }
+]

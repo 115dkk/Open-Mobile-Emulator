@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-keymap-set-active"
+description = "Enables the keymap_set_active command without any pre-configured scope."
+commands.allow = ["keymap_set_active"]
+
+[[permission]]
+identifier = "deny-keymap-set-active"
+description = "Denies the keymap_set_active command without any pre-configured scope."
+commands.deny = ["keymap_set_active"]

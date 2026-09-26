@@ -1,0 +1,15 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+// Copyright (C) 2026 Open Mobile Emulator contributors
+import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    environment: 'jsdom',
+    include: ['ui/src/**/*.test.{ts,tsx}'],
+    setupFiles: ['ui/src/test-setup.ts'],
+    clearMocks: true,
+    restoreMocks: true,
+  },
+});

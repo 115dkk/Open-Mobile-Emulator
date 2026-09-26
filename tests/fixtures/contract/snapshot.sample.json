@@ -1,0 +1,138 @@
+{
+  "contractVersion": 1,
+  "productVersion": "0.1.0",
+  "phase": "main",
+  "host": {
+    "rows": [
+      {
+        "id": "cpuVirtualization",
+        "status": "ready",
+        "detail": "프로세서 가상화를 사용할 수 있습니다."
+      }
+    ],
+    "ready": true,
+    "inspectedAt": "2026-09-26T12:00:00Z"
+  },
+  "wizard": {
+    "step": "done",
+    "canContinue": false,
+    "canSkip": false,
+    "download": {
+      "stage": "verified",
+      "doneBytes": 1024,
+      "totalBytes": 1024,
+      "bytesPerSecond": 512,
+      "label": "guest.iso"
+    },
+    "gsfId": "1234567890",
+    "diskSizeGib": 32,
+    "diskFreeBytes": 53687091200
+  },
+  "guest": {
+    "state": "running",
+    "bootCompleted": true,
+    "adbConnected": true,
+    "hosting": "embedded",
+    "resolution": {
+      "width": 1280,
+      "height": 720
+    },
+    "lastExit": {
+      "kind": "guestReset",
+      "at": "2026-09-26T11:50:00Z",
+      "logPath": "logs/qemu-default.stderr.log"
+    },
+    "fps": 60,
+    "startedAt": "2026-09-26T11:55:00Z"
+  },
+  "apps": {
+    "available": true,
+    "items": [
+      {
+        "package": "com.example.app",
+        "label": "Example",
+        "versionName": "1.0",
+        "installedAt": "2026-09-26T11:00:00Z"
+      }
+    ],
+    "install": null
+  },
+  "keymap": {
+    "profiles": [
+      {
+        "id": "trickcal-default",
+        "name": "Default keymap",
+        "bundled": true,
+        "bindingCount": 3
+      }
+    ],
+    "activeId": "trickcal-default",
+    "enabled": true
+  },
+  "display": {
+    "presets": [
+      {
+        "id": "hd-720",
+        "size": {
+          "width": 1280,
+          "height": 720
+        },
+        "densityDpi": 160,
+        "orientation": "landscape",
+        "needsReboot": true
+      },
+      {
+        "id": "full-hd",
+        "size": {
+          "width": 1920,
+          "height": 1080
+        },
+        "densityDpi": 240,
+        "orientation": "landscape",
+        "needsReboot": true
+      },
+      {
+        "id": "portrait-720",
+        "size": {
+          "width": 720,
+          "height": 1280
+        },
+        "densityDpi": 160,
+        "orientation": "portrait",
+        "needsReboot": true
+      }
+    ],
+    "activeId": "hd-720",
+    "fit": "fitWindow"
+  },
+  "settings": {
+    "memoryMib": 8192,
+    "vcpus": 4,
+    "gpuMode": "virgl",
+    "closeAction": "minimizeToTray",
+    "showFps": true,
+    "autoUpdateCheck": true,
+    "homeDir": "C:\\Users\\Example\\AppData\\Local\\OpenMobileEmulator",
+    "diskUsageBytes": 1024
+  },
+  "update": {
+    "currentVersion": "0.1.0",
+    "state": {
+      "kind": "available",
+      "version": "0.2.0",
+      "notesUrl": "https://github.com/115dkk/Open-Mobile-Emulator/releases"
+    }
+  },
+  "notices": [
+    {
+      "at": "2026-09-26T12:00:00Z",
+      "level": "info",
+      "message": "게스트가 시작되었습니다."
+    }
+  ],
+  "issue": {
+    "code": "not_wired",
+    "message": "아직 준비되지 않은 기능입니다.",
+    "nextAction": null
+  }
+}
