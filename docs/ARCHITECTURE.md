@@ -23,11 +23,11 @@
 ┌───────────────────────────────▼──────────────────────────────────────────┐
 │ ome-runtime  스냅숏 투영, 설정 저장(원자적 JSON), 명령 분배, 마법사 진행  │
 ├───────────┬──────────┬───────────┬───────────┬───────────┬───────────────┤
-│ guest-    │ super-   │ qmp       │ artifacts │ host-     │ adb           │
-│ config    │ visor    │           │           │ check     │               │
+│ guest-    │ guest-   │ super-    │ qmp       │ artifacts │ host-check    │
+│ image     │ config   │ visor     │           │           │               │
 ├───────────┼──────────┼───────────┼───────────┼───────────┼───────────────┤
-│ window-   │ keymap   │ wizard    │ diagnos-  │ (핵심 크레이트 전부       │
-│ host      │          │           │ tics      │  #![forbid(unsafe_code)]) │
+│ adb       │ window-  │ input     │ overlay   │ wizard    │ diagnostics   │
+│ (세대별)  │ host     │ (파이프라인)│ (두번째 창)│           │ (전부 forbid) │
 └───────────┴──────────┴───────────┴───────────┴───────────┴───────────────┘
                                 │ 소유된 타입만 오간다(원시 핸들 없음)
 ┌───────────────────────────────▼──────────────────────────────────────────┐
@@ -56,6 +56,7 @@ host/
   deny.toml               cargo-deny 라이선스 허용 목록과 advisories
   crates/
     ome-platform-win/     Win32 (unsafe는 src/ffi/ 안에만, 크레이트 수준 deny)
+    ome-guest-image/      GuestImageProfile, GuestFamily 어댑터, CapabilityProbe (3.15절)
     ome-guest-config/     GuestConfig, QemuInvocation
     ome-qmp/              QmpChannel
     ome-supervisor/       Supervisor 상태 기계와 프로세스 어댑터
@@ -63,7 +64,9 @@ host/
     ome-host-check/       HostReadiness
     ome-adb/              AdbSession, AppPackage
     ome-window-host/      Stage 기하와 GuestWindowHost
-    ome-keymap/           KeymapProfile, Mapper
+    ome-input/            입력 파이프라인: 포착, 문, 해석, 합성, 일정, 프로필 저장, 자동 적용 (3.16절)
+                          (뼈대 첫 판의 ome-keymap을 이 이름으로 넓힌다)
+    ome-overlay/          OverlayWindow 기하와 편집기 프로토콜 (3.17절)
     ome-wizard/           FirstRunWizard 상태 기계
     ome-diagnostics/      DiagnosticBundle
     ome-runtime/          AppRuntime, AppSnapshot, Command, AppIssue, 설정 저장
@@ -72,7 +75,8 @@ host/
                           src/{main,lib,commands,admission,events,tray,window}.rs, icons/
   ui/                     Vite + React: index.html, src/{main.tsx, App.tsx, bridge.ts,
                           contracts.ts, screens/, components/, styles/}, public/fonts/
-  presets/                키 매핑 프리셋 JSON (게임 이름은 파일 이름에만, R6)
+  presets/                입력 프로필 프리셋 JSON (게임 이름은 파일 이름에만, R6)
+manifests/images/         게스트 이미지 프로필 JSON (3.15절). 산출물 URL과 SHA-256은 manifests/artifacts.json
   tools/                  node --test 게이트(권한 목록, 빌드 정책), quality.mjs
   package.json, package-lock.json, .npmrc(save-exact, engine-strict), .node-version
 ```
@@ -97,6 +101,11 @@ host/
   usb-tablet, usb-kbd, dsound + intel-hda. 각 값의 출처 주석은 런처에서 옮긴다.
 - 테스트 표면: 런처 `Start-Guest.ps1 -DryRun`의 인자 출력을 픽스처로 저장해 두고 Rust 출력과
   인자 단위로 대조한다. 검증 실패 경로는 표로 테스트한다.
+- 이미지 프로필과의 관계: `GuestConfig`는 이미지 프로필(3.15절)이 허용 목록 안에서 준 재정의
+  (GPU 장치 문자열, 디스플레이 추가 옵션, 부팅 인자)를 받아 인자에 반영한다. 재정의는 열거형과
+  검증된 값이며 자유 문자열 인자는 받지 않는다. 입력 파이프라인용 `-device virtio-multitouch-pci`
+  는 `GuestConfig.multitouch` 플래그로 켠다. 기본은 켬이지만 런처 동등성 픽스처는 끔으로 잰다
+  (런처에는 이 장치가 없다). 게스트가 이 장치를 인식하는지는 능력 조사가 확인한다.
 
 ### 3.2 ome-platform-win
 
@@ -184,6 +193,9 @@ host/
   `AppPackage::open(path)`는 APK, XAPK, APKS를 열어 base와 split 목록을 만든다.
 - 뒤에 숨는 것: adb 명령줄 전부(`adb -s 127.0.0.1:5555 ...`), 인용 규칙, 출력 파싱, XAPK zip
   풀기, `install-multiple` 순서, 첫 부팅 뒤 미디어 볼륨 15 설정(KNOWN_LIMITATIONS).
+- 세대 의존성: 안드로이드 세대에 따라 달라지는 명령(미디어 볼륨, 기기 ID, 전경 앱, 앱 목록
+  출력 형식)은 이 크레이트가 직접 알지 않고 `ome-guest-image`의 `FamilyAdapter`에서 받는다.
+  `AdbSession`은 세션(어디에 붙는가)이고 어댑터는 방언(무슨 말을 하는가)이다.
 - 이음새: `CommandRunner` 트레이트(실제 프로세스, 테스트 녹음).
 - 테스트 표면: 출력 파싱과 패키지 열기는 픽스처로, 설치 순서는 녹음으로 테스트한다.
 
@@ -196,12 +208,12 @@ host/
   `SWP_FRAMECHANGED`, DPI 혼합 호스팅, 포커스 넘기기, QEMU 종료 시 분리.
 - 테스트 표면: 기하 계산은 순수 테스트. 실제 담기는 M2 첫 스파이크에서 SDL 픽스처로 잰다.
 
-### 3.9 ome-keymap
+### 3.9 ome-keymap (뼈대 첫 판; 3.16절 ome-input으로 넓힌다)
 
-- 인터페이스: `KeymapProfile`(JSON, 버전 필드), `Mapper::translate(key_event, stage_size)
-  -> Vec<InputEvent>`(순수), 프리셋 로더.
-- 뒤에 숨는 것: 키 코드 표, 좌표 정규화(0~32767), 스와이프의 단계 분해, 눌림과 뗌.
-- 테스트 표면: 프로필과 키 입력에 대한 이벤트 열을 표로 테스트한다.
+- 뼈대 첫 판에는 키 → 탭/스와이프의 순수 매퍼와 프리셋 로더만 있다. 사용자가 2026-09-26 밤에
+  요구한 입력 기능 전체(홀드, 가상 조이스틱, 마우스 버튼, 게임별 자동 적용, 논리 좌표,
+  오버레이 편집기, 일시 중지 단축키, 매크로 자리)는 3.16절의 `ome-input`이 소유하고, 이
+  크레이트는 그 이름으로 바뀐다.
 
 ### 3.10 ome-wizard
 
@@ -239,6 +251,10 @@ host/
   fs, shell, http 플러그인 권한이 없다.
 - 트레이 아이콘과 알림은 껍데기가 소유한다. 알림은 `tauri-plugin-notification`을 Rust 쪽에서만
   부른다.
+- 창은 둘이다. `main`과, 무대 위에 얹는 투명한 `overlay`(3.17절). 오버레이 창은 `main`이 소유하고
+  장식이 없으며 Rust가 무대 사각형에 맞춰 놓는다. 편집 모드가 아니면
+  `set_ignore_cursor_events(true)`로 클릭이 통과한다. 두 창은 같은 권한 목록을 쓰고, 오버레이
+  웹뷰가 부를 수 있는 명령도 앱의 타입 명령뿐이다.
 
 ### 3.14 host/ui (웹뷰)
 
@@ -249,6 +265,86 @@ host/
   쓰지 않는다. 폰트는 저장소에 담아 오프라인으로 싣는다(R10).
 - QA 갤러리(`ui/qa.html`, 합성 스냅숏)는 제품 빌드에 절대 들어가지 않는다. Vite 플러그인이
   제품 번들에 QA 모듈이 섞이면 빌드를 실패시킨다.
+
+### 3.15 ome-guest-image
+
+사용자 요구(2026-09-26 밤): 1차 목표는 Pie(API 28), 13, 15, 16, 17을 지원하는 것이고, 그 뒤로
+새 안드로이드가 나오는 대로 따라간다. 그러므로 안드로이드 게스트는 처음부터 교체 가능한 부품이다
+(ADR-0004). D2가 정한 Bliss 16.9.x(안드로이드 13)는 첫 프로필이고, 다른 세대는 프로필을 더해
+지원한다.
+
+- 인터페이스: `GuestImageProfile::load_all(dir) -> Vec<GuestImageProfile>`(`manifests/images/*.json`),
+  `profile.family() -> GuestFamily`, `FamilyAdapter::for_profile(&profile) -> Box<dyn FamilyAdapter>`,
+  `CapabilityProbe::run(&adb, &adapter) -> CapabilityReport`(첫 부팅 뒤 한 번, 결과는 게스트
+  메타데이터에 저장), `CompatEntry::load(package)`.
+- 이미지 프로필의 필드: `id`, `display_name`(사용자 말로, 예: "안드로이드 13"), `android_version`,
+  `api_level`, `distribution`(`bliss`, `android_x86`, `self_built`), `artifact`(`manifests/artifacts.json`의
+  산출물 이름), `translator`(`houdini`, `ndk_translation`, `digitalis`, `none`; `translator/`
+  계약의 `android_api`와 대조), `boot_args`, `grub_entry_hint`, `install_guide`(설치기 안내 문장
+  목록), `qemu_overrides`(허용 목록 안의 열거형 값만: GPU 장치, 디스플레이 옵션, EDID), `status`
+  (`verified`, `candidate`, `deprecated`)와 검증 기록.
+- 세대 어댑터가 소유하는 방언: 앱 목록(`pm list packages -3 --show-versioncode`의 유무),
+  앱 라벨 읽기, 미디어 볼륨(`cmd media_session volume`, 없으면 `service call audio` 대체),
+  기기 ID(GSF `content query`, 권한이 막히면 안내 문장으로 대체), 전경 앱(`dumpsys activity
+  activities`의 `topResumedActivity` 또는 `mResumedActivity`), 부팅 완료 표지, 네이티브 브리지
+  속성(`ro.dalvik.vm.native.bridge`의 값), 화면 크기와 밀도 명령. 세대는 `Legacy`(28~29),
+  `Modern`(30~34), `Current`(35~)로 시작하고 조사 결과에 따라 나눈다. 모르는 API 레벨은
+  `Current`로 시작한다.
+- 뒤에 숨는 것: 세대별 명령 문자열과 출력 파서 전부. 호출자(런타임, 마법사, 입력 파이프라인)는
+  `adapter.foreground_package()`처럼 뜻으로만 부른다.
+- 테스트 표면: 각 세대 어댑터의 명령 문자열 표와 출력 파서를 녹음 픽스처로 테스트한다. 능력
+  조사는 가짜 adb로 항목별 성공과 실패를 테스트한다. 실제 이미지에서의 조사 결과는
+  `docs/evidence/M2/images/<id>.md`에 남긴다.
+- 후보 이미지(2026-09-26 기준, 버전 대응은 확인 필요): 안드로이드 9 Pie는 Bliss OS 11.x 또는
+  Android-x86 9.0-r2(변환기 libhoudini), 안드로이드 13은 Bliss 16.9.7(검증됨), 안드로이드 15와
+  16은 Bliss 18 또는 arcadia-x86 트리의 자체 빌드(R3), 안드로이드 17은 상류가 나오는 대로. Pie
+  세대는 `minSdk`가 28을 넘는 앱을 설치할 수 없다는 사실을 호환성 항목이 말한다.
+
+### 3.16 ome-input
+
+사용자 요구(2026-09-26 밤): 좌표 탭, 홀드, 방향키와 WASD의 가상 조이스틱, 드래그와 스와이프,
+마우스 버튼, 게임별 프로필 저장과 자동 적용, 해상도와 창 크기에 흔들리지 않는 논리 좌표,
+화면 위에서 바로 고치는 편집기, 전체 매핑을 잠시 끄는 단축키. 그리고 나중에 키보드 매크로 같은
+편의 기능이 더해질 수 있다(ADR-0005).
+
+파이프라인은 다섯 단계이고 단계마다 모듈이다.
+
+| 단계 | 모듈 | 인터페이스 | 뒤에 숨는 것 |
+|---|---|---|---|
+| 포착 | `KeyboardSource`, `MouseSource` | `subscribe() -> Receiver<HostInput>` (키 코드와 눌림/뗌, 마우스 버튼과 휠, 포인터의 무대 좌표) | 플랫폼 크레이트의 `WH_KEYBOARD_LL`, `WH_MOUSE_LL` 훅, 전용 스레드, 1 ms 안에 끝나는 콜백. 아무 입력도 기록하지 않는다 |
+| 문 | `Gate` | `admit(&HostInput, &Focus) -> Admitted | PassThrough` | 무대가 포커스를 갖고 포인터가 무대 안일 때만 소비. 일시 중지 단축키(기본 F12, 설정 가능)를 여기서 처리하고 상태를 알린다. 편집 모드에서는 합성하지 않는다. 바인딩이 없는 입력은 게스트로 그대로 통과한다 |
+| 해석 | `Interpreter` | `on(HostInput, now) -> Vec<TouchOp>`(순수. 눌린 키 집합, 슬롯 배정, 조이스틱 상태를 내부에 갖는다) | 바인딩 종류(탭과 홀드, 스와이프, 가상 조이스틱, 마우스 버튼, 휠, 통과), 논리 좌표 → 게스트 픽셀 → QMP 축(0~32767) 변환, 기준점 정책으로 화면 비율 차이 흡수, 슬롯 최대 10개 |
+| 합성 | `TouchSynth`, `KeySynth` | `apply(TouchOp)`, `apply(KeyOp)` | QMP `input-send-event`의 멀티터치 이벤트(`virtio-multitouch-pci`, 확인 필요: QEMU 11.1 `qapi/ui.json`의 `InputMultiTouchEvent`), 장치가 없을 때의 단일 포인터 폴백, `send-key` |
+| 일정 | `Scheduler` | `schedule(at, TouchOp)`, `tick(now)` | 스와이프의 보간 단계, 조이스틱 60 Hz 갱신, 나중의 매크로 시퀀스. 단조 시계 주입으로 결정적 테스트 |
+
+- 프로필: `InputProfile`(JSON, `version`, `id`, `name`, `package: Option`, `reference_aspect`,
+  `anchor: Center | Edges`, `bindings: Vec<Binding>`). `ProfileStore`는 동봉 프리셋(`host/presets/`)과
+  사용자 프로필(`<home>/profiles/`)을 합쳐 읽고 원자적으로 저장한다. `AutoApply`는
+  `ForegroundWatcher`(세대 어댑터의 전경 앱 명령을 1초마다)의 패키지로 프로필을 고른다.
+  프로필이 없으면 매핑 없음이며, 마지막으로 수동 선택한 프로필은 그 게스트에 기억된다.
+- 논리 좌표: 저장은 0.0~1.0. 프로필의 `reference_aspect`와 실제 게스트 비율이 다르면 `anchor`
+  정책으로 옮긴다(가운데 기준은 짧은 축을 맞추고 긴 축은 가운데 정렬, 가장자리 기준은 각 점이
+  가까운 가장자리에서의 거리 비율을 지킨다). 무대 크기와 배율은 좌표에 영향이 없다. 좌표는
+  언제나 게스트 화면 기준이다.
+- 테스트 표면: 해석기는 입력 열 → 터치 동작 열의 표로 전부 테스트한다. 조이스틱은 키 조합
+  여덟 방향과 뗌 순서, 홀드는 누름과 뗌의 짝, 슬롯은 동시 터치 열 개, 기준점 정책은 16:9 →
+  16:10과 세로 전환. 일정은 가짜 시계로. 합성은 가짜 QMP로. 포착은 플랫폼 스파이크에서만.
+- 매크로 자리: `Binding.action`은 `#[non_exhaustive]` 열거형이고 `Sequence { steps, repeat }`
+  변형과 일정 단계의 시퀀스 실행이 들어갈 자리를 문서 주석으로 표시한다. v1에는 넣지 않는다(D9).
+  들어갈 때는 게임 약관 검토가 먼저다(P5).
+
+### 3.17 ome-overlay
+
+- 인터페이스: `OverlayGeometry::for_stage(stage_rect_physical, guest_size) -> Rect`(순수. 무대 안의
+  게스트 화면 영역과 같다), `OverlayState { mode: Hidden | Showing | Editing, profile_id,
+  suspended }`, 편집 프로토콜: 오버레이 웹뷰가 보내는 명령은 `input_binding_upsert { binding }`,
+  `input_binding_remove { id }`, `input_editor_toggle`뿐이고 좌표는 논리 좌표로 온다.
+- 뒤에 숨는 것: 두 번째 Tauri 창(투명, 장식 없음, `main` 소유)을 무대에 맞춰 놓는 일, 편집 모드
+  밖의 클릭 통과, 무대가 움직이거나 크기가 바뀔 때의 재배치(창 담기와 같은 `StageRect` 신호를
+  받는다), 게스트가 꺼지면 숨김.
+- 표지의 그림은 오버레이 웹뷰(HTML/CSS)가 그린다. 글자는 어떤 게임 화면 위에서도 읽히도록
+  어두운 배경 칩 위에 놓는다(DESIGN.md 9절).
+- 테스트 표면: 기하는 순수 테스트. 창 배치는 창 담기 스파이크와 함께 잰다.
 
 ## 4. 데이터 흐름 두 가지
 
@@ -291,3 +387,33 @@ M2 구현의 첫 작업은 창 담기다. `ome-platform-win`의 창 함수와 `o
 지금 돌고 있는 QEMU와 같은 인자로 띄운 QEMU 창을 임시 Tauri 창의 무대에 붙여 DPI, 포커스,
 크기 변경, 종료 처리를 잰다. 결과는 `docs/evidence/M2/window-hosting.md`에 남긴다. 이
 스파이크가 실패하면 2안(별도 창 + 오버레이)으로 가고, 그 결정은 ADR로 남긴다.
+
+두 번째 스파이크는 멀티터치다. `-device virtio-multitouch-pci`를 더한 게스트에서 QMP
+멀티터치 이벤트가 안드로이드 터치로 닿는지, 슬롯 두 개(조이스틱 + 탭)가 동시에 동작하는지,
+`usb-tablet`의 마우스와 함께 써도 어긋나지 않는지를 잰다. 결과는
+`docs/evidence/M2/multitouch.md`에 남기고, 실패하면 단일 포인터 폴백만으로 v1을 낸다.
+
+## 7. 확장 지점
+
+- **새 안드로이드 버전**: `manifests/images/<id>.json`을 더하고(산출물은 `artifacts.json`에),
+  세대 어댑터가 모르는 방언이 있으면 어댑터를 하나 더한 뒤, 게스트를 만들어 능력 조사를
+  돌리고 결과를 `docs/evidence/M2/images/<id>.md`에 남긴다. 호환성 항목에 그 이미지의 검증
+  기록을 적으면 끝이다. 코드 변경은 어댑터에 국한된다.
+- **새 바인딩 종류(매크로 포함)**: `Binding.action`에 변형을 더하고 해석기에 그 변형의 터치
+  동작 열을, 필요하면 일정 단계에 시퀀스를 더한다. 오버레이 편집기에 표지 종류 하나가 늘고
+  프로필 JSON `version`이 오른다. 새 이음새는 없다.
+- **새 입력 장치**(게임패드): 포착 단계에 `GamepadSource`를 더하고 `HostInput` 열거형에 변형을
+  더한다. 해석기의 바인딩은 입력 종류에 무관하다.
+- **다른 변환기**(Digitalis): 이미지 프로필의 `translator` 값 하나와 `translator/` 계약이다.
+
+## 8. 뼈대 첫 판 뒤에 바로 고칠 계약
+
+뼈대 첫 판의 `contract.rs`는 `KeymapView`와 `keymap_*` 명령을 갖는다. 3.15~3.17절을 반영하는
+두 번째 판에서 다음이 바뀐다. 웹뷰와 Rust와 권한 목록을 한 커밋에서 같이 고친다.
+
+| 지금 | 다음 |
+|---|---|
+| `KeymapView { profiles, active_id, enabled }` | `InputView { profiles, active_id, suspended, editing, auto_apply, foreground_package, multitouch: Capability }` |
+| `keymap_set_active`, `keymap_set_enabled`, `keymap_delete` | `input_profile_select`, `input_suspend_toggle`, `input_profile_delete`, `input_profile_save { profile }`, `input_binding_upsert { binding }`, `input_binding_remove { id }`, `input_editor_toggle`, `input_auto_apply_set { enabled }` |
+| (없음) | `ImagesView { profiles: Vec<GuestImageSummary>, guests: Vec<GuestSummary>, active_guest }`, 명령 `guest_image_select { id }`, `guest_create { image_id, size_gib }`, `guest_select { name }` |
+| `GuestView` | `GuestView` + `image_id`, `android_version`, `api_level`, `capabilities: CapabilityReport` |
