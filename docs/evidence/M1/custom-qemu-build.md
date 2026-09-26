@@ -12,10 +12,10 @@ contains whitespace), exposed in the repository as the junction `qemu-build\out`
 | QEMU tag | `v11.1.1` |
 | Upstream commit | `c3d48b7d1e89604920e5b81b91140c2ad39a1943` |
 | Patches | `0001-symlink-install-tree-skip-without-symlink-privilege.patch` (see `qemu-build/patches/README.md`) |
-| Build date (UTC) | 2026-09-25T05:26:46Z |
+| Build date (UTC) | 2026-09-26T10:30:31Z (rebuilt with the ANGLE bundling below; the first build was 2026-09-25T05:26:46Z) |
 | `--version` | `QEMU emulator version 11.1.1 (v11.1.1-dirty)` (dirty = patched index tree) |
-| Executable SHA-256 | `ef3d62f55b78e49126e9d8b16a497a0087286e5401dceade4b6b1e56197d9caf` |
-| Bundled DLLs | 19, resolved with `ldd` from UCRT64 (`dist/qemu/dll-origins.tsv`) |
+| Executable SHA-256 | `2b052552b9b8f4bb3dd1f636f0eb06189cf8944a29b7c048170325e3ccaed902` (first build: `ef3d62f55b78e49126e9d8b16a497a0087286e5401dceade4b6b1e56197d9caf`) |
+| Bundled DLLs | 24, resolved with `ldd` from UCRT64 (`dist/qemu/dll-origins.tsv`): the first build's 19 plus `libEGL.dll`, `libGLESv2.dll`, `libjpeg-8.dll`, `libpng16-16.dll`, `libstdc++-6.dll` |
 
 Configure options (`out/configure-options.txt`):
 
@@ -138,12 +138,28 @@ and the `*_vulkan_secondaries` / `*_with_capture` variants. With
 `libEGL.dll` was reachable through the launching shell's `PATH` or working
 directory (browsers, Electron and Qt applications ship one).
 
-Fix chosen: bundle ANGLE from the MSYS2 package `mingw-w64-ucrt-x86_64-angleproject`
-(`libEGL.dll`, `libGLESv2.dll` and their DLL dependencies) in `copy_runtime`, pin
-the package in `pins.env`, and let `make-third-party.sh` list it (BSD-3-Clause).
-This matches the distribution build and keeps the QEMU source unpatched. Until
-that lands, M0 and M1 experiments keep using the distribution QEMU
-(`OME_QEMU_DIR`, runbook step 0).
+Fix applied the same evening: `pins.env` pins
+`mingw-w64-ucrt-x86_64-angleproject=2.1.r25748.890b5d8f-6` (BSD-3-Clause),
+`copy_runtime` in `build-qemu.sh` copies `libEGL.dll` and `libGLESv2.dll` from
+UCRT64 and lets the existing `ldd` queue pull their dependencies
+(`libstdc++-6.dll`, `libjpeg-8.dll`, `libpng16-16.dll`), and the generated block of
+`THIRD_PARTY.md` lists angleproject, libjpeg-turbo, libpng and libstdc++. This
+matches the distribution build and keeps the QEMU source unpatched; the bundle
+grows by about 12 MB. `Build-Qemu.ps1 -Clean -Step all` rebuilt everything in
+764 s, then `dist`, `thirdparty` and `sourceoffer` were run again. Verification
+of the rebuilt binary: three starts with `-m 256 -S -device virtio-vga-gl
+-display sdl,gl=on` and the bundled pflash from a `PATH` of
+`C:\Windows\System32;C:\Windows` only, all alive after 8 s
+(`custom-qemu-cdb/summary.txt`); `ci/Invoke-AllChecks.ps1` passes. Booting the
+Bliss guest on the custom build is the next check; M0 and M1 evidence stays on
+the distribution QEMU (`OME_QEMU_DIR`, runbook step 0).
+
+Two build-script observations from the rebuild, not fixed today: MSYS2 bash
+failed to fork right after the `all` step finished its install
+(`dofork: child -1 - CreateProcessW failed ... errno 13`, exit 254), so the
+`dist` step had to be run separately; and a second `-Step build` on the same
+tree stops with "Inputs changed; use -Clean" because the configure fingerprint
+is computed before `configure-options.txt` exists on a clean run.
 
 ## Failures met and fixed on the way
 
@@ -165,8 +181,8 @@ Meson wraps into one tarball without extracting anything on the host.
 | Item | Value |
 |---|---|
 | File | `dist/qemu-source-offer-v11.1.1-c3d48b7d1e89.tar.gz` |
-| Size | 249,531,104 bytes |
-| SHA-256 (`dist/SHA256SUMS`) | `dfe3bab9b8e4c9ecc9020035863a5767b2fba16f3053567a7b1d8d53dc350bac` |
+| Size | 249,527,191 bytes (regenerated 2026-09-26 with the ANGLE rebuild; the 2026-09-25 tarball was 249,531,104 bytes) |
+| SHA-256 (`dist/SHA256SUMS`) | `637ea3acdc9cdf6e9845959ed6cfe93658fbb9befd87ec389a9c8a354b9ed6d8` (2026-09-25: `dfe3bab9b8e4c9ecc9020035863a5767b2fba16f3053567a7b1d8d53dc350bac`) |
 | Members | 84,031 |
 
 Representative members (type and size from `tar -tvzf`):

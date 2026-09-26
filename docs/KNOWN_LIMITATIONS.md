@@ -74,10 +74,10 @@
   guest. A four-processor view changed neither the game's thread count nor its
   frame rate (`docs/evidence/M1/cpuinfo-experiment.txt`), so the stock file stays
   and the log line is cosmetic.
-- The custom QEMU build (`qemu-build/`) crashes at start-up with any
-  `-display sdl,gl=on` unless an EGL library is reachable: QEMU 11.1.1's SDL GL
-  path calls `eglGetCurrentDisplay` through libepoxy, which needs `libEGL.dll`.
-  The distribution build bundles ANGLE for this; the custom bundle will do the
-  same (`docs/evidence/M1/custom-qemu-build.md`). Until then use the distribution
-  QEMU through `OME_QEMU_DIR`.
+- QEMU 11.1.1's SDL GL display calls `eglGetCurrentDisplay` through libepoxy,
+  which needs `libEGL.dll` next to the executable or on `PATH`; without it QEMU
+  crashes at start-up with `0xC0000005`. The custom build therefore bundles
+  ANGLE (`libEGL.dll`, `libGLESv2.dll`, BSD-3-Clause, about 12 MB), as the
+  distribution build does (`docs/evidence/M1/custom-qemu-build.md`). Do not
+  strip those files from a release.
 - Multi-instance, macros, and scripted automation are not part of v1 (D9).

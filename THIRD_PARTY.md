@@ -11,6 +11,7 @@ Components that a release **ships** (binaries inside the installer):
 | QEMU | v11.1.1 (c3d48b7d1e89604920e5b81b91140c2ad39a1943) | See bundled COPYING | https://gitlab.com/qemu-project/qemu | Separate process; corresponding source offer |
 | QEMU firmware/data | Same QEMU source pin | See pc-bios and roms notices in source offer | https://gitlab.com/qemu-project/qemu | Includes EDK2 and installed ROM/keymap data; review individual licenses before release |
 | mingw-w64-ucrt-x86_64-SDL2 | 2.32.10-1 | spdx:Zlib | https://libsdl.org/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
+| mingw-w64-ucrt-x86_64-angleproject | 2.1.r25748.890b5d8f-6 | spdx:BSD-3-Clause | http://angleproject.org/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
 | mingw-w64-ucrt-x86_64-bzip2 | 1.0.8-4 | custom | https://sourceware.org/bzip2/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
 | mingw-w64-ucrt-x86_64-gettext-runtime | 1.0-1 | spdx:GPL-3.0-or-later AND LGPL-2.1-or-later | https://www.gnu.org/software/gettext/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
 | mingw-w64-ucrt-x86_64-glib2 | 2.90.0-1 | spdx:LGPL-2.1-or-later | https://gitlab.gnome.org/GNOME/glib | Copied UCRT64 DLL; upstream URL from pacman -Qi |
@@ -18,7 +19,10 @@ Components that a release **ships** (binaries inside the installer):
 | mingw-w64-ucrt-x86_64-libffi | 3.8.0-1 | spdx:MIT | https://sourceware.org/libffi | Copied UCRT64 DLL; upstream URL from pacman -Qi |
 | mingw-w64-ucrt-x86_64-libgcc | 16.2.0-4 | spdx:GPL-3.0-or-later WITH GCC-exception-3.1 AND GFDL-1.3-or-later | https://gcc.gnu.org | Copied UCRT64 DLL; upstream URL from pacman -Qi |
 | mingw-w64-ucrt-x86_64-libiconv | 1.19-1 | spdx:LGPL-2.1-or-later  documentation:spdx:GPL-3.0-or-later | https://www.gnu.org/software/libiconv/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
+| mingw-w64-ucrt-x86_64-libjpeg-turbo | 3.2.0-1 | custom:BSD-like | https://libjpeg-turbo.virtualgl.org/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
+| mingw-w64-ucrt-x86_64-libpng | 1.6.58-1 | custom | http://www.libpng.org/pub/png/libpng.html | Copied UCRT64 DLL; upstream URL from pacman -Qi |
 | mingw-w64-ucrt-x86_64-libslirp | 4.9.3-1 | spdx:BSD-3-Clause | https://gitlab.freedesktop.org/slirp/libslirp | Copied UCRT64 DLL; upstream URL from pacman -Qi |
+| mingw-w64-ucrt-x86_64-libstdc++ | 16.2.0-4 | spdx:GPL-3.0-or-later WITH GCC-exception-3.1 AND GFDL-1.3-or-later | https://gcc.gnu.org | Copied UCRT64 DLL; upstream URL from pacman -Qi |
 | mingw-w64-ucrt-x86_64-libwinpthread | 14.0.0.r420.g61d40c4c0-1 | spdx:MIT AND BSD-3-Clause-Clear | https://www.mingw-w64.org/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
 | mingw-w64-ucrt-x86_64-ncurses | 6.6-4 | spdx:MIT | https://www.gnu.org/software/ncurses/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
 | mingw-w64-ucrt-x86_64-pcre2 | 10.48-3 | spdx:BSD-3-Clause | https://pcre.org/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |

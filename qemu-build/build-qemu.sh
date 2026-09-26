@@ -13,7 +13,7 @@ install_deps() {
     local packages=()
     read -r -a packages <<< "$MSYS2_PACKAGES"
     pacman -S --needed --noconfirm "${packages[@]}"
-    pacman -Q "${packages[@]}" > "$OUT/pacman-requested.txt"
+    pacman -Q "${packages[@]%%=*}" > "$OUT/pacman-requested.txt"
     pacman -Q > "$OUT/pacman-lock.txt"
 }
 
@@ -111,6 +111,17 @@ copy_runtime() {
         [[ -f "$OUT/install/bin/$exe" ]] || fail "Missing executable: $exe"
         cp -- "$OUT/install/bin/$exe" "$stage/bin/$exe"
         queue+=("$OUT/install/bin/$exe")
+    done
+    # ui/sdl2.c calls eglGetCurrentDisplay through libepoxy on the SDL GL path.
+    # Without libEGL.dll, epoxy resolves it to NULL and QEMU crashes at startup.
+    for exe in libEGL.dll libGLESv2.dll; do
+        dependency="/ucrt64/bin/$exe"
+        [[ -f "$dependency" ]] || fail "Missing ANGLE runtime: $exe"
+        seen[$dependency]=1
+        cp -- "$dependency" "$stage/bin/"
+        pacman -Qqo "$dependency" >> "$stage/dll-packages.txt"
+        printf '%s\t%s\n' "$exe" "$dependency" >> "$stage/dll-origins.tsv"
+        queue+=("$dependency")
     done
     while (( index < ${#queue[@]} )); do
         exe=${queue[$index]}; index=$((index + 1))
