@@ -1,0 +1,175 @@
+
+************* Preparing the environment for Debugger Extensions Gallery repositories **************
+   ExtensionRepository : Implicit
+   UseExperimentalFeatureForNugetShare : true
+   AllowNugetExeUpdate : true
+   NonInteractiveNuget : true
+   AllowNugetMSCredentialProviderInstall : true
+   AllowParallelInitializationOfLocalRepositories : true
+   EnableRedirectToChakraJsProvider : false
+
+   -- Configuring repositories
+      ----> Repository : LocalInstalled, Enabled: true
+      ----> Repository : UserExtensions, Enabled: true
+
+>>>>>>>>>>>>> Preparing the environment for Debugger Extensions Gallery repositories completed, duration 0.000 seconds
+
+************* Waiting for Debugger Extensions Gallery to Initialize **************
+
+>>>>>>>>>>>>> Waiting for Debugger Extensions Gallery to Initialize completed, duration 0.032 seconds
+   ----> Repository : UserExtensions, Enabled: true, Packages count: 0
+   ----> Repository : LocalInstalled, Enabled: true, Packages count: 46
+
+Microsoft (R) Windows Debugger Version 10.0.29547.1002 AMD64
+Copyright (c) Microsoft Corporation. All rights reserved.
+
+CommandLine: "C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\qemu-system-x86_64.exe" -m 256 -S -device virtio-vga-gl -display sdl,gl=on -drive "if=pflash,format=raw,readonly=on,file=C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\install\share\qemu\edk2-x86_64-code.fd"
+
+************* Path validation summary **************
+Response                         Time (ms)     Location
+Deferred                                       srv*
+Symbol search path is: srv*
+Executable search path is: 
+
++------------------------------------------------------------------------+
+| This target supports Hardware-enforced Stack Protection. A HW based    |
+| "Shadow Stack" may be available to assist in debugging and analysis.   |
+| See aka.ms/userhsp for more info.                                      |
+|                                                                        |
+| dps @ssp                                                               |
+|                                                                        |
++------------------------------------------------------------------------+
+
+ModLoad: 00007ff6`87610000 00007ff6`8c1e9000   qemu-system-x86_64.exe
+ModLoad: 00007ffc`02d90000 00007ffc`02fa8000   ntdll.dll
+ModLoad: 00007ffc`024a0000 00007ffc`02564000   C:\Windows\System32\KERNEL32.DLL
+ModLoad: 00007ffc`00650000 00007ffc`00a23000   C:\Windows\System32\KERNELBASE.dll
+ModLoad: 00007ffc`00a30000 00007ffc`00ae1000   C:\Windows\System32\ADVAPI32.dll
+ModLoad: 00007ffc`00dd0000 00007ffc`00e77000   C:\Windows\System32\msvcrt.dll
+ModLoad: 00007ffc`01ab0000 00007ffc`01b58000   C:\Windows\System32\sechost.dll
+ModLoad: 00007ffc`002c0000 00007ffc`002e8000   C:\Windows\System32\bcrypt.dll
+ModLoad: 00007ffc`00b20000 00007ffc`00c38000   C:\Windows\System32\RPCRT4.dll
+ModLoad: 00007ffb`fff10000 00007ffc`00021000   C:\Windows\System32\ucrtbase.dll
+ModLoad: 00007ffc`02580000 00007ffc`02720000   C:\Windows\System32\ole32.dll
+ModLoad: 00007ffb`722e0000 00007ffb`722ff000   C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\libbz2-1.dll
+ModLoad: 00007ffc`00030000 00007ffc`000ca000   C:\Windows\System32\msvcp_win.dll
+ModLoad: 00007ffb`2ad10000 00007ffb`2ad9a000   C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\libncursesw6.dll
+ModLoad: 00007ffb`1bb30000 00007ffb`1bc4e000   C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\libiconv-2.dll
+ModLoad: 00007ffc`01780000 00007ffc`01932000   C:\Windows\System32\USER32.dll
+ModLoad: 00007ffc`00af0000 00007ffc`00b19000   C:\Windows\System32\GDI32.dll
+ModLoad: 00007ffc`004e0000 00007ffc`00506000   C:\Windows\System32\win32u.dll
+ModLoad: 00000147`ddbd0000 00000147`ddbf6000   C:\Windows\System32\win32u.dll
+ModLoad: 00007ffb`49c80000 00007ffb`49c96000   C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\libwinpthread-1.dll
+ModLoad: 00007ffc`003b0000 00007ffc`004d3000   C:\Windows\System32\gdi32full.dll
+ModLoad: 00007ffc`013e0000 00007ffc`01772000   C:\Windows\System32\combase.dll
+ModLoad: 00007ffc`01c00000 00007ffc`0249e000   C:\Windows\System32\SHELL32.dll
+ModLoad: 00007ffc`00510000 00007ffc`0064f000   C:\Windows\System32\wintypes.dll
+ModLoad: 00007ffc`01b60000 00007ffc`01bd1000   C:\Windows\System32\WS2_32.dll
+ModLoad: 00007ffb`eda70000 00007ffb`edaa4000   C:\Windows\SYSTEM32\WINMM.dll
+ModLoad: 00007ffb`19260000 00007ffb`19415000   C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\libepoxy-0.dll
+ModLoad: 00007ffb`19090000 00007ffb`19260000   C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\libgio-2.0-0.dll
+ModLoad: 00007ffb`18f00000 00007ffb`19083000   C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\libglib-2.0-0.dll
+ModLoad: 00007ffb`8e980000 00007ffb`8e98d000   C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\libgmodule-2.0-0.dll
+ModLoad: 00007ffb`1bad0000 00007ffb`1bb2b000   C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\libgobject-2.0-0.dll
+ModLoad: 00007ffc`027e0000 00007ffc`02849000   C:\Windows\System32\SHLWAPI.dll
+ModLoad: 00007ffb`1ba10000 00007ffb`1baca000   C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\libpixman-1-0.dll
+ModLoad: 00007ffa`f2a40000 00007ffa`f2c8f000   C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\SDL2.dll
+ModLoad: 00007ffc`02720000 00007ffc`02751000   C:\Windows\System32\IMM32.dll
+ModLoad: 00007ffb`2aff0000 00007ffb`2b02c000   C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\libslirp-0.dll
+ModLoad: 00007ffa`f2960000 00007ffa`f2a3c000   C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\libvirglrenderer-1.dll
+ModLoad: 00007ffb`18ed0000 00007ffb`18ef5000   C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\zlib1.dll
+ModLoad: 00007ffc`00ca0000 00007ffc`00d78000   C:\Windows\System32\OLEAUT32.dll
+ModLoad: 00007ffa`eecc0000 00007ffa`eedee000   C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\libzstd.dll
+ModLoad: 00007ffc`00f60000 00007ffc`013d4000   C:\Windows\System32\SETUPAPI.dll
+ModLoad: 00007ffa`f2900000 00007ffa`f2952000   C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\libintl-8.dll
+ModLoad: 00007ffb`fdd80000 00007ffb`fde78000   C:\Windows\SYSTEM32\DNSAPI.dll
+ModLoad: 00000147`ddbd0000 00000147`ddc22000   C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\libintl-8.dll
+ModLoad: 00007ffb`fdd50000 00007ffb`fdd7d000   C:\Windows\SYSTEM32\IPHLPAPI.DLL
+ModLoad: 00007ffb`73a60000 00007ffb`73a70000   C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\libffi-8.dll
+ModLoad: 00007ffa`eec00000 00007ffa`eecb2000   C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\libpcre2-8-0.dll
+ModLoad: 00007ffb`f6a10000 00007ffb`f6a1a000   C:\Windows\SYSTEM32\VERSION.dll
+ModLoad: 00007ffa`f2830000 00007ffa`f285a000   C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\libgcc_s_seh-1.dll
+ModLoad: 00007ffb`ffb80000 00007ffb`ffbce000   C:\Windows\SYSTEM32\cfgmgr32.DLL
+(5108.3b34): Break instruction exception - code 80000003 (first chance)
+ntdll!LdrpDoDebuggerBreak+0x30:
+00007ffc`02e6cbc4 cc              int     3
+0:000> cdb: Reading initial command 'sxe av; g; .echo EXCEPTION-OR-EXIT; kb; r; q'
+ModLoad: 00007ffb`fef30000 00007ffb`fef3c000   C:\Windows\SYSTEM32\CRYPTBASE.DLL
+ModLoad: 00007ffc`000d0000 00007ffc`0014b000   C:\Windows\System32\bcryptPrimitives.dll
+ModLoad: 00007ffc`01aa0000 00007ffc`01aa9000   C:\Windows\System32\NSI.dll
+ModLoad: 00007ffb`fe4f0000 00007ffb`fe508000   C:\Windows\SYSTEM32\kernel.appcore.dll
+ModLoad: 00007ffc`02850000 00007ffc`02954000   C:\Windows\System32\shcore.dll
+ModLoad: 00007ffb`ffb30000 00007ffb`ffb4b000   C:\Windows\SYSTEM32\CRYPTSP.dll
+ModLoad: 00007ffb`fed20000 00007ffb`fed57000   C:\Windows\system32\rsaenh.dll
+ModLoad: 00007ffb`feaa0000 00007ffb`feb09000   C:\Windows\system32\mswsock.dll
+ModLoad: 00007ffb`f8460000 00007ffb`f851c000   C:\Windows\SYSTEM32\mscms.dll
+ModLoad: 00007ffa`f2d60000 00007ffa`f2da9000   C:\Windows\SYSTEM32\icm32.dll
+ModLoad: 00007ffb`fc480000 00007ffb`fc533000   C:\Windows\system32\uxtheme.dll
+ModLoad: 00007ffb`882a0000 00007ffb`883a0000   C:\Windows\SYSTEM32\OPENGL32.DLL
+ModLoad: 00007ffb`8e9a0000 00007ffb`8e9cd000   C:\Windows\SYSTEM32\GLU32.dll
+ModLoad: 00007ffb`fc570000 00007ffb`fc5a7000   C:\Windows\SYSTEM32\dxcore.dll
+ModLoad: 00007ffc`01940000 00007ffc`01aa0000   C:\Windows\System32\MSCTF.dll
+ModLoad: 00007ffc`00e80000 00007ffc`00f30000   C:\Windows\System32\clbcatq.dll
+ModLoad: 00007ffb`f8c50000 00007ffb`f8d9a000   C:\Windows\System32\AppXDeploymentClient.dll
+ModLoad: 00007ffb`2ce50000 00007ffb`2fce8000   C:\Windows\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_436833bbb0f00476\nvoglv64.dll
+ModLoad: 00007ffb`fe2e0000 00007ffb`fe2f4000   C:\Windows\SYSTEM32\WTSAPI32.dll
+ModLoad: 00007ffb`fefb0000 00007ffb`fefc2000   C:\Windows\SYSTEM32\msasn1.dll
+ModLoad: 00007ffb`f61f0000 00007ffb`f6222000   C:\Windows\SYSTEM32\cryptnet.dll
+ModLoad: 00007ffc`00150000 00007ffc`002b8000   C:\Windows\System32\CRYPT32.dll
+ModLoad: 00007ffb`f6160000 00007ffb`f61b0000   C:\Windows\SYSTEM32\wldp.dll
+ModLoad: 00007ffb`fed90000 00007ffb`feeea000   C:\Windows\SYSTEM32\drvstore.dll
+ModLoad: 00007ffb`ffb50000 00007ffb`ffb7c000   C:\Windows\SYSTEM32\devobj.dll
+ModLoad: 00007ffb`ff760000 00007ffb`ff794000   C:\Windows\SYSTEM32\ntmarta.dll
+ModLoad: 00007ffb`ffe90000 00007ffb`fff0c000   C:\Windows\System32\WINTRUST.dll
+ModLoad: 00007ffc`01be0000 00007ffc`01bff000   C:\Windows\System32\imagehlp.dll
+ModLoad: 00007ffb`df810000 00007ffb`e61b7000   C:\Windows\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_436833bbb0f00476\nvgpucomp64.dll
+ModLoad: 00007ffb`fd040000 00007ffb`fd958000   C:\Windows\SYSTEM32\windows.storage.dll
+ModLoad: 00007ffc`02570000 00007ffc`02578000   C:\Windows\System32\PSAPI.DLL
+ModLoad: 00007ffb`ff7f0000 00007ffb`ffa23000   C:\Windows\SYSTEM32\dbghelp.dll
+ModLoad: 00007ffb`fca80000 00007ffb`fcaab000   C:\Windows\SYSTEM32\dwmapi.dll
+ModLoad: 00007ffc`02570000 00007ffc`02578000   C:\Windows\System32\PSAPI.DLL
+ModLoad: 00007ffb`ff7f0000 00007ffb`ffa23000   C:\Windows\SYSTEM32\dbghelp.dll
+ModLoad: 00007ffc`02570000 00007ffc`02578000   C:\Windows\System32\PSAPI.DLL
+ModLoad: 00007ffb`ff7f0000 00007ffb`ffa23000   C:\Windows\SYSTEM32\dbghelp.dll
+ModLoad: 00007ffc`02570000 00007ffc`02578000   C:\Windows\System32\PSAPI.DLL
+ModLoad: 00007ffb`ff7f0000 00007ffb`ffa23000   C:\Windows\SYSTEM32\dbghelp.dll
+ModLoad: 00007ffb`ff7a0000 00007ffb`ff7ed000   C:\Windows\SYSTEM32\powrprof.dll
+ModLoad: 00007ffb`ff4c0000 00007ffb`ff4d3000   C:\Windows\SYSTEM32\UMPDC.dll
+ModLoad: 00007ffb`fe260000 00007ffb`fe2cc000   C:\Windows\SYSTEM32\WINSTA.dll
+(5108.3b34): Access violation - code c0000005 (first chance)
+First chance exceptions are reported before any exception handling.
+This exception may be expected and handled.
+EXCEPTION-OR-EXIT
+Unable to load image qemu-system-x86_64.exe, Win32 error 0n2
+RetAddr               : Args to Child                                                           : Call Site
+00007ff6`87935545     : 00000147`f18dc810 00007ff6`87a38937 00000147`f11d9be0 00007ffb`18f4eabb : 0x0
+00007ff6`87936c0e     : 00000147`f11d9be0 00007ff6`87a39123 00000000`00000070 00000147`dfbb98d0 : qemu_system_x86_64!qemu_plugin_register_atexit_cb+0x217505
+00007ff6`87934ff1     : 00000000`00000000 00007ff6`80000002 00000000`00000000 00000147`dfbd1a20 : qemu_system_x86_64!qemu_plugin_register_atexit_cb+0x218bce
+00007ff6`87906445     : 00000000`00000038 00007ff6`00000000 00007ff6`88bbc898 00000000`00000000 : qemu_system_x86_64!qemu_plugin_register_atexit_cb+0x216fb1
+00007ff6`87b2a4aa     : 00000000`00000000 00000147`ddca8040 00000147`ddca7980 00007ffc`00671fbf : qemu_system_x86_64!qemu_plugin_register_atexit_cb+0x1e8405
+00007ff6`87c0056c     : 00000000`00000000 00000000`0000000a 00000147`ddca8040 00000000`00000000 : qemu_system_x86_64!qemu_plugin_register_atexit_cb+0x40c46a
+00007ff6`87611157     : 00007ffc`00010f28 00007ff6`87bffb60 00007ffc`00000002 00000000`00000002 : qemu_system_x86_64!qemu_plugin_register_atexit_cb+0x4e252c
+00007ffc`024b259d     : 00000000`00000000 00000000`00000000 00000000`00000000 00000000`00000000 : qemu_system_x86_64+0x1157
+00007ffc`02deaf78     : 00000000`00000000 00000000`00000000 00000000`00000000 00000000`00000000 : KERNEL32!BaseThreadInitThunk+0x1d
+00000000`00000000     : 00000000`00000000 00000000`00000000 00000000`00000000 00000000`00000000 : ntdll!RtlUserThreadStart+0x28
+rax=0000000000000000 rbx=00000147f143a510 rcx=00007ffb193ed1b0
+rdx=0000000000000000 rsi=000000000000002a rdi=0000000000000001
+rip=0000000000000000 rsp=0000001acc7ff718 rbp=00007ff688dda660
+ r8=00000147f1932630  r9=0000000000000001 r10=00000147ddc40000
+r11=0000001acc7ff570 r12=00007ff688bcd4e0 r13=00007ff688dd9ea0
+r14=00000147f143a510 r15=00007ff688bcd580
+iopl=0         nv up ei pl nz na pe nc
+cs=0033  ss=002b  ds=002b  es=002b  fs=0053  gs=002b             efl=00210206
+00000000`00000000 ??              ???
+quit:
+NatVis script unloaded from 'C:\Program Files\WindowsApps\Microsoft.WinDbg_1.2603.20001.0_x64__8wekyb3d8bbwe\amd64\Visualizers\atlmfc.natvis'
+NatVis script unloaded from 'C:\Program Files\WindowsApps\Microsoft.WinDbg_1.2603.20001.0_x64__8wekyb3d8bbwe\amd64\Visualizers\concurrency.natvis'
+NatVis script unloaded from 'C:\Program Files\WindowsApps\Microsoft.WinDbg_1.2603.20001.0_x64__8wekyb3d8bbwe\amd64\Visualizers\cpp_rest.natvis'
+NatVis script unloaded from 'C:\Program Files\WindowsApps\Microsoft.WinDbg_1.2603.20001.0_x64__8wekyb3d8bbwe\amd64\Visualizers\ObjectiveC.natvis'
+NatVis script unloaded from 'C:\Program Files\WindowsApps\Microsoft.WinDbg_1.2603.20001.0_x64__8wekyb3d8bbwe\amd64\Visualizers\stl.natvis'
+NatVis script unloaded from 'C:\Program Files\WindowsApps\Microsoft.WinDbg_1.2603.20001.0_x64__8wekyb3d8bbwe\amd64\Visualizers\Windows.Data.Json.natvis'
+NatVis script unloaded from 'C:\Program Files\WindowsApps\Microsoft.WinDbg_1.2603.20001.0_x64__8wekyb3d8bbwe\amd64\Visualizers\Windows.Devices.Geolocation.natvis'
+NatVis script unloaded from 'C:\Program Files\WindowsApps\Microsoft.WinDbg_1.2603.20001.0_x64__8wekyb3d8bbwe\amd64\Visualizers\Windows.Devices.Sensors.natvis'
+NatVis script unloaded from 'C:\Program Files\WindowsApps\Microsoft.WinDbg_1.2603.20001.0_x64__8wekyb3d8bbwe\amd64\Visualizers\Windows.Media.natvis'
+NatVis script unloaded from 'C:\Program Files\WindowsApps\Microsoft.WinDbg_1.2603.20001.0_x64__8wekyb3d8bbwe\amd64\Visualizers\windows.natvis'
+NatVis script unloaded from 'C:\Program Files\WindowsApps\Microsoft.WinDbg_1.2603.20001.0_x64__8wekyb3d8bbwe\amd64\Visualizers\winrt.natvis'

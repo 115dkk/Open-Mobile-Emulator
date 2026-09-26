@@ -124,6 +124,19 @@ adb -s 127.0.0.1:5555 shell mount -t ext4 -o rw,noatime /dev/block/vda2 /data/lo
 ```
 Entry strings are listed in `docs/evidence/M0/findings-20260926.md`.
 
+Audio: the guest's media volume starts at 5 of 15 (-33 dB), which makes the game
+inaudible on the host even though the path works. Set it once per guest:
+
+```powershell
+adb -s 127.0.0.1:5555 shell cmd media_session volume --stream 3 --set 15
+```
+To prove sound reaches the host without listening, read the peak meter of QEMU's
+audio session on the default render endpoint (WASAPI `IAudioMeterInformation`,
+for example through pycaw; the script used on 2026-09-26 is
+`docs/evidence/M1/host-audio-meter.py`). A value above 0 for the
+`qemu-system-x86_64.exe` session while the guest plays is the evidence
+(`docs/evidence/M1/whpx-boot.md`).
+
 ## 6. Google sign-in path (M0 step 8)
 
 Follow `docs/GOOGLE_ACCOUNT.md`; record the result there and in the evidence folder.

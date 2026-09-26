@@ -1,0 +1,40 @@
+# Software-rendering entry (nomodeset HWACCEL=0) booted with the launcher's current virgl device string (virtio-vga-gl,edid=off), 2026-09-26
+# GRUB Environment Block
+default=VM Options ->> >BlissOS-16.9.7 2024-10-11  - Vbox/VMWare - No HW Acceleration
+#########
+unmounted-root
+19:00:53 adb reboot (QEMU exits because of -action reboot=shutdown)
+19:00:55 QEMU gone after 2 s: True
+19:01:30 sys.boot_completed=1 after 34 s from Start-Guest
+
+GLES: Google Inc., Google SwiftShader, OpenGL ES 3.0 SwiftShader 4.1.0.7
+Physical size: 1024x768
+Physical density: 160
+  DisplayDeviceInfo{"Built-in Screen": uniqueId="local:0", 1024 x 768, modeId 1, defaultModeId 1, supportedModes [{id=1, width=1024, height=768, fps=84.302, alternativeRefreshRates=[]}], colorMode 0, supportedColorModes [0], hdrCapabilities HdrCapabilities{mSupportedHdrTypes=[], mMaxLuminance=500.0, mMaxAverageLuminance=500.0, mMinLuminance=0.0}, allmSupported false, gameContentTypeSupported false, density 160, 159.568 x 159.895 dpi, appVsyncOff 2000000, presDeadline 11862114, touch INTERNAL, rotation 0, type INTERNAL, address {port=0}, deviceProductInfo null, state ON, committedState ON, frameRateOverride , brightnessMinimum 0.0, brightnessMaximum 1.0, brightnessDefault 0.39763778, FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY, FLAG_ROTATES_WITH_CONTENT, FLAG_SECURE, FLAG_SUPPORTS_PROTECTED_BUFFERS, installOrientation 0}
+libndk_translation.so
+stack_depot_disable=on cgroup_disable=pressure BOOT_IMAGE=/android-2024-10-11/kernel stack_depot_disable=on cgroup_disable=pressure root=/dev/ram0 quiet nomodeset HWACCEL=0
+
+GLES: Google Inc., Google SwiftShader, OpenGL ES 3.0 SwiftShader 4.1.0.7
+      present offset:         0 ns	     VSYNC period:  11862114 ns
+U:1024x768p-75
+version 
+[    0.630143] pci 0000:00:01.0: BAR 0: assigned to efifb
+[    0.896702] efifb: probing for efifb
+[    0.896713] efifb: framebuffer at 0x80000000, using 3072k, total 3072k
+[    0.896714] efifb: mode is 1024x768x32, linelength=4096, pages=1
+[    0.896715] efifb: scrolling: redraw
+[    0.896715] efifb: Truecolor: size=8:8:8:8, shift=24:16:8:0
+QMP screendump: ok, 210911 bytes
+adb screencap: 204111 bytes
+QEMU pid 33276 window 'QEMU (OME default-0)'
+
+19:03:43 switching grubenv back to the virgl entry and rebooting
+# GRUB Environment Block
+default=VM Options ->> >BlissOS-16.9.7 2024-10-11  - QEMU/KVM - Virgl - SW-FFMPEG
+#############
+unmounted-root
+19:03:45 QEMU gone after 1 s
+19:04:20 virgl entry again: sys.boot_completed=1 after 34 s
+GLES: Mesa, virgl (NVIDIA GeForce RTX 2080 SUPER/PCIe/SSE2), OpenGL ES 3.2 Mesa 24.0.8
+      present offset:         0 ns	     VSYNC period:  16678174 ns
+Physical size: 1280x800

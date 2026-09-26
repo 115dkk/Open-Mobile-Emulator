@@ -62,4 +62,22 @@
   retried in the background and was not blocked by it. Product networking is
   unaffected (R10), but a host network that filters such domains will show the
   same retries in `logcat`.
+- Bliss 16.9.7 boots with the media stream at index 5 of 15, which AudioFlinger
+  applies as -33 dB. Game audio does reach the host through QEMU's `dsound`
+  backend (measured on the host's audio session, 2026-09-26,
+  `docs/evidence/M1/whpx-boot.md`), but at that index it arrives as near
+  silence. Until the launcher or the M2 wizard sets the volume after the first
+  boot, run `adb shell cmd media_session volume --stream 3 --set 15` once; the
+  guest keeps the value across reboots.
+- The translator presents ARM code with a two-processor `/proc/cpuinfo`
+  (`/system/etc/cpuinfo.arm64.txt`), so Unity logs `Cores = 2` on a 4-vCPU
+  guest. A four-processor view changed neither the game's thread count nor its
+  frame rate (`docs/evidence/M1/cpuinfo-experiment.txt`), so the stock file stays
+  and the log line is cosmetic.
+- The custom QEMU build (`qemu-build/`) crashes at start-up with any
+  `-display sdl,gl=on` unless an EGL library is reachable: QEMU 11.1.1's SDL GL
+  path calls `eglGetCurrentDisplay` through libepoxy, which needs `libEGL.dll`.
+  The distribution build bundles ANGLE for this; the custom bundle will do the
+  same (`docs/evidence/M1/custom-qemu-build.md`). Until then use the distribution
+  QEMU through `OME_QEMU_DIR`.
 - Multi-instance, macros, and scripted automation are not part of v1 (D9).

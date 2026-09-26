@@ -103,25 +103,47 @@ PowerShell with a PATH that excludes `C:\msys64` and Git:
 The bundled `edk2-x86_64-code.fd` is byte-identical to the distribution build's
 (3,653,632 bytes, same SHA-256).
 
-## Open issue: intermittent access violation at start-up
+## Access violation at start-up: root cause found on 2026-09-26
 
-Three episodes of `0xC0000005` (or a start-up hang with no output) were observed
-between 18:44 and 18:53 local time, each lasting minutes, then the same command
-lines ran fine:
+On 2026-09-25 three episodes of `0xC0000005` (or a start-up hang with no output)
+were seen between 18:44 and 18:53, each lasting minutes, and then the same command
+lines ran; the suspects noted that day (Defender, the MacType hook, GL timing) were
+wrong. On 2026-09-26 the crash reproduced 10 of 10 times under `cdb` and 9 of 9
+times without a debugger, within 1 to 3 s, with every `-display sdl,gl=on`
+configuration (`VGA` or `virtio-vga-gl`, with or without pflash); `-display sdl`
+without GL does not crash (`custom-qemu-cdb/summary.txt`).
 
-- 18:44: first launch after the build, `-device virtio-vga-gl -display sdl,gl=on` with pflash and QMP, exit `0xC0000005` after 6 s.
-- 18:45: five launches including `--version` produced no output within 12 to 15 s and were killed.
-- 18:53: 10 of 10 launches of `-m 256 -S -device virtio-vga-gl -display sdl,gl=on` with pflash exited `0xC0000005`, while 10 of 10 launches of the distribution QEMU 11.1.0 with the same arguments ran.
-- 18:56 onward: the identical command line ran 3 times in a row, and every isolation combination ran.
+Stack from `cdb` with the build's DWARF line table resolved by `addr2line`
+(`custom-qemu-cdb/run-1.txt`, `run-breakpoint.txt`):
 
-No Windows Error Reporting event or report was recorded (WER appears disabled).
-Suspects, none confirmed: Defender real-time scan of the freshly built binaries,
-the MacType hook DLL that is injected into every windowed process, or a
-timing-dependent fault in GL context or virgl initialisation. Next step: install
-`mingw-w64-ucrt-x86_64-gdb` in UCRT64 and capture a backtrace of a crashing run,
-or enable WER LocalDumps with the user's consent. Until then M0 and M1 experiments
-use the distribution QEMU (`OME_QEMU_DIR`, runbook step 0) and the custom build is
-the release-path artifact only.
+| Frame | Location |
+|---|---|
+| 0 | `0x0` (call through a null pointer, `rip=0`) |
+| 1 | `sdl2_window_create`, `ui/sdl2.c:127`: `qemu_egl_display = eglGetCurrentDisplay();` |
+| 2 | `sdl2_gl_console_init`, `ui/sdl2-gl.c:313` |
+| 3 | `sdl2_display_init`, `ui/sdl2.c:975` |
+| 4 | `qemu_init_displays`, `system/vl.c:2710` |
+
+`eglGetCurrentDisplay` goes through libepoxy's dispatch pointer. Breaking at the
+call showed the pointer chain intact (`rax` = libepoxy's `epoxy_eglGetCurrentDisplay`
+variable, holding its resolver in `.text`); the resolver then looks for
+`libEGL.dll`, finds none in the bundle or on `PATH`, returns NULL, and the
+rewritten dispatch calls address 0. The distribution QEMU 11.1.0 in
+`C:\Program Files\qemu` runs the same line (its exe imports the same 16 epoxy EGL
+symbols and upstream `master` and `stable-11.1` carry the line unguarded) but
+ships ANGLE next to the exe: `libEGL.dll`, `libGLESv2.dll`, `libGLESv1_CM.dll`
+and the `*_vulkan_secondaries` / `*_with_capture` variants. With
+`C:\Program Files\qemu` prepended to `PATH`, the unmodified custom binary ran 3 of
+3 times. The 2026-09-25 "then it worked" episodes are the same mechanism: whether a
+`libEGL.dll` was reachable through the launching shell's `PATH` or working
+directory (browsers, Electron and Qt applications ship one).
+
+Fix chosen: bundle ANGLE from the MSYS2 package `mingw-w64-ucrt-x86_64-angleproject`
+(`libEGL.dll`, `libGLESv2.dll` and their DLL dependencies) in `copy_runtime`, pin
+the package in `pins.env`, and let `make-third-party.sh` list it (BSD-3-Clause).
+This matches the distribution build and keeps the QEMU source unpatched. Until
+that lands, M0 and M1 experiments keep using the distribution QEMU
+(`OME_QEMU_DIR`, runbook step 0).
 
 ## Failures met and fixed on the way
 

@@ -1,0 +1,22 @@
+# Custom QEMU v11.1.1 start-up under cdb, 2026-09-26. Command per run: cdbX64 -o -c 'sxe av; g; .echo EXCEPTION-OR-EXIT; kb; r; q' <exe> -m 256 -S -device virtio-vga-gl -display sdl,gl=on -drive if=pflash,format=raw,readonly=on,file=<edk2-x86_64-code.fd>. A run still alive after 8 s (QEMU paused at -S, no crash) is killed from outside.
+exe: C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\qemu-system-x86_64.exe (83455945 bytes, sha256 ef3d62f55b78e49126e9d8b16a497a0087286e5401dceade4b6b1e56197d9caf)
+run 1 : ACCESS VIOLATION exit= after 3 s
+run 2 : ACCESS VIOLATION exit= after 1 s
+run 3 : ACCESS VIOLATION exit= after 1 s
+run 4 : ACCESS VIOLATION exit= after 2 s
+run 5 : ACCESS VIOLATION exit= after 2 s
+run 6 : ACCESS VIOLATION exit= after 1 s
+run 7 : ACCESS VIOLATION exit= after 1 s
+run 8 : ACCESS VIOLATION exit= after 1 s
+run 9 : ACCESS VIOLATION exit= after 1 s
+run 10 : ACCESS VIOLATION exit= after 1 s
+
+# Variants without cdb (same binary), each killed after 8 s if still alive:
+virtio-vga-gl + gtk,gl=on : exit 0x00000001 | exit 0x00000001 | exit 0x00000001 stderr: C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\qemu-system-x86_64.exe: -display gtk,gl=on: Parameter 'type' does not accept value 'gtk'
+virtio-vga-gl + sdl,gl=on, no pflash : exit 0xC0000005 | exit 0xC0000005 | exit 0xC0000005
+VGA + sdl,gl=on : exit 0xC0000005 | exit 0xC0000005 | exit 0xC0000005
+virtio-vga-gl + sdl (no gl) : exit 0x00000001 | exit 0x00000001 | exit 0x00000001 stderr: C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\qemu-system-x86_64.exe: -device virtio-vga-gl: The display backend does not have OpenGL support enabled
+virtio-vga-gl + sdl,gl=on (baseline) : exit 0xC0000005 | exit 0xC0000005 | exit 0xC0000005
+distribution QEMU 11.1.0, VGA + sdl,gl=on, same minutes: exit 0x00000001 | exit 0x00000001 | exit 0x00000001
+
+# Verification: same custom binary and arguments with 'C:\Program Files\qemu' (which holds ANGLE's libEGL.dll and libGLESv2.dll) prepended to PATH: alive at 8 s (ok) | alive at 8 s (ok) | alive at 8 s (ok)
