@@ -41,23 +41,22 @@ replayed after a perfect clear; same stage type, one more enemy wave.
 | Battle 1-2 | pass | 88 % | 2,010 | 18.9 / 22.8 | 6.38 | 38.1 fps setup (p50 27 ms, p90 33.5, max 45.8), 38.5 fps wave (p50 26.5 ms, p90 30.7, max 46) | `step-45`, `step-46` | `run-virgl-battle/sf-latency-*.txt` |
 | Stage list screen (animated map) with `-m 8192` (fourth boot, 15:36); stage 1-3 was locked, so the taps meant for it did nothing and no battle ran | measured, not a battle | 60 to 64 % | 1,901 | 14.3 / n.a. | 7.17 | 38.2 fps and 37.8 fps in two 10 s windows (p50 26.2 to 26.7 ms, p90 28.6 to 30.8, max 45.2) | `step-49`, `step-50` (both show the stage list) | `run-virgl-8g-battle/`; guest MemFree 1.46 GB, MemAvailable 4.85 GB |
 | Title, lobby and stage list screen with `-m 8192` and `-global virtio-vga-gl.edid=off` (seventh boot, 16:10; guest mode 1280x800 at 60 Hz); stage 1-3 still locked, no battle ran | measured, not a battle | 92 % | | | | 58.4 fps title (p50 16.8 ms), 57.9 fps lobby (p50 16.7 ms, p99 35.9), 58.5 fps and 58.4 fps stage list (p50 16.9 to 17 ms, p90 20, max 24.2) | `step-51`, `step-52` (both show the stage list) | `run-virgl-60hz-battle/sf-latency-*.txt` (`setup` and `wave` files are the stage list); MemFree 1.55 GB |
+| Battle 1-3, same boot (16:30 to 16:38; the reward node between 1-2 and 1-3 had to be claimed first, then the stage tutorial skipped) | pass, victory, Lv.3 to Lv.4 | 120 to 140 % | 2,049 | 24.1 / n.a. | 7.22 | 58.5 fps active wave with no overlay (p50 17 ms, p90 20.6, p99 28, max 28); 54.3 fps and 57.5 fps with the stage tutorial dialogue over the field | `step-53` to `step-55` | `run-virgl-60hz-battle/sf-latency-battle13-*.txt`; MemFree 1.53 GB |
 
 ## Comparison (M1 completion criterion: battle frames and host CPU at least as good as the M0 harness)
 
-| Measure | Software harness (M0), battle 1-1 | virgl, 6 GiB, 75 Hz EDID, battle 1-2 | virgl, 8 GiB, 75 Hz, stage list screen | virgl, 8 GiB, 60 Hz (`edid=off`), title / lobby / stage list |
+| Measure | Software harness (M0), battle 1-1 | virgl, 6 GiB, 75 Hz EDID, battle 1-2 | virgl, 8 GiB, 75 Hz, stage list screen | virgl, 8 GiB, 60 Hz (`edid=off`), battle 1-3 |
 |---|---|---|---|---|
-| Presented frame rate | 12 to 13 fps | 38 fps | 38 fps | 58 fps |
-| Frame time p50 | 71 to 95 ms | 27 ms | 26 ms | 17 ms |
-| Game process CPU (`top`, 4 vCPU) | 320 to 336 % | 88 % | 60 to 64 % | 92 % |
-| Host CPU (whole PC) | 28 to 34 % | 19 % | 14 % | not sampled |
-| Game PSS | 2.6 to 2.9 GB | 2.0 GB | 1.9 GB | not sampled |
-| Guest free memory | 80 to 115 MB free (6 GiB) | 282 MB free (6 GiB) | 1.46 GB free (8 GiB) | 1.55 GB free (8 GiB) |
+| Presented frame rate | 12 to 13 fps | 38 fps | 38 fps | 58.5 fps |
+| Frame time p50 / p90 / p99 | 71 to 95 / 83 to 107 / 83 to 119 ms | 27 / 31 / 46 ms | 26 / 29 / 45 ms | 17 / 21 / 28 ms |
+| Game process CPU (`top`, 4 vCPU) | 320 to 336 % | 88 % | 60 to 64 % | 120 to 140 % |
+| Host CPU (whole PC) | 28 to 34 % | 19 % | 14 % | 24 % |
+| Game PSS | 2.6 to 2.9 GB | 2.0 GB | 1.9 GB | 2.05 GB |
+| Guest free memory | 80 to 115 MB free (6 GiB) | 282 MB free (6 GiB) | 1.46 GB free (8 GiB) | 1.53 GB free (8 GiB) |
 
-The 8 GiB and 60 Hz columns are not battle measurements: stage 1-3 turned out
-to be locked and the scripted taps stayed on the stage list, which was only
-noticed when the screenshots were reviewed. The 75 Hz versus 60 Hz comparison
-holds because both columns measure the same screens; a 60 Hz battle number is
-still owed.
+The third column is not a battle: stage 1-3 was still locked on that boot and
+the scripted taps stayed on the stage list, noticed only when the screenshots
+were reviewed. The fourth column is the real 1-3 battle on the 60 Hz mode.
 
 virgl wins on every row. Raising the guest to 8 GiB (launcher default since
 2026-09-26, user approval up to 16 GiB) lifted free memory from about 100 MB to
