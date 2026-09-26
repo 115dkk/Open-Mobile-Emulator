@@ -16,7 +16,7 @@ Recorded 2026-09-25. Update when any row changes.
 ## Harness
 
 Distribution QEMU for Windows (winget `SoftwareFreedomConservancy.QEMU` 11.1.0),
-`-accel whpx,kernel-irqchip=off`, `-cpu Skylake-Client-v4`, q35, 6144 MiB, 4 vCPU,
+`-accel whpx,kernel-irqchip=off`, `-cpu Skylake-Client-v4`, q35, 6144 MiB (8192 MiB from the fourth boot on 2026-09-26, now the launcher default), 4 vCPU,
 standard VGA (`-device VGA`) with the guest's software rendering, `-action reboot=shutdown`.
 See `launcher/Start-Guest.ps1 -Gpu std`; the exact command line of every start is in
 `%LOCALAPPDATA%\OpenMobileEmulator\logs\qemu-default-<timestamp>.log`.

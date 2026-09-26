@@ -58,8 +58,10 @@ param(
     # banner with it and booted with this named model (docs/evidence/M0/guest-install.md).
     [string]$Cpu = 'Skylake-Client-v4',
 
+    # 8 GiB by default: with 6 GiB the tested game left 80 to 115 MB free in battle
+    # (docs/evidence/M0/metrics.md). The user approved up to 16 GiB on 2026-09-26.
     [ValidateRange(128, 1048576)]
-    [int]$MemoryMB = 6144,
+    [int]$MemoryMB = 8192,
 
     [ValidateRange(1, 1024)]
     [int]$Smp = 4,

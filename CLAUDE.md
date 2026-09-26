@@ -294,5 +294,6 @@ PRODUCT/
 | 설치함(2026-09-25) | QEMU 11.1.0 → `C:\Program Files\qemu` (winget `SoftwareFreedomConservancy.QEMU`), MSYS2 20260611 → `C:\msys64` (winget `MSYS2.MSYS2`) |
 | 없음 | VirtualBox |
 | WHPX 확인 사항(2026-09-25 저녁) | `-cpu max`는 쓰지 않는다. WHPX에서는 QEMU가 게스트 CPUID를 자기 모델로 답하고 `max`는 TCG 정의(AMD 벤더)라 Bliss가 init 배너 뒤에서 멈춘다. 런처 기본값은 `Skylake-Client-v4`. 게스트 주도 리셋(재부팅, QMP `system_reset`)은 QEMU 11.1.0 WHPX에서 xsave 상태 오류로 VM이 멈추므로 런처는 `-action reboot=shutdown`으로 QEMU를 끝내고 다시 띄운다. 표준 VGA에서는 `nomodeset HWACCEL=0` 항목만 부팅한다. 근거는 `docs/evidence/M0/guest-install.md` |
+| 게스트 메모리(2026-09-26 사용자 결정) | 런처 기본값 8192 MiB, 최대 16 GiB까지 승인. 6144 MiB에서는 트릭컬 전투 중 게스트 여유 메모리가 80~115 MB까지 떨어졌다(`docs/evidence/M0/metrics.md`) |
 
 개발용 도구(QEMU, MSYS2) 설치는 winget으로 하고, 이는 제품의 네트워크 목록(R10)이 아니라 개발 환경 준비다.

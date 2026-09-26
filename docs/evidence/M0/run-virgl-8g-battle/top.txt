@@ -1,0 +1,52 @@
+Tasks: 204 total,   1 running, 203 sleeping,   0 stopped,   0 zombie
+  Mem:  8120716K total,  6656668K used,  1464048K free,    78392K buffers
+ Swap:  4222768K total,        0K used,  4222768K free,  3728860K cached
+400%cpu  36%user   0%nice  36%sys 328%idle   0%iow   0%irq   0%sirq   0%host
+  PID USER         PR  NI VIRT  RES  SHR S[%CPU] %MEM     TIME+ ARGS
+ 3339 u0_a287      10 -10  37G 2.2G 778M S 64.0  28.4   4:53.01 com.epidgames.trickcalrevive
+  884 root         -3  -8  11G  91M  49M S  8.0   1.1   0:33.68 surfaceflinger
+ 4556 root         20   0  10G 4.9M 4.2M R  4.0   0.0   0:00.00 top -m 10 -n 3 -b
+  881 audioserver  20   0  11G  26M  21M S  4.0   0.3   0:06.09 audioserver
+  339 root         20   0    0    0    0 I  4.0   0.0   0:01.78 [kworker/u8:5-events_unbound]
+ 4386 root         20   0    0    0    0 I  0.0   0.0   0:00.01 [kworker/0:2-events]
+ 4003 mediacodec   20   0  10G  13M  11M S  0.0   0.1   0:00.01 media.swcodec oid.media.swcodec/bin/mediaswcodec
+ 3870 u0_a232      20   0  13G 156M 105M S  0.0   1.9   0:00.26 com.android.vending:quick_launch
+ 3831 u0_a287      10 -10  29G  71M  10M S  0.0   0.8   0:00.01 com.epidgames.trickcalrevive
+ 3760 root         -2   0    0    0    0 S  0.0   0.0   0:00.00 [erofs_worker/3]
+
+
+
+Tasks: 204 total,   1 running, 203 sleeping,   0 stopped,   0 zombie
+  Mem:  8120716K total,  6657924K used,  1462792K free,    78392K buffers
+ Swap:  4222768K total,        0K used,  4222768K free,  3728856K cached
+400%cpu  30%user   0%nice  32%sys 338%idle   0%iow   0%irq   0%sirq   0%host
+  PID USER         PR  NI VIRT  RES  SHR S[%CPU] %MEM     TIME+ ARGS
+ 3339 u0_a287      10 -10  37G 2.2G 778M S 58.6  28.4   4:53.17 com.epidgames.trickcalrevive
+  884 root         -3  -8  11G  91M  49M S  7.3   1.1   0:33.70 surfaceflinger
+  881 audioserver  20   0  11G  26M  21M S  1.3   0.3   0:06.10 audioserver
+  762 system       -3  -8  11G  40M  36M S  1.3   0.5   0:05.67 android.hardware.graphics.composer@2.4-service
+  865 audioserver  20   0  47M  15M  13M S  1.0   0.1   0:03.70 android.hardware.audio.service
+  339 root         20   0    0    0    0 I  0.6   0.0   0:01.79 [kworker/u8:5-events_unbound]
+ 4386 root         20   0    0    0    0 I  0.3   0.0   0:00.01 [kworker/0:2-events]
+ 3623 root         20   0  10G  10M 5.6M S  0.3   0.1   0:00.37 adbd --root_seclabel=u:r:su:s0
+ 2901 u0_a233      20   0  14G 263M 203M S  0.3   3.3   0:01.01 com.google.android.gms.unstable
+ 4556 root         20   0  10G 4.9M 4.2M R  0.0   0.0   0:00.01 top -m 10 -n 3 -b
+
+
+
+Tasks: 204 total,   1 running, 203 sleeping,   0 stopped,   0 zombie
+  Mem:  8120716K total,  6657752K used,  1462964K free,    78392K buffers
+ Swap:  4222768K total,        0K used,  4222768K free,  3729336K cached
+400%cpu  31%user   0%nice  27%sys 341%idle   0%iow   0%irq   0%sirq   0%host
+  PID USER         PR  NI VIRT  RES  SHR S[%CPU] %MEM     TIME+ ARGS
+ 3339 u0_a287      10 -10  37G 2.2G 778M S 57.6  28.4   4:54.93 com.epidgames.trickcalrevive
+  884 root         -3  -8  11G  91M  49M S  6.6   1.1   0:33.92 surfaceflinger
+  881 audioserver  20   0  11G  26M  21M S  1.3   0.3   0:06.14 audioserver
+  762 system       -3  -8  11G  40M  36M S  1.0   0.5   0:05.71 android.hardware.graphics.composer@2.4-service
+ 4556 root         20   0  10G 5.2M 4.3M R  0.6   0.0   0:00.01 top -m 10 -n 3 -b
+  339 root         20   0    0    0    0 I  0.6   0.0   0:01.81 [kworker/u8:5-events_unbound]
+  865 audioserver  20   0  47M  15M  13M S  0.3   0.1   0:03.73 android.hardware.audio.service
+ 4386 root         20   0    0    0    0 I  0.0   0.0   0:00.02 [kworker/0:2-events]
+ 4003 mediacodec   20   0  10G  13M  11M S  0.0   0.1   0:00.01 media.swcodec oid.media.swcodec/bin/mediaswcodec
+ 3870 u0_a232      20   0  13G 156M 105M S  0.0   1.9   0:00.26 com.android.vending:quick_launch
+

@@ -39,6 +39,7 @@ replayed after a perfect clear; same stage type, one more enemy wave.
 | Post-download loading | pass after reboot; one thread busy | 48 % | 1,122 | 21.1 / 22.8 | 6.31 | | `step-06` | `run-virgl-loading-stall/`, `gfxinfo` 3 frames total |
 | Guest account, story, quit and relaunch | done once, under the software harness (above); the account carried over to this boot | | | | | | `step-43`, `step-44` | |
 | Battle 1-2 | pass | 88 % | 2,010 | 18.9 / 22.8 | 6.38 | 38.1 fps setup (p50 27 ms, p90 33.5, max 45.8), 38.5 fps wave (p50 26.5 ms, p90 30.7, max 46) | `step-45`, `step-46` | `run-virgl-battle/sf-latency-*.txt` |
+| Battle 1-3 with `-m 8192` (fourth boot, 15:36) | pass | 60 to 64 % | 1,901 | 14.3 / n.a. | 7.17 | 38.2 fps setup (p50 26.2 ms, p90 28.6, max 45.2), 37.8 fps wave (p50 26.7 ms, p90 30.8, max 43) | `step-49`, `step-50` | `run-virgl-8g-battle/`; guest MemFree 1.46 GB, MemAvailable 4.85 GB during the wave |
 
 ## Comparison (M1 completion criterion: battle frames and host CPU at least as good as the M0 harness)
 
@@ -51,10 +52,12 @@ replayed after a perfect clear; same stage type, one more enemy wave.
 | Game PSS | 2.6 to 2.9 GB | 2.0 GB |
 | Guest free memory (6 GB guest) | 80 to 115 MB free, 2.1 GB cached | 282 MB free, 2.8 GB cached |
 
-virgl wins on every row. The 38 fps ceiling is consistent with a CPU-bound
-Unity main thread under translation (one core at 88 %), not with the GPU.
-The guest sits close to its 6 GB memory limit during the game under both
-harnesses; raising `-m` is worth testing before M2.
+virgl wins on every row. Raising the guest to 8 GiB (launcher default since
+2026-09-26, user approval up to 16 GiB) lifted free memory from about 100 MB to
+1.46 GB and cut the game's CPU share from 88 % to about 60 %, but the presented
+frame rate stayed at 38 fps with a steady 26.5 ms frame interval. Memory was a
+source of stutter, not of the frame-rate ceiling; the ceiling is examined in
+`findings-20260926.md` (frame pacing against the display refresh).
 
 ## Idle baseline (2026-09-25, `run-20260925-215100`, no game installed)
 

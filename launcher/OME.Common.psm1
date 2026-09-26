@@ -1059,7 +1059,7 @@ function Get-OmeQemuArguments {
         [string]$Cpu = 'Skylake-Client-v4',
 
         [ValidateRange(128, 1048576)]
-        [int]$MemoryMB = 6144,
+        [int]$MemoryMB = 8192,
 
         [ValidateRange(1, 1024)]
         [int]$Smp = 4,

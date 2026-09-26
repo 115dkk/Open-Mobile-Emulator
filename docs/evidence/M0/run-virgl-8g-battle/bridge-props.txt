@@ -1,0 +1,7 @@
+ro.dalvik.vm.native.bridge=libndk_translation.so
+ro.product.cpu.abilist=x86_64,arm64-v8a,x86,armeabi-v7a,armeabi
+ro.product.cpu.abilist64=x86_64,arm64-v8a
+ro.enable.native.bridge.exec=
+ro.build.version.release=13
+ro.build.version.sdk=33
+ro.product.model=Generic Android-x86_64
