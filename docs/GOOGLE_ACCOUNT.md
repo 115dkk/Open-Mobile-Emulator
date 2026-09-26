@@ -5,7 +5,7 @@ register them once so that Play services will sign in. The product shows the
 required ID and links to the registration page. It never registers on behalf of
 the user and never alters device identity to pass certification.
 
-## Procedure (to be validated in M0 step 8)
+## Procedure (validated in M0 step 8 on 2026-09-26)
 
 1. Boot the guest and finish the first-run wizard **without** adding a Google
    account.
@@ -20,10 +20,18 @@ the user and never alters device identity to pass certification.
      (`docs/evidence/M0/google-account.md`).
    - Without root: install a device-ID viewer app that displays the GSF ID.
 3. Open https://www.google.com/android/uncertified/ while signed in to the
-   Google account you intend to use, paste the GSF ID, submit.
-4. Wait a few minutes, then add the account in guest Settings.
-5. Record the outcome (sign-in works or not, Play Store state) in
-   `docs/evidence/M0/`.
+   Google account you intend to use, paste the GSF ID, submit. The page accepts
+   the 16-digit hexadecimal form (it did on 2026-09-26); keep the decimal form
+   at hand in case the form changes.
+4. Wait about ten minutes, then add the account in guest Settings. The product
+   can open the page for you: `am start -a android.settings.ADD_ACCOUNT_SETTINGS
+   --esa account_types com.google` shows Google's sign-in directly. The
+   credentials are typed inside the guest window, never through the product.
+5. Result recorded in `docs/evidence/M0/google-account.md`: the account was
+   added without a certification warning, Google Play Games fetched the player
+   profile for it, a game that calls Play Games sign-in at start-up stopped
+   opening the system "Add account" page, and the Play Store opened. In-app
+   purchases were not tested.
 
 ## What the product does and does not do
 

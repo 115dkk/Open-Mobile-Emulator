@@ -10,7 +10,7 @@ Recorded 2026-09-25. Update when any row changes.
 | RAM | 64 GB |
 | GPU | NVIDIA GeForce RTX 2080 SUPER, driver 32.0.16.1664 |
 | OS | Windows 11 Education 10.0.22621 |
-| Hypervisor | Hyper-V enabled and running. `HypervisorPlatform` (WHPX) was disabled at the start; enablement with user consent is recorded in `whpx-enable.md` (dism.exe, exit 3010, reboot pending) |
+| Hypervisor | Hyper-V enabled and running. `HypervisorPlatform` (WHPX) was disabled at the start; enablement with user consent is recorded in `whpx-enable.md` (dism.exe, exit 3010); the host rebooted the same evening and WHPX has been in use since |
 | Tools | PowerShell 7.6.6, adb 37.0.1, NDK 27.2 / 28.2, build-tools 35 / 36, JDK 17 |
 
 ## Harness
@@ -59,6 +59,8 @@ vda2 from the running guest (`findings-20260926.md`, `nomodeset-boot-via-grubenv
 - `guest-install.md` (installation, boot attempts, WHPX findings, setup wizard, reboot test) with `install-*.png`, `installed-grub-*.png`, `first-boot-*.png`, `boot-attempt-1-*`
 - `bridge-props.txt`, `cpuinfo.txt` (M0 step 4, done; copies from `run-20260925-215100/`)
 - `arm64-probe-run.md`, `arm64-probe-screen.png` (self-built arm64-only APK under libndk_translation)
-- `google-account.md` (M0 step 8, partial: GSF ID read, registration is the user's step)
-- `metrics.md` (M0 step 7, pending the game APK from the user's phone)
-- Screenshots per scenario step (M0 step 6, pending the game APK)
+- `google-account.md` (M0 step 8, done 2026-09-26: GSF ID read, registered by the user, account added, Play Games sign-in verified; `google-account-added.txt`)
+- `metrics.md` (M0 step 7, done 2026-09-26 for both harnesses; per-run samples in `run-*/`)
+- `findings-20260926.md` (the game run in order: APK, boots, crashes, network, scenario, step 8)
+- `step-01` to `step-48` screenshots (M0 step 6; game UI only, kept out of README and releases per R6)
+- `run-virgl-*`, `run-nomodeset-*` (samples), `crash-ndk-translation-1/` (translator abort), `swcodec-gralloc-abort-virgl.txt` (codec abort), `game-process-maps.txt`, `audio-flinger-*.txt`, `nomodeset-boot-via-grubenv.txt`, `logcat-virgl-firstrun-full.txt`

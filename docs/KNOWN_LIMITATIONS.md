@@ -7,7 +7,9 @@
   Vulkan are unsupported until the gfxstream path exists (P1).
 - The guest is a Google-uncertified device. Play Store and in-app purchases are
   not guaranteed even after the uncertified-device registration described in
-  `docs/GOOGLE_ACCOUNT.md`.
+  `docs/GOOGLE_ACCOUNT.md`. On 2026-09-26 the registration worked on the
+  development host: the account was added, Google Play Games signed in, and the
+  Play Store opened; purchases remain untested.
 - Enabling the Windows Hypervisor Platform runs Windows on top of Hyper-V. Games
   with kernel anti-cheat on the same PC may refuse to start while it is on. The
   product never changes this setting by itself (R9).

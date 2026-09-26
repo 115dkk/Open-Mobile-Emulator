@@ -50,3 +50,35 @@ file into `sqlite3` avoids the problem.
 - Still open, for after the user registers the GSF ID above: add the account
   in guest Settings, relaunch the game, and record whether Play Games sign-in
   succeeds (and whether the attempt stops opening the "Add account" page).
+
+## 2026-09-26 15:06: registration done by the user
+
+The user submitted the hexadecimal GSF ID `39335c0a…(가려짐)` on
+https://www.google.com/android/uncertified/ from their own browser session
+(the host PC had rebooted at 13:05; the guest came back with the same ID). The
+page accepts the 16-digit hexadecimal form as of 2026 (Google support threads
+and XDA, 2025-11); the decimal form was kept as a fallback. Next: wait 10 to 20
+minutes, open the guest's "Add account" screen, let the user type the
+credentials in the QEMU window, then check `dumpsys account` and the game's
+Play Games sign-in.
+
+## 2026-09-26 15:16 to 15:22: account added, Play Games sign-in works
+
+- After ten minutes, `am start -a android.settings.ADD_ACCOUNT_SETTINGS --esa
+  account_types com.google` opened the Google sign-in page in the guest and the
+  user typed the credentials in the QEMU window. `dumpsys account` then lists
+  one `com.google` account (`google-account-added.txt`, name redacted). No
+  "device isn't certified" message appeared.
+- Game relaunch (`step-48-title-after-google-account.png`): the title loaded
+  with the same guest account number, and this time the Play Games call did not
+  open the system "Add account" page and logged no `Returning an error code`.
+  GMS logged `PlayGamesServices[PlayerAgent]: Fetched player profile from server
+  with playerId=...` for the account, so Play Games sign-in on this registered
+  uncertified guest works.
+- The game's own "Google로 로그인" was not pressed: linking the user's Google
+  account to a game account is their decision, and the M0 scenario runs on the
+  guest account.
+- Play Store (`com.android.vending`) opened on the account and loaded its
+  storefront (For you, Games, Apps) without a certification warning. The
+  screenshot is not kept because it shows the user's Play profile; in-app
+  purchases were not tested (KNOWN_LIMITATIONS keeps that caveat).
