@@ -330,6 +330,7 @@ fn map_io(error: io::Error) -> QmpError {
 mod tests {
     use std::net::TcpListener;
     use std::thread;
+    use std::time::Instant;
 
     use super::*;
 
@@ -416,8 +417,16 @@ mod tests {
         });
         let mut channel = QmpChannel::connect(address, Duration::from_secs(1)).expect("connect");
         assert_eq!(channel.poll_event(), None);
-        thread::sleep(Duration::from_millis(30));
-        let event = channel.poll_event().expect("assembled event");
+        // The server finishes the line after 25 ms; under load the thread may be late, so poll
+        // until a deadline instead of sleeping a fixed 30 ms (flaked once on 2026-09-27).
+        let deadline = Instant::now() + Duration::from_secs(2);
+        let event = loop {
+            if let Some(event) = channel.poll_event() {
+                break event;
+            }
+            assert!(Instant::now() < deadline, "assembled event");
+            thread::sleep(Duration::from_millis(10));
+        };
         assert_eq!(event.event, "RESET");
         server.join().expect("server thread");
     }

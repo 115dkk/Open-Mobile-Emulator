@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-open-home-folder"
+description = "Enables the open_home_folder command without any pre-configured scope."
+commands.allow = ["open_home_folder"]
+
+[[permission]]
+identifier = "deny-open-home-folder"
+description = "Denies the open_home_folder command without any pre-configured scope."
+commands.deny = ["open_home_folder"]

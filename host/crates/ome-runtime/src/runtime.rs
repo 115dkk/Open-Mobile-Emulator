@@ -77,6 +77,7 @@ pub struct AppRuntime {
     input_editing: bool,
     input_auto_apply: bool,
     suspend_hotkey: String,
+    input_overlay_visible: bool,
     display_fit: StageFit,
     active_display: Option<String>,
     custom_display: Option<CustomDisplay>,
@@ -141,6 +142,7 @@ impl AppRuntime {
             input_profiles.extend(user_profiles);
         }
         let active_input = input_profiles.first().map(|profile| profile.id.clone());
+        let input_overlay_visible = settings.binding_overlay_default;
         let feature_state = deps
             .probe
             .hypervisor_platform()
@@ -165,6 +167,7 @@ impl AppRuntime {
             input_editing: false,
             input_auto_apply: true,
             suspend_hotkey: "F12".to_owned(),
+            input_overlay_visible,
             display_fit: StageFit::FitWindow,
             active_display: Some("hd-720".to_owned()),
             custom_display: None,
@@ -180,7 +183,7 @@ impl AppRuntime {
             contract_version: CONTRACT_VERSION,
             product_version: self.deps.product_version.clone(),
             phase: self.phase,
-            blocker: self.blocker,
+            blocker: self.current_blocker(),
             host: self.host.clone(),
             wizard: self.wizard_view(),
             images: self.images_view(),
@@ -208,6 +211,7 @@ impl AppRuntime {
                     .to_owned(),
                 ),
                 root_enabled: None,
+                media_volume: None,
             },
             apps: AppsView {
                 available: false,
@@ -223,9 +227,10 @@ impl AppRuntime {
                 foreground_package: None,
                 multitouch: Capability::Unknown,
                 suspend_hotkey: self.suspend_hotkey.clone(),
+                overlay_visible: self.input_overlay_visible,
             },
             display: DisplayView {
-                presets: display_presets(),
+                presets: self.display_presets(),
                 active_id: self.active_display.clone(),
                 custom: self.custom_display,
                 fit: self.display_fit,
@@ -283,10 +288,19 @@ impl AppRuntime {
             }
             Command::WizardContinue => self.wizard_continue(),
             Command::WizardSkip => self.wizard_skip(),
+            Command::WizardDefer => {
+                // wiring: persist the unchanged wizard state when wizard storage is introduced.
+                self.phase = AppPhase::Main;
+                Ok(())
+            }
             Command::GuestImageSelect { id } => self.select_image(id),
             Command::InputProfileSelect { id } => self.select_input(id),
             Command::InputSuspendToggle => {
                 self.input_suspended = !self.input_suspended;
+                Ok(())
+            }
+            Command::InputOverlayToggle => {
+                self.input_overlay_visible = !self.input_overlay_visible;
                 Ok(())
             }
             Command::InputProfileDelete { id } => self.delete_input(id),
@@ -339,7 +353,26 @@ impl AppRuntime {
                 self.settings = validated;
                 Ok(())
             }
-            Command::WhpxEnable
+            Command::GuestVolumeSet { index } if index > 15 => Err(issues::invalid_media_volume()),
+            Command::OpenHelp { topic } => match topic {
+                crate::HelpTopic::VirtualizationBios
+                | crate::HelpTopic::HypervisorPlatform
+                | crate::HelpTopic::GoogleAccount
+                | crate::HelpTopic::AdbSecurity
+                | crate::HelpTopic::QemuSource
+                | crate::HelpTopic::ThirdPartyNotices
+                | crate::HelpTopic::ReleaseNotes => Err(issues::not_wired()),
+            },
+            Command::CopyToClipboard { item } => match item {
+                crate::ClipboardItem::DeviceId | crate::ClipboardItem::AdbAddress => {
+                    Err(issues::not_wired())
+                }
+            },
+            Command::AppQuit
+            | Command::GuestVolumeSet { .. }
+            | Command::AppInstallCancel
+            | Command::OpenHomeFolder
+            | Command::WhpxEnable
             | Command::ArtifactDownloadStart
             | Command::ArtifactDownloadCancel
             | Command::GuestCreate { .. }
@@ -422,6 +455,7 @@ impl AppRuntime {
             if profile.bundled {
                 return Err(issues::invalid_input_profile());
             }
+            self.active_input = Some(profile.id.clone());
             self.input_profiles.push(profile);
         }
         Ok(())
@@ -472,7 +506,7 @@ impl AppRuntime {
     }
 
     fn apply_display_preset(&mut self, id: String) -> Result<(), AppIssue> {
-        let preset = display_presets()
+        let preset = display_presets_for(self.current_orientation())
             .into_iter()
             .find(|preset| preset.id == id)
             .ok_or_else(issues::display_preset_not_found)?;
@@ -607,6 +641,32 @@ impl AppRuntime {
         }
     }
 
+    fn current_blocker(&self) -> Option<Blocker> {
+        self.blocker.or_else(|| {
+            (self.phase == AppPhase::Main && self.feature_state == FeatureState::Disabled)
+                .then_some(Blocker {
+                    kind: BlockerKind::HypervisorPlatformOff,
+                })
+        })
+    }
+
+    fn current_orientation(&self) -> Orientation {
+        if let Some(active_id) = self.active_display.as_deref()
+            && let Some(preset) = display_presets_for(Orientation::Landscape)
+                .into_iter()
+                .find(|preset| preset.id == active_id)
+        {
+            return preset.orientation;
+        }
+        self.custom_display
+            .map(|custom| orientation_for_size(custom.size))
+            .unwrap_or(Orientation::Landscape)
+    }
+
+    fn display_presets(&self) -> Vec<DisplayPreset> {
+        display_presets_for(self.current_orientation())
+    }
+
     fn selected_profile(&self) -> Option<&GuestImageProfile> {
         let selected = self.selected_image.as_deref()?;
         self.image_profiles
@@ -705,8 +765,12 @@ pub fn load_input_directory(
     load_profiles(directory)
 }
 
-/// Returns the three fixed display presets exposed by the contract.
+/// Returns the three fixed display presets assuming the default landscape orientation.
 pub fn display_presets() -> Vec<DisplayPreset> {
+    display_presets_for(Orientation::Landscape)
+}
+
+fn display_presets_for(current_orientation: Orientation) -> Vec<DisplayPreset> {
     vec![
         DisplayPreset {
             id: "hd-720".to_owned(),
@@ -716,7 +780,7 @@ pub fn display_presets() -> Vec<DisplayPreset> {
             },
             density_dpi: 160,
             orientation: Orientation::Landscape,
-            needs_reboot: true,
+            needs_reboot: current_orientation != Orientation::Landscape,
         },
         DisplayPreset {
             id: "full-hd".to_owned(),
@@ -726,7 +790,7 @@ pub fn display_presets() -> Vec<DisplayPreset> {
             },
             density_dpi: 240,
             orientation: Orientation::Landscape,
-            needs_reboot: true,
+            needs_reboot: current_orientation != Orientation::Landscape,
         },
         DisplayPreset {
             id: "portrait-720".to_owned(),
@@ -736,9 +800,17 @@ pub fn display_presets() -> Vec<DisplayPreset> {
             },
             density_dpi: 160,
             orientation: Orientation::Portrait,
-            needs_reboot: true,
+            needs_reboot: current_orientation != Orientation::Portrait,
         },
     ]
+}
+
+fn orientation_for_size(size: Size) -> Orientation {
+    if size.height > size.width {
+        Orientation::Portrait
+    } else {
+        Orientation::Landscape
+    }
 }
 
 fn refresh_rates(custom: Option<u32>) -> Vec<u32> {
@@ -1086,6 +1158,88 @@ mod tests {
             .expect("custom refresh");
         assert!(snapshot.display.refresh_rates.contains(&100));
         assert!(!snapshot.display.refresh_supported);
+    }
+
+    #[test]
+    fn contract_three_commands_update_runtime_owned_state() {
+        let (_directory, mut runtime) = runtime(FeatureState::Disabled);
+        let wizard_step = runtime.snapshot().wizard.step;
+        let snapshot = runtime.apply(Command::WizardDefer).expect("defer wizard");
+        assert_eq!(snapshot.phase, AppPhase::Main);
+        assert_eq!(snapshot.wizard.step, wizard_step);
+        assert_eq!(
+            snapshot.blocker,
+            Some(Blocker {
+                kind: BlockerKind::HypervisorPlatformOff,
+            })
+        );
+        assert!(snapshot.input.overlay_visible);
+        assert!(
+            !runtime
+                .apply(Command::InputOverlayToggle)
+                .expect("toggle overlay")
+                .input
+                .overlay_visible
+        );
+    }
+
+    #[test]
+    fn new_input_profile_becomes_active_but_existing_save_keeps_selection() {
+        let (_directory, mut runtime) = runtime(FeatureState::Enabled);
+        let mut custom = runtime.snapshot().input.profiles[0].clone();
+        let original = custom.id.clone();
+        custom.id = "new-profile".to_owned();
+        custom.bundled = false;
+        let snapshot = runtime
+            .apply(Command::InputProfileSave {
+                profile: custom.clone(),
+            })
+            .expect("save new profile");
+        assert_eq!(snapshot.input.active_id.as_deref(), Some("new-profile"));
+        runtime
+            .apply(Command::InputProfileSelect {
+                id: Some(original.clone()),
+            })
+            .expect("select original");
+        custom.name = "Renamed".to_owned();
+        let snapshot = runtime
+            .apply(Command::InputProfileSave { profile: custom })
+            .expect("save existing profile");
+        assert_eq!(snapshot.input.active_id.as_deref(), Some(original.as_str()));
+    }
+
+    #[test]
+    fn display_reboot_requirement_depends_on_current_orientation() {
+        let (_directory, mut runtime) = runtime(FeatureState::Enabled);
+        let initial = runtime.snapshot();
+        assert!(!initial.display.presets[0].needs_reboot);
+        assert!(!initial.display.presets[1].needs_reboot);
+        assert!(initial.display.presets[2].needs_reboot);
+        let portrait = runtime
+            .apply(Command::DisplayCustomApply {
+                size: Size {
+                    width: 720,
+                    height: 1280,
+                },
+                density_dpi: 160,
+            })
+            .expect("portrait display");
+        assert!(portrait.display.presets[0].needs_reboot);
+        assert!(portrait.display.presets[1].needs_reboot);
+        assert!(!portrait.display.presets[2].needs_reboot);
+    }
+
+    #[test]
+    fn volume_validation_precedes_unwired_adapter() {
+        let (_directory, mut runtime) = runtime(FeatureState::Enabled);
+        let invalid = runtime
+            .apply(Command::GuestVolumeSet { index: 16 })
+            .expect_err("invalid volume");
+        assert_eq!(invalid.code, "invalid_media_volume");
+        let unwired = runtime
+            .apply(Command::GuestVolumeSet { index: 15 })
+            .expect_err("volume adapter is not wired");
+        assert_eq!(unwired.code, "not_wired");
     }
 
     #[test]

@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-wizard-defer"
+description = "Enables the wizard_defer command without any pre-configured scope."
+commands.allow = ["wizard_defer"]
+
+[[permission]]
+identifier = "deny-wizard-defer"
+description = "Denies the wizard_defer command without any pre-configured scope."
+commands.deny = ["wizard_defer"]

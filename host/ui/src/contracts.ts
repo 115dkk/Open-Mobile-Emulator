@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Open Mobile Emulator contributors
 // Read-only presentation contracts mirroring ome-runtime contract.rs field for field.
 
-export const CONTRACT_VERSION = 2;
+export const CONTRACT_VERSION = 3;
 
 export type AppPhase = 'wizard' | 'main';
 export type BlockerKind = 'virtualizationOff' | 'qemuMissing' | 'hypervisorPlatformOff';
@@ -97,6 +97,7 @@ export interface GuestView {
   readonly deviceId: string | null;
   readonly adbAddress: string | null;
   readonly rootEnabled: boolean | null;
+  readonly mediaVolume: number | null;
 }
 
 export interface AppItem { readonly package: string; readonly label: string; readonly versionName: string | null; readonly installedAt: string | null }
@@ -137,6 +138,7 @@ export interface InputView {
   readonly foregroundPackage: string | null;
   readonly multitouch: Capability;
   readonly suspendHotkey: string;
+  readonly overlayVisible: boolean;
 }
 
 export type Orientation = 'landscape' | 'portrait';
@@ -217,6 +219,14 @@ export interface AppSnapshot {
   readonly issue: AppIssue | null;
 }
 
+/** Help destinations opened by trusted native code. */
+export type HelpTopic =
+  | 'virtualizationBios' | 'hypervisorPlatform' | 'googleAccount' | 'adbSecurity'
+  | 'qemuSource' | 'thirdPartyNotices' | 'releaseNotes';
+
+/** Snapshot-owned values that native code may copy. */
+export type ClipboardItem = 'deviceId' | 'adbAddress';
+
 /** Event names emitted by the shell. */
 export const EVENT_SNAPSHOT = 'snapshot';
 export const EVENT_PROGRESS = 'progress';
@@ -227,6 +237,9 @@ export interface ControllerBridge {
   hostCheckRefresh(): Promise<AppSnapshot>;
   wizardContinue(): Promise<AppSnapshot>;
   wizardSkip(): Promise<AppSnapshot>;
+  wizardDefer(): Promise<AppSnapshot>;
+  openHelp(topic: HelpTopic): Promise<AppSnapshot>;
+  appQuit(): Promise<AppSnapshot>;
   whpxEnable(): Promise<AppSnapshot>;
   artifactDownloadStart(): Promise<AppSnapshot>;
   artifactDownloadCancel(): Promise<AppSnapshot>;
@@ -239,13 +252,16 @@ export interface ControllerBridge {
   guestStop(): Promise<AppSnapshot>;
   guestRestart(): Promise<AppSnapshot>;
   guestRootSet(enabled: boolean): Promise<AppSnapshot>;
+  guestVolumeSet(index: number): Promise<AppSnapshot>;
   stageRectChanged(rect: StageRect): Promise<AppSnapshot>;
   screenshotSave(): Promise<AppSnapshot>;
   appInstallPick(): Promise<AppSnapshot>;
+  appInstallCancel(): Promise<AppSnapshot>;
   appUninstall(pkg: string): Promise<AppSnapshot>;
   appLaunch(pkg: string): Promise<AppSnapshot>;
   inputProfileSelect(id: string | null): Promise<AppSnapshot>;
   inputSuspendToggle(): Promise<AppSnapshot>;
+  inputOverlayToggle(): Promise<AppSnapshot>;
   inputProfileDelete(id: string): Promise<AppSnapshot>;
   inputProfileSave(profile: InputProfile): Promise<AppSnapshot>;
   inputBindingUpsert(profileId: string, binding: Binding): Promise<AppSnapshot>;
@@ -264,6 +280,8 @@ export interface ControllerBridge {
   diagnosticsExport(): Promise<AppSnapshot>;
   openLogsFolder(): Promise<AppSnapshot>;
   openScreenshotsFolder(): Promise<AppSnapshot>;
+  openHomeFolder(): Promise<AppSnapshot>;
+  copyToClipboard(item: ClipboardItem): Promise<AppSnapshot>;
   openRegistrationPage(): Promise<AppSnapshot>;
   guestWindowToFront(): Promise<AppSnapshot>;
   /** Subscribe to snapshot pushes. */

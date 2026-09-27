@@ -42,13 +42,24 @@ describe('presentation controller', () => {
   it('forwards action arguments to the bridge', async () => {
     const guestCreate = vi.fn<ControllerBridge['guestCreate']>(() => Promise.resolve(sampleSnapshot));
     const stageRectChanged = vi.fn<ControllerBridge['stageRectChanged']>(() => Promise.resolve(sampleSnapshot));
-    const bridge: ControllerBridge = { ...fixtureBridge(), guestCreate, stageRectChanged };
+    const openHelp = vi.fn<ControllerBridge['openHelp']>(() => Promise.resolve(sampleSnapshot));
+    const guestVolumeSet = vi.fn<ControllerBridge['guestVolumeSet']>(() => Promise.resolve(sampleSnapshot));
+    const copyToClipboard = vi.fn<ControllerBridge['copyToClipboard']>(() => Promise.resolve(sampleSnapshot));
+    const bridge: ControllerBridge = {
+      ...fixtureBridge(), guestCreate, stageRectChanged, openHelp, guestVolumeSet, copyToClipboard,
+    };
     const { result } = renderHook(() => useController(bridge));
     await waitFor(() => { expect(result.current.snapshot).not.toBeNull(); });
     await act(() => result.current.actions.guestCreate('sample-android-13', 64));
     await act(() => result.current.actions.stageRectChanged({ x: 1, y: 2, width: 3, height: 4, scaleFactor: 1.5 }));
+    await act(() => result.current.actions.openHelp('googleAccount'));
+    await act(() => result.current.actions.guestVolumeSet(8));
+    await act(() => result.current.actions.copyToClipboard('adbAddress'));
     expect(guestCreate).toHaveBeenCalledWith('sample-android-13', 64);
     expect(stageRectChanged).toHaveBeenCalledWith({ x: 1, y: 2, width: 3, height: 4, scaleFactor: 1.5 });
+    expect(openHelp).toHaveBeenCalledWith('googleAccount');
+    expect(guestVolumeSet).toHaveBeenCalledWith(8);
+    expect(copyToClipboard).toHaveBeenCalledWith('adbAddress');
   });
 
   it('keeps the same actions object across renders', async () => {

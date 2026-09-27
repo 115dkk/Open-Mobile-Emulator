@@ -128,6 +128,15 @@ pub fn invalid_display() -> AppIssue {
     }
 }
 
+/// Returns an issue when a media-volume index is outside the operating-system range.
+pub fn invalid_media_volume() -> AppIssue {
+    AppIssue {
+        code: "invalid_media_volume".to_owned(),
+        message: "운영체제 볼륨 값이 허용 범위를 벗어나 적용하지 않았습니다.".to_owned(),
+        next_action: Some("0부터 15까지의 값으로 다시 지정하십시오.".to_owned()),
+    }
+}
+
 /// Returns an issue when applying a display setting requires an unavailable connection.
 pub fn operating_system_connection_unavailable() -> AppIssue {
     AppIssue {

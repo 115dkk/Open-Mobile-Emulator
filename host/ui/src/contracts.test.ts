@@ -112,7 +112,7 @@ const guestSummary = object<GuestSummary>({
   lastStartedAt: nullable(string), capabilities: capabilityReport,
 });
 const snapshot = object<AppSnapshot>({
-  contractVersion: (value, path) => { if (value !== 2) fail(path, 'contract version 2'); },
+  contractVersion: (value, path) => { if (value !== 3) fail(path, 'contract version 3'); },
   productVersion: string, phase: enumeration('wizard', 'main'),
   blocker: nullable(object({ kind: enumeration('virtualizationOff', 'qemuMissing', 'hypervisorPlatformOff') })),
   host: object<HostReport>({
@@ -135,6 +135,7 @@ const snapshot = object<AppSnapshot>({
     lastExit: nullable(object<LastExit>({ kind: enumeration('userStop', 'guestReset', 'bootTimeout', 'crash', 'startFailed'), at: string, logPath: nullable(string) })),
     imageId: nullable(string), androidVersion: nullable(string), apiLevel: nullable(number),
     capabilities: capabilityReport, deviceId: nullable(string), adbAddress: nullable(string), rootEnabled: nullable(boolean),
+    mediaVolume: nullable(number),
   }),
   apps: object<AppsView>({
     available: boolean, install: nullable(transfer),
@@ -143,6 +144,7 @@ const snapshot = object<AppSnapshot>({
   input: object<InputView>({
     profiles: array(profile), activeId: nullable(string), suspended: boolean, editing: boolean,
     autoApply: boolean, foregroundPackage: nullable(string), multitouch: capability, suspendHotkey: string,
+    overlayVisible: boolean,
   }),
   display: object<DisplayView>({
     activeId: nullable(string), custom: nullable(object<CustomDisplay>({ size, densityDpi: number })),
@@ -169,13 +171,14 @@ function fixture(name: string): unknown {
 }
 
 const commandShapes: Record<string, Record<string, Check>> = {
-  hostCheckRefresh: {}, wizardContinue: {}, wizardSkip: {}, whpxEnable: {},
-  artifactDownloadStart: {}, artifactDownloadCancel: {}, guestImageSelect: { id: string },
+  hostCheckRefresh: {}, wizardContinue: {}, wizardSkip: {}, wizardDefer: {},
+  openHelp: { topic: enumeration('virtualizationBios', 'hypervisorPlatform', 'googleAccount', 'adbSecurity', 'qemuSource', 'thirdPartyNotices', 'releaseNotes') },
+  appQuit: {}, whpxEnable: {}, artifactDownloadStart: {}, artifactDownloadCancel: {}, guestImageSelect: { id: string },
   guestCreate: { imageId: string, sizeGib: number }, guestSelect: { name: string },
   guestDelete: { name: string }, guestReinstall: { name: string }, guestStart: {}, guestStop: {},
-  guestRestart: {}, guestRootSet: { enabled: boolean }, stageRectChanged: { rect }, screenshotSave: {},
-  appInstallPick: {}, appUninstall: { package: string }, appLaunch: { package: string },
-  inputProfileSelect: { id: nullable(string) }, inputSuspendToggle: {}, inputProfileDelete: { id: string },
+  guestRestart: {}, guestRootSet: { enabled: boolean }, guestVolumeSet: { index: number }, stageRectChanged: { rect }, screenshotSave: {},
+  appInstallPick: {}, appInstallCancel: {}, appUninstall: { package: string }, appLaunch: { package: string },
+  inputProfileSelect: { id: nullable(string) }, inputSuspendToggle: {}, inputOverlayToggle: {}, inputProfileDelete: { id: string },
   inputProfileSave: { profile }, inputBindingUpsert: { profileId: string, binding },
   inputBindingRemove: { profileId: string, id: string }, inputEditorToggle: {},
   inputAutoApplySet: { enabled: boolean }, inputSuspendHotkeySet: { code: string },
@@ -183,7 +186,8 @@ const commandShapes: Record<string, Record<string, Check>> = {
   displayRefreshSet: { hz: nullable(number) }, displayVsyncSet: { mode: enumeration('off', 'on', 'adaptive') },
   stageFitSet: { fit: enumeration('fitWindow', 'oneToOne') },
   settingsSave: { settings: object<SettingsInput>(settingsInput) }, updateCheck: {}, updateInstall: {},
-  diagnosticsExport: {}, openLogsFolder: {}, openScreenshotsFolder: {}, openRegistrationPage: {}, guestWindowToFront: {},
+  diagnosticsExport: {}, openLogsFolder: {}, openScreenshotsFolder: {}, openHomeFolder: {},
+  copyToClipboard: { item: enumeration('deviceId', 'adbAddress') }, openRegistrationPage: {}, guestWindowToFront: {},
 };
 
 describe('Rust/TypeScript contract fixtures', () => {

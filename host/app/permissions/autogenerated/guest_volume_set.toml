@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-guest-volume-set"
+description = "Enables the guest_volume_set command without any pre-configured scope."
+commands.allow = ["guest_volume_set"]
+
+[[permission]]
+identifier = "deny-guest-volume-set"
+description = "Denies the guest_volume_set command without any pre-configured scope."
+commands.deny = ["guest_volume_set"]

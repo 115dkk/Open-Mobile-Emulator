@@ -1,5 +1,5 @@
 {
-  "contractVersion": 2,
+  "contractVersion": 3,
   "productVersion": "0.1.0",
   "phase": "main",
   "blocker": {
@@ -172,7 +172,8 @@
     },
     "deviceId": "1234567890",
     "adbAddress": "127.0.0.1:5555",
-    "rootEnabled": false
+    "rootEnabled": false,
+    "mediaVolume": 8
   },
   "apps": {
     "available": true,
@@ -296,7 +297,8 @@
     "autoApply": true,
     "foregroundPackage": "com.example.app",
     "multitouch": "unavailable",
-    "suspendHotkey": "F12"
+    "suspendHotkey": "F12",
+    "overlayVisible": true
   },
   "display": {
     "presets": [
@@ -308,7 +310,7 @@
         },
         "densityDpi": 160,
         "orientation": "landscape",
-        "needsReboot": true
+        "needsReboot": false
       },
       {
         "id": "full-hd",
@@ -318,7 +320,7 @@
         },
         "densityDpi": 240,
         "orientation": "landscape",
-        "needsReboot": true
+        "needsReboot": false
       },
       {
         "id": "portrait-720",

@@ -252,6 +252,7 @@ fn representative_snapshot() -> AppSnapshot {
             device_id: Some("1234567890".to_owned()),
             adb_address: Some("127.0.0.1:5555".to_owned()),
             root_enabled: Some(false),
+            media_volume: Some(8),
         },
         apps: AppsView {
             available: true,
@@ -272,6 +273,7 @@ fn representative_snapshot() -> AppSnapshot {
             foreground_package: Some("com.example.app".to_owned()),
             multitouch: Capability::Unavailable,
             suspend_hotkey: "F12".to_owned(),
+            overlay_visible: true,
         },
         display: DisplayView {
             presets: display_presets(),
@@ -332,6 +334,11 @@ fn every_command() -> Vec<Command> {
         Command::HostCheckRefresh,
         Command::WizardContinue,
         Command::WizardSkip,
+        Command::WizardDefer,
+        Command::OpenHelp {
+            topic: HelpTopic::HypervisorPlatform,
+        },
+        Command::AppQuit,
         Command::WhpxEnable,
         Command::ArtifactDownloadStart,
         Command::ArtifactDownloadCancel,
@@ -355,6 +362,7 @@ fn every_command() -> Vec<Command> {
         Command::GuestStop,
         Command::GuestRestart,
         Command::GuestRootSet { enabled: true },
+        Command::GuestVolumeSet { index: 8 },
         Command::StageRectChanged {
             rect: StageRect {
                 x: 10.0,
@@ -366,6 +374,7 @@ fn every_command() -> Vec<Command> {
         },
         Command::ScreenshotSave,
         Command::AppInstallPick,
+        Command::AppInstallCancel,
         Command::AppUninstall {
             package: "com.example.app".to_owned(),
         },
@@ -376,6 +385,7 @@ fn every_command() -> Vec<Command> {
             id: Some("example-input".to_owned()),
         },
         Command::InputSuspendToggle,
+        Command::InputOverlayToggle,
         Command::InputProfileDelete {
             id: "custom".to_owned(),
         },
@@ -429,6 +439,10 @@ fn every_command() -> Vec<Command> {
         Command::DiagnosticsExport,
         Command::OpenLogsFolder,
         Command::OpenScreenshotsFolder,
+        Command::OpenHomeFolder,
+        Command::CopyToClipboard {
+            item: ClipboardItem::DeviceId,
+        },
         Command::OpenRegistrationPage,
         Command::GuestWindowToFront,
     ]

@@ -3,8 +3,8 @@
 use std::sync::{Arc, Mutex};
 
 use ome_runtime::{
-    AppIssue, AppRuntime, AppSnapshot, Binding, Command, InputProfile, SettingsInput, Size,
-    StageFit, StageRect, VsyncMode,
+    AppIssue, AppRuntime, AppSnapshot, Binding, ClipboardItem, Command, HelpTopic, InputProfile,
+    SettingsInput, Size, StageFit, StageRect, VsyncMode,
 };
 use tauri::{AppHandle, State};
 
@@ -105,6 +105,8 @@ macro_rules! command_no_args {
 command_no_args!(host_check_refresh, Command::HostCheckRefresh);
 command_no_args!(wizard_continue, Command::WizardContinue);
 command_no_args!(wizard_skip, Command::WizardSkip);
+command_no_args!(wizard_defer, Command::WizardDefer);
+command_no_args!(app_quit, Command::AppQuit);
 command_no_args!(whpx_enable, Command::WhpxEnable);
 command_no_args!(artifact_download_start, Command::ArtifactDownloadStart);
 command_no_args!(artifact_download_cancel, Command::ArtifactDownloadCancel);
@@ -113,15 +115,36 @@ command_no_args!(guest_stop, Command::GuestStop);
 command_no_args!(guest_restart, Command::GuestRestart);
 command_no_args!(screenshot_save, Command::ScreenshotSave);
 command_no_args!(app_install_pick, Command::AppInstallPick);
+command_no_args!(app_install_cancel, Command::AppInstallCancel);
 command_no_args!(input_suspend_toggle, Command::InputSuspendToggle);
+command_no_args!(input_overlay_toggle, Command::InputOverlayToggle);
 command_no_args!(input_editor_toggle, Command::InputEditorToggle);
 command_no_args!(update_check, Command::UpdateCheck);
 command_no_args!(update_install, Command::UpdateInstall);
 command_no_args!(diagnostics_export, Command::DiagnosticsExport);
 command_no_args!(open_logs_folder, Command::OpenLogsFolder);
 command_no_args!(open_screenshots_folder, Command::OpenScreenshotsFolder);
+command_no_args!(open_home_folder, Command::OpenHomeFolder);
 command_no_args!(open_registration_page, Command::OpenRegistrationPage);
 command_no_args!(guest_window_to_front, Command::GuestWindowToFront);
+
+#[tauri::command]
+pub(crate) async fn open_help(
+    app: AppHandle,
+    state: State<'_, ShellState>,
+    topic: HelpTopic,
+) -> Result<AppSnapshot, AppIssue> {
+    apply(app, &state, Command::OpenHelp { topic }).await
+}
+
+#[tauri::command]
+pub(crate) async fn copy_to_clipboard(
+    app: AppHandle,
+    state: State<'_, ShellState>,
+    item: ClipboardItem,
+) -> Result<AppSnapshot, AppIssue> {
+    apply(app, &state, Command::CopyToClipboard { item }).await
+}
 
 #[tauri::command]
 pub(crate) async fn guest_image_select(
@@ -172,6 +195,15 @@ pub(crate) async fn guest_root_set(
 ) -> Result<AppSnapshot, AppIssue> {
     apply(app, &state, Command::GuestRootSet { enabled }).await
 }
+#[tauri::command]
+pub(crate) async fn guest_volume_set(
+    app: AppHandle,
+    state: State<'_, ShellState>,
+    index: u32,
+) -> Result<AppSnapshot, AppIssue> {
+    apply(app, &state, Command::GuestVolumeSet { index }).await
+}
+
 #[tauri::command]
 pub(crate) async fn stage_rect_changed(
     app: AppHandle,

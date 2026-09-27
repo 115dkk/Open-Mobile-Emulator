@@ -14,7 +14,7 @@ pub use ome_input::{
 };
 
 /// Current Rust-to-webview contract version.
-pub const CONTRACT_VERSION: u32 = 2;
+pub const CONTRACT_VERSION: u32 = 3;
 
 /// The one read-only projection the webview renders.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -406,6 +406,8 @@ pub struct GuestView {
     pub adb_address: Option<String>,
     /// Whether root requests are enabled, or unknown before probing.
     pub root_enabled: Option<bool>,
+    /// Current media volume index from 0 through 15, or unknown before probing.
+    pub media_volume: Option<u32>,
 }
 
 /// Virtual-machine supervisor states.
@@ -552,6 +554,8 @@ pub struct InputView {
     pub multitouch: Capability,
     /// W3C keyboard code used to suspend mapping.
     pub suspend_hotkey: String,
+    /// Whether input bindings are visible over the operating-system window.
+    pub overlay_visible: bool,
 }
 
 /// Display projection.
@@ -807,6 +811,36 @@ pub struct AppIssue {
     pub next_action: Option<String>,
 }
 
+/// Help destinations selected by trusted native code.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum HelpTopic {
+    /// Firmware virtualization setup help.
+    VirtualizationBios,
+    /// Windows Hypervisor Platform setup help.
+    HypervisorPlatform,
+    /// Google account registration help.
+    GoogleAccount,
+    /// Adb access security help.
+    AdbSecurity,
+    /// Matching QEMU source-offer download.
+    QemuSource,
+    /// Third-party software notices.
+    ThirdPartyNotices,
+    /// Release notes for the available update.
+    ReleaseNotes,
+}
+
+/// Snapshot-owned values that native code may copy to the clipboard.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum ClipboardItem {
+    /// GSF Android ID from the active operating system.
+    DeviceId,
+    /// Adb address from the active virtual machine.
+    AdbAddress,
+}
+
 /// Every command the webview may send.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(
@@ -821,6 +855,15 @@ pub enum Command {
     WizardContinue,
     /// Skip an optional wizard step.
     WizardSkip,
+    /// Close the wizard while retaining its current progress.
+    WizardDefer,
+    /// Open a trusted help destination.
+    OpenHelp {
+        /// Help destination chosen by the webview.
+        topic: HelpTopic,
+    },
+    /// Close the window and end the application.
+    AppQuit,
     /// Enable WHPX after explicit consent.
     WhpxEnable,
     /// Start the selected image download.
@@ -865,6 +908,11 @@ pub enum Command {
         /// Requested root state.
         enabled: bool,
     },
+    /// Set the operating-system media volume.
+    GuestVolumeSet {
+        /// Media volume index from 0 through 15.
+        index: u32,
+    },
     /// Update the webview stage rectangle.
     StageRectChanged {
         /// Current stage geometry.
@@ -874,6 +922,8 @@ pub enum Command {
     ScreenshotSave,
     /// Open a native package picker and install selected packages.
     AppInstallPick,
+    /// Cancel the active package installation.
+    AppInstallCancel,
     /// Uninstall one package.
     AppUninstall {
         /// Android package name.
@@ -891,6 +941,8 @@ pub enum Command {
     },
     /// Toggle mapping suspension.
     InputSuspendToggle,
+    /// Toggle the input-binding overlay.
+    InputOverlayToggle,
     /// Delete one user profile.
     InputProfileDelete {
         /// Profile ID.
@@ -969,6 +1021,13 @@ pub enum Command {
     OpenLogsFolder,
     /// Open the fixed screenshots folder.
     OpenScreenshotsFolder,
+    /// Open the fixed product home folder.
+    OpenHomeFolder,
+    /// Copy a snapshot-owned value to the clipboard.
+    CopyToClipboard {
+        /// Value selected by the webview.
+        item: ClipboardItem,
+    },
     /// Copy the device ID and open Google's registration page.
     OpenRegistrationPage,
     /// Bring the separate operating-system window forward.
@@ -982,6 +1041,9 @@ impl Command {
             Self::HostCheckRefresh => "host_check_refresh",
             Self::WizardContinue => "wizard_continue",
             Self::WizardSkip => "wizard_skip",
+            Self::WizardDefer => "wizard_defer",
+            Self::OpenHelp { .. } => "open_help",
+            Self::AppQuit => "app_quit",
             Self::WhpxEnable => "whpx_enable",
             Self::ArtifactDownloadStart => "artifact_download_start",
             Self::ArtifactDownloadCancel => "artifact_download_cancel",
@@ -994,13 +1056,16 @@ impl Command {
             Self::GuestStop => "guest_stop",
             Self::GuestRestart => "guest_restart",
             Self::GuestRootSet { .. } => "guest_root_set",
+            Self::GuestVolumeSet { .. } => "guest_volume_set",
             Self::StageRectChanged { .. } => "stage_rect_changed",
             Self::ScreenshotSave => "screenshot_save",
             Self::AppInstallPick => "app_install_pick",
+            Self::AppInstallCancel => "app_install_cancel",
             Self::AppUninstall { .. } => "app_uninstall",
             Self::AppLaunch { .. } => "app_launch",
             Self::InputProfileSelect { .. } => "input_profile_select",
             Self::InputSuspendToggle => "input_suspend_toggle",
+            Self::InputOverlayToggle => "input_overlay_toggle",
             Self::InputProfileDelete { .. } => "input_profile_delete",
             Self::InputProfileSave { .. } => "input_profile_save",
             Self::InputBindingUpsert { .. } => "input_binding_upsert",
@@ -1019,6 +1084,8 @@ impl Command {
             Self::DiagnosticsExport => "diagnostics_export",
             Self::OpenLogsFolder => "open_logs_folder",
             Self::OpenScreenshotsFolder => "open_screenshots_folder",
+            Self::OpenHomeFolder => "open_home_folder",
+            Self::CopyToClipboard { .. } => "copy_to_clipboard",
             Self::OpenRegistrationPage => "open_registration_page",
             Self::GuestWindowToFront => "guest_window_to_front",
         }
@@ -1031,6 +1098,9 @@ pub const TAURI_COMMANDS: &[&str] = &[
     "host_check_refresh",
     "wizard_continue",
     "wizard_skip",
+    "wizard_defer",
+    "open_help",
+    "app_quit",
     "whpx_enable",
     "artifact_download_start",
     "artifact_download_cancel",
@@ -1043,13 +1113,16 @@ pub const TAURI_COMMANDS: &[&str] = &[
     "guest_stop",
     "guest_restart",
     "guest_root_set",
+    "guest_volume_set",
     "stage_rect_changed",
     "screenshot_save",
     "app_install_pick",
+    "app_install_cancel",
     "app_uninstall",
     "app_launch",
     "input_profile_select",
     "input_suspend_toggle",
+    "input_overlay_toggle",
     "input_profile_delete",
     "input_profile_save",
     "input_binding_upsert",
@@ -1068,6 +1141,8 @@ pub const TAURI_COMMANDS: &[&str] = &[
     "diagnostics_export",
     "open_logs_folder",
     "open_screenshots_folder",
+    "open_home_folder",
+    "copy_to_clipboard",
     "open_registration_page",
     "guest_window_to_front",
 ];
