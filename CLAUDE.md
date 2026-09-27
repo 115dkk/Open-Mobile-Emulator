@@ -250,7 +250,7 @@ PRODUCT/
 ### 출시 후 트랙 (순서는 사용자가 정한다)
 
 - P1. gfxstream: 윈도우 호스트에서 `virtio-gpu-rutabaga`를 빌드할 수 있는지 조사 스파이크. 리눅스 전제 문서를 윈도우로 옮기는 데 필요한 변경을 목록화하고, 불가하면 대안(ANGLE 위 virgl, Venus)을 평가한다. 결과 문서만 산출하고 코드는 승인 후.
-- P2. Digitalis 교체: `translator/` 계약(6절)에 맞춰 Digitalis 바이너리 번들을 설치하는 스크립트를 만들고, libndk와 A/B로 트릭컬 시나리오와 측정표를 비교한다. 성능이나 안정성이 미달이면 결과를 기록하고 기본값은 libndk로 유지한다. ADR-0006 뒤로 Digitalis는 구글 SDK 계약의 사용 범위 문제(3.1)가 없는 유일한 변환기이기도 하다.
+- P2. Digitalis 교체: `translator/` 계약(6절)에 맞춰 Digitalis 바이너리 번들을 설치하는 스크립트를 만들고, libndk와 A/B로 트릭컬 시나리오와 측정표를 비교한다. 성능이나 안정성이 미달이면 결과를 기록하고 기본값은 libndk로 유지한다. ADR-0006 뒤로 Digitalis(Apache-2.0, AOSP Berberis 수정판)는 후보 변환기 가운데 구글 SDK 계약의 사용 범위 문제(3.1)가 없는 유일한 것이기도 하다.
 - P3. 게스트 갱신: Bliss 18 또는 arcadia 기반 foss 이미지를 빌드하고, 블롭은 사용자 PC가 설치 시점에 넣는다(R3, ADR-0006). 0절의 목표(새 안드로이드를 가장 빨리 따라가기)의 중심이다. 구글은 새 안드로이드마다 베타 단계부터 x86_64 에뮬레이터 이미지를 내므로(2026-09-28 색인에 `android-37.2-beta3`, `android-canary-20260909` 항목), 이 흐름이 갖춰지면 갱신 속도는 구글의 이미지 출시 속도를 따른다. 게스트를 올리게 만드는 것은 앱의 minSdk다. targetSdk는 설치를 막지 않는다. 트릭컬 10644는 targetSdk 36, minSdk 26으로 API 33 게스트에서 돈다(`docs/evidence/M0/findings-20260926.md`). gfxstream 게스트 드라이버도 자체 이미지에 묶인다(`docs/DECISION-gpu-roadmap.md`).
 - P4. 다른 게임: 사용자가 지정한 게임마다 APK ABI 확인 → 시나리오 → 프리셋 → 호환성 표 갱신. 탐지 차단 게임은 미지원 표기(R7).
 - P5. D9 재검토: 멀티 인스턴스와 매크로는 게임 약관 검토 뒤 사용자 결정.

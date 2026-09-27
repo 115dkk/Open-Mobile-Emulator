@@ -7,7 +7,8 @@
   Android SDK License Agreement, which grants use "solely to develop
   applications for compatible implementations of Android" (section 3.1).
   Running games is outside that scope (`docs/adr/0006-guest-image-distribution.md`).
-  Self-built guest images are released without Google files; see R3.
+  Self-built guest images, once they exist, are released without Google files
+  (R3).
 - GPU acceleration is OpenGL only, through virglrenderer. Games that require
   Vulkan are unsupported until the gfxstream path exists (P1).
 - The guest is a Google-uncertified device. Play Store and in-app purchases are
