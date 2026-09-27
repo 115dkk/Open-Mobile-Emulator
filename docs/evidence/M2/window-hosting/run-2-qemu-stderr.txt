@@ -1,0 +1,11 @@
+C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\qemu-system-x86_64.exe: failed to get xsave state: No error
+C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\qemu-system-x86_64.exe: failed to get xsave state: No error
+C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\qemu-system-x86_64.exe: failed to get xsave state: No error

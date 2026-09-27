@@ -7,6 +7,32 @@ use std::io::Write;
 
 use ome_adb::AdbSession;
 use ome_guest_image::{PushFile, RunnerError, ShellCommand, ShellOutput, ShellRunner};
+use ome_supervisor::PowerOffHook;
+
+/// Graceful Android shutdown used by the guest-process supervisor.
+#[derive(Clone, Debug)]
+pub struct AdbPowerOff {
+    session: AdbSession,
+}
+
+impl AdbPowerOff {
+    /// Creates an independent shutdown owner over one pinned adb session.
+    #[must_use]
+    pub fn new(session: AdbSession) -> Self {
+        Self { session }
+    }
+}
+
+impl PowerOffHook for AdbPowerOff {
+    fn request_power_off(&self) -> bool {
+        self.session.connect().is_ok()
+            && self
+                .session
+                .boot_completed()
+                .is_ok_and(|completed| completed)
+            && self.session.power_off().is_ok()
+    }
+}
 
 /// Local newtype required because both `AdbSession` and `ShellRunner` belong to sibling crates.
 #[derive(Clone, Copy, Debug)]
@@ -100,5 +126,73 @@ mod tests {
                     .to_vec(),
             ]
         );
+    }
+
+    #[test]
+    fn power_off_returns_true_only_after_connected_booted_guest_accepts_request() {
+        let recorded = RecordedRunner::new([
+            success("connected to 127.0.0.1:5555"),
+            success("1"),
+            success(""),
+        ]);
+        let calls = recorded.clone();
+        let session = AdbSession::new("adb.exe", "127.0.0.1:5555".to_owned(), Box::new(recorded))
+            .expect("session");
+
+        assert!(AdbPowerOff::new(session).request_power_off());
+        assert_eq!(
+            calls
+                .calls()
+                .into_iter()
+                .map(|call| call.args)
+                .collect::<Vec<_>>(),
+            vec![
+                ["connect", "127.0.0.1:5555"].map(OsString::from).to_vec(),
+                [
+                    "-s",
+                    "127.0.0.1:5555",
+                    "shell",
+                    "getprop",
+                    "sys.boot_completed",
+                ]
+                .map(OsString::from)
+                .to_vec(),
+                ["-s", "127.0.0.1:5555", "reboot", "-p"]
+                    .map(OsString::from)
+                    .to_vec(),
+            ]
+        );
+    }
+
+    #[test]
+    fn power_off_returns_false_when_connect_fails() {
+        let recorded = RecordedRunner::new([Ok(Output {
+            exit_code: 1,
+            stdout: b"failed to connect to 127.0.0.1:5555".to_vec(),
+            stderr: Vec::new(),
+        })]);
+        let calls = recorded.clone();
+        let session = AdbSession::new("adb.exe", "127.0.0.1:5555".to_owned(), Box::new(recorded))
+            .expect("session");
+
+        assert!(!AdbPowerOff::new(session).request_power_off());
+        assert_eq!(calls.calls().len(), 1);
+    }
+
+    #[test]
+    fn power_off_returns_false_when_reboot_command_fails() {
+        let recorded = RecordedRunner::new([
+            success("already connected to 127.0.0.1:5555"),
+            success("1"),
+            Ok(Output {
+                exit_code: 1,
+                stdout: Vec::new(),
+                stderr: b"reboot rejected".to_vec(),
+            }),
+        ]);
+        let session = AdbSession::new("adb.exe", "127.0.0.1:5555".to_owned(), Box::new(recorded))
+            .expect("session");
+
+        assert!(!AdbPowerOff::new(session).request_power_off());
     }
 }

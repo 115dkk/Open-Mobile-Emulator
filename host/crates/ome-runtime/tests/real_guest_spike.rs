@@ -10,6 +10,7 @@ use std::io::Write as _;
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::path::{Path, PathBuf};
 use std::process::Command as ProcessCommand;
+use std::sync::Arc;
 use std::sync::mpsc::{self, Receiver};
 use std::thread;
 use std::time::{Duration, Instant};
@@ -20,8 +21,8 @@ use ome_platform_win::{
     TestHostWindow, WindowHandle, find_windows_of_process, set_thread_dpi_hosting_mixed,
 };
 use ome_runtime::{
-    AppRuntime, Capability, CapabilityId, Command, Desktop, GuestState, HostingMode, OmeHome,
-    RuntimeDeps, StageRect, WindowsProbe,
+    AdbPowerOff, AppRuntime, Capability, CapabilityId, Command, Desktop, GuestState, HostingMode,
+    OmeHome, RuntimeDeps, StageRect, WindowsProbe,
 };
 use ome_supervisor::windows_adapter::WindowsProcessAdapter;
 use ome_supervisor::{GuestEvent, Supervisor, SupervisorPolicy, TcpQmpFactory};
@@ -153,11 +154,17 @@ fn measures_real_guest_through_product_runtime() {
         .ok()
     });
     let logs = home.subdir("logs").expect("resolve product log directory");
+    let supervisor_policy = adb
+        .as_ref()
+        .map_or_else(SupervisorPolicy::default, |session| SupervisorPolicy {
+            power_off_hook: Arc::new(AdbPowerOff::new(session.clone())),
+            ..SupervisorPolicy::default()
+        });
     let supervisor = Supervisor::new(
         WindowsProcessAdapter,
         TcpQmpFactory,
         logs,
-        SupervisorPolicy::default(),
+        supervisor_policy,
     );
     let mut runtime = AppRuntime::open(
         home.clone(),

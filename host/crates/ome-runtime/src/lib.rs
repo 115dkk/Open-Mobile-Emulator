@@ -14,6 +14,7 @@ pub mod operations;
 pub mod runtime;
 pub mod settings;
 
+pub use adapters::AdbPowerOff;
 pub use contract::*;
 pub use desktop::{Desktop, UnavailableDesktop};
 pub use guest_store::{GuestRecord, GuestStore, GuestStoreError};

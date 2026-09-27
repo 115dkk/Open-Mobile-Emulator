@@ -10,11 +10,12 @@ mod setup;
 mod tray;
 mod window;
 
+use std::sync::Arc;
 use std::time::Duration;
 
 use ome_adb::{AdbSession, ProcessRunner};
 use ome_artifacts::{ArtifactStore, Manifest, UreqFetch};
-use ome_runtime::{AppIssue, AppRuntime, Desktop, OmeHome, RuntimeDeps, WorkerDeps};
+use ome_runtime::{AdbPowerOff, AppIssue, AppRuntime, Desktop, OmeHome, RuntimeDeps, WorkerDeps};
 #[cfg(windows)]
 use ome_supervisor::windows_adapter::WindowsProcessAdapter;
 use ome_supervisor::{Supervisor, SupervisorPolicy, TcpQmpFactory};
@@ -35,6 +36,13 @@ fn initialize_runtime(manifest_root: &std::path::Path) -> Result<AppRuntime, App
     let adb = ome_host_adb(&probe);
     let desktop: Box<dyn Desktop> = Box::new(WindowsDesktop::default());
     #[cfg(windows)]
+    let supervisor_policy = adb
+        .as_ref()
+        .map_or_else(SupervisorPolicy::default, |session| SupervisorPolicy {
+            power_off_hook: Arc::new(AdbPowerOff::new(session.clone())),
+            ..SupervisorPolicy::default()
+        });
+    #[cfg(windows)]
     let supervisor = Some(Box::new(Supervisor::new(
         WindowsProcessAdapter,
         TcpQmpFactory,
@@ -42,7 +50,7 @@ fn initialize_runtime(manifest_root: &std::path::Path) -> Result<AppRuntime, App
             eprintln!("OME log directory resolution failed: {error}");
             commands::storage_issue()
         })?,
-        SupervisorPolicy::default(),
+        supervisor_policy,
     )) as Box<dyn ome_runtime::GuestProcess>);
     #[cfg(not(windows))]
     let supervisor = None;
