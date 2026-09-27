@@ -49,6 +49,7 @@ export const controllerBridge: ControllerBridge = {
   guestRootSet: (enabled) => native('guest_root_set', { enabled }),
   guestVolumeSet: (index) => native('guest_volume_set', { index }),
   stageRectChanged: (rect) => native('stage_rect_changed', { rect }),
+  stageHidden: () => native('stage_hidden'),
   screenshotSave: () => native('screenshot_save'),
   appInstallPick: () => native('app_install_pick'),
   appInstallCancel: () => native('app_install_cancel'),

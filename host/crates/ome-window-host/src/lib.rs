@@ -263,6 +263,35 @@ impl GuestWindowHost {
             .map_err(|_| HostingIssue::Platform)
     }
 
+    /// Hides the attached guest child without detaching it.
+    pub fn hide(&mut self) -> Result<(), HostingIssue> {
+        let (Some(_hosted), Some(guest)) = (self.hosted.as_ref(), self.guest) else {
+            return Ok(());
+        };
+        if !guest.alive() {
+            self.hosted = None;
+            self.guest = None;
+            return Ok(());
+        }
+        guest.handle.hide().map_err(|_| HostingIssue::Platform)
+    }
+
+    /// Shows the attached guest child without taking keyboard focus.
+    pub fn show(&mut self) -> Result<(), HostingIssue> {
+        let (Some(_hosted), Some(guest)) = (self.hosted.as_ref(), self.guest) else {
+            return Ok(());
+        };
+        if !guest.alive() {
+            self.hosted = None;
+            self.guest = None;
+            return Ok(());
+        }
+        guest
+            .handle
+            .show_inactive()
+            .map_err(|_| HostingIssue::Platform)
+    }
+
     /// Restores the guest's saved style, extended style, and parent.
     ///
     /// A vanished or PID-reused HWND is treated as already detached.
@@ -507,6 +536,8 @@ mod tests {
             height: u32::MAX,
         })
         .expect("unattached place");
+        host.hide().expect("unattached hide");
+        host.show().expect("unattached show");
         host.detach().expect("unattached detach");
         host.to_front().expect("unattached focus");
         assert!(!host.is_attached());

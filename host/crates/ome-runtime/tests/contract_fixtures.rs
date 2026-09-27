@@ -382,6 +382,7 @@ fn every_command() -> Vec<Command> {
                 scale_factor: 1.25,
             },
         },
+        Command::StageHidden,
         Command::ScreenshotSave,
         Command::AppInstallPick,
         Command::AppInstallCancel,

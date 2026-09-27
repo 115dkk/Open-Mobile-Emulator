@@ -116,6 +116,10 @@ pub trait WindowPlacement: Send {
     fn attach(&mut self, target: HostingTarget) -> Result<(), HostingIssue>;
     /// Places the attached window.
     fn place(&mut self, rect: ome_window_host::Rect) -> Result<(), HostingIssue>;
+    /// Hides the attached child window.
+    fn hide(&mut self) -> Result<(), HostingIssue>;
+    /// Shows the attached child window without activation.
+    fn show(&mut self) -> Result<(), HostingIssue>;
     /// Restores top-level window state.
     fn detach(&mut self) -> Result<(), HostingIssue>;
     /// Activates the hosted or separate window.
@@ -134,6 +138,12 @@ impl WindowPlacement for GuestWindowHost {
     }
     fn place(&mut self, rect: ome_window_host::Rect) -> Result<(), HostingIssue> {
         GuestWindowHost::place(self, rect)
+    }
+    fn hide(&mut self) -> Result<(), HostingIssue> {
+        GuestWindowHost::hide(self)
+    }
+    fn show(&mut self) -> Result<(), HostingIssue> {
+        GuestWindowHost::show(self)
     }
     fn detach(&mut self) -> Result<(), HostingIssue> {
         GuestWindowHost::detach(self)
@@ -288,6 +298,7 @@ pub struct AppRuntime {
     hosted_pid: Option<u32>,
     host_window: Option<u64>,
     last_stage_rect: Option<StageRect>,
+    stage_visible: bool,
     resolution: Option<Size>,
     last_exit: Option<LastExit>,
     started_at: Option<String>,
@@ -413,7 +424,7 @@ impl AppRuntime {
         let update_state = UpdateState::Idle;
         let apps = active_record.map_or_else(Vec::new, stored_apps);
         let (worker_tx, worker_rx) = mpsc::channel();
-        Ok(Self {
+        let mut runtime = Self {
             home,
             deps,
             workers: WorkerDeps::default(),
@@ -465,6 +476,7 @@ impl AppRuntime {
             hosted_pid: None,
             host_window: None,
             last_stage_rect: None,
+            stage_visible: true,
             resolution,
             last_exit: None,
             started_at: None,
@@ -483,7 +495,9 @@ impl AppRuntime {
             notices: Vec::new(),
             update_state,
             issue: None,
-        })
+        };
+        runtime.refresh_host();
+        Ok(runtime)
     }
 
     /// Returns the complete read-only projection without performing I/O.
@@ -627,6 +641,7 @@ impl AppRuntime {
             Command::GuestRestart => self.restart_guest(),
             Command::GuestVolumeSet { index } => self.set_guest_volume(index),
             Command::StageRectChanged { rect } => self.place_guest_window(rect),
+            Command::StageHidden => self.hide_guest_window(),
             Command::ScreenshotSave => self.save_screenshot(),
             Command::AppInstallCancel => {
                 self.cancel_app_install();
@@ -1766,12 +1781,30 @@ impl AppRuntime {
 
     fn place_guest_window(&mut self, rect: StageRect) -> Result<(), AppIssue> {
         self.last_stage_rect = Some(rect);
+        self.stage_visible = true;
         self.try_place_guest_window();
+        if self.hosting == HostingMode::Embedded {
+            self.deps
+                .window_host
+                .show()
+                .map_err(|_| issues::window_unavailable())?;
+        }
+        Ok(())
+    }
+
+    fn hide_guest_window(&mut self) -> Result<(), AppIssue> {
+        self.stage_visible = false;
+        if self.hosting == HostingMode::Embedded {
+            self.deps
+                .window_host
+                .hide()
+                .map_err(|_| issues::window_unavailable())?;
+        }
         Ok(())
     }
 
     fn try_place_guest_window(&mut self) {
-        if self.guest_state != GuestState::Running {
+        if !self.stage_visible || self.guest_state != GuestState::Running {
             return;
         }
         let Some(parent_window) = self.host_window else {
@@ -1825,9 +1858,14 @@ impl AppRuntime {
         self.try_place_guest_window();
     }
 
+    /// Reports whether a stage currently exists in the webview.
+    pub fn stage_visible(&self) -> bool {
+        self.stage_visible
+    }
+
     /// Returns the attached guest client rectangle in physical screen pixels when known.
     pub fn guest_client_screen_rect(&self) -> Option<Rect> {
-        (self.hosting == HostingMode::Embedded)
+        (self.stage_visible && self.hosting == HostingMode::Embedded)
             .then(|| self.deps.window_host.client_screen_rect())
             .flatten()
     }
@@ -1910,6 +1948,7 @@ impl AppRuntime {
                 self.boot_started = Some(Instant::now());
                 self.hosted_pid = None;
                 self.hosting = HostingMode::None;
+                self.stage_visible = true;
                 let _ = self.deps.window_host.detach();
             }
             ome_supervisor::GuestState::Stopped => {
@@ -1922,6 +1961,7 @@ impl AppRuntime {
                 self.pid = None;
                 self.started_at = None;
                 self.hosted_pid = None;
+                self.stage_visible = true;
                 let _ = self.deps.window_host.detach();
                 if self.restart_pending {
                     self.restart_pending = false;
@@ -1945,6 +1985,7 @@ impl AppRuntime {
                 self.started_at = None;
                 self.hosted_pid = None;
                 self.restart_pending = false;
+                self.stage_visible = true;
                 let _ = self.deps.window_host.detach();
             }
             ome_supervisor::GuestState::Stopping => {}
@@ -2412,11 +2453,13 @@ impl AppRuntime {
     }
 
     fn current_blocker(&self) -> Option<Blocker> {
+        if self.phase != AppPhase::Main {
+            return None;
+        }
         self.blocker.or_else(|| {
-            (self.phase == AppPhase::Main && self.feature_state == FeatureState::Disabled)
-                .then_some(Blocker {
-                    kind: BlockerKind::HypervisorPlatformOff,
-                })
+            (self.feature_state == FeatureState::Disabled).then_some(Blocker {
+                kind: BlockerKind::HypervisorPlatformOff,
+            })
         })
     }
 
@@ -2603,12 +2646,17 @@ fn fetch_release_document(
     let outcome = http
         .fetch(URL, None, &mut bytes, &mut |_| true)
         .map_err(|_| issues::update_check_failed())?;
-    if outcome.status != 200
-        || outcome
-            .final_url
-            .as_deref()
-            .is_some_and(|url| !hosts.permits(url))
+    if outcome
+        .final_url
+        .as_deref()
+        .is_some_and(|url| !hosts.permits(url))
     {
+        return Err(issues::update_check_failed());
+    }
+    if outcome.status == 404 {
+        return Err(issues::update_up_to_date());
+    }
+    if outcome.status != 200 {
         return Err(issues::update_check_failed());
     }
     serde_json::from_slice(&bytes).map_err(|_| issues::update_check_failed())
@@ -2640,7 +2688,7 @@ fn release_from_document(
     let installer = installers
         .next()
         .cloned()
-        .ok_or_else(issues::update_check_failed)?;
+        .ok_or_else(issues::update_up_to_date)?;
     if installers.next().is_some() {
         return Err(issues::update_check_failed());
     }
@@ -3179,6 +3227,7 @@ mod tests {
     struct FixedHttp {
         body: Vec<u8>,
         final_url: String,
+        status: u16,
     }
 
     impl HttpFetch for FixedHttp {
@@ -3195,7 +3244,11 @@ mod tests {
                 return Err(FetchError::Cancelled);
             }
             Ok(FetchOutcome {
-                status: if range_start.is_some() { 206 } else { 200 },
+                status: if range_start.is_some() {
+                    206
+                } else {
+                    self.status
+                },
                 final_url: Some(self.final_url.clone()),
                 bytes_written: count,
             })
@@ -3299,6 +3352,8 @@ mod tests {
         attached: Arc<Mutex<bool>>,
         targets: Arc<Mutex<Vec<HostingTarget>>>,
         placements: Arc<Mutex<Vec<ome_window_host::Rect>>>,
+        hide_count: Arc<Mutex<u32>>,
+        show_count: Arc<Mutex<u32>>,
         detach_count: Arc<Mutex<u32>>,
     }
 
@@ -3309,6 +3364,8 @@ mod tests {
                 attached: Arc::new(Mutex::new(false)),
                 targets: Arc::new(Mutex::new(Vec::new())),
                 placements: Arc::new(Mutex::new(Vec::new())),
+                hide_count: Arc::new(Mutex::new(0)),
+                show_count: Arc::new(Mutex::new(0)),
                 detach_count: Arc::new(Mutex::new(0)),
             }
         }
@@ -3331,6 +3388,16 @@ mod tests {
 
         fn place(&mut self, rect: ome_window_host::Rect) -> Result<(), HostingIssue> {
             self.placements.lock().expect("placements lock").push(rect);
+            Ok(())
+        }
+
+        fn hide(&mut self) -> Result<(), HostingIssue> {
+            *self.hide_count.lock().expect("hide lock") += 1;
+            Ok(())
+        }
+
+        fn show(&mut self) -> Result<(), HostingIssue> {
+            *self.show_count.lock().expect("show lock") += 1;
             Ok(())
         }
 
@@ -3661,6 +3728,15 @@ mod tests {
     }
 
     #[test]
+    fn open_runs_host_check_before_the_first_snapshot() {
+        let (_directory, runtime) = runtime(FeatureState::Enabled);
+        let snapshot = runtime.snapshot();
+        assert!(snapshot.host.ready);
+        assert_eq!(snapshot.host.rows.len(), 8);
+        assert!(snapshot.host.inspected_at.is_some());
+    }
+
+    #[test]
     fn host_refresh_uses_limits_and_enabled_feature_skips_consent() {
         let (_directory, mut runtime) = runtime(FeatureState::Enabled);
         let snapshot = runtime
@@ -3698,6 +3774,9 @@ mod tests {
         )
         .expect("runtime");
         let snapshot = runtime.apply(Command::HostCheckRefresh).expect("refresh");
+        assert_eq!(snapshot.blocker, None);
+        assert!(!snapshot.host.ready);
+        let snapshot = runtime.apply(Command::WizardDefer).expect("leave wizard");
         assert_eq!(
             snapshot.blocker,
             Some(Blocker {
@@ -4172,6 +4251,84 @@ mod tests {
     }
 
     #[test]
+    fn stage_hidden_hides_embedded_window_and_next_rect_shows_it() {
+        let embedded = RecordingWindow::embedded();
+        let hides = Arc::clone(&embedded.hide_count);
+        let shows = Arc::clone(&embedded.show_count);
+        let placements = Arc::clone(&embedded.placements);
+        let (_directory, mut runtime, _supervisor, _runner) =
+            lifecycle_runtime(std::iter::empty(), RecordingDesktop::default(), embedded);
+        runtime.set_host_window(77);
+        let rect = StageRect {
+            x: 1.0,
+            y: 2.0,
+            width: 300.0,
+            height: 200.0,
+            scale_factor: 1.5,
+        };
+        runtime
+            .apply(Command::StageRectChanged { rect })
+            .expect("store rect");
+        runtime.ingest_guest_event(guest_event(
+            ome_supervisor::GuestState::Running,
+            Some(22),
+            None,
+        ));
+        assert!(runtime.guest_client_screen_rect().is_some());
+
+        runtime.apply(Command::StageHidden).expect("hide stage");
+        assert_eq!(*hides.lock().expect("hide count"), 1);
+        assert_eq!(runtime.guest_client_screen_rect(), None);
+
+        runtime
+            .apply(Command::StageRectChanged {
+                rect: StageRect {
+                    width: 400.0,
+                    ..rect
+                },
+            })
+            .expect("show stage");
+        assert_eq!(*shows.lock().expect("show count"), 1);
+        assert_eq!(placements.lock().expect("placements").len(), 2);
+        assert!(runtime.guest_client_screen_rect().is_some());
+    }
+
+    #[test]
+    fn stage_hidden_does_not_touch_a_separate_window() {
+        let separate = RecordingWindow::separate();
+        let hides = Arc::clone(&separate.hide_count);
+        let shows = Arc::clone(&separate.show_count);
+        let (_directory, mut runtime, _supervisor, _runner) =
+            lifecycle_runtime(std::iter::empty(), RecordingDesktop::default(), separate);
+        runtime.set_host_window(77);
+        let rect = StageRect {
+            x: 1.0,
+            y: 2.0,
+            width: 300.0,
+            height: 200.0,
+            scale_factor: 1.5,
+        };
+        runtime
+            .apply(Command::StageRectChanged { rect })
+            .expect("store rect");
+        runtime.ingest_guest_event(guest_event(
+            ome_supervisor::GuestState::Running,
+            Some(23),
+            None,
+        ));
+        assert_eq!(
+            runtime.snapshot().guest.hosting,
+            HostingMode::SeparateWindow
+        );
+        runtime.apply(Command::StageHidden).expect("accept hidden");
+        runtime
+            .apply(Command::StageRectChanged { rect })
+            .expect("accept visible");
+        assert_eq!(*hides.lock().expect("hide count"), 0);
+        assert_eq!(*shows.lock().expect("show count"), 0);
+    }
+
+    #[test]
     fn desktop_folder_commands_create_and_open_fixed_home_directories() {
         let desktop = RecordingDesktop::default();
         let observed = desktop.clone();
@@ -4399,6 +4556,7 @@ package:dev.ome.two versionCode:8",
             Box::new(FixedHttp {
                 body: body[4..].to_vec(),
                 final_url: "https://example.com/test.iso".to_owned(),
+                status: 200,
             }),
         ));
         runtime
@@ -4440,6 +4598,7 @@ package:dev.ome.two versionCode:8",
             Box::new(FixedHttp {
                 body: body.clone(),
                 final_url: "https://example.com/test.iso".to_owned(),
+                status: 200,
             }),
         ));
         runtime
@@ -4585,6 +4744,58 @@ package:dev.ome.two versionCode:8",
         assert!(zip.by_name("qemu/default.stdout.log").is_ok());
         assert!(zip.by_name("environment.txt").is_ok());
         assert_eq!(observed.paths(), [diagnostics]);
+    }
+
+    #[test]
+    fn update_check_maps_http_404_to_up_to_date() {
+        let (_directory, mut runtime) = runtime(FeatureState::Enabled);
+        runtime.set_worker_deps(WorkerDeps {
+            http: Arc::new(FixedHttp {
+                body: Vec::new(),
+                final_url:
+                    "https://api.github.com/repos/115dkk/Open-Mobile-Emulator/releases/latest"
+                        .to_owned(),
+                status: 404,
+            }),
+            ..WorkerDeps::default()
+        });
+        runtime
+            .apply(Command::UpdateCheck)
+            .expect("start update check");
+        for _ in 0..1000 {
+            runtime.poll_workers();
+            if !matches!(runtime.snapshot().update.state, UpdateState::Checking) {
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        assert!(matches!(
+            runtime.snapshot().update.state,
+            UpdateState::UpToDate { .. }
+        ));
+    }
+
+    #[test]
+    fn release_without_usable_installer_is_up_to_date() {
+        let document = ReleaseDocument {
+            tag_name: "v0.2.0".to_owned(),
+            html_url: "https://github.com/115dkk/Open-Mobile-Emulator/releases/tag/v0.2.0"
+                .to_owned(),
+            body: "notes".to_owned(),
+            assets: vec![ReleaseAsset {
+                name: "source.tar.gz".to_owned(),
+                browser_download_url:
+                    "https://github.com/115dkk/Open-Mobile-Emulator/releases/download/v0.2.0/source.tar.gz"
+                        .to_owned(),
+                size: 12,
+            }],
+        };
+        assert_eq!(
+            release_from_document(document, "0.1.0")
+                .expect_err("no usable installer")
+                .code,
+            "update_up_to_date"
+        );
     }
 
     #[test]

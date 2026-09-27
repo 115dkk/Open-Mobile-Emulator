@@ -24,9 +24,13 @@ function CurrentScreen({ item, snapshot, actions, navigate }: ScreenProps & { re
 
 export function Shell({ snapshot, actions }: ScreenProps) {
   const [current, setCurrent] = useState<RailItem>('stage');
+  const select = (item: RailItem) => {
+    if (current === 'stage' && item !== 'stage') void actions.stageHidden();
+    setCurrent(item);
+  };
   return (
     <div className="ome-shell">
-      <Rail current={current} onSelect={setCurrent} guestState={snapshot.guest.state} version={snapshot.productVersion} />
+      <Rail current={current} onSelect={select} guestState={snapshot.guest.state} version={snapshot.productVersion} />
       <main className="ome-shell-body">
         <CurrentScreen item={current} snapshot={snapshot} actions={actions} navigate={setCurrent} />
       </main>

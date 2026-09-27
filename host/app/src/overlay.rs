@@ -133,10 +133,10 @@ impl OverlayWindow {
         })
     }
 
-    fn sync(&self, snapshot: &AppSnapshot, guest_rect: Option<Rect>) {
+    fn sync(&self, snapshot: &AppSnapshot, guest_rect: Option<Rect>, stage_visible: bool) {
         let mode = overlay_mode(snapshot);
         let exact = guest_rect.map(to_physical_rect);
-        let rect = if snapshot.guest.hosting == HostingMode::Embedded {
+        let rect = if stage_visible && snapshot.guest.hosting == HostingMode::Embedded {
             exact.or_else(|| self.fallback_rect())
         } else {
             None
@@ -205,7 +205,17 @@ pub(crate) fn install(app: &tauri::App) -> tauri::Result<()> {
 }
 
 pub(crate) fn snapshot(app: &tauri::AppHandle, snapshot: &AppSnapshot, guest_rect: Option<Rect>) {
-    app.state::<OverlayWindow>().sync(snapshot, guest_rect);
+    snapshot_with_stage_visibility(app, snapshot, guest_rect, true);
+}
+
+pub(crate) fn snapshot_with_stage_visibility(
+    app: &tauri::AppHandle,
+    snapshot: &AppSnapshot,
+    guest_rect: Option<Rect>,
+    stage_visible: bool,
+) {
+    app.state::<OverlayWindow>()
+        .sync(snapshot, guest_rect, stage_visible);
 }
 
 pub(crate) fn remember_stage_rect(app: &tauri::AppHandle, rect: StageRect) {
@@ -225,9 +235,14 @@ pub(crate) fn refresh(app: &tauri::AppHandle) {
     let shell = app.state::<ShellState>();
     let values = shell.runtime.lock().ok().and_then(|guard| {
         let runtime = guard.as_ref().ok()?;
-        Some((runtime.snapshot(), runtime.guest_client_screen_rect()))
+        Some((
+            runtime.snapshot(),
+            runtime.guest_client_screen_rect(),
+            runtime.stage_visible(),
+        ))
     });
-    if let Some((snapshot, guest_rect)) = values {
-        app.state::<OverlayWindow>().sync(&snapshot, guest_rect);
+    if let Some((snapshot, guest_rect, stage_visible)) = values {
+        app.state::<OverlayWindow>()
+            .sync(&snapshot, guest_rect, stage_visible);
     }
 }

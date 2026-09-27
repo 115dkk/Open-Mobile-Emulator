@@ -7,7 +7,7 @@ import type {
 import type { OverlaySeed } from './overlay/model';
 
 export const sampleSnapshot: AppSnapshot = {
-  contractVersion: 5, productVersion: '0.1.0', phase: 'wizard', blocker: null,
+  contractVersion: 6, productVersion: '0.1.0', phase: 'wizard', blocker: null,
   host: { rows: [], ready: false, inspectedAt: null },
   wizard: {
     step: 'hostCheck', canContinue: false, canSkip: false, download: null,
@@ -71,6 +71,7 @@ export function fixtureBridge(
     guestRootSet: apply,
     guestVolumeSet: apply,
     stageRectChanged: apply,
+    stageHidden: apply,
     screenshotSave: apply,
     appInstallPick: apply,
     appInstallCancel: apply,

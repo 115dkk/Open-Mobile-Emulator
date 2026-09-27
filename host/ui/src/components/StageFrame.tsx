@@ -7,6 +7,8 @@ import type { StageRect } from '../contracts';
 export interface StageFrameProps {
   /** Receives the frame's CSS-pixel rectangle whenever it moves or resizes. Rust places the window. */
   readonly onRect: (rect: StageRect) => void | Promise<void>;
+  /** Runs when the frame leaves the webview so Rust can hide native windows. */
+  readonly onHidden?: (() => void | Promise<void>) | undefined;
   /** What sits in the frame while no window covers it. */
   readonly children?: ReactNode;
   readonly className?: string | undefined;
@@ -16,9 +18,10 @@ export interface StageFrameProps {
  * The darkest area where the operating system's window is placed. It reports its rectangle to
  * Rust; zero-sized rectangles (hidden, not laid out) are not reported.
  */
-export function StageFrame({ onRect, children, className }: StageFrameProps) {
+export function StageFrame({ onRect, onHidden, children, className }: StageFrameProps) {
   const frame = useRef<HTMLDivElement>(null);
   const report = useEffectEvent((rect: StageRect) => { void onRect(rect); });
+  const reportHidden = useEffectEvent(() => { void onHidden?.(); });
 
   useEffect(() => {
     const element = frame.current;
@@ -48,6 +51,7 @@ export function StageFrame({ onRect, children, className }: StageFrameProps) {
       observer?.disconnect();
       window.removeEventListener('resize', schedule);
       if (pending !== 0) window.cancelAnimationFrame(pending);
+      reportHidden();
     };
   }, []);
 

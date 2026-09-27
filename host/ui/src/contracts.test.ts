@@ -119,7 +119,7 @@ const guestSummary = object<GuestSummary>({
   lastStartedAt: nullable(string), capabilities: capabilityReport,
 });
 const snapshot = object<AppSnapshot>({
-  contractVersion: (value, path) => { if (value !== 5) fail(path, 'contract version 5'); },
+  contractVersion: (value, path) => { if (value !== 6) fail(path, 'contract version 6'); },
   productVersion: string, phase: enumeration('wizard', 'main'),
   blocker: nullable(object({ kind: enumeration('virtualizationOff', 'qemuMissing', 'hypervisorPlatformOff') })),
   host: object<HostReport>({
@@ -186,7 +186,8 @@ const commandShapes: Record<string, Record<string, Check>> = {
   appQuit: {}, whpxEnable: {}, artifactDownloadStart: {}, artifactDownloadCancel: {}, guestImageSelect: { id: string },
   guestCreate: { imageId: string, sizeGib: number }, guestSelect: { id: string },
   guestDelete: { id: string }, guestReinstall: { name: string }, guestStart: {}, guestStop: {},
-  guestRestart: {}, guestRootSet: { enabled: boolean }, guestVolumeSet: { index: number }, stageRectChanged: { rect }, screenshotSave: {},
+  guestRestart: {}, guestRootSet: { enabled: boolean }, guestVolumeSet: { index: number },
+  stageRectChanged: { rect }, stageHidden: {}, screenshotSave: {},
   appInstallPick: {}, appInstallCancel: {}, appUninstall: { package: string }, appLaunch: { package: string },
   inputProfileSelect: { id: nullable(string) }, inputSuspendToggle: {}, inputOverlayToggle: {}, inputProfileDelete: { id: string },
   inputProfileSave: { profile }, inputBindingUpsert: { profileId: string, binding },

@@ -14,7 +14,7 @@ pub use ome_input::{
 };
 
 /// Current Rust-to-webview contract version.
-pub const CONTRACT_VERSION: u32 = 5;
+pub const CONTRACT_VERSION: u32 = 6;
 
 /// The one read-only projection the webview renders.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -957,11 +957,13 @@ pub enum Command {
         /// Media volume index from 0 through 15.
         index: u32,
     },
-    /// Update the webview stage rectangle.
+    /// Update the webview stage rectangle and make the hosted child visible.
     StageRectChanged {
         /// Current stage geometry.
         rect: StageRect,
     },
+    /// Hide the hosted child because the stage left the webview.
+    StageHidden,
     /// Save an operating-system screenshot.
     ScreenshotSave,
     /// Open a native package picker and install selected packages.
@@ -1104,6 +1106,7 @@ impl Command {
             Self::GuestRootSet { .. } => "guest_root_set",
             Self::GuestVolumeSet { .. } => "guest_volume_set",
             Self::StageRectChanged { .. } => "stage_rect_changed",
+            Self::StageHidden => "stage_hidden",
             Self::ScreenshotSave => "screenshot_save",
             Self::AppInstallPick => "app_install_pick",
             Self::AppInstallCancel => "app_install_cancel",
@@ -1162,6 +1165,7 @@ pub const TAURI_COMMANDS: &[&str] = &[
     "guest_root_set",
     "guest_volume_set",
     "stage_rect_changed",
+    "stage_hidden",
     "screenshot_save",
     "app_install_pick",
     "app_install_cancel",

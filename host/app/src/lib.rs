@@ -136,12 +136,13 @@ fn start_event_pump(app: tauri::AppHandle, shell: commands::ShellState) {
                 let update_exit = runtime.take_update_exit_requested();
                 let after = runtime.snapshot();
                 let guest_rect = runtime.guest_client_screen_rect();
+                let stage_visible = runtime.stage_visible();
                 drop(guard);
                 if update_exit {
                     commands::request_app_exit(&app, &shell);
                 }
                 if after != before {
-                    events::snapshot(&app, &after, guest_rect);
+                    events::snapshot(&app, &after, guest_rect, stage_visible);
                     tray::update_power_label(&app, after.guest.state);
                 }
                 let exit_requested = shell
@@ -229,6 +230,7 @@ pub fn run() {
             commands::guest_root_set,
             commands::guest_volume_set,
             commands::stage_rect_changed,
+            commands::stage_hidden,
             commands::screenshot_save,
             commands::app_install_pick,
             commands::app_install_cancel,

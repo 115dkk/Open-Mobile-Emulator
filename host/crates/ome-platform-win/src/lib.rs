@@ -316,6 +316,30 @@ impl WindowHandle {
         }
     }
 
+    /// Hides this window without changing focus or activation.
+    pub fn hide(self) -> Result<(), PlatformError> {
+        #[cfg(windows)]
+        {
+            ffi::window::hide(self.0).map_err(PlatformError::Io)
+        }
+        #[cfg(not(windows))]
+        {
+            Err(PlatformError::Unsupported)
+        }
+    }
+
+    /// Shows this window without activating it.
+    pub fn show_inactive(self) -> Result<(), PlatformError> {
+        #[cfg(windows)]
+        {
+            ffi::window::show_inactive(self.0).map_err(PlatformError::Io)
+        }
+        #[cfg(not(windows))]
+        {
+            Err(PlatformError::Unsupported)
+        }
+    }
+
     /// Reports whether this window owns keyboard focus in its GUI thread queue.
     pub fn has_keyboard_focus(self) -> Result<bool, PlatformError> {
         #[cfg(windows)]

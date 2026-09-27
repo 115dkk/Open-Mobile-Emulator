@@ -108,6 +108,7 @@ export function useController(bridge: ControllerBridge): ControllerState {
     guestRootSet: (enabled) => execute(() => bridge.guestRootSet(enabled)),
     guestVolumeSet: (index) => execute(() => bridge.guestVolumeSet(index)),
     stageRectChanged: (rect) => execute(() => bridge.stageRectChanged(rect)),
+    stageHidden: () => execute(() => bridge.stageHidden()),
     screenshotSave: () => execute(() => bridge.screenshotSave()),
     appInstallPick: () => execute(() => bridge.appInstallPick()),
     appInstallCancel: () => execute(() => bridge.appInstallCancel()),

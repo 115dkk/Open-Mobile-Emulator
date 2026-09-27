@@ -76,6 +76,9 @@
     }
   },
   {
+    "kind": "stageHidden"
+  },
+  {
     "kind": "screenshotSave"
   },
   {

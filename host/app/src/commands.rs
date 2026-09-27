@@ -62,16 +62,17 @@ pub(crate) async fn apply(
     tauri::async_runtime::spawn_blocking(move || {
         let _lease = lease;
         let mut guard = runtime.lock().map_err(|_| worker_issue())?;
-        let (snapshot, guest_rect) = match &mut *guard {
+        let (snapshot, guest_rect, stage_visible) = match &mut *guard {
             Ok(runtime) => {
                 let snapshot = runtime.apply(command)?;
                 let guest_rect = runtime.guest_client_screen_rect();
-                (snapshot, guest_rect)
+                let stage_visible = runtime.stage_visible();
+                (snapshot, guest_rect, stage_visible)
             }
             Err(issue) => return Err(issue.clone()),
         };
         drop(guard);
-        events::snapshot(&app, &snapshot, guest_rect);
+        events::snapshot(&app, &snapshot, guest_rect, stage_visible);
         Ok(snapshot)
     })
     .await
@@ -120,6 +121,7 @@ command_no_args!(artifact_download_cancel, Command::ArtifactDownloadCancel);
 command_no_args!(guest_start, Command::GuestStart);
 command_no_args!(guest_stop, Command::GuestStop);
 command_no_args!(guest_restart, Command::GuestRestart);
+command_no_args!(stage_hidden, Command::StageHidden);
 command_no_args!(screenshot_save, Command::ScreenshotSave);
 command_no_args!(app_install_cancel, Command::AppInstallCancel);
 command_no_args!(input_suspend_toggle, Command::InputSuspendToggle);
@@ -181,16 +183,17 @@ pub(crate) async fn install_native_paths(
     tauri::async_runtime::spawn_blocking(move || {
         let _lease = lease;
         let mut guard = runtime.lock().map_err(|_| worker_issue())?;
-        let (snapshot, guest_rect) = match &mut *guard {
+        let (snapshot, guest_rect, stage_visible) = match &mut *guard {
             Ok(runtime) => {
                 let snapshot = runtime.install_apps(paths)?;
                 let guest_rect = runtime.guest_client_screen_rect();
-                (snapshot, guest_rect)
+                let stage_visible = runtime.stage_visible();
+                (snapshot, guest_rect, stage_visible)
             }
             Err(issue) => return Err(issue.clone()),
         };
         drop(guard);
-        events::snapshot(&app, &snapshot, guest_rect);
+        events::snapshot(&app, &snapshot, guest_rect, stage_visible);
         Ok(snapshot)
     })
     .await

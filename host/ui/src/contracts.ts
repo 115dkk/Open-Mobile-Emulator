@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Open Mobile Emulator contributors
 // Read-only presentation contracts mirroring ome-runtime contract.rs field for field.
 
-export const CONTRACT_VERSION = 5;
+export const CONTRACT_VERSION = 6;
 
 export type AppPhase = 'wizard' | 'main';
 export type BlockerKind = 'virtualizationOff' | 'qemuMissing' | 'hypervisorPlatformOff';
@@ -276,6 +276,7 @@ export interface ControllerBridge {
   guestRootSet(enabled: boolean): Promise<AppSnapshot>;
   guestVolumeSet(index: number): Promise<AppSnapshot>;
   stageRectChanged(rect: StageRect): Promise<AppSnapshot>;
+  stageHidden(): Promise<AppSnapshot>;
   screenshotSave(): Promise<AppSnapshot>;
   appInstallPick(): Promise<AppSnapshot>;
   appInstallCancel(): Promise<AppSnapshot>;

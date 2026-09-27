@@ -21,11 +21,11 @@ use windows::Win32::UI::WindowsAndMessaging::{
     CWPSTRUCT, CallNextHookEx, EnumWindows, GA_PARENT, GUITHREADINFO, GWL_EXSTYLE, GWL_STYLE,
     GetAncestor, GetClassNameW, GetClientRect, GetGUIThreadInfo, GetWindowLongPtrW,
     GetWindowThreadProcessId, HC_ACTION, HHOOK, HWND_TOP, IsWindow, IsWindowVisible,
-    SMTO_ABORTIFHUNG, SW_SHOW, SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE,
-    SWP_NOZORDER, SWP_SHOWWINDOW, SendMessageTimeoutW, SetForegroundWindow, SetWindowLongPtrW,
-    SetWindowPos, SetWindowsHookExW, ShowWindow, UnhookWindowsHookEx, WH_CALLWNDPROC, WM_APP,
-    WS_CAPTION, WS_CHILD, WS_EX_APPWINDOW, WS_MAXIMIZEBOX, WS_MINIMIZEBOX, WS_POPUP, WS_SYSMENU,
-    WS_THICKFRAME,
+    SMTO_ABORTIFHUNG, SW_HIDE, SW_SHOW, SW_SHOWNA, SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOMOVE,
+    SWP_NOSIZE, SWP_NOZORDER, SWP_SHOWWINDOW, SendMessageTimeoutW, SetForegroundWindow,
+    SetWindowLongPtrW, SetWindowPos, SetWindowsHookExW, ShowWindow, UnhookWindowsHookEx,
+    WH_CALLWNDPROC, WM_APP, WS_CAPTION, WS_CHILD, WS_EX_APPWINDOW, WS_MAXIMIZEBOX, WS_MINIMIZEBOX,
+    WS_POPUP, WS_SYSMENU, WS_THICKFRAME,
 };
 use windows::core::BOOL;
 
@@ -102,6 +102,22 @@ pub(crate) fn is_visible(raw: isize) -> io::Result<bool> {
     // SAFETY: window is a borrowed HWND checked non-null. The call reads only
     // window state and takes no pointer, bound, ownership, or privilege.
     Ok(unsafe { IsWindowVisible(window) }.as_bool())
+}
+
+pub(crate) fn hide(raw: isize) -> io::Result<()> {
+    let window = hwnd(raw)?;
+    // SAFETY: window is a borrowed non-null HWND. SW_HIDE changes only its
+    // visibility; the BOOL reports prior visibility rather than failure.
+    let _ = unsafe { ShowWindow(window, SW_HIDE) };
+    Ok(())
+}
+
+pub(crate) fn show_inactive(raw: isize) -> io::Result<()> {
+    let window = hwnd(raw)?;
+    // SAFETY: window is a borrowed non-null HWND. SW_SHOWNA makes it visible
+    // without activating it; the BOOL reports prior visibility rather than failure.
+    let _ = unsafe { ShowWindow(window, SW_SHOWNA) };
+    Ok(())
 }
 
 pub(crate) fn belongs_to_process(raw: isize, expected_pid: u32) -> bool {

@@ -51,6 +51,7 @@ describe('native bridge', () => {
       [() => controllerBridge.guestRootSet(true), 'guest_root_set', { enabled: true }],
       [() => controllerBridge.guestVolumeSet(8), 'guest_volume_set', { index: 8 }],
       [() => controllerBridge.stageRectChanged(rect), 'stage_rect_changed', { rect }],
+      [() => controllerBridge.stageHidden(), 'stage_hidden', undefined],
       [() => controllerBridge.screenshotSave(), 'screenshot_save', undefined],
       [() => controllerBridge.appInstallPick(), 'app_install_pick', undefined],
       [() => controllerBridge.appInstallCancel(), 'app_install_cancel', undefined],

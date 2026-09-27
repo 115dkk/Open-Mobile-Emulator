@@ -25,6 +25,7 @@ fn main() {
         "guest_root_set",
         "guest_volume_set",
         "stage_rect_changed",
+        "stage_hidden",
         "screenshot_save",
         "app_install_pick",
         "app_install_cancel",

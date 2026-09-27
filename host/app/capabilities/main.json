@@ -27,6 +27,7 @@
     "allow-guest-root-set",
     "allow-guest-volume-set",
     "allow-stage-rect-changed",
+    "allow-stage-hidden",
     "allow-screenshot-save",
     "allow-app-install-pick",
     "allow-app-install-cancel",
