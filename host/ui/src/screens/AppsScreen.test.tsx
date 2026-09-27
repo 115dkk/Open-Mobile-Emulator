@@ -29,7 +29,7 @@ function row(name: string): HTMLElement {
 
 function withApp(label: string): AppSnapshot {
   const base = variant('apps-running');
-  const app: AppItem = { package: 'com.example.sample.x', label, versionName: '1.0.0', installedAt: null };
+  const app: AppItem = { package: 'com.example.sample.x', label, versionName: '1.0.0', versionCode: null, installedAt: null };
   return { ...base, apps: { ...base.apps, items: [app] } };
 }
 
