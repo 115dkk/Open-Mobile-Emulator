@@ -172,7 +172,7 @@ fn measures_real_guest_through_product_runtime() {
 
     let home = OmeHome::resolved().expect("resolve product home");
     let manifest_root = repository.join("manifests");
-    let probe = WindowsProbe;
+    let probe = WindowsProbe::new(home.as_path().to_path_buf());
     let qemu = probe.qemu().expect("probe QEMU");
     if let Some(qemu) = qemu.as_ref() {
         measurements.record("environment.qemu_version", &qemu.version);

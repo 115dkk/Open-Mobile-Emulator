@@ -5,6 +5,7 @@
 
 pub(crate) mod elevation;
 pub(crate) mod handle;
+pub(crate) mod host;
 pub(crate) mod hypervisor;
 pub(crate) mod job;
 pub(crate) mod keyboard;

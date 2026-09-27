@@ -33,7 +33,7 @@ fn initialize_runtime(manifest_root: &std::path::Path) -> Result<AppRuntime, App
         commands::storage_issue()
     })?;
     #[cfg(windows)]
-    let probe = ome_runtime::WindowsProbe;
+    let probe = ome_runtime::WindowsProbe::new(home.as_path().to_path_buf());
     #[cfg(not(windows))]
     let probe = ome_runtime::TableProbe::new();
     let adb = ome_host_adb(&probe);

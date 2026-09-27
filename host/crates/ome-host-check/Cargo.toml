@@ -14,5 +14,8 @@ description = "Read-only host readiness rows"
 serde.workspace = true
 thiserror.workspace = true
 
+[target.'cfg(windows)'.dependencies]
+ome-platform-win = { path = "../ome-platform-win" }
+
 [lints]
 workspace = true

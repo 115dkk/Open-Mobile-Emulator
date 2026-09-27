@@ -2414,6 +2414,7 @@ dependencies = [
 name = "ome-host-check"
 version = "0.1.0"
 dependencies = [
+ "ome-platform-win",
  "serde",
  "thiserror 2.0.21",
 ]

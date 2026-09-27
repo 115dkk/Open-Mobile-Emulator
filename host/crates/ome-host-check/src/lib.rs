@@ -523,29 +523,79 @@ fn bool_value(value: &ProbeValue) -> Probe<bool> {
     }
 }
 
-/// Windows placeholder until `ome-platform-win` supplies native observations.
-///
-/// Every method returns [`ProbeError::Unwired`], never a synthetic success.
+/// Raw Windows virtualization observations used by the pure product mapping.
 #[cfg(windows)]
-#[derive(Clone, Copy, Debug, Default)]
-pub struct WindowsProbe;
+#[derive(Clone, Copy, Debug)]
+struct HostFacts {
+    virtualization_firmware_enabled: bool,
+    hypervisor_present: bool,
+    whpx_available: Probe<bool>,
+}
+
+/// Maps raw Windows virtualization observations to the two product-facing answers.
+#[cfg(windows)]
+fn virtualization_answers(facts: HostFacts) -> (Probe<bool>, Probe<FeatureState>) {
+    let cpu_virtualization = match facts.whpx_available {
+        Ok(whpx_available) => {
+            Ok(whpx_available || facts.virtualization_firmware_enabled || facts.hypervisor_present)
+        }
+        Err(_) if facts.virtualization_firmware_enabled || facts.hypervisor_present => Ok(true),
+        Err(error) => Err(error),
+    };
+    let hypervisor_platform = facts.whpx_available.map(|available| {
+        if available {
+            FeatureState::Enabled
+        } else {
+            FeatureState::Disabled
+        }
+    });
+    (cpu_virtualization, hypervisor_platform)
+}
+
+#[cfg(windows)]
+fn virtualization_facts() -> HostFacts {
+    HostFacts {
+        virtualization_firmware_enabled: ome_platform_win::virtualization_firmware_enabled(),
+        hypervisor_present: ome_platform_win::hypervisor_present(),
+        whpx_available: ome_platform_win::whpx_available().map_err(|_| ProbeError::Unavailable),
+    }
+}
+
+/// Read-only Windows host probe scoped to the volume containing OME home.
+///
+/// Windows Hypervisor Platform reports [`FeatureState::Enabled`] only when WHPX is callable. A
+/// feature that is installed while its hypervisor has not launched reports
+/// [`FeatureState::Disabled`], allowing the wizard to offer the explicit activation flow.
+#[cfg(windows)]
+#[derive(Clone, Debug)]
+pub struct WindowsProbe {
+    home: PathBuf,
+}
+
+#[cfg(windows)]
+impl WindowsProbe {
+    /// Creates a probe that reports free space for the volume containing `home`.
+    pub fn new(home: PathBuf) -> Self {
+        Self { home }
+    }
+}
 
 #[cfg(windows)]
 impl HostProbe for WindowsProbe {
     fn cpu_virtualization(&self) -> Probe<bool> {
-        Err(ProbeError::Unwired)
+        virtualization_answers(virtualization_facts()).0
     }
 
     fn hypervisor_platform(&self) -> Probe<FeatureState> {
-        Err(ProbeError::Unwired)
+        virtualization_answers(virtualization_facts()).1
     }
 
     fn reboot_pending(&self) -> Probe<bool> {
-        Err(ProbeError::Unwired)
+        ome_platform_win::reboot_pending().map_err(|_| ProbeError::Unavailable)
     }
 
     fn whpx_available(&self) -> Probe<bool> {
-        Err(ProbeError::Unwired)
+        ome_platform_win::whpx_available().map_err(|_| ProbeError::Unavailable)
     }
 
     fn qemu(&self) -> Probe<Option<QemuFound>> {
@@ -561,15 +611,15 @@ impl HostProbe for WindowsProbe {
     }
 
     fn free_disk_bytes(&self) -> Probe<u64> {
-        Err(ProbeError::Unwired)
+        ome_platform_win::free_disk_bytes(&self.home).map_err(|_| ProbeError::Unavailable)
     }
 
     fn total_memory_bytes(&self) -> Probe<u64> {
-        Err(ProbeError::Unwired)
+        ome_platform_win::total_memory_bytes().map_err(|_| ProbeError::Unavailable)
     }
 
     fn logical_processors(&self) -> Probe<u32> {
-        Err(ProbeError::Unwired)
+        Ok(ome_platform_win::logical_processors())
     }
 }
 
@@ -911,5 +961,85 @@ mod tests {
             .with_logical_processors(ProbeValue::LogicalProcessors(12));
         assert_eq!(probe.total_memory_bytes(), Ok(123));
         assert_eq!(probe.logical_processors(), Ok(12));
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn virtualization_mapping_covers_every_combination() {
+        let whpx_results = [Ok(false), Ok(true), Err(ProbeError::Unavailable)];
+        for virtualization_firmware_enabled in [false, true] {
+            for hypervisor_present in [false, true] {
+                for whpx_available in whpx_results {
+                    let facts = HostFacts {
+                        virtualization_firmware_enabled,
+                        hypervisor_present,
+                        whpx_available,
+                    };
+                    let expected_cpu = match whpx_available {
+                        Ok(available) => {
+                            Ok(available || virtualization_firmware_enabled || hypervisor_present)
+                        }
+                        Err(_) if virtualization_firmware_enabled || hypervisor_present => Ok(true),
+                        Err(error) => Err(error),
+                    };
+                    let expected_feature = whpx_available.map(|available| {
+                        if available {
+                            FeatureState::Enabled
+                        } else {
+                            FeatureState::Disabled
+                        }
+                    });
+                    assert_eq!(
+                        virtualization_answers(facts),
+                        (expected_cpu, expected_feature),
+                        "firmware={virtualization_firmware_enabled}, hypervisor={hypervisor_present}, whpx={whpx_available:?}"
+                    );
+                }
+            }
+        }
+    }
+
+    #[cfg(windows)]
+    #[test]
+    #[ignore = "prints and verifies read-only observations from this Windows host"]
+    fn windows_probe_reports_this_host() {
+        let home = std::env::var_os("LOCALAPPDATA")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| std::env::current_dir().expect("current directory"))
+            .join("OpenMobileEmulator");
+        let probe = WindowsProbe::new(home);
+
+        let cpu_virtualization = probe.cpu_virtualization();
+        let hypervisor_platform = probe.hypervisor_platform();
+        let reboot_pending = probe.reboot_pending();
+        let whpx_available = probe.whpx_available();
+        let qemu = probe.qemu();
+        let firmware = probe.firmware();
+        let adb = probe.adb();
+        let free_disk_bytes = probe.free_disk_bytes();
+        let total_memory_bytes = probe.total_memory_bytes();
+        let logical_processors = probe.logical_processors();
+
+        println!("cpu_virtualization={cpu_virtualization:?}");
+        println!("hypervisor_platform={hypervisor_platform:?}");
+        println!("reboot_pending={reboot_pending:?}");
+        println!("whpx_available={whpx_available:?}");
+        println!("qemu={qemu:?}");
+        println!("firmware={firmware:?}");
+        println!("adb={adb:?}");
+        println!("free_disk_bytes={free_disk_bytes:?}");
+        println!("total_memory_bytes={total_memory_bytes:?}");
+        println!("logical_processors={logical_processors:?}");
+
+        let report = HostReadiness::inspect(&probe);
+        for row in &report.rows {
+            println!("row={:?}|{:?}|{}", row.id, row.status, row.detail);
+        }
+        let ready = report.verdict == Verdict::Ready;
+        println!("verdict={:?}", report.verdict);
+        println!("ready={ready}");
+
+        assert_eq!(whpx_available, Ok(true));
+        assert!(ready, "host report was not ready: {report:?}");
     }
 }

@@ -686,6 +686,44 @@ pub fn launch_elevated(
     }
 }
 
+/// Reports whether Windows exposes firmware-enabled hardware virtualization.
+#[cfg(windows)]
+pub fn virtualization_firmware_enabled() -> bool {
+    ffi::host::virtualization_firmware_enabled()
+}
+
+/// Reports whether x86_64 CPUID says a hypervisor is present.
+#[cfg(windows)]
+pub fn hypervisor_present() -> bool {
+    ffi::host::hypervisor_present()
+}
+
+/// Reports whether either Windows servicing stack records a pending reboot.
+#[cfg(windows)]
+pub fn reboot_pending() -> io::Result<bool> {
+    ffi::host::reboot_pending()
+}
+
+/// Reports free bytes available to the caller on the volume containing `path`.
+///
+/// When `path` does not exist yet, the nearest existing directory ancestor is used.
+#[cfg(windows)]
+pub fn free_disk_bytes(path: &Path) -> io::Result<u64> {
+    ffi::host::free_disk_bytes(path)
+}
+
+/// Reports total physical memory in bytes.
+#[cfg(windows)]
+pub fn total_memory_bytes() -> io::Result<u64> {
+    ffi::host::total_memory_bytes()
+}
+
+/// Reports active logical processors across every Windows processor group.
+#[cfg(windows)]
+pub fn logical_processors() -> u32 {
+    ffi::host::logical_processors()
+}
+
 /// Reports whether the Windows Hypervisor Platform is present.
 ///
 /// A missing `WinHvPlatform.dll` is a normal `Ok(false)` result.
