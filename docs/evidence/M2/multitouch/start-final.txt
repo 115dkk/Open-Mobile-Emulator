@@ -1,0 +1,5 @@
+QEMU started with PID 12704.
+Command log: C:\Users\USER\AppData\Local\OpenMobileEmulator\logs\qemu-default-20260927-184124332.log
+Standard output log: C:\Users\USER\AppData\Local\OpenMobileEmulator\logs\qemu-default-20260927-184124332.stdout.log
+Standard error log: C:\Users\USER\AppData\Local\OpenMobileEmulator\logs\qemu-default-20260927-184124332.stderr.log
+QMP status: {"status":"running","running":true}

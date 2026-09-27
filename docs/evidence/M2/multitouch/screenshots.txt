@@ -1,0 +1,21 @@
+QMP error: no surface
+baseline.png: adb exec-out screencap -p (QMP unavailable)
+single-down.png: adb exec-out screencap -p (QMP unavailable)
+two-down.png: adb exec-out screencap -p (QMP unavailable)
+two-drag.png: adb exec-out screencap -p (QMP unavailable)
+mouse-down.png: adb exec-out screencap -p (QMP unavailable)
+mouse-touch-after.png: adb exec-out screencap -p (QMP unavailable)
+QMP error: no surface
+baseline.png: adb exec-out screencap -p (QMP unavailable)
+single-down.png: adb exec-out screencap -p (QMP unavailable)
+two-down.png: adb exec-out screencap -p (QMP unavailable)
+two-drag.png: adb exec-out screencap -p (QMP unavailable)
+mouse-down.png: adb exec-out screencap -p (QMP unavailable)
+mouse-touch-after.png: adb exec-out screencap -p (QMP unavailable)
+QMP error: no surface
+baseline.png: adb exec-out screencap -p (QMP unavailable)
+single-down.png: adb exec-out screencap -p (QMP unavailable)
+two-down.png: adb exec-out screencap -p (QMP unavailable)
+two-drag.png: adb exec-out screencap -p (QMP unavailable)
+mouse-down.png: adb exec-out screencap -p (QMP unavailable)
+mouse-touch-after.png: adb exec-out screencap -p (QMP unavailable)

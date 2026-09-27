@@ -157,3 +157,43 @@ Describe 'Convert-OmePpmToPng' {
         }
     }
 }
+
+Describe 'ConvertTo-OmeQmpTouchEvent' {
+    # Verified against QEMU v11.1.0 and v11.1.1 qapi/ui.json,
+    # hw/input/virtio-input-hid.c and ui/input.c on 2026-09-27.
+    It 'emits the exact slot and separate data packets for <Type>' -ForEach @(
+        @{ Type = 'begin' }, @{ Type = 'update' }
+    ) {
+        $events = @(ConvertTo-OmeQmpTouchEvent -Type $Type -Slot 1 -TrackingId 2 -X 8192 -Y 16384)
+        $json = ConvertTo-Json -InputObject $events -Compress -Depth 10
+        $json | Should -Be ('[{"type":"mtt","data":{"type":"' + $Type + '","slot":1,"tracking-id":2,"axis":"x","value":0}},{"type":"mtt","data":{"type":"data","slot":1,"tracking-id":2,"axis":"x","value":8192}},{"type":"mtt","data":{"type":"data","slot":1,"tracking-id":2,"axis":"y","value":16384}}]')
+        $events[0] | Should -BeOfType ([Collections.Specialized.OrderedDictionary])
+    }
+
+    It 'releases rather than reasserts the tracking id on <Type>' -ForEach @(
+        @{ Type = 'end' }, @{ Type = 'cancel' }
+    ) {
+        $events = @(ConvertTo-OmeQmpTouchEvent -Type $Type -Slot 0 -TrackingId 1 -X 8192 -Y 8192)
+        (ConvertTo-Json -InputObject $events -Compress -Depth 10) | Should -Be ('[{"type":"mtt","data":{"type":"' + $Type + '","slot":0,"tracking-id":-1,"axis":"x","value":0}}]')
+    }
+
+    It 'normalizes the enum and preserves coordinate limits and the tenth slot' {
+        $events = @(ConvertTo-OmeQmpTouchEvent -Type BEGIN -Slot 9 -TrackingId 10 -X 0 -Y 32767)
+        $events[0].data.type | Should -BeExactly 'begin'
+        $events[0].data.slot | Should -Be 9
+        $events[1].data.value | Should -Be 0
+        $events[2].data.value | Should -Be 32767
+    }
+
+    It 'rejects invalid <Field> value <Value>' -ForEach @(
+        @{ Field = 'Type'; Value = 'data' },
+        @{ Field = 'Slot'; Value = -1 }, @{ Field = 'Slot'; Value = 10 },
+        @{ Field = 'TrackingId'; Value = -1 },
+        @{ Field = 'X'; Value = -1 }, @{ Field = 'X'; Value = 32768 },
+        @{ Field = 'Y'; Value = -1 }, @{ Field = 'Y'; Value = 32768 }
+    ) {
+        $parameters = @{ Type = 'begin'; Slot = 0; TrackingId = 1; X = 0; Y = 0 }
+        $parameters[$Field] = $Value
+        { ConvertTo-OmeQmpTouchEvent @parameters } | Should -Throw
+    }
+}

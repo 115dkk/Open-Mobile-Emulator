@@ -1,0 +1,9 @@
+[      28.047829] EV_ABS       ABS_MT_TRACKING_ID   00000001            
+[      28.047829] EV_ABS       ABS_MT_POSITION_X    00002000            
+[      28.047829] EV_ABS       ABS_MT_POSITION_Y    00002000            
+[      28.047829] EV_KEY       BTN_TOUCH            DOWN                
+[      28.047829] EV_SYN       SYN_REPORT           00000000            
+[      28.536285] EV_ABS       ABS_MT_TRACKING_ID   ffffffff            
+[      28.536285] EV_KEY       BTN_TOUCH            UP                  
+[      28.536285] EV_SYN       SYN_REPORT           00000000            
+

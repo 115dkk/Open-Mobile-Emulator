@@ -629,6 +629,83 @@ function Invoke-OmeQmp {
 
 <#
 .SYNOPSIS
+Builds the QMP events for one virtio multitouch contact operation.
+.DESCRIPTION
+Returns a slot/tracking event followed by X/Y data for begin and update.
+End and cancel release the slot with tracking-id -1. The caller owns contact
+state and must send a touch button release only when the last contact ends.
+QEMU 11.1 qapi/ui.json requires every mtt field even when the device ignores
+axis/value on the slot event. hw/input/virtio-input-hid.c uses only data events
+for coordinates; input-send-event does not expand begin/update automatically.
+.PARAMETER Type
+Contact operation: begin, update, end, or cancel.
+.PARAMETER Slot
+Contact slot, 0 through 9 (the ten slots used by QEMU ui/input.c).
+.PARAMETER TrackingId
+Nonnegative contact identity for begin/update, retained by the caller.
+Ignored on end/cancel, which always emit -1.
+.PARAMETER X
+Absolute horizontal coordinate, 0 through 32767.
+.PARAMETER Y
+Absolute vertical coordinate, 0 through 32767.
+.EXAMPLE
+$events = @(ConvertTo-OmeQmpTouchEvent -Type begin -Slot 0 -TrackingId 1 -X 8192 -Y 8192)
+Invoke-OmeQmp -Command input-send-event -Arguments @{ events = $events }
+#>
+function ConvertTo-OmeQmpTouchEvent {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [ValidateSet('begin', 'update', 'end', 'cancel')]
+        [string]$Type,
+
+        [Parameter(Mandatory)]
+        [ValidateRange(0, 9)]
+        [int]$Slot,
+
+        [Parameter(Mandatory)]
+        [ValidateRange(0, 2147483647)]
+        [int]$TrackingId,
+
+        [Parameter(Mandatory)]
+        [ValidateRange(0, 32767)]
+        [int]$X,
+
+        [Parameter(Mandatory)]
+        [ValidateRange(0, 32767)]
+        [int]$Y
+    )
+
+    $operation = $Type.ToLowerInvariant()
+    $released = $operation -in @('end', 'cancel')
+    [ordered]@{
+        type = 'mtt'
+        data = [ordered]@{
+            type = $operation
+            slot = $Slot
+            'tracking-id' = $(if ($released) { -1 } else { $TrackingId })
+            axis = 'x'
+            value = 0
+        }
+    }
+    if (-not $released) {
+        foreach ($axis in @('x', 'y')) {
+            [ordered]@{
+                type = 'mtt'
+                data = [ordered]@{
+                    type = 'data'
+                    slot = $Slot
+                    'tracking-id' = $TrackingId
+                    axis = $axis
+                    value = $(if ($axis -ceq 'x') { $X } else { $Y })
+                }
+            }
+        }
+    }
+}
+
+<#
+.SYNOPSIS
 Measures QMP query latency.
 .DESCRIPTION
 Times repeated query-status round trips and returns minimum, average, and maximum milliseconds.
@@ -1176,6 +1253,7 @@ Export-ModuleMember -Function @(
     'Find-OmeApkSigner',
     'Write-OmeLog',
     'Invoke-OmeQmp',
+    'ConvertTo-OmeQmpTouchEvent',
     'Measure-OmeQmpLatency',
     'Convert-OmePpmToPng',
     'Save-OmeQmpScreenshot',

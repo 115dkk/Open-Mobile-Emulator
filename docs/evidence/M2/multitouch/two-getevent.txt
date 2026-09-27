@@ -1,0 +1,17 @@
+[      36.186073] EV_ABS       ABS_MT_TRACKING_ID   00000001            
+[      36.186073] EV_ABS       ABS_MT_SLOT          00000001            
+[      36.186073] EV_ABS       ABS_MT_TRACKING_ID   00000002            
+[      36.186073] EV_ABS       ABS_MT_POSITION_X    00005fff            
+[      36.186073] EV_ABS       ABS_MT_POSITION_Y    00003000            
+[      36.186073] EV_KEY       BTN_TOUCH            DOWN                
+[      36.186073] EV_SYN       SYN_REPORT           00000000            
+[      36.599045] EV_ABS       ABS_MT_SLOT          00000000            
+[      36.599045] EV_ABS       ABS_MT_POSITION_X    00002ccc            
+[      36.599045] EV_ABS       ABS_MT_POSITION_Y    00002666            
+[      36.599045] EV_SYN       SYN_REPORT           00000000            
+[      37.027158] EV_ABS       ABS_MT_TRACKING_ID   ffffffff            
+[      37.027158] EV_ABS       ABS_MT_SLOT          00000001            
+[      37.027158] EV_ABS       ABS_MT_TRACKING_ID   ffffffff            
+[      37.027158] EV_KEY       BTN_TOUCH            UP                  
+[      37.027158] EV_SYN       SYN_REPORT           00000000            
+

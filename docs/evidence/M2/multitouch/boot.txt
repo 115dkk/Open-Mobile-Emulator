@@ -1,0 +1,17 @@
+Start requested: 2026-09-27T18:29:13.4494759+09:00
+
+SystemExe : C:\Open Mobile Emulator\qemu-build\out\bin\qemu-system-x86_64.exe
+ImgExe    : C:\Open Mobile Emulator\qemu-build\out\bin\qemu-img.exe
+ShareDir  : C:\Open Mobile Emulator\qemu-build\out\share
+Version   : 11.1.1
+Source    : custom-build
+
+
+QEMU emulator version 11.1.1 (v11.1.1-dirty)
+Copyright (c) 2003-2026 Fabrice Bellard and the QEMU Project developers
+Boot completed: 2026-09-27T18:29:46.3989041+09:00; elapsed seconds: 32.9494282
+TQ3A.230901.001.C1
+Second start requested: 2026-09-27T18:30:48.4463403+09:00
+Second boot completed: 2026-09-27T18:31:20.8118896+09:00; elapsed seconds: 32.3655493
+Final start requested: 2026-09-27T18:41:23.7639764+09:00
+Final boot completed: 2026-09-27T18:41:56.4836204+09:00; elapsed seconds: 32.719644

@@ -1,0 +1,12 @@
+could not open /dev/input/event7, Permission denied
+could not open /dev/input/event6, Permission denied
+could not get driver version for /dev/input/mouse1, Inappropriate ioctl for device
+could not open /dev/input/event5, Permission denied
+could not get driver version for /dev/input/js0, Invalid argument
+could not open /dev/input/event4, Permission denied
+could not get driver version for /dev/input/mouse0, Inappropriate ioctl for device
+could not open /dev/input/event0, Permission denied
+could not get driver version for /dev/input/mice, Inappropriate ioctl for device
+could not open /dev/input/event2, Permission denied
+could not open /dev/input/event3, Permission denied
+could not open /dev/input/event1, Permission denied

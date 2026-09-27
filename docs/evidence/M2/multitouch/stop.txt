@@ -1,0 +1,2 @@
+Requested power-off through adb (127.0.0.1:5555).
+Guest 'default' stopped normally.

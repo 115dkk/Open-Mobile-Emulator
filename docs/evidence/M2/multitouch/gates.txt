@@ -1,0 +1,42 @@
+SUMMARY forbidden findings=0 candidates=763
+RESULT Check-Forbidden PASS
+SUMMARY manifest findings=0 artifacts=1
+RESULT Check-Manifest PASS
+SPDX .design-sync/prebuild.mjs missing
+SPDX .design-sync/previews/Button.tsx missing
+SPDX .design-sync/previews/Chip.tsx missing
+SPDX .design-sync/previews/Dialog.tsx missing
+SPDX .design-sync/previews/EmptyState.tsx missing
+SPDX .design-sync/previews/Field.tsx missing
+SPDX .design-sync/previews/Icon.tsx missing
+SPDX .design-sync/previews/IconButton.tsx missing
+SPDX .design-sync/previews/IssueNotice.tsx missing
+SPDX .design-sync/previews/ProgressBar.tsx missing
+SPDX .design-sync/previews/Rail.tsx missing
+SPDX .design-sync/previews/ScreenHeader.tsx missing
+SPDX .design-sync/previews/Segmented.tsx missing
+SPDX .design-sync/previews/Select.tsx missing
+SPDX .design-sync/previews/SettingRow.tsx missing
+SPDX .design-sync/previews/Slider.tsx missing
+SPDX .design-sync/previews/StageFrame.tsx missing
+SPDX .design-sync/previews/StatusDot.tsx missing
+SPDX .design-sync/previews/StepList.tsx missing
+SPDX .design-sync/previews/Toggle.tsx missing
+SUMMARY spdx findings=20 checked=242 candidates=763
+RESULT Check-SpdxHeaders FAIL(1)
+UNSAFE host/crates/ome-platform-win/src/lib.rs missing-undocumented-block-deny
+SUMMARY unsafe-scope findings=1 checked=47
+RESULT Check-UnsafeScope FAIL(1)
+[95m
+[95mStarting discovery in 6 files.[0m
+[95mDiscovery found 42 tests in 306ms.[0m
+[95mRunning tests.[0m
+[32m[+] C:\Open Mobile Emulator\tests\ci\Check-Forbidden.Tests.ps1[0m[90m 3.49s (3s|363ms)[0m
+[32m[+] C:\Open Mobile Emulator\tests\ci\Check-Manifest.Tests.ps1[0m[90m 4.04s (3.95s|63ms)[0m
+[32m[+] C:\Open Mobile Emulator\tests\ci\Check-SpdxHeaders.Tests.ps1[0m[90m 2.44s (2.38s|40ms)[0m
+[32m[+] C:\Open Mobile Emulator\tests\ci\Check-UnsafeScope.Tests.ps1[0m[90m 3.09s (3.02s|55ms)[0m
+[32m[+] C:\Open Mobile Emulator\tests\launcher\OME.Common.Tests.ps1[0m[90m 436ms (299ms|75ms)[0m
+[32m[+] C:\Open Mobile Emulator\tests\launcher\Start-Guest.Tests.ps1[0m[90m 734ms (665ms|53ms)[0m
+[97mTests completed in 14.25s[0m
+[32mTests Passed: 42, [0m[90mFailed: 0, [0m[90mSkipped: 0, [0m[90mInconclusive: 0, [0m[37m[0m[90mNotRun: 0[0m
+RESULT Pester PASS
