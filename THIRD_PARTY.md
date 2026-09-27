@@ -38,3 +38,7 @@ publisher (see `manifests/artifacts.json` and `docs/NETWORK.md`):
 | Component | Publisher | License | Why not shipped |
 |---|---|---|---|
 | Bliss OS 16.9.x GApps x86_64 ISO | Bliss Labs (SourceForge `blissos-x86`) | AOSP Apache-2.0 plus proprietary Google components | Contains proprietary binaries we may not redistribute (R2) |
+
+## 호스트 소스 데이터 고지
+
+호스트 크레이트가 소스로 품은 외부 데이터의 고지는 `host/THIRD_PARTY.md`에 있다(keycodemapdb의 키 코드 표, BSD-3-Clause).

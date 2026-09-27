@@ -48,6 +48,7 @@ pub fn overlay_mode(snapshot: &AppSnapshot) -> OverlayMode {
             .any(|profile| profile.id == *active_id)
     });
     if snapshot.guest.state != GuestState::Running
+        || !snapshot.guest.boot_completed
         || !active_profile_exists
         || (!input.overlay_visible && !input.editing)
     {
@@ -99,6 +100,15 @@ mod tests {
             value.guest.state = state;
             assert_eq!(overlay_mode(&value), OverlayMode::Hidden, "{state:?}");
         }
+    }
+
+    #[test]
+    fn running_before_the_operating_system_boots_is_hidden() {
+        let mut value = snapshot();
+        value.guest.boot_completed = false;
+        assert_eq!(overlay_mode(&value), OverlayMode::Hidden);
+        value.guest.boot_completed = true;
+        assert_eq!(overlay_mode(&value), OverlayMode::Editing);
     }
 
     #[test]

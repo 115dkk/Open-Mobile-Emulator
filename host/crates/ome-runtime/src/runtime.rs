@@ -21,8 +21,11 @@ use ome_guest_image::{
 use ome_host_check::{
     FeatureState, HardwareLimits, HostProbe, HostReadiness, Verdict, hardware_limits,
 };
-use ome_input::{InputProfile, is_keyboard_code, load_profiles};
-use ome_supervisor::{GuestEvent, ProcessAdapter, QmpFactory, Supervisor};
+use ome_input::{
+    Decision, Gate, GateFacts, HostKey, InputProfile, KeyEvent as MappedKeyEvent, KeySynth, Mapper,
+    is_keyboard_code, load_profiles, profile_has_key_binding,
+};
+use ome_supervisor::{GuestEvent, InputError, ProcessAdapter, QmpFactory, Supervisor};
 use ome_window_host::{
     GuestWindowHost, HostingIssue, HostingTarget, StageGeometry, StageRect as NativeStageRect,
 };
@@ -68,6 +71,8 @@ pub trait GuestProcess: Send {
     ) -> Result<(), String>;
     /// Requests graceful shutdown.
     fn request_stop(&self);
+    /// Submits QMP input without waiting for the QMP response.
+    fn send_input(&self, events: Vec<serde_json::Value>) -> Result<(), InputError>;
     /// Returns the current supervisor state.
     fn state(&self) -> ome_supervisor::GuestState;
     /// Subscribes to lifecycle events.
@@ -99,6 +104,10 @@ where
 
     fn request_stop(&self) {
         let _ = Supervisor::request_stop(self);
+    }
+
+    fn send_input(&self, events: Vec<serde_json::Value>) -> Result<(), InputError> {
+        Supervisor::send_input(self, events)
     }
 
     fn state(&self) -> ome_supervisor::GuestState {
@@ -271,6 +280,13 @@ pub struct AppRuntime {
     input_auto_apply: bool,
     suspend_hotkey: String,
     input_overlay_visible: bool,
+    key_synth: KeySynth,
+    input_send_errors: u64,
+    input_send_notice_shown: bool,
+    unknown_key_observations: u64,
+    dropped_touch_operations: u64,
+    suspend_hotkey_down: bool,
+    interpreted_keys: std::collections::BTreeSet<(u16, bool)>,
     display_fit: StageFit,
     active_display: Option<String>,
     custom_display: Option<CustomDisplay>,
@@ -449,6 +465,13 @@ impl AppRuntime {
             input_auto_apply: true,
             suspend_hotkey: "F12".to_owned(),
             input_overlay_visible,
+            key_synth: KeySynth::default(),
+            input_send_errors: 0,
+            input_send_notice_shown: false,
+            unknown_key_observations: 0,
+            dropped_touch_operations: 0,
+            suspend_hotkey_down: false,
+            interpreted_keys: std::collections::BTreeSet::new(),
             display_fit: StageFit::FitWindow,
             active_display: Some("hd-720".to_owned()),
             custom_display: None,
@@ -1852,6 +1875,142 @@ impl AppRuntime {
         }
     }
 
+    /// Routes one native keyboard observation through the gate, interpreter, or raw-key synth.
+    ///
+    /// QMP work occurs on the supervisor thread; this method only submits to its channel.
+    pub fn ingest_host_key(&mut self, event: ome_platform_win::KeyEvent, app_foreground: bool) {
+        let Ok(scan) = u16::try_from(event.scan) else {
+            return;
+        };
+        let key = HostKey {
+            scan,
+            extended: event.extended,
+            pressed: event.pressed,
+        };
+        let browser_code = key.browser_code();
+        let active_profile = self
+            .active_input
+            .as_deref()
+            .and_then(|id| self.input_profiles.iter().find(|profile| profile.id == id));
+        let continuing_interpretation = self.interpreted_keys.contains(&(key.scan, key.extended));
+        let continuing_passthrough = self.key_synth.is_pressed(key);
+        let profile_wants_interpretation = browser_code.is_some_and(|code| {
+            active_profile.is_some_and(|profile| profile_has_key_binding(profile, code))
+        });
+        let active_profile_has_binding =
+            continuing_interpretation || (!continuing_passthrough && profile_wants_interpretation);
+        let facts = GateFacts {
+            guest_running: self.guest_state == GuestState::Running,
+            stage_visible: self.stage_visible,
+            app_foreground,
+            overlay_editing: self.input_editing,
+            boot_completed: self.boot_completed || continuing_interpretation,
+            suspended: self.input_suspended && !continuing_interpretation,
+            active_profile_has_binding,
+            suspend_hotkey: &self.suspend_hotkey,
+        };
+        match Gate::admit(&key, &facts) {
+            Decision::Ignore => {
+                let outside_stage = self.guest_state != GuestState::Running
+                    || !self.stage_visible
+                    || !app_foreground;
+                if outside_stage {
+                    self.key_synth.reset();
+                    self.interpreted_keys.clear();
+                    self.suspend_hotkey_down = false;
+                } else {
+                    self.key_synth.forget_release(key);
+                    if !key.pressed {
+                        self.interpreted_keys.remove(&(key.scan, key.extended));
+                        if browser_code == Some(self.suspend_hotkey.as_str()) {
+                            self.suspend_hotkey_down = false;
+                        }
+                    }
+                }
+            }
+            Decision::ToggleSuspend => {
+                if !self.suspend_hotkey_down {
+                    self.suspend_hotkey_down = true;
+                    self.input_suspended = !self.input_suspended;
+                }
+            }
+            Decision::Interpret => {
+                let identity = (key.scan, key.extended);
+                if key.pressed {
+                    if !self.interpreted_keys.insert(identity) {
+                        return;
+                    }
+                } else if !self.interpreted_keys.remove(&identity) {
+                    return;
+                }
+                let Some(code) = browser_code else {
+                    return;
+                };
+                let Some(profile) = active_profile else {
+                    return;
+                };
+                let touch_events = Mapper::translate(
+                    profile,
+                    MappedKeyEvent {
+                        code: code.to_owned(),
+                        pressed: key.pressed,
+                    },
+                );
+                if !touch_events.is_empty() {
+                    let count = u64::try_from(touch_events.len()).unwrap_or(u64::MAX);
+                    self.dropped_touch_operations =
+                        self.dropped_touch_operations.saturating_add(count);
+                    // wiring: the multitouch synth is the next step; mapper touch operations are
+                    // intentionally not submitted as single-pointer QMP events here.
+                    eprintln!(
+                        "mapped keyboard touch operations dropped until multitouch synth wiring: count={count} total={}",
+                        self.dropped_touch_operations
+                    );
+                }
+            }
+            Decision::PassThrough => {
+                let unknown_before = self.key_synth.unknown_count();
+                if let Some(input) = self.key_synth.apply(key) {
+                    self.submit_input(vec![input]);
+                }
+                let unknown_after = self.key_synth.unknown_count();
+                if unknown_after != unknown_before {
+                    self.unknown_key_observations = self.unknown_key_observations.saturating_add(1);
+                    eprintln!(
+                        "unknown keyboard scan code dropped: scan={:#x} extended={} count={}",
+                        key.scan, key.extended, self.unknown_key_observations
+                    );
+                }
+            }
+        }
+    }
+
+    fn submit_input(&mut self, events: Vec<serde_json::Value>) {
+        let result = self
+            .deps
+            .supervisor
+            .as_deref()
+            .ok_or(InputError::ChannelUnavailable)
+            .and_then(|supervisor| supervisor.send_input(events));
+        if result.is_err() {
+            self.input_send_errors = self.input_send_errors.saturating_add(1);
+            eprintln!(
+                "guest input submission failed: count={}",
+                self.input_send_errors
+            );
+            if !self.input_send_notice_shown {
+                self.input_send_notice_shown = true;
+                self.push_notice(Notice {
+                    at: local_rfc3339(),
+                    level: NoticeLevel::Warning,
+                    message:
+                        "키 입력을 운영체제에 보내지 못했습니다. 운영체제를 다시 시작하십시오."
+                            .to_owned(),
+                });
+            }
+        }
+    }
+
     /// Supplies the native parent window after the shell creates it.
     pub fn set_host_window(&mut self, parent: u64) {
         self.host_window = (parent != 0).then_some(parent);
@@ -1910,6 +2069,10 @@ impl AppRuntime {
         }
         match event.state {
             ome_supervisor::GuestState::Starting => {
+                self.key_synth.reset();
+                self.interpreted_keys.clear();
+                self.suspend_hotkey_down = false;
+                self.input_send_notice_shown = false;
                 self.pid = event.pid;
                 self.boot_started = Some(Instant::now());
                 self.boot_completed = false;
@@ -1934,6 +2097,9 @@ impl AppRuntime {
                 self.try_place_guest_window();
             }
             ome_supervisor::GuestState::Restarting => {
+                self.key_synth.reset();
+                self.interpreted_keys.clear();
+                self.suspend_hotkey_down = false;
                 self.pid = event.pid;
                 self.last_exit = Some(LastExit {
                     kind: ExitKind::GuestReset,
@@ -1952,6 +2118,9 @@ impl AppRuntime {
                 let _ = self.deps.window_host.detach();
             }
             ome_supervisor::GuestState::Stopped => {
+                self.key_synth.reset();
+                self.interpreted_keys.clear();
+                self.suspend_hotkey_down = false;
                 self.boot_completed = false;
                 self.adb_connected = false;
                 self.adb_connect_attempted = false;
@@ -1975,6 +2144,9 @@ impl AppRuntime {
                 }
             }
             ome_supervisor::GuestState::Failed => {
+                self.key_synth.reset();
+                self.interpreted_keys.clear();
+                self.suspend_hotkey_down = false;
                 self.boot_completed = false;
                 self.adb_connected = false;
                 self.adb_connect_attempted = false;
@@ -3292,6 +3464,7 @@ mod tests {
         state: Arc<Mutex<ome_supervisor::GuestState>>,
         starts: Arc<Mutex<Vec<(GuestConfig, GuestPaths, QemuInstall)>>>,
         stop_requests: Arc<Mutex<u32>>,
+        inputs: Arc<Mutex<Vec<Vec<serde_json::Value>>>>,
     }
 
     impl Default for ScriptedGuest {
@@ -3300,6 +3473,7 @@ mod tests {
                 state: Arc::new(Mutex::new(ome_supervisor::GuestState::Stopped)),
                 starts: Arc::new(Mutex::new(Vec::new())),
                 stop_requests: Arc::new(Mutex::new(0)),
+                inputs: Arc::new(Mutex::new(Vec::new())),
             }
         }
     }
@@ -3334,6 +3508,11 @@ mod tests {
 
         fn request_stop(&self) {
             *self.stop_requests.lock().expect("stop request lock") += 1;
+        }
+
+        fn send_input(&self, events: Vec<serde_json::Value>) -> Result<(), InputError> {
+            self.inputs.lock().expect("input lock").push(events);
+            Ok(())
         }
 
         fn state(&self) -> ome_supervisor::GuestState {
@@ -3841,6 +4020,132 @@ mod tests {
                 .input
                 .suspended
         );
+    }
+
+    #[test]
+    fn host_key_gate_passes_raw_keys_and_toggles_suspend_without_forwarding_hotkey() {
+        let (_home, mut runtime, supervisor, _runner) =
+            lifecycle_runtime([], RecordingDesktop::default(), RecordingWindow::embedded());
+        runtime.guest_state = GuestState::Running;
+        runtime.stage_visible = true;
+        runtime.boot_completed = true;
+        runtime.active_input = None;
+        let event = |scan, pressed| ome_platform_win::KeyEvent {
+            vk: 0,
+            scan,
+            pressed,
+            extended: false,
+            injected: false,
+        };
+
+        runtime.ingest_host_key(event(0x1e, true), true);
+        runtime.ingest_host_key(event(0x1e, true), true);
+        runtime.ingest_host_key(event(0x1e, false), true);
+        assert_eq!(
+            *supervisor.inputs.lock().expect("input lock"),
+            vec![
+                vec![serde_json::json!({
+                    "type":"key","data":{"down":true,"key":{"type":"qcode","data":"a"}}
+                })],
+                vec![serde_json::json!({
+                    "type":"key","data":{"down":false,"key":{"type":"qcode","data":"a"}}
+                })],
+            ]
+        );
+
+        runtime.ingest_host_key(event(0x58, true), true);
+        runtime.ingest_host_key(event(0x58, true), true);
+        assert!(runtime.snapshot().input.suspended);
+        runtime.ingest_host_key(event(0x58, false), true);
+        assert!(runtime.snapshot().input.suspended);
+        assert_eq!(supervisor.inputs.lock().expect("input lock").len(), 2);
+    }
+
+    #[test]
+    fn raw_key_release_keeps_its_route_when_boot_completes_between_events() {
+        let (_home, mut runtime, supervisor, _runner) =
+            lifecycle_runtime([], RecordingDesktop::default(), RecordingWindow::embedded());
+        runtime.guest_state = GuestState::Running;
+        runtime.stage_visible = true;
+        runtime.boot_completed = false;
+        let event = |pressed| ome_platform_win::KeyEvent {
+            vk: 0x20,
+            scan: 0x39,
+            pressed,
+            extended: false,
+            injected: false,
+        };
+        runtime.ingest_host_key(event(true), true);
+        runtime.boot_completed = true;
+        runtime.ingest_host_key(event(true), true);
+        runtime.ingest_host_key(event(false), true);
+        let inputs = supervisor.inputs.lock().expect("input lock");
+        assert_eq!(
+            inputs.len(),
+            2,
+            "repeat is suppressed and release stays raw"
+        );
+        assert_eq!(inputs[0][0]["data"]["down"], true);
+        assert_eq!(inputs[1][0]["data"]["down"], false);
+    }
+
+    #[test]
+    fn explicit_pass_through_binding_reaches_raw_key_synth() {
+        let (_home, mut runtime, supervisor, _runner) =
+            lifecycle_runtime([], RecordingDesktop::default(), RecordingWindow::embedded());
+        runtime.guest_state = GuestState::Running;
+        runtime.stage_visible = true;
+        runtime.boot_completed = true;
+        runtime.input_profiles[0].bindings.push(ome_input::Binding {
+            id: "escape-raw".to_owned(),
+            trigger: ome_input::Trigger::Key {
+                code: "Escape".to_owned(),
+            },
+            action: ome_input::BindingAction::PassThrough,
+        });
+        for pressed in [true, false] {
+            runtime.ingest_host_key(
+                ome_platform_win::KeyEvent {
+                    vk: 0x1b,
+                    scan: 0x01,
+                    pressed,
+                    extended: false,
+                    injected: false,
+                },
+                true,
+            );
+        }
+        assert_eq!(supervisor.inputs.lock().expect("input lock").len(), 2);
+    }
+
+    #[test]
+    fn host_key_gate_ignores_background_and_drops_bound_touch_until_synth_exists() {
+        let (_home, mut runtime, supervisor, _runner) =
+            lifecycle_runtime([], RecordingDesktop::default(), RecordingWindow::embedded());
+        runtime.guest_state = GuestState::Running;
+        runtime.stage_visible = true;
+        runtime.boot_completed = true;
+        runtime.ingest_host_key(
+            ome_platform_win::KeyEvent {
+                vk: 0,
+                scan: 0x39,
+                pressed: true,
+                extended: false,
+                injected: true,
+            },
+            true,
+        );
+        runtime.ingest_host_key(
+            ome_platform_win::KeyEvent {
+                vk: 0,
+                scan: 0x1e,
+                pressed: true,
+                extended: false,
+                injected: true,
+            },
+            false,
+        );
+        assert!(supervisor.inputs.lock().expect("input lock").is_empty());
     }
 
     #[test]

@@ -483,6 +483,18 @@ pub struct PreviousStyle {
     parent: Option<isize>,
 }
 
+/// Returns the current Windows foreground-window token, or zero when there is none.
+pub fn foreground_window() -> u64 {
+    #[cfg(windows)]
+    {
+        ffi::window::foreground_window() as usize as u64
+    }
+    #[cfg(not(windows))]
+    {
+        0
+    }
+}
+
 /// Enumerates all top-level windows currently owned by `pid`.
 pub fn find_windows_of_process(pid: u32) -> Result<Vec<WindowHandle>, PlatformError> {
     #[cfg(windows)]

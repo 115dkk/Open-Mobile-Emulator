@@ -13,7 +13,7 @@ mod setup;
 mod tray;
 mod window;
 
-use std::sync::Arc;
+use std::sync::{Arc, Mutex, mpsc};
 use std::time::Duration;
 
 use ome_adb::{AdbSession, ProcessRunner};
@@ -108,6 +108,43 @@ fn ome_host_adb(probe: &dyn ome_host_check::HostProbe) -> Option<AdbSession> {
     .ok()
 }
 
+#[cfg(windows)]
+fn start_input_pump(
+    app: tauri::AppHandle,
+    shell: commands::ShellState,
+    main_window: u64,
+) -> Result<(), tauri::Error> {
+    let (sender, receiver) = mpsc::channel();
+    let hook = ome_platform_win::KeyboardHook::install(sender)
+        .map_err(|error| tauri::Error::Io(std::io::Error::other(error)))?;
+    app.manage(Mutex::new(hook));
+    std::thread::Builder::new()
+        .name("ome-runtime-input".to_owned())
+        .spawn(move || {
+            while let Ok(event) = receiver.recv() {
+                let app_foreground = ome_platform_win::foreground_window() == main_window;
+                let Ok(mut guard) = shell.runtime.lock() else {
+                    break;
+                };
+                let Ok(runtime) = &mut *guard else {
+                    break;
+                };
+                let suspended_before = runtime.snapshot().input.suspended;
+                runtime.ingest_host_key(event, app_foreground);
+                let snapshot = runtime.snapshot();
+                let suspension_changed = snapshot.input.suspended != suspended_before;
+                if suspension_changed {
+                    let guest_rect = runtime.guest_client_screen_rect();
+                    let stage_visible = runtime.stage_visible();
+                    drop(guard);
+                    events::snapshot(&app, &snapshot, guest_rect, stage_visible);
+                }
+            }
+        })
+        .map_err(|error| tauri::Error::Io(std::io::Error::other(error)))?;
+    Ok(())
+}
+
 fn start_event_pump(app: tauri::AppHandle, shell: commands::ShellState) {
     let receiver = shell.runtime.lock().ok().and_then(|guard| {
         guard
@@ -197,6 +234,7 @@ pub fn run() {
                         eprintln!("automatic update check could not start: {}", issue.code);
                     }
                 }
+                start_input_pump(app.handle().clone(), shell.clone(), raw)?;
             }
             tray::install(app)?;
             #[cfg(windows)]

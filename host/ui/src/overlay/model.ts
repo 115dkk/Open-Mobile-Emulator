@@ -30,7 +30,7 @@ export function activeProfile(snapshot: AppSnapshot): InputProfile | null {
  */
 export function overlayMode(snapshot: AppSnapshot): OverlayMode {
   const { guest, input } = snapshot;
-  if (guest.state !== 'running' || activeProfile(snapshot) === null) return 'hidden';
+  if (guest.state !== 'running' || !guest.bootCompleted || activeProfile(snapshot) === null) return 'hidden';
   if (!input.overlayVisible && !input.editing) return 'hidden';
   return input.editing ? 'editing' : 'showing';
 }

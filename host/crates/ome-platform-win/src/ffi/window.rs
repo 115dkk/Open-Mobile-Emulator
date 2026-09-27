@@ -19,13 +19,13 @@ use windows::Win32::UI::HiDpi::{
 };
 use windows::Win32::UI::WindowsAndMessaging::{
     CWPSTRUCT, CallNextHookEx, EnumWindows, GA_PARENT, GUITHREADINFO, GWL_EXSTYLE, GWL_STYLE,
-    GetAncestor, GetClassNameW, GetClientRect, GetGUIThreadInfo, GetWindowLongPtrW,
-    GetWindowThreadProcessId, HC_ACTION, HHOOK, HWND_TOP, IsWindow, IsWindowVisible,
-    SMTO_ABORTIFHUNG, SW_HIDE, SW_SHOW, SW_SHOWNA, SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOMOVE,
-    SWP_NOSIZE, SWP_NOZORDER, SWP_SHOWWINDOW, SendMessageTimeoutW, SetForegroundWindow,
-    SetWindowLongPtrW, SetWindowPos, SetWindowsHookExW, ShowWindow, UnhookWindowsHookEx,
-    WH_CALLWNDPROC, WM_APP, WS_CAPTION, WS_CHILD, WS_EX_APPWINDOW, WS_MAXIMIZEBOX, WS_MINIMIZEBOX,
-    WS_POPUP, WS_SYSMENU, WS_THICKFRAME,
+    GetAncestor, GetClassNameW, GetClientRect, GetForegroundWindow, GetGUIThreadInfo,
+    GetWindowLongPtrW, GetWindowThreadProcessId, HC_ACTION, HHOOK, HWND_TOP, IsWindow,
+    IsWindowVisible, SMTO_ABORTIFHUNG, SW_HIDE, SW_SHOW, SW_SHOWNA, SWP_FRAMECHANGED,
+    SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER, SWP_SHOWWINDOW, SendMessageTimeoutW,
+    SetForegroundWindow, SetWindowLongPtrW, SetWindowPos, SetWindowsHookExW, ShowWindow,
+    UnhookWindowsHookEx, WH_CALLWNDPROC, WM_APP, WS_CAPTION, WS_CHILD, WS_EX_APPWINDOW,
+    WS_MAXIMIZEBOX, WS_MINIMIZEBOX, WS_POPUP, WS_SYSMENU, WS_THICKFRAME,
 };
 use windows::core::BOOL;
 
@@ -49,6 +49,12 @@ static FOCUS_LOCK: Mutex<()> = Mutex::new(());
 struct Enumeration {
     pid: u32,
     windows: Vec<isize>,
+}
+
+pub(crate) fn foreground_window() -> isize {
+    // SAFETY: GetForegroundWindow takes no pointers, transfers no ownership, and only returns the
+    // current system foreground-window token. A null result is represented as zero.
+    unsafe { GetForegroundWindow().0 as isize }
 }
 
 pub(crate) fn find_windows_of_process(pid: u32) -> io::Result<Vec<isize>> {

@@ -17,6 +17,7 @@ describe('overlay mode', () => {
   it('is hidden unless the system runs, a profile is applied and markers are on or being edited', () => {
     expect(overlayMode(withInput({}, { state: 'stopped' }))).toBe('hidden');
     expect(overlayMode(withInput({}, { state: 'starting' }))).toBe('hidden');
+    expect(overlayMode(withInput({}, { bootCompleted: false }))).toBe('hidden');
     expect(overlayMode(withInput({ activeId: null }))).toBe('hidden');
     expect(overlayMode(withInput({ activeId: 'no-such-profile' }))).toBe('hidden');
     expect(overlayMode(withInput({ overlayVisible: false }))).toBe('hidden');

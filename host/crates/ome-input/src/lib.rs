@@ -10,6 +10,8 @@ use std::path::Path;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
+pub mod keycodes;
+
 /// Current input-profile JSON schema version.
 pub const INPUT_PROFILE_VERSION: u32 = 2;
 /// Absolute pointer maximum used by guest input events.
@@ -441,6 +443,168 @@ pub fn is_keyboard_code(code: &str) -> bool {
         })
 }
 
+/// One native host-key observation before interpretation or synthesis.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct HostKey {
+    /// Win32 scan-set-1 make-code byte.
+    pub scan: u16,
+    /// Whether Windows reported the `e0` extended-key prefix.
+    pub extended: bool,
+    /// True for key down and false for key up.
+    pub pressed: bool,
+}
+
+impl HostKey {
+    /// Returns this key's W3C `KeyboardEvent.code`, when the generated table knows it.
+    pub fn browser_code(self) -> Option<&'static str> {
+        keycodes::scan_to_browser_code(self.scan, self.extended)
+    }
+}
+
+/// Runtime facts consumed by the pure keyboard gate.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct GateFacts<'a> {
+    /// QMP has reached the supervisor's running state.
+    pub guest_running: bool,
+    /// The stage exists in the main window.
+    pub stage_visible: bool,
+    /// The main app window is the Windows foreground window.
+    pub app_foreground: bool,
+    /// The overlay editor currently owns input.
+    pub overlay_editing: bool,
+    /// The guest operating system reported its boot marker.
+    pub boot_completed: bool,
+    /// Profile interpretation is temporarily suspended.
+    pub suspended: bool,
+    /// A selected profile contains this key in one of its bindings.
+    pub active_profile_has_binding: bool,
+    /// Browser code reserved for toggling suspension.
+    pub suspend_hotkey: &'a str,
+}
+
+/// One keyboard routing decision.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Decision {
+    /// Discard the observation.
+    Ignore,
+    /// Toggle profile suspension without forwarding the hotkey.
+    ToggleSuspend,
+    /// Send the key to the profile interpreter.
+    Interpret,
+    /// Send the raw key to QMP.
+    PassThrough,
+}
+
+/// Pure keyboard admission gate.
+#[derive(Clone, Copy, Debug, Default)]
+pub struct Gate;
+
+impl Gate {
+    /// Decides how one host-key observation should be routed.
+    pub fn admit(key: &HostKey, facts: &GateFacts<'_>) -> Decision {
+        if !facts.guest_running || !facts.stage_visible || !facts.app_foreground {
+            return Decision::Ignore;
+        }
+        let code = key.browser_code();
+        if code == Some(facts.suspend_hotkey) {
+            return if key.pressed {
+                Decision::ToggleSuspend
+            } else {
+                Decision::Ignore
+            };
+        }
+        if facts.overlay_editing {
+            return Decision::Ignore;
+        }
+        let Some(_code) = code else {
+            return Decision::PassThrough;
+        };
+        if facts.boot_completed && !facts.suspended && facts.active_profile_has_binding {
+            Decision::Interpret
+        } else {
+            Decision::PassThrough
+        }
+    }
+}
+
+/// Stateful QMP keyboard-event synthesizer.
+#[derive(Debug, Default)]
+pub struct KeySynth {
+    pressed: BTreeSet<(u16, bool)>,
+    unknown: u64,
+}
+
+impl KeySynth {
+    /// Converts one raw host-key observation to one QMP `InputEvent` JSON value.
+    ///
+    /// Repeated key-down observations are suppressed until their matching key-up. Unknown keys are
+    /// counted and ignored. A key-up without a prior forwarded key-down is ignored as stale.
+    pub fn apply(&mut self, key: HostKey) -> Option<serde_json::Value> {
+        let identity = (key.scan, key.extended);
+        let Some(qcode) = keycodes::scan_to_qcode(key.scan, key.extended) else {
+            self.unknown = self.unknown.saturating_add(1);
+            return None;
+        };
+        if key.pressed {
+            if !self.pressed.insert(identity) {
+                return None;
+            }
+        } else if !self.pressed.remove(&identity) {
+            return None;
+        }
+        Some(serde_json::json!({
+            "type": "key",
+            "data": {
+                "down": key.pressed,
+                "key": { "type": "qcode", "data": qcode }
+            }
+        }))
+    }
+
+    /// Returns how many unknown host-key observations were ignored.
+    pub fn unknown_count(&self) -> u64 {
+        self.unknown
+    }
+
+    /// Reports whether this key has a forwarded down event awaiting its up event.
+    pub fn is_pressed(&self, key: HostKey) -> bool {
+        self.pressed.contains(&(key.scan, key.extended))
+    }
+
+    /// Forgets a release that the gate intentionally did not forward.
+    pub fn forget_release(&mut self, key: HostKey) {
+        if !key.pressed {
+            self.pressed.remove(&(key.scan, key.extended));
+        }
+    }
+
+    /// Forgets pressed-key history when guest ownership changes.
+    pub fn reset(&mut self) {
+        self.pressed.clear();
+    }
+}
+
+/// Returns whether a profile interprets the supplied browser keyboard code.
+///
+/// An explicit [`BindingAction::PassThrough`] binding routes through [`KeySynth`] instead.
+pub fn profile_has_key_binding(profile: &InputProfile, code: &str) -> bool {
+    profile.bindings.iter().any(|binding| {
+        if matches!(binding.action, BindingAction::PassThrough) {
+            return false;
+        }
+        match &binding.trigger {
+            Trigger::Key { code: bound } => bound == code,
+            Trigger::KeySet {
+                up,
+                down,
+                left,
+                right,
+            } => [up, down, left, right].iter().any(|bound| *bound == code),
+            Trigger::MouseButton { .. } | Trigger::Wheel { .. } => false,
+        }
+    })
+}
+
 /// One host key event supplied by the native keyboard adapter.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct KeyEvent {
@@ -662,7 +826,8 @@ mod tests {
                 "bindings": [
                     {"id":"tap","trigger":{"kind":"key","code":"Space"},"action":{"kind":"tap","at":{"x":0.5,"y":1.0},"hold":false}},
                     {"id":"hold","trigger":{"kind":"key","code":"KeyH"},"action":{"kind":"tap","at":{"x":0.25,"y":0.25},"hold":true}},
-                    {"id":"swipe","trigger":{"kind":"key","code":"ArrowLeft"},"action":{"kind":"swipe","from":{"x":1.0,"y":0.5},"to":{"x":0.0,"y":0.5},"durationMs":32}}
+                    {"id":"swipe","trigger":{"kind":"key","code":"ArrowLeft"},"action":{"kind":"swipe","from":{"x":1.0,"y":0.5},"to":{"x":0.0,"y":0.5},"durationMs":32}},
+                    {"id":"raw","trigger":{"kind":"key","code":"Escape"},"action":{"kind":"passThrough"}}
                 ]
             }"#,
         )
@@ -758,6 +923,189 @@ mod tests {
         for json in invalid {
             assert!(InputProfile::parse(json).is_err(), "{json}");
         }
+    }
+
+    #[test]
+    fn gate_applies_every_keyboard_rule_in_order() {
+        let key = HostKey {
+            scan: 0x1e,
+            extended: false,
+            pressed: true,
+        };
+        let base = GateFacts {
+            guest_running: true,
+            stage_visible: true,
+            app_foreground: true,
+            overlay_editing: false,
+            boot_completed: true,
+            suspended: false,
+            active_profile_has_binding: true,
+            suspend_hotkey: "F12",
+        };
+        let cases = [
+            (
+                GateFacts {
+                    guest_running: false,
+                    ..base
+                },
+                Decision::Ignore,
+            ),
+            (
+                GateFacts {
+                    stage_visible: false,
+                    ..base
+                },
+                Decision::Ignore,
+            ),
+            (
+                GateFacts {
+                    app_foreground: false,
+                    ..base
+                },
+                Decision::Ignore,
+            ),
+            (
+                GateFacts {
+                    overlay_editing: true,
+                    ..base
+                },
+                Decision::Ignore,
+            ),
+            (
+                GateFacts {
+                    boot_completed: false,
+                    ..base
+                },
+                Decision::PassThrough,
+            ),
+            (
+                GateFacts {
+                    suspended: true,
+                    ..base
+                },
+                Decision::PassThrough,
+            ),
+            (
+                GateFacts {
+                    active_profile_has_binding: false,
+                    ..base
+                },
+                Decision::PassThrough,
+            ),
+            (base, Decision::Interpret),
+        ];
+        for (facts, expected) in cases {
+            assert_eq!(Gate::admit(&key, &facts), expected, "{facts:?}");
+        }
+        let hotkey = HostKey {
+            scan: 0x58,
+            extended: false,
+            pressed: true,
+        };
+        assert_eq!(Gate::admit(&hotkey, &base), Decision::ToggleSuspend);
+        assert_eq!(
+            Gate::admit(
+                &HostKey {
+                    pressed: false,
+                    ..hotkey
+                },
+                &base
+            ),
+            Decision::Ignore
+        );
+        assert_eq!(
+            Gate::admit(
+                &hotkey,
+                &GateFacts {
+                    overlay_editing: true,
+                    suspended: true,
+                    boot_completed: false,
+                    ..base
+                }
+            ),
+            Decision::ToggleSuspend
+        );
+    }
+
+    #[test]
+    fn unknown_key_inside_an_admitted_stage_passes_through_for_synth_counting() {
+        let key = HostKey {
+            scan: 0xffff,
+            extended: false,
+            pressed: true,
+        };
+        let facts = GateFacts {
+            guest_running: true,
+            stage_visible: true,
+            app_foreground: true,
+            overlay_editing: false,
+            boot_completed: true,
+            suspended: false,
+            active_profile_has_binding: false,
+            suspend_hotkey: "F12",
+        };
+        assert_eq!(Gate::admit(&key, &facts), Decision::PassThrough);
+        assert_eq!(
+            Gate::admit(
+                &key,
+                &GateFacts {
+                    overlay_editing: true,
+                    ..facts
+                }
+            ),
+            Decision::Ignore
+        );
+    }
+
+    #[test]
+    fn key_synth_serializes_exact_qmp_shape_and_suppresses_repeat() {
+        let mut synth = KeySynth::default();
+        let down = HostKey {
+            scan: 0x1e,
+            extended: false,
+            pressed: true,
+        };
+        let up = HostKey {
+            pressed: false,
+            ..down
+        };
+        assert_eq!(
+            synth.apply(down),
+            Some(serde_json::json!({
+                "type":"key",
+                "data":{"down":true,"key":{"type":"qcode","data":"a"}}
+            }))
+        );
+        assert_eq!(synth.apply(down), None, "auto-repeat is suppressed");
+        assert_eq!(
+            synth.apply(up),
+            Some(serde_json::json!({
+                "type":"key",
+                "data":{"down":false,"key":{"type":"qcode","data":"a"}}
+            }))
+        );
+        assert_eq!(synth.apply(up), None, "stale release is suppressed");
+    }
+
+    #[test]
+    fn explicit_pass_through_binding_is_not_interpreted() {
+        let profile = profile();
+        assert!(profile_has_key_binding(&profile, "Space"));
+        assert!(!profile_has_key_binding(&profile, "Escape"));
+    }
+
+    #[test]
+    fn key_synth_counts_unknown_observations() {
+        let mut synth = KeySynth::default();
+        assert_eq!(
+            synth.apply(HostKey {
+                scan: 0xffff,
+                extended: false,
+                pressed: true
+            }),
+            None
+        );
+        assert_eq!(synth.unknown_count(), 1);
     }
 
     #[test]

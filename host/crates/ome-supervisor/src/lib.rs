@@ -9,7 +9,7 @@ use std::fs::File;
 use std::io;
 use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex, mpsc};
 use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
@@ -237,6 +237,8 @@ pub trait ChildProcess: Send {
 pub trait QmpSession: Send {
     /// Sends QMP `system_powerdown`.
     fn system_powerdown(&mut self) -> Result<(), QmpError>;
+    /// Sends one complete QMP `input-send-event` array.
+    fn input_send_event(&mut self, events: &[serde_json::Value]) -> Result<(), QmpError>;
     /// Returns the next queued QMP event, if one is immediately available.
     fn poll_event(&mut self) -> Option<QmpEvent>;
 }
@@ -244,6 +246,10 @@ pub trait QmpSession: Send {
 impl QmpSession for QmpChannel {
     fn system_powerdown(&mut self) -> Result<(), QmpError> {
         QmpChannel::system_powerdown(self)
+    }
+
+    fn input_send_event(&mut self, events: &[serde_json::Value]) -> Result<(), QmpError> {
+        QmpChannel::input_send_event(self, events)
     }
 
     fn poll_event(&mut self) -> Option<QmpEvent> {
@@ -337,6 +343,20 @@ pub struct GuestEvent {
     pub logs: Option<LogPaths>,
 }
 
+/// Failure to submit input to the non-blocking supervisor channel.
+#[derive(Clone, Copy, Debug, Eq, Error, PartialEq)]
+pub enum InputError {
+    /// The supervisor worker's input receiver is unavailable.
+    #[error("guest input channel is unavailable")]
+    ChannelUnavailable,
+}
+
+#[derive(Debug)]
+struct InputMessage {
+    epoch: u64,
+    events: Vec<serde_json::Value>,
+}
+
 /// Failure returned synchronously by supervisor admission and setup.
 #[derive(Debug, Error)]
 pub enum SupervisorError {
@@ -366,6 +386,8 @@ where
     policy: SupervisorPolicy,
     shared: Arc<Shared>,
     worker_active: Arc<AtomicBool>,
+    input_tx: mpsc::Sender<InputMessage>,
+    input_rx: Arc<Mutex<mpsc::Receiver<InputMessage>>>,
 }
 
 impl<A, Q> std::fmt::Debug for Supervisor<A, Q>
@@ -387,6 +409,8 @@ struct Shared {
     state: Mutex<GuestState>,
     subscribers: Mutex<Vec<mpsc::Sender<GuestEvent>>>,
     stop_requested: AtomicBool,
+    input_epoch: AtomicU64,
+    dropped_input: AtomicU64,
 }
 
 impl<A, Q> Supervisor<A, Q>
@@ -396,6 +420,7 @@ where
 {
     /// Creates a stopped supervisor; no process or thread starts until [`Self::start`].
     pub fn new(adapter: A, qmp_factory: Q, log_dir: PathBuf, policy: SupervisorPolicy) -> Self {
+        let (input_tx, input_rx) = mpsc::channel();
         Self {
             adapter: Arc::new(Mutex::new(Some(adapter))),
             qmp_factory: Arc::new(qmp_factory),
@@ -405,8 +430,12 @@ where
                 state: Mutex::new(GuestState::Stopped),
                 subscribers: Mutex::new(Vec::new()),
                 stop_requested: AtomicBool::new(false),
+                input_epoch: AtomicU64::new(0),
+                dropped_input: AtomicU64::new(0),
             }),
             worker_active: Arc::new(AtomicBool::new(false)),
+            input_tx,
+            input_rx: Arc::new(Mutex::new(input_rx)),
         }
     }
 
@@ -441,6 +470,7 @@ where
             qmp_factory: Arc::clone(&self.qmp_factory),
             shared: Arc::clone(&self.shared),
             worker_active: Arc::clone(&self.worker_active),
+            input_rx: Arc::clone(&self.input_rx),
             log_dir: self.log_dir.clone(),
             policy: self.policy.clone(),
         };
@@ -464,6 +494,53 @@ where
         }
         self.shared.stop_requested.store(true, Ordering::Release);
         Ok(())
+    }
+
+    /// Submits input without waiting for a QMP response.
+    ///
+    /// Input observed outside `Running` is counted and discarded immediately. Each message carries
+    /// the current process epoch so a late message can never reach a replacement guest process.
+    pub fn send_input(&self, events: Vec<serde_json::Value>) -> Result<(), InputError> {
+        if events.is_empty() {
+            return Ok(());
+        }
+        let state = *lock_unpoisoned(&self.shared.state);
+        if state != GuestState::Running {
+            record_input_drop(&self.shared, events.len(), "guest-not-running");
+            return Ok(());
+        }
+        let message = InputMessage {
+            epoch: self.shared.input_epoch.load(Ordering::Acquire),
+            events,
+        };
+        self.input_tx
+            .send(message)
+            .map_err(|_| InputError::ChannelUnavailable)
+    }
+
+    /// Returns the number of individual input events discarded by the supervisor.
+    pub fn dropped_input_count(&self) -> u64 {
+        self.shared.dropped_input.load(Ordering::Acquire)
+    }
+
+    #[cfg(test)]
+    fn test_set_running(&self) -> u64 {
+        let mut state = lock_unpoisoned(&self.shared.state);
+        let epoch = self.shared.input_epoch.fetch_add(1, Ordering::AcqRel) + 1;
+        *state = GuestState::Running;
+        epoch
+    }
+
+    #[cfg(test)]
+    fn test_receive_input(&self, epoch: u64, qmp: &mut dyn QmpSession) {
+        receive_and_send_input(
+            &self.shared,
+            &self.input_rx,
+            epoch,
+            self.state(),
+            qmp,
+            Duration::from_millis(10),
+        );
     }
 
     /// Returns the latest public state.
@@ -492,6 +569,7 @@ struct WorkerContext<A, Q> {
     qmp_factory: Arc<Q>,
     shared: Arc<Shared>,
     worker_active: Arc<AtomicBool>,
+    input_rx: Arc<Mutex<mpsc::Receiver<InputMessage>>>,
     log_dir: PathBuf,
     policy: SupervisorPolicy,
 }
@@ -506,12 +584,15 @@ where
         qmp_factory,
         shared,
         worker_active,
+        input_rx,
         log_dir,
         policy,
     } = context;
     let mut lifecycle = Lifecycle::Starting;
     let mut replacement = false;
     loop {
+        let input_epoch = next_input_epoch(&shared);
+        drain_stale_input(&shared, &input_rx, input_epoch);
         let logs = match create_log_paths(&log_dir, config.name()) {
             Ok(paths) => paths,
             Err(_) => {
@@ -647,7 +728,14 @@ where
                 }
                 kill_sent = true;
             }
-            thread::sleep(policy.poll_interval);
+            receive_and_send_input(
+                &shared,
+                &input_rx,
+                input_epoch,
+                lifecycle.state(),
+                qmp.as_mut(),
+                policy.poll_interval,
+            );
         }
         if replacement {
             replacement = false;
@@ -658,6 +746,58 @@ where
         break;
     }
     worker_active.store(false, Ordering::Release);
+}
+
+fn next_input_epoch(shared: &Shared) -> u64 {
+    let _state = lock_unpoisoned(&shared.state);
+    shared.input_epoch.fetch_add(1, Ordering::AcqRel) + 1
+}
+
+fn receive_and_send_input(
+    shared: &Shared,
+    receiver: &Mutex<mpsc::Receiver<InputMessage>>,
+    epoch: u64,
+    state: GuestState,
+    qmp: &mut dyn QmpSession,
+    timeout: Duration,
+) {
+    let message = lock_unpoisoned(receiver).recv_timeout(timeout);
+    let Ok(message) = message else {
+        return;
+    };
+    if state != GuestState::Running || message.epoch != epoch {
+        record_input_drop(shared, message.events.len(), "stale-process-epoch");
+        return;
+    }
+    if let Err(error) = qmp.input_send_event(&message.events) {
+        record_input_drop(shared, message.events.len(), "qmp-send-failed");
+        eprintln!("guest input QMP send failed: {error}");
+    }
+}
+
+fn drain_stale_input(
+    shared: &Shared,
+    receiver: &Mutex<mpsc::Receiver<InputMessage>>,
+    current_epoch: u64,
+) {
+    let receiver = lock_unpoisoned(receiver);
+    while let Ok(message) = receiver.try_recv() {
+        let reason = if message.epoch == current_epoch {
+            "guest-not-running"
+        } else {
+            "stale-process-epoch"
+        };
+        record_input_drop(shared, message.events.len(), reason);
+    }
+}
+
+fn record_input_drop(shared: &Shared, count: usize, reason: &str) {
+    let count = u64::try_from(count).unwrap_or(u64::MAX);
+    let total = shared
+        .dropped_input
+        .fetch_add(count, Ordering::AcqRel)
+        .saturating_add(count);
+    eprintln!("guest input dropped: count={count} total={total} reason={reason}");
 }
 
 fn classify_shutdown(event: &QmpEvent) -> Option<LifecycleEvent> {
@@ -932,6 +1072,43 @@ mod tests {
     }
 
     #[derive(Debug)]
+    struct WaitingSpawn {
+        child_exited: Arc<AtomicBool>,
+    }
+
+    impl ProcessAdapter for WaitingSpawn {
+        fn spawn(
+            &mut self,
+            _invocation: &QemuInvocation,
+            _logs: &LogPaths,
+        ) -> Result<Box<dyn ChildProcess>, SpawnError> {
+            Ok(Box::new(WaitingChild {
+                exited: Arc::clone(&self.child_exited),
+            }))
+        }
+    }
+
+    #[derive(Debug)]
+    struct WaitingChild {
+        exited: Arc<AtomicBool>,
+    }
+
+    impl ChildProcess for WaitingChild {
+        fn pid(&self) -> u32 {
+            42
+        }
+
+        fn try_wait(&mut self) -> Result<Option<i32>, WaitError> {
+            Ok(self.exited.load(Ordering::Acquire).then_some(0))
+        }
+
+        fn kill(&mut self) -> Result<(), WaitError> {
+            self.exited.store(true, Ordering::Release);
+            Ok(())
+        }
+    }
+
+    #[derive(Debug)]
     struct NeverQmp;
 
     impl QmpFactory for NeverQmp {
@@ -942,6 +1119,193 @@ mod tests {
         ) -> Result<Box<dyn QmpSession>, QmpError> {
             Err(QmpError::Closed)
         }
+    }
+
+    #[derive(Clone, Debug)]
+    struct RecordingQmpFactory {
+        session: Arc<Mutex<Option<ChannelQmp>>>,
+    }
+
+    impl QmpFactory for RecordingQmpFactory {
+        fn connect(
+            &self,
+            _address: SocketAddr,
+            _timeout: Duration,
+        ) -> Result<Box<dyn QmpSession>, QmpError> {
+            Ok(Box::new(
+                lock_unpoisoned(&self.session)
+                    .take()
+                    .expect("one QMP session"),
+            ))
+        }
+    }
+
+    #[derive(Debug)]
+    struct ChannelQmp {
+        input_calls: mpsc::Sender<Vec<serde_json::Value>>,
+        exited: Arc<AtomicBool>,
+    }
+
+    impl QmpSession for ChannelQmp {
+        fn system_powerdown(&mut self) -> Result<(), QmpError> {
+            self.exited.store(true, Ordering::Release);
+            Ok(())
+        }
+
+        fn input_send_event(&mut self, events: &[serde_json::Value]) -> Result<(), QmpError> {
+            self.input_calls
+                .send(events.to_vec())
+                .map_err(|_| QmpError::Closed)
+        }
+
+        fn poll_event(&mut self) -> Option<QmpEvent> {
+            None
+        }
+    }
+
+    #[derive(Clone, Debug, Default)]
+    struct NeverSpawn;
+
+    impl ProcessAdapter for NeverSpawn {
+        fn spawn(
+            &mut self,
+            _invocation: &QemuInvocation,
+            _logs: &LogPaths,
+        ) -> Result<Box<dyn ChildProcess>, SpawnError> {
+            Err(SpawnError::Unwired)
+        }
+    }
+
+    #[derive(Debug, Default)]
+    struct RecordingQmp {
+        input_calls: Vec<Vec<serde_json::Value>>,
+    }
+
+    impl QmpSession for RecordingQmp {
+        fn system_powerdown(&mut self) -> Result<(), QmpError> {
+            Ok(())
+        }
+
+        fn input_send_event(&mut self, events: &[serde_json::Value]) -> Result<(), QmpError> {
+            self.input_calls.push(events.to_vec());
+            Ok(())
+        }
+
+        fn poll_event(&mut self) -> Option<QmpEvent> {
+            None
+        }
+    }
+
+    fn input_supervisor() -> Supervisor<NeverSpawn, NeverQmp> {
+        Supervisor::new(
+            NeverSpawn,
+            NeverQmp,
+            std::env::temp_dir(),
+            SupervisorPolicy::default(),
+        )
+    }
+
+    #[test]
+    fn worker_wakes_for_input_and_makes_one_exact_qmp_call() {
+        let directory = std::env::temp_dir().join(format!(
+            "ome-supervisor-input-{}-{}",
+            std::process::id(),
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .expect("clock")
+                .as_nanos()
+        ));
+        let exited = Arc::new(AtomicBool::new(false));
+        let (input_sender, input_receiver) = mpsc::channel();
+        let factory = RecordingQmpFactory {
+            session: Arc::new(Mutex::new(Some(ChannelQmp {
+                input_calls: input_sender,
+                exited: Arc::clone(&exited),
+            }))),
+        };
+        let mut supervisor = Supervisor::new(
+            WaitingSpawn {
+                child_exited: Arc::clone(&exited),
+            },
+            factory,
+            directory.clone(),
+            SupervisorPolicy {
+                poll_interval: Duration::from_secs(1),
+                ..SupervisorPolicy::default()
+            },
+        );
+        let events = supervisor.subscribe();
+        let config = GuestConfig::validate(Default::default()).expect("config");
+        let paths = GuestPaths {
+            disk: "disk.qcow2".into(),
+            firmware_code: "code.fd".into(),
+            firmware_vars: "vars.fd".into(),
+            iso: None,
+        };
+        let install = QemuInstall {
+            system_exe: "qemu.exe".into(),
+        };
+        supervisor.start(config, paths, install).expect("start");
+        loop {
+            let event = events
+                .recv_timeout(Duration::from_secs(1))
+                .expect("running event");
+            if event.state == GuestState::Running {
+                break;
+            }
+        }
+        let input = serde_json::json!({
+            "type":"key",
+            "data":{"down":true,"key":{"type":"qcode","data":"a"}}
+        });
+        let started = Instant::now();
+        supervisor
+            .send_input(vec![input.clone()])
+            .expect("submit input");
+        assert_eq!(
+            input_receiver
+                .recv_timeout(Duration::from_millis(200))
+                .expect("worker wakes before one-second poll"),
+            vec![input]
+        );
+        assert!(started.elapsed() < Duration::from_millis(200));
+        supervisor.request_stop().expect("request stop");
+        while supervisor.state() != GuestState::Stopped {
+            events
+                .recv_timeout(Duration::from_secs(2))
+                .expect("stopped event");
+        }
+        let _ = fs::remove_dir_all(directory);
+    }
+
+    #[test]
+    fn running_input_becomes_one_exact_input_send_event_call() {
+        let supervisor = input_supervisor();
+        let epoch = supervisor.test_set_running();
+        let event = serde_json::json!({
+            "type":"key",
+            "data":{"down":true,"key":{"type":"qcode","data":"a"}}
+        });
+        supervisor
+            .send_input(vec![event.clone()])
+            .expect("submit input");
+        let mut qmp = RecordingQmp::default();
+        supervisor.test_receive_input(epoch, &mut qmp);
+        assert_eq!(qmp.input_calls, vec![vec![event]]);
+        assert_eq!(supervisor.dropped_input_count(), 0);
+    }
+
+    #[test]
+    fn input_before_running_is_dropped_and_never_replayed() {
+        let supervisor = input_supervisor();
+        supervisor
+            .send_input(vec![serde_json::json!({"before":"running"})])
+            .expect("drop before running");
+        assert_eq!(supervisor.dropped_input_count(), 1);
+        let epoch = supervisor.test_set_running();
+        let mut qmp = RecordingQmp::default();
+        supervisor.test_receive_input(epoch, &mut qmp);
+        assert!(qmp.input_calls.is_empty());
     }
 
     #[test]

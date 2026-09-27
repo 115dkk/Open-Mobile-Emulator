@@ -312,14 +312,19 @@ manifests/images/         게스트 이미지 프로필 JSON (3.15절). 산출�
 화면 위에서 바로 고치는 편집기, 전체 매핑을 잠시 끄는 단축키. 그리고 나중에 키보드 매크로 같은
 편의 기능이 더해질 수 있다(ADR-0005).
 
-파이프라인은 다섯 단계이고 단계마다 모듈이다.
+파이프라인은 다섯 단계이고 단계마다 모듈이다. 현재 포착, 문, 키 합성은 구현되어 있다.
+`KeyboardHook`이 읽은 스캔 코드와 확장 플래그는 keycodemapdb에서 생성한 표로 브라우저 코드와
+QEMU qcode가 된다. 런타임은 전경 창, 무대 표시, 부팅 완료, 편집, 일시 중지, 선택 프로필을 문에
+넘기며, 통과 입력은 감독자 채널을 거쳐 QMP `input-send-event`로 간다. 감독자 스레드만 QMP를
+소유하므로 입력 호출은 런타임을 막지 않는다. 실행 중이 아닐 때 온 입력은 버리고 개수를 로그에
+남긴다.
 
 | 단계 | 모듈 | 인터페이스 | 뒤에 숨는 것 |
 |---|---|---|---|
-| 포착 | `KeyboardSource`, `MouseSource` | `subscribe() -> Receiver<HostInput>` (키 코드와 눌림/뗌, 마우스 버튼과 휠, 포인터의 무대 좌표) | 플랫폼 크레이트의 `WH_KEYBOARD_LL`, `WH_MOUSE_LL` 훅, 전용 스레드, 1 ms 안에 끝나는 콜백. 아무 입력도 기록하지 않는다 |
-| 문 | `Gate` | `admit(&HostInput, &Focus) -> Admitted | PassThrough` | 무대가 포커스를 갖고 포인터가 무대 안일 때만 소비. 일시 중지 단축키(기본 F12, 설정 가능)를 여기서 처리하고 상태를 알린다. 편집 모드에서는 합성하지 않는다. 바인딩이 없는 입력은 게스트로 그대로 통과한다 |
+| 포착 | `KeyboardHook`(구현), `MouseSource`(예정) | `KeyboardHook::install(Sender<KeyEvent>)` | 플랫폼 크레이트의 `WH_KEYBOARD_LL` 훅과 전용 스레드가 키 스캔 코드, 확장 여부, 눌림·뗌을 보낸다. 콜백은 입력을 막거나 기록하지 않는다. 마우스 훅은 아직 없다 |
+| 문 | `Gate`(키 구현) | `admit(&HostKey, &GateFacts) -> Decision` | 게스트 실행, 무대 표시, 앱 전경 여부를 먼저 검사한다. F12 등 일시 중지 단축키의 누름만 상태를 바꾸고 게스트에는 보내지 않는다. 부팅 뒤 선택 프로필에 바인딩된 키만 해석하며, 그 밖의 키는 그대로 통과한다 |
 | 해석 | `Interpreter` | `on(HostInput, now) -> Vec<TouchOp>`(순수. 눌린 키 집합, 슬롯 배정, 조이스틱 상태를 내부에 갖는다) | 바인딩 종류(탭과 홀드, 스와이프, 가상 조이스틱, 마우스 버튼, 휠, 통과), 논리 좌표 → 게스트 픽셀 → QMP 축(0~32767) 변환, 기준점 정책으로 화면 비율 차이 흡수, 슬롯 최대 10개 |
-| 합성 | `TouchSynth`, `KeySynth` | `apply(TouchOp)`, `apply(KeyOp)` | QMP `input-send-event`의 멀티터치 이벤트(`virtio-multitouch-pci`, 확인 필요: QEMU 11.1 `qapi/ui.json`의 `InputMultiTouchEvent`), 장치가 없을 때의 단일 포인터 폴백, `send-key` |
+| 합성 | `TouchSynth`(예정), `KeySynth`(구현) | `KeySynth::apply(HostKey) -> Option<Value>` | `KeySynth`는 QMP `input-send-event` 키 JSON을 만들고 자동 반복 누름을 없앤다. 알 수 없는 스캔 코드는 세어 버린다. `TouchSynth`의 멀티터치 이벤트와 장치가 없을 때의 단일 포인터 폴백은 아직 없다 |
 | 일정 | `Scheduler` | `schedule(at, TouchOp)`, `tick(now)` | 스와이프의 보간 단계, 조이스틱 60 Hz 갱신, 나중의 매크로 시퀀스. 단조 시계 주입으로 결정적 테스트 |
 
 - 프로필: `InputProfile`(JSON, `version`, `id`, `name`, `package: Option`, `reference_aspect`,
@@ -331,12 +336,18 @@ manifests/images/         게스트 이미지 프로필 JSON (3.15절). 산출�
   정책으로 옮긴다(가운데 기준은 짧은 축을 맞추고 긴 축은 가운데 정렬, 가장자리 기준은 각 점이
   가까운 가장자리에서의 거리 비율을 지킨다). 무대 크기와 배율은 좌표에 영향이 없다. 좌표는
   언제나 게스트 화면 기준이다.
-- 테스트 표면: 해석기는 입력 열 → 터치 동작 열의 표로 전부 테스트한다. 조이스틱은 키 조합
+- 테스트 표면: 문은 모든 판정 규칙을 표로 검사하고, 키 합성은 정확한 QMP JSON과 반복 제거를
+  검사한다. 감독자는 실행 전 입력을 버리는지와 한 입력 묶음이 QMP 호출 하나가 되는지를 가짜
+  QMP로 검사한다. 해석기는 입력 열 → 터치 동작 열의 표로 전부 테스트한다. 조이스틱은 키 조합
   여덟 방향과 뗌 순서, 홀드는 누름과 뗌의 짝, 슬롯은 동시 터치 열 개, 기준점 정책은 16:9 →
   16:10과 세로 전환. 일정은 가짜 시계로. 합성은 가짜 QMP로. 포착은 플랫폼 스파이크에서만.
 - 매크로 자리: `Binding.action`은 `#[non_exhaustive]` 열거형이고 `Sequence { steps, repeat }`
   변형과 일정 단계의 시퀀스 실행이 들어갈 자리를 문서 주석으로 표시한다. v1에는 넣지 않는다(D9).
   들어갈 때는 게임 약관 검토가 먼저다(P5).
+
+- 남은 일: `TouchSynth`와 `Scheduler`를 구현하고 현재 `Mapper`가 만든 터치 동작을 멀티터치
+  QMP 이벤트로 잇는다. 마우스 포착, 조이스틱 상태, 스와이프 일정도 이때 연결한다. 지금은
+  바인딩된 키가 만든 터치 동작을 로그에 남기고 버린다.
 
 ### 3.17 ome-overlay
 
