@@ -18,9 +18,9 @@ import {
   byteUnit, formatBytes, formatBytesIn, formatDuration, formatGib, formatPercent, formatRate, formatTimestamp,
 } from '../format';
 import {
-  CAPABILITY_LABEL, bootSteps, hostLines,
+  CAPABILITY_LABEL, FAILURE_NEXT_STEP, bootSteps, hostLines,
 } from '../presentation';
-import type { StepState } from '../presentation';
+import type { BootStep, StepState } from '../presentation';
 import { ImageCards } from './ImageCards';
 import { useEscapeKey } from './use-escape-key';
 import { ESC_LINE, WhpxConsentBody } from './WhpxConsentBody';
@@ -380,20 +380,29 @@ function CapabilityList({ guest }: { readonly guest: GuestView }) {
 
 function FirstBootStep({ snapshot, actions }: StepProps) {
   const { guest, wizard } = snapshot;
+  // The failed symbol and the noun phrase name the failure; the detail says what to do (DESIGN.md 9).
+  const detail = (step: BootStep): ReactNode => {
+    if (step.state === 'failed') return FAILURE_NEXT_STEP;
+    if (step.id === 'probe') return <CapabilityList guest={guest} />;
+    return undefined;
+  };
   const steps: StepItem[] = bootSteps(guest, true).map((step) => ({
     id: step.id,
     label: step.label,
     state: step.state,
-    children: step.id === 'probe' ? <CapabilityList guest={guest} /> : undefined,
+    children: detail(step),
   }));
-  const running = guest.state !== 'stopped' && guest.state !== 'failed';
+  const failed = guest.state === 'failed';
+  const running = guest.state !== 'stopped' && !failed;
   return (
     <WizardLayout
       wide
       issue={snapshot.issue}
       onDefer={actions.wizardDefer}
-      footer={(running || wizard.canContinue) ? <>
+      footer={(running || failed || wizard.canContinue) ? <>
         {running && <Button size="large" onClick={actions.guestStop}>취소</Button>}
+        {/* The virtual machine has ended; the supervisor starts again from Failed. */}
+        {failed && <Button size="large" variant="primary" icon="refresh" onClick={actions.guestStart}>다시 시작</Button>}
         {wizard.canContinue && <Button size="large" variant="primary" onClick={actions.wizardContinue}>다음</Button>}
       </> : undefined}
     >

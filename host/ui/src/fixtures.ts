@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Copyright (C) 2026 Open Mobile Emulator contributors
 import type {
-  AppIssue, AppItem, AppSnapshot, BlockerKind, ControllerBridge, GuestImageSummary, GuestSummary, HostRow,
+  AppIssue, AppItem, AppSnapshot, BlockerKind, ControllerBridge, GuestImageSummary, GuestSummary, GuestView, HostRow,
   TransferProgress,
 } from './contracts';
 
@@ -230,6 +230,16 @@ export const wizardGallery: readonly GalleryVariant[] = [
     snapshot: wizardAt('firstBoot', {
       images: installedImages,
       guest: { ...sampleSnapshot.guest, state: 'starting', hosting: 'embedded', imageId: 'sample-android-13' },
+    }),
+  },
+  {
+    id: 'first-boot-failed', label: 'S1.6 첫 부팅: 부팅 실패',
+    snapshot: wizardAt('firstBoot', {
+      images: installedImages,
+      guest: {
+        ...sampleSnapshot.guest, state: 'failed', imageId: 'sample-android-13',
+        lastExit: { kind: 'bootTimeout', at: '2026-09-26T19:58:00', logPath: null },
+      },
     }),
   },
   {
@@ -562,9 +572,30 @@ export const displayGallery: readonly GalleryVariant[] = [
   },
 ];
 
+/** The running system with its device ID read and the account screen reachable (M2-SCREENS.md 6). */
+const googleGuest: GuestView = {
+  ...railRunningSnapshot.guest, deviceIdDecimal: '4578502957678280785', addAccountSupported: true,
+};
+
 export const settingsGallery: readonly GalleryVariant[] = [
   { id: 'settings-stopped', label: 'S6 설정: 꺼짐', snapshot: railStoppedSnapshot },
   { id: 'settings-running', label: 'S6 설정: 실행 중', snapshot: railRunningSnapshot },
+  {
+    id: 'settings-google-reading', label: 'S6 설정: Google 계정, 기기 ID 읽는 중',
+    snapshot: { ...railRunningSnapshot, guest: { ...railRunningSnapshot.guest, deviceId: null, deviceIdDecimal: null, googleAccounts: null } },
+  },
+  {
+    id: 'settings-google-id', label: 'S6 설정: Google 계정, 등록 전',
+    snapshot: { ...railRunningSnapshot, guest: { ...googleGuest, googleAccounts: 0 } },
+  },
+  {
+    id: 'settings-google-registered', label: 'S6 설정: Google 계정, 등록 페이지를 연 뒤',
+    snapshot: { ...railRunningSnapshot, guest: { ...googleGuest, googleAccounts: 0, registrationOpenedAt: '2026-09-27T20:14:00' } },
+  },
+  {
+    id: 'settings-google-account', label: 'S6 설정: Google 계정, 로그인됨',
+    snapshot: { ...railRunningSnapshot, guest: { ...googleGuest, googleAccounts: 1, registrationOpenedAt: '2026-09-27T20:14:00' } },
+  },
   {
     id: 'settings-network', label: 'S6 설정: 다른 PC 연결 허용, 새 버전',
     snapshot: {

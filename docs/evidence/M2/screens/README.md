@@ -27,6 +27,7 @@ chrome.exe --headless=new --disable-gpu --hide-scrollbars --no-first-run
 | download-transferring | S1.4 이미지 다운로드 중 |
 | install-guide | S1.5 설치 안내 |
 | first-boot-done | S1.6 첫 부팅, 기능 확인 끝 |
+| first-boot-failed | S1.6 첫 부팅, 운영체제 부팅 실패(실패 줄 아래 다음 행동, 바닥에 `다시 시작`) |
 | app-install | S1.7 앱 설치(설치 중 한 건, 완료 한 건) |
 | blocked-virtualization | S8 가상화 꺼짐 |
 | stage-running | S2 실행 중 |

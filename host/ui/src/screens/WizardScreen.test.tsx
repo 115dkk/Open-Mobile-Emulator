@@ -23,7 +23,7 @@ function show(snapshot: AppSnapshot) {
 describe('first-run wizard: 나중에 하기', () => {
   it.each([
     'host-ready', 'whpx-consent', 'reboot-pending', 'download-idle', 'download-transferring',
-    'install-disk', 'install-guide', 'first-boot', 'app-install',
+    'install-disk', 'install-guide', 'first-boot', 'first-boot-failed', 'app-install',
   ])('%s closes the wizard and keeps the step', async (id) => {
     const actions = show(variant(id));
     await userEvent.click(screen.getByRole('button', { name: '나중에 하기' }));
@@ -178,6 +178,18 @@ describe('first-run wizard: S1.6 first boot', () => {
     expect(within(steps).getByText('운영체제 부팅').closest('li')).toHaveAttribute('aria-current', 'step');
     await userEvent.click(screen.getByRole('button', { name: '취소' }));
     expect(actions.guestStop).toHaveBeenCalledOnce();
+  });
+
+  it('says what to do after a failed boot and restarts', async () => {
+    const actions = show(variant('first-boot-failed'));
+    const steps = screen.getByRole('list', { name: '첫 부팅 진행' });
+    const boot = within(steps).getByText('운영체제 부팅').closest('li');
+    expect(boot).toHaveClass('ome-step-failed');
+    expect(within(boot as HTMLElement).getByText('다시 시작을 시도할 수 있습니다. 반복될 경우 로그를 첨부해 문제를 보고하십시오.')).toBeInTheDocument();
+    expect(within(steps).queryByText(/180|신호/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '취소' })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: '다시 시작' }));
+    expect(actions.guestStart).toHaveBeenCalledOnce();
   });
 
   it('marks probed capabilities and reports the applied defaults', async () => {

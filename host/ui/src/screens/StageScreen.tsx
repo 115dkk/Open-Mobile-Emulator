@@ -12,7 +12,7 @@ import type {
 } from '../contracts';
 import { Button, Icon, IconButton, IssueNotice, Slider, StageFrame, StatusDot, StepList } from '../components';
 import { formatTimestamp } from '../format';
-import { GUEST_STATE_LABEL, GUEST_STATE_TONE, bootSteps } from '../presentation';
+import { FAILURE_NEXT_STEP, GUEST_STATE_LABEL, GUEST_STATE_TONE, bootSteps } from '../presentation';
 
 function sizeText(size: Size): string {
   return `${String(size.width)}x${String(size.height)}`;
@@ -182,7 +182,7 @@ function FailedStage({ lastExit, actions }: { readonly lastExit: LastExit | null
         <span className="ome-stage-failure-icon"><Icon name="alert-circle" size={24} strokeWidth={2} /></span>
         <h2 className="ome-stage-failure-title">{failureTitle(lastExit)}</h2>
       </div>
-      <p className="ome-stage-failure-body">다시 시작을 시도할 수 있습니다. 반복될 경우 로그를 첨부해 문제를 보고하십시오.</p>
+      <p className="ome-stage-failure-body">{FAILURE_NEXT_STEP}</p>
       <div className="ome-stage-failure-actions">
         {/* The virtual machine has ended; the supervisor starts again from Failed. */}
         <Button variant="primary" icon="refresh" onClick={actions.guestStart}>다시 시작</Button>

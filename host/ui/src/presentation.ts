@@ -97,6 +97,9 @@ export const IMAGE_STATUS_TONE: Readonly<Record<ImageStatus, StatusTone>> = {
   deprecated: 'muted',
 };
 
+/** The line after every failure title (DESIGN.md 9): what the user can do next, never the internals. */
+export const FAILURE_NEXT_STEP = '다시 시작을 시도할 수 있습니다. 반복될 경우 로그를 첨부해 문제를 보고하십시오.';
+
 export interface BootStep {
   readonly id: 'vm' | 'screen' | 'boot' | 'probe';
   readonly label: string;
@@ -118,13 +121,42 @@ export function bootSteps(guest: GuestView, includeProbe: boolean): BootStep[] {
     { id: 'boot', label: '운영체제 부팅', done: booted },
   ];
   if (includeProbe) facts.push({ id: 'probe', label: '기능 확인', done: guest.capabilities.probedAt !== null });
+  if (guest.state === 'failed') {
+    // The runtime clears the hosting and boot facts when the virtual machine ends, so the failed
+    // line comes from the exit: the machine never started, or it started and the operating system
+    // did not boot (timeout or crash before the boot marker).
+    const failedIndex = guest.lastExit?.kind === 'startFailed' ? 0 : 2;
+    return facts.map(({ id, label }, index) => ({ id, label, state: failedStepState(index, failedIndex) }));
+  }
   const moving = guest.state === 'starting' || guest.state === 'running' || guest.state === 'restarting';
   let current = false;
   return facts.map(({ id, label, done }) => {
     if (done) return { id, label, state: 'done' };
     if (current) return { id, label, state: 'pending' };
     current = true;
-    if (guest.state === 'failed') return { id, label, state: 'failed' };
     return { id, label, state: moving ? 'active' : 'pending' };
   });
+}
+
+function failedStepState(index: number, failedIndex: number): StepState {
+  if (index < failedIndex) return 'done';
+  if (index === failedIndex) return 'failed';
+  return 'pending';
+}
+
+/** Google 계정 section states (M2-SCREENS.md 6), picked from the snapshot in this order. */
+export type GoogleAccountState = 'account' | 'registered' | 'id' | 'reading';
+
+export function googleAccountState(guest: GuestView): GoogleAccountState {
+  if ((guest.googleAccounts ?? 0) >= 1) return 'account';
+  if (guest.registrationOpenedAt !== null) return 'registered';
+  if (guest.deviceId !== null) return 'id';
+  return 'reading';
+}
+
+/** Local hour and minute of a timestamp: `20:14`. Unparseable input is shown as given. */
+export function clockTime(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 }

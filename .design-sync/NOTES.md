@@ -28,6 +28,12 @@ Repo-specific facts a future sync needs. One bullet per gotcha; append, never re
   render check 19/19 clean, every cell graded good, final capture 19 carried forward. Font
   chunks hit `read ECONNRESET` twice on the way up; single-file retries succeeded.
 
+- 2026-09-27 (later): re-sync after the StepList preview copy fix (the failed step's detail now says
+  what to do next, per DESIGN.md 9, instead of the internal 180 s timeout). Anchor fetched with
+  `DesignSync get_file _ds_sync.json` into `.design-sync/.cache/remote-sync.json`; `resync.mjs`
+  reported 18 verified-by-upload, 1 changed (StepList), no bundle/style/aux change; re-graded from
+  the fresh sheet; uploaded sentinel → 5 StepList files → `_ds_sync.json` → sentinel.
+
 ## Known render warns
 
 - `[FONT_MISSING] "Cascadia Mono" (--font-mono)`: the mono stack is `"Sarasa Mono K", Consolas,
