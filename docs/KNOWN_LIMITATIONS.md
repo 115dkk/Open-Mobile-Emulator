@@ -9,6 +9,16 @@
   Running games is outside that scope (`docs/adr/0006-guest-image-distribution.md`).
   Self-built guest images, once they exist, are released without Google files
   (R3).
+- 32-bit ARM apps (`armeabi-v7a`, `armeabi`) run only through a proprietary
+  translator. The open translator the project aims to make the default for
+  64-bit ARM apps (Digitalis, P2) has an ARM64 backend only, and no open
+  ARM32-to-x86 translator was found (2026-09-28). The Android 13 guest lists
+  both 32-bit ABIs (`docs/evidence/M0/bridge-props.txt`), but no 32-bit-only
+  app has been run on it yet (`docs/adr/0008-drop-pie-abi-based-translator-policy.md`).
+- Android 9 (Pie) is not a planned guest profile. Commercial emulators keep it
+  mainly for low-memory PCs, many instances, macros, and 32-bit apps; the first
+  three are outside this product, and 32-bit apps are covered by the Android 13
+  profile (ADR-0008).
 - GPU acceleration is OpenGL only, through virglrenderer. Games that require
   Vulkan are unsupported until the gfxstream path exists (P1).
 - The guest is a Google-uncertified device. Play Store and in-app purchases are

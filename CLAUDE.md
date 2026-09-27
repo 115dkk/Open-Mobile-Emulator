@@ -6,7 +6,9 @@
 
 개정 2026-09-25 (같은 날 오후): 사용자 결정으로 제품 이름, 라이선스, M0 하네스, APK 출처를 확정했다. 변경된 항목은 D6, R5, R6, 8절과 새로 넣은 9절이다.
 
-개정 2026-09-28 (제안, PR 병합으로 승인): 사용자가 밝힌 최우선 목표를 0절에 적고, 자체 이미지 배포 방식(`docs/adr/0006-guest-image-distribution.md`)과 릴리스 빌드 출처 증명(`docs/adr/0007-release-build-provenance.md`)을 반영했다. 변경된 항목은 0절, D4, R2, R3, M3, P2, P3, 6절, 8절 9번이다.
+개정 2026-09-28 (PR #1로 병합): 사용자가 밝힌 최우선 목표를 0절에 적고, 자체 이미지 배포 방식(`docs/adr/0006-guest-image-distribution.md`)과 릴리스 빌드 출처 증명(`docs/adr/0007-release-build-provenance.md`)을 반영했다. 변경된 항목은 0절, D4, R2, R3, M3, P2, P3, 6절, 8절 9번이다.
+
+개정 2026-09-28 (같은 날): 안드로이드 9(Pie)를 1차 목표에서 빼고, 번역기의 공개 원칙을 ABI 기준으로 세웠다(`docs/adr/0008-drop-pie-abi-based-translator-policy.md`). 변경된 항목은 D2, D4, M3 4번, P2, 6절, 8절 9번이다.
 
 ---
 
@@ -51,9 +53,9 @@ Claude Code는 이 절의 사실을 다시 조사하지 않아도 된다. 다만
 | ID | 결정 | 바꾸려면 |
 |---|---|---|
 | D1 | 하이퍼바이저는 WHPX. 커널 드라이버를 만들거나 배포하지 않는다. | 사용자 승인 |
-| D2 | 게스트는 x86_64 안드로이드 이미지이고 **이미지 프로필로 교체되는 부품**이다(`docs/adr/0004-replaceable-guest-image.md`, 사용자 요구 2026-09-26 밤). 첫 프로필은 Bliss OS 16.9.x GApps(안드로이드 13) 공식 ISO(M0, M1로 검증). 1차 목표는 안드로이드 9(Pie), 13, 15, 16, 17 프로필이며, 그 뒤로 새 버전이 나오는 대로 프로필을 더해 따라간다. 15 이상은 Bliss 18 또는 arcadia 트리의 자체 빌드(R3)가 후보다. 세대별 차이는 세대 어댑터 하나에만 있고 다른 코드는 API 레벨로 분기하지 않는다. | 사용자 승인 |
+| D2 | 게스트는 x86_64 안드로이드 이미지이고 **이미지 프로필로 교체되는 부품**이다(`docs/adr/0004-replaceable-guest-image.md`, 사용자 요구 2026-09-26 밤). 첫 프로필은 Bliss OS 16.9.x GApps(안드로이드 13) 공식 ISO(M0, M1로 검증). 1차 목표는 안드로이드 13, 15, 16, 17 프로필이며(안드로이드 9는 ADR-0008로 뺐다), 그 뒤로 새 버전이 나오는 대로 프로필을 더해 따라간다. 15 이상은 Bliss 18 또는 arcadia 트리의 자체 빌드(R3)가 후보다. 세대별 차이는 세대 어댑터 하나에만 있고 다른 코드는 API 레벨로 분기하지 않는다. | 사용자 승인 |
 | D3 | GPU는 1단계 virglrenderer(OpenGL), 2단계 gfxstream. | 2단계 진입은 사용자 승인 |
-| D4 | ARM 변환기는 게스트에 포함된 구글 libndk_translation. 자체 이미지에서는 게스트에 미리 들어 있지 않고 설치 시점에 사용자 PC가 6절 계약으로 넣는다(ADR-0006). 교체 가능한 부품으로 취급하며 `translator/` 계약(6절)을 지킨다. | 계약 변경은 사용자 승인 |
+| D4 | ARM 변환기는 게스트에 포함된 구글 libndk_translation. 자체 이미지에서는 게스트에 미리 들어 있지 않고 설치 시점에 사용자 PC가 6절 계약으로 넣는다(ADR-0006). 교체 가능한 부품으로 취급하며 `translator/` 계약(6절)을 지킨다. 공개 원칙은 ABI 기준이다(ADR-0008). arm64-v8a는 공개 번역기(Digitalis, P2)를 기본으로 삼는 것이 목표이고, armeabi-v7a와 armeabi는 공개 번역기가 없으므로 비공개 번역기를 쓰며 그 이유를 밝힌다. | 계약 변경은 사용자 승인 |
 | D5 | QEMU는 별도 프로세스로 실행하고 QMP 소켓으로 제어한다. QEMU 코드를 링크하거나 복사하지 않는다. | 변경 불가 |
 | D6 | 자체 코드 라이선스는 GPL-2.0-or-later. 이유는 상용 에뮬레이터 업체가 이 코드를 가져가 비공개로 최적화해 되파는 일을 막기 위해서다(사용자 결정 2026-09-25). 게스트 오버레이(`guest/overlay/`)와 변환기 번들 템플릿처럼 AOSP 파생 파일은 원 라이선스 Apache-2.0을 유지하며, `or-later` 덕분에 두 부분이 만나도 GPL-3.0 아래에서 결합할 수 있다. | 사용자 승인 |
 | D7 | 프런트엔드는 **Tauri 2 + Rust**(사용자 결정 2026-09-26, 근거는 `docs/DECISION-frontend.md` 8절). 지능은 Rust 크레이트가 갖고 Tauri 껍데기와 웹뷰는 얇게 둔다. `unsafe`는 윈도우 전용 크레이트의 ffi 모듈에만 허용하고 나머지 크레이트는 전부 `forbid`한다(`docs/adr/0002-unsafe-policy.md`). M0, M1은 PowerShell 7 스크립트로만 만들었다. | 사용자 승인 |
@@ -239,6 +241,7 @@ PRODUCT/
 4. `docs/KNOWN_LIMITATIONS.md` 확정. 최소 항목:
    - ARM 변환기는 Bliss 빌드가 포함한 구글의 비공개 바이너리이며 이 프로젝트가 만든 것이 아니다. 오픈소스 교체는 후속 작업이다.
    - 구글이 이 변환기를 싣는 에뮬레이터 이미지의 SDK 라이선스 계약은 3.1에서 호환 안드로이드용 앱을 개발하는 목적에만 사용권을 준다. 게임 실행은 그 범위에 들지 않는다(ADR-0006 열린 문제).
+   - 32비트 ARM 앱(armeabi-v7a, armeabi)은 공개 번역기가 없어 비공개 번역기로만 돈다(ADR-0008).
    - GPU 가속은 OpenGL(virgl) 경로뿐이라 Vulkan 필수 게임은 미지원이다.
    - 게스트는 구글 비인증 기기라 Play 스토어와 인앱 결제는 등록 절차를 거쳐도 보장되지 않는다.
    - WHPX를 켜면 윈도우가 하이퍼바이저 위에서 동작하므로 같은 PC의 커널 안티치트 게임과 충돌할 수 있고, 제품은 이 설정을 임의로 바꾸지 않는다.
@@ -250,7 +253,7 @@ PRODUCT/
 ### 출시 후 트랙 (순서는 사용자가 정한다)
 
 - P1. gfxstream: 윈도우 호스트에서 `virtio-gpu-rutabaga`를 빌드할 수 있는지 조사 스파이크. 리눅스 전제 문서를 윈도우로 옮기는 데 필요한 변경을 목록화하고, 불가하면 대안(ANGLE 위 virgl, Venus)을 평가한다. 결과 문서만 산출하고 코드는 승인 후.
-- P2. Digitalis 교체: `translator/` 계약(6절)에 맞춰 Digitalis 바이너리 번들을 설치하는 스크립트를 만들고, libndk와 A/B로 트릭컬 시나리오와 측정표를 비교한다. 성능이나 안정성이 미달이면 결과를 기록하고 기본값은 libndk로 유지한다. ADR-0006 뒤로 Digitalis(Apache-2.0, AOSP Berberis 수정판)는 후보 변환기 가운데 구글 SDK 계약의 사용 범위 문제(3.1)가 없는 유일한 것이기도 하다.
+- P2. Digitalis 교체: `translator/` 계약(6절)에 맞춰 Digitalis 바이너리 번들을 설치하는 스크립트를 만들고, libndk와 A/B로 트릭컬 시나리오와 측정표를 비교한다. 성능이나 안정성이 미달이면 결과를 기록하고 기본값은 libndk로 유지한다. ADR-0006 뒤로 Digitalis(Apache-2.0, AOSP Berberis 수정판)는 후보 변환기 가운데 구글 SDK 계약의 사용 범위 문제(3.1)가 없는 유일한 것이기도 하다. Digitalis는 AOSP 16(API 36)에 맞춰 빌드되고 다른 API 레벨의 이미지에 섞어 넣는 것을 지원하지 않으므로, 통째로 포크하지 않고 버전에 묶인 플랫폼 층(게스트 bionic, `native_bridge_support` 프록시)만 OME가 소스에서 API 레벨별로 빌드한다(ADR-0008, 빌드 위치는 확인 필요). 순서는 API 33(지금 게스트, 이 묶음이 생기면 P3를 기다리지 않고 A/B를 시작한다), API 34~37, API 30~32다. Digitalis에는 ARM64 백엔드만 있다.
 - P3. 게스트 갱신: Bliss 18 또는 arcadia 기반 foss 이미지를 빌드하고, 블롭은 사용자 PC가 설치 시점에 넣는다(R3, ADR-0006). 0절의 목표(새 안드로이드를 가장 빨리 따라가기)의 중심이다. 구글은 새 안드로이드마다 베타 단계부터 x86_64 에뮬레이터 이미지를 내므로(2026-09-28 색인에 `android-37.2-beta3`, `android-canary-20260909` 항목), 이 흐름이 갖춰지면 갱신 속도는 구글의 이미지 출시 속도를 따른다. 게스트를 올리게 만드는 것은 앱의 minSdk다. targetSdk는 설치를 막지 않는다. 트릭컬 10644는 targetSdk 36, minSdk 26으로 API 33 게스트에서 돈다(`docs/evidence/M0/findings-20260926.md`). gfxstream 게스트 드라이버도 자체 이미지에 묶인다(`docs/DECISION-gpu-roadmap.md`).
 - P4. 다른 게임: 사용자가 지정한 게임마다 APK ABI 확인 → 시나리오 → 프리셋 → 호환성 표 갱신. 탐지 차단 게임은 미지원 표기(R7).
 - P5. D9 재검토: 멀티 인스턴스와 매크로는 게임 약관 검토 뒤 사용자 결정.
@@ -264,7 +267,7 @@ PRODUCT/
 - 번들 디렉터리 구조는 AOSP 네이티브 브리지 배치를 따른다: `system/bin/<arch>/`, `system/lib/<arch>/`, `system/lib64/<arch>/`, 브리지 라이브러리(`libndk_translation.so` 또는 `libberberis.so` 등), `system/etc/binfmt_misc/`, `system/etc/init/` 스크립트.
 - 번들에는 `translator.json`이 있다: `name, version, provider(google|intel|digitalis), android_api, host_arch, guest_abis, bridge_lib, props{ro.dalvik.vm.native.bridge, ro.dalvik.vm.isa.arm, ro.dalvik.vm.isa.arm64, ro.enable.native.bridge.exec, ro.product.cpu.abilist*}, source_url, source_sha256, license`.
 - `translator/install.ps1 -Bundle <dir> -Target <guest>`: 게스트의 system을 쓰기 가능하게 마운트하거나 `adb root; adb remount`로 파일을 밀어 넣고 속성을 반영한 뒤 재부팅한다. 되돌리기(`-Uninstall`)를 반드시 구현한다.
-- `translator/smoke.ps1`: (1) `tests/fixtures/hello_arm64`(자체 빌드, 소스 포함) 실행 결과 확인, (2) 자체 제작 arm64 전용 테스트 APK 설치와 실행, (3) 트릭컬 시나리오 축약판. 세 단계 결과를 `docs/evidence/translator-<name>-<version>.md`에 기록한다.
+- `translator/smoke.ps1`: (1) `tests/fixtures/hello_arm64`(자체 빌드, 소스 포함) 실행 결과 확인, (2) 자체 제작 arm64 전용 테스트 APK 설치와 실행, (2-1) 자체 제작 armeabi-v7a 전용 테스트 APK(`tests/fixtures/arm32-probe`) 설치와 실행(`guest_abis`에 32비트 ABI가 없는 묶음은 "해당 없음"으로 기록, ADR-0008), (3) 트릭컬 시나리오 축약판. 각 단계 결과를 `docs/evidence/translator-<name>-<version>.md`에 기록한다.
 - `android_api`가 게스트 API 레벨과 다르면 설치를 거부한다. 버전 불일치는 이 계층에서 가장 흔한 실패 원인이다.
 - 설치기가 사용자 PC에서 구글 에뮬레이터 이미지로부터 꺼낸 묶음(ADR-0006)도 이 계약으로 들어온다. 그때 `source_url`은 `dl.google.com`의 이미지 zip 주소, `source_sha256`은 매니페스트의 값, `license`는 색인의 `uses-license` 값(예: `android-sdk-license`)이다.
 
@@ -293,7 +296,7 @@ PRODUCT/
 6. 출시 후 트랙 P1~P5의 우선순위.
 7. ~~M2 화면의 여섯 가지 질문(`docs/M2-SCREENS.md` 10절)~~ 정함 2026-09-27: 아이콘 레일, fps 기본 숨김, 창 닫으면 게스트 끄기(트레이는 설정), 구글 안내는 첫 실행에서 제외, F12, 이미지 카드는 최신이 앞이고 알파가 아닌 최신이 기본.
 8. D8을 다시 열지(다른 상용 에뮬레이터처럼 인증 기기 지문을 쓸지). 현재는 변경 불가 그대로이며 사용자가 열기 전에는 손대지 않는다.
-9. 구글 변환기의 사용 범위(ADR-0006 열린 문제). 안드로이드 SDK 라이선스 계약 3.1은 앱 개발 목적에만 사용권을 준다. (가) 구글 변환기를 기본으로 두고 사실을 동의 화면과 문서에 적는다, (나) Digitalis가 P2를 통과하면 기본을 바꾸고 구글 변환기는 동의 뒤 고르는 선택지로 둔다, (다) 구글 이미지 조립 흐름을 만들지 않는다 가운데 고른다. 정하기 전에는 R3의 사용자 PC 조립 흐름을 구현하지 않는다.
+9. 구글 변환기의 사용 범위(ADR-0006 열린 문제). 안드로이드 SDK 라이선스 계약 3.1은 앱 개발 목적에만 사용권을 준다. (가) 구글 변환기를 기본으로 두고 사실을 동의 화면과 문서에 적는다, (나) Digitalis가 P2를 통과하면 기본을 바꾸고 구글 변환기는 동의 뒤 고르는 선택지로 둔다, (다) 구글 이미지 조립 흐름을 만들지 않는다 가운데 고른다. 정하기 전에는 R3의 사용자 PC 조립 흐름을 구현하지 않는다. 어느 쪽을 골라도 32비트 ARM 앱은 비공개 번역기에 기대므로(ADR-0008), 이 선택은 arm64의 기본 번역기를 정하는 문제다.
 
 ---
 

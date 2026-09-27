@@ -53,8 +53,10 @@ Follows the AOSP native-bridge layout:
   `android_api` differs from the guest API level. `-Uninstall` restores the
   previous state from a backup it made on install.
 - `smoke.ps1`: (1) runs `tests/fixtures/hello_arm64`, (2) installs and runs the
-  arm64 probe APK, (3) runs the short game scenario. Writes
-  `docs/evidence/translator-<name>-<version>.md`.
+  arm64 probe APK, (2-1) installs and runs the armeabi-v7a probe APK
+  (`tests/fixtures/arm32-probe`; recorded as "not applicable" when the bundle's
+  `guest_abis` has no 32-bit ABI, ADR-0008), (3) runs the short game scenario.
+  Writes `docs/evidence/translator-<name>-<version>.md`.
 
 ## Where the bundled Google translator comes from
 
@@ -72,8 +74,28 @@ develop applications for compatible implementations of Android" (3.1) and
 forbids copying, modifying, and redistributing any part of the SDK (3.4). Running
 games through the Google translator is outside 3.1; the choice this leaves is
 CLAUDE.md section 8 item 9. Digitalis (P2) is the translator without that
-restriction.
+restriction, for 64-bit ARM only: it has no ARM32 backend, so 32-bit ARM apps
+stay on a proprietary translator whichever way item 9 is decided (ADR-0008).
 
 The development host already holds such an image under the Android SDK
 (`system-images/android-36/google_apis/x86_64`), which is useful for inspecting
 the layout; nothing from it is committed.
+
+## Digitalis bundles per API level (ADR-0008)
+
+Digitalis tracks AOSP 16 (API 36), and its documentation does not support
+mixing a bundle into an image of another platform release: the ARM64 guest
+bionic and the proxy trampolines come from `frameworks/libs/native_bridge_support`
+built from the same sources as the host image. The translator core (JITs,
+interpreter, guest loader) is not tied to the Android version. OME therefore
+does not hard-fork Digitalis; it builds the version-bound platform layer per API
+level from source, in the order API 33 (the current guest), API 34 to 37, then
+API 30 to 32. Where to build is to be decided (an AOSP tree may exceed a
+GitHub-hosted runner's disk and time); a bundle that ships in a release still
+needs ADR-0007 provenance. `native_bridge_support` exists in
+AOSP release branches from Android 11, `binary_translation` from Android 14.
+
+One guest has a single `ro.dalvik.vm.native.bridge` file name, but the 32-bit
+zygote loads it from `/system/lib` and the 64-bit zygote from `/system/lib64`.
+Running Digitalis for 64-bit and a proprietary translator for 32-bit in one guest
+is therefore possible in principle (to be verified in P2).
