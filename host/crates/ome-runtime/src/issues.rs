@@ -310,3 +310,214 @@ pub fn window_unavailable() -> AppIssue {
         next_action: Some("작업 표시줄에서 운영체제 창을 선택하십시오.".to_owned()),
     }
 }
+
+/// Returns an issue when another long-running native operation is active.
+pub fn operation_in_progress() -> AppIssue {
+    AppIssue {
+        code: "operation_in_progress".to_owned(),
+        message: "앱이 다른 작업을 처리하고 있어 요청을 시작하지 않았습니다.".to_owned(),
+        next_action: Some("현재 작업이 끝난 뒤 다시 시도하십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue after a user-requested cancellation.
+pub fn operation_cancelled() -> AppIssue {
+    AppIssue {
+        code: "operation_cancelled".to_owned(),
+        message: "요청한 작업을 취소했습니다.".to_owned(),
+        next_action: None,
+    }
+}
+
+/// Returns an issue when a native worker thread cannot start.
+pub fn worker_unavailable() -> AppIssue {
+    AppIssue {
+        code: "app_worker_unavailable".to_owned(),
+        message: "요청한 작업을 시작하지 못했습니다.".to_owned(),
+        next_action: Some("앱을 종료한 뒤 다시 실행하십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when package paths or archives fail validation.
+pub fn app_package_invalid() -> AppIssue {
+    AppIssue {
+        code: "app_package_invalid".to_owned(),
+        message: "선택한 앱 파일을 열지 못해 설치하지 않았습니다.".to_owned(),
+        next_action: Some("APK, XAPK 또는 APKS 파일을 다시 선택하십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when adb rejects package installation.
+pub fn app_install_failed() -> AppIssue {
+    AppIssue {
+        code: "app_install_failed".to_owned(),
+        message: "앱을 운영체제에 설치하지 못했습니다.".to_owned(),
+        next_action: Some("앱 파일과 저장 공간을 확인한 뒤 다시 시도하십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when installed packages cannot be listed.
+pub fn app_list_unavailable() -> AppIssue {
+    AppIssue {
+        code: "app_list_unavailable".to_owned(),
+        message: "설치된 앱 목록을 가져오지 못했습니다.".to_owned(),
+        next_action: Some("운영체제 부팅이 끝난 뒤 다시 시도하십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when one package cannot be removed.
+pub fn app_uninstall_failed() -> AppIssue {
+    AppIssue {
+        code: "app_uninstall_failed".to_owned(),
+        message: "앱을 운영체제에서 제거하지 못했습니다.".to_owned(),
+        next_action: Some("운영체제 연결을 확인한 뒤 다시 시도하십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when one package cannot be launched.
+pub fn app_launch_failed() -> AppIssue {
+    AppIssue {
+        code: "app_launch_failed".to_owned(),
+        message: "앱을 운영체제에서 실행하지 못했습니다.".to_owned(),
+        next_action: Some("앱이 설치되어 있는지 확인한 뒤 다시 시도하십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when the trusted artifact store was not constructed.
+pub fn artifact_store_unavailable() -> AppIssue {
+    AppIssue {
+        code: "artifact_store_unavailable".to_owned(),
+        message: "운영체제 이미지 저장소를 준비하지 못했습니다.".to_owned(),
+        next_action: Some("앱을 다시 설치한 뒤 다시 여십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when an image transfer or digest verification fails.
+pub fn artifact_download_failed() -> AppIssue {
+    AppIssue {
+        code: "artifact_download_failed".to_owned(),
+        message: "운영체제 이미지를 다운로드하거나 검증하지 못했습니다.".to_owned(),
+        next_action: Some("네트워크 연결을 확인한 뒤 다시 시도하십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when guest creation is requested before artifact verification.
+pub fn artifact_not_verified() -> AppIssue {
+    AppIssue {
+        code: "artifact_not_verified".to_owned(),
+        message: "운영체제 이미지의 무결성 확인이 끝나지 않아 설치하지 않았습니다.".to_owned(),
+        next_action: Some("이미지 다운로드와 무결성 확인을 마친 뒤 다시 시도하십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when the requested disk size is not one of the supported choices.
+pub fn invalid_disk_size() -> AppIssue {
+    AppIssue {
+        code: "invalid_disk_size".to_owned(),
+        message: "디스크 크기가 허용 범위를 벗어나 만들지 않았습니다.".to_owned(),
+        next_action: Some("32, 64 또는 128 GiB를 선택하십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when qemu-img cannot create the virtual disk.
+pub fn guest_create_failed() -> AppIssue {
+    AppIssue {
+        code: "operating_system_create_failed".to_owned(),
+        message: "운영체제 디스크를 만들지 못했습니다.".to_owned(),
+        next_action: Some("저장 공간을 확인한 뒤 다시 시도하십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when the user declines elevation.
+pub fn whpx_enable_declined() -> AppIssue {
+    AppIssue {
+        code: "hypervisor_enable_declined".to_owned(),
+        message: "관리자 권한 요청을 취소해 하이퍼바이저를 활성화하지 않았습니다.".to_owned(),
+        next_action: Some(
+            "활성화하려면 버튼을 다시 누르고 관리자 권한 요청을 승인하십시오.".to_owned(),
+        ),
+    }
+}
+
+/// Returns an issue when the fixed setup helper cannot start.
+pub fn whpx_enable_unavailable() -> AppIssue {
+    AppIssue {
+        code: "hypervisor_enable_unavailable".to_owned(),
+        message: "하이퍼바이저 활성화를 시작하지 못했습니다.".to_owned(),
+        next_action: Some("앱을 다시 설치한 뒤 다시 시도하십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when the fixed setup helper exits unsuccessfully.
+pub fn whpx_enable_failed(code: u32) -> AppIssue {
+    AppIssue {
+        code: "hypervisor_enable_failed".to_owned(),
+        message: format!(
+            "하이퍼바이저 활성화가 끝나지 않았습니다. 종료 코드 {code}를 로그에 기록했습니다."
+        ),
+        next_action: Some("Windows 기능 상태를 확인한 뒤 다시 시도하십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when local diagnostic collection fails.
+pub fn diagnostics_failed() -> AppIssue {
+    AppIssue {
+        code: "diagnostics_export_failed".to_owned(),
+        message: "진단 묶음을 만들지 못했습니다.".to_owned(),
+        next_action: Some("저장 공간과 폴더 접근 권한을 확인한 뒤 다시 시도하십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when release metadata cannot be read or trusted.
+pub fn update_check_failed() -> AppIssue {
+    AppIssue {
+        code: "update_check_failed".to_owned(),
+        message: "업데이트 정보를 확인하지 못했습니다.".to_owned(),
+        next_action: Some("네트워크 연결을 확인한 뒤 다시 시도하십시오.".to_owned()),
+    }
+}
+
+/// Internal control result used to project an up-to-date state.
+pub fn update_up_to_date() -> AppIssue {
+    AppIssue {
+        code: "update_up_to_date".to_owned(),
+        message: "현재 버전이 최신입니다.".to_owned(),
+        next_action: None,
+    }
+}
+
+/// Returns an issue when no checked update is available.
+pub fn update_not_available() -> AppIssue {
+    AppIssue {
+        code: "update_not_available".to_owned(),
+        message: "설치할 업데이트가 없습니다.".to_owned(),
+        next_action: Some("업데이트 확인을 먼저 실행하십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when an update has no trusted sibling checksum.
+pub fn update_unverified() -> AppIssue {
+    AppIssue {
+        code: "update_unverified".to_owned(),
+        message: "업데이트 파일의 검증 정보를 찾지 못해 다운로드하지 않았습니다.".to_owned(),
+        next_action: Some("검증 정보가 포함된 새 릴리스를 기다리십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when an update download or digest check fails.
+pub fn update_download_failed() -> AppIssue {
+    AppIssue {
+        code: "update_download_failed".to_owned(),
+        message: "업데이트를 다운로드하거나 검증하지 못했습니다.".to_owned(),
+        next_action: Some("네트워크 연결을 확인한 뒤 다시 시도하십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when the verified installer cannot launch.
+pub fn update_launch_failed() -> AppIssue {
+    AppIssue {
+        code: "update_launch_failed".to_owned(),
+        message: "검증한 업데이트 설치 파일을 실행하지 못했습니다.".to_owned(),
+        next_action: Some("Windows 보안 설정을 확인한 뒤 다시 시도하십시오.".to_owned()),
+    }
+}

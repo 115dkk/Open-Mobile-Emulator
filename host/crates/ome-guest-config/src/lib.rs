@@ -348,9 +348,13 @@ pub struct QemuInvocation {
 }
 
 impl QemuInvocation {
-    /// Builds the normal persistent-disk boot invocation.
+    /// Builds a persistent-disk invocation, using installer mode when an ISO is supplied.
     pub fn for_boot(config: &GuestConfig, paths: &GuestPaths, install: &QemuInstall) -> Self {
-        Self::build(config, paths, install, None)
+        if paths.iso.is_some() {
+            Self::for_install(config, paths, install).expect("ISO presence was checked above")
+        } else {
+            Self::build(config, paths, install, None)
+        }
     }
 
     /// Builds an installer invocation, returning [`InvocationError::MissingIso`]

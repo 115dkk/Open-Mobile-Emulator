@@ -1,5 +1,5 @@
 {
-  "contractVersion": 4,
+  "contractVersion": 5,
   "productVersion": "0.1.0",
   "phase": "main",
   "blocker": {
@@ -187,6 +187,7 @@
         "package": "com.example.app",
         "label": "Example",
         "versionName": "1.0",
+        "versionCode": 100,
         "installedAt": "2026-09-27T11:00:00Z"
       }
     ],
@@ -380,7 +381,11 @@
     "state": {
       "kind": "available",
       "version": "0.2.0",
-      "notesUrl": "https://github.com/115dkk/Open-Mobile-Emulator/releases"
+      "notesUrl": "https://github.com/115dkk/Open-Mobile-Emulator/releases",
+      "asset": {
+        "name": "Open-Mobile-Emulator-0.2.0.exe",
+        "sizeBytes": 2048
+      }
     }
   },
   "notices": [

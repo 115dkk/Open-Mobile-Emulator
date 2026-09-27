@@ -58,4 +58,14 @@ impl Desktop for WindowsDesktop {
             .set_text(text)
             .map_err(|error| error.to_string())
     }
+
+    fn launch_installer(&self, path: &Path) -> Result<(), String> {
+        if !path.is_file() {
+            return Err("verified installer is missing".to_owned());
+        }
+        Command::new(path)
+            .spawn()
+            .map(|_| ())
+            .map_err(|error| error.to_string())
+    }
 }

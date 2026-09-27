@@ -237,11 +237,12 @@ impl Clock for SystemClock {
 }
 
 /// One adb session pinned to a validated executable and one serial.
+#[derive(Clone)]
 pub struct AdbSession {
     adb_exe: PathBuf,
     serial: String,
-    runner: Box<dyn CommandRunner>,
-    clock: Box<dyn Clock>,
+    runner: Arc<dyn CommandRunner>,
+    clock: Arc<dyn Clock>,
 }
 
 impl std::fmt::Debug for AdbSession {
@@ -281,8 +282,8 @@ impl AdbSession {
         Ok(Self {
             adb_exe: adb_exe.into(),
             serial,
-            runner,
-            clock,
+            runner: runner.into(),
+            clock: clock.into(),
         })
     }
 

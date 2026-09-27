@@ -219,8 +219,23 @@ pub trait HttpFetch: Send + Sync {
         url: &str,
         range_start: Option<u64>,
         sink: &mut dyn Write,
-        progress: &mut dyn FnMut(u64),
+        progress: &mut dyn FnMut(u64) -> bool,
     ) -> Result<FetchOutcome, FetchError>;
+}
+
+impl<T> HttpFetch for std::sync::Arc<T>
+where
+    T: HttpFetch + ?Sized,
+{
+    fn fetch(
+        &self,
+        url: &str,
+        range_start: Option<u64>,
+        sink: &mut dyn Write,
+        progress: &mut dyn FnMut(u64) -> bool,
+    ) -> Result<FetchOutcome, FetchError> {
+        (**self).fetch(url, range_start, sink, progress)
+    }
 }
 
 /// Errors reported by an [`HttpFetch`] implementation.
@@ -232,6 +247,9 @@ pub enum FetchError {
     /// The response body could not be copied to storage.
     #[error("HTTP response could not be written")]
     Io(#[source] io::Error),
+    /// The caller cancelled the transfer after a completed chunk.
+    #[error("HTTP request was cancelled")]
+    Cancelled,
     /// The server returned a status incompatible with the requested transfer mode.
     #[error("unexpected HTTP status {status} for resume={resuming}")]
     UnexpectedStatus {
@@ -266,6 +284,7 @@ impl UreqFetch {
         let config = ureq::Agent::config_builder()
             .https_only(true)
             .max_redirects(10)
+            .user_agent("Open-Mobile-Emulator")
             .build();
         Self {
             agent: ureq::Agent::new_with_config(config),
@@ -280,7 +299,7 @@ impl HttpFetch for UreqFetch {
         url: &str,
         range_start: Option<u64>,
         sink: &mut dyn Write,
-        progress: &mut dyn FnMut(u64),
+        progress: &mut dyn FnMut(u64) -> bool,
     ) -> Result<FetchOutcome, FetchError> {
         use ureq::ResponseExt;
 
@@ -314,7 +333,9 @@ impl HttpFetch for UreqFetch {
             sink.write_all(&buffer[..count]).map_err(FetchError::Io)?;
             let count = u64::try_from(count).expect("buffer length fits u64");
             bytes_written += count;
-            progress(count);
+            if !progress(count) {
+                return Err(FetchError::Cancelled);
+            }
         }
         Ok(FetchOutcome {
             status,
@@ -322,6 +343,15 @@ impl HttpFetch for UreqFetch {
             bytes_written,
         })
     }
+}
+
+/// Progress boundary reported by a cancellable artifact operation.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum StoreProgress {
+    /// A response chunk was written to the partial file.
+    Bytes(u64),
+    /// Streaming SHA-256 verification is about to run.
+    Verifying,
 }
 
 /// Verification state of one named artifact.
@@ -347,10 +377,11 @@ pub struct VerifiedFile {
 }
 
 /// Verified storage rooted in one caller-chosen directory.
+#[derive(Clone)]
 pub struct ArtifactStore {
     manifest: Manifest,
     dir: PathBuf,
-    http: Box<dyn HttpFetch>,
+    http: std::sync::Arc<dyn HttpFetch>,
 }
 
 impl std::fmt::Debug for ArtifactStore {
@@ -372,7 +403,7 @@ impl ArtifactStore {
         Self {
             manifest,
             dir: dir.into(),
-            http,
+            http: http.into(),
         }
     }
 
@@ -382,6 +413,29 @@ impl ArtifactStore {
             .artifacts
             .iter()
             .find(|artifact| artifact.fetched_by == "installer")
+    }
+
+    /// Returns trusted metadata for one named artifact.
+    pub fn metadata(&self, name: &str) -> Option<&Artifact> {
+        self.artifact(name)
+    }
+
+    /// Returns a verified file descriptor without starting network work.
+    pub fn verified(&self, name: &str) -> Option<VerifiedFile> {
+        let artifact = self.artifact(name)?;
+        let path = self.dir.join(&artifact.filename);
+        matches!(self.verify_path(artifact, &path), Verification::Verified)
+            .then(|| verified_file(artifact, path))
+    }
+
+    /// Returns bytes retained in the resumable partial file.
+    pub fn partial_len(&self, name: &str) -> u64 {
+        self.artifact(name)
+            .and_then(|artifact| {
+                fs::metadata(self.dir.join(format!("{}.part", artifact.filename))).ok()
+            })
+            .filter(|metadata| metadata.is_file())
+            .map_or(0, |metadata| metadata.len())
     }
 
     /// Verifies a complete named file by size first and streaming SHA-256 second.
@@ -405,6 +459,21 @@ impl ArtifactStore {
         name: &str,
         progress: &mut dyn FnMut(u64),
     ) -> Result<VerifiedFile, StoreError> {
+        self.ensure_cancellable(name, &mut |event| {
+            if let StoreProgress::Bytes(bytes) = event {
+                progress(bytes);
+            }
+            true
+        })
+    }
+
+    /// Ensures an artifact while allowing the caller to stop at transfer and verification
+    /// boundaries. A cancelled partial file is retained for the next resume attempt.
+    pub fn ensure_cancellable(
+        &self,
+        name: &str,
+        progress: &mut dyn FnMut(StoreProgress) -> bool,
+    ) -> Result<VerifiedFile, StoreError> {
         let artifact = self
             .artifact(name)
             .ok_or_else(|| StoreError::UnknownArtifact(name.to_owned()))?;
@@ -413,10 +482,17 @@ impl ArtifactStore {
         }
         fs::create_dir_all(&self.dir).map_err(StoreError::Io)?;
         let final_path = self.dir.join(&artifact.filename);
-        match self.verify_path(artifact, &final_path) {
-            Verification::Verified => return Ok(verified_file(artifact, final_path)),
-            Verification::Missing => {}
-            Verification::Mismatch(_) => fs::remove_file(&final_path).map_err(StoreError::Io)?,
+        if final_path.is_file() {
+            if !progress(StoreProgress::Verifying) {
+                return Err(StoreError::Cancelled);
+            }
+            match self.verify_path(artifact, &final_path) {
+                Verification::Verified => return Ok(verified_file(artifact, final_path)),
+                Verification::Missing => {}
+                Verification::Mismatch(_) => {
+                    fs::remove_file(&final_path).map_err(StoreError::Io)?
+                }
+            }
         }
 
         let part_path = self.dir.join(format!("{}.part", artifact.filename));
@@ -432,6 +508,9 @@ impl ArtifactStore {
             Err(error) => return Err(StoreError::Io(error)),
         };
         if resume == artifact.size_bytes {
+            if !progress(StoreProgress::Verifying) {
+                return Err(StoreError::Cancelled);
+            }
             match self.verify_path(artifact, &part_path) {
                 Verification::Verified => {
                     fs::rename(&part_path, &final_path).map_err(StoreError::Io)?;
@@ -450,7 +529,7 @@ impl ArtifactStore {
                 &artifact.url,
                 (resume > 0).then_some(resume),
                 &mut file,
-                progress,
+                &mut |bytes| progress(StoreProgress::Bytes(bytes)),
             )
             .map_err(StoreError::Fetch)?;
         self.verify_fetch_url(&outcome)?;
@@ -460,7 +539,9 @@ impl ArtifactStore {
             resume = 0;
             let restarted = self
                 .http
-                .fetch(&artifact.url, None, &mut file, progress)
+                .fetch(&artifact.url, None, &mut file, &mut |bytes| {
+                    progress(StoreProgress::Bytes(bytes))
+                })
                 .map_err(StoreError::Fetch)?;
             self.verify_fetch_url(&restarted)?;
         } else if resume > 0 && outcome.status == 206 {
@@ -475,6 +556,9 @@ impl ArtifactStore {
         file.sync_all().map_err(StoreError::Io)?;
         drop(file);
 
+        if !progress(StoreProgress::Verifying) {
+            return Err(StoreError::Cancelled);
+        }
         match self.verify_path(artifact, &part_path) {
             Verification::Verified => {
                 fs::rename(&part_path, &final_path).map_err(StoreError::Io)?;
@@ -588,6 +672,9 @@ pub enum StoreError {
     /// Downloaded bytes do not match the manifest; the partial file is retained.
     #[error("artifact verification failed: {0}")]
     VerificationFailed(String),
+    /// The caller cancelled and any partial file remains available for resume.
+    #[error("artifact transfer was cancelled")]
+    Cancelled,
 }
 
 #[cfg(test)]
@@ -610,7 +697,7 @@ mod tests {
             _url: &str,
             range_start: Option<u64>,
             sink: &mut dyn Write,
-            progress: &mut dyn FnMut(u64),
+            progress: &mut dyn FnMut(u64) -> bool,
         ) -> Result<FetchOutcome, FetchError> {
             self.calls.lock().expect("calls lock").push(range_start);
             let (status, start) = if self.ignore_range && range_start.is_some() {
@@ -622,7 +709,9 @@ mod tests {
             };
             let bytes = &self.body[start..];
             sink.write_all(bytes).map_err(FetchError::Io)?;
-            progress(u64::try_from(bytes.len()).expect("test length fits u64"));
+            if !progress(u64::try_from(bytes.len()).expect("test length fits u64")) {
+                return Err(FetchError::Cancelled);
+            }
             Ok(FetchOutcome {
                 status,
                 final_url: self.final_url.clone(),
@@ -775,6 +864,33 @@ mod tests {
         assert!(calls.lock().expect("calls lock").is_empty());
         assert_eq!(
             fs::read(directory.path().join("guest.iso")).expect("read file"),
+            body
+        );
+    }
+
+    #[test]
+    fn cancellation_retains_partial_for_resume() {
+        let body = b"complete".to_vec();
+        let directory = tempfile::tempdir().expect("temp directory");
+        let store = ArtifactStore::new(
+            manifest(&body),
+            directory.path(),
+            Box::new(FakeFetch {
+                body: body.clone(),
+                calls: Arc::new(Mutex::new(Vec::new())),
+                ignore_range: false,
+                final_url: None,
+            }),
+        );
+        let result = store.ensure_cancellable("guest-iso", &mut |event| {
+            !matches!(event, StoreProgress::Bytes(_))
+        });
+        assert!(matches!(
+            result,
+            Err(StoreError::Fetch(FetchError::Cancelled))
+        ));
+        assert_eq!(
+            fs::read(directory.path().join("guest.iso.part")).expect("retained partial"),
             body
         );
     }

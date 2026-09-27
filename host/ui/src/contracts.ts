@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Open Mobile Emulator contributors
 // Read-only presentation contracts mirroring ome-runtime contract.rs field for field.
 
-export const CONTRACT_VERSION = 4;
+export const CONTRACT_VERSION = 5;
 
 export type AppPhase = 'wizard' | 'main';
 export type BlockerKind = 'virtualizationOff' | 'qemuMissing' | 'hypervisorPlatformOff';
@@ -35,6 +35,16 @@ export interface WizardView {
   readonly installGuide: readonly string[];
   readonly diskSizeGib: number;
   readonly diskFreeBytes: number | null;
+}
+
+export interface InstallProgress {
+  readonly label: string;
+  readonly stage: TransferStage;
+  readonly doneItems: number;
+  readonly totalItems: number;
+  readonly ratio: number | null;
+  readonly doneBytes: number;
+  readonly totalBytes: number | null;
 }
 
 export type ImageDistribution = 'bliss' | 'androidX86' | 'selfBuilt';
@@ -105,8 +115,14 @@ export interface GuestView {
   readonly mediaVolume: number | null;
 }
 
-export interface AppItem { readonly package: string; readonly label: string; readonly versionName: string | null; readonly installedAt: string | null }
-export interface AppsView { readonly available: boolean; readonly items: readonly AppItem[]; readonly install: TransferProgress | null }
+export interface AppItem {
+  readonly package: string;
+  readonly label: string;
+  readonly versionName: string | null;
+  readonly versionCode: number | null;
+  readonly installedAt: string | null;
+}
+export interface AppsView { readonly available: boolean; readonly items: readonly AppItem[]; readonly install: InstallProgress | null }
 
 export interface LogicalPoint { readonly x: number; readonly y: number }
 export type MouseButton = 'left' | 'right' | 'middle';
@@ -196,10 +212,11 @@ export type UpdateState =
   | { readonly kind: 'idle' }
   | { readonly kind: 'checking' }
   | { readonly kind: 'upToDate'; readonly checkedAt: string }
-  | { readonly kind: 'available'; readonly version: string; readonly notesUrl: string | null }
+  | { readonly kind: 'available'; readonly version: string; readonly notesUrl: string | null; readonly asset: UpdateAsset }
   | { readonly kind: 'downloading'; readonly progress: TransferProgress }
   | { readonly kind: 'readyToInstall'; readonly version: string }
   | { readonly kind: 'failed'; readonly issue: AppIssue };
+export interface UpdateAsset { readonly name: string; readonly sizeBytes: number }
 export interface UpdateView { readonly currentVersion: string; readonly state: UpdateState }
 
 export type NoticeLevel = 'info' | 'warning' | 'error';

@@ -13,6 +13,10 @@ pub trait Desktop: Send + Sync {
     fn open_url(&self, url: &str) -> Result<(), String>;
     /// Replaces clipboard text.
     fn copy_text(&self, text: &str) -> Result<(), String>;
+    /// Launches one verified local installer package.
+    fn launch_installer(&self, _path: &Path) -> Result<(), String> {
+        Err("installer launch is unavailable".to_owned())
+    }
 }
 
 /// Fail-closed desktop used by tests or shells that do not provide native integration.
@@ -31,6 +35,10 @@ impl Desktop for UnavailableDesktop {
     fn copy_text(&self, _text: &str) -> Result<(), String> {
         Err("desktop integration is unavailable".to_owned())
     }
+
+    fn launch_installer(&self, _path: &Path) -> Result<(), String> {
+        Err("desktop integration is unavailable".to_owned())
+    }
 }
 
 #[cfg(test)]
@@ -39,6 +47,7 @@ pub(crate) struct RecordingDesktop {
     paths: std::sync::Arc<std::sync::Mutex<Vec<std::path::PathBuf>>>,
     urls: std::sync::Arc<std::sync::Mutex<Vec<String>>>,
     texts: std::sync::Arc<std::sync::Mutex<Vec<String>>>,
+    installers: std::sync::Arc<std::sync::Mutex<Vec<std::path::PathBuf>>>,
 }
 
 #[cfg(test)]
@@ -79,6 +88,14 @@ impl Desktop for RecordingDesktop {
             .lock()
             .map_err(|_| "recording lock failed".to_owned())?
             .push(text.to_owned());
+        Ok(())
+    }
+
+    fn launch_installer(&self, path: &Path) -> Result<(), String> {
+        self.installers
+            .lock()
+            .map_err(|_| "recording lock failed".to_owned())?
+            .push(path.to_path_buf());
         Ok(())
     }
 }

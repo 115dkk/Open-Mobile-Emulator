@@ -76,8 +76,15 @@ pub(crate) fn install(app: &tauri::App) -> tauri::Result<()> {
             }
         }
         tauri::WindowEvent::DragDrop(tauri::DragDropEvent::Drop { paths, .. }) => {
-            // Native paths never cross into the webview. Installation is not wired yet.
-            eprintln!("native file drop (installation not connected): {paths:?}");
+            let paths = paths.clone();
+            let app = handle.app_handle().clone();
+            let shell = app.state::<ShellState>().inner().clone();
+            tauri::async_runtime::spawn(async move {
+                if let Err(issue) = crate::commands::install_native_paths(app, &shell, paths).await
+                {
+                    eprintln!("native file drop installation failed: {}", issue.code);
+                }
+            });
         }
         _ => {}
     });

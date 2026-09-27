@@ -60,8 +60,8 @@ export function AppsScreen({ snapshot, actions }: ScreenProps) {
   const [removing, setRemoving] = useState<AppItem | null>(null);
   const install = apps.install;
   const installing = install !== null && ACTIVE_INSTALL.includes(install.stage);
-  const ratio = install !== null && install.totalBytes !== null && install.totalBytes > 0
-    ? install.doneBytes / install.totalBytes : null;
+  // Rust reports the ratio (null while adb gives no byte count); the bar is indeterminate then.
+  const ratio = install === null ? null : install.ratio;
   const shown = apps.items.filter((app) => matches(app, query));
 
   const confirmRemoval = async () => {

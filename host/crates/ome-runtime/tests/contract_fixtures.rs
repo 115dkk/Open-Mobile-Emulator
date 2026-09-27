@@ -265,6 +265,7 @@ fn representative_snapshot() -> AppSnapshot {
                 package: "com.example.app".to_owned(),
                 label: "Example".to_owned(),
                 version_name: Some("1.0".to_owned()),
+                version_code: Some(100),
                 installed_at: Some("2026-09-27T11:00:00Z".to_owned()),
             }],
             install: None,
@@ -319,6 +320,10 @@ fn representative_snapshot() -> AppSnapshot {
                 notes_url: Some(
                     "https://github.com/115dkk/Open-Mobile-Emulator/releases".to_owned(),
                 ),
+                asset: UpdateAsset {
+                    name: "Open-Mobile-Emulator-0.2.0.exe".to_owned(),
+                    size_bytes: 2048,
+                },
             },
         },
         notices: vec![Notice {

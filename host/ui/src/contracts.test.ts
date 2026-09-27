@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import type {
   AppIssue, AppSnapshot, AppsView, Binding, BindingAction, CapabilityItem, CapabilityReport,
   CustomDisplay, DisplayPreset, DisplayView, GuestImageSummary, GuestSummary, GuestView,
-  HostReport, HostRow, ImagesView, InputProfile, InputView, LastExit, LogicalPoint, Notice,
+  HostReport, HostRow, ImagesView, InputProfile, InputView, InstallProgress, LastExit, LogicalPoint, Notice,
   SettingsInput, SettingsView, Size, StageRect, TransferProgress, Trigger, UpdateState,
   UpdateView, WizardView,
 } from './contracts';
@@ -42,6 +42,10 @@ const rect = object<StageRect>({ x: number, y: number, width: number, height: nu
 const transfer = object<TransferProgress>({
   stage: enumeration('waiting', 'transferring', 'verifying', 'verified', 'failed', 'cancelled'),
   doneBytes: number, totalBytes: nullable(number), bytesPerSecond: nullable(number), label: string,
+});
+const install = object<InstallProgress>({
+  label: string, stage: enumeration('waiting', 'transferring', 'verifying', 'verified', 'failed', 'cancelled'),
+  doneItems: number, totalItems: number, ratio: nullable(number), doneBytes: number, totalBytes: nullable(number),
 });
 const capability = enumeration('available', 'unavailable', 'unknown');
 const capabilityItem = object<CapabilityItem>({
@@ -92,7 +96,10 @@ const update: Check = (value, path) => {
     idle: object<Extract<UpdateState, { kind: 'idle' }>>({ kind: enumeration('idle') }),
     checking: object<Extract<UpdateState, { kind: 'checking' }>>({ kind: enumeration('checking') }),
     upToDate: object<Extract<UpdateState, { kind: 'upToDate' }>>({ kind: enumeration('upToDate'), checkedAt: string }),
-    available: object<Extract<UpdateState, { kind: 'available' }>>({ kind: enumeration('available'), version: string, notesUrl: nullable(string) }),
+    available: object<Extract<UpdateState, { kind: 'available' }>>({
+      kind: enumeration('available'), version: string, notesUrl: nullable(string),
+      asset: object({ name: string, sizeBytes: number }),
+    }),
     downloading: object<Extract<UpdateState, { kind: 'downloading' }>>({ kind: enumeration('downloading'), progress: transfer }),
     readyToInstall: object<Extract<UpdateState, { kind: 'readyToInstall' }>>({ kind: enumeration('readyToInstall'), version: string }),
     failed: object<Extract<UpdateState, { kind: 'failed' }>>({ kind: enumeration('failed'), issue }),
@@ -112,7 +119,7 @@ const guestSummary = object<GuestSummary>({
   lastStartedAt: nullable(string), capabilities: capabilityReport,
 });
 const snapshot = object<AppSnapshot>({
-  contractVersion: (value, path) => { if (value !== 4) fail(path, 'contract version 4'); },
+  contractVersion: (value, path) => { if (value !== 5) fail(path, 'contract version 5'); },
   productVersion: string, phase: enumeration('wizard', 'main'),
   blocker: nullable(object({ kind: enumeration('virtualizationOff', 'qemuMissing', 'hypervisorPlatformOff') })),
   host: object<HostReport>({
@@ -139,8 +146,10 @@ const snapshot = object<AppSnapshot>({
     registrationOpenedAt: nullable(string), addAccountSupported: boolean, pid: nullable(number),
   }),
   apps: object<AppsView>({
-    available: boolean, install: nullable(transfer),
-    items: array(object<AppsView['items'][number]>({ package: string, label: string, versionName: nullable(string), installedAt: nullable(string) })),
+    available: boolean, install: nullable(install),
+    items: array(object<AppsView['items'][number]>({
+      package: string, label: string, versionName: nullable(string), versionCode: nullable(number), installedAt: nullable(string),
+    })),
   }),
   input: object<InputView>({
     profiles: array(profile), activeId: nullable(string), suspended: boolean, editing: boolean,

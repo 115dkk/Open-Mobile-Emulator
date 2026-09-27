@@ -292,7 +292,7 @@ impl GuestStore {
                 if record.id != id {
                     return Err(GuestStoreError::InvalidId);
                 }
-                if disk.is_file() {
+                if disk.is_file() && record.disk_bytes == 0 {
                     record.disk_bytes = disk.metadata().map_err(GuestStoreError::Io)?.len();
                 }
                 records.push(record);

@@ -14,7 +14,7 @@ pub use ome_input::{
 };
 
 /// Current Rust-to-webview contract version.
-pub const CONTRACT_VERSION: u32 = 4;
+pub const CONTRACT_VERSION: u32 = 5;
 
 /// The one read-only projection the webview renders.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -216,6 +216,26 @@ pub enum TransferStage {
     Failed,
     /// User cancelled the transfer.
     Cancelled,
+}
+
+/// Progress while one or more application packages are installed.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct InstallProgress {
+    /// Current source filename or package identifier.
+    pub label: String,
+    /// Stable operation stage.
+    pub stage: TransferStage,
+    /// Completed package count.
+    pub done_items: u64,
+    /// Total package count.
+    pub total_items: u64,
+    /// Overall ratio from zero through one when known.
+    pub ratio: Option<f64>,
+    /// Compatibility byte-shaped count used by existing progress presentation.
+    pub done_bytes: u64,
+    /// Compatibility byte-shaped total used by existing progress presentation.
+    pub total_bytes: Option<u64>,
 }
 
 /// Available operating-system profiles and installed virtual machines.
@@ -527,7 +547,7 @@ pub struct AppsView {
     /// Last known installed applications.
     pub items: Vec<AppItem>,
     /// Current application installation progress.
-    pub install: Option<TransferProgress>,
+    pub install: Option<InstallProgress>,
 }
 
 /// One installed application.
@@ -540,6 +560,8 @@ pub struct AppItem {
     pub label: String,
     /// Version name when known.
     pub version_name: Option<String>,
+    /// Package-manager version code when known.
+    pub version_code: Option<u64>,
     /// Installation time when known.
     pub installed_at: Option<String>,
 }
@@ -744,6 +766,16 @@ pub struct UpdateView {
     pub state: UpdateState,
 }
 
+/// Trusted installer asset selected from one GitHub release.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateAsset {
+    /// Publisher-provided leaf filename.
+    pub name: String,
+    /// Declared asset byte length.
+    pub size_bytes: u64,
+}
+
 /// Product update operation state.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(
@@ -767,6 +799,8 @@ pub enum UpdateState {
         version: String,
         /// Release notes URL when supplied by trusted update metadata.
         notes_url: Option<String>,
+        /// Installer asset chosen by native code.
+        asset: UpdateAsset,
     },
     /// Update package is downloading.
     Downloading {

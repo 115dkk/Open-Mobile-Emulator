@@ -1,14 +1,17 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Copyright (C) 2026 Open Mobile Emulator contributors
 
+use std::ffi::OsString;
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::sync::mpsc;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, mpsc};
+use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use jiff::{Unit, Zoned};
-use ome_adb::AdbSession;
-use ome_artifacts::{ArtifactStore, Manifest};
+use ome_adb::{AdbSession, AppPackage};
+use ome_artifacts::{ArtifactStore, Manifest, StoreError, StoreProgress};
 use ome_guest_config::{GuestConfig, GuestPaths, QemuInstall, RawGuestConfig};
 use ome_guest_image::{
     CapabilityProbe, Distribution, FamilyAdapter, GuestImageProfile, ImageStatus as ProfileStatus,
@@ -24,6 +27,9 @@ use ome_window_host::{
     GuestWindowHost, HostingIssue, HostingTarget, StageGeometry, StageRect as NativeStageRect,
 };
 use ome_wizard::{Facts, Outcome, Step, WizardState, advance, can_continue, can_skip};
+use semver::Version;
+use serde::Deserialize;
+use sha2::{Digest, Sha256};
 
 use crate::adapters::AdbShellRunner;
 use crate::desktop::Desktop;
@@ -32,21 +38,29 @@ use crate::guest_store::{
 };
 use crate::home::OmeHome;
 use crate::issues;
+use crate::operations::{ElevationError, WorkerDeps};
 use crate::settings::{Settings, SettingsError, SettingsStore};
 use crate::{
-    AppIssue, AppPhase, AppSnapshot, AppsView, Blocker, BlockerKind, CONTRACT_VERSION, Capability,
-    CapabilityId, CapabilityReport, ClipboardItem, Command, CustomDisplay, DisplayPreset,
-    DisplayView, ExitKind, GuestImageSummary, GuestState, GuestSummary, GuestView, HelpTopic,
-    HostCheckId, HostReport, HostRow, HostStatus, HostingMode, ImageDistribution, ImageStatus,
-    ImageTranslator, ImagesView, InputView, LastExit, Notice, NoticeLevel, Orientation,
-    SettingsView, Size, StageFit, StageRect, UpdateState, UpdateView, VsyncMode, WizardStep,
-    WizardView,
+    AppIssue, AppItem, AppPhase, AppSnapshot, AppsView, Blocker, BlockerKind, CONTRACT_VERSION,
+    Capability, CapabilityId, CapabilityReport, ClipboardItem, Command, CustomDisplay,
+    DisplayPreset, DisplayView, ExitKind, GuestImageSummary, GuestState, GuestSummary, GuestView,
+    HelpTopic, HostCheckId, HostReport, HostRow, HostStatus, HostingMode, ImageDistribution,
+    ImageStatus, ImageTranslator, ImagesView, InputView, InstallProgress, LastExit, Notice,
+    NoticeLevel, Orientation, SettingsView, Size, StageFit, StageRect, TransferProgress,
+    TransferStage, UpdateAsset, UpdateState, UpdateView, VsyncMode, WizardStep, WizardView,
 };
 
 /// Process lifecycle seam owned by the runtime.
 pub trait GuestProcess: Send {
     /// Starts one validated virtual-machine process.
     fn start(
+        &mut self,
+        config: GuestConfig,
+        paths: GuestPaths,
+        install: QemuInstall,
+    ) -> Result<(), String>;
+    /// Starts one installer-mode virtual-machine process.
+    fn start_install(
         &mut self,
         config: GuestConfig,
         paths: GuestPaths,
@@ -66,6 +80,15 @@ where
     Q: QmpFactory,
 {
     fn start(
+        &mut self,
+        config: GuestConfig,
+        paths: GuestPaths,
+        install: QemuInstall,
+    ) -> Result<(), String> {
+        Supervisor::start(self, config, paths, install).map_err(|error| error.to_string())
+    }
+
+    fn start_install(
         &mut self,
         config: GuestConfig,
         paths: GuestPaths,
@@ -157,10 +180,51 @@ impl std::fmt::Debug for RuntimeDeps {
     }
 }
 
+#[derive(Debug)]
+enum WorkerEvent {
+    ArtifactProgress(TransferProgress),
+    ArtifactFinished(Result<(), AppIssue>),
+    InstallProgress(InstallProgress),
+    InstallFinished(Result<Vec<AppItem>, AppIssue>),
+    UpdateChecked(Result<UpdateRelease, AppIssue>),
+    UpdateProgress(TransferProgress),
+    UpdateDownloaded(Result<DownloadedUpdate, AppIssue>),
+}
+
+#[derive(Clone, Debug)]
+struct UpdateRelease {
+    version: String,
+    notes_url: Option<String>,
+    installer: ReleaseAsset,
+    checksum: Option<ReleaseAsset>,
+}
+
+#[derive(Clone, Debug)]
+struct DownloadedUpdate {
+    version: String,
+    path: PathBuf,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+struct ReleaseDocument {
+    tag_name: String,
+    html_url: String,
+    body: String,
+    assets: Vec<ReleaseAsset>,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+struct ReleaseAsset {
+    name: String,
+    browser_download_url: String,
+    size: u64,
+}
+
 /// Native product runtime and owner of snapshot projection and command decisions.
 pub struct AppRuntime {
     home: OmeHome,
     deps: RuntimeDeps,
+    workers: WorkerDeps,
     settings_store: SettingsStore,
     guest_store: GuestStore,
     settings: Settings,
@@ -194,6 +258,17 @@ pub struct AppRuntime {
     adb_connect_attempted: bool,
     boot_started: Option<Instant>,
     last_account_poll: Option<Instant>,
+    apps: Vec<AppItem>,
+    install_progress: Option<InstallProgress>,
+    install_cancel: Option<Arc<AtomicBool>>,
+    artifact_progress: Option<TransferProgress>,
+    artifact_cancel: Option<Arc<AtomicBool>>,
+    worker_tx: mpsc::Sender<WorkerEvent>,
+    worker_rx: mpsc::Receiver<WorkerEvent>,
+    update_release: Option<UpdateRelease>,
+    update_download: Option<DownloadedUpdate>,
+    update_exit_requested: bool,
+    installing_guest: bool,
     hosting: HostingMode,
     hosted_pid: Option<u32>,
     host_window: Option<u64>,
@@ -321,9 +396,12 @@ impl AppRuntime {
             .hypervisor_platform()
             .unwrap_or(FeatureState::Unknown);
         let update_state = UpdateState::Idle;
+        let apps = active_record.map_or_else(Vec::new, stored_apps);
+        let (worker_tx, worker_rx) = mpsc::channel();
         Ok(Self {
             home,
             deps,
+            workers: WorkerDeps::default(),
             settings_store,
             guest_store,
             settings,
@@ -357,6 +435,17 @@ impl AppRuntime {
             adb_connect_attempted: false,
             boot_started: None,
             last_account_poll: None,
+            apps,
+            install_progress: None,
+            install_cancel: None,
+            artifact_progress: None,
+            artifact_cancel: None,
+            worker_tx,
+            worker_rx,
+            update_release: None,
+            update_download: None,
+            update_exit_requested: false,
+            installing_guest: false,
             hosting: HostingMode::None,
             hosted_pid: None,
             host_window: None,
@@ -426,9 +515,9 @@ impl AppRuntime {
                 media_volume: self.media_volume,
             },
             apps: AppsView {
-                available: self.boot_completed,
-                items: Vec::new(),
-                install: None,
+                available: self.guest_state == GuestState::Running && self.boot_completed,
+                items: self.apps.clone(),
+                install: self.install_progress.clone(),
             },
             input: InputView {
                 profiles: self.input_profiles.clone(),
@@ -508,6 +597,14 @@ impl AppRuntime {
                 Ok(())
             }
             Command::GuestImageSelect { id } => self.select_image(id),
+            Command::WhpxEnable => self.enable_whpx(),
+            Command::ArtifactDownloadStart => self.start_artifact_download(),
+            Command::ArtifactDownloadCancel => {
+                self.cancel_artifact_download();
+                Ok(())
+            }
+            Command::GuestCreate { image_id, size_gib } => self.create_guest(image_id, size_gib),
+            Command::GuestReinstall { name } => self.reinstall_guest(name),
             Command::GuestSelect { id } => self.select_guest(id),
             Command::GuestDelete { id } => self.delete_guest(id),
             Command::GuestStart => self.start_guest(),
@@ -516,6 +613,15 @@ impl AppRuntime {
             Command::GuestVolumeSet { index } => self.set_guest_volume(index),
             Command::StageRectChanged { rect } => self.place_guest_window(rect),
             Command::ScreenshotSave => self.save_screenshot(),
+            Command::AppInstallCancel => {
+                self.cancel_app_install();
+                Ok(())
+            }
+            Command::AppUninstall { package } => self.uninstall_app(&package),
+            Command::AppLaunch { package } => self.launch_app(&package),
+            Command::UpdateCheck => self.start_update_check(),
+            Command::UpdateInstall => self.start_update_install(),
+            Command::DiagnosticsExport => self.export_diagnostics(),
             Command::OpenHelp { topic } => self.open_help(topic),
             Command::OpenHomeFolder => self.open_fixed_directory(None),
             Command::OpenLogsFolder => self.open_fixed_directory(Some("logs")),
@@ -587,20 +693,701 @@ impl AppRuntime {
                 self.settings = validated;
                 Ok(())
             }
-            Command::AppQuit
-            | Command::AppInstallCancel
-            | Command::WhpxEnable
-            | Command::ArtifactDownloadStart
-            | Command::ArtifactDownloadCancel
-            | Command::GuestCreate { .. }
-            | Command::GuestReinstall { .. }
-            | Command::GuestRootSet { .. }
-            | Command::AppInstallPick
-            | Command::AppUninstall { .. }
-            | Command::AppLaunch { .. }
-            | Command::UpdateCheck
-            | Command::UpdateInstall
-            | Command::DiagnosticsExport => Err(issues::not_wired()),
+            Command::AppQuit | Command::GuestRootSet { .. } | Command::AppInstallPick => {
+                Err(issues::not_wired())
+            }
+        }
+    }
+
+    /// Replaces process, elevation, and HTTP adapters before native commands run.
+    pub fn set_worker_deps(&mut self, workers: WorkerDeps) {
+        self.workers = workers;
+    }
+
+    /// Starts the configured one-time startup update check.
+    pub fn start_auto_update_check(&mut self) -> Result<AppSnapshot, AppIssue> {
+        if self.settings.auto_update_check && matches!(self.update_state, UpdateState::Idle) {
+            self.start_update_check()?;
+        }
+        Ok(self.snapshot())
+    }
+
+    /// Starts installation for validated native paths supplied only by the shell.
+    pub fn install_apps(&mut self, paths: Vec<PathBuf>) -> Result<AppSnapshot, AppIssue> {
+        self.require_booted()?;
+        let paths = validate_app_paths(paths)?;
+        if paths.is_empty() {
+            return Ok(self.snapshot());
+        }
+        if self.install_cancel.is_some() {
+            return Err(issues::operation_in_progress());
+        }
+        let adb = self
+            .deps
+            .adb
+            .as_ref()
+            .cloned()
+            .ok_or_else(issues::operating_system_connection_unavailable)?;
+        let total = u64::try_from(paths.len()).unwrap_or(u64::MAX);
+        let cancel = Arc::new(AtomicBool::new(false));
+        self.install_cancel = Some(Arc::clone(&cancel));
+        self.install_progress = Some(install_progress(
+            paths[0]
+                .file_name()
+                .and_then(|name| name.to_str())
+                .unwrap_or("앱 파일"),
+            TransferStage::Waiting,
+            0,
+            total,
+        ));
+        let sender = self.worker_tx.clone();
+        thread::Builder::new()
+            .name("ome-app-install".to_owned())
+            .spawn(move || {
+                let mut done = 0_u64;
+                let mut failure = None;
+                for path in paths {
+                    if done > 0 && cancel.load(Ordering::Acquire) {
+                        break;
+                    }
+                    let label = path
+                        .file_name()
+                        .and_then(|name| name.to_str())
+                        .unwrap_or("앱 파일")
+                        .to_owned();
+                    let _ = sender.send(WorkerEvent::InstallProgress(install_progress(
+                        &label,
+                        TransferStage::Transferring,
+                        done,
+                        total,
+                    )));
+                    let package = match AppPackage::open(&path) {
+                        Ok(package) => package,
+                        Err(_) => {
+                            failure = Some(issues::app_package_invalid());
+                            break;
+                        }
+                    };
+                    if adb.install(&package).is_err() {
+                        failure = Some(issues::app_install_failed());
+                        break;
+                    }
+                    done = done.saturating_add(1);
+                }
+                let result = if let Some(issue) = failure {
+                    Err(issue)
+                } else if cancel.load(Ordering::Acquire) {
+                    Ok(Vec::new())
+                } else {
+                    adb.packages()
+                        .map(package_items)
+                        .map_err(|_| issues::app_list_unavailable())
+                };
+                let _ = sender.send(WorkerEvent::InstallFinished(result));
+            })
+            .map_err(|_| issues::worker_unavailable())?;
+        Ok(self.snapshot())
+    }
+
+    fn require_booted(&self) -> Result<(), AppIssue> {
+        if self.guest_state == GuestState::Running && self.boot_completed {
+            Ok(())
+        } else {
+            Err(issues::operating_system_not_running())
+        }
+    }
+
+    fn cancel_app_install(&self) {
+        if let Some(cancel) = &self.install_cancel {
+            cancel.store(true, Ordering::Release);
+        }
+    }
+
+    fn uninstall_app(&mut self, package: &str) -> Result<(), AppIssue> {
+        self.require_booted()?;
+        let adb = self
+            .deps
+            .adb
+            .as_ref()
+            .ok_or_else(issues::operating_system_connection_unavailable)?;
+        adb.uninstall(package)
+            .map_err(|_| issues::app_uninstall_failed())?;
+        self.refresh_apps()
+    }
+
+    fn launch_app(&self, package: &str) -> Result<(), AppIssue> {
+        self.require_booted()?;
+        self.deps
+            .adb
+            .as_ref()
+            .ok_or_else(issues::operating_system_connection_unavailable)?
+            .launch(package)
+            .map_err(|_| issues::app_launch_failed())
+    }
+
+    fn refresh_apps(&mut self) -> Result<(), AppIssue> {
+        let packages = self
+            .deps
+            .adb
+            .as_ref()
+            .ok_or_else(issues::operating_system_connection_unavailable)?
+            .packages()
+            .map_err(|_| issues::app_list_unavailable())?;
+        self.apps = package_items(packages);
+        Ok(())
+    }
+
+    fn start_artifact_download(&mut self) -> Result<(), AppIssue> {
+        if self.artifact_cancel.is_some() {
+            return Err(issues::operation_in_progress());
+        }
+        let profile = self
+            .selected_profile()
+            .ok_or_else(issues::image_not_found)?;
+        let artifact_name = profile.artifact.clone();
+        let store = self
+            .deps
+            .artifacts
+            .as_ref()
+            .cloned()
+            .ok_or_else(issues::artifact_store_unavailable)?;
+        if let Some(verified) = store.verified(&artifact_name) {
+            let label = verified
+                .path
+                .file_name()
+                .and_then(|name| name.to_str())
+                .unwrap_or("운영체제 이미지")
+                .to_owned();
+            self.artifact_progress = Some(transfer_progress(
+                TransferStage::Verified,
+                verified.size_bytes,
+                Some(verified.size_bytes),
+                None,
+                label,
+            ));
+            return Ok(());
+        }
+        let artifact = store
+            .metadata(&artifact_name)
+            .ok_or_else(issues::image_not_found)?;
+        let label = artifact.filename.clone();
+        let total = artifact.size_bytes;
+        let initial = store.partial_len(&artifact_name).min(total);
+        let cancel = Arc::new(AtomicBool::new(false));
+        self.artifact_cancel = Some(Arc::clone(&cancel));
+        self.artifact_progress = Some(transfer_progress(
+            TransferStage::Waiting,
+            initial,
+            Some(total),
+            None,
+            label.clone(),
+        ));
+        let sender = self.worker_tx.clone();
+        thread::Builder::new()
+            .name("ome-artifact-download".to_owned())
+            .spawn(move || {
+                let started = Instant::now();
+                let mut done = initial;
+                let result = store.ensure_cancellable(&artifact_name, &mut |event| match event {
+                    StoreProgress::Bytes(bytes) => {
+                        done = done.saturating_add(bytes).min(total);
+                        let elapsed = started.elapsed().as_secs_f64();
+                        let rate = (elapsed > 0.0).then(|| {
+                            u64::try_from((done.saturating_sub(initial) as f64 / elapsed) as u128)
+                                .unwrap_or(u64::MAX)
+                        });
+                        let _ = sender.send(WorkerEvent::ArtifactProgress(transfer_progress(
+                            TransferStage::Transferring,
+                            done,
+                            Some(total),
+                            rate,
+                            label.clone(),
+                        )));
+                        !cancel.load(Ordering::Acquire)
+                    }
+                    StoreProgress::Verifying => {
+                        let _ = sender.send(WorkerEvent::ArtifactProgress(transfer_progress(
+                            TransferStage::Verifying,
+                            total,
+                            Some(total),
+                            None,
+                            label.clone(),
+                        )));
+                        !cancel.load(Ordering::Acquire)
+                    }
+                });
+                let mapped = match result {
+                    Ok(_) => {
+                        let _ = sender.send(WorkerEvent::ArtifactProgress(transfer_progress(
+                            TransferStage::Verified,
+                            total,
+                            Some(total),
+                            None,
+                            label,
+                        )));
+                        Ok(())
+                    }
+                    Err(
+                        StoreError::Cancelled
+                        | StoreError::Fetch(ome_artifacts::FetchError::Cancelled),
+                    ) => Err(issues::operation_cancelled()),
+                    Err(_) => Err(issues::artifact_download_failed()),
+                };
+                let _ = sender.send(WorkerEvent::ArtifactFinished(mapped));
+            })
+            .map_err(|_| issues::worker_unavailable())?;
+        Ok(())
+    }
+
+    fn cancel_artifact_download(&self) {
+        if let Some(cancel) = &self.artifact_cancel {
+            cancel.store(true, Ordering::Release);
+        }
+    }
+
+    fn enable_whpx(&mut self) -> Result<(), AppIssue> {
+        match self.workers.elevation.enable_whpx() {
+            Ok(0) => {
+                self.feature_state = FeatureState::Enabled;
+                self.wizard = advance(self.wizard.clone(), Outcome::WhpxEnabledNeedsReboot);
+                self.wizard = advance(self.wizard.clone(), Outcome::Continue);
+                Ok(())
+            }
+            Ok(3010) => {
+                self.feature_state = FeatureState::Enabled;
+                self.wizard = advance(self.wizard.clone(), Outcome::WhpxEnabledNeedsReboot);
+                Ok(())
+            }
+            Ok(1223) => Err(issues::whpx_enable_declined()),
+            Ok(code) => {
+                eprintln!("ome-setup exited with code {code}");
+                Err(issues::whpx_enable_failed(code))
+            }
+            Err(ElevationError::Declined) => Err(issues::whpx_enable_declined()),
+            Err(ElevationError::Failed(_)) => Err(issues::whpx_enable_unavailable()),
+        }
+    }
+
+    fn create_guest(&mut self, image_id: String, size_gib: u32) -> Result<(), AppIssue> {
+        self.create_guest_internal(image_id, size_gib, None)
+    }
+
+    fn create_guest_internal(
+        &mut self,
+        image_id: String,
+        size_gib: u32,
+        forced_id: Option<String>,
+    ) -> Result<(), AppIssue> {
+        if !matches!(self.guest_state, GuestState::Stopped | GuestState::Failed) {
+            return Err(issues::operating_system_running());
+        }
+        if !matches!(size_gib, 32 | 64 | 128) {
+            return Err(issues::invalid_disk_size());
+        }
+        let profile = self
+            .profile_by_id(&image_id)
+            .cloned()
+            .ok_or_else(issues::image_not_found)?;
+        let store = self
+            .deps
+            .artifacts
+            .as_ref()
+            .ok_or_else(issues::artifact_store_unavailable)?;
+        let verified = store
+            .verified(&profile.artifact)
+            .ok_or_else(issues::artifact_not_verified)?;
+        let found = self
+            .deps
+            .probe
+            .qemu()
+            .ok()
+            .flatten()
+            .ok_or_else(issues::qemu_unavailable)?;
+        let system_exe = PathBuf::from(&found.program);
+        let qemu_img = system_exe
+            .parent()
+            .ok_or_else(issues::qemu_unavailable)?
+            .join("qemu-img.exe");
+        let firmware_code = found
+            .firmware_code
+            .map(PathBuf::from)
+            .ok_or_else(issues::firmware_unavailable)?;
+        let template = found
+            .firmware_vars_template
+            .map(PathBuf::from)
+            .ok_or_else(issues::firmware_unavailable)?;
+        let id = forced_id.unwrap_or(self.next_guest_id(&image_id)?);
+        let directory = self.guest_store.guest_dir(&id).map_err(guest_store_issue)?;
+        fs::create_dir(&directory).map_err(|_| issues::guest_storage_unavailable())?;
+        let result = (|| {
+            let disk = directory.join("disk.qcow2");
+            let args = [
+                OsString::from("create"),
+                OsString::from("-f"),
+                OsString::from("qcow2"),
+                disk.as_os_str().to_owned(),
+                OsString::from(format!("{size_gib}G")),
+            ];
+            if self
+                .workers
+                .process
+                .run(&qemu_img, &args)
+                .map_err(|_| issues::guest_create_failed())?
+                != 0
+                || !disk.is_file()
+            {
+                return Err(issues::guest_create_failed());
+            }
+            let firmware_vars = directory.join("efivars.fd");
+            fs::copy(template, &firmware_vars).map_err(|_| issues::firmware_unavailable())?;
+            let record = GuestRecord {
+                id: id.clone(),
+                image_id: profile.id.clone(),
+                android_version: profile.android_version.clone(),
+                api_level: profile.api_level,
+                disk_bytes: u64::from(size_gib) << 30,
+                created_at: Some(local_rfc3339()),
+                last_started_at: None,
+                capabilities: Default::default(),
+                device_id: None,
+                registration_opened_at: None,
+                root_enabled: None,
+            };
+            self.guest_store.save(&record).map_err(guest_store_issue)?;
+            let config = self.build_guest_config(&record, &profile)?;
+            let paths = GuestPaths {
+                disk,
+                firmware_code,
+                firmware_vars,
+                iso: Some(verified.path),
+            };
+            self.deps
+                .supervisor
+                .as_deref_mut()
+                .ok_or_else(issues::process_unavailable)?
+                .start_install(config, paths, QemuInstall { system_exe })
+                .map_err(|_| issues::process_start_failed())?;
+            self.guests.push(record);
+            self.guests.sort_by(|left, right| left.id.cmp(&right.id));
+            self.active_guest = Some(id.clone());
+            self.selected_image = Some(profile.id);
+            self.guest_store
+                .save_active(Some(&id))
+                .map_err(guest_store_issue)?;
+            if let Some(position) = self.selected_guest_index() {
+                self.load_guest_projection(position);
+            }
+            self.installing_guest = true;
+            self.boot_started = Some(Instant::now());
+            self.boot_completed = false;
+            self.adb_connected = false;
+            Ok(())
+        })();
+        if result.is_err() {
+            let _ = fs::remove_dir_all(&directory);
+        }
+        result
+    }
+
+    fn reinstall_guest(&mut self, name: String) -> Result<(), AppIssue> {
+        if !matches!(self.guest_state, GuestState::Stopped | GuestState::Failed) {
+            return Err(issues::operating_system_running());
+        }
+        let record = self
+            .guests
+            .iter()
+            .find(|guest| guest.id == name)
+            .cloned()
+            .ok_or_else(issues::guest_not_found)?;
+        let size_gib = u32::try_from(record.disk_bytes >> 30)
+            .unwrap_or(32)
+            .clamp(32, 128);
+        self.guest_store.delete(&name).map_err(guest_store_issue)?;
+        self.guests.retain(|guest| guest.id != name);
+        self.active_guest = None;
+        self.create_guest_internal(record.image_id, size_gib, Some(name))
+    }
+
+    fn next_guest_id(&self, image_id: &str) -> Result<String, AppIssue> {
+        let base = safe_guest_id(image_id).ok_or_else(issues::image_not_found)?;
+        if !self.guests.iter().any(|guest| guest.id == base) {
+            return Ok(base);
+        }
+        for suffix in 2..=9999 {
+            let candidate = format!("{base}-{suffix}");
+            if !self.guests.iter().any(|guest| guest.id == candidate) {
+                return Ok(candidate);
+            }
+        }
+        Err(issues::guest_create_failed())
+    }
+
+    fn export_diagnostics(&mut self) -> Result<(), AppIssue> {
+        let logs = self
+            .home
+            .subdir("logs")
+            .map_err(|_| issues::home_unavailable())?;
+        let mut host_logs = Vec::new();
+        let mut qemu_logs = Vec::new();
+        for entry in fs::read_dir(&logs).map_err(|_| issues::diagnostics_failed())? {
+            let path = entry.map_err(|_| issues::diagnostics_failed())?.path();
+            if !path.is_file() {
+                continue;
+            }
+            let name = path
+                .file_name()
+                .and_then(|name| name.to_str())
+                .unwrap_or_default();
+            if name.contains(".stdout.") || name.contains(".stderr.") || name.contains(".cmd.") {
+                qemu_logs.push(path);
+            } else {
+                host_logs.push(path);
+            }
+        }
+        host_logs.sort();
+        qemu_logs.sort();
+        let logcat = if self.guest_state == GuestState::Running && self.boot_completed {
+            self.deps
+                .adb
+                .as_ref()
+                .and_then(|adb| adb.logcat_tail().ok())
+        } else {
+            None
+        };
+        let host_report =
+            serde_json::to_string(&self.host).map_err(|_| issues::diagnostics_failed())?;
+        let settings =
+            serde_json::to_string(&self.settings).map_err(|_| issues::diagnostics_failed())?;
+        let environment = vec![
+            (
+                "productVersion".to_owned(),
+                self.deps.product_version.clone(),
+            ),
+            ("hostReportJson".to_owned(), host_report),
+            ("settingsJson".to_owned(), settings),
+            ("guestState".to_owned(), format!("{:?}", self.guest_state)),
+            ("memoryMiB".to_owned(), self.settings.memory_mib.to_string()),
+            ("vcpus".to_owned(), self.settings.vcpus.to_string()),
+            (
+                "gpuMode".to_owned(),
+                format!("{:?}", self.settings.gpu_mode),
+            ),
+            (
+                "closeAction".to_owned(),
+                format!("{:?}", self.settings.close_action),
+            ),
+            (
+                "adbAccess".to_owned(),
+                format!("{:?}", self.settings.adb_access),
+            ),
+        ];
+        let out_dir = self
+            .home
+            .subdir("diagnostics")
+            .map_err(|_| issues::home_unavailable())?;
+        let path = ome_diagnostics::DiagnosticBundle::collect(ome_diagnostics::BundleRequest {
+            host_logs,
+            qemu_logs,
+            logcat,
+            environment,
+            out_dir: out_dir.clone(),
+        })
+        .map_err(|_| issues::diagnostics_failed())?;
+        self.deps
+            .desktop
+            .open_path(&out_dir)
+            .map_err(|_| issues::desktop_unavailable())?;
+        self.push_notice(Notice {
+            at: local_rfc3339(),
+            level: NoticeLevel::Info,
+            message: format!("진단 묶음을 {}에 저장했습니다.", path.display()),
+        });
+        Ok(())
+    }
+
+    fn start_update_check(&mut self) -> Result<(), AppIssue> {
+        if matches!(
+            self.update_state,
+            UpdateState::Checking | UpdateState::Downloading { .. }
+        ) {
+            return Err(issues::operation_in_progress());
+        }
+        self.update_state = UpdateState::Checking;
+        let version = self.deps.product_version.clone();
+        let sender = self.worker_tx.clone();
+        let fetch = Arc::clone(&self.workers.http);
+        thread::Builder::new()
+            .name("ome-update-check".to_owned())
+            .spawn(move || {
+                let result = fetch_release_document(fetch.as_ref())
+                    .and_then(|document| release_from_document(document, &version));
+                let _ = sender.send(WorkerEvent::UpdateChecked(result));
+            })
+            .map_err(|_| issues::worker_unavailable())?;
+        Ok(())
+    }
+
+    fn start_update_install(&mut self) -> Result<(), AppIssue> {
+        if matches!(
+            self.update_state,
+            UpdateState::Checking | UpdateState::Downloading { .. }
+        ) {
+            return Err(issues::operation_in_progress());
+        }
+        if let Some(download) = self.update_download.clone() {
+            self.deps
+                .desktop
+                .launch_installer(&download.path)
+                .map_err(|_| issues::update_launch_failed())?;
+            self.update_state = UpdateState::ReadyToInstall {
+                version: download.version,
+            };
+            self.update_exit_requested = true;
+            return Ok(());
+        }
+        let release = self
+            .update_release
+            .clone()
+            .ok_or_else(issues::update_not_available)?;
+        let checksum = release
+            .checksum
+            .clone()
+            .ok_or_else(issues::update_unverified)?;
+        let directory = self.home.as_path().join("updates");
+        fs::create_dir_all(&directory).map_err(|_| issues::update_download_failed())?;
+        self.update_state = UpdateState::Downloading {
+            progress: transfer_progress(
+                TransferStage::Waiting,
+                0,
+                Some(release.installer.size),
+                None,
+                release.installer.name.clone(),
+            ),
+        };
+        let sender = self.worker_tx.clone();
+        let fetch = Arc::clone(&self.workers.http);
+        thread::Builder::new()
+            .name("ome-update-download".to_owned())
+            .spawn(move || {
+                let result = download_update_release(
+                    &release,
+                    &checksum,
+                    &directory,
+                    &sender,
+                    fetch.as_ref(),
+                );
+                let _ = sender.send(WorkerEvent::UpdateDownloaded(result));
+            })
+            .map_err(|_| issues::worker_unavailable())?;
+        Ok(())
+    }
+
+    /// Takes the one-shot request to close after launching a verified updater.
+    pub fn take_update_exit_requested(&mut self) -> bool {
+        std::mem::take(&mut self.update_exit_requested)
+    }
+
+    /// Applies completed background work without waiting.
+    pub fn poll_workers(&mut self) {
+        self.drain_worker_events();
+    }
+
+    fn drain_worker_events(&mut self) {
+        while let Ok(event) = self.worker_rx.try_recv() {
+            match event {
+                WorkerEvent::ArtifactProgress(progress) => self.artifact_progress = Some(progress),
+                WorkerEvent::ArtifactFinished(result) => {
+                    self.artifact_cancel = None;
+                    if let Err(issue) = result {
+                        let cancelled = issue.code == "operation_cancelled";
+                        self.artifact_progress =
+                            self.artifact_progress.take().map(|mut progress| {
+                                progress.stage = if cancelled {
+                                    TransferStage::Cancelled
+                                } else {
+                                    TransferStage::Failed
+                                };
+                                progress
+                            });
+                        if !cancelled {
+                            self.issue = Some(issue);
+                        }
+                    }
+                }
+                WorkerEvent::InstallProgress(progress) => self.install_progress = Some(progress),
+                WorkerEvent::InstallFinished(result) => {
+                    let cancelled = self
+                        .install_cancel
+                        .as_ref()
+                        .is_some_and(|cancel| cancel.load(Ordering::Acquire));
+                    self.install_cancel = None;
+                    match result {
+                        Ok(items) => {
+                            if !items.is_empty() {
+                                self.apps = items;
+                            }
+                            if let Some(progress) = &mut self.install_progress {
+                                progress.stage = if cancelled {
+                                    TransferStage::Cancelled
+                                } else {
+                                    TransferStage::Verified
+                                };
+                                if !cancelled {
+                                    progress.done_items = progress.total_items;
+                                    progress.done_bytes = progress.total_items;
+                                    progress.ratio = Some(1.0);
+                                }
+                            }
+                        }
+                        Err(issue) => {
+                            if let Some(progress) = &mut self.install_progress {
+                                progress.stage = TransferStage::Failed;
+                            }
+                            self.issue = Some(issue);
+                        }
+                    }
+                }
+                WorkerEvent::UpdateChecked(result) => match result {
+                    Ok(release) => {
+                        let state = UpdateState::Available {
+                            version: release.version.clone(),
+                            notes_url: release.notes_url.clone(),
+                            asset: UpdateAsset {
+                                name: release.installer.name.clone(),
+                                size_bytes: release.installer.size,
+                            },
+                        };
+                        self.update_release = Some(release);
+                        self.update_state = state;
+                    }
+                    Err(issue) if issue.code == "update_up_to_date" => {
+                        self.update_release = None;
+                        self.update_state = UpdateState::UpToDate {
+                            checked_at: local_rfc3339(),
+                        };
+                    }
+                    Err(issue) => self.update_state = UpdateState::Failed { issue },
+                },
+                WorkerEvent::UpdateProgress(progress) => {
+                    self.update_state = UpdateState::Downloading { progress };
+                }
+                WorkerEvent::UpdateDownloaded(result) => match result {
+                    Ok(download) => {
+                        let version = download.version.clone();
+                        let path = download.path.clone();
+                        if self.deps.desktop.launch_installer(&path).is_ok() {
+                            self.update_state = UpdateState::ReadyToInstall { version };
+                            self.update_exit_requested = true;
+                        } else {
+                            self.update_download = Some(download);
+                            self.update_state = UpdateState::Failed {
+                                issue: issues::update_launch_failed(),
+                            };
+                        }
+                    }
+                    Err(issue) => self.update_state = UpdateState::Failed { issue },
+                },
+            }
         }
     }
 
@@ -1119,6 +1906,10 @@ impl AppRuntime {
                     if let Err(issue) = self.start_guest() {
                         self.issue = Some(issue);
                     }
+                } else if self.wizard.step == Step::FirstBoot
+                    && let Err(issue) = self.start_guest()
+                {
+                    self.issue = Some(issue);
                 }
             }
             ome_supervisor::GuestState::Failed => {
@@ -1140,6 +1931,7 @@ impl AppRuntime {
 
     /// Advances one non-blocking adb boot/account poll.
     pub fn tick(&mut self) {
+        self.drain_worker_events();
         if self.guest_state != GuestState::Running {
             return;
         }
@@ -1225,6 +2017,16 @@ impl AppRuntime {
             height: display.height,
         });
         self.add_account_supported = add_account_supported;
+        self.apps = package_items(
+            outcome
+                .packages
+                .iter()
+                .map(|package| ome_adb::InstalledPackage {
+                    package: package.package.clone(),
+                    version_code: package.version_code,
+                })
+                .collect(),
+        );
         if let Some(position) = self.selected_guest_index() {
             self.guests[position].apply_probe(&outcome, probed_at);
             if self.guest_store.save(&self.guests[position]).is_err() {
@@ -1321,6 +2123,7 @@ impl AppRuntime {
         self.add_account_supported = adapter_for(guest.api_level)
             .add_google_account_command()
             .is_some();
+        self.apps = stored_apps(guest);
     }
 
     fn clear_guest_projection(&mut self) {
@@ -1333,9 +2136,13 @@ impl AppRuntime {
         self.media_volume = None;
         self.resolution = None;
         self.add_account_supported = false;
+        self.apps.clear();
     }
 
     fn select_image(&mut self, id: String) -> Result<(), AppIssue> {
+        if self.artifact_cancel.is_some() {
+            return Err(issues::operation_in_progress());
+        }
         let profile = self
             .image_profiles
             .iter()
@@ -1483,7 +2290,7 @@ impl AppRuntime {
         self.host = HostReport {
             rows: report.rows.into_iter().map(convert_host_row).collect(),
             ready: report.verdict != Verdict::Blocked,
-            inspected_at: None,
+            inspected_at: Some(local_rfc3339()),
         };
         self.blocker = blocker_from_host(&self.host);
     }
@@ -1512,6 +2319,12 @@ impl AppRuntime {
         {
             return Err(issues::wizard_cannot_continue());
         }
+        if self.wizard.step == Step::GuestInstall && self.installing_guest {
+            self.stop_guest()?;
+            self.installing_guest = false;
+            self.wizard = advance(self.wizard.clone(), outcome);
+            return Ok(());
+        }
         let before = self.wizard.step;
         self.wizard = advance(self.wizard.clone(), outcome);
         if self.wizard.step == before {
@@ -1539,17 +2352,15 @@ impl AppRuntime {
             host_ready: self.host.ready,
             whpx_consent: false,
             artifact_verified: self
-                .deps
-                .artifacts
-                .as_ref()
-                .and_then(ArtifactStore::installer)
-                .is_some_and(|artifact| {
-                    self.deps.artifacts.as_ref().is_some_and(|store| {
-                        matches!(
-                            store.verify(&artifact.name),
-                            ome_artifacts::Verification::Verified
-                        )
-                    })
+                .selected_profile()
+                .and_then(|profile| {
+                    self.deps
+                        .artifacts
+                        .as_ref()
+                        .map(|store| (store, profile.artifact.as_str()))
+                })
+                .is_some_and(|(store, name)| {
+                    matches!(store.verify(name), ome_artifacts::Verification::Verified)
                 }),
             guest_installed: !self.guests.is_empty(),
             guest_booted: self.boot_completed,
@@ -1567,14 +2378,14 @@ impl AppRuntime {
                 can_continue(self.wizard.step, facts)
             },
             can_skip: can_skip(self.wizard.step),
-            download: None,
+            download: self.artifact_progress.clone(),
             image_id: self.selected_image.clone(),
             install_guide: self
                 .selected_profile()
                 .map(|profile| profile.install_guide.clone())
                 .unwrap_or_default(),
             disk_size_gib: 32,
-            disk_free_bytes: None,
+            disk_free_bytes: self.deps.probe.free_disk_bytes().ok(),
         }
     }
 
@@ -1653,6 +2464,313 @@ impl AppRuntime {
             active_guest: self.active_guest.clone(),
         }
     }
+}
+
+fn safe_guest_id(image_id: &str) -> Option<String> {
+    let mut id = String::with_capacity(image_id.len().min(70));
+    let mut separator = false;
+    for byte in image_id.bytes() {
+        let valid = byte.is_ascii_alphanumeric() || byte == b'_';
+        if valid {
+            if id.len() >= 70 {
+                break;
+            }
+            id.push(char::from(byte));
+            separator = false;
+        } else if !separator && !id.is_empty() {
+            if id.len() >= 70 {
+                break;
+            }
+            id.push('-');
+            separator = true;
+        }
+    }
+    while id.ends_with('-') {
+        id.pop();
+    }
+    (!id.is_empty()).then_some(id)
+}
+
+fn stored_apps(guest: &GuestRecord) -> Vec<AppItem> {
+    package_items(
+        guest
+            .capabilities
+            .packages
+            .iter()
+            .map(|package| ome_adb::InstalledPackage {
+                package: package.package.clone(),
+                version_code: package.version_code,
+            })
+            .collect(),
+    )
+}
+
+fn package_items(packages: Vec<ome_adb::InstalledPackage>) -> Vec<AppItem> {
+    let mut items = packages
+        .into_iter()
+        .map(|package| AppItem {
+            label: package.package.clone(),
+            version_name: None,
+            version_code: package.version_code,
+            package: package.package,
+            installed_at: None,
+        })
+        .collect::<Vec<_>>();
+    items.sort_by(|left, right| left.package.cmp(&right.package));
+    items
+}
+
+/// Accepts existing APK, XAPK, and APKS files without exposing paths to the webview.
+pub fn validate_app_paths(paths: Vec<PathBuf>) -> Result<Vec<PathBuf>, AppIssue> {
+    let mut valid = Vec::with_capacity(paths.len());
+    for path in paths {
+        let extension = path
+            .extension()
+            .and_then(|value| value.to_str())
+            .map(str::to_ascii_lowercase);
+        if !path.is_file() || !matches!(extension.as_deref(), Some("apk" | "xapk" | "apks")) {
+            return Err(issues::app_package_invalid());
+        }
+        valid.push(path);
+    }
+    Ok(valid)
+}
+
+fn transfer_progress(
+    stage: TransferStage,
+    done_bytes: u64,
+    total_bytes: Option<u64>,
+    bytes_per_second: Option<u64>,
+    label: String,
+) -> TransferProgress {
+    TransferProgress {
+        stage,
+        done_bytes,
+        total_bytes,
+        bytes_per_second,
+        label,
+    }
+}
+
+fn install_progress(
+    label: &str,
+    stage: TransferStage,
+    done_items: u64,
+    total_items: u64,
+) -> InstallProgress {
+    InstallProgress {
+        label: label.to_owned(),
+        stage,
+        done_items,
+        total_items,
+        ratio: (total_items > 0).then_some(done_items as f64 / total_items as f64),
+        done_bytes: done_items,
+        total_bytes: Some(total_items),
+    }
+}
+
+fn fetch_release_document(
+    http: &dyn ome_artifacts::HttpFetch,
+) -> Result<ReleaseDocument, AppIssue> {
+    const URL: &str = "https://api.github.com/repos/115dkk/Open-Mobile-Emulator/releases/latest";
+    let hosts = ome_artifacts::AllowedHosts(vec!["api.github.com".to_owned()]);
+    if !hosts.permits(URL) {
+        return Err(issues::update_check_failed());
+    }
+    let mut bytes = Vec::new();
+    let outcome = http
+        .fetch(URL, None, &mut bytes, &mut |_| true)
+        .map_err(|_| issues::update_check_failed())?;
+    if outcome.status != 200
+        || outcome
+            .final_url
+            .as_deref()
+            .is_some_and(|url| !hosts.permits(url))
+    {
+        return Err(issues::update_check_failed());
+    }
+    serde_json::from_slice(&bytes).map_err(|_| issues::update_check_failed())
+}
+
+fn release_from_document(
+    document: ReleaseDocument,
+    product_version: &str,
+) -> Result<UpdateRelease, AppIssue> {
+    let available = Version::parse(document.tag_name.trim_start_matches(['v', 'V']))
+        .map_err(|_| issues::update_check_failed())?;
+    let current = Version::parse(product_version).map_err(|_| issues::update_check_failed())?;
+    if available <= current {
+        return Err(issues::update_up_to_date());
+    }
+    if !trusted_release_notes_url(&document.html_url) {
+        return Err(issues::update_check_failed());
+    }
+    let mut installers = document.assets.iter().filter(|asset| {
+        let lower = asset.name.to_ascii_lowercase();
+        !lower.ends_with(".sha256")
+            && matches!(
+                Path::new(&lower)
+                    .extension()
+                    .and_then(|value| value.to_str()),
+                Some("exe" | "msi" | "msix")
+            )
+    });
+    let installer = installers
+        .next()
+        .cloned()
+        .ok_or_else(issues::update_check_failed)?;
+    if installers.next().is_some() {
+        return Err(issues::update_check_failed());
+    }
+    if !is_safe_leaf(&installer.name) || !trusted_update_asset_url(&installer.browser_download_url)
+    {
+        return Err(issues::update_check_failed());
+    }
+    let checksum = document
+        .assets
+        .iter()
+        .find(|asset| asset.name == format!("{}.sha256", installer.name))
+        .cloned();
+    if checksum.as_ref().is_some_and(|asset| {
+        !is_safe_leaf(&asset.name) || !trusted_update_asset_url(&asset.browser_download_url)
+    }) {
+        return Err(issues::update_check_failed());
+    }
+    let notes_url =
+        (!document.body.is_empty() || !document.html_url.is_empty()).then_some(document.html_url);
+    Ok(UpdateRelease {
+        version: available.to_string(),
+        notes_url,
+        installer,
+        checksum,
+    })
+}
+
+fn is_safe_leaf(name: &str) -> bool {
+    !name.is_empty()
+        && Path::new(name)
+            .components()
+            .all(|component| matches!(component, std::path::Component::Normal(_)))
+        && Path::new(name).components().count() == 1
+}
+
+fn trusted_update_asset_url(url: &str) -> bool {
+    ome_artifacts::AllowedHosts(vec![
+        "github.com".to_owned(),
+        "objects.githubusercontent.com".to_owned(),
+    ])
+    .permits(url)
+        && url
+            .strip_prefix("https://github.com/")
+            .is_none_or(|path| path.starts_with("115dkk/Open-Mobile-Emulator/releases/download/"))
+}
+
+fn fetch_to_bytes(
+    http: &dyn ome_artifacts::HttpFetch,
+    url: &str,
+    hosts: &ome_artifacts::AllowedHosts,
+) -> Result<Vec<u8>, AppIssue> {
+    if !hosts.permits(url) {
+        return Err(issues::update_download_failed());
+    }
+    let mut bytes = Vec::new();
+    let outcome = http
+        .fetch(url, None, &mut bytes, &mut |_| true)
+        .map_err(|_| issues::update_download_failed())?;
+    if outcome.status != 200
+        || outcome
+            .final_url
+            .as_deref()
+            .is_some_and(|final_url| !hosts.permits(final_url))
+    {
+        return Err(issues::update_download_failed());
+    }
+    Ok(bytes)
+}
+
+fn download_update_release(
+    release: &UpdateRelease,
+    checksum: &ReleaseAsset,
+    directory: &Path,
+    sender: &mpsc::Sender<WorkerEvent>,
+    http: &dyn ome_artifacts::HttpFetch,
+) -> Result<DownloadedUpdate, AppIssue> {
+    if !is_safe_leaf(&release.installer.name) || !is_safe_leaf(&checksum.name) {
+        return Err(issues::update_check_failed());
+    }
+    let hosts = ome_artifacts::AllowedHosts(vec![
+        "github.com".to_owned(),
+        "objects.githubusercontent.com".to_owned(),
+    ]);
+    let checksum_bytes = fetch_to_bytes(http, &checksum.browser_download_url, &hosts)?;
+    let checksum_text =
+        std::str::from_utf8(&checksum_bytes).map_err(|_| issues::update_unverified())?;
+    let expected = checksum_text
+        .split_whitespace()
+        .find(|word| word.len() == 64 && word.bytes().all(|byte| byte.is_ascii_hexdigit()))
+        .ok_or_else(issues::update_unverified)?;
+    if !hosts.permits(&release.installer.browser_download_url) {
+        return Err(issues::update_download_failed());
+    }
+    let staging = directory.join(format!("{}.part", release.installer.name));
+    let final_path = directory.join(&release.installer.name);
+    let mut file = std::fs::File::create(&staging).map_err(|_| issues::update_download_failed())?;
+    let started = Instant::now();
+    let mut done = 0_u64;
+    let outcome = http
+        .fetch(
+            &release.installer.browser_download_url,
+            None,
+            &mut file,
+            &mut |bytes| {
+                done = done.saturating_add(bytes);
+                let rate = (started.elapsed().as_secs_f64() > 0.0)
+                    .then(|| (done as f64 / started.elapsed().as_secs_f64()) as u64);
+                let _ = sender.send(WorkerEvent::UpdateProgress(transfer_progress(
+                    TransferStage::Transferring,
+                    done,
+                    Some(release.installer.size),
+                    rate,
+                    release.installer.name.clone(),
+                )));
+                true
+            },
+        )
+        .map_err(|_| issues::update_download_failed())?;
+    if outcome.status != 200
+        || outcome
+            .final_url
+            .as_deref()
+            .is_some_and(|url| !hosts.permits(url))
+        || done != release.installer.size
+    {
+        let _ = fs::remove_file(staging);
+        return Err(issues::update_download_failed());
+    }
+    use std::io::{Read, Write};
+    file.flush().map_err(|_| issues::update_download_failed())?;
+    drop(file);
+    let mut source = std::fs::File::open(&staging).map_err(|_| issues::update_download_failed())?;
+    let mut hasher = Sha256::new();
+    let mut buffer = [0_u8; 64 * 1024];
+    loop {
+        let count = source
+            .read(&mut buffer)
+            .map_err(|_| issues::update_download_failed())?;
+        if count == 0 {
+            break;
+        }
+        hasher.update(&buffer[..count]);
+    }
+    if !format!("{:x}", hasher.finalize()).eq_ignore_ascii_case(expected) {
+        let _ = fs::remove_file(&staging);
+        return Err(issues::update_unverified());
+    }
+    fs::rename(&staging, &final_path).map_err(|_| issues::update_download_failed())?;
+    Ok(DownloadedUpdate {
+        version: release.version.clone(),
+        path: final_path,
+    })
 }
 
 fn trusted_release_notes_url(url: &str) -> bool {
@@ -1933,7 +3051,8 @@ fn blocker_from_host(report: &HostReport) -> Option<Blocker> {
     }
 }
 
-fn guest_store_issue(_error: GuestStoreError) -> AppIssue {
+fn guest_store_issue(error: GuestStoreError) -> AppIssue {
+    eprintln!("operating-system storage failed: {error}");
     issues::guest_storage_unavailable()
 }
 
@@ -1987,9 +3106,12 @@ fn convert_step(step: Step) -> WizardStep {
 mod tests {
     use std::ffi::OsString;
     use std::fs;
+    use std::io::Write;
     use std::sync::{Arc, Mutex};
 
+    use crate::{ElevationLauncher, NativeProcessRunner};
     use ome_adb::{Output, RecordedRunner};
+    use ome_artifacts::{FetchError, FetchOutcome, HttpFetch};
     use ome_guest_image::{
         Attempt, DeviceId, DisplayInfo, GuestFamily, PackageEntry, ShellCommand,
     };
@@ -1999,6 +3121,64 @@ mod tests {
     use super::*;
     use crate::desktop::RecordingDesktop;
     use crate::{AdbAccess, CloseAction, GpuMode, SettingsInput};
+
+    #[derive(Clone, Debug)]
+    struct FakeElevation(Result<u32, ElevationError>);
+
+    impl ElevationLauncher for FakeElevation {
+        fn enable_whpx(&self) -> Result<u32, ElevationError> {
+            self.0.clone()
+        }
+    }
+
+    type NativeCalls = Vec<(PathBuf, Vec<OsString>)>;
+
+    #[derive(Clone, Debug, Default)]
+    struct CreatingDiskRunner {
+        calls: Arc<Mutex<NativeCalls>>,
+    }
+
+    impl NativeProcessRunner for CreatingDiskRunner {
+        fn run(&self, program: &Path, args: &[OsString]) -> Result<i32, String> {
+            self.calls
+                .lock()
+                .map_err(|_| "native calls lock failed".to_owned())?
+                .push((program.to_path_buf(), args.to_vec()));
+            let disk = args
+                .get(3)
+                .map(PathBuf::from)
+                .ok_or_else(|| "missing disk argument".to_owned())?;
+            fs::write(disk, [0_u8; 1]).map_err(|error| error.to_string())?;
+            Ok(0)
+        }
+    }
+
+    #[derive(Clone, Debug)]
+    struct FixedHttp {
+        body: Vec<u8>,
+        final_url: String,
+    }
+
+    impl HttpFetch for FixedHttp {
+        fn fetch(
+            &self,
+            _url: &str,
+            range_start: Option<u64>,
+            sink: &mut dyn Write,
+            progress: &mut dyn FnMut(u64) -> bool,
+        ) -> Result<FetchOutcome, FetchError> {
+            sink.write_all(&self.body).map_err(FetchError::Io)?;
+            let count = u64::try_from(self.body.len()).expect("test body fits u64");
+            if !progress(count) {
+                return Err(FetchError::Cancelled);
+            }
+            Ok(FetchOutcome {
+                status: if range_start.is_some() { 206 } else { 200 },
+                final_url: Some(self.final_url.clone()),
+                bytes_written: count,
+            })
+        }
+    }
 
     fn ready_probe(feature: FeatureState) -> TableProbe {
         TableProbe::new()
@@ -2066,6 +3246,15 @@ mod tests {
                 .map_err(|_| "state lock failed".to_owned())? =
                 ome_supervisor::GuestState::Starting;
             Ok(())
+        }
+
+        fn start_install(
+            &mut self,
+            config: GuestConfig,
+            paths: GuestPaths,
+            install: QemuInstall,
+        ) -> Result<(), String> {
+            self.start(config, paths, install)
         }
 
         fn request_stop(&self) {
@@ -2984,6 +4173,419 @@ mod tests {
     }
 
     #[test]
+    fn drag_drop_validation_rejects_missing_and_unsupported_paths() {
+        let directory = tempfile::tempdir().expect("temp directory");
+        let apk = directory.path().join("sample.APK");
+        fs::write(&apk, b"apk").expect("APK fixture");
+        assert_eq!(
+            validate_app_paths(vec![apk.clone()]).expect("valid APK"),
+            [apk]
+        );
+        for invalid in [
+            directory.path().join("missing.apk"),
+            directory.path().join("sample.zip"),
+        ] {
+            assert_eq!(
+                validate_app_paths(vec![invalid])
+                    .expect_err("invalid path")
+                    .code,
+                "app_package_invalid"
+            );
+        }
+    }
+
+    #[test]
+    fn app_install_reports_progress_and_refreshes_packages() {
+        let package_dir = tempfile::tempdir().expect("package directory");
+        let first = package_dir.path().join("first.apk");
+        let second = package_dir.path().join("second.apk");
+        fs::write(&first, b"apk").expect("first APK");
+        fs::write(&second, b"apk").expect("second APK");
+        let outputs = [
+            output("Success"),
+            output("Success"),
+            output(
+                "package:dev.ome.one versionCode:7
+package:dev.ome.two versionCode:8",
+            ),
+        ];
+        let (_home, mut runtime, _supervisor, runner) = lifecycle_runtime(
+            outputs,
+            RecordingDesktop::default(),
+            RecordingWindow::embedded(),
+        );
+        runtime.guest_state = GuestState::Running;
+        runtime.boot_completed = true;
+        runtime
+            .install_apps(vec![first, second])
+            .expect("install admitted");
+        for _ in 0..1000 {
+            runtime.poll_workers();
+            if runtime.install_cancel.is_none() {
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        let snapshot = runtime.snapshot();
+        assert_eq!(snapshot.apps.items.len(), 2);
+        assert_eq!(snapshot.apps.items[0].version_code, Some(7));
+        assert_eq!(
+            snapshot.apps.install.expect("progress").stage,
+            TransferStage::Verified
+        );
+        assert_eq!(
+            runner
+                .calls()
+                .iter()
+                .filter(|call| call.args.iter().any(|arg| arg == "install"))
+                .count(),
+            2
+        );
+    }
+
+    #[test]
+    fn app_install_cancel_stops_after_current_file() {
+        let package_dir = tempfile::tempdir().expect("package directory");
+        let first = package_dir.path().join("first.apk");
+        let second = package_dir.path().join("second.apk");
+        fs::write(&first, b"apk").expect("first APK");
+        fs::write(&second, b"apk").expect("second APK");
+        let (_home, mut runtime, _supervisor, runner) = lifecycle_runtime(
+            [output("Success")],
+            RecordingDesktop::default(),
+            RecordingWindow::embedded(),
+        );
+        runtime.guest_state = GuestState::Running;
+        runtime.boot_completed = true;
+        runtime
+            .install_apps(vec![first, second])
+            .expect("install admitted");
+        runtime.cancel_app_install();
+        for _ in 0..1000 {
+            runtime.poll_workers();
+            if runtime.install_cancel.is_none() {
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        assert!(runtime.install_cancel.is_none(), "install worker completed");
+        assert_eq!(
+            runtime
+                .snapshot()
+                .apps
+                .install
+                .expect("cancelled progress")
+                .stage,
+            TransferStage::Cancelled
+        );
+        assert!(runner.calls().len() <= 1);
+    }
+
+    #[test]
+    fn whpx_exit_codes_map_to_wizard_and_issues() {
+        for (result, expected_step, expected_code) in [
+            (Ok(0), WizardStep::ArtifactDownload, None),
+            (Ok(3010), WizardStep::RebootPending, None),
+            (
+                Ok(1223),
+                WizardStep::WhpxConsent,
+                Some("hypervisor_enable_declined"),
+            ),
+            (
+                Err(ElevationError::Declined),
+                WizardStep::WhpxConsent,
+                Some("hypervisor_enable_declined"),
+            ),
+        ] {
+            let (_directory, mut runtime) = runtime(FeatureState::Disabled);
+            runtime.wizard.step = Step::WhpxConsent;
+            runtime.set_worker_deps(WorkerDeps {
+                elevation: Arc::new(FakeElevation(result)),
+                ..WorkerDeps::default()
+            });
+            let outcome = runtime.apply(Command::WhpxEnable);
+            assert_eq!(runtime.snapshot().wizard.step, expected_step);
+            assert_eq!(
+                outcome.err().map(|issue| issue.code).as_deref(),
+                expected_code
+            );
+        }
+    }
+
+    #[test]
+    fn artifact_download_reports_verify_resume_and_cancel() {
+        let body = b"artifact bytes".to_vec();
+        let hash = format!("{:x}", Sha256::digest(&body));
+        let (_directory, mut runtime) = runtime(FeatureState::Enabled);
+        runtime.image_profiles.push(GuestImageProfile {
+            id: "test-image".to_owned(),
+            display_name: "테스트 운영체제".to_owned(),
+            android_version: "13".to_owned(),
+            api_level: 33,
+            distribution: Distribution::Bliss,
+            artifact: "test-artifact".to_owned(),
+            translator: Translator::NdkTranslation,
+            boot_args: vec![],
+            grub_entry_hint: "installer".to_owned(),
+            install_guide: vec![],
+            qemu_overrides: vec![],
+            status: ProfileStatus::Verified,
+            released_at: Some("2024-10-11".to_owned()),
+            verifications: vec![],
+        });
+        runtime.selected_image = Some("test-image".to_owned());
+        let artifact_dir = runtime
+            .home
+            .subdir("artifacts")
+            .expect("artifact directory");
+        fs::write(artifact_dir.join("test.iso.part"), &body[..4]).expect("partial");
+        let manifest = Manifest::parse(&format!(
+            r#"{{"schema_version":1,"allowed_hosts":["example.com"],"artifacts":[{{
+            "name":"test-artifact","version":"1","filename":"test.iso",
+            "url":"https://example.com/test.iso","size_bytes":{},"sha256":"{}",
+            "license":"test","provenance_note":"test","fetched_by":"installer"}}]}}"#,
+            body.len(),
+            hash
+        ))
+        .expect("manifest");
+        runtime.deps.artifacts = Some(ArtifactStore::new(
+            manifest,
+            &artifact_dir,
+            Box::new(FixedHttp {
+                body: body[4..].to_vec(),
+                final_url: "https://example.com/test.iso".to_owned(),
+            }),
+        ));
+        runtime
+            .apply(Command::ArtifactDownloadStart)
+            .expect("download start");
+        for _ in 0..1000 {
+            runtime.poll_workers();
+            if runtime.artifact_cancel.is_none() {
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        let progress = runtime
+            .snapshot()
+            .wizard
+            .download
+            .expect("download progress");
+        assert_eq!(progress.stage, TransferStage::Verified);
+        assert_eq!(
+            progress.done_bytes,
+            u64::try_from(body.len()).expect("test size")
+        );
+        assert!(artifact_dir.join("test.iso").is_file());
+
+        fs::remove_file(artifact_dir.join("test.iso")).expect("remove complete");
+        runtime.deps.artifacts = Some(ArtifactStore::new(
+            runtime.artifact_manifest.clone().unwrap_or_else(|| {
+                Manifest::parse(&format!(
+                    r#"{{"schema_version":1,"allowed_hosts":["example.com"],"artifacts":[{{
+                "name":"test-artifact","version":"1","filename":"test.iso",
+                "url":"https://example.com/test.iso","size_bytes":{},"sha256":"{}",
+                "license":"test","provenance_note":"test","fetched_by":"installer"}}]}}"#,
+                    body.len(),
+                    hash
+                ))
+                .expect("manifest")
+            }),
+            &artifact_dir,
+            Box::new(FixedHttp {
+                body: body.clone(),
+                final_url: "https://example.com/test.iso".to_owned(),
+            }),
+        ));
+        runtime
+            .apply(Command::ArtifactDownloadStart)
+            .expect("cancel start");
+        runtime
+            .apply(Command::ArtifactDownloadCancel)
+            .expect("cancel request");
+        for _ in 0..1000 {
+            runtime.poll_workers();
+            if runtime.artifact_cancel.is_none() {
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        assert_eq!(
+            runtime
+                .snapshot()
+                .wizard
+                .download
+                .expect("cancel progress")
+                .stage,
+            TransferStage::Cancelled
+        );
+        assert!(artifact_dir.join("test.iso.part").is_file());
+    }
+
+    #[test]
+    fn guest_create_and_reinstall_write_layout_and_start_installer_iso() {
+        let body = b"verified installer image".to_vec();
+        let hash = format!("{:x}", Sha256::digest(&body));
+        let (directory, mut runtime, supervisor, _runner) = lifecycle_runtime(
+            std::iter::empty(),
+            RecordingDesktop::default(),
+            RecordingWindow::embedded(),
+        );
+        let qemu_dir = directory.path().join("qemu");
+        fs::create_dir(&qemu_dir).expect("qemu directory");
+        let system = qemu_dir.join("qemu-system-x86_64.exe");
+        let image = qemu_dir.join("qemu-img.exe");
+        let code = qemu_dir.join("code.fd");
+        let vars = qemu_dir.join("vars.fd");
+        for path in [&system, &image, &code, &vars] {
+            fs::write(path, b"fixture").expect("qemu fixture");
+        }
+        runtime.deps.probe = Box::new(ready_probe(FeatureState::Enabled).with(
+            ProbeId::QemuPresent,
+            ProbeValue::Qemu(Some(QemuFound {
+                version: "test".to_owned(),
+                source: "test".to_owned(),
+                program: system.to_string_lossy().into_owned(),
+                firmware_code: Some(code.to_string_lossy().into_owned()),
+                firmware_vars_template: Some(vars.to_string_lossy().into_owned()),
+            })),
+        ));
+        runtime.image_profiles[0].artifact = "test-artifact".to_owned();
+        let manifest = Manifest::parse(&format!(
+            r#"{{"schema_version":1,"allowed_hosts":["example.com"],"artifacts":[{{
+            "name":"test-artifact","version":"1","filename":"test.iso",
+            "url":"https://example.com/test.iso","size_bytes":{},"sha256":"{}",
+            "license":"test","provenance_note":"test","fetched_by":"installer"}}]}}"#,
+            body.len(),
+            hash
+        ))
+        .expect("manifest");
+        let artifact_dir = directory.path().join("home/artifacts");
+        fs::write(artifact_dir.join("test.iso"), body).expect("verified artifact");
+        runtime.deps.artifacts = Some(ArtifactStore::new(
+            manifest,
+            artifact_dir,
+            Box::new(ome_artifacts::UreqFetch::new()),
+        ));
+        let runner = CreatingDiskRunner::default();
+        runtime.set_worker_deps(WorkerDeps {
+            process: Arc::new(runner.clone()),
+            ..WorkerDeps::default()
+        });
+        runtime.guests.clear();
+        runtime.active_guest = None;
+        runtime.wizard.step = Step::GuestInstall;
+        runtime
+            .apply(Command::GuestCreate {
+                image_id: "bliss-16.9.7-android-13".to_owned(),
+                size_gib: 32,
+            })
+            .expect("guest create");
+        let id = "bliss-16-9-7-android-13";
+        let guest_dir = directory.path().join("home/vm").join(id);
+        assert!(guest_dir.join("disk.qcow2").is_file());
+        assert_eq!(
+            fs::read(guest_dir.join("efivars.fd")).expect("vars copy"),
+            b"fixture"
+        );
+        let document: serde_json::Value =
+            serde_json::from_slice(&fs::read(guest_dir.join("guest.json")).expect("guest JSON"))
+                .expect("guest document");
+        assert_eq!(document["id"], id);
+        assert_eq!(document["diskBytes"], 32_u64 << 30);
+        {
+            let starts = supervisor.starts.lock().expect("starts lock");
+            assert_eq!(starts.len(), 1);
+            assert_eq!(
+                starts[0].1.iso.as_deref(),
+                Some(directory.path().join("home/artifacts/test.iso").as_path())
+            );
+        }
+        assert_eq!(runner.calls.lock().expect("runner calls")[0].0, image);
+
+        runtime.guest_state = GuestState::Stopped;
+        *supervisor.state.lock().expect("state lock") = ome_supervisor::GuestState::Stopped;
+        runtime
+            .apply(Command::GuestReinstall {
+                name: id.to_owned(),
+            })
+            .expect("reinstall");
+        assert_eq!(runtime.active_guest.as_deref(), Some(id));
+        assert!(guest_dir.join("guest.json").is_file());
+        assert_eq!(supervisor.starts.lock().expect("starts lock").len(), 2);
+    }
+
+    #[test]
+    fn diagnostics_bundle_contains_expected_entries_and_opens_folder() {
+        let desktop = RecordingDesktop::default();
+        let observed = desktop.clone();
+        let (directory, mut runtime, _supervisor, _runner) =
+            lifecycle_runtime(std::iter::empty(), desktop, RecordingWindow::embedded());
+        let logs = directory.path().join("home/logs");
+        fs::write(logs.join("host.log"), b"host").expect("host log");
+        fs::write(logs.join("default.stdout.log"), b"qemu").expect("qemu log");
+        runtime
+            .apply(Command::DiagnosticsExport)
+            .expect("diagnostics export");
+        let diagnostics = directory.path().join("home/diagnostics");
+        let archive = fs::read_dir(&diagnostics)
+            .expect("diagnostics directory")
+            .next()
+            .expect("bundle entry")
+            .expect("bundle path")
+            .path();
+        let mut zip =
+            zip::ZipArchive::new(std::fs::File::open(archive).expect("bundle")).expect("ZIP");
+        assert!(zip.by_name("logs/host.log").is_ok());
+        assert!(zip.by_name("qemu/default.stdout.log").is_ok());
+        assert!(zip.by_name("environment.txt").is_ok());
+        assert_eq!(observed.paths(), [diagnostics]);
+    }
+
+    #[test]
+    fn update_check_parses_release_and_compares_semver() {
+        let document = ReleaseDocument {
+            tag_name: "v0.2.0".to_owned(),
+            html_url: "https://github.com/115dkk/Open-Mobile-Emulator/releases/tag/v0.2.0".to_owned(),
+            body: "notes".to_owned(),
+            assets: vec![
+                ReleaseAsset { name: "ome.exe".to_owned(), browser_download_url: "https://github.com/115dkk/Open-Mobile-Emulator/releases/download/v0.2.0/ome.exe".to_owned(), size: 12 },
+                ReleaseAsset { name: "ome.exe.sha256".to_owned(), browser_download_url: "https://github.com/115dkk/Open-Mobile-Emulator/releases/download/v0.2.0/ome.exe.sha256".to_owned(), size: 64 },
+            ],
+        };
+        let release = release_from_document(document.clone(), "0.1.9").expect("new release");
+        assert_eq!(release.version, "0.2.0");
+        assert!(release.checksum.is_some());
+        assert_eq!(
+            release_from_document(document, "0.2.0")
+                .expect_err("up to date")
+                .code,
+            "update_up_to_date"
+        );
+    }
+
+    #[test]
+    fn update_install_refuses_release_without_checksum() {
+        let (_directory, mut runtime) = runtime(FeatureState::Enabled);
+        runtime.update_release = Some(UpdateRelease {
+            version: "0.2.0".to_owned(), notes_url: None,
+            installer: ReleaseAsset {
+                name: "ome.exe".to_owned(),
+                browser_download_url: "https://github.com/115dkk/Open-Mobile-Emulator/releases/download/v0.2.0/ome.exe".to_owned(),
+                size: 12,
+            },
+            checksum: None,
+        });
+        assert_eq!(
+            runtime
+                .apply(Command::UpdateInstall)
+                .expect_err("unverified update")
+                .code,
+            "update_unverified"
+        );
+    }
+
+    #[test]
     fn release_notes_accept_only_the_repository_release_urls() {
         for accepted in [
             "https://github.com/115dkk/Open-Mobile-Emulator/releases",
@@ -3028,6 +4630,8 @@ mod tests {
             Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../docs/NETWORK.md"),
         )
         .expect("NETWORK.md");
+        assert!(network.contains("api.github.com"));
+        assert!(network.contains("objects.githubusercontent.com"));
         for url in observed.urls() {
             let authority = url
                 .strip_prefix("https://")

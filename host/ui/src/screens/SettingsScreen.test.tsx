@@ -396,7 +396,7 @@ describe('settings screen (S6): 저장 위치, 업데이트, 진단, 정보', ()
     expect(actions.openHelp).toHaveBeenCalledWith('releaseNotes');
     cleanup();
     const snapshot = variant('settings-network');
-    show({ ...snapshot, update: { currentVersion: '0.1.0', state: { kind: 'available', version: '0.2.0', notesUrl: null } } });
+    show({ ...snapshot, update: { currentVersion: '0.1.0', state: { kind: 'available', version: '0.2.0', notesUrl: null, asset: { name: 'ome-0.2.0-setup.exe', sizeBytes: 1 } } } });
     expect(within(section('업데이트')).queryByRole('button', { name: '릴리스 노트' })).toBeNull();
     expect(within(section('업데이트')).getByRole('button', { name: '다운로드 후 설치' })).toBeInTheDocument();
   });

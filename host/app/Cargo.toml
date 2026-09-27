@@ -31,10 +31,12 @@ tauri = { version = "2.11.6", default-features = false, features = ["wry", "comp
 tauri-plugin-single-instance = "2.4.5"
 ome-runtime = { path = "../crates/ome-runtime" }
 ome-supervisor = { path = "../crates/ome-supervisor" }
+ome-artifacts = { path = "../crates/ome-artifacts" }
 ome-adb = { path = "../crates/ome-adb" }
 ome-window-host = { path = "../crates/ome-window-host" }
 ome-host-check = { path = "../crates/ome-host-check" }
 arboard.workspace = true
+rfd = { version = "0.17.2", default-features = false, features = ["common-controls-v6"] }
 serde.workspace = true
 serde_json.workspace = true
 

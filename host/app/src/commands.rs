@@ -116,13 +116,11 @@ command_no_args!(guest_start, Command::GuestStart);
 command_no_args!(guest_stop, Command::GuestStop);
 command_no_args!(guest_restart, Command::GuestRestart);
 command_no_args!(screenshot_save, Command::ScreenshotSave);
-command_no_args!(app_install_pick, Command::AppInstallPick);
 command_no_args!(app_install_cancel, Command::AppInstallCancel);
 command_no_args!(input_suspend_toggle, Command::InputSuspendToggle);
 command_no_args!(input_overlay_toggle, Command::InputOverlayToggle);
 command_no_args!(input_editor_toggle, Command::InputEditorToggle);
 command_no_args!(update_check, Command::UpdateCheck);
-command_no_args!(update_install, Command::UpdateInstall);
 command_no_args!(diagnostics_export, Command::DiagnosticsExport);
 command_no_args!(open_logs_folder, Command::OpenLogsFolder);
 command_no_args!(open_screenshots_folder, Command::OpenScreenshotsFolder);
@@ -130,6 +128,67 @@ command_no_args!(open_home_folder, Command::OpenHomeFolder);
 command_no_args!(open_registration_page, Command::OpenRegistrationPage);
 command_no_args!(google_account_add_open, Command::GoogleAccountAddOpen);
 command_no_args!(guest_window_to_front, Command::GuestWindowToFront);
+
+#[tauri::command]
+pub(crate) async fn update_install(
+    app: AppHandle,
+    state: State<'_, ShellState>,
+) -> Result<AppSnapshot, AppIssue> {
+    let snapshot = apply(app.clone(), &state, Command::UpdateInstall).await?;
+    if matches!(
+        snapshot.update.state,
+        ome_runtime::UpdateState::ReadyToInstall { .. }
+    ) {
+        request_app_exit(&app, &state);
+    }
+    Ok(snapshot)
+}
+
+#[tauri::command]
+pub(crate) async fn app_install_pick(
+    app: AppHandle,
+    state: State<'_, ShellState>,
+) -> Result<AppSnapshot, AppIssue> {
+    let paths = tauri::async_runtime::spawn_blocking(|| {
+        rfd::FileDialog::new()
+            .add_filter("앱 파일", &["apk", "xapk", "apks"])
+            .pick_files()
+            .unwrap_or_default()
+    })
+    .await
+    .map_err(|error| {
+        eprintln!("app picker task failed: {error}");
+        worker_issue()
+    })?;
+    if paths.is_empty() {
+        return app_snapshot(state).await;
+    }
+    install_native_paths(app, &state, paths).await
+}
+
+pub(crate) async fn install_native_paths(
+    app: AppHandle,
+    state: &ShellState,
+    paths: Vec<std::path::PathBuf>,
+) -> Result<AppSnapshot, AppIssue> {
+    let lease = state.admission.try_enter().ok_or_else(busy_issue)?;
+    let runtime = Arc::clone(&state.runtime);
+    tauri::async_runtime::spawn_blocking(move || {
+        let _lease = lease;
+        let mut guard = runtime.lock().map_err(|_| worker_issue())?;
+        let snapshot = match &mut *guard {
+            Ok(runtime) => runtime.install_apps(paths)?,
+            Err(issue) => return Err(issue.clone()),
+        };
+        events::snapshot(&app, &snapshot);
+        Ok(snapshot)
+    })
+    .await
+    .map_err(|error| {
+        eprintln!("native app installation task failed: {error}");
+        worker_issue()
+    })?
+}
 
 pub(crate) fn request_app_exit(app: &AppHandle, state: &ShellState) {
     let should_wait = state

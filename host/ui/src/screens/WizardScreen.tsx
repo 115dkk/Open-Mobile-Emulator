@@ -423,8 +423,8 @@ function AppInstallStep({ snapshot, actions }: StepProps) {
   const { apps, wizard } = snapshot;
   const install = apps.install;
   const installing = install !== null && ACTIVE_TRANSFER.includes(install.stage);
-  const ratio = install !== null && install.totalBytes !== null && install.totalBytes > 0
-    ? install.doneBytes / install.totalBytes : null;
+  // Rust reports the ratio (null while adb gives no byte count); the bar is indeterminate then.
+  const ratio = install === null ? null : install.ratio;
   return (
     <WizardLayout
       issue={snapshot.issue}

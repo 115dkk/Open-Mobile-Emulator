@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Copyright (C) 2026 Open Mobile Emulator contributors
 import type {
-  AppIssue, AppItem, AppSnapshot, BlockerKind, ControllerBridge, GuestImageSummary, GuestSummary, GuestView, HostRow,
+  AppIssue, AppItem, AppSnapshot, BlockerKind, ControllerBridge, GuestImageSummary, GuestSummary, GuestView, HostRow, InstallProgress,
   TransferProgress,
 } from './contracts';
 import type { OverlaySeed } from './overlay/model';
@@ -151,9 +151,9 @@ export const sampleInstallGuide: readonly string[] = [
 ];
 
 export const sampleApps: readonly AppItem[] = [
-  { package: 'com.example.sample.a', label: '샘플 앱 A', versionName: '1.4.2', installedAt: '2026-09-24T10:00:00' },
-  { package: 'com.example.sample.b', label: '샘플 앱 B', versionName: '3.0.1', installedAt: '2026-09-25T10:00:00' },
-  { package: 'com.example.sample.c', label: '샘플 앱 C', versionName: '0.9.0', installedAt: '2026-09-26T10:00:00' },
+  { package: 'com.example.sample.a', label: '샘플 앱 A', versionName: '1.4.2', versionCode: 142, installedAt: '2026-09-24T10:00:00' },
+  { package: 'com.example.sample.b', label: '샘플 앱 B', versionName: '3.0.1', versionCode: 301, installedAt: '2026-09-25T10:00:00' },
+  { package: 'com.example.sample.c', label: '샘플 앱 C', versionName: '0.9.0', versionCode: 90, installedAt: '2026-09-26T10:00:00' },
 ];
 
 const sampleGuest: GuestSummary = {
@@ -165,6 +165,14 @@ function transfer(stage: TransferProgress['stage'], doneRatio: number, label: st
   return {
     stage, doneBytes: Math.round(total * doneRatio), totalBytes: total,
     bytesPerSecond: stage === 'transferring' ? Math.round(12.4 * MIB) : null, label,
+  };
+}
+
+/** An app install in flight: the second of two files, with the byte ratio adb reports. */
+function installing(label: string, ratio: number, total: number): InstallProgress {
+  return {
+    label, stage: 'transferring', doneItems: 1, totalItems: 2, ratio,
+    doneBytes: Math.round(total * ratio), totalBytes: total,
   };
 }
 
@@ -270,7 +278,7 @@ export const wizardGallery: readonly GalleryVariant[] = [
       images: installedImages,
       wizard: { canContinue: true, canSkip: true },
       guest: { ...sampleSnapshot.guest, state: 'running', hosting: 'embedded', bootCompleted: true, adbConnected: true },
-      apps: { available: true, items: sampleApps.slice(0, 1), install: transfer('transferring', 0.41, 'sample-app-d.xapk', 180 * MIB) },
+      apps: { available: true, items: sampleApps.slice(0, 1), install: installing('sample-app-d.xapk', 0.41, 180 * MIB) },
     }),
   },
 ];
@@ -412,7 +420,7 @@ export const appsGallery: readonly GalleryVariant[] = [
     id: 'apps-installing', label: 'S3 앱: 설치 중',
     snapshot: {
       ...runningSnapshot,
-      apps: { ...runningApps, install: transfer('transferring', 0.41, 'sample-app-d.xapk', 180 * MIB) },
+      apps: { ...runningApps, install: installing('sample-app-d.xapk', 0.41, 180 * MIB) },
     },
   },
   { id: 'apps-stopped', label: 'S3 앱: 운영체제 꺼짐', snapshot: { ...stageSnapshot, apps: { available: false, items: sampleApps, install: null } } },
@@ -607,6 +615,7 @@ export const settingsGallery: readonly GalleryVariant[] = [
         state: {
           kind: 'available', version: '0.2.0',
           notesUrl: 'https://github.com/115dkk/Open-Mobile-Emulator/releases/tag/v0.2.0',
+          asset: { name: 'OpenMobileEmulator-0.2.0-setup.exe', sizeBytes: 48 * MIB },
         },
       },
     },

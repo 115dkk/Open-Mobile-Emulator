@@ -6,19 +6,22 @@ mod admission;
 mod commands;
 mod desktop;
 mod events;
+mod setup;
 mod tray;
 mod window;
 
 use std::time::Duration;
 
 use ome_adb::{AdbSession, ProcessRunner};
-use ome_runtime::{AppIssue, AppRuntime, Desktop, OmeHome, RuntimeDeps};
+use ome_artifacts::{ArtifactStore, Manifest, UreqFetch};
+use ome_runtime::{AppIssue, AppRuntime, Desktop, OmeHome, RuntimeDeps, WorkerDeps};
 #[cfg(windows)]
 use ome_supervisor::windows_adapter::WindowsProcessAdapter;
 use ome_supervisor::{Supervisor, SupervisorPolicy, TcpQmpFactory};
 use tauri::Manager;
 
 use crate::desktop::WindowsDesktop;
+use crate::setup::WindowsElevation;
 
 fn initialize_runtime(manifest_root: &std::path::Path) -> Result<AppRuntime, AppIssue> {
     let home = OmeHome::from_path(OmeHome::resolve()).map_err(|error| {
@@ -43,11 +46,23 @@ fn initialize_runtime(manifest_root: &std::path::Path) -> Result<AppRuntime, App
     )) as Box<dyn ome_runtime::GuestProcess>);
     #[cfg(not(windows))]
     let supervisor = None;
-    AppRuntime::open(
+    let manifest = Manifest::load(manifest_root.join("artifacts.json")).map_err(|error| {
+        eprintln!("artifact manifest loading failed: {error}");
+        commands::storage_issue()
+    })?;
+    let artifact_dir = home.subdir("artifacts").map_err(|error| {
+        eprintln!("artifact directory resolution failed: {error}");
+        commands::storage_issue()
+    })?;
+    let mut runtime = AppRuntime::open(
         home,
         RuntimeDeps {
             probe: Box::new(probe),
-            artifacts: None,
+            artifacts: Some(ArtifactStore::new(
+                manifest,
+                artifact_dir,
+                Box::new(UreqFetch::new()),
+            )),
             adb,
             supervisor,
             desktop,
@@ -57,7 +72,19 @@ fn initialize_runtime(manifest_root: &std::path::Path) -> Result<AppRuntime, App
             artifacts_manifest: Some(manifest_root.join("artifacts.json")),
             product_version: env!("CARGO_PKG_VERSION").to_owned(),
         },
-    )
+    )?;
+    let helper = std::env::current_exe()
+        .ok()
+        .and_then(|path| {
+            path.parent()
+                .map(|directory| directory.join("ome-setup.exe"))
+        })
+        .unwrap_or_else(|| std::path::PathBuf::from("ome-setup.exe"));
+    runtime.set_worker_deps(WorkerDeps {
+        elevation: std::sync::Arc::new(WindowsElevation::new(helper)),
+        ..WorkerDeps::default()
+    });
+    Ok(runtime)
 }
 
 fn ome_host_adb(probe: &dyn ome_host_check::HostProbe) -> Option<AdbSession> {
@@ -95,8 +122,12 @@ fn start_event_pump(app: tauri::AppHandle, shell: commands::ShellState) {
                     Err(std::sync::mpsc::RecvTimeoutError::Timeout) => runtime.tick(),
                     Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => break,
                 }
+                let update_exit = runtime.take_update_exit_requested();
                 let after = runtime.snapshot();
                 drop(guard);
+                if update_exit {
+                    commands::request_app_exit(&app, &shell);
+                }
                 if after != before {
                     events::snapshot(&app, &after);
                     tray::update_power_label(&app, after.guest.state);
@@ -148,6 +179,9 @@ pub fn run() {
                     && let Ok(runtime) = &mut *guard
                 {
                     runtime.set_host_window(raw);
+                    if let Err(issue) = runtime.start_auto_update_check() {
+                        eprintln!("automatic update check could not start: {}", issue.code);
+                    }
                 }
             }
             tray::install(app)?;

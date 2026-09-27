@@ -10,6 +10,7 @@ pub mod desktop;
 pub mod guest_store;
 pub mod home;
 pub mod issues;
+pub mod operations;
 pub mod runtime;
 pub mod settings;
 
@@ -20,6 +21,10 @@ pub use home::{HomeError, OmeHome};
 pub use ome_host_check::TableProbe;
 #[cfg(windows)]
 pub use ome_host_check::WindowsProbe;
+pub use operations::{
+    ELEVATION_TIMEOUT, ElevationError, ElevationLauncher, NativeProcessRunner,
+    ProcessCommandRunner, UnavailableElevation, WorkerDeps,
+};
 pub use runtime::{AppRuntime, GuestProcess, RuntimeDeps, display_presets, load_input_directory};
 pub use settings::{
     MAX_SETTINGS_BYTES, SETTINGS_SCHEMA_VERSION, Settings, SettingsError, SettingsStore,
