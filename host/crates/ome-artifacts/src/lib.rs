@@ -513,7 +513,7 @@ impl ArtifactStore {
             }
             match self.verify_path(artifact, &part_path) {
                 Verification::Verified => {
-                    fs::rename(&part_path, &final_path).map_err(StoreError::Io)?;
+                    promote_partial(&part_path, &final_path)?;
                     return Ok(verified_file(artifact, final_path));
                 }
                 Verification::Missing | Verification::Mismatch(_) => {
@@ -561,7 +561,7 @@ impl ArtifactStore {
         }
         match self.verify_path(artifact, &part_path) {
             Verification::Verified => {
-                fs::rename(&part_path, &final_path).map_err(StoreError::Io)?;
+                promote_partial(&part_path, &final_path)?;
                 Ok(verified_file(artifact, final_path))
             }
             Verification::Missing => Err(StoreError::VerificationFailed(
@@ -611,6 +611,13 @@ impl ArtifactStore {
                 artifact.size_bytes
             ));
         }
+        let marker = marker_path(path);
+        let stamp = marker_stamp(artifact, &metadata);
+        if let Some(stamp) = &stamp
+            && fs::read_to_string(&marker).is_ok_and(|recorded| recorded == *stamp)
+        {
+            return Verification::Verified;
+        }
         let mut file = match File::open(path) {
             Ok(file) => file,
             Err(_) => return Verification::Mismatch("file cannot be read".to_owned()),
@@ -626,14 +633,52 @@ impl ArtifactStore {
         }
         let actual = format!("{:x}", hasher.finalize());
         if actual.eq_ignore_ascii_case(artifact.sha256.trim()) {
+            if let Some(stamp) = stamp {
+                // Best effort: a marker that cannot be written only costs the next digest.
+                let _ = fs::write(&marker, stamp);
+            }
             Verification::Verified
         } else {
+            let _ = fs::remove_file(&marker);
             Verification::Mismatch(format!(
                 "SHA-256 mismatch; expected {}",
                 artifact.sha256.trim().to_ascii_lowercase()
             ))
         }
     }
+}
+
+/// Path of the verification marker kept beside a complete artifact file.
+fn marker_path(path: &Path) -> PathBuf {
+    let mut name = path.as_os_str().to_owned();
+    name.push(".verified");
+    PathBuf::from(name)
+}
+
+/// The cached proof of one completed SHA-256 check: the manifest digest, the file size and the
+/// modification time. Digesting a multi-gigabyte image takes seconds and the runtime reads the
+/// verification state on every snapshot, so the marker stands in for the digest while the size and
+/// modification time hold. A new manifest digest or any write to the file invalidates it.
+fn marker_stamp(artifact: &Artifact, metadata: &fs::Metadata) -> Option<String> {
+    let modified = metadata
+        .modified()
+        .ok()?
+        .duration_since(std::time::UNIX_EPOCH)
+        .ok()?;
+    Some(format!(
+        "{}\n{}\n{}.{:09}\n",
+        artifact.sha256.trim().to_ascii_lowercase(),
+        metadata.len(),
+        modified.as_secs(),
+        modified.subsec_nanos()
+    ))
+}
+
+/// Renames a verified partial to its final name and carries its marker along (best effort).
+fn promote_partial(part_path: &Path, final_path: &Path) -> Result<(), StoreError> {
+    fs::rename(part_path, final_path).map_err(StoreError::Io)?;
+    let _ = fs::rename(marker_path(part_path), marker_path(final_path));
+    Ok(())
 }
 
 fn open_partial(path: &Path, append: bool) -> Result<File, StoreError> {
@@ -815,6 +860,81 @@ mod tests {
             store.verify("guest-iso"),
             Verification::Mismatch("size 5, expected 8".to_owned())
         );
+    }
+
+    #[test]
+    fn verification_marker_stands_in_for_the_digest_while_size_and_mtime_hold() {
+        let directory = tempfile::tempdir().expect("temp directory");
+        let path = directory.path().join("guest.iso");
+        fs::write(&path, b"complete").expect("write file");
+        let store = ArtifactStore::new(
+            manifest(b"complete"),
+            directory.path(),
+            Box::new(FakeFetch {
+                body: Vec::new(),
+                calls: Arc::new(Mutex::new(Vec::new())),
+                ignore_range: false,
+                final_url: None,
+            }),
+        );
+        assert_eq!(store.verify("guest-iso"), Verification::Verified);
+        let marker = directory.path().join("guest.iso.verified");
+        let recorded = fs::read_to_string(&marker).expect("marker written");
+        let digest = format!("{:x}", Sha256::digest(b"complete"));
+        assert!(
+            recorded.starts_with(&format!("{digest}\n8\n")),
+            "{recorded}"
+        );
+        assert_eq!(recorded.lines().count(), 3);
+
+        // Same size, other bytes, original modification time: the marker still answers.
+        let modified = fs::metadata(&path)
+            .expect("metadata")
+            .modified()
+            .expect("modification time");
+        fs::write(&path, b"complet3").expect("rewrite same size");
+        File::options()
+            .write(true)
+            .open(&path)
+            .expect("reopen")
+            .set_modified(modified)
+            .expect("restore modification time");
+        assert_eq!(store.verify("guest-iso"), Verification::Verified);
+
+        // A later write (new modification time) forces the digest again and drops the marker.
+        File::options()
+            .write(true)
+            .open(&path)
+            .expect("reopen")
+            .set_modified(modified + std::time::Duration::from_secs(5))
+            .expect("advance modification time");
+        assert!(matches!(
+            store.verify("guest-iso"),
+            Verification::Mismatch(reason) if reason.starts_with("SHA-256 mismatch")
+        ));
+        assert!(!marker.exists());
+    }
+
+    #[test]
+    fn promotion_carries_the_verification_marker() {
+        let body = b"complete".to_vec();
+        let directory = tempfile::tempdir().expect("temp directory");
+        let store = ArtifactStore::new(
+            manifest(&body),
+            directory.path(),
+            Box::new(FakeFetch {
+                body: body.clone(),
+                calls: Arc::new(Mutex::new(Vec::new())),
+                ignore_range: false,
+                final_url: None,
+            }),
+        );
+        store
+            .ensure("guest-iso", &mut |_| {})
+            .expect("ensure artifact");
+        assert!(directory.path().join("guest.iso.verified").is_file());
+        assert!(!directory.path().join("guest.iso.part.verified").exists());
+        assert_eq!(store.verify("guest-iso"), Verification::Verified);
     }
 
     #[test]
