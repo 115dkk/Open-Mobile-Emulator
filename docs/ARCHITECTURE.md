@@ -519,9 +519,9 @@ VsyncMode = Off | On | Adaptive
   유지한다. `ome-guest-config`는 주사율이 None이면 지금처럼 `virtio-vga-gl,edid=off`를 내고(런처 동등성
   픽스처 그대로), Some(hz)면 `virtio-vga-gl,edid=on[,xres=<w>,yres=<h>],refresh_rate=<hz*1000>`을 낸다.
   다시 시작해야 적용된다. `DisplayView.refresh_supported: bool`은 QEMU 번들의 `ome-patches.txt`에 0002가
-  있을 때만 참이고 그때만 주사율 행이 화면에 있다. 안드로이드 쪽은 EDID에 120 Hz 모드가 있어도 기본
-  60 Hz로 돌므로(부팅 C, `docs/DECISION-hardware-display.md` 3절) 세대 어댑터가 `settings put system
-  peak_refresh_rate`와 `min_refresh_rate`를 같은 값으로 맞춘다. 수직 동기화도 같다. QEMU SDL 디스플레이의
+  있을 때만 참이고 그때만 주사율 행이 화면에 있다. EDID의 선호 모드가 주사율을 실으므로 안드로이드는
+  설정 변경 없이 그 모드로 돈다(부팅 D: 1280x800 @ 119.997 Hz, VSYNC 8.33 ms). 세대 어댑터의
+  `peak_refresh_rate` 설정은 필요할 때만 쓰는 예비 수단이다. 수직 동기화도 같다. QEMU SDL 디스플레이의
   `SDL_GL_SetSwapInterval(0)` 고정값(`ui/sdl2.c`)을 `-display sdl,swap-interval=<-1|0|1>` 옵션으로 여는
   자체 패치 0003이 있어야 하고, `vsync_supported = true`일 때만 화면에 행이 있다.
 

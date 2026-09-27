@@ -76,9 +76,12 @@
 
 ### 답
 
-지원한다. 다만 QEMU 11.1의 SDL 디스플레이는 주사율을 게스트에 알릴 방법이 없어 자체 패치가 필요하고,
-그 패치를 이 저장소에 넣는다(`qemu-build/patches/0002-ui-sdl2-refresh-rate-option.patch`, R4의 소스
-묶음에 포함). 게스트가 실제로 그 주사율로 그리는지는 패치된 QEMU로 잰다(부팅 C).
+지원한다. QEMU 11.1의 virtio-gpu는 주사율을 장치 속성으로 받지 않으므로 자체 패치가 필요하고,
+그 패치를 이 저장소에 넣었다(`qemu-build/patches/0002-virtio-gpu-refresh-rate-property.patch`, R4의
+소스 묶음에 포함). 패치된 QEMU로 게스트가 1280x800 @ 119.997 Hz로 부팅하고 SurfaceFlinger VSYNC
+주기가 8.33 ms가 되는 것을 확인했다(부팅 D, `docs/evidence/M2/sizing-20260927/README.md`). 안드로이드
+쪽 설정은 필요 없었다. 게임이 그 주기로 실제로 그리는지는 게임과 GPU에 달렸고 게임 세션에서
+따로 잰다.
 
 ### 사실
 
@@ -97,10 +100,11 @@
 
 ### 설계
 
-- `-display sdl,refresh-rate=<hz>` 옵션(30~240)이 `QemuUIInfo.refresh_rate`(mHz)를 보낸다. 제품은
-  `DisplayView.refresh_rate_hz`가 None이면 `edid=off`(지금과 같음), Some이면 `edid=on,xres=,yres=`와
-  이 옵션을 낸다. `refresh_supported`는 QEMU 번들의 `ome-patches.txt`에 0002가 있을 때 참이고, 그때만
-  주사율 행이 화면에 있다(`ARCHITECTURE.md` 8.4절).
+- 장치 속성 `refresh_rate`(mHz, 30000~240000)가 EDID의 선호 모드에 실린다. 첫 시도였던 SDL 옵션
+  방식은 SDL 창의 시작 크기가 장치의 `xres`, `yres`를 덮어써 폐기했다(부팅 C). 제품은
+  `DisplayView.refresh_rate_hz`가 None이면 `edid=off`(지금과 같음), Some이면
+  `virtio-vga-gl,edid=on,xres=,yres=,refresh_rate=<hz*1000>`을 낸다. `refresh_supported`는 QEMU 번들의
+  `ome-patches.txt`에 0002가 있을 때 참이고, 그때만 주사율 행이 화면에 있다(`ARCHITECTURE.md` 8.4절).
 
 ## 4. 수직 동기화
 
@@ -120,7 +124,6 @@
 
 ## 5. 확인 항목
 
-- 부팅 C(패치된 QEMU, `refresh-rate=120,swap-interval=1`): `dumpsys display`의 활성 모드 주사율과
-  SurfaceFlinger VSYNC 주기, 게임 fps. 결과는 `docs/evidence/M2/sizing-20260927/bootC-*`와
-  `docs/evidence/M2/qemu-display-options.md`.
+- 120 Hz 모드에서의 게임 fps와 프레임 간격(부팅 D는 모드와 VSYNC 주기까지만 쟀다).
+- `swap-interval=1`과 `-1`의 호스트 표시 효과(찢어짐, 입력 지연)를 게임 세션에서 비교.
 - 4K(3840x2160) 물리 모드에서 virgl 프레임과 호스트 GPU 텍스처 상한.

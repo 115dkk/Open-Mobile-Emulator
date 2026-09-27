@@ -1,0 +1,52 @@
+### before refresh-rate settings
+$ cat /sys/class/drm/card0-Virtual-1/modes | head -3
+1280x800
+5120x2160
+4096x2160
+
+$ dumpsys display | grep -E "mActiveSfDisplayMode" | cut -c1-300
+    mActiveSfDisplayMode=DisplayMode{id=0, width=1280, height=800, xDpi=101.6, yDpi=101.6, refreshRate=119.99717, appVsyncOffsetNanos=2000000, presentationDeadlineNanos=8333530, group=1}
+
+$ dumpsys display | grep -oE "DisplayDeviceInfo\{[^}]*supportedModes \[\{[^}]*\}" | cut -c1-260
+DisplayDeviceInfo{"Built-in Screen": uniqueId="local:4632256312697818880", 1280 x 800, modeId 1, defaultModeId 1, supportedModes [{id=1, width=1280, height=800, fps=119.99717, alternativeRefreshRates=[]}
+
+$ dumpsys SurfaceFlinger | grep -iE "VSYNC period" | head -2
+      present offset:         0 ns	     VSYNC period:   8333530 ns
+
+$ wm size
+Physical size: 1280x800
+
+$ settings get system peak_refresh_rate
+null
+
+$ settings get system min_refresh_rate
+null
+
+### settings put system peak_refresh_rate 120 / min_refresh_rate 120
+$ cat /sys/class/drm/card0-Virtual-1/modes | head -3
+1280x800
+5120x2160
+4096x2160
+
+$ dumpsys display | grep -E "mActiveSfDisplayMode" | cut -c1-300
+    mActiveSfDisplayMode=DisplayMode{id=0, width=1280, height=800, xDpi=101.6, yDpi=101.6, refreshRate=119.99717, appVsyncOffsetNanos=2000000, presentationDeadlineNanos=8333530, group=1}
+
+$ dumpsys display | grep -oE "DisplayDeviceInfo\{[^}]*supportedModes \[\{[^}]*\}" | cut -c1-260
+DisplayDeviceInfo{"Built-in Screen": uniqueId="local:4632256312697818880", 1280 x 800, modeId 1, defaultModeId 1, supportedModes [{id=1, width=1280, height=800, fps=119.99717, alternativeRefreshRates=[]}
+
+$ dumpsys SurfaceFlinger | grep -iE "VSYNC period" | head -2
+      present offset:         0 ns	     VSYNC period:   8333530 ns
+
+$ wm size
+Physical size: 1280x800
+
+$ settings get system peak_refresh_rate
+120.0
+
+$ settings get system min_refresh_rate
+120.0
+
+### restore defaults
+$ dumpsys SurfaceFlinger | grep -iE "VSYNC period" | head -1
+      present offset:         0 ns	     VSYNC period:   8333530 ns
+

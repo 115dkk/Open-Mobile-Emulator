@@ -53,8 +53,12 @@
   `docs/evidence/M2/sizing-20260927/`); only the EDID's preferred mode and
   refresh rate are lost. The SDL display backend never reports a refresh rate
   to virtio-gpu (only GTK does), so a chosen refresh rate needs the OME patch
-  `qemu-build/patches/0002-ui-sdl2-refresh-rate-option.patch`, and host vsync
-  needs `0003-ui-sdl2-swap-interval-option.patch` (`docs/DECISION-hardware-display.md`).
+  `qemu-build/patches/0002-virtio-gpu-refresh-rate-property.patch` (device
+  property `refresh_rate` in mHz), and host vsync needs
+  `0003-ui-sdl2-swap-interval-option.patch`. With the patched build and
+  `refresh_rate=120000` the guest boots at 1280x800 with a 119.997 Hz mode and
+  an 8.33 ms VSYNC period (2026-09-27, `docs/evidence/M2/sizing-20260927/`);
+  whether a game renders at that rate is untested.
 - The translator aborted once with `ndk_translation: Cannot process signal 11`
   while a native thread attached to the JVM (`docs/evidence/M0/crash-ndk-translation-1/`),
   after 170 s of a launch that was otherwise idle on a download prompt. It did
