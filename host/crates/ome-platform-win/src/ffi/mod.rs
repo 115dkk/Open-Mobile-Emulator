@@ -7,7 +7,9 @@ pub(crate) mod elevation;
 pub(crate) mod handle;
 pub(crate) mod hypervisor;
 pub(crate) mod job;
+pub(crate) mod keyboard;
 pub(crate) mod process;
+pub(crate) mod test_window;
 pub(crate) mod window;
 
 pub(crate) fn io_error(error: windows::core::Error) -> std::io::Error {

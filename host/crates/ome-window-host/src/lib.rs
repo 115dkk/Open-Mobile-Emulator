@@ -1,10 +1,18 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Copyright (C) 2026 Open Mobile Emulator contributors
-//! Pure stage geometry and a placeholder for native guest-window hosting.
+//! Pure stage geometry and native guest-window hosting.
 #![forbid(unsafe_code)]
 
+use std::thread;
+use std::time::{Duration, Instant};
+
+use ome_platform_win::{PreviousStyle, WindowHandle, find_windows_of_process};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
+
+const DISCOVERY_TIMEOUT: Duration = Duration::from_secs(5);
+const DISCOVERY_INTERVAL: Duration = Duration::from_millis(100);
+const SDL_WINDOW_CLASS: &str = "SDL_app";
 
 /// A rectangle in physical pixels relative to the host client area.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -164,34 +172,217 @@ pub struct HostingTarget {
     pub guest_process_id: u32,
 }
 
-/// Guest-window hosting facade reserved for the platform adapter.
-#[derive(Clone, Copy, Debug, Default)]
-pub struct GuestWindowHost;
+#[derive(Debug)]
+struct HostedWindow {
+    parent: WindowHandle,
+    previous: PreviousStyle,
+}
+
+#[derive(Clone, Copy, Debug)]
+struct GuestWindow {
+    handle: WindowHandle,
+    process_id: u32,
+}
+
+impl GuestWindow {
+    fn alive(self) -> bool {
+        self.handle.belongs_to_process(self.process_id)
+    }
+}
+
+/// Owns the reversible conversion of one QEMU SDL window into a hosted child.
+#[derive(Debug, Default)]
+pub struct GuestWindowHost {
+    guest: Option<GuestWindow>,
+    hosted: Option<HostedWindow>,
+    last_rect: Option<Rect>,
+    last_discovery_time: Option<Duration>,
+    guest_dpi_before_attach: Option<u32>,
+}
 
 impl GuestWindowHost {
-    /// Attaches the guest's top-level window to the host parent.
+    /// Attaches the guest's preferred visible top-level window to the host parent.
     ///
-    /// Returns [`HostingIssue::Unwired`] until the platform crate's window functions are connected.
-    pub fn attach(&mut self, _target: HostingTarget) -> Result<(), HostingIssue> {
-        // wiring: ome-platform-win supplies window discovery and safe attach here.
-        Err(HostingIssue::Unwired)
+    /// Discovery waits up to five seconds for a visible window, preferring
+    /// `SDL_app` whenever it appears in an enumeration. Style, extended style,
+    /// and parent changes are rolled back together
+    /// when any native operation fails.
+    pub fn attach(&mut self, target: HostingTarget) -> Result<(), HostingIssue> {
+        self.detach()?;
+        self.guest = None;
+        self.hosted = None;
+        self.last_discovery_time = None;
+        self.guest_dpi_before_attach = None;
+        if target.parent_window == 0 || target.guest_process_id == 0 {
+            return Err(HostingIssue::Platform);
+        }
+        let parent =
+            WindowHandle::from_u64(target.parent_window).map_err(|_| HostingIssue::Platform)?;
+        let discovery_started = Instant::now();
+        let guest = GuestWindow {
+            handle: discover_guest_window(target.guest_process_id)?,
+            process_id: target.guest_process_id,
+        };
+        self.last_discovery_time = Some(discovery_started.elapsed());
+        self.guest_dpi_before_attach =
+            Some(guest.handle.dpi().map_err(|_| HostingIssue::Platform)?);
+        let rect = self.last_rect.unwrap_or(Rect {
+            x: 0,
+            y: 0,
+            width: 0,
+            height: 0,
+        });
+        let (width, height) = native_dimensions(rect)?;
+        let previous = guest
+            .handle
+            .make_child_of_at(parent, rect.x, rect.y, width, height)
+            .map_err(|_| HostingIssue::Platform)?;
+        self.guest = Some(guest);
+        self.hosted = Some(HostedWindow { parent, previous });
+        Ok(())
     }
 
-    /// Places an attached guest window in a physical client rectangle.
+    /// Places an attached guest window in a physical parent-client rectangle.
     ///
-    /// Returns [`HostingIssue::Unwired`] until the platform window adapter is connected.
-    pub fn place(&mut self, _rect: Rect) -> Result<(), HostingIssue> {
-        // wiring: ome-platform-win applies the physical rectangle here.
-        Err(HostingIssue::Unwired)
+    /// The latest rectangle is retained for the next attach. Calls made while no
+    /// live guest is attached are accepted without a native operation.
+    pub fn place(&mut self, rect: Rect) -> Result<(), HostingIssue> {
+        self.last_rect = Some(rect);
+        let (Some(_hosted), Some(guest)) = (self.hosted.as_ref(), self.guest) else {
+            return Ok(());
+        };
+        if !guest.alive() {
+            self.hosted = None;
+            self.guest = None;
+            return Ok(());
+        }
+        let (width, height) = native_dimensions(rect)?;
+        guest
+            .handle
+            .set_bounds(rect.x, rect.y, width, height)
+            .map_err(|_| HostingIssue::Platform)
     }
 
-    /// Restores the guest to a top-level window when possible.
+    /// Restores the guest's saved style, extended style, and parent.
     ///
-    /// Returns [`HostingIssue::Unwired`] until the platform window adapter is connected.
+    /// A vanished or PID-reused HWND is treated as already detached.
     pub fn detach(&mut self) -> Result<(), HostingIssue> {
-        // wiring: ome-platform-win restores style and parent here.
-        Err(HostingIssue::Unwired)
+        let Some(hosted) = self.hosted.take() else {
+            if self.guest.is_some_and(|guest| !guest.alive()) {
+                self.guest = None;
+            }
+            return Ok(());
+        };
+        let Some(guest) = self.guest else {
+            return Ok(());
+        };
+        if !guest.alive() {
+            self.guest = None;
+            return Ok(());
+        }
+        if let Err(_error) = guest.handle.restore_top_level(hosted.previous) {
+            self.hosted = Some(hosted);
+            return Err(HostingIssue::Platform);
+        }
+        Ok(())
     }
+
+    /// Brings the guest forward and gives it keyboard focus.
+    ///
+    /// Hosted children ask the parent window thread to run `SetActiveWindow`
+    /// followed by `SetFocus`; a detached remembered window receives a
+    /// best-effort foreground request. With no live window, the method is a no-op.
+    pub fn to_front(&mut self) -> Result<(), HostingIssue> {
+        let Some(guest) = self.guest else {
+            return Ok(());
+        };
+        if !guest.alive() {
+            self.hosted = None;
+            self.guest = None;
+            return Ok(());
+        }
+        if let Some(hosted) = self.hosted.as_ref() {
+            return guest
+                .handle
+                .focus_as_child_of(hosted.parent)
+                .map_err(|_| HostingIssue::Platform);
+        }
+        guest
+            .handle
+            .to_foreground()
+            .map_err(|_| HostingIssue::Platform)
+    }
+
+    /// Reports whether a live guest window is currently embedded.
+    pub fn is_attached(&self) -> bool {
+        self.hosted.is_some() && self.guest_window_alive()
+    }
+
+    /// Reports whether the discovered HWND still exists and belongs to the PID.
+    pub fn guest_window_alive(&self) -> bool {
+        self.guest.is_some_and(GuestWindow::alive)
+    }
+
+    /// Returns the discovered guest window token for diagnostics and native tests.
+    pub fn guest_window(&self) -> Option<WindowHandle> {
+        self.guest
+            .filter(|guest| guest.alive())
+            .map(|guest| guest.handle)
+    }
+
+    /// Returns how long the most recent successful window discovery took.
+    pub fn last_discovery_time(&self) -> Option<Duration> {
+        self.last_discovery_time
+    }
+
+    /// Returns the guest window DPI sampled immediately before the last attach.
+    pub fn guest_dpi_before_attach(&self) -> Option<u32> {
+        self.guest_dpi_before_attach
+    }
+}
+
+impl Drop for GuestWindowHost {
+    fn drop(&mut self) {
+        let _ = self.detach();
+    }
+}
+
+fn discover_guest_window(pid: u32) -> Result<WindowHandle, HostingIssue> {
+    let deadline = Instant::now() + DISCOVERY_TIMEOUT;
+    loop {
+        let windows = find_windows_of_process(pid).map_err(|_| HostingIssue::Platform)?;
+        if let Some(window) = preferred_visible_window(&windows) {
+            return Ok(window);
+        }
+        let now = Instant::now();
+        if now >= deadline {
+            return Err(HostingIssue::WindowNotFound);
+        }
+        thread::sleep(DISCOVERY_INTERVAL.min(deadline.saturating_duration_since(now)));
+    }
+}
+
+fn preferred_visible_window(windows: &[WindowHandle]) -> Option<WindowHandle> {
+    let mut first_visible = None;
+    for window in windows.iter().copied() {
+        if !window.is_visible().unwrap_or(false) {
+            continue;
+        }
+        first_visible.get_or_insert(window);
+        if window
+            .class_name()
+            .is_ok_and(|class_name| class_name == SDL_WINDOW_CLASS)
+        {
+            return Some(window);
+        }
+    }
+    first_visible
+}
+
+fn native_dimensions(rect: Rect) -> Result<(i32, i32), HostingIssue> {
+    let width = i32::try_from(rect.width).map_err(|_| HostingIssue::Platform)?;
+    let height = i32::try_from(rect.height).map_err(|_| HostingIssue::Platform)?;
+    Ok((width, height))
 }
 
 /// Guest-window hosting failures.
@@ -203,7 +394,7 @@ pub enum HostingIssue {
     /// The guest process has no eligible top-level window.
     #[error("guest window was not found")]
     WindowNotFound,
-    /// The operating system rejected attach, placement, or detach.
+    /// The operating system rejected attach, placement, focus, or detach.
     #[error("guest window hosting failed")]
     Platform,
 }
@@ -307,24 +498,36 @@ mod tests {
     }
 
     #[test]
-    fn hosting_methods_fail_closed_until_platform_wiring_arrives() {
-        let mut host = GuestWindowHost;
+    fn unattached_place_and_detach_are_idempotent() {
+        let mut host = GuestWindowHost::default();
+        host.place(Rect {
+            x: 0,
+            y: 0,
+            width: u32::MAX,
+            height: u32::MAX,
+        })
+        .expect("unattached place");
+        host.detach().expect("unattached detach");
+        host.to_front().expect("unattached focus");
+        assert!(!host.is_attached());
+        assert!(!host.guest_window_alive());
+    }
+
+    #[test]
+    fn window_preference_uses_no_ineligible_windows() {
+        assert_eq!(preferred_visible_window(&[]), None);
+    }
+
+    #[test]
+    fn native_dimensions_reject_values_outside_win32_range() {
         assert_eq!(
-            host.attach(HostingTarget {
-                parent_window: 1,
-                guest_process_id: 2,
-            }),
-            Err(HostingIssue::Unwired)
-        );
-        assert_eq!(
-            host.place(Rect {
+            native_dimensions(Rect {
                 x: 0,
                 y: 0,
-                width: 1,
+                width: i32::MAX as u32 + 1,
                 height: 1,
             }),
-            Err(HostingIssue::Unwired)
+            Err(HostingIssue::Platform)
         );
-        assert_eq!(host.detach(), Err(HostingIssue::Unwired));
     }
 }

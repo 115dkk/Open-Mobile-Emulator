@@ -11,6 +11,7 @@ publish.workspace = true
 description = "Stage geometry and hosting the guest window inside the stage"
 
 [dependencies]
+ome-platform-win = { path = "../ome-platform-win" }
 serde.workspace = true
 thiserror.workspace = true
 

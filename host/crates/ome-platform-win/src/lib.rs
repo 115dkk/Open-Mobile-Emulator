@@ -247,6 +247,23 @@ impl WindowHandle {
         Self(value)
     }
 
+    /// Returns the opaque numeric token used by the window-hosting contract.
+    pub fn as_u64(self) -> u64 {
+        self.0 as usize as u64
+    }
+
+    /// Wraps the numeric token used by the window-hosting contract.
+    pub fn from_u64(value: u64) -> Result<Self, PlatformError> {
+        usize::try_from(value)
+            .map(|value| Self(value as isize))
+            .map_err(|_| {
+                PlatformError::Io(io::Error::new(
+                    io::ErrorKind::InvalidInput,
+                    "window token does not fit the host pointer width",
+                ))
+            })
+    }
+
     /// Returns the window's registered class name.
     pub fn class_name(self) -> Result<String, PlatformError> {
         #[cfg(windows)]
@@ -259,21 +276,74 @@ impl WindowHandle {
         }
     }
 
-    /// Converts this top-level window to `WS_CHILD`, reparents it, and refreshes
-    /// its non-client frame. The returned value must be retained for restoration.
-    pub fn make_child_of(self, parent: WindowHandle) -> Result<PreviousStyle, PlatformError> {
+    /// Reports whether the window is visible.
+    pub fn is_visible(self) -> Result<bool, PlatformError> {
         #[cfg(windows)]
         {
-            ffi::window::make_child_of(self.0, parent.0).map_err(PlatformError::Io)
+            ffi::window::is_visible(self.0).map_err(PlatformError::Io)
         }
         #[cfg(not(windows))]
         {
-            let _ = parent;
             Err(PlatformError::Unsupported)
         }
     }
 
-    /// Restores the saved style and parent after a successful [`Self::make_child_of`].
+    /// Reports whether this token still denotes a window owned by `pid`.
+    ///
+    /// The PID check guards against HWND reuse after the original window exits.
+    pub fn belongs_to_process(self, pid: u32) -> bool {
+        #[cfg(windows)]
+        {
+            ffi::window::belongs_to_process(self.0, pid)
+        }
+        #[cfg(not(windows))]
+        {
+            let _ = pid;
+            false
+        }
+    }
+
+    /// Reports whether this window owns keyboard focus in its GUI thread queue.
+    pub fn has_keyboard_focus(self) -> Result<bool, PlatformError> {
+        #[cfg(windows)]
+        {
+            ffi::window::has_keyboard_focus(self.0).map_err(PlatformError::Io)
+        }
+        #[cfg(not(windows))]
+        {
+            Err(PlatformError::Unsupported)
+        }
+    }
+
+    /// Converts this top-level window to `WS_CHILD`, reparents it, and refreshes
+    /// its non-client frame. The returned value must be retained for restoration.
+    pub fn make_child_of(self, parent: WindowHandle) -> Result<PreviousStyle, PlatformError> {
+        self.make_child_of_at(parent, 0, 0, 0, 0)
+    }
+
+    /// Converts and reparents this window while applying its first child bounds
+    /// in one recoverable platform operation.
+    pub fn make_child_of_at(
+        self,
+        parent: WindowHandle,
+        x: i32,
+        y: i32,
+        width: i32,
+        height: i32,
+    ) -> Result<PreviousStyle, PlatformError> {
+        #[cfg(windows)]
+        {
+            ffi::window::make_child_of_at(self.0, parent.0, x, y, width, height)
+                .map_err(PlatformError::Io)
+        }
+        #[cfg(not(windows))]
+        {
+            let _ = (parent, x, y, width, height);
+            Err(PlatformError::Unsupported)
+        }
+    }
+
+    /// Restores the saved style, extended style, and parent after child hosting.
     pub fn restore_top_level(self, previous: PreviousStyle) -> Result<(), PlatformError> {
         #[cfg(windows)]
         {
@@ -299,6 +369,43 @@ impl WindowHandle {
         }
     }
 
+    /// Runs activation on `parent`'s owner thread and focuses this hosted child.
+    pub fn focus_as_child_of(self, parent: WindowHandle) -> Result<(), PlatformError> {
+        #[cfg(windows)]
+        {
+            ffi::window::focus_child(self.0, parent.0).map_err(PlatformError::Io)
+        }
+        #[cfg(not(windows))]
+        {
+            let _ = parent;
+            Err(PlatformError::Unsupported)
+        }
+    }
+
+    /// Requests foreground activation for a separate top-level window.
+    pub fn to_foreground(self) -> Result<(), PlatformError> {
+        #[cfg(windows)]
+        {
+            ffi::window::to_foreground(self.0).map_err(PlatformError::Io)
+        }
+        #[cfg(not(windows))]
+        {
+            Err(PlatformError::Unsupported)
+        }
+    }
+
+    /// Returns the physical client size of the window.
+    pub fn client_size(self) -> Result<(i32, i32), PlatformError> {
+        #[cfg(windows)]
+        {
+            ffi::window::client_size(self.0).map_err(PlatformError::Io)
+        }
+        #[cfg(not(windows))]
+        {
+            Err(PlatformError::Unsupported)
+        }
+    }
+
     /// Returns the window's effective DPI; zero from Win32 is reported as an error.
     pub fn dpi(self) -> Result<u32, PlatformError> {
         #[cfg(windows)]
@@ -312,10 +419,11 @@ impl WindowHandle {
     }
 }
 
-/// Style and parent saved before changing a window to child mode.
+/// Style, extended style, and parent saved before changing a window to child mode.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct PreviousStyle {
     style: isize,
+    ex_style: isize,
     parent: Option<isize>,
 }
 
@@ -347,6 +455,10 @@ pub struct DpiHostingGuard {
 pub struct DpiHostingGuard;
 
 /// Switches the current thread to mixed DPI hosting until the returned guard drops.
+///
+/// Call this on the thread that will create the parent window, before creating
+/// that window. Keep the returned guard alive for at least as long as the parent
+/// window so child hosting continues under the selected behavior.
 pub fn set_thread_dpi_hosting_mixed() -> Result<DpiHostingGuard, PlatformError> {
     #[cfg(windows)]
     {
@@ -360,33 +472,118 @@ pub fn set_thread_dpi_hosting_mixed() -> Result<DpiHostingGuard, PlatformError> 
     }
 }
 
-/// Low-level keyboard event shape reserved for the keymap input adapter.
+/// Low-level keyboard event observed by [`KeyboardHook`].
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct KeyEvent {
     /// Win32 virtual-key code.
-    pub virtual_key: u32,
+    pub vk: u32,
     /// Win32 scan code.
-    pub scan_code: u32,
-    /// Whether the event releases rather than presses the key.
-    pub key_up: bool,
+    pub scan: u32,
+    /// `true` for key-down and `false` for key-up.
+    pub pressed: bool,
+    /// Whether Windows marked the key as extended.
+    pub extended: bool,
     /// Whether Windows marked the event as injected.
     pub injected: bool,
 }
 
-/// Owner of a future dedicated `WH_KEYBOARD_LL` message-loop thread.
+/// Owner of a dedicated `WH_KEYBOARD_LL` message-loop thread.
+#[cfg(windows)]
+#[derive(Debug)]
+pub struct KeyboardHook {
+    _inner: ffi::keyboard::KeyboardHook,
+}
+
+/// Placeholder keyboard hook on non-Windows hosts.
+#[cfg(not(windows))]
 #[derive(Debug)]
 pub struct KeyboardHook;
 
 impl KeyboardHook {
-    /// Installs the global low-level hook and forwards compact events to `sink`.
+    /// Installs a global observing hook and forwards compact events to `sink`.
     ///
-    /// This remains deliberately unwired until foreground-window filtering and
-    /// sub-millisecond callback behavior have an integration test fixture.
+    /// The callback never swallows input and retains no key history. Dropping
+    /// the owner asks the dedicated message loop to quit; that thread unhooks
+    /// before it exits, and the owner waits only up to a fixed bound.
     pub fn install(sink: Sender<KeyEvent>) -> Result<Self, PlatformError> {
-        let _ = sink;
-        Err(PlatformError::Unwired(
-            "WH_KEYBOARD_LL requires the foreground-window integration fixture",
-        ))
+        #[cfg(windows)]
+        {
+            ffi::keyboard::KeyboardHook::install(sink)
+                .map(|inner| Self { _inner: inner })
+                .map_err(PlatformError::Io)
+        }
+        #[cfg(not(windows))]
+        {
+            let _ = sink;
+            Err(PlatformError::Unsupported)
+        }
+    }
+}
+
+/// A plain top-level window whose creating thread owns its message loop.
+///
+/// This type exists for native integration tests; it creates no webview and
+/// destroys the window on its owner thread when dropped.
+#[cfg(windows)]
+#[derive(Debug)]
+pub struct TestHostWindow(ffi::test_window::TestHostWindow);
+
+/// Placeholder test host window on non-Windows systems.
+#[cfg(not(windows))]
+#[derive(Debug)]
+pub struct TestHostWindow;
+
+impl TestHostWindow {
+    /// Creates and shows a top-level window with the requested client size.
+    pub fn create(title: &str, width: i32, height: i32) -> Result<Self, PlatformError> {
+        #[cfg(windows)]
+        {
+            ffi::test_window::TestHostWindow::create(title, width, height)
+                .map(Self)
+                .map_err(PlatformError::Io)
+        }
+        #[cfg(not(windows))]
+        {
+            let _ = (title, width, height);
+            Err(PlatformError::Unsupported)
+        }
+    }
+
+    /// Returns the opaque token for the live test window.
+    pub fn handle(&self) -> WindowHandle {
+        #[cfg(windows)]
+        {
+            WindowHandle(self.0.raw())
+        }
+        #[cfg(not(windows))]
+        {
+            WindowHandle(0)
+        }
+    }
+
+    /// Returns the current physical client size.
+    pub fn client_size(&self) -> Result<(i32, i32), PlatformError> {
+        #[cfg(windows)]
+        {
+            self.0.client_size().map_err(PlatformError::Io)
+        }
+        #[cfg(not(windows))]
+        {
+            Err(PlatformError::Unsupported)
+        }
+    }
+
+    /// Resizes the window so its client area has the requested physical size.
+    pub fn resize(&self, width: i32, height: i32) -> Result<(), PlatformError> {
+        #[cfg(windows)]
+        {
+            self.0.resize(width, height).map_err(PlatformError::Io)
+        }
+        #[cfg(not(windows))]
+        {
+            let _ = (width, height);
+            Err(PlatformError::Unsupported)
+        }
     }
 }
 
@@ -505,6 +702,15 @@ mod tests {
                 "{input:?}"
             );
         }
+    }
+
+    #[cfg(windows)]
+    #[test]
+    #[ignore = "requires an interactive Windows desktop"]
+    fn keyboard_hook_installs_and_drops_without_panicking() {
+        let (sink, _events) = std::sync::mpsc::channel();
+        let hook = KeyboardHook::install(sink).expect("install keyboard hook");
+        drop(hook);
     }
 
     #[cfg(windows)]
