@@ -329,6 +329,7 @@ fn map_io(error: io::Error) -> QmpError {
 #[cfg(test)]
 mod tests {
     use std::net::TcpListener;
+    use std::sync::mpsc;
     use std::thread;
     use std::time::Instant;
 
@@ -405,20 +406,34 @@ mod tests {
 
     #[test]
     fn partial_event_line_survives_poll_timeout() {
-        let (address, server) = server(|stream| {
+        // The server finishes the line only after the client's first poll has returned. A fixed
+        // 25 ms server sleep raced that poll: `read_message` waits up to the read timeout once per
+        // read, so a poll that has taken the partial line waits again for the rest. On the Windows
+        // CI runner that wait evidently lasted past 25 ms despite the 1 ms POLL_TIMEOUT (timer
+        // granularity), and the first poll returned the whole event (`host` on main 5e993e9,
+        // 2026-09-28). Raising POLL_TIMEOUT to 40 ms reproduces the old failure on Linux.
+        let (partial_written_tx, partial_written) = mpsc::channel();
+        let (finish_line, finish_line_rx) = mpsc::channel();
+        let (address, server) = server(move |stream| {
             let mut write = stream.try_clone().expect("clone writer");
             let _reader = handshake(stream);
             write
                 .write_all(b"{\"event\":\"RESET\"")
                 .expect("write partial event");
-            thread::sleep(Duration::from_millis(25));
+            partial_written_tx.send(()).expect("report partial event");
+            finish_line_rx
+                .recv_timeout(Duration::from_secs(5))
+                .expect("client asks for the rest of the line");
             write.write_all(b",\"data\":{}}\r\n").expect("finish event");
             keep_response_alive();
         });
         let mut channel = QmpChannel::connect(address, Duration::from_secs(1)).expect("connect");
+        partial_written
+            .recv_timeout(Duration::from_secs(5))
+            .expect("server wrote the partial event");
         assert_eq!(channel.poll_event(), None);
-        // The server finishes the line after 25 ms; under load the thread may be late, so poll
-        // until a deadline instead of sleeping a fixed 30 ms (flaked once on 2026-09-27).
+        finish_line.send(()).expect("ask for the rest of the line");
+        // The rest arrives after the signal above; poll until a deadline instead of sleeping.
         let deadline = Instant::now() + Duration::from_secs(2);
         let event = loop {
             if let Some(event) = channel.poll_event() {
