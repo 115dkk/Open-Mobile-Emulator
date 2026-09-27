@@ -5,7 +5,7 @@ param(
  [int]$Width=0, [int]$Height=0, [int]$X=80, [int]$Y=60,
  [switch]$Quit, [switch]$Inventory, [string]$HomePath,
  [string]$Keys, [string]$Text, [string]$FilePath, [switch]$GameSelection,
- [int]$KillOwnedPid, [string]$ExpectedCreation
+ [int]$KillOwnedPid, [string]$ExpectedCreation, [switch]$WaitInstaller
 )
 $ErrorActionPreference='Stop'
 [Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)
@@ -70,17 +70,23 @@ public class W {
   uint target=GetWindowThreadProcessId(h,out p);
   if(foreground!=current) AttachThreadInput(current,foreground,true);
   if(target!=current && target!=foreground) AttachThreadInput(current,target,true);
-  try {BringWindowToTop(root);SetForegroundWindow(root);SetFocus(h);}
-  finally {
-   if(target!=current && target!=foreground) AttachThreadInput(current,target,false);
-   if(foreground!=current) AttachThreadInput(current,foreground,false);
-  }
+  // Keep input queues attached until this short-lived helper exits. Detaching before
+  // SendInput restores webview focus for a cross-process reparented SDL child.
+  BringWindowToTop(root);SetForegroundWindow(root);SetFocus(h);
   if(GetForegroundWindow()!=root) throw new Exception("Target window is not foreground; refusing keyboard input or desktop capture");
  }
+ [DllImport("user32.dll")] public static extern bool SetCursorPos(int x,int y);
+ public static void ClickFocus(IntPtr h) {
+  R r; GetWindowRect(h,out r); SetCursorPos(r.L+20,r.T+20);
+  var down=new INPUT {type=0,u=new UNION {mi=new MOUSEINPUT {flags=2}}};
+  var up=new INPUT {type=0,u=new UNION {mi=new MOUSEINPUT {flags=4}}};
+  if(SendInput(2,new[]{down,up},Marshal.SizeOf<INPUT>())!=2) throw new Exception("Mouse focus SendInput failed");
+  System.Threading.Thread.Sleep(150);
+ }
  public static void Key(ushort vk,bool up=false) {
-  uint flags=8u | (up?2u:0u);
+  uint flags=up?2u:0u;
   if(vk>=0x21 && vk<=0x28) flags|=1;
-  var input=new INPUT {type=1,u=new UNION {ki=new KEYBDINPUT {scan=(ushort)MapVirtualKey(vk,0),flags=flags}}};
+  var input=new INPUT {type=1,u=new UNION {ki=new KEYBDINPUT {vk=vk,scan=(ushort)MapVirtualKey(vk,0),flags=flags}}};
   if(SendInput(1,new[]{input},Marshal.SizeOf<INPUT>())!=1) throw new Exception("SendInput failed");
  }
  public static void Tap(ushort vk) {Key(vk);System.Threading.Thread.Sleep(45);Key(vk,true);System.Threading.Thread.Sleep(90);}
@@ -98,9 +104,30 @@ public class W {
 $p=Get-Process -Id $AppPid
 $h=$p.MainWindowHandle
 if($h -eq 0){throw 'No main window'}
+if ($WaitInstaller) {
+ $deadline = [DateTime]::UtcNow.AddSeconds(30)
+ do {
+  $candidates = @([W]::All()) + @([W]::Children($h))
+  $targets = @($candidates | Where-Object { [W]::Pid($_) -ne $AppPid -and [W]::Class($_) -eq 'SDL_app' -and [W]::IsWindowVisible($_) } | Select-Object -Unique)
+  $targets = @($targets | Where-Object {
+   $candidate = Get-CimInstance Win32_Process -Filter "ProcessId = $([W]::Pid($_))"
+   $candidate.ParentProcessId -eq $AppPid -and $candidate.CommandLine.Replace('\','/').Contains($HomePath.Replace('\','/') + '/')
+  })
+  if ($targets.Count -eq 1) { break }
+  Start-Sleep -Milliseconds 40
+ } while ([DateTime]::UtcNow -lt $deadline)
+ if ($targets.Count -ne 1) { throw 'Owned visible installer window did not appear' }
+ $h = $targets[0]
+ # Interrupt GRUB's short live-boot timeout as soon as the window is created.
+ # Do not select an entry until the caller has captured and recognized the menu.
+ $until = [DateTime]::UtcNow.AddSeconds(3)
+ do { [W]::Focus($h); [W]::Tap(0x24); Start-Sleep -Milliseconds 100 } while ([DateTime]::UtcNow -lt $until)
+ @{pid=[W]::Pid($h);hwnd=$h.ToInt64();action='interrupt-installer-grub'} | ConvertTo-Json -Compress
+ exit
+}
 if ($QemuPid) {
  $candidates = @([W]::All()) + @([W]::Children($h))
- $targets = @($candidates | Where-Object { [W]::Pid($_) -eq $QemuPid -and [W]::Class($_) -eq 'SDL_app' } | Select-Object -Unique)
+ $targets = @($candidates | Where-Object { [W]::Pid($_) -eq $QemuPid -and [W]::Class($_) -eq 'SDL_app' -and [W]::IsWindowVisible($_) } | Select-Object -Unique)
  if($targets.Count -ne 1){throw "SDL_app window count $($targets.Count) for owned QEMU $QemuPid"}
  $h=$targets[0]
 }
@@ -135,6 +162,7 @@ if ($FilePath) {
 }
 if ($Keys -or $Text) {
  [W]::Focus($h)
+ if ($QemuPid) { [W]::ClickFocus($h) }
  $map=@{HOME=0x24;END=0x23;UP=0x26;DOWN=0x28;LEFT=0x25;RIGHT=0x27;ENTER=0x0d;TAB=9;ESC=0x1b;BACKSPACE=8;SPACE=0x20}
  if($Keys){foreach($key in $Keys.Split(',')){
   if(!$map.ContainsKey($key)){throw "Unknown key $key"}

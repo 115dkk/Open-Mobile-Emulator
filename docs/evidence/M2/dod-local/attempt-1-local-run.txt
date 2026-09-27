@@ -1,0 +1,116 @@
+SPDX-License-Identifier: GPL-2.0-or-later
+M2 wizard-only local run, 2026-09-28 03:16:40–03:16:55 KST
+
+RESULT: BLOCKED AT HOST CHECK. THIS IS NOT A COMPLETED M2 ACCEPTANCE RUN.
+No ISO download, guest installation, capability probe or game execution occurred.
+
+Environment
+- Windows 11 Education 22621, Intel Core i5-12600KF, 64 GB RAM, RTX 2080 SUPER
+  (host identity from the project development-host record).
+- Fresh session scratchpad home: dod-home-final. No developer home/state backup,
+  replacement or mutation. Private game files were checked/read only.
+- App: host/target/debug/ome.exe, embedded production UI.
+- npm run build passed. Initial cargo build failed during concurrent StageHidden
+  edits (E0004); subsequent cargo build -p ome-app -p ome-setup --features
+  custom-protocol passed in 8.53 seconds.
+- QEMU downloaded from repository release qemu-v11.1.1-ome1, not local fallback.
+  Archive qemu-ome-v11.1.1-c3d48b7d1e89-win64.zip, verified before extraction:
+  9a79feccfcb71a1e695ca8ae48376a6274d7e09606054df77ab0f65fc85f8b17
+  Extracted beside app to host/target/debug/qemu/{bin,share}.
+  Executable SHA-256: 82f259806c13f907f9d7462e2f2a876d123c27b814ac0378ffd34f2059960b18
+- Native preflight free bytes: 85544419328. No existing ome.exe or QEMU.
+- App was built while another worker was modifying product files. Its source
+  changes are not part of this driver's changes. No product source was edited here.
+
+Measured final run (raw UTC timestamps in dod-result.json)
+preflight             760 ms  passed
+launch               2961 ms  passed
+S1.1 host check       4790 ms  failed after pressing visible 다시 확인
+cleanup              4897 ms  passed; native tray 종료, application exit 0
+S1.2 WHPX                 --  not run
+S1.4 ISO download          --  not run
+S1.5 Bliss installation    --  not run
+S1.6 first boot/probe      --  not run; probeItems=[]
+S1.7 game installation     --  not run
+game launch/capture        --  not run
+normal stage stop/quit     --  not run; cleanup quit was successful
+Final process list: []
+No QEMU was ever started. All three scratch trial homes have zero qcow2 files;
+there is no temporary guest disk to delete.
+
+Confirmed product blocker
+host/crates/ome-host-check/src/lib.rs:528–572 defines WindowsProbe methods for
+cpu_virtualization, hypervisor_platform, reboot_pending, whpx_available,
+free_disk_bytes, total_memory_bytes and logical_processors as ProbeError::Unwired.
+The first run after host checking was connected projects this as
+blocker.kind=virtualizationOff, host.ready=false, wizard.canContinue=false.
+Rows cpuVirtualization and diskSpace are blocked; hypervisorPlatform,
+rebootPending and whpxAvailable are attention. QEMU, firmware and adb are ready.
+The visible page says BIOS virtualization is off, rather than showing a host
+check table. Pressing 다시 확인 reproduces the same blocker. The snapshot records
+an inability to inspect, not a measured disabled BIOS setting. No bypass was used.
+
+Other contract differences found by reading, NOT exercised after the blocker
+- Enabled WHPX skips S1.2; it does not display an already-enabled Continue page.
+- S1.7's picker is 파일 고르기, not 설치. The native picker accepts multiple files.
+- S1.7 has installation results but no 실행 or 스크린샷. Driver completes the
+  wizard before using 앱 실행 and 무대 스크린샷. Strict wizard-only launch cannot
+  be certified with this UI. A new product flow requires the coordinator's decision.
+- No visible wizard-resume control was found for the software-rendering retry;
+  driver reports this gap instead of issuing a private mutating bridge call.
+- pulled.json records package and signature/pull metadata, but no versionName or
+  versionCode. Both remain null; after installation the product app list can
+  supply installedVersion. Device serial/fingerprint were not copied into evidence.
+- Installer keystrokes use the M0 record, including fat32 ESP, ext4 system, no OTA,
+  EFI GRUB2 and no system-rw prompt (M0 never saw that prompt). This sequence and
+  the timing assumptions are UNVERIFIED because the run never reached S1.5.
+- Game observation has 60-second product screenshots for 15 minutes, no account
+  creation or automatic consent. It does not yet decide whether the game reached
+  a stable playable/title screen. A completed observation returns needs-review,
+  not a false passed verdict. Mandatory guest/game dialogs may need additional
+  measured native-input automation after the host blocker is fixed.
+
+Driver trials
+First trial found the blocker but the old .ome-wizard-only launch wait mislabeled
+it as a 12-second launch timeout. Its desktop capture included another app and
+was NOT published. The helper now attaches foreground input threads and refuses
+capture unless the owned window is foreground. Second and final trials classified
+the host-check blocker correctly. Published screenshots are from final trial only.
+No application or QEMU from another session was terminated.
+
+Evidence
+- dod-result.json: steps, measurements, host rows, source identity, final processes
+- driver-output.txt: timestamped actions and every read-only app_snapshot result
+- 01-first-screen.txt, 02-host-verdict.txt, 02b-host-rechecked.txt, failure.txt
+- shots/*.png: native product-window captures; 02b-host-rechecked.png shows blocker
+- app-output.txt: captured app stdout/stderr
+- gate-syntax.txt, gate-policy.txt, gate-publication-and-processes.txt
+No product log files were generated under the fresh home's logs directory.
+No game screenshot exists because the game was never installed or started.
+
+Gates
+node --check ci/dod/run-dod.mjs: passed (exit 0, no output)
+PowerShell parser: passed
+PSScriptAnalyzer: skipped; module not installed
+Invoke-AllChecks.ps1:
+  Check-Forbidden PASS; Check-Manifest PASS; Check-SpdxHeaders PASS
+  Check-UnsafeScope FAIL(1): host/crates/ome-platform-win/src/lib.rs
+  missing-undocumented-block-deny (concurrent product edit, not changed here)
+  Pester PASS: 42 passed, 0 failed
+Evidence publication positive test: 11 files staged.
+Evidence publication negative test: synthetic sentinel.apk rejected before copy.
+git diff --check: exit 0; existing/concurrent files produced CRLF notices only.
+
+Workflow (not dispatched)
+After committing/pushing the workflow, dispatch:
+  gh workflow run m2-dod.yml --repo 115dkk/Open-Mobile-Emulator --ref main
+Inspect:
+  gh run list --repo 115dkk/Open-Mobile-Emulator --workflow m2-dod.yml
+  gh run view <RUN_ID> --repo 115dkk/Open-Mobile-Emulator --log-failed
+  gh run download <RUN_ID> --repo 115dkk/Open-Mobile-Emulator --name m2-wizard-evidence
+Requires secret OME_FIXTURES_DEPLOY_KEY with read-only access to the private
+ome-game-fixtures repository. A temporary owner-only key file is deleted in a
+finally block immediately after clone. The workflow uploads only separately
+staged PNG/TXT/MD/JSON evidence. APK/archive/disk/key files, fixtures, vm, artifacts,
+.git and reparse points cause publication to fail. It never uploads the home or
+fixture checkout. No workflow was dispatched and no Windows minutes were used.

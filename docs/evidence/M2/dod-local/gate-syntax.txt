@@ -1,2 +1,4 @@
+PASS PowerShell parser native.ps1
+PASS PowerShell parser ocr.ps1
+PASS PowerShell parser publish-evidence.ps1
 SKIP PSScriptAnalyzer: module absent
-PASS PowerShell parser

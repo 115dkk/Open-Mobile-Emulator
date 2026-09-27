@@ -21,13 +21,15 @@ const port = Number(process.env.OME_DOD_CDP_PORT ?? 9333);
 const scrub = text => text.replaceAll(gameDirectory.replaceAll('\\', '\\\\'), '<private-fixtures>').replaceAll(gameDirectory, '<private-fixtures>').replaceAll(gameDirectory.replaceAll('\\', '/'), '<private-fixtures>').replace(/C:([\\/]+)Users\1[^\\/\r\n" ]+/gi, 'C:$1Users$1USER');
 fs.mkdirSync(path.join(output, 'shots'), { recursive: true });
 const plannedSteps = ['preflight', 'launch', 'S1.1-host-check', 'S1.2-WHPX', 'S1.4-download', 'S1.5-installer', 'S1.6-first-boot', 'S1.7-game-install', 'game-launch', 'stop', 'quit'];
-const result = { startedAt: new Date().toISOString(), outcome: 'failed', steps: [], gaps: [], measurements: {}, probeItems: [], softwareRenderingRetry: false };
+const result = { startedAt: new Date().toISOString(), outcome: 'failed', steps: [], gaps: [], measurements: {}, probeItems: [], softwareRenderingRetry: false, utf8Check: '다시 확인' };
 const writeJson = (name, value) => fs.writeFileSync(path.join(output, name), scrub(JSON.stringify(value, null, 2)) + '\n');
 const log = (event, data = {}) => { const line = scrub(JSON.stringify({ at: new Date().toISOString(), event, ...data })); console.log(line); fs.appendFileSync(path.join(output, 'driver-output.txt'), line + '\n'); };
 const native = args => {
-  const r = spawnSync('pwsh', ['-NoProfile', '-File', path.join(directory, 'native.ps1'), ...args], { encoding: 'utf8', timeout: 45000 });
-  if (r.status !== 0) throw Error(`native helper (${r.status}): ${r.stdout} ${r.stderr}`);
-  return JSON.parse(r.stdout.trim());
+  const r = spawnSync('pwsh', ['-NoProfile', '-File', path.join(directory, 'native.ps1'), ...args], { encoding: 'buffer', timeout: 45000 });
+  const stdout = r.stdout?.toString('utf8') ?? '';
+  const stderr = r.stderr?.toString('utf8') ?? '';
+  if (r.status !== 0) throw Error(`native helper (${r.status}): ${stdout} ${stderr}`);
+  return JSON.parse(stdout.trim());
 };
 const inventory = () => native(['-Inventory', '-HomePath', home]);
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -59,7 +61,7 @@ async function snapshot() {
 }
 async function capture(name, qemuPid) {
   log('capture', { name, ...native(['-AppPid', String(app.pid), ...(qemuPid ? ['-QemuPid', String(qemuPid)] : []), '-Shot', path.join(output, 'shots', `${name}.png`)]) });
-  fs.writeFileSync(path.join(output, `${name}.txt`), scrub(await page.locator('body').innerText()));
+  fs.writeFileSync(path.join(output, `${name}.txt`), scrub(await page.locator('body').innerText()), 'utf8');
 }
 const click = async name => { log('click', { name }); await page.getByRole('button', { name, exact: true }).click(); };
 const rail = async name => { await page.getByRole('navigation', { name: '주 메뉴' }).getByRole('button', { name, exact: true }).click(); await delay(400); };
@@ -85,9 +87,18 @@ async function keys(pid, label, keySequence, text, waitMs = 800) {
   log('installer-input', { label, ...native(['-AppPid', String(app.pid), '-QemuPid', String(pid), ...(keySequence ? ['-Keys', keySequence] : []), ...(text ? ['-Text', text] : [])]) });
   await delay(waitMs); await capture(`installer-${label}`, pid);
 }
+function recognize(name) {
+  const r = spawnSync('powershell.exe', ['-NoProfile', '-File', path.join(directory, 'ocr.ps1'), '-Image', path.join(output, 'shots', name + '.png')], { encoding: 'buffer', timeout: 30000 });
+  if (r.status !== 0) throw new StopRun(`Installer OCR unavailable: ${r.stderr?.toString('utf8')}`);
+  const value = JSON.parse(r.stdout.toString('utf8')); log('installer-ocr', { name, ...value }); return value.text;
+}
 async function installGuest(pid) {
   // docs/evidence/M0/guest-install.md 69-94. Never send these to an existing disk.
-  await keys(pid, '01-grub-installation', 'HOME,DOWN,DOWN,DOWN,DOWN,ENTER', null, 30000);
+  await capture('installer-00-grub-menu', pid);
+  if (!/installation/i.test(recognize('installer-00-grub-menu'))) throw new StopRun('Installer GRUB menu was not reached; no partition keys sent');
+  await keys(pid, '01a-grub-select-installation', 'HOME,DOWN,DOWN,DOWN,DOWN');
+  await keys(pid, '01-grub-installation', 'ENTER', null, 30000);
+  if (!/partition/i.test(recognize('installer-01-grub-installation'))) throw new StopRun('Expected installer partition dialog; refusing blind partition keystrokes');
   await keys(pid, '02-partition-menu', null, 'c');
   await keys(pid, '03-cfdisk-confirm', 'ENTER');
   await keys(pid, '04-cfdisk-label', 'ENTER');
@@ -113,8 +124,19 @@ async function installGuest(pid) {
   await keys(pid, '24-system-label', 'ENTER');
   await keys(pid, '25-system-confirm', 'LEFT,ENTER', null, 5000);
   await keys(pid, '26-no-ota', 'RIGHT,ENTER');
-  await keys(pid, '27-efi-grub2', 'HOME,ENTER', null, 120000);
-  // M0 saw no system-rw prompt. No Run/Reboot key: product 설치 완료 stops the installer.
+  await keys(pid, '27-efi-grub2', 'HOME,ENTER', null, 3000);
+  // M0 saw no system-rw prompt. Assert the final Run/Reboot dialog, not elapsed time.
+  let check = 0;
+  await until(async () => {
+    const label = `installer-28-completion-${String(check++).padStart(2, '0')}`;
+    await capture(label, pid);
+    const r = spawnSync('powershell.exe', ['-NoProfile', '-File', path.join(directory, 'ocr.ps1'), '-Image', path.join(output, 'shots', label + '.png')], { encoding: 'buffer', timeout: 30000 });
+    if (r.status !== 0) throw new StopRun(`Installer OCR unavailable: ${r.stderr?.toString('utf8')}`);
+    const recognized = JSON.parse(r.stdout.toString('utf8'));
+    log('installer-final-prompt-ocr', recognized);
+    const text = recognized.text.toLowerCase().replace(/[^a-z]/g, '');
+    return text.includes('congratulations') && text.includes('installedsuccessfully');
+  }, 10 * 60000, 'installer Congratulations / installed successfully / Run dialog', 15000);
   await capture('installer-28-copy-finished', pid);
 }
 async function stopGuest() {
@@ -139,7 +161,7 @@ async function guestScreenshot(name) {
 }
 try {
   await step('preflight', async () => {
-    const pre = inventory(); log('preflight', pre); result.environment = pre;
+    const pre = inventory(); log('preflight', { ...pre, utf8Check: result.utf8Check }); result.environment = pre;
     if (pre.processes.length) throw Error('Existing QEMU or ome.exe; no process was touched');
     const realHome = path.resolve(process.env.LOCALAPPDATA, 'OpenMobileEmulator').toLowerCase(); const h = home.toLowerCase();
     if (h === realHome || h.startsWith(realHome + path.sep) || realHome.startsWith(h + path.sep)) throw Error('Refusing developer product home or its ancestors/descendants');
@@ -208,8 +230,20 @@ try {
     await capture('04-image-verified'); await click('다음'); await capture('05-disk-size');
   });
   await step('S1.5-installer', async () => {
-    const start = Date.now(); await click('디스크 만들기'); let pid;
-    try { pid = await qemuWindow(); }
+    const start = Date.now();
+    // Start the native watcher before the UI click; PowerShell/CIM startup otherwise misses
+    // the ISO GRUB countdown and enters Live Android rather than Installation.
+    const watcher = spawn('pwsh', ['-NoProfile', '-File', path.join(directory, 'native.ps1'), '-AppPid', String(app.pid), '-WaitInstaller', '-HomePath', home], { stdio: ['ignore', 'pipe', 'pipe'] });
+    let watcherOut = '', watcherErr = '';
+    watcher.stdout.setEncoding('utf8'); watcher.stderr.setEncoding('utf8');
+    watcher.stdout.on('data', s => { watcherOut += s; }); watcher.stderr.on('data', s => { watcherErr += s; });
+    const watched = new Promise(resolve => watcher.once('exit', code => resolve(code)));
+    await delay(1800); await click('디스크 만들기'); let pid;
+    try {
+      if (await watched !== 0) throw Error(`Installer watcher failed: ${watcherErr}`);
+      const observed = JSON.parse(watcherOut); log('installer-watcher', observed); pid = observed.pid;
+      rememberProcesses(); if (!ownedQemu.has(pid)) throw Error('Installer process identity not confirmed');
+    }
     catch (error) {
       const stderr = fs.existsSync(path.join(home, 'logs')) ? fs.readdirSync(path.join(home, 'logs')).filter(n => /qemu.*stderr/.test(n)).map(n => fs.readFileSync(path.join(home, 'logs', n), 'utf8')).join('\n') : '';
       if (Date.now() - start <= 45000 && /(?:GL|EGL|OpenGL|virgl).*(?:error|fail)|(?:error|fail).*(?:GL|EGL|virgl)/i.test(stderr)) {
@@ -225,24 +259,27 @@ try {
     await capture('06-install-complete'); await click('설치 완료');
   });
   await step('S1.6-first-boot', async () => {
-    const start = Date.now(); const pid = await qemuWindow();
-    await keys(pid, '29-disk-vm-options', 'HOME,DOWN,DOWN,DOWN,DOWN,ENTER', null, 500);
-    await keys(pid, '30-disk-boot', result.softwareRenderingRetry ? 'HOME,DOWN,ENTER' : 'HOME,ENTER', null, 3000);
+    const start = Date.now();
+    if (result.softwareRenderingRetry) {
+      const pid = await qemuWindow();
+      await keys(pid, '29-disk-vm-options', 'HOME,DOWN,DOWN,DOWN,DOWN,ENTER', null, 500);
+      await keys(pid, '30-disk-boot', 'HOME,DOWN,ENTER', null, 3000);
+    } else log('first-boot-default', { note: 'Normal virgl path: leave installed GRUB default unchanged; no keys sent.' });
     const s = await until(async () => { const s = await snapshot(); return s.guest.bootCompleted && s.guest.capabilities.items.some(i => i.state !== 'unknown') && s; }, 10 * 60000, 'first boot and probe', 3000);
     result.measurements.firstBootMs = Date.now() - start; result.probeItems = s.guest.capabilities.items;
     await capture('07-first-boot-probe'); log('applied-defaults', { text: await page.locator('body').innerText() }); await click('다음');
   });
   await step('S1.7-game-install', async () => {
-    await capture('08-app-install'); const start = Date.now();
-    gap('S1.7 opens the native file picker with 파일 고르기, not 설치.');
-    await click('파일 고르기');
+    await capture('08-app-install');
+    gap('S1.7 has no launch/capture actions; complete wizard before installing from 앱 as directed for round 2.');
+    await click('완료'); await rail('앱');
+    const start = Date.now(); await click('설치');
     native(['-AppPid', String(app.pid), '-FilePath', gameDirectory, '-GameSelection']);
     log('file-dialog', { closed: true, selection: 'four private split APKs' });
     const s = await until(async () => { const s = await snapshot(); return s.apps.items.some(a => a.package === result.game.package) && s; }, 300000, 'game installed');
     result.game.installedVersion = s.apps.items.find(a => a.package === result.game.package).versionName;
     result.measurements.gameInstallMs = Date.now() - start; await capture('09-game-installed');
-    gap('S1.7 has no 실행 or 스크린샷. Complete wizard, launch from 앱 and capture from 무대.');
-    await click('완료'); await rail('앱');
+    await rail('앱');
   });
   await step('game-launch', async () => {
     const start = Date.now();
@@ -279,7 +316,7 @@ try {
       const logs = path.join(home, 'logs');
       if (fs.existsSync(logs)) {
         fs.mkdirSync(path.join(output, 'logs'), { recursive: true });
-        for (const entry of fs.readdirSync(logs, { withFileTypes: true })) if (entry.isFile()) fs.writeFileSync(path.join(output, 'logs', entry.name.replace(/\.[^.]+$/, '') + '.txt'), scrub(fs.readFileSync(path.join(logs, entry.name), 'utf8')));
+        for (const entry of fs.readdirSync(logs, { withFileTypes: true })) if (entry.isFile()) fs.writeFileSync(path.join(output, 'logs', entry.name.replace(/\.[^.]+$/, '') + '.txt'), scrub(fs.readFileSync(path.join(logs, entry.name), 'utf8')), 'utf8');
       }
       result.temporaryHome = home;
     }
@@ -287,7 +324,7 @@ try {
   if (result.forcedCleanup) result.outcome = 'failed';
   for (const name of plannedSteps) if (!result.steps.some(s => s.name === name)) result.steps.push({ name, start: null, end: null, durationMs: null, outcome: 'not-run', reason: 'An earlier step failed; no bypass attempted' });
   result.endedAt = new Date().toISOString(); writeJson('dod-result.json', result);
-  const appOutput = path.join(output, 'app-output.txt'); if (fs.existsSync(appOutput)) fs.writeFileSync(appOutput, scrub(fs.readFileSync(appOutput, 'utf8')));
+  const appOutput = path.join(output, 'app-output.txt'); if (fs.existsSync(appOutput)) fs.writeFileSync(appOutput, scrub(fs.readFileSync(appOutput, 'utf8')), 'utf8');
   if (browser) await browser.close().catch(() => {});
 }
 process.exitCode = result.outcome === 'passed' ? 0 : 1;

@@ -1,56 +1,56 @@
 {
-  "startedAt": "2026-09-27T20:21:42.938Z",
+  "startedAt": "2026-09-27T20:11:10.220Z",
   "outcome": "failed",
   "steps": [
     {
       "name": "preflight",
-      "start": "2026-09-27T20:21:42.938Z",
+      "start": "2026-09-27T20:11:10.221Z",
       "outcome": "passed",
-      "end": "2026-09-27T20:21:43.778Z",
-      "durationMs": 839
+      "end": "2026-09-27T20:11:10.987Z",
+      "durationMs": 765
     },
     {
       "name": "launch",
-      "start": "2026-09-27T20:21:43.779Z",
+      "start": "2026-09-27T20:11:10.989Z",
       "outcome": "passed",
-      "end": "2026-09-27T20:21:48.360Z",
-      "durationMs": 4580
+      "end": "2026-09-27T20:11:14.114Z",
+      "durationMs": 3125
     },
     {
       "name": "S1.1-host-check",
-      "start": "2026-09-27T20:21:48.361Z",
+      "start": "2026-09-27T20:11:14.115Z",
       "outcome": "passed",
-      "end": "2026-09-27T20:21:50.023Z",
-      "durationMs": 1661
+      "end": "2026-09-27T20:11:15.781Z",
+      "durationMs": 1666
     },
     {
       "name": "S1.2-WHPX",
-      "start": "2026-09-27T20:21:50.024Z",
+      "start": "2026-09-27T20:11:15.782Z",
       "outcome": "passed",
-      "end": "2026-09-27T20:21:51.616Z",
-      "durationMs": 1591
+      "end": "2026-09-27T20:11:17.404Z",
+      "durationMs": 1621
     },
     {
       "name": "S1.4-download",
-      "start": "2026-09-27T20:21:51.617Z",
+      "start": "2026-09-27T20:11:17.405Z",
       "outcome": "passed",
-      "end": "2026-09-27T20:23:20.185Z",
-      "durationMs": 88568
+      "end": "2026-09-27T20:12:41.184Z",
+      "durationMs": 83779
     },
     {
       "name": "S1.5-installer",
-      "start": "2026-09-27T20:23:20.186Z",
+      "start": "2026-09-27T20:12:41.184Z",
       "outcome": "failed",
-      "error": "Error: Expected installer partition dialog; refusing blind partition keystrokes\n    at installGuest (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:101:78)\n    at async file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:258:5\n    at async step (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:72:9)\n    at async file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:232:3",
-      "end": "2026-09-27T20:24:07.187Z",
-      "durationMs": 47001
+      "error": "Error: Expected installer partition dialog; refusing blind partition keystrokes\n    at installGuest (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:100:78)\n    at async file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:257:5\n    at async step (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:72:9)\n    at async file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:231:3",
+      "end": "2026-09-27T20:13:24.753Z",
+      "durationMs": 43568
     },
     {
       "name": "cleanup",
-      "start": "2026-09-27T20:24:08.935Z",
+      "start": "2026-09-27T20:13:26.502Z",
       "outcome": "passed",
-      "end": "2026-09-27T20:24:46.438Z",
-      "durationMs": 37503
+      "end": "2026-09-27T20:14:04.367Z",
+      "durationMs": 37864
     },
     {
       "name": "S1.6-first-boot",
@@ -98,17 +98,17 @@
     "WHPX already enabled: product skips S1.2 instead of showing an already-on screen."
   ],
   "measurements": {
-    "downloadMs": 85312,
+    "downloadMs": 80352,
     "downloadBytes": 2429550592,
-    "downloadAverageBytesPerSecond": 28478415.603900976
+    "downloadAverageBytesPerSecond": 30236342.493030664
   },
   "probeItems": [],
   "softwareRenderingRetry": false,
   "utf8Check": "다시 확인",
   "environment": {
-    "processes": [],
-    "freeBytes": 72399478784,
-    "killed": 0
+    "freeBytes": 77275279360,
+    "killed": 0,
+    "processes": []
   },
   "game": {
     "package": "com.epidgames.trickcalrevive",
@@ -164,10 +164,10 @@
       }
     ],
     "ready": true,
-    "inspectedAt": "2026-09-28T05:21:44+09:00"
+    "inspectedAt": "2026-09-28T05:11:11+09:00"
   },
-  "error": "Error: Expected installer partition dialog; refusing blind partition keystrokes\n    at installGuest (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:101:78)\n    at async file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:258:5\n    at async step (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:72:9)\n    at async file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:232:3",
+  "error": "Error: Expected installer partition dialog; refusing blind partition keystrokes\n    at installGuest (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:100:78)\n    at async file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:257:5\n    at async step (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:72:9)\n    at async file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:231:3",
   "finalProcesses": [],
-  "temporaryHome": "C:\\Users\\USER\\AppData\\Local\\Temp\\claude\\C--Open-Mobile-Emulator\\5443167b-6434-41c7-b80b-6e15a0fef829\\scratchpad\\dod-home-round2e",
-  "endedAt": "2026-09-27T20:24:46.439Z"
+  "temporaryHome": "C:\\Users\\USER\\AppData\\Local\\Temp\\claude\\C--Open-Mobile-Emulator\\5443167b-6434-41c7-b80b-6e15a0fef829\\scratchpad\\dod-home-round2c",
+  "endedAt": "2026-09-27T20:14:04.368Z"
 }
