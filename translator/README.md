@@ -59,7 +59,21 @@ Follows the AOSP native-bridge layout:
 ## Where the bundled Google translator comes from
 
 Bliss OS 16.9.x ships `libndk_translation` extracted from a Google emulator
-image. For the P3 self-built image, the `vendor_google_emu-x86` flow extracts it
-at build time from a Google APIs system image (R3). The development host already
-holds such an image under the Android SDK (`system-images/android-36/google_apis/x86_64`),
-which is useful for inspecting the layout; nothing from it is committed.
+image. Self-built images (P3) ship without it (`BLISS_BUILD_VARIANT=foss`): the
+installer downloads a Google APIs x86_64 system image from `dl.google.com` on the
+user's PC, extracts a bundle in this contract's layout there, and installs it
+into the guest (R3, ADR-0006). No release, server, or mirror of this project
+carries a guest image that contains Google files. The `vendor_google_emu-x86`
+flow on a build machine stays a development and evidence tool.
+
+The Google images are distributed under the Android SDK License Agreement
+(`android-sdk-license` in the repository index), which grants use "solely to
+develop applications for compatible implementations of Android" (3.1) and
+forbids copying, modifying, and redistributing any part of the SDK (3.4). Running
+games through the Google translator is outside 3.1; the choice this leaves is
+CLAUDE.md section 8 item 9. Digitalis (P2) is the translator without that
+restriction.
+
+The development host already holds such an image under the Android SDK
+(`system-images/android-36/google_apis/x86_64`), which is useful for inspecting
+the layout; nothing from it is committed.
