@@ -251,8 +251,9 @@
 - 화면은 `host/ui/src/screens/`에 전부 있다. 마법사 일곱 단계, 막힘 화면 세 가지, 무대의 모든
   상태, 앱, 입력(레일 화면), 표시(주사율과 수직 동기화 절 포함), 설정(설치된 운영체제, 고급 절
   포함). 컴포넌트는 `host/ui/src/components/`, 문구 도우미는 `presentation.ts`와 `input-profile.ts`.
-  픽스처 변형과 QA 갤러리(`npm run build:qa` 뒤 `target/ui-qa/qa.html?state=<id>`)가 모든 상태를
-  보인다. 목업에 없던 화면은 구현에서 먼저 만들었고 목업은 갱신하지 않았다.
+  픽스처 변형과 QA 갤러리(`npm run build:qa` 뒤 `target/ui-qa/qa.html?state=<id>`, 테마는
+  `theme=dark|light`, 선택기를 숨기려면 `picker=hidden`)가 모든 상태를 보인다. 두 테마의 스크린샷은
+  `docs/evidence/M2/screens/`에 있다. 목업에 없던 화면은 구현에서 먼저 만들었고 목업은 갱신하지 않았다.
 - 계약 3판(`ARCHITECTURE.md` 8.7절)이 화면이 필요로 한 명령을 전부 갖는다. 아직 `not_wired`인
   명령(가상 머신 시작과 정지, 산출물 다운로드, 앱 설치, 업데이트, 진단, 도움말 열기, 클립보드,
   폴더 열기, 볼륨)은 감독자, 산출물 저장소, adb 어댑터, 껍데기가 붙는 다음 단계의 일이다.

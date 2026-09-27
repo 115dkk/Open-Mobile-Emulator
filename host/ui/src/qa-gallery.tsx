@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Open Mobile Emulator contributors
 // Synthetic gallery: the real App over fixture snapshots, with a state and theme picker.
 // Loaded only by qa-main.tsx (build mode `qa`); the product build rejects this module.
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { App } from './App';
 import { blockedGallery, fixtureBridge, mainGallery, wizardGallery } from './fixtures';
 import type { GalleryVariant } from './fixtures';
@@ -43,6 +43,23 @@ function readInitial(): string {
   return allVariants().find((variant) => variant.id === requested)?.id ?? allVariants()[0]?.id ?? '';
 }
 
+/** `?theme=dark|light` picks the theme up front, so a headless browser can shoot both themes. */
+function readInitialTheme(): Theme {
+  const requested = new URLSearchParams(window.location.search).get('theme');
+  return requested === 'dark' || requested === 'light' ? requested : 'system';
+}
+
+/** `?picker=hidden` drops the picker, which otherwise covers the bottom-right corner of the screen. */
+function pickerHidden(): boolean {
+  return new URLSearchParams(window.location.search).get('picker') === 'hidden';
+}
+
+function writeParam(name: string, value: string) {
+  const url = new URL(window.location.href);
+  url.searchParams.set(name, value);
+  window.history.replaceState(null, '', url);
+}
+
 function applyTheme(theme: Theme) {
   if (theme === 'system') document.documentElement.removeAttribute('data-theme');
   else document.documentElement.setAttribute('data-theme', theme);
@@ -50,14 +67,18 @@ function applyTheme(theme: Theme) {
 
 export function Gallery() {
   const [selected, setSelected] = useState(readInitial);
-  const [theme, setTheme] = useState<Theme>('system');
+  const [theme, setTheme] = useState<Theme>(readInitialTheme);
   const variant = allVariants().find((item) => item.id === selected);
   const bridge = useMemo(() => fixtureBridge(variant?.snapshot), [variant]);
   useRailPick(selected, RAIL_PICKS);
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
 
   return (
     <>
       <App key={selected} bridge={bridge} />
+      {pickerHidden() ? null : (
       <div className="ome-qa-picker" role="region" aria-label="갤러리 상태">
         <label className="ome-qa-field">
           <span>상태</span>
@@ -66,9 +87,7 @@ export function Gallery() {
             onChange={(event) => {
               const next = event.currentTarget.value;
               setSelected(next);
-              const url = new URL(window.location.href);
-              url.searchParams.set('state', next);
-              window.history.replaceState(null, '', url);
+              writeParam('state', next);
             }}
           >
             {GROUPS.map((group) => (
@@ -86,7 +105,7 @@ export function Gallery() {
               const value = event.currentTarget.value;
               const next: Theme = value === 'dark' || value === 'light' ? value : 'system';
               setTheme(next);
-              applyTheme(next);
+              writeParam('theme', next);
             }}
           >
             <option value="system">시스템</option>
@@ -95,6 +114,7 @@ export function Gallery() {
           </select>
         </label>
       </div>
+      )}
     </>
   );
 }
