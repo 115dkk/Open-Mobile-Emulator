@@ -323,142 +323,11 @@ pub struct ProbeOutcome {
 #[derive(Clone, Copy, Debug, Default)]
 pub struct CapabilityProbe;
 
-impl CapabilityProbe {
-    /// Guest path used for the screenshot probe; removed after the check.
-    pub const SCREENSHOT_PROBE_PATH: &'static str = "/data/local/tmp/ome-probe.png";
+mod dialects;
+mod parsers;
+mod probe;
 
-    /// Runs every probe item over `runner` with `adapter`'s dialect.
-    ///
-    /// Root is requested at most once, and only when an attempted command needs it.
-    // wiring: ASTRA implements the item loop; this body records every item as unknown.
-    #[must_use]
-    pub fn run(&self, _runner: &dyn ShellRunner, _adapter: &dyn FamilyAdapter) -> ProbeOutcome {
-        ProbeOutcome {
-            items: ProbeItem::ALL
-                .iter()
-                .map(|item| (*item, ProbeState::Unknown))
-                .collect(),
-            device_id: None,
-            native_bridge: None,
-            media_volume: None,
-            google_accounts: None,
-            foreground: None,
-            root_enabled: None,
-            display: None,
-            packages: Vec::new(),
-        }
-    }
-}
-
-macro_rules! unfilled_adapter {
-    ($name:ident, $family:expr) => {
-        /// Dialect placeholder; every command is reported as unavailable until it is filled in.
-        #[derive(Clone, Copy, Debug, Default)]
-        pub struct $name;
-
-        // wiring: ASTRA fills each method with the generation's command and parser.
-        impl FamilyAdapter for $name {
-            fn family(&self) -> GuestFamily {
-                $family
-            }
-            fn boot_completed_command(&self) -> Option<ShellCommand> {
-                None
-            }
-            fn parse_boot_completed(&self, _output: &str) -> bool {
-                false
-            }
-            fn native_bridge_command(&self) -> Option<ShellCommand> {
-                None
-            }
-            fn parse_native_bridge(&self, _output: &str) -> Option<String> {
-                None
-            }
-            fn packages_command(&self) -> Option<ShellCommand> {
-                None
-            }
-            fn parse_packages(&self, _output: &str) -> Vec<PackageEntry> {
-                Vec::new()
-            }
-            fn app_label_command(&self, _package: &str) -> Option<ShellCommand> {
-                None
-            }
-            fn parse_app_label(&self, _output: &str) -> Option<String> {
-                None
-            }
-            fn foreground_command(&self) -> Option<ShellCommand> {
-                None
-            }
-            fn parse_foreground(&self, _output: &str) -> Option<String> {
-                None
-            }
-            fn media_volume_set_command(&self, _index: u32) -> Option<ShellCommand> {
-                None
-            }
-            fn media_volume_get_command(&self) -> Option<ShellCommand> {
-                None
-            }
-            fn parse_media_volume(&self, _output: &str) -> Option<u32> {
-                None
-            }
-            fn display_size_command(&self, _width: u32, _height: u32) -> Option<ShellCommand> {
-                None
-            }
-            fn display_size_reset_command(&self) -> Option<ShellCommand> {
-                None
-            }
-            fn display_density_command(&self, _density_dpi: u32) -> Option<ShellCommand> {
-                None
-            }
-            fn display_size_query_command(&self) -> Option<ShellCommand> {
-                None
-            }
-            fn display_density_query_command(&self) -> Option<ShellCommand> {
-                None
-            }
-            fn parse_display(
-                &self,
-                _size_output: &str,
-                _density_output: &str,
-            ) -> Option<DisplayInfo> {
-                None
-            }
-            fn device_id_attempts(&self) -> Vec<Attempt> {
-                Vec::new()
-            }
-            fn parse_device_id(&self, _output: &str) -> Option<DeviceId> {
-                None
-            }
-            fn google_accounts_command(&self) -> Option<ShellCommand> {
-                None
-            }
-            fn parse_google_accounts(&self, _output: &str) -> Option<u32> {
-                None
-            }
-            fn add_google_account_command(&self) -> Option<ShellCommand> {
-                None
-            }
-            fn root_state_command(&self) -> Option<ShellCommand> {
-                None
-            }
-            fn parse_root_state(&self, _output: &str) -> Option<bool> {
-                None
-            }
-            fn input_devices_command(&self) -> Option<ShellCommand> {
-                None
-            }
-            fn parse_multitouch(&self, _output: &str) -> Option<bool> {
-                None
-            }
-            fn screenshot_command(&self, _remote_path: &str) -> Option<ShellCommand> {
-                None
-            }
-        }
-    };
-}
-
-unfilled_adapter!(LegacyAdapter, GuestFamily::Legacy);
-unfilled_adapter!(ModernAdapter, GuestFamily::Modern);
-unfilled_adapter!(CurrentAdapter, GuestFamily::Current);
+pub use dialects::{CurrentAdapter, LegacyAdapter, ModernAdapter};
 
 #[cfg(test)]
 mod tests {
@@ -483,10 +352,10 @@ mod tests {
     }
 
     #[test]
-    fn adapter_for_picks_the_family_and_reports_nothing_before_filling() {
+    fn adapter_for_picks_the_family_and_supplies_attempts() {
         let adapter = adapter_for(33);
         assert_eq!(adapter.family(), GuestFamily::Modern);
-        assert!(adapter.device_id_attempts().is_empty());
+        assert_eq!(adapter.device_id_attempts().len(), 2);
         assert_eq!(ProbeItem::ALL.len(), 10);
     }
 }

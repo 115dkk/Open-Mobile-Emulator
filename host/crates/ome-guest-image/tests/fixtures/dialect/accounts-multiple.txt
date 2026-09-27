@@ -1,0 +1,11 @@
+# synthetic, verify on a real guest
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+Accounts: 3
+Account {name=one, type=com.google}
+Account {name=two, type=com.google.other}
+Account {name=three, type=com.google}
+Account {name=history, type=com.google}
+User UserInfo{10:Work:30}:
+Accounts: 1
+Account {name=four, type=com.google}

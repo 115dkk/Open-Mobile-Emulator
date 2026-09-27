@@ -1,0 +1,5 @@
+# synthetic, verify on a real guest
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+[v] will get volume
+[v] volume is 7 in range [0..15]

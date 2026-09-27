@@ -1,0 +1,7 @@
+# synthetic, verify on a real guest
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+add device 1: /dev/input/event0
+  name:     "QEMU Virtio MultiTouch"
+  events:
+    ABS (0003): ABS_MT_POSITION_X : value 0, min 0, max 32767

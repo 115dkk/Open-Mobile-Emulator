@@ -1,0 +1,4 @@
+# synthetic, verify on a real guest
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+java.lang.SecurityException: Permission Denial: reading com.google.android.gsf.gservices from uid=2000

@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+# Recorded: docs/evidence/M2/sizing-20260927/bootA-guest.txt
+Physical size: 1280x800

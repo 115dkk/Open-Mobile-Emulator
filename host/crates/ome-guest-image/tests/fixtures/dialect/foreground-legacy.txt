@@ -1,0 +1,5 @@
+# synthetic, verify on a real guest
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+ACTIVITY MANAGER ACTIVITIES (dumpsys activity activities)
+    mResumedActivity: ActivityRecord{123abc u0 com.example.game/.MainActivity t11}

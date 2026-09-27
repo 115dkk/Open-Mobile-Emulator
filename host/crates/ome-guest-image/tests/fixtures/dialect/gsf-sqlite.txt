@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+# Recorded: docs/evidence/M0/google-account.md
+android_id|4121739…(가려짐)
