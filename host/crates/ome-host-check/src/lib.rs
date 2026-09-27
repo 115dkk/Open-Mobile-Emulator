@@ -694,15 +694,57 @@ fn command_version(program: &Path, args: &[&str]) -> String {
 
 #[cfg(windows)]
 fn path_text(path: &Path) -> String {
-    path.canonicalize()
+    let text = path
+        .canonicalize()
         .unwrap_or_else(|_| path.to_path_buf())
         .to_string_lossy()
-        .into_owned()
+        .into_owned();
+    strip_verbatim_prefix(&text)
+}
+
+/// `Path::canonicalize` returns a verbatim path on Windows (`\\?\C:\...`). QEMU derives
+/// `../etc/qemu.conf` from its own program path with forward slashes, and the verbatim form
+/// forbids both `..` and `/`, so the process died with `Invalid argument` before it started
+/// (`docs/evidence/M2/window-hosting.md`, first measurement). The probe therefore reports plain
+/// drive and UNC paths, which every consumer (the supervisor's command line, `Command::new`,
+/// the settings screen) accepts.
+#[cfg(windows)]
+fn strip_verbatim_prefix(text: &str) -> String {
+    if let Some(rest) = text.strip_prefix(r"\\?\UNC\") {
+        format!(r"\\{rest}")
+    } else if let Some(rest) = text.strip_prefix(r"\\?\") {
+        rest.to_owned()
+    } else {
+        text.to_owned()
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[cfg(windows)]
+    #[test]
+    fn verbatim_prefixes_are_stripped_from_reported_paths() {
+        assert_eq!(
+            strip_verbatim_prefix(r"\\?\C:\qemu\bin\qemu-system-x86_64.exe"),
+            r"C:\qemu\bin\qemu-system-x86_64.exe"
+        );
+        assert_eq!(
+            strip_verbatim_prefix(r"\\?\UNC\server\share\adb.exe"),
+            r"\\server\share\adb.exe"
+        );
+        assert_eq!(strip_verbatim_prefix(r"C:\adb.exe"), r"C:\adb.exe");
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn path_text_of_an_existing_file_has_no_verbatim_prefix() {
+        let file = std::env::current_exe().expect("test executable path");
+        let text = path_text(&file);
+        assert!(!text.starts_with(r"\\?\"), "{text}");
+        assert!(Path::new(&text).is_file(), "{text}");
+    }
 
     fn ready_probe() -> TableProbe {
         TableProbe::new()
