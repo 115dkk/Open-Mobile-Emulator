@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Copyright (C) 2026 Open Mobile Emulator contributors
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import type { AppSnapshot } from '../contracts';
@@ -30,10 +30,14 @@ function statusBar() {
   return bar;
 }
 
-/** Buttons that must not exist: volume and marker visibility have no command yet. */
-function expectNoUnwiredButtons() {
-  expect(screen.queryByRole('button', { name: '볼륨' })).toBeNull();
-  expect(screen.queryByRole('button', { name: /매핑 표시/u })).toBeNull();
+/** Toolbar controls in document order, by accessible name. */
+function toolbarOrder(): (string | null)[] {
+  return [...toolbar().querySelectorAll('button, select')].map((control) => control.getAttribute('aria-label'));
+}
+
+/** Outside the running state the toolbar holds the display preset and the marker toggle (M2-SCREENS.md 9.1). */
+function expectPresetAndMarkerToggleOnly() {
+  expect(toolbarOrder()).toEqual(['표시 프리셋', '매핑 표시']);
 }
 
 describe('stage: stopped', () => {
@@ -46,11 +50,12 @@ describe('stage: stopped', () => {
     expect(actions.guestStart).toHaveBeenCalledOnce();
   });
 
-  it('keeps only the display preset in the toolbar', () => {
-    show(variant('stage-stopped'));
-    expect(within(toolbar()).queryAllByRole('button')).toEqual([]);
+  it('keeps the display preset and the marker toggle in the toolbar', async () => {
+    const actions = show(variant('stage-stopped'));
+    expectPresetAndMarkerToggleOnly();
     expect(within(toolbar()).getByRole('combobox', { name: '표시 프리셋' })).toHaveValue('fhd-landscape');
-    expectNoUnwiredButtons();
+    await userEvent.click(within(toolbar()).getByRole('button', { name: '매핑 표시' }));
+    expect(actions.inputOverlayToggle).toHaveBeenCalledOnce();
   });
 
   it('names the state, version, size and input profile in the status bar', () => {
@@ -107,24 +112,71 @@ describe('stage: starting', () => {
     expect(screen.queryByRole('button', { name: '시작' })).toBeNull();
     await userEvent.click(screen.getByRole('button', { name: '취소' }));
     expect(actions.guestStop).toHaveBeenCalledOnce();
-    expectNoUnwiredButtons();
+    expectPresetAndMarkerToggleOnly();
   });
 });
 
 describe('stage: running', () => {
-  it('sends the toolbar commands', async () => {
+  it('orders the toolbar and sends its commands', async () => {
     const actions = show(variant('stage-running'));
+    expect(toolbarOrder()).toEqual(['스크린샷', '볼륨', '표시 프리셋', '매핑 표시', '매핑 편집', '다시 시작', '끄기']);
     const bar = within(toolbar());
     await userEvent.click(bar.getByRole('button', { name: '스크린샷' }));
+    await userEvent.click(bar.getByRole('button', { name: '매핑 표시' }));
     await userEvent.click(bar.getByRole('button', { name: '매핑 편집' }));
     await userEvent.click(bar.getByRole('button', { name: '다시 시작' }));
     await userEvent.click(bar.getByRole('button', { name: '끄기' }));
     expect(actions.screenshotSave).toHaveBeenCalledOnce();
+    expect(actions.inputOverlayToggle).toHaveBeenCalledOnce();
     expect(actions.inputEditorToggle).toHaveBeenCalledOnce();
     expect(actions.guestRestart).toHaveBeenCalledOnce();
     expect(actions.guestStop).toHaveBeenCalledOnce();
     expect(bar.getByRole('button', { name: '매핑 편집' })).toHaveAttribute('aria-pressed', 'false');
-    expectNoUnwiredButtons();
+  });
+
+  it('marks the marker toggle from overlayVisible', () => {
+    const running = variant('stage-running');
+    const { unmount } = render(<StageScreen snapshot={running} actions={mockActions()} />);
+    expect(within(toolbar()).getByRole('button', { name: '매핑 표시' })).toHaveAttribute('aria-pressed', 'true');
+    unmount();
+    show({ ...running, input: { ...running.input, overlayVisible: false } });
+    expect(within(toolbar()).getByRole('button', { name: '매핑 표시' })).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('opens the media volume slider in the toolbar and sends each step', async () => {
+    const actions = show(variant('stage-running'));
+    const bar = within(toolbar());
+    const volume = bar.getByRole('button', { name: '볼륨' });
+    expect(volume).toHaveAttribute('aria-expanded', 'false');
+    expect(bar.queryByRole('slider', { name: '미디어 볼륨' })).toBeNull();
+    await userEvent.click(volume);
+    expect(volume).toHaveAttribute('aria-expanded', 'true');
+    const slider = bar.getByRole('slider', { name: '미디어 볼륨' });
+    expect(slider).toHaveValue('9');
+    expect(slider).toHaveAttribute('min', '0');
+    expect(slider).toHaveAttribute('max', '15');
+    fireEvent.change(slider, { target: { value: '12' } });
+    expect(actions.guestVolumeSet).toHaveBeenCalledWith(12);
+    expect(slider).toHaveValue('12');
+    fireEvent.pointerUp(slider);
+    expect(actions.guestVolumeSet).toHaveBeenCalledOnce();
+  });
+
+  it('has no volume button unless the probe found the media volume and Rust reported its value', () => {
+    const running = variant('stage-running');
+    const items = running.guest.capabilities.items.map((item) => item.id === 'mediaVolume'
+      ? { ...item, state: 'unknown' as const } : item);
+    const { unmount } = render(
+      <StageScreen
+        snapshot={{ ...running, guest: { ...running.guest, capabilities: { ...running.guest.capabilities, items } } }}
+        actions={mockActions()}
+      />,
+    );
+    expect(within(toolbar()).queryByRole('button', { name: '볼륨' })).toBeNull();
+    unmount();
+    show({ ...running, guest: { ...running.guest, mediaVolume: null } });
+    expect(within(toolbar()).queryByRole('button', { name: '볼륨' })).toBeNull();
+    expect(within(toolbar()).getByRole('button', { name: '스크린샷' })).toBeInTheDocument();
   });
 
   it('draws nothing over the embedded window and names the connection in the status bar', () => {
@@ -181,13 +233,13 @@ describe('stage: restarting and stopping', () => {
   it('keeps the stage dark with the state in the status bar', () => {
     show(variant('stage-restarting'));
     expect(within(statusBar()).getByText('다시 시작 중')).toBeInTheDocument();
-    expect(screen.queryAllByRole('button')).toEqual([]);
+    expect(screen.getAllByRole('button').map((button) => button.getAttribute('aria-label'))).toEqual(['매핑 표시']);
   });
 
   it('names stopping in the status bar', () => {
     show(variant('stage-stopping'));
     expect(within(statusBar()).getByText('끄는 중')).toBeInTheDocument();
-    expect(screen.queryAllByRole('button')).toEqual([]);
+    expect(screen.getAllByRole('button').map((button) => button.getAttribute('aria-label'))).toEqual(['매핑 표시']);
   });
 });
 
@@ -227,10 +279,8 @@ describe('stage: failed', () => {
     expect(screen.getByRole('heading', { level: 2, name: '크래시가 일어났습니다.' })).toBeInTheDocument();
   });
 
-  it('has only the display preset in the toolbar', () => {
+  it('has only the display preset and the marker toggle in the toolbar', () => {
     show(variant('stage-failed-start'));
-    expect(within(toolbar()).queryAllByRole('button')).toEqual([]);
-    expect(within(toolbar()).getByRole('combobox', { name: '표시 프리셋' })).toBeInTheDocument();
-    expectNoUnwiredButtons();
+    expectPresetAndMarkerToggleOnly();
   });
 });

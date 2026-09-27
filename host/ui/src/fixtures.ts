@@ -334,6 +334,7 @@ function stageAt(guest: GuestPatch, patch: StagePatch = {}): AppSnapshot {
 const runningGuest: GuestPatch = {
   state: 'running', hosting: 'embedded', bootCompleted: true, adbConnected: true, fps: 58,
   startedAt: '2026-09-27T09:10:00', capabilities: stageProbe, deviceId: '3f2a9c41d07b5e68', rootEnabled: false,
+  mediaVolume: 9,
 };
 
 const runningApps: AppSnapshot['apps'] = { available: true, items: sampleApps, install: null };
@@ -567,7 +568,13 @@ export const settingsGallery: readonly GalleryVariant[] = [
     snapshot: {
       ...railRunningSnapshot,
       settings: { ...railRunningSnapshot.settings, adbAccess: 'network' },
-      update: { currentVersion: '0.1.0', state: { kind: 'available', version: '0.2.0', notesUrl: null } },
+      update: {
+        currentVersion: '0.1.0',
+        state: {
+          kind: 'available', version: '0.2.0',
+          notesUrl: 'https://github.com/115dkk/Open-Mobile-Emulator/releases/tag/v0.2.0',
+        },
+      },
     },
   },
   {

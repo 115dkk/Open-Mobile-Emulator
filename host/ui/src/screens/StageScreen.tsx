@@ -2,14 +2,15 @@
 // Copyright (C) 2026 Open Mobile Emulator contributors
 // Stage (M2-SCREENS.md 2): a toolbar, the stage where Rust places the operating system's window, and a
 // status bar. Which buttons exist follows the guest state and the capability probe in the snapshot;
-// whether a command succeeds is Rust's call. Volume and marker visibility have no command in the
-// contract yet, so they have no button (absent, not disabled).
+// whether a command succeeds is Rust's call. Marker visibility is a view setting and stays in every
+// state; volume needs a running system whose probe found the media volume and reported its value.
+import { useId, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { ScreenActions, ScreenProps } from '../actions';
 import type {
   AppSnapshot, Capability, CapabilityId, DisplayPreset, DisplayView, ExitKind, GuestView, LastExit, Size,
 } from '../contracts';
-import { Button, Icon, IconButton, IssueNotice, StageFrame, StatusDot, StepList } from '../components';
+import { Button, Icon, IconButton, IssueNotice, Slider, StageFrame, StatusDot, StepList } from '../components';
 import { formatTimestamp } from '../format';
 import { GUEST_STATE_LABEL, GUEST_STATE_TONE, bootSteps } from '../presentation';
 
@@ -77,15 +78,63 @@ function PresetSelect({ display, guest, onApply }: PresetSelectProps) {
   );
 }
 
+/** The media volume index range of `guest_volume_set` (ARCHITECTURE.md 8.7). */
+const MEDIA_VOLUME_MAX = 15;
+
+/**
+ * `볼륨`: a disclosure button whose slider opens inline in the toolbar row, because a panel under the
+ * toolbar would sit behind the operating system's native window. Every step is sent at once so the
+ * change is audible while dragging; the draft keeps the thumb in place until the snapshot follows.
+ */
+function VolumeControl({ volume, onSet }: { readonly volume: number; readonly onSet: ScreenActions['guestVolumeSet'] }) {
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState<number | null>(null);
+  const sliderId = useId();
+  return (
+    <>
+      <button
+        type="button"
+        className="ome-icon-button ome-stage-volume-toggle"
+        aria-label="볼륨"
+        title="볼륨"
+        aria-expanded={open}
+        aria-controls={open ? sliderId : undefined}
+        onClick={() => { setOpen(!open); }}
+      >
+        <Icon name="volume" size={20} />
+      </button>
+      {open && (
+        <div id={sliderId} className="ome-stage-volume">
+          <Slider
+            label="미디어 볼륨"
+            min={0}
+            max={MEDIA_VOLUME_MAX}
+            value={draft ?? volume}
+            format={String}
+            onChange={(next) => {
+              setDraft(next);
+              void onSet(next);
+            }}
+            onCommit={() => { setDraft(null); }}
+          />
+        </div>
+      )}
+    </>
+  );
+}
+
 function StageToolbar({ snapshot, actions }: ScreenProps) {
   const { guest, display, input } = snapshot;
   const running = guest.state === 'running';
   const screenshot = running && capability(guest, 'screenshot') !== 'unavailable';
+  const volume = running && capability(guest, 'mediaVolume') === 'available' ? guest.mediaVolume : null;
   return (
     <div className="ome-stage-toolbar" role="group" aria-label="무대 도구">
       {screenshot && <IconButton icon="camera" label="스크린샷" onClick={actions.screenshotSave} />}
-      {screenshot && display.presets.length > 0 && <span className="ome-stage-toolbar-divider" aria-hidden="true" />}
+      {volume !== null && <VolumeControl volume={volume} onSet={actions.guestVolumeSet} />}
+      {(screenshot || volume !== null) && <span className="ome-stage-toolbar-divider" aria-hidden="true" />}
       <PresetSelect display={display} guest={guest} onApply={actions.displayPresetApply} />
+      <IconButton icon="eye" label="매핑 표시" pressed={input.overlayVisible} onClick={actions.inputOverlayToggle} />
       {running && (
         <IconButton icon="pencil" label="매핑 편집" pressed={input.editing} onClick={actions.inputEditorToggle} />
       )}

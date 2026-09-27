@@ -2,6 +2,8 @@
 // Copyright (C) 2026 Open Mobile Emulator contributors
 // First-run wizard (M2-SCREENS.md 1). Rust owns the step order and whether each button may act;
 // this screen reads `wizard.step`, `wizard.canContinue` and `wizard.canSkip` and sends commands.
+// `나중에 하기` on every step, and S1.2's way out, send `wizard_defer`: Rust keeps the step and opens
+// the stage.
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import type { ScreenActions, ScreenProps } from '../actions';
@@ -60,11 +62,13 @@ interface LayoutProps {
   readonly issue: AppIssue | null;
   readonly children: ReactNode;
   readonly footer?: ReactNode;
+  /** `나중에 하기` at the footer's start: closes the wizard and keeps this step (every step but `done`). */
+  readonly onDefer?: (() => Promise<void>) | undefined;
   /** Stage on the left, guidance on the right (S1.5 after the disk exists, S1.6). */
   readonly wide?: boolean | undefined;
 }
 
-function WizardLayout({ issue, children, footer, wide = false }: LayoutProps) {
+function WizardLayout({ issue, children, footer, onDefer, wide = false }: LayoutProps) {
   return (
     <>
       <main className={wide ? 'ome-wizard-body ome-wizard-body-wide' : 'ome-wizard-body'}>
@@ -73,9 +77,10 @@ function WizardLayout({ issue, children, footer, wide = false }: LayoutProps) {
           {wide ? <div className="ome-wizard-wide-row">{children}</div> : children}
         </div>
       </main>
-      {footer !== undefined && (
+      {(footer !== undefined || onDefer !== undefined) && (
         <footer className="ome-wizard-footer">
-          <div className="ome-wizard-footer-actions">{footer}</div>
+          {onDefer !== undefined && <Button size="large" variant="ghost" onClick={onDefer}>나중에 하기</Button>}
+          {footer !== undefined && <div className="ome-wizard-footer-actions">{footer}</div>}
         </footer>
       )}
     </>
@@ -93,6 +98,7 @@ function HostCheckStep({ snapshot, actions }: StepProps) {
   return (
     <WizardLayout
       issue={snapshot.issue}
+      onDefer={actions.wizardDefer}
       footer={<>
         <Button size="large" icon="refresh" onClick={actions.hostCheckRefresh}>다시 확인</Button>
         <Button size="large" variant="primary" disabled={!wizard.canContinue} onClick={actions.wizardContinue}>계속</Button>
@@ -123,15 +129,16 @@ function HostCheckStep({ snapshot, actions }: StepProps) {
 }
 
 function WhpxConsentStep({ snapshot, actions }: StepProps) {
-  const { canSkip } = snapshot.wizard;
-  // Leaving consent is a skip; Rust reports whether this step may be skipped.
-  useEscapeKey(canSkip ? () => { void actions.wizardSkip(); } : null);
+  // Leaving consent is always possible: the wizard stays at this step and the stage reports the
+  // hypervisor blocker, so the way out does not depend on `canSkip`.
+  useEscapeKey(() => { void actions.wizardDefer(); });
   return (
     <WizardLayout
       issue={snapshot.issue}
+      onDefer={actions.wizardDefer}
       footer={<>
-        {canSkip && <p className="ome-footer-note">{ESC_LINE}</p>}
-        {canSkip && <Button size="large" onClick={actions.wizardSkip}>지금은 건너뛰기</Button>}
+        <p className="ome-footer-note">{ESC_LINE}</p>
+        <Button size="large" onClick={actions.wizardDefer}>지금은 건너뛰기</Button>
         <Button size="large" variant="primary" onClick={actions.whpxEnable}>활성화</Button>
       </>}
     >
@@ -140,9 +147,13 @@ function WhpxConsentStep({ snapshot, actions }: StepProps) {
   );
 }
 
-function RebootPendingStep({ snapshot }: StepProps) {
+function RebootPendingStep({ snapshot, actions }: StepProps) {
   return (
-    <WizardLayout issue={snapshot.issue}>
+    <WizardLayout
+      issue={snapshot.issue}
+      onDefer={actions.wizardDefer}
+      footer={<Button size="large" variant="primary" onClick={actions.appQuit}>닫기</Button>}
+    >
       <h1 className="ome-page-title">하이퍼바이저를 활성화했습니다.</h1>
       <p className="ome-lead">PC를 다시 시작한 뒤 앱을 다시 열면 이어서 진행합니다.</p>
     </WizardLayout>
@@ -228,7 +239,7 @@ function ArtifactDownloadStep({ snapshot, actions }: StepProps) {
   }
 
   return (
-    <WizardLayout issue={snapshot.issue} footer={footer}>
+    <WizardLayout issue={snapshot.issue} onDefer={actions.wizardDefer} footer={footer}>
       <h1 className="ome-page-title">운영체제 이미지 다운로드</h1>
       <p className="ome-lead">운영체제 이미지를 공식 배포처에서 다운로드합니다. 연결이 끊겨도 다시 이어받을 수 있습니다.</p>
       {images.profiles.length > 0 && (
@@ -287,6 +298,7 @@ function GuestInstallStep({ snapshot, actions }: StepProps) {
     return (
       <WizardLayout
         issue={snapshot.issue}
+        onDefer={actions.wizardDefer}
         footer={
           <Button
             size="large"
@@ -323,6 +335,7 @@ function GuestInstallStep({ snapshot, actions }: StepProps) {
     <WizardLayout
       wide
       issue={snapshot.issue}
+      onDefer={actions.wizardDefer}
       footer={<Button size="large" variant="primary" disabled={!wizard.canContinue} onClick={actions.wizardContinue}>설치 완료</Button>}
     >
       <StageFrame onRect={actions.stageRectChanged}>
@@ -378,6 +391,7 @@ function FirstBootStep({ snapshot, actions }: StepProps) {
     <WizardLayout
       wide
       issue={snapshot.issue}
+      onDefer={actions.wizardDefer}
       footer={(running || wizard.canContinue) ? <>
         {running && <Button size="large" onClick={actions.guestStop}>취소</Button>}
         {wizard.canContinue && <Button size="large" variant="primary" onClick={actions.wizardContinue}>다음</Button>}
@@ -404,6 +418,7 @@ function AppInstallStep({ snapshot, actions }: StepProps) {
   return (
     <WizardLayout
       issue={snapshot.issue}
+      onDefer={actions.wizardDefer}
       footer={<>
         {wizard.canSkip && <Button size="large" onClick={actions.wizardSkip}>건너뛰기</Button>}
         <Button size="large" variant="primary" disabled={!wizard.canContinue} onClick={actions.wizardContinue}>완료</Button>

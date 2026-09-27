@@ -95,6 +95,7 @@ export function AppsScreen({ snapshot, actions }: ScreenProps) {
             <span><span className="ome-mono">{install.label}</span> 설치 중</span>
             <div className="ome-install-bar"><ProgressBar value={ratio} label="설치 진행률" size="thin" /></div>
             {ratio !== null && <span className="ome-readout">{formatPercent(ratio)}</span>}
+            <Button onClick={actions.appInstallCancel}>취소</Button>
           </div>
         )}
         <div className={apps.available ? 'ome-apps-list' : 'ome-apps-list ome-apps-list-stale'}>

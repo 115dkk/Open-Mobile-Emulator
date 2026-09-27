@@ -2,8 +2,8 @@
 // Copyright (C) 2026 Open Mobile Emulator contributors
 // Settings screen (M2-SCREENS.md 6, mockup S6): section titles over setting rows, no cards. Limits
 // come from Rust (`memoryMibMin/Max`, `vcpusMax`); every change is sent as a whole `SettingsInput` or
-// as its own command. Actions without a command yet (opening the home folder, third-party notices,
-// the virtual machine source, release notes, copying to the clipboard) have no button.
+// as its own command. The webview knows no URL and copies no text itself: help pages, notices and
+// release notes go through `open_help`, and `복사` names a snapshot value that Rust copies.
 import { useEffect, useEffectEvent, useId, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { ScreenActions, ScreenProps } from '../actions';
@@ -11,7 +11,7 @@ import type {
   AppSnapshot, CloseAction, GuestSummary, NoticeLevel, SettingsInput, SettingsView, UpdateView,
 } from '../contracts';
 import {
-  Button, Dialog, Icon, IssueNotice, ProgressBar, ScreenHeader, Segmented, Select, SettingRow, Slider, Toggle,
+  Button, Dialog, Icon, IconButton, IssueNotice, ProgressBar, ScreenHeader, Segmented, Select, SettingRow, Slider, Toggle,
 } from '../components';
 import type { IconName } from '../components';
 import { formatBytes, formatGib, formatPercent, formatTimestamp } from '../format';
@@ -266,6 +266,7 @@ function GoogleSection({ snapshot, actions }: SectionProps) {
         이 운영체제는 Google 인증 기기가 아닙니다. Google 계정으로 로그인하려면 기기 ID를 Google에 한 번 등록해야 합니다.
       </p>
       <SettingRow label="기기 ID" help={<span className="ome-mono ome-settings-value">{guest.deviceId}</span>}>
+        <IconButton icon="copy" label="복사" onClick={() => actions.copyToClipboard('deviceId')} />
         <Button icon="external-link" onClick={actions.openRegistrationPage}>등록 페이지 열기</Button>
       </SettingRow>
       <p className="ome-settings-note">등록해도 Play 스토어와 인앱 결제는 보장되지 않습니다.</p>
@@ -330,6 +331,10 @@ function AdvancedSection({ snapshot, actions, save }: SectionProps) {
         help="adb로 연결한 프로그램은 운영체제 안의 모든 앱과 데이터를 다룰 수 있습니다. 신뢰하는 프로그램만 연결하십시오."
       >
         {guest.adbAddress !== null && <span className="ome-mono ome-settings-value">{guest.adbAddress}</span>}
+        {guest.adbAddress !== null && (
+          <IconButton icon="copy" label="복사" onClick={() => actions.copyToClipboard('adbAddress')} />
+        )}
+        <Button variant="ghost" icon="external-link" onClick={() => actions.openHelp('adbSecurity')}>도움말</Button>
       </SettingRow>
       <SettingRow
         label="다른 PC에서 연결 허용"
@@ -369,7 +374,7 @@ function AdvancedSection({ snapshot, actions, save }: SectionProps) {
 
 // ---- 저장 위치 ----
 
-function StorageSection({ snapshot }: SectionProps) {
+function StorageSection({ snapshot, actions }: SectionProps) {
   const { settings } = snapshot;
   return (
     <Section title="저장 위치">
@@ -381,6 +386,7 @@ function StorageSection({ snapshot }: SectionProps) {
         {settings.diskUsageBytes !== null && (
           <span className="ome-muted">사용 중 <span className="ome-readout">{formatBytes(settings.diskUsageBytes)}</span></span>
         )}
+        {settings.homeDir !== '' && <Button icon="folder-open" onClick={actions.openHomeFolder}>폴더 열기</Button>}
       </SettingRow>
     </Section>
   );
@@ -411,9 +417,13 @@ function NewVersionRow({ update, actions }: { readonly update: UpdateView; reado
   const { state } = update;
   switch (state.kind) {
     case 'available':
+      // The version sits on the help line so the fixed control column holds both buttons. Rust opens
+      // `notesUrl`; without one there is nothing to open and no button.
       return (
-        <SettingRow label="새 버전">
-          <span className="ome-readout">{state.version}</span>
+        <SettingRow label="새 버전" help={<span className="ome-readout">{state.version}</span>}>
+          {state.notesUrl !== null && (
+            <Button variant="ghost" icon="external-link" onClick={() => actions.openHelp('releaseNotes')}>릴리스 노트</Button>
+          )}
           <Button variant="primary" icon="download" onClick={actions.updateInstall}>다운로드 후 설치</Button>
         </SettingRow>
       );
@@ -429,8 +439,7 @@ function NewVersionRow({ update, actions }: { readonly update: UpdateView; reado
     }
     case 'readyToInstall':
       return (
-        <SettingRow label="새 버전">
-          <span className="ome-readout">{state.version}</span>
+        <SettingRow label="새 버전" help={<span className="ome-readout">{state.version}</span>}>
           <Button variant="primary" onClick={actions.updateInstall}>설치</Button>
         </SettingRow>
       );
@@ -500,10 +509,15 @@ function DiagnosticsSection({ snapshot, actions }: SectionProps) {
 
 // ---- 정보 ----
 
-function AboutSection({ snapshot }: SectionProps) {
+function AboutSection({ snapshot, actions }: SectionProps) {
   return (
     <Section title="정보">
-      <SettingRow label="Open Mobile Emulator" help={`버전 ${snapshot.productVersion} · GPL-2.0-or-later`} />
+      <SettingRow label="Open Mobile Emulator" help={`버전 ${snapshot.productVersion} · GPL-2.0-or-later`}>
+        <Button variant="ghost" icon="external-link" onClick={() => actions.openHelp('thirdPartyNotices')}>제3자 고지</Button>
+      </SettingRow>
+      <SettingRow label="가상 머신 소스 코드" help="이 앱에 포함된 가상 머신 프로그램의 소스 코드를 받을 수 있습니다.">
+        <Button variant="ghost" icon="external-link" onClick={() => actions.openHelp('qemuSource')}>소스 코드 받기</Button>
+      </SettingRow>
     </Section>
   );
 }

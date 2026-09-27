@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Copyright (C) 2026 Open Mobile Emulator contributors
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import type { AppSnapshot, SettingsInput } from '../contracts';
@@ -52,12 +52,10 @@ describe('settings screen (S6): layout', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('다시 시도하십시오.');
   });
 
-  it('has no buttons for actions without a command', () => {
+  it('has no way to set up again from the beginning', () => {
     show(variant('settings-running'));
-    for (const name of ['폴더 열기', '제3자 고지', '소스 코드 받기', '복사', '처음부터 다시 설정']) {
-      expect(screen.queryByRole('button', { name })).toBeNull();
-      expect(screen.queryByRole('link', { name })).toBeNull();
-    }
+    expect(screen.queryByRole('button', { name: '처음부터 다시 설정' })).toBeNull();
+    expect(screen.queryByRole('link', { name: '처음부터 다시 설정' })).toBeNull();
   });
 });
 
@@ -175,6 +173,13 @@ describe('settings screen (S6): Google 계정', () => {
     await userEvent.click(within(google).getByRole('button', { name: '등록 페이지 열기' }));
     expect(actions.openRegistrationPage).toHaveBeenCalledOnce();
   });
+
+  it('copies the device ID through Rust', async () => {
+    const actions = show(variant('settings-running'));
+    await userEvent.click(within(section('Google 계정')).getByRole('button', { name: '복사' }));
+    expect(actions.copyToClipboard).toHaveBeenCalledOnce();
+    expect(actions.copyToClipboard).toHaveBeenCalledWith('deviceId');
+  });
 });
 
 describe('settings screen (S6): 입력', () => {
@@ -219,6 +224,22 @@ describe('settings screen (S6): 고급', () => {
     expect(actions.settingsSave).toHaveBeenLastCalledWith({ ...saved, adbAccess: 'network' });
   });
 
+  it('copies the adb address and opens the adb help page', async () => {
+    const actions = show(variant('settings-stopped'));
+    const advanced = section('고급');
+    await userEvent.click(within(advanced).getByRole('button', { name: '복사' }));
+    expect(actions.copyToClipboard).toHaveBeenCalledWith('adbAddress');
+    await userEvent.click(within(advanced).getByRole('button', { name: '도움말' }));
+    expect(actions.openHelp).toHaveBeenCalledWith('adbSecurity');
+  });
+
+  it('has no copy button without an adb address', () => {
+    const snapshot = variant('settings-stopped');
+    show({ ...snapshot, guest: { ...snapshot.guest, adbAddress: null } });
+    expect(within(section('고급')).queryByRole('button', { name: '복사' })).toBeNull();
+    expect(within(section('고급')).getByRole('button', { name: '도움말' })).toBeInTheDocument();
+  });
+
   it('warns while other PCs may connect', () => {
     show(variant('settings-network'));
     expect(screen.getByText('같은 네트워크의 누구나 이 운영체제에 접근할 수 있습니다.')).toBeInTheDocument();
@@ -256,6 +277,12 @@ describe('settings screen (S6): 저장 위치, 업데이트, 진단, 정보', ()
     expect(within(storage).getByText('38.2 GB')).toBeInTheDocument();
   });
 
+  it('opens the home folder', async () => {
+    const actions = show(variant('settings-stopped'));
+    await userEvent.click(within(section('저장 위치')).getByRole('button', { name: '폴더 열기' }));
+    expect(actions.openHomeFolder).toHaveBeenCalledOnce();
+  });
+
   it('checks for updates and switches the automatic check', async () => {
     const actions = show(variant('settings-stopped'));
     const update = section('업데이트');
@@ -282,6 +309,17 @@ describe('settings screen (S6): 저장 위치, 업데이트, 진단, 정보', ()
     expect(within(update).getByText('0.2.0')).toBeInTheDocument();
     await userEvent.click(within(update).getByRole('button', { name: '다운로드 후 설치' }));
     expect(actions.updateInstall).toHaveBeenCalledOnce();
+  });
+
+  it('opens the release notes of the new version, and has no link without them', async () => {
+    const actions = show(variant('settings-network'));
+    await userEvent.click(within(section('업데이트')).getByRole('button', { name: '릴리스 노트' }));
+    expect(actions.openHelp).toHaveBeenCalledWith('releaseNotes');
+    cleanup();
+    const snapshot = variant('settings-network');
+    show({ ...snapshot, update: { currentVersion: '0.1.0', state: { kind: 'available', version: '0.2.0', notesUrl: null } } });
+    expect(within(section('업데이트')).queryByRole('button', { name: '릴리스 노트' })).toBeNull();
+    expect(within(section('업데이트')).getByRole('button', { name: '다운로드 후 설치' })).toBeInTheDocument();
   });
 
   it('shows download progress and the ready state', async () => {
@@ -323,5 +361,17 @@ describe('settings screen (S6): 저장 위치, 업데이트, 진단, 정보', ()
     const about = section('정보');
     expect(within(about).getByText('Open Mobile Emulator')).toBeInTheDocument();
     expect(within(about).getByText('버전 0.1.0 · GPL-2.0-or-later')).toBeInTheDocument();
+  });
+
+  it('opens the third-party notices and the virtual machine source', async () => {
+    const actions = show(variant('settings-stopped'));
+    const about = section('정보');
+    expect(within(about).getByText('가상 머신 소스 코드')).toBeInTheDocument();
+    expect(within(about).getByText('이 앱에 포함된 가상 머신 프로그램의 소스 코드를 받을 수 있습니다.')).toBeInTheDocument();
+    await userEvent.click(within(about).getByRole('button', { name: '제3자 고지' }));
+    expect(actions.openHelp).toHaveBeenLastCalledWith('thirdPartyNotices');
+    await userEvent.click(within(about).getByRole('button', { name: '소스 코드 받기' }));
+    expect(actions.openHelp).toHaveBeenLastCalledWith('qemuSource');
+    expect(actions.openHelp).toHaveBeenCalledTimes(2);
   });
 });

@@ -97,7 +97,13 @@ describe('apps: running operating system', () => {
     expect(screen.getByText('sample-app-d.xapk').parentElement).toHaveTextContent('sample-app-d.xapk 설치 중');
     expect(screen.getByRole('progressbar', { name: '설치 진행률' })).toHaveAttribute('aria-valuenow', '41');
     expect(screen.getByText('41%')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: '취소' })).toBeNull();
+  });
+
+  it('cancels the install from the install line', async () => {
+    const actions = show(variant('apps-installing'));
+    await userEvent.click(screen.getByRole('button', { name: '취소' }));
+    expect(actions.appInstallCancel).toHaveBeenCalledOnce();
+    expect(actions.appUninstall).not.toHaveBeenCalled();
   });
 
   it('says there are no apps', () => {

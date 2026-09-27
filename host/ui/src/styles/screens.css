@@ -574,6 +574,19 @@
   margin-left: auto;
 }
 
+/* 볼륨: the slider opens inside the toolbar row, since nothing may hang below it (see the preset). */
+
+.ome-stage-volume {
+  display: flex;
+  flex: none;
+  align-items: center;
+  width: 160px;
+}
+
+.ome-stage-volume-toggle[aria-expanded="true"] {
+  background-color: var(--accent-soft);
+}
+
 /* Display preset: a native select drawn as a quiet toolbar button (icon, size, chevron). */
 
 .ome-stage-preset {

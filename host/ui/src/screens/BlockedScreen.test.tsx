@@ -30,6 +30,13 @@ describe('blocked screen (S8)', () => {
     expect(actions.hostCheckRefresh).toHaveBeenCalledOnce();
   });
 
+  it('opens the BIOS help page from 켜는 방법', async () => {
+    const actions = show(variant('blocked-virtualization'));
+    await userEvent.click(screen.getByRole('button', { name: '켜는 방법' }));
+    expect(actions.openHelp).toHaveBeenCalledWith('virtualizationBios');
+    expect(actions.hostCheckRefresh).not.toHaveBeenCalled();
+  });
+
   it('asks for a reinstall when the virtual machine components are missing', async () => {
     const actions = show(variant('blocked-qemu'));
     expect(screen.getByRole('heading', { level: 1, name: '가상 머신 구성 요소를 찾을 수 없습니다.' })).toBeInTheDocument();

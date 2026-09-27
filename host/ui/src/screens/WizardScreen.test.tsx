@@ -20,6 +20,18 @@ function show(snapshot: AppSnapshot) {
   return actions;
 }
 
+describe('first-run wizard: 나중에 하기', () => {
+  it.each([
+    'host-ready', 'whpx-consent', 'reboot-pending', 'download-idle', 'download-transferring',
+    'install-disk', 'install-guide', 'first-boot', 'app-install',
+  ])('%s closes the wizard and keeps the step', async (id) => {
+    const actions = show(variant(id));
+    await userEvent.click(screen.getByRole('button', { name: '나중에 하기' }));
+    expect(actions.wizardDefer).toHaveBeenCalledOnce();
+    expect(actions.wizardSkip).not.toHaveBeenCalled();
+  });
+});
+
 describe('first-run wizard: S1.1 host check', () => {
   it('states the verdict, the six rows with Rust sentences and the check time', () => {
     show(variant('host-ready'));
@@ -70,20 +82,14 @@ describe('first-run wizard: S1.2 hypervisor consent', () => {
     expect(actions.whpxEnable).toHaveBeenCalledOnce();
   });
 
-  it('offers no way to skip while Rust says the step cannot be skipped', () => {
-    const actions = show(variant('whpx-consent'));
-    expect(screen.queryByRole('button', { name: '지금은 건너뛰기' })).toBeNull();
-    fireEvent.keyDown(document, { key: 'Escape' });
-    expect(actions.wizardSkip).not.toHaveBeenCalled();
-  });
-
-  it('leaves by button or Esc when Rust allows skipping, and says so', async () => {
+  it.each([false, true])('leaves by button or Esc and says so, whatever canSkip is (%s)', async (canSkip) => {
     const snapshot = variant('whpx-consent');
-    const actions = show({ ...snapshot, wizard: { ...snapshot.wizard, canSkip: true } });
+    const actions = show({ ...snapshot, wizard: { ...snapshot.wizard, canSkip } });
     expect(screen.getByText('Esc 키로도 나갈 수 있습니다.')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: '지금은 건너뛰기' }));
     fireEvent.keyDown(document, { key: 'Escape' });
-    expect(actions.wizardSkip).toHaveBeenCalledTimes(2);
+    expect(actions.wizardDefer).toHaveBeenCalledTimes(2);
+    expect(actions.wizardSkip).not.toHaveBeenCalled();
   });
 });
 
@@ -92,7 +98,13 @@ describe('first-run wizard: S1.3 restart', () => {
     show(variant('reboot-pending'));
     expect(screen.getByText('하이퍼바이저를 활성화했습니다.')).toBeInTheDocument();
     expect(screen.getByText('PC를 다시 시작한 뒤 앱을 다시 열면 이어서 진행합니다.')).toBeInTheDocument();
-    expect(screen.queryAllByRole('button')).toHaveLength(0);
+  });
+
+  it('closes the app with 닫기 and offers no restart button', async () => {
+    const actions = show(variant('reboot-pending'));
+    expect(screen.getAllByRole('button').map((button) => button.textContent)).toEqual(['나중에 하기', '닫기']);
+    await userEvent.click(screen.getByRole('button', { name: '닫기' }));
+    expect(actions.appQuit).toHaveBeenCalledOnce();
   });
 });
 

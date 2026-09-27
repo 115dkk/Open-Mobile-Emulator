@@ -47,6 +47,7 @@ export function BlockedScreen({ snapshot, actions }: ScreenProps) {
           <h1 className="ome-page-title">이 PC의 BIOS 설정에서 가상화가 꺼져 있습니다.</h1>
           <p className="ome-lead">PC를 다시 시작해 BIOS 설정에서 가상화(Intel VT-x 또는 AMD-V)를 켠 뒤 이 앱을 다시 여십시오.</p>
           <div className="ome-blocked-actions">
+            <Button size="large" icon="external-link" onClick={() => actions.openHelp('virtualizationBios')}>켜는 방법</Button>
             <Button size="large" variant="primary" icon="refresh" onClick={actions.hostCheckRefresh}>다시 확인</Button>
           </div>
           <p className="ome-caption">BIOS 메뉴 이름은 PC 제조사마다 다릅니다.</p>
