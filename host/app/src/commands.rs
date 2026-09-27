@@ -62,11 +62,16 @@ pub(crate) async fn apply(
     tauri::async_runtime::spawn_blocking(move || {
         let _lease = lease;
         let mut guard = runtime.lock().map_err(|_| worker_issue())?;
-        let snapshot = match &mut *guard {
-            Ok(runtime) => runtime.apply(command)?,
+        let (snapshot, guest_rect) = match &mut *guard {
+            Ok(runtime) => {
+                let snapshot = runtime.apply(command)?;
+                let guest_rect = runtime.guest_client_screen_rect();
+                (snapshot, guest_rect)
+            }
             Err(issue) => return Err(issue.clone()),
         };
-        events::snapshot(&app, &snapshot);
+        drop(guard);
+        events::snapshot(&app, &snapshot, guest_rect);
         Ok(snapshot)
     })
     .await
@@ -176,11 +181,16 @@ pub(crate) async fn install_native_paths(
     tauri::async_runtime::spawn_blocking(move || {
         let _lease = lease;
         let mut guard = runtime.lock().map_err(|_| worker_issue())?;
-        let snapshot = match &mut *guard {
-            Ok(runtime) => runtime.install_apps(paths)?,
+        let (snapshot, guest_rect) = match &mut *guard {
+            Ok(runtime) => {
+                let snapshot = runtime.install_apps(paths)?;
+                let guest_rect = runtime.guest_client_screen_rect();
+                (snapshot, guest_rect)
+            }
             Err(issue) => return Err(issue.clone()),
         };
-        events::snapshot(&app, &snapshot);
+        drop(guard);
+        events::snapshot(&app, &snapshot, guest_rect);
         Ok(snapshot)
     })
     .await
@@ -314,7 +324,10 @@ pub(crate) async fn stage_rect_changed(
     state: State<'_, ShellState>,
     rect: StageRect,
 ) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::StageRectChanged { rect }).await
+    let snapshot = apply(app.clone(), &state, Command::StageRectChanged { rect }).await?;
+    crate::overlay::remember_stage_rect(&app, rect);
+    crate::overlay::refresh(&app);
+    Ok(snapshot)
 }
 #[tauri::command]
 pub(crate) async fn app_uninstall(

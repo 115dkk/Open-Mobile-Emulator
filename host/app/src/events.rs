@@ -3,10 +3,15 @@
 use ome_runtime::{AppSnapshot, EVENT_SNAPSHOT};
 use tauri::Emitter;
 
-pub(crate) fn snapshot(app: &tauri::AppHandle, snapshot: &AppSnapshot) {
+pub(crate) fn snapshot(
+    app: &tauri::AppHandle,
+    snapshot: &AppSnapshot,
+    guest_rect: Option<ome_runtime::Rect>,
+) {
     // A delivery error does not undo a completed native operation. Its caller
     // also receives the snapshot as the command result.
     if let Err(error) = app.emit(EVENT_SNAPSHOT, snapshot) {
         eprintln!("snapshot event delivery failed: {error}");
     }
+    crate::overlay::snapshot(app, snapshot, guest_rect);
 }

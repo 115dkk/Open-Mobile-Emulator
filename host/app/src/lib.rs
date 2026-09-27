@@ -6,6 +6,9 @@ mod admission;
 mod commands;
 mod desktop;
 mod events;
+mod overlay;
+#[cfg(debug_assertions)]
+mod overlay_check;
 mod setup;
 mod tray;
 mod window;
@@ -132,12 +135,13 @@ fn start_event_pump(app: tauri::AppHandle, shell: commands::ShellState) {
                 }
                 let update_exit = runtime.take_update_exit_requested();
                 let after = runtime.snapshot();
+                let guest_rect = runtime.guest_client_screen_rect();
                 drop(guard);
                 if update_exit {
                     commands::request_app_exit(&app, &shell);
                 }
                 if after != before {
-                    events::snapshot(&app, &after);
+                    events::snapshot(&app, &after, guest_rect);
                     tray::update_power_label(&app, after.guest.state);
                 }
                 let exit_requested = shell
@@ -180,6 +184,7 @@ pub fn run() {
             let shell = commands::ShellState::new(initialize_runtime(&manifest_root));
             app.manage(shell.clone());
             window::install(app)?;
+            overlay::install(app)?;
             #[cfg(windows)]
             if let Some(main) = app.get_webview_window("main") {
                 let raw = main.hwnd()?.0 as usize as u64;
@@ -195,7 +200,11 @@ pub fn run() {
             tray::install(app)?;
             #[cfg(windows)]
             window::keep_dpi_guard(dpi_guard);
-            start_event_pump(app.handle().clone(), shell);
+            start_event_pump(app.handle().clone(), shell.clone());
+            #[cfg(debug_assertions)]
+            if overlay_check::requested() {
+                overlay_check::start(app.handle().clone(), shell);
+            }
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![

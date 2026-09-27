@@ -234,6 +234,19 @@ impl Child {
     }
 }
 
+/// One native client rectangle in physical screen pixels.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ScreenRect {
+    /// Horizontal screen coordinate.
+    pub x: i32,
+    /// Vertical screen coordinate.
+    pub y: i32,
+    /// Physical width.
+    pub width: u32,
+    /// Physical height.
+    pub height: u32,
+}
+
 /// Opaque numeric window token used to bridge differing `windows` crate versions.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct WindowHandle(isize);
@@ -399,6 +412,25 @@ impl WindowHandle {
         #[cfg(windows)]
         {
             ffi::window::client_size(self.0).map_err(PlatformError::Io)
+        }
+        #[cfg(not(windows))]
+        {
+            Err(PlatformError::Unsupported)
+        }
+    }
+
+    /// Returns the client rectangle in physical screen pixels.
+    pub fn client_screen_rect(self) -> Result<ScreenRect, PlatformError> {
+        #[cfg(windows)]
+        {
+            ffi::window::client_screen_rect(self.0)
+                .map(|(x, y, width, height)| ScreenRect {
+                    x,
+                    y,
+                    width,
+                    height,
+                })
+                .map_err(PlatformError::Io)
         }
         #[cfg(not(windows))]
         {

@@ -340,19 +340,23 @@ manifests/images/         게스트 이미지 프로필 JSON (3.15절). 산출�
 
 ### 3.17 ome-overlay
 
-- 인터페이스: `OverlayGeometry::for_stage(stage_rect_physical, guest_size) -> Rect`(순수. 무대 안의
-  게스트 화면 영역과 같다), `OverlayState { mode: Hidden | Showing | Editing, profile_id,
-  suspended }`, 편집 프로토콜: 오버레이 웹뷰는 편집 중인 바인딩을 초안으로 들고 있다가 `저장`에서
+- 순수 인터페이스는 `overlay_mode(&AppSnapshot) -> OverlayMode`, `overlay_rect(PhysicalRect) ->
+  PhysicalRect`, `placement(mode, Option<PhysicalRect>) -> OverlayPlacement`이다. 게스트가 실행 중이고
+  선택한 프로필이 실제 목록에 있으며 표지를 켰거나 편집 중일 때만 창을 보인다. 편집 프로토콜은
+  그대로다. 오버레이 웹뷰는 편집 중인 바인딩을 초안으로 들고 있다가 `저장`에서
   `input_profile_save { profile }` 하나로 보낸다. Rust가 프로필 전체를 한 번에 검증하므로 두 표지의
-  키를 맞바꾸는 편집도 중간 상태 없이 들어간다(바인딩 하나씩 `input_binding_upsert`로 보내면 첫
-  번째가 키 중복으로 거부된다). 그 밖에 보내는 명령은 `input_editor_toggle`뿐이고 좌표는 논리
-  좌표로 온다. `input_binding_upsert`와 `input_binding_remove`는 레일의 입력 화면이 쓴다.
-- 뒤에 숨는 것: 두 번째 Tauri 창(투명, 장식 없음, `main` 소유)을 무대에 맞춰 놓는 일, 편집 모드
-  밖의 클릭 통과, 무대가 움직이거나 크기가 바뀔 때의 재배치(창 담기와 같은 `StageRect` 신호를
-  받는다), 게스트가 꺼지면 숨김.
+  키를 맞바꾸는 편집도 중간 상태 없이 들어간다. 그 밖에 보내는 명령은 `input_editor_toggle`뿐이고
+  좌표는 논리 좌표로 온다. `input_binding_upsert`와 `input_binding_remove`는 레일의 입력 화면이 쓴다.
+- `host/app/src/overlay.rs`가 `overlay.html`을 여는 두 번째 Tauri 창을 처음 필요할 때 만든다. 이 창은
+  투명하고 장식과 그림자와 작업 표시줄 항목이 없으며 `main`이 소유한다. 붙인 SDL 자식의 클라이언트
+  사각형을 화면 물리 픽셀로 읽어 같은 자리에 놓고, 읽지 못하면 `main`의 클라이언트 원점과 마지막
+  `StageRect`를 사용한다. 편집 밖에서는 클릭을 통과시키고, 편집에 들어갈 때 오버레이로 포커스를
+  옮기며 나올 때 `main`으로 돌린다. 같은 배치를 되풀이하지 않는다. `main`이 최소화되거나 숨으면
+  소유 창도 숨고, 창 이동·크기·배율·포커스 이벤트와 모든 새 스냅숏에서 배치를 다시 계산한다.
 - 표지의 그림은 오버레이 웹뷰(HTML/CSS)가 그린다. 글자는 어떤 게임 화면 위에서도 읽히도록
   어두운 배경 칩 위에 놓는다(DESIGN.md 9절).
-- 테스트 표면: 기하는 순수 테스트. 창 배치는 창 담기 스파이크와 함께 잰다.
+- 테스트 표면: 모드 표와 사각형·배치 규칙은 순수 단위 테스트로 검사한다. 실제 창의 좌표, 보임,
+  클릭 통과, 중지 때 숨김은 무시된 실제 게스트 테스트에서 잰다.
 
 ## 4. 데이터 흐름 두 가지
 

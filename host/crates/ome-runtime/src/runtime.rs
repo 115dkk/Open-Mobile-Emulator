@@ -46,7 +46,7 @@ use crate::{
     DisplayPreset, DisplayView, ExitKind, GuestImageSummary, GuestState, GuestSummary, GuestView,
     HelpTopic, HostCheckId, HostReport, HostRow, HostStatus, HostingMode, ImageDistribution,
     ImageStatus, ImageTranslator, ImagesView, InputView, InstallProgress, LastExit, Notice,
-    NoticeLevel, Orientation, SettingsView, Size, StageFit, StageRect, TransferProgress,
+    NoticeLevel, Orientation, Rect, SettingsView, Size, StageFit, StageRect, TransferProgress,
     TransferStage, UpdateAsset, UpdateState, UpdateView, VsyncMode, WizardStep, WizardView,
 };
 
@@ -122,6 +122,10 @@ pub trait WindowPlacement: Send {
     fn to_front(&mut self) -> Result<(), HostingIssue>;
     /// Reports live embedded state.
     fn is_attached(&self) -> bool;
+    /// Returns the hosted guest client rectangle in physical screen pixels when known.
+    fn client_screen_rect(&self) -> Option<Rect> {
+        None
+    }
 }
 
 impl WindowPlacement for GuestWindowHost {
@@ -139,6 +143,17 @@ impl WindowPlacement for GuestWindowHost {
     }
     fn is_attached(&self) -> bool {
         GuestWindowHost::is_attached(self)
+    }
+    fn client_screen_rect(&self) -> Option<Rect> {
+        let native = GuestWindowHost::guest_window(self)?
+            .client_screen_rect()
+            .ok()?;
+        Some(Rect {
+            x: native.x,
+            y: native.y,
+            width: native.width,
+            height: native.height,
+        })
     }
 }
 
@@ -1810,6 +1825,13 @@ impl AppRuntime {
         self.try_place_guest_window();
     }
 
+    /// Returns the attached guest client rectangle in physical screen pixels when known.
+    pub fn guest_client_screen_rect(&self) -> Option<Rect> {
+        (self.hosting == HostingMode::Embedded)
+            .then(|| self.deps.window_host.client_screen_rect())
+            .flatten()
+    }
+
     /// Subscribes to lifecycle events without exposing the concrete supervisor type.
     pub fn subscribe_guest_events(&self) -> Option<mpsc::Receiver<GuestEvent>> {
         self.deps.supervisor.as_deref().map(GuestProcess::subscribe)
@@ -3325,6 +3347,19 @@ mod tests {
         fn is_attached(&self) -> bool {
             *self.attached.lock().expect("attached lock")
         }
+
+        fn client_screen_rect(&self) -> Option<Rect> {
+            self.placements
+                .lock()
+                .expect("placements lock")
+                .last()
+                .map(|rect| Rect {
+                    x: rect.x,
+                    y: rect.y,
+                    width: rect.width,
+                    height: rect.height,
+                })
+        }
     }
 
     #[derive(Debug)]
@@ -4092,6 +4127,15 @@ mod tests {
         assert_eq!(runtime.snapshot().guest.hosting, HostingMode::Embedded);
         assert_eq!(targets.lock().expect("targets lock").len(), 1);
         assert_eq!(placements.lock().expect("placements lock").len(), 1);
+        assert_eq!(
+            runtime.guest_client_screen_rect(),
+            Some(Rect {
+                x: 2,
+                y: 3,
+                width: 450,
+                height: 300,
+            })
+        );
         runtime
             .apply(Command::StageRectChanged {
                 rect: StageRect {
@@ -4120,6 +4164,7 @@ mod tests {
             runtime.snapshot().guest.hosting,
             HostingMode::SeparateWindow
         );
+        assert_eq!(runtime.guest_client_screen_rect(), None);
         runtime
             .apply(Command::StageRectChanged { rect })
             .expect("keep separate placement");

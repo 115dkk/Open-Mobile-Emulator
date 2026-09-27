@@ -30,14 +30,21 @@ pub(crate) fn local_navigation(url: &tauri::Url) -> bool {
 }
 
 pub(crate) fn show_main(app: &tauri::AppHandle) {
-    if let Some(window) = app.get_webview_window("main")
-        && let Err(error) = window
+    if let Some(window) = app.get_webview_window("main") {
+        if let Err(error) = window
             .show()
             .and_then(|()| window.unminimize())
             .and_then(|()| window.set_focus())
-    {
-        eprintln!("main window could not be shown: {error}");
+        {
+            eprintln!("main window could not be shown: {error}");
+        }
+        refresh_overlay(app);
     }
+}
+
+fn refresh_overlay(app: &tauri::AppHandle) {
+    let app = app.clone();
+    tauri::async_runtime::spawn_blocking(move || crate::overlay::refresh(&app));
 }
 
 pub(crate) fn install(app: &tauri::App) -> tauri::Result<()> {
@@ -73,6 +80,7 @@ pub(crate) fn install(app: &tauri::App) -> tauri::Result<()> {
                 if let Err(error) = handle.hide() {
                     eprintln!("main window could not be hidden: {error}");
                 }
+                refresh_overlay(handle.app_handle());
             }
         }
         tauri::WindowEvent::DragDrop(tauri::DragDropEvent::Drop { paths, .. }) => {
@@ -86,6 +94,10 @@ pub(crate) fn install(app: &tauri::App) -> tauri::Result<()> {
                 }
             });
         }
+        tauri::WindowEvent::Moved(_)
+        | tauri::WindowEvent::Resized(_)
+        | tauri::WindowEvent::ScaleFactorChanged { .. }
+        | tauri::WindowEvent::Focused(_) => refresh_overlay(handle.app_handle()),
         _ => {}
     });
     Ok(())

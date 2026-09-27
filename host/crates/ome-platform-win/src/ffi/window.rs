@@ -10,8 +10,9 @@ use std::sync::Mutex;
 use std::sync::atomic::{AtomicI32, AtomicIsize, Ordering};
 
 use windows::Win32::Foundation::{
-    ERROR_SUCCESS, GetLastError, HWND, LPARAM, LRESULT, RECT, SetLastError, WPARAM,
+    ERROR_SUCCESS, GetLastError, HWND, LPARAM, LRESULT, POINT, RECT, SetLastError, WPARAM,
 };
+use windows::Win32::Graphics::Gdi::ClientToScreen;
 use windows::Win32::UI::HiDpi::{
     DPI_HOSTING_BEHAVIOR, DPI_HOSTING_BEHAVIOR_INVALID, DPI_HOSTING_BEHAVIOR_MIXED,
     GetDpiForWindow, SetThreadDpiHostingBehavior,
@@ -286,6 +287,28 @@ pub(crate) fn client_size(raw: isize) -> io::Result<(i32, i32)> {
     // for exactly one RECT and no pointer is retained after the synchronous call.
     unsafe { GetClientRect(window, &raw mut client) }.map_err(super::io_error)?;
     Ok((client.right - client.left, client.bottom - client.top))
+}
+
+pub(crate) fn client_screen_rect(raw: isize) -> io::Result<(i32, i32, u32, u32)> {
+    let window = hwnd(raw)?;
+    let mut client = RECT::default();
+    // SAFETY: window is a borrowed live HWND; client is aligned and writable for one RECT, and the
+    // synchronous call retains neither pointer nor handle ownership.
+    unsafe { GetClientRect(window, &raw mut client) }.map_err(super::io_error)?;
+    let width = u32::try_from(client.right - client.left)
+        .map_err(|_| io::Error::other("client width is negative"))?;
+    let height = u32::try_from(client.bottom - client.top)
+        .map_err(|_| io::Error::other("client height is negative"))?;
+    let mut origin = POINT {
+        x: client.left,
+        y: client.top,
+    };
+    // SAFETY: window is a borrowed live HWND and origin is one aligned, writable POINT. The API
+    // mutates only that point, performs no allocation, and retains no pointer or handle ownership.
+    if !unsafe { ClientToScreen(window, &raw mut origin) }.as_bool() {
+        return Err(io::Error::last_os_error());
+    }
+    Ok((origin.x, origin.y, width, height))
 }
 
 pub(crate) fn dpi(raw: isize) -> io::Result<u32> {

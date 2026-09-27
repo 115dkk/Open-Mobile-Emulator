@@ -34,6 +34,7 @@ ome-supervisor = { path = "../crates/ome-supervisor" }
 ome-artifacts = { path = "../crates/ome-artifacts" }
 ome-adb = { path = "../crates/ome-adb" }
 ome-window-host = { path = "../crates/ome-window-host" }
+ome-overlay = { path = "../crates/ome-overlay" }
 ome-host-check = { path = "../crates/ome-host-check" }
 arboard.workspace = true
 rfd = { version = "0.17.2", default-features = false, features = ["common-controls-v6"] }

@@ -26,7 +26,7 @@ function sameNames(actual, expected) {
 test('all registered commands have a capability grant', () => {
   assert.ok(names.length > 0);
   assert.equal(capability.identifier, 'main');
-  assert.deepEqual(capability.windows, ['main']);
+  assert.deepEqual(capability.windows, ['main', 'overlay']);
   assert.equal(capability.remote, undefined);
   for (const permission of allowed) assert.ok(capability.permissions.includes(permission), permission);
 });

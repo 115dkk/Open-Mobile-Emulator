@@ -108,6 +108,50 @@ impl RunClock {
 }
 
 #[test]
+#[ignore = "launches a prebuilt product app; requires an interactive Windows desktop, WHPX, QEMU, and the adopted default guest"]
+fn measures_real_overlay_window_through_product_app() {
+    let initial_processes = qemu_processes();
+    assert!(
+        initial_processes.is_empty(),
+        "QEMU was already running; overlay check did not start it: {initial_processes:?}"
+    );
+    let repository = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../..");
+    let executable = repository.join("host/target/debug/ome.exe");
+    assert!(
+        executable.is_file(),
+        "build the product app before running this check: {}",
+        executable.display()
+    );
+    let run = catch_unwind(AssertUnwindSafe(|| {
+        let output = ProcessCommand::new(&executable)
+            .arg("--real-overlay-window-check")
+            .output()
+            .expect("run product overlay check");
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        print!("{stdout}");
+        eprint!("{}", String::from_utf8_lossy(&output.stderr));
+        assert!(
+            output.status.success(),
+            "product overlay check failed: {}",
+            output.status
+        );
+        assert!(
+            stdout.contains("guest.client_rect=")
+                && stdout.contains("overlay_check.finished_unix_ms="),
+            "product app exited without completing the overlay check"
+        );
+    }));
+    let final_processes = qemu_processes();
+    assert!(
+        final_processes.is_empty(),
+        "QEMU remains after overlay check: {final_processes:?}"
+    );
+    if let Err(payload) = run {
+        std::panic::resume_unwind(payload);
+    }
+}
+
+#[test]
 #[ignore = "requires an interactive Windows desktop, WHPX, QEMU, adb, and the adopted default guest"]
 fn measures_real_guest_through_product_runtime() {
     let repository = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../..");

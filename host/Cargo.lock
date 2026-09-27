@@ -2357,6 +2357,7 @@ dependencies = [
  "ome-adb",
  "ome-artifacts",
  "ome-host-check",
+ "ome-overlay",
  "ome-platform-win",
  "ome-runtime",
  "ome-supervisor",
@@ -2427,6 +2428,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "ome-overlay"
+version = "0.1.0"
+dependencies = [
+ "ome-runtime",
+ "serde_json",
+]
+
+[[package]]
 name = "ome-platform-win"
 version = "0.1.0"
 dependencies = [
@@ -2455,6 +2464,7 @@ dependencies = [
  "ome-guest-image",
  "ome-host-check",
  "ome-input",
+ "ome-overlay",
  "ome-platform-win",
  "ome-supervisor",
  "ome-window-host",
