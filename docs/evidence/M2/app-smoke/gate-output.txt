@@ -1,0 +1,21 @@
+SUMMARY forbidden findings=0 candidates=837
+RESULT Check-Forbidden PASS
+SUMMARY manifest findings=0 artifacts=1
+RESULT Check-Manifest PASS
+SUMMARY spdx findings=0 checked=267 candidates=837
+RESULT Check-SpdxHeaders PASS
+SUMMARY unsafe-scope findings=0 checked=54
+RESULT Check-UnsafeScope PASS
+[95m
+[95mStarting discovery in 6 files.[0m
+[95mDiscovery found 42 tests in 292ms.[0m
+[95mRunning tests.[0m
+[32m[+] C:\Open Mobile Emulator\tests\ci\Check-Forbidden.Tests.ps1[0m[90m 3.14s (2.65s|374ms)[0m
+[32m[+] C:\Open Mobile Emulator\tests\ci\Check-Manifest.Tests.ps1[0m[90m 4.5s (4.44s|40ms)[0m
+[32m[+] C:\Open Mobile Emulator\tests\ci\Check-SpdxHeaders.Tests.ps1[0m[90m 2.66s (2.61s|31ms)[0m
+[32m[+] C:\Open Mobile Emulator\tests\ci\Check-UnsafeScope.Tests.ps1[0m[90m 3s (2.93s|40ms)[0m
+[32m[+] C:\Open Mobile Emulator\tests\launcher\OME.Common.Tests.ps1[0m[90m 508ms (312ms|133ms)[0m
+[32m[+] C:\Open Mobile Emulator\tests\launcher\Start-Guest.Tests.ps1[0m[90m 691ms (626ms|50ms)[0m
+[97mTests completed in 14.53s[0m
+[32mTests Passed: 42, [0m[90mFailed: 0, [0m[90mSkipped: 0, [0m[90mInconclusive: 0, [0m[37m[0m[90mNotRun: 0[0m
+RESULT Pester PASS

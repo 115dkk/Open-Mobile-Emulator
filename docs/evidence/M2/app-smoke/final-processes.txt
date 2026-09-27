@@ -1,0 +1,8 @@
+> tasklist /FI "IMAGENAME eq qemu-system-x86_64.exe"
+정보: 실행 중인 작업 중 지정된 조건에 일치하는 작업이 없습니다.
+exit=0
+> tasklist /FI "IMAGENAME eq ome.exe"
+정보: 실행 중인 작업 중 지정된 조건에 일치하는 작업이 없습니다.
+exit=0
+> cmd /c "tasklist | findstr /i qemu-system"
+exit=1
