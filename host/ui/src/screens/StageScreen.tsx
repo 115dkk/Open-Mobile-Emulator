@@ -12,6 +12,7 @@ import type {
 } from '../contracts';
 import { Button, Icon, IconButton, IssueNotice, Slider, StageFrame, StatusDot, StepList } from '../components';
 import { formatTimestamp } from '../format';
+import { keyLabel } from '../input-profile';
 import { FAILURE_NEXT_STEP, GUEST_STATE_LABEL, GUEST_STATE_TONE, bootSteps } from '../presentation';
 
 function sizeText(size: Size): string {
@@ -259,7 +260,7 @@ function StageStatus({ snapshot }: { readonly snapshot: AppSnapshot }) {
       {input.suspended && (
         <span className="ome-stage-status-paused">
           <Icon name="pause" size={14} strokeWidth={2} />
-          {`매핑 일시 중지 (${input.suspendHotkey})`}
+          {`매핑 일시 중지 (${keyLabel(input.suspendHotkey)})`}
         </span>
       )}
       {fps !== null && <span className="ome-stage-status-fps">{`${String(Math.round(fps))} fps`}</span>}

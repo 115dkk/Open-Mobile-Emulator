@@ -4,9 +4,10 @@ import type {
   AppIssue, AppItem, AppSnapshot, BlockerKind, ControllerBridge, GuestImageSummary, GuestSummary, GuestView, HostRow,
   TransferProgress,
 } from './contracts';
+import type { OverlaySeed } from './overlay/model';
 
 export const sampleSnapshot: AppSnapshot = {
-  contractVersion: 4, productVersion: '0.1.0', phase: 'wizard', blocker: null,
+  contractVersion: 5, productVersion: '0.1.0', phase: 'wizard', blocker: null,
   host: { rows: [], ready: false, inspectedAt: null },
   wizard: {
     step: 'hostCheck', canContinue: false, canSkip: false, download: null,
@@ -98,7 +99,7 @@ export function fixtureBridge(
     openScreenshotsFolder: apply,
     openHomeFolder: apply,
     copyToClipboard: apply,
-    openRegistrationPage: apply,
+    openRegistrationPage: apply,
     googleAccountAddOpen: apply,
     guestWindowToFront: apply,
     watchSnapshot: () => Promise.resolve(() => Promise.resolve()),
@@ -629,5 +630,67 @@ export const settingsGallery: readonly GalleryVariant[] = [
         },
       },
     },
+  },
+];
+
+// ---- Overlay window (S4-오버레이): the page over a neutral placeholder in a 1280x800 frame. Every
+// binding kind once (tap, hold, joystick, swipe, mouse button fixed and where pressed, wheel, pass
+// through), markers more than 40px apart at 1280x800 and at the test DOM's 1024x768. ----
+
+/** A gallery state of the overlay page; `seed` is the editor state it starts from. */
+export interface OverlayGalleryVariant extends GalleryVariant {
+  readonly seed?: OverlaySeed | undefined;
+}
+
+export const overlayProfile: InputProfileFixture = {
+  id: 'overlay-1', name: '내 프로필 1', bundled: false, targetPackage: 'com.example.sample.b',
+  referenceAspect: { width: 16, height: 10 }, anchor: 'center',
+  bindings: [
+    {
+      id: 'move', trigger: { kind: 'keySet', up: 'KeyW', down: 'KeyS', left: 'KeyA', right: 'KeyD' },
+      action: { kind: 'joystick', center: { x: 0.16, y: 0.68 }, radius: 0.16 },
+    },
+    { id: 'skill', trigger: { kind: 'key', code: 'KeyQ' }, action: { kind: 'tap', at: { x: 0.8, y: 0.45 }, hold: false } },
+    { id: 'guard', trigger: { kind: 'key', code: 'KeyE' }, action: { kind: 'tap', at: { x: 0.9, y: 0.62 }, hold: true } },
+    {
+      id: 'dash', trigger: { kind: 'key', code: 'Space' },
+      action: { kind: 'swipe', from: { x: 0.56, y: 0.8 }, to: { x: 0.72, y: 0.8 }, durationMs: 240 },
+    },
+    { id: 'menu', trigger: { kind: 'mouseButton', button: 'right' }, action: { kind: 'mouseTap', at: { x: 0.92, y: 0.14 } } },
+    { id: 'touch', trigger: { kind: 'mouseButton', button: 'left' }, action: { kind: 'mouseTap', at: null } },
+    { id: 'scroll', trigger: { kind: 'wheel', direction: 'up' }, action: { kind: 'wheelSwipe', at: { x: 0.5, y: 0.4 }, distance: 0.2 } },
+    { id: 'back', trigger: { kind: 'key', code: 'Escape' }, action: { kind: 'passThrough' } },
+  ],
+};
+
+const overlayInput: AppSnapshot['input'] = {
+  ...runningSnapshot.input,
+  profiles: [...sampleInputProfiles.filter((profile) => profile.bundled), overlayProfile],
+  activeId: overlayProfile.id, overlayVisible: true, editing: false, suspended: false,
+};
+
+/** The running system with markers shown. */
+export const overlaySnapshot: AppSnapshot = {
+  ...runningSnapshot,
+  guest: { ...runningSnapshot.guest, resolution: { width: 1280, height: 800 } },
+  input: overlayInput,
+};
+
+const overlayEditing: AppSnapshot = { ...overlaySnapshot, input: { ...overlayInput, editing: true } };
+
+export const overlayGallery: readonly OverlayGalleryVariant[] = [
+  { id: 'overlay-showing', label: 'S4 오버레이: 표지', snapshot: overlaySnapshot },
+  {
+    id: 'overlay-suspended', label: 'S4 오버레이: 매핑 일시 중지',
+    snapshot: { ...overlaySnapshot, input: { ...overlayInput, suspended: true } },
+  },
+  { id: 'overlay-editing', label: 'S4 오버레이: 편집, 표지 선택', snapshot: overlayEditing, seed: { selectedId: 'move' } },
+  {
+    id: 'overlay-editing-card', label: 'S4 오버레이: 편집, 표지 카드',
+    snapshot: overlayEditing, seed: { selectedId: 'dash', cardOpen: true },
+  },
+  {
+    id: 'overlay-editing-bundled', label: 'S4 오버레이: 편집, 동봉 프리셋',
+    snapshot: { ...overlayEditing, input: { ...overlayEditing.input, activeId: 'bundled-sample-a' } },
   },
 ];

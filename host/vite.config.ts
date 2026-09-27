@@ -36,7 +36,13 @@ export default defineConfig(({ mode }) => ({
     target: ['es2022', 'chrome110'],
     sourcemap: false,
     rolldownOptions: {
-      input: fileURLToPath(new URL(mode === 'qa' ? './ui/qa.html' : './ui/index.html', import.meta.url)),
+      // The product has two windows: `main` (index.html) and the transparent `overlay` (overlay.html).
+      input: mode === 'qa'
+        ? fileURLToPath(new URL('./ui/qa.html', import.meta.url))
+        : {
+          index: fileURLToPath(new URL('./ui/index.html', import.meta.url)),
+          overlay: fileURLToPath(new URL('./ui/overlay.html', import.meta.url)),
+        },
     },
   },
 }));

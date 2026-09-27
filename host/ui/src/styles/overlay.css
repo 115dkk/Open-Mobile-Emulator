@@ -1,0 +1,495 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
+/* Copyright (C) 2026 Open Mobile Emulator contributors */
+/* The overlay window (DESIGN.md 8): markers over the operating system's screen. Everything is drawn on
+   dark chips so it reads over any game frame, and overlay.html fixes the dark theme. Colors come from
+   tokens.css only; the chip backing is `stage-frame` at .72 (rgb(11 13 16 / .72)). Markers appear and
+   disappear by opacity over --motion-fast and do nothing else. Loaded after tokens.css and app.css. */
+
+/* The window: transparent, dark, no scrolling. Scoped to overlay.html so the QA gallery keeps its page. */
+
+html.ome-overlay-window,
+html.ome-overlay-window body {
+  background-color: transparent;
+  color-scheme: dark;
+  overflow: hidden;
+}
+
+html.ome-overlay-window #root {
+  position: relative;
+}
+
+/* Root: the page's own box is the guest screen. */
+
+.ome-overlay {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  color: var(--text);
+  font: var(--type-body);
+  user-select: none;
+}
+
+/* Outside the editor nothing takes a pointer; Rust also lets every click through the window. */
+.ome-overlay-showing,
+.ome-overlay-showing * {
+  pointer-events: none;
+}
+
+/* In the editor clicks come here; a faint veil says so and keeps every pixel of the window hit-testable. */
+.ome-overlay-editing {
+  background-color: color-mix(in srgb, var(--stage-frame) 24%, transparent);
+}
+
+.ome-overlay-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.ome-overlay-layer:focus {
+  outline: none;
+}
+
+.ome-overlay-surface {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.ome-overlay-surface:focus-visible {
+  outline-offset: -4px;
+}
+
+/* One binding's drawing. Appears by opacity; a leaving one fades out before it is removed. */
+
+.ome-overlay-markers {
+  position: absolute;
+  inset: 0;
+  transition: opacity var(--motion-fast) var(--ease-standard);
+}
+
+.ome-overlay-markers-suspended {
+  opacity: var(--disabled-opacity);
+}
+
+.ome-overlay-binding {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  animation: ome-fade-in var(--motion-fast) var(--ease-standard);
+  transition: opacity var(--motion-fast) var(--ease-standard);
+}
+
+.ome-overlay-binding-leaving {
+  opacity: 0;
+}
+
+.ome-overlay-pin {
+  position: absolute;
+  display: flex;
+  transform: translate(-50%, -50%);
+}
+
+/* Tap: a 32px circle with the key; a pill when the key's name is longer. */
+.ome-overlay-marker {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-width: var(--space-8);
+  height: var(--space-8);
+  padding: 0 var(--space-2);
+  border: 1.5px solid var(--accent);
+  border-radius: var(--space-4);
+  background-color: color-mix(in srgb, var(--stage-frame) 72%, transparent);
+  color: var(--text);
+  font: var(--type-label);
+  white-space: nowrap;
+}
+
+/* Hold: the same circle with one dot inside. */
+.ome-overlay-marker-hold::before {
+  content: "";
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--accent);
+}
+
+.ome-overlay-marker-mouse {
+  padding: 0 var(--space-3) 0 var(--space-2);
+}
+
+/* Joystick: four keys in a cross on one chip, inside the dashed circle of its radius. */
+.ome-overlay-cross {
+  display: grid;
+  grid-template-areas:
+    ". up ."
+    "left . right"
+    ". down .";
+  grid-template-columns: repeat(3, minmax(18px, auto));
+  grid-template-rows: repeat(3, 18px);
+  place-items: center;
+  column-gap: 2px;
+  padding: 3px var(--space-1);
+  border: 1.5px solid var(--accent);
+  border-radius: var(--space-3);
+  background-color: color-mix(in srgb, var(--stage-frame) 72%, transparent);
+  color: var(--text);
+  font: var(--type-label);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.ome-overlay-cross-up { grid-area: up; }
+.ome-overlay-cross-left { grid-area: left; }
+.ome-overlay-cross-right { grid-area: right; }
+.ome-overlay-cross-down { grid-area: down; }
+
+.ome-overlay-ring {
+  position: absolute;
+  border: 1.5px dashed var(--accent);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.ome-overlay-ring-pending {
+  border-color: var(--accent-hover);
+}
+
+/* Swipe line and arrow head; the wheel's extent is dashed. */
+.ome-overlay-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ome-overlay-extent {
+  stroke-dasharray: 4 4;
+}
+
+.ome-overlay-duration {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  height: var(--space-6);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-control);
+  background-color: color-mix(in srgb, var(--stage-frame) 72%, transparent);
+  color: var(--text);
+  font: var(--type-caption);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+}
+
+/* Editor: a marker is a button with a 40px hit area around the drawn chip. */
+
+.ome-overlay-hit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--target-min);
+  min-height: var(--target-min);
+  padding: var(--space-1);
+  border: 0;
+  border-radius: var(--space-5);
+  background-color: transparent;
+  color: inherit;
+  cursor: grab;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.ome-overlay-hit:active {
+  cursor: grabbing;
+}
+
+/* Selected: the 2px accent-hover border, with a faint halo so it tells apart over a busy frame. */
+.ome-overlay-hit[data-selected="true"] .ome-overlay-marker,
+.ome-overlay-hit[data-selected="true"] .ome-overlay-cross {
+  border-width: 2px;
+  border-color: var(--accent-hover);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-hover) 28%, transparent);
+}
+
+/* The 8px handle: the joystick's radius and the swipe's end. */
+.ome-overlay-handle {
+  position: absolute;
+  width: var(--space-6);
+  height: var(--space-6);
+  transform: translate(-50%, -50%);
+  cursor: grab;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.ome-overlay-handle::after {
+  content: "";
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: 50%;
+  background-color: var(--accent-hover);
+  box-shadow: 0 0 0 1.5px var(--stage-frame);
+}
+
+.ome-overlay-handle:active {
+  cursor: grabbing;
+}
+
+/* A new marker's place while it waits for its key or its card. */
+.ome-overlay-pending {
+  position: absolute;
+  width: var(--space-8);
+  height: var(--space-8);
+  border: 2px dashed var(--accent-hover);
+  border-radius: 50%;
+  background-color: color-mix(in srgb, var(--stage-frame) 40%, transparent);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.ome-overlay-prompt {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background-color: color-mix(in srgb, var(--stage-frame) 88%, transparent);
+  color: var(--text);
+  font: var(--type-label);
+  white-space: nowrap;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.ome-overlay-prompt-notice {
+  color: var(--warning);
+}
+
+/* Mouse buttons that act where they are pressed have no place on screen; they sit in this tray. */
+.ome-overlay-tray {
+  position: absolute;
+  left: var(--space-4);
+  bottom: var(--space-4);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0 0 0 var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius-control) + var(--space-1));
+  background-color: color-mix(in srgb, var(--stage-frame) 88%, transparent);
+}
+
+.ome-overlay-tray-label {
+  color: var(--muted);
+  font: var(--type-caption);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+span.ome-overlay-tray-item {
+  display: inline-flex;
+  padding: var(--space-1);
+}
+
+/* The small card beside a marker. */
+.ome-overlay-card {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 312px;
+  max-width: calc(100% - var(--space-4));
+  padding: var(--space-2) var(--space-4) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background-color: var(--surface);
+  box-shadow: var(--shadow-surface);
+  color: var(--text);
+  animation: ome-fade-in var(--motion-fast) var(--ease-standard);
+}
+
+.ome-overlay-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-right: calc(-1 * var(--space-2));
+}
+
+.ome-overlay-card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  font-weight: 600;
+}
+
+.ome-overlay-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.ome-overlay-card-body .ome-labelled,
+.ome-overlay-card-body .ome-segmented {
+  align-self: stretch;
+}
+
+.ome-overlay-card-body .ome-segmented-option {
+  flex: 1;
+  min-width: 0;
+  padding: 0 var(--space-2);
+}
+
+.ome-overlay-card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.ome-overlay-card-row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ome-overlay-card-keys {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+}
+
+.ome-overlay-card-keys div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.ome-overlay-card-keys dt {
+  color: var(--muted);
+}
+
+.ome-overlay-card-keys dd {
+  margin: 0;
+}
+
+.ome-overlay-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+}
+
+/* Top center: the editor's tool bar, or the suspended chip outside the editor. */
+.ome-overlay-top {
+  position: absolute;
+  top: var(--space-3);
+  left: 50%;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  width: max-content;
+  max-width: calc(100% - var(--space-6));
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.ome-overlay-editing .ome-overlay-top > * {
+  pointer-events: auto;
+}
+
+.ome-overlay-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius-control) + var(--space-2));
+  background-color: color-mix(in srgb, var(--stage-frame) 88%, transparent);
+}
+
+.ome-overlay-bar .ome-segmented-option {
+  min-width: 64px;
+}
+
+.ome-overlay-bar-divider {
+  width: 1px;
+  height: var(--space-6);
+  background-color: var(--line);
+}
+
+.ome-overlay-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--space-8);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background-color: color-mix(in srgb, var(--stage-frame) 88%, transparent);
+  color: var(--text);
+  font: var(--type-label);
+  white-space: nowrap;
+}
+
+.ome-overlay-issue {
+  width: 480px;
+  max-width: 100%;
+}
+
+@media (forced-colors: active) {
+  .ome-overlay-marker,
+  .ome-overlay-cross,
+  .ome-overlay-ring,
+  .ome-overlay-pending,
+  .ome-overlay-duration,
+  .ome-overlay-chip,
+  .ome-overlay-prompt,
+  .ome-overlay-tray,
+  .ome-overlay-card {
+    border-color: CanvasText;
+  }
+
+  .ome-overlay-lines {
+    stroke: CanvasText;
+  }
+
+  .ome-overlay-handle::after,
+  .ome-overlay-marker-hold::before {
+    background-color: CanvasText;
+  }
+}

@@ -38,6 +38,7 @@ chrome.exe --headless=new --disable-gpu --hide-scrollbars --no-first-run
 | display-refresh | S5 표시, 주사율 절 포함(`-dark-tall` 추가) |
 | settings-running | S6 설정, 실행 중(`-dark-tall` 추가) |
 | settings-update-failed | S6 설정, 꺼짐, 업데이트 확인 실패(`-dark-tall` 추가) |
+| overlay-showing, overlay-suspended, overlay-editing, overlay-editing-card, overlay-editing-bundled | S4-오버레이(어두운 테마만. 오버레이 창은 테마와 무관하게 어두운 값을 쓴다). 표지 다섯 종류 위의 표시 모드, 일시 중지 칩, 편집 도구 띠와 선택된 조이스틱, 스와이프 카드, 동봉 프리셋 안내 |
 
 ## 살펴본 결과
 
