@@ -1,0 +1,76 @@
+From 29941a2f7e6cd4cba05bbda8f3b1c65001430761 Mon Sep 17 00:00:00 2001
+From: Open Mobile Emulator contributors <noreply@example.invalid>
+Date: Sun, 27 Sep 2026 00:00:00 +0000
+Subject: [PATCH] virtio-gpu: add configurable EDID refresh rate
+
+Add a refresh_rate device property in mHz so callers can select the
+rate used for virtio-gpu EDID without supplying UI geometry.  Preserve
+a real rate reported by a display backend, and otherwise retain the
+device setting.  Zero keeps upstream behavior.
+
+The hw/display/virtio-gpu-base.c header states GPL version 2 or later.
+The include/hw/virtio/virtio-gpu.h header states GPL version 2.  This
+change is written for Open Mobile Emulator.
+
+Signed-off-by: Open Mobile Emulator contributors <noreply@example.invalid>
+---
+ hw/display/virtio-gpu-base.c   | 11 ++++++++++-
+ include/hw/virtio/virtio-gpu.h |  4 +++-
+ 2 files changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/hw/display/virtio-gpu-base.c b/hw/display/virtio-gpu-base.c
+index 270fbaa..962c85f 100644
+--- a/hw/display/virtio-gpu-base.c
++++ b/hw/display/virtio-gpu-base.c
+@@ -108,7 +108,8 @@ static void virtio_gpu_ui_info(void *opaque, uint32_t idx, QemuUIInfo *info)
+ 
+     g->req_state[idx].x = info->xoff;
+     g->req_state[idx].y = info->yoff;
+-    g->req_state[idx].refresh_rate = info->refresh_rate;
++    g->req_state[idx].refresh_rate = info->refresh_rate ?
++        info->refresh_rate : g->conf.refresh_rate;
+     g->req_state[idx].width = info->width;
+     g->req_state[idx].height = info->height;
+     g->req_state[idx].width_mm = info->width_mm;
+@@ -194,11 +195,19 @@ virtio_gpu_base_device_realize(DeviceState *qdev,
+         error_setg(errp, "invalid max_outputs > %d", VIRTIO_GPU_MAX_SCANOUTS);
+         return false;
+     }
++    if (g->conf.refresh_rate &&
++        (g->conf.refresh_rate < 30000 ||
++         g->conf.refresh_rate > 240000)) {
++        error_setg(errp,
++                   "refresh_rate must be between 30000 and 240000 mHz");
++        return false;
++    }
+ 
+     g->enabled_output_bitmask = 1;
+ 
+     g->req_state[0].width = g->conf.xres;
+     g->req_state[0].height = g->conf.yres;
++    g->req_state[0].refresh_rate = g->conf.refresh_rate;
+ 
+     for (output_idx = 0, node = g->conf.outputs;
+          node; output_idx++, node = node->next) {
+diff --git a/include/hw/virtio/virtio-gpu.h b/include/hw/virtio/virtio-gpu.h
+index 220231e..a01f59f 100644
+--- a/include/hw/virtio/virtio-gpu.h
++++ b/include/hw/virtio/virtio-gpu.h
+@@ -131,6 +131,7 @@ struct virtio_gpu_base_conf {
+     uint32_t flags;
+     uint32_t xres;
+     uint32_t yres;
++    uint32_t refresh_rate;
+     uint64_t hostmem;
+     VirtIOGPUOutputList *outputs;
+ };
+@@ -176,7 +177,8 @@ struct VirtIOGPUBaseClass {
+     DEFINE_PROP_BIT("edid", _state, _conf.flags, \
+                     VIRTIO_GPU_FLAG_EDID_ENABLED, true), \
+     DEFINE_PROP_UINT32("xres", _state, _conf.xres, 1280), \
+-    DEFINE_PROP_UINT32("yres", _state, _conf.yres, 800)
++    DEFINE_PROP_UINT32("yres", _state, _conf.yres, 800), \
++    DEFINE_PROP_UINT32("refresh_rate", _state, _conf.refresh_rate, 0)
+ 
+ typedef struct VGPUDMABuf {
+     QemuDmaBuf *buf;

@@ -11,11 +11,13 @@ contains whitespace), exposed in the repository as the junction `qemu-build\out`
 |---|---|
 | QEMU tag | `v11.1.1` |
 | Upstream commit | `c3d48b7d1e89604920e5b81b91140c2ad39a1943` |
-| Patches | `0001-symlink-install-tree-skip-without-symlink-privilege.patch` (see `qemu-build/patches/README.md`) |
+| Patches | `0001-symlink-install-tree-skip-without-symlink-privilege.patch`, `0002-virtio-gpu-refresh-rate-property.patch`, `0003-ui-sdl2-swap-interval-option.patch` (see `qemu-build/patches/README.md`) |
 | Build date (UTC) | 2026-09-26T10:30:31Z (rebuilt with the ANGLE bundling below; the first build was 2026-09-25T05:26:46Z) |
 | `--version` | `QEMU emulator version 11.1.1 (v11.1.1-dirty)` (dirty = patched index tree) |
-| Executable SHA-256 | `2b052552b9b8f4bb3dd1f636f0eb06189cf8944a29b7c048170325e3ccaed902` (first build: `ef3d62f55b78e49126e9d8b16a497a0087286e5401dceade4b6b1e56197d9caf`) |
+| Executable SHA-256 | `82f259806c13f907f9d7462e2f2a876d123c27b814ac0378ffd34f2059960b18` (ANGLE rebuild: `2b052552b9b8f4bb3dd1f636f0eb06189cf8944a29b7c048170325e3ccaed902`; first build: `ef3d62f55b78e49126e9d8b16a497a0087286e5401dceade4b6b1e56197d9caf`) |
 | Bundled DLLs | 24, resolved with `ldd` from UCRT64 (`dist/qemu/dll-origins.tsv`): the first build's 19 plus `libEGL.dll`, `libGLESv2.dll`, `libjpeg-8.dll`, `libpng16-16.dll`, `libstdc++-6.dll` |
+
+Rebuilt 2026-09-27 with 0002 and 0003 (see `docs/evidence/M2/qemu-display-options.md`).
 
 Configure options (`out/configure-options.txt`):
 

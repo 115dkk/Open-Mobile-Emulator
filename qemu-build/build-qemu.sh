@@ -100,7 +100,7 @@ build_qemu() {
 
 copy_runtime() {
     verify_build
-    local stage exe dependency line report index=0
+    local stage exe dependency line report patch index=0
     local queue=() dependencies=()
     declare -A seen=()
     stage=$(mktemp -d "$OUT/dist-stage.XXXXXX")
@@ -157,6 +157,11 @@ copy_runtime() {
     cp -R -- "$OUT/install/share/qemu/." "$stage/share/qemu/"
     cp -- "$SOURCE/COPYING" "$stage/licenses/QEMU-COPYING"
     cp -- "$OUT/pacman-lock.txt" "$OUT/qemu-commit.txt" "$OUT/build-date.txt" "$OUT/configure-options.txt" "$stage/"
+    : > "$stage/bin/ome-patches.txt"
+    shopt -s nullglob
+    for patch in "$BUILD_ROOT"/patches/*.patch; do
+        basename -- "$patch"
+    done > "$stage/bin/ome-patches.txt"
     "$stage/bin/qemu-system-x86_64.exe" --version
     "$stage/bin/qemu-img.exe" --version
     "$stage/bin/qemu-system-x86_64.exe" -accel help | tee "$OUT/accel-help.txt"

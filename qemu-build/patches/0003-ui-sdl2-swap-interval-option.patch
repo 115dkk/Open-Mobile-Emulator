@@ -1,0 +1,110 @@
+From bf8999c5297bf575d346cd90ba3f8ae66270f7af Mon Sep 17 00:00:00 2001
+From: Open Mobile Emulator contributors <noreply@example.invalid>
+Date: Sun, 27 Sep 2026 00:01:00 +0000
+Subject: [PATCH] ui/sdl2: add configurable GL swap interval
+
+Let callers select immediate, synchronized, or adaptive OpenGL buffer
+swaps in the SDL display backend.  Keep zero as the default, warn when
+the driver refuses a value, and retry adaptive vsync failures with
+immediate updates.
+
+The ui/sdl2.c header carries the MIT license text.  qapi/ui.json has no
+file-local license header and is GPL-2.0-or-later under QEMU's LICENSE.
+This change is written for Open Mobile Emulator.
+
+Signed-off-by: Open Mobile Emulator contributors <noreply@example.invalid>
+---
+ qapi/ui.json |  7 ++++++-
+ ui/sdl2.c    | 34 +++++++++++++++++++++++++++++++++-
+ 2 files changed, 39 insertions(+), 2 deletions(-)
+
+diff --git a/qapi/ui.json b/qapi/ui.json
+index b2c42a7..27b5d36 100644
+--- a/qapi/ui.json
++++ b/qapi/ui.json
+@@ -1477,10 +1477,15 @@
+ # @grab-mod: Modifier keys that should be pressed together with the
+ #     "G" key to release the mouse grab.
+ #
++# @swap-interval: Open Mobile Emulator swap interval for OpenGL.  -1
++#     requests adaptive vsync, 0 immediate updates, and 1 vsync.
++#     Defaults to 0.
++#
+ # Since: 7.1
+ ##
+ { 'struct'  : 'DisplaySDL',
+-  'data'    : { '*grab-mod'   : 'HotKeyMod' } }
++  'data'    : { '*grab-mod'     : 'HotKeyMod',
++                '*swap-interval': 'int' } }
+ 
+ ##
+ # @DisplayType:
+diff --git a/ui/sdl2.c b/ui/sdl2.c
+index 1c97d23..9e424eb 100644
+--- a/ui/sdl2.c
++++ b/ui/sdl2.c
+@@ -24,6 +24,8 @@
+ /* Ported SDL 1.2 code to 2.0 by Dave Airlie. */
+ 
+ #include "qemu/osdep.h"
++#include "qapi/error.h"
++#include "qemu/error-report.h"
+ #include "qemu/module.h"
+ #include "qemu/cutils.h"
+ #include "ui/console.h"
+@@ -110,6 +112,8 @@ void sdl2_window_create(struct sdl2_console *scon)
+                                          flags);
+     if (scon->opengl) {
+         const char *driver = "opengl";
++        int swap_interval = scon->opts->u.sdl.has_swap_interval ?
++            scon->opts->u.sdl.swap_interval : 0;
+ 
+         if (scon->opts->gl == DISPLAY_GL_MODE_ES) {
+             driver = "opengles2";
+@@ -121,7 +125,14 @@ void sdl2_window_create(struct sdl2_console *scon)
+         SDL_SetHint(SDL_HINT_RENDER_BATCHING, "1");
+ 
+         scon->winctx = SDL_GL_CreateContext(scon->real_window);
+-        SDL_GL_SetSwapInterval(0);
++        if (SDL_GL_SetSwapInterval(swap_interval)) {
++            warn_report("sdl: failed to set swap interval %d: %s",
++                        swap_interval, SDL_GetError());
++            if (swap_interval == -1 && SDL_GL_SetSwapInterval(0)) {
++                warn_report("sdl: failed to fall back to swap interval 0: %s",
++                            SDL_GetError());
++            }
++        }
+ 
+ #ifdef CONFIG_OPENGL
+         qemu_egl_display = eglGetCurrentDisplay();
+@@ -858,9 +869,30 @@ static const DisplayGLCtxOps gl_ctx_ops = {
+ };
+ #endif
+ 
++static bool sdl2_display_validate_options(DisplayOptions *o, Error **errp)
++{
++    assert(o->type == DISPLAY_TYPE_SDL);
++
++    if (o->u.sdl.has_swap_interval &&
++        o->u.sdl.swap_interval != -1 &&
++        o->u.sdl.swap_interval != 0 &&
++        o->u.sdl.swap_interval != 1) {
++        error_setg(errp, "SDL swap interval must be -1, 0, or 1");
++        return false;
++    }
++
++    return true;
++}
++
+ static void sdl2_display_early_init(DisplayOptions *o)
+ {
++    Error *local_err = NULL;
++
+     assert(o->type == DISPLAY_TYPE_SDL);
++    if (!sdl2_display_validate_options(o, &local_err)) {
++        error_report_err(local_err);
++        exit(1);
++    }
+     if (o->has_gl && o->gl) {
+ #ifdef CONFIG_OPENGL
+         display_opengl = 1;

@@ -92,15 +92,25 @@ upstream [keycodemapdb][keycode], [SoftFloat][softfloat] and [TestFloat][testflo
 wraps. All recursive [Git submodules][submodules] are retained for firmware source.
 No unreviewed Windows patch or secondary binary distributor is used.
 
+## OME display options
+
+OME's QEMU patch series adds a virtio-gpu refresh-rate property and an SDL swap
+option for the product's display settings. `-device
+virtio-vga-gl,edid=on,refresh_rate=<mHz>` selects 30000 through 240000 mHz;
+omitting it keeps upstream's generated-EDID rate behaviour. `-display
+sdl,swap-interval=<-1|0|1>` requests adaptive vsync, immediate updates or vsync,
+respectively, and defaults to upstream's immediate mode (`0`) when omitted.
+Both settings take effect when QEMU starts.
+
 ## Outputs
 
 | Location under qemu-build | Contents |
 |---|---|
 | `src/qemu/` | External upstream checkout, staged local patches, pinned subprojects/submodules |
 | `out/build/`, `out/install/` | Ninja build and installation prefix |
-| `out/bin/` | Symlink-free launcher copies of both EXEs and resolved UCRT64 DLLs |
+| `out/bin/` | Launcher copies of both EXEs, resolved UCRT64 DLLs and `ome-patches.txt` (no symbolic links) |
 | `out/share/qemu/` | Firmware, keymaps and installed QEMU data beside the launcher bin directory |
-| `dist/qemu/bin/`, `dist/qemu/share/qemu/` | Same distributable runtime layout |
+| `dist/qemu/bin/`, `dist/qemu/share/qemu/` | Same distributable runtime layout and applied-patch list in `bin/ome-patches.txt` |
 | `dist/qemu/dll-origins.tsv`, `dll-packages.txt` | DLL paths and pacman ownership inventory |
 | `out/logs/` | Appended logs for each build/packaging step |
 | `out/THIRD_PARTY.generated.md` | Full candidate document with only the generated block replaced |
