@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Copyright (C) 2026 Open Mobile Emulator contributors
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ScreenActions } from './actions';
 import type { AppIssue, AppSnapshot, ControllerBridge } from './contracts';
 
 export function presentationIssue(error: unknown): AppIssue {
@@ -17,8 +18,14 @@ export function presentationIssue(error: unknown): AppIssue {
   };
 }
 
+export interface ControllerState {
+  readonly snapshot: AppSnapshot | null;
+  readonly issue: AppIssue | null;
+  readonly actions: ScreenActions;
+}
+
 /** Presentation state only. Admission and all command decisions stay in Rust. */
-export function useController(bridge: ControllerBridge) {
+export function useController(bridge: ControllerBridge): ControllerState {
   const [snapshot, setSnapshot] = useState<AppSnapshot | null>(null);
   const [issue, setIssue] = useState<AppIssue | null>(null);
   const generation = useRef(0);
@@ -78,10 +85,52 @@ export function useController(bridge: ControllerBridge) {
     }
   }, []);
 
-  return {
-    snapshot,
-    issue,
+  // Every bridge command, wrapped so its result lands in this state. The mapped ScreenActions
+  // type makes a missing command a compile error.
+  const actions = useMemo<ScreenActions>(() => ({
     hostCheckRefresh: () => execute(() => bridge.hostCheckRefresh()),
+    wizardContinue: () => execute(() => bridge.wizardContinue()),
+    wizardSkip: () => execute(() => bridge.wizardSkip()),
+    whpxEnable: () => execute(() => bridge.whpxEnable()),
+    artifactDownloadStart: () => execute(() => bridge.artifactDownloadStart()),
+    artifactDownloadCancel: () => execute(() => bridge.artifactDownloadCancel()),
+    guestImageSelect: (id) => execute(() => bridge.guestImageSelect(id)),
+    guestCreate: (imageId, sizeGib) => execute(() => bridge.guestCreate(imageId, sizeGib)),
+    guestSelect: (name) => execute(() => bridge.guestSelect(name)),
+    guestDelete: (name) => execute(() => bridge.guestDelete(name)),
+    guestReinstall: (name) => execute(() => bridge.guestReinstall(name)),
     guestStart: () => execute(() => bridge.guestStart()),
-  };
+    guestStop: () => execute(() => bridge.guestStop()),
+    guestRestart: () => execute(() => bridge.guestRestart()),
+    guestRootSet: (enabled) => execute(() => bridge.guestRootSet(enabled)),
+    stageRectChanged: (rect) => execute(() => bridge.stageRectChanged(rect)),
+    screenshotSave: () => execute(() => bridge.screenshotSave()),
+    appInstallPick: () => execute(() => bridge.appInstallPick()),
+    appUninstall: (pkg) => execute(() => bridge.appUninstall(pkg)),
+    appLaunch: (pkg) => execute(() => bridge.appLaunch(pkg)),
+    inputProfileSelect: (id) => execute(() => bridge.inputProfileSelect(id)),
+    inputSuspendToggle: () => execute(() => bridge.inputSuspendToggle()),
+    inputProfileDelete: (id) => execute(() => bridge.inputProfileDelete(id)),
+    inputProfileSave: (profile) => execute(() => bridge.inputProfileSave(profile)),
+    inputBindingUpsert: (profileId, binding) => execute(() => bridge.inputBindingUpsert(profileId, binding)),
+    inputBindingRemove: (profileId, id) => execute(() => bridge.inputBindingRemove(profileId, id)),
+    inputEditorToggle: () => execute(() => bridge.inputEditorToggle()),
+    inputAutoApplySet: (enabled) => execute(() => bridge.inputAutoApplySet(enabled)),
+    inputSuspendHotkeySet: (code) => execute(() => bridge.inputSuspendHotkeySet(code)),
+    displayPresetApply: (id) => execute(() => bridge.displayPresetApply(id)),
+    displayCustomApply: (size, densityDpi) => execute(() => bridge.displayCustomApply(size, densityDpi)),
+    displayRefreshSet: (hz) => execute(() => bridge.displayRefreshSet(hz)),
+    displayVsyncSet: (mode) => execute(() => bridge.displayVsyncSet(mode)),
+    stageFitSet: (fit) => execute(() => bridge.stageFitSet(fit)),
+    settingsSave: (settings) => execute(() => bridge.settingsSave(settings)),
+    updateCheck: () => execute(() => bridge.updateCheck()),
+    updateInstall: () => execute(() => bridge.updateInstall()),
+    diagnosticsExport: () => execute(() => bridge.diagnosticsExport()),
+    openLogsFolder: () => execute(() => bridge.openLogsFolder()),
+    openScreenshotsFolder: () => execute(() => bridge.openScreenshotsFolder()),
+    openRegistrationPage: () => execute(() => bridge.openRegistrationPage()),
+    guestWindowToFront: () => execute(() => bridge.guestWindowToFront()),
+  }), [bridge, execute]);
+
+  return { snapshot, issue, actions };
 }

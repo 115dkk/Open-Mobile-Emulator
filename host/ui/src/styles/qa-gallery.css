@@ -1,0 +1,35 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
+/* Copyright (C) 2026 Open Mobile Emulator contributors */
+/* State picker of the synthetic gallery (qa-main.tsx). Not part of the product build. */
+
+.ome-qa-picker {
+  position: fixed;
+  right: var(--space-3);
+  bottom: var(--space-3);
+  z-index: 200;
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-card);
+  background-color: var(--surface);
+  box-shadow: var(--shadow-surface);
+  font: var(--type-caption);
+  color: var(--muted);
+}
+
+.ome-qa-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.ome-qa-field select {
+  height: 32px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background-color: var(--surface-raised);
+  color: var(--text);
+  font: var(--type-caption);
+}

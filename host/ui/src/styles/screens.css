@@ -1,0 +1,535 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
+/* Copyright (C) 2026 Open Mobile Emulator contributors */
+/* Screen layouts. One section per screen, each under its own `ome-<screen>-` prefix. Shared
+   components are styled in app.css. Colors and type come from tokens.css only. */
+
+/* Shell (rail + body) */
+
+.ome-shell {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.ome-shell-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* Wizard (S1) */
+
+.ome-wizard {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.ome-wizard-header {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-4);
+  height: 64px;
+  padding: 0 var(--space-8);
+  border-bottom: 1px solid var(--line);
+}
+
+.ome-wizard-dots {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.ome-wizard-dot {
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: 50%;
+  background-color: var(--line-strong);
+}
+
+.ome-wizard-dot-done {
+  background-color: var(--accent);
+}
+
+.ome-wizard-dot-current {
+  background-color: var(--accent);
+  box-shadow: 0 0 0 var(--space-1) color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+.ome-wizard-position {
+  display: flex;
+  gap: var(--space-2);
+  color: var(--text);
+}
+
+.ome-wizard-count {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The one custom transition in the product: a step rises 4px as it appears. */
+.ome-wizard-step {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  animation: ome-wizard-rise var(--motion-normal) var(--ease-standard);
+}
+
+@keyframes ome-wizard-rise {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+.ome-wizard-body {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--space-10) var(--space-8);
+}
+
+.ome-wizard-body-wide {
+  padding: var(--space-6) var(--space-8);
+}
+
+.ome-wizard-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  width: 640px;
+  max-width: 100%;
+}
+
+.ome-wizard-wide {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.ome-wizard-wide-row {
+  display: flex;
+  flex: 1;
+  gap: var(--space-6);
+  min-height: 0;
+}
+
+.ome-wizard-wide-row > .ome-stage-frame {
+  min-height: 360px;
+}
+
+.ome-wizard-side {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: var(--space-5);
+  width: 320px;
+  overflow: auto;
+}
+
+.ome-wizard-footer {
+  display: flex;
+  flex: none;
+  align-items: center;
+  height: 80px;
+  padding: 0 var(--space-8);
+  border-top: 1px solid var(--line);
+}
+
+.ome-wizard-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-left: auto;
+}
+
+.ome-footer-note {
+  margin-right: var(--space-2);
+  color: var(--muted);
+}
+
+/* S1.1 host check */
+
+.ome-host-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background-color: var(--surface);
+}
+
+.ome-host-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--line);
+}
+
+.ome-host-row:last-child {
+  border-bottom: 0;
+}
+
+.ome-host-dot {
+  display: inline-flex;
+  align-items: center;
+  height: 1.5em;
+}
+
+.ome-host-label {
+  flex: none;
+  width: 220px;
+  font-weight: 600;
+}
+
+.ome-host-detail {
+  min-width: 0;
+  color: var(--muted);
+}
+
+/* S1.2 consent (also S8 활성화) */
+
+.ome-check-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ome-check-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.ome-check-list-mark {
+  display: inline-flex;
+  align-items: center;
+  height: 1.5em;
+  color: var(--muted);
+}
+
+.ome-caution {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background-color: var(--surface);
+}
+
+.ome-caution-icon {
+  display: inline-flex;
+  align-items: center;
+  height: 1.5em;
+  color: var(--warning);
+}
+
+/* S1.4 image cards and download */
+
+.ome-image-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-3);
+}
+
+.ome-image-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background-color: var(--surface);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition-property: background-color, box-shadow;
+  transition-duration: var(--motion-fast);
+  transition-timing-function: var(--ease-standard);
+}
+
+.ome-image-card:hover:not(:disabled) {
+  background-color: var(--surface-raised);
+}
+
+.ome-image-card[aria-checked="true"] {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.ome-image-card:disabled {
+  cursor: default;
+}
+
+.ome-image-card:disabled:not([aria-checked="true"]) {
+  opacity: var(--disabled-opacity);
+}
+
+.ome-image-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.ome-image-card-name {
+  font: var(--type-section);
+}
+
+.ome-image-card-meta {
+  display: flex;
+  gap: var(--space-3);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ome-facts {
+  display: flex;
+  flex-direction: column;
+}
+
+.ome-fact {
+  display: flex;
+  gap: var(--space-4);
+  padding: var(--space-2) 0;
+}
+
+.ome-fact dt {
+  flex: none;
+  width: 88px;
+  color: var(--muted);
+}
+
+.ome-fact dd {
+  min-width: 0;
+}
+
+.ome-transfer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background-color: var(--surface);
+}
+
+.ome-transfer-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.ome-transfer-percent {
+  margin-left: auto;
+}
+
+.ome-transfer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+  color: var(--muted);
+}
+
+/* S1.5 install guide */
+
+.ome-guide {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ome-guide-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.ome-guide-number {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-6);
+  height: var(--space-6);
+  border-radius: 50%;
+  background-color: var(--surface-raised);
+  color: var(--muted);
+  font: var(--type-label);
+  font-variant-numeric: tabular-nums;
+}
+
+/* S1.6 capability probe */
+
+.ome-capabilities {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ome-capability {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--muted);
+}
+
+.ome-capability-available {
+  color: var(--text);
+}
+
+.ome-capability-mark {
+  display: inline-flex;
+  justify-content: center;
+  width: var(--space-4);
+}
+
+.ome-capability-available .ome-capability-mark {
+  color: var(--success);
+}
+
+/* S1.7 app install */
+
+.ome-drop-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  min-height: 232px;
+  padding: var(--space-6);
+  border: 2px dashed var(--line-strong);
+  border-radius: var(--radius-card);
+  background-color: var(--surface);
+  color: var(--muted);
+  text-align: center;
+}
+
+.ome-drop-zone-icon {
+  display: inline-flex;
+  color: var(--muted);
+}
+
+.ome-drop-zone-text {
+  color: var(--text);
+}
+
+.ome-install-line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background-color: var(--surface);
+}
+
+.ome-install-bar {
+  flex: 1;
+  min-width: 80px;
+}
+
+.ome-install-results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ome-install-result {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background-color: var(--surface);
+}
+
+.ome-install-result-mark {
+  display: inline-flex;
+  color: var(--success);
+}
+
+.ome-install-result-name {
+  font-weight: 600;
+}
+
+.ome-install-result-state {
+  margin-left: auto;
+  color: var(--muted);
+}
+
+/* Blocked (S8) */
+
+.ome-blocked {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--space-10);
+}
+
+.ome-blocked-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 520px;
+  max-width: 100%;
+}
+
+.ome-blocked-column-wide {
+  gap: var(--space-6);
+  width: 640px;
+}
+
+.ome-blocked-icon {
+  display: inline-flex;
+  color: var(--warning);
+}
+
+.ome-blocked-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.ome-blocked-actions-end {
+  justify-content: flex-end;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ome-wizard-step {
+    animation: none;
+  }
+
+  .ome-image-card {
+    transition: none;
+  }
+}
