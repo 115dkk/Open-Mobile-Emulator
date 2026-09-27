@@ -1,0 +1,104 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+// Copyright (C) 2026 Open Mobile Emulator contributors
+//! Runtime adapters over the raw adb session.
+#![forbid(unsafe_code)]
+
+use std::io::Write;
+
+use ome_adb::AdbSession;
+use ome_guest_image::{PushFile, RunnerError, ShellCommand, ShellOutput, ShellRunner};
+
+/// Local newtype required because both `AdbSession` and `ShellRunner` belong to sibling crates.
+#[derive(Clone, Copy, Debug)]
+pub struct AdbShellRunner<'a>(pub &'a AdbSession);
+
+impl ShellRunner for AdbShellRunner<'_> {
+    fn shell(&self, command: &ShellCommand) -> Result<ShellOutput, RunnerError> {
+        // CapabilityProbe calls `root` once before dispatching commands marked `needs_root`.
+        // Other callers must send only commands supplied by a FamilyAdapter method whose
+        // contract does not require root.
+        let output = self.0.shell(&command.args).map_err(runner_error)?;
+        Ok(ShellOutput {
+            stdout: String::from_utf8_lossy(&output.stdout).into_owned(),
+            exit_code: output.exit_code,
+        })
+    }
+
+    fn root(&self) -> Result<(), RunnerError> {
+        self.0.root().map_err(runner_error)
+    }
+
+    fn push(&self, file: &PushFile) -> Result<(), RunnerError> {
+        let mut local = tempfile::NamedTempFile::new().map_err(|error| RunnerError {
+            reason: error.to_string(),
+        })?;
+        local
+            .write_all(&file.contents)
+            .map_err(|error| RunnerError {
+                reason: error.to_string(),
+            })?;
+        local.flush().map_err(|error| RunnerError {
+            reason: error.to_string(),
+        })?;
+        self.0
+            .push(local.path(), &file.remote_path)
+            .map_err(runner_error)
+    }
+}
+
+fn runner_error(error: ome_adb::AdbError) -> RunnerError {
+    RunnerError {
+        reason: error.to_string(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::ffi::OsString;
+
+    use ome_adb::{Output, RecordedRunner};
+
+    use super::*;
+
+    fn success(stdout: &str) -> Result<Output, ome_adb::RecordedError> {
+        Ok(Output {
+            exit_code: 0,
+            stdout: stdout.as_bytes().to_vec(),
+            stderr: Vec::new(),
+        })
+    }
+
+    #[test]
+    fn probe_owned_root_step_runs_only_once_before_privileged_shell() {
+        let recorded = RecordedRunner::new([
+            success("restarting adbd as root"),
+            success(""),
+            success("value"),
+        ]);
+        let calls = recorded.clone();
+        let session =
+            AdbSession::new("adb.exe", "serial".to_owned(), Box::new(recorded)).expect("session");
+        let runner = AdbShellRunner(&session);
+        runner.root().expect("root");
+        let output = runner
+            .shell(&ShellCommand::new(["privileged"]).as_root())
+            .expect("shell");
+        assert_eq!(output.stdout, "value");
+        assert_eq!(
+            calls
+                .calls()
+                .into_iter()
+                .map(|call| call.args)
+                .collect::<Vec<_>>(),
+            vec![
+                ["-s", "serial", "root"].map(OsString::from).to_vec(),
+                ["-s", "serial", "wait-for-device"]
+                    .map(OsString::from)
+                    .to_vec(),
+                ["-s", "serial", "shell", "privileged"]
+                    .map(OsString::from)
+                    .to_vec(),
+            ]
+        );
+    }
+}

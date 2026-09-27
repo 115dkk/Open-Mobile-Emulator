@@ -6,7 +6,7 @@ import type {
 } from './contracts';
 
 export const sampleSnapshot: AppSnapshot = {
-  contractVersion: 3, productVersion: '0.1.0', phase: 'wizard', blocker: null,
+  contractVersion: 4, productVersion: '0.1.0', phase: 'wizard', blocker: null,
   host: { rows: [], ready: false, inspectedAt: null },
   wizard: {
     step: 'hostCheck', canContinue: false, canSkip: false, download: null,
@@ -17,7 +17,8 @@ export const sampleSnapshot: AppSnapshot = {
     state: 'stopped', bootCompleted: false, adbConnected: false, hosting: 'none',
     resolution: null, lastExit: null, fps: null, startedAt: null, imageId: null,
     androidVersion: null, apiLevel: null, capabilities: { probedAt: null, items: [] },
-    deviceId: null, adbAddress: '127.0.0.1:5555', rootEnabled: null, mediaVolume: null,
+    deviceId: null, deviceIdDecimal: null, googleAccounts: null, registrationOpenedAt: null,
+    addAccountSupported: false, pid: null, adbAddress: '127.0.0.1:5555', rootEnabled: null, mediaVolume: null,
   },
   apps: { available: false, items: [], install: null },
   input: {
@@ -97,7 +98,8 @@ export function fixtureBridge(
     openScreenshotsFolder: apply,
     openHomeFolder: apply,
     copyToClipboard: apply,
-    openRegistrationPage: apply,
+    openRegistrationPage: apply,
+    googleAccountAddOpen: apply,
     guestWindowToFront: apply,
     watchSnapshot: () => Promise.resolve(() => Promise.resolve()),
     watchProgress: () => Promise.resolve(() => Promise.resolve()),

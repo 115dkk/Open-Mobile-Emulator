@@ -42,8 +42,8 @@ describe('native bridge', () => {
       [() => controllerBridge.artifactDownloadCancel(), 'artifact_download_cancel', undefined],
       [() => controllerBridge.guestImageSelect('image'), 'guest_image_select', { id: 'image' }],
       [() => controllerBridge.guestCreate('image', 32), 'guest_create', { imageId: 'image', sizeGib: 32 }],
-      [() => controllerBridge.guestSelect('default'), 'guest_select', { name: 'default' }],
-      [() => controllerBridge.guestDelete('old'), 'guest_delete', { name: 'old' }],
+      [() => controllerBridge.guestSelect('default'), 'guest_select', { id: 'default' }],
+      [() => controllerBridge.guestDelete('old'), 'guest_delete', { id: 'old' }],
       [() => controllerBridge.guestReinstall('default'), 'guest_reinstall', { name: 'default' }],
       [() => controllerBridge.guestStart(), 'guest_start', undefined],
       [() => controllerBridge.guestStop(), 'guest_stop', undefined],
@@ -80,6 +80,7 @@ describe('native bridge', () => {
       [() => controllerBridge.openHomeFolder(), 'open_home_folder', undefined],
       [() => controllerBridge.copyToClipboard('deviceId'), 'copy_to_clipboard', { item: 'deviceId' }],
       [() => controllerBridge.openRegistrationPage(), 'open_registration_page', undefined],
+      [() => controllerBridge.googleAccountAddOpen(), 'google_account_add_open', undefined],
       [() => controllerBridge.guestWindowToFront(), 'guest_window_to_front', undefined],
     ];
     for (const [operation, command, args] of cases) {

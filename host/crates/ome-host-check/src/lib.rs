@@ -4,6 +4,10 @@
 #![forbid(unsafe_code)]
 
 use std::collections::BTreeMap;
+#[cfg(windows)]
+use std::path::{Path, PathBuf};
+#[cfg(windows)]
+use std::process::Command;
 
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -45,8 +49,24 @@ pub enum FeatureState {
 pub struct QemuFound {
     /// Parsed or publisher-provided version text.
     pub version: String,
-    /// Discovery source such as an environment override or product bundle.
+    /// Discovery source such as the product bundle or a development installation.
     pub source: String,
+    /// Absolute path to `qemu-system-x86_64.exe`.
+    pub program: String,
+    /// Read-only UEFI code image discovered beside this QEMU installation.
+    pub firmware_code: Option<String>,
+    /// UEFI variable-store template copied for newly created virtual machines.
+    pub firmware_vars_template: Option<String>,
+}
+
+/// A discovered Android debugging tool.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdbFound {
+    /// Parsed adb version text when the executable reported it.
+    pub version: String,
+    /// Absolute path to `adb.exe`.
+    pub program: String,
 }
 
 /// Read-only host observation seam.
@@ -67,7 +87,7 @@ pub trait HostProbe: Send + Sync {
     /// Reports whether required firmware files are present.
     fn firmware(&self) -> Probe<bool>;
     /// Reports the discovered adb version string, or confirmed absence.
-    fn adb(&self) -> Probe<Option<String>>;
+    fn adb(&self) -> Probe<Option<AdbFound>>;
     /// Reports available bytes on the volume that holds OME home.
     fn free_disk_bytes(&self) -> Probe<u64>;
     /// Reports total physical memory in bytes.
@@ -418,8 +438,8 @@ pub enum ProbeValue {
     Feature(FeatureState),
     /// Optional virtual-machine executable observation.
     Qemu(Option<QemuFound>),
-    /// Optional Android debugging tool version.
-    Adb(Option<String>),
+    /// Optional Android debugging tool discovery result.
+    Adb(Option<AdbFound>),
     /// Free storage bytes.
     Bytes(u64),
     /// Total physical memory bytes.
@@ -461,7 +481,7 @@ impl HostProbe for TableProbe {
         bool_value(self.value(HostCheckId::FirmwarePresent)?)
     }
 
-    fn adb(&self) -> Probe<Option<String>> {
+    fn adb(&self) -> Probe<Option<AdbFound>> {
         match self.value(HostCheckId::AdbPresent)? {
             ProbeValue::Adb(value) => Ok(value.clone()),
             _ => Err(ProbeError::InvalidData),
@@ -529,15 +549,15 @@ impl HostProbe for WindowsProbe {
     }
 
     fn qemu(&self) -> Probe<Option<QemuFound>> {
-        Err(ProbeError::Unwired)
+        Ok(find_qemu())
     }
 
     fn firmware(&self) -> Probe<bool> {
-        Err(ProbeError::Unwired)
+        Ok(find_qemu().is_some_and(|found| found.firmware_code.is_some()))
     }
 
-    fn adb(&self) -> Probe<Option<String>> {
-        Err(ProbeError::Unwired)
+    fn adb(&self) -> Probe<Option<AdbFound>> {
+        Ok(find_adb())
     }
 
     fn free_disk_bytes(&self) -> Probe<u64> {
@@ -551,6 +571,133 @@ impl HostProbe for WindowsProbe {
     fn logical_processors(&self) -> Probe<u32> {
         Err(ProbeError::Unwired)
     }
+}
+
+#[cfg(windows)]
+fn find_qemu() -> Option<QemuFound> {
+    let mut candidates = Vec::new();
+    if let Ok(executable) = std::env::current_exe()
+        && let Some(directory) = executable.parent()
+    {
+        candidates.push((directory.join("qemu/bin"), "product-bundle"));
+        candidates.push((directory.join("qemu"), "product-bundle"));
+    }
+    let local_app_data = std::env::var_os("LOCALAPPDATA")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| PathBuf::from("C:/Users/USER/AppData/Local"));
+    candidates.push((
+        local_app_data.join("OpenMobileEmulator/qemu-build/out/bin"),
+        "custom-build",
+    ));
+    candidates.push((PathBuf::from("C:/Program Files/qemu"), "distribution"));
+
+    for (directory, source) in candidates {
+        let program = directory.join("qemu-system-x86_64.exe");
+        if !program.is_file() {
+            continue;
+        }
+        let (firmware_code, firmware_vars_template) = find_firmware(&directory)
+            .map(|(code, vars)| (Some(path_text(&code)), Some(path_text(&vars))))
+            .unwrap_or((None, None));
+        return Some(QemuFound {
+            version: command_version(&program, &["--version"]),
+            source: source.to_owned(),
+            program: path_text(&program),
+            firmware_code,
+            firmware_vars_template,
+        });
+    }
+    find_on_path("qemu-system-x86_64.exe").map(|program| {
+        let directory = program.parent().unwrap_or_else(|| Path::new("."));
+        let (firmware_code, firmware_vars_template) = find_firmware(directory)
+            .map(|(code, vars)| (Some(path_text(&code)), Some(path_text(&vars))))
+            .unwrap_or((None, None));
+        QemuFound {
+            version: command_version(&program, &["--version"]),
+            source: "path".to_owned(),
+            program: path_text(&program),
+            firmware_code,
+            firmware_vars_template,
+        }
+    })
+}
+
+#[cfg(windows)]
+fn find_firmware(binary_directory: &Path) -> Option<(PathBuf, PathBuf)> {
+    let parent = binary_directory.parent();
+    let mut directories = vec![binary_directory.join("share")];
+    if let Some(parent) = parent {
+        directories.push(parent.join("share"));
+    }
+    let mut with_nested = Vec::new();
+    for directory in directories {
+        with_nested.push(directory.join("qemu"));
+        with_nested.push(directory);
+    }
+    for directory in with_nested {
+        for (code, vars) in [
+            ("edk2-x86_64-code.fd", "edk2-i386-vars.fd"),
+            ("OVMF_CODE.fd", "OVMF_VARS.fd"),
+        ] {
+            let code = directory.join(code);
+            let vars = directory.join(vars);
+            if code.is_file() && vars.is_file() {
+                return Some((code, vars));
+            }
+        }
+    }
+    None
+}
+
+#[cfg(windows)]
+fn find_adb() -> Option<AdbFound> {
+    let mut candidates = Vec::new();
+    if let Some(path) = std::env::var_os("OME_ADB").filter(|value| !value.is_empty()) {
+        candidates.push(PathBuf::from(path));
+    }
+    if let Some(home) = std::env::var_os("ANDROID_HOME").filter(|value| !value.is_empty()) {
+        candidates.push(PathBuf::from(home).join("platform-tools/adb.exe"));
+    }
+    if let Some(local) = std::env::var_os("LOCALAPPDATA").filter(|value| !value.is_empty()) {
+        candidates.push(PathBuf::from(local).join("Android/Sdk/platform-tools/adb.exe"));
+    }
+    candidates
+        .into_iter()
+        .find(|path| path.is_file())
+        .or_else(|| find_on_path("adb.exe"))
+        .map(|program| AdbFound {
+            version: command_version(&program, &["version"]),
+            program: path_text(&program),
+        })
+}
+
+#[cfg(windows)]
+fn find_on_path(name: &str) -> Option<PathBuf> {
+    let path = std::env::var_os("PATH")?;
+    std::env::split_paths(&path)
+        .map(|directory| directory.join(name))
+        .find(|candidate| candidate.is_file())
+}
+
+#[cfg(windows)]
+fn command_version(program: &Path, args: &[&str]) -> String {
+    Command::new(program)
+        .args(args)
+        .output()
+        .ok()
+        .filter(|output| output.status.success())
+        .and_then(|output| String::from_utf8(output.stdout).ok())
+        .and_then(|output| output.lines().next().map(str::trim).map(str::to_owned))
+        .filter(|line| !line.is_empty())
+        .unwrap_or_else(|| "unknown".to_owned())
+}
+
+#[cfg(windows)]
+fn path_text(path: &Path) -> String {
+    path.canonicalize()
+        .unwrap_or_else(|_| path.to_path_buf())
+        .to_string_lossy()
+        .into_owned()
 }
 
 #[cfg(test)]
@@ -571,12 +718,18 @@ mod tests {
                 ProbeValue::Qemu(Some(QemuFound {
                     version: "11.1".to_owned(),
                     source: "bundle".to_owned(),
+                    program: "C:/qemu/qemu-system-x86_64.exe".to_owned(),
+                    firmware_code: Some("C:/qemu/share/edk2-x86_64-code.fd".to_owned()),
+                    firmware_vars_template: Some("C:/qemu/share/edk2-i386-vars.fd".to_owned()),
                 })),
             )
             .with(HostCheckId::FirmwarePresent, ProbeValue::Bool(true))
             .with(
                 HostCheckId::AdbPresent,
-                ProbeValue::Adb(Some("37".to_owned())),
+                ProbeValue::Adb(Some(AdbFound {
+                    version: "37".to_owned(),
+                    program: "C:/adb.exe".to_owned(),
+                })),
             )
             .with(
                 HostCheckId::DiskSpace,

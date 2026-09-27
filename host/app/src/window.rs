@@ -5,6 +5,17 @@ use tauri::Manager;
 
 use crate::commands::ShellState;
 
+#[cfg(windows)]
+thread_local! {
+    static DPI_HOSTING_GUARD: std::cell::RefCell<Option<ome_platform_win::DpiHostingGuard>> =
+        const { std::cell::RefCell::new(None) };
+}
+
+#[cfg(windows)]
+pub(crate) fn keep_dpi_guard(guard: ome_platform_win::DpiHostingGuard) {
+    DPI_HOSTING_GUARD.with(|slot| slot.replace(Some(guard)));
+}
+
 pub(crate) fn local_navigation(url: &tauri::Url) -> bool {
     if !url.username().is_empty() || url.password().is_some() {
         return false;
@@ -54,7 +65,8 @@ pub(crate) fn install(app: &tauri::App) -> tauri::Result<()> {
                 Err(_) => false,
             };
             if !hide {
-                // wiring: send a graceful `GuestStop` before allowing the window to close.
+                api.prevent_close();
+                crate::commands::request_app_exit(handle.app_handle(), &state);
             }
             if hide {
                 api.prevent_close();

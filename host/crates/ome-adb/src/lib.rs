@@ -9,7 +9,7 @@ use std::fs::{self, File};
 use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
 
@@ -138,10 +138,10 @@ pub struct RecordedCall {
 }
 
 /// Queue-backed test runner that records each invocation.
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct RecordedRunner {
-    calls: Mutex<Vec<RecordedCall>>,
-    outputs: Mutex<VecDeque<Result<Output, RecordedError>>>,
+    calls: Arc<Mutex<Vec<RecordedCall>>>,
+    outputs: Arc<Mutex<VecDeque<Result<Output, RecordedError>>>>,
 }
 
 /// Cloneable error supplied to [`RecordedRunner`].
@@ -154,11 +154,19 @@ pub enum RecordedError {
 }
 
 impl RecordedRunner {
+    /// Appends outputs that future recorded invocations consume in order.
+    pub fn extend(&self, outputs: impl IntoIterator<Item = Result<Output, RecordedError>>) {
+        self.outputs
+            .lock()
+            .expect("recorded outputs lock")
+            .extend(outputs);
+    }
+
     /// Creates a runner whose queued outputs are consumed in order.
     pub fn new(outputs: impl IntoIterator<Item = Result<Output, RecordedError>>) -> Self {
         Self {
-            calls: Mutex::new(Vec::new()),
-            outputs: Mutex::new(outputs.into_iter().collect()),
+            calls: Arc::new(Mutex::new(Vec::new())),
+            outputs: Arc::new(Mutex::new(outputs.into_iter().collect())),
         }
     }
 
@@ -331,6 +339,42 @@ impl AdbSession {
             self.clock
                 .sleep(Duration::from_secs(2).min(timeout - elapsed));
         }
+    }
+
+    /// Runs one raw operating-system shell command and preserves stdout and the remote exit code.
+    ///
+    /// Arguments remain separate all the way to `adb`; callers must not join them into a shell
+    /// string. A nonzero remote exit code is returned in [`Output`] so generation adapters can
+    /// decide whether an unavailable command is a capability result or an error.
+    pub fn shell(&self, args: &[String]) -> Result<Output, AdbError> {
+        if args.is_empty() || args.iter().any(|argument| argument.is_empty()) {
+            return Err(AdbError::InvalidArgument);
+        }
+        let mut command = self.serial_prefix();
+        command.push(OsString::from("shell"));
+        command.extend(args.iter().map(OsString::from));
+        self.run(&command, COMMAND_TIMEOUT)
+    }
+
+    /// Restarts adbd as root and waits briefly for the selected device to return.
+    pub fn root(&self) -> Result<(), AdbError> {
+        self.expect_success(&self.serial_args(["root"]), COMMAND_TIMEOUT)?;
+        self.wait_for_device(COMMAND_TIMEOUT)
+    }
+
+    /// Pushes one trusted local file to an absolute operating-system path.
+    pub fn push(&self, local: &Path, remote: &str) -> Result<(), AdbError> {
+        if !local.is_file() || !remote.starts_with('/') || remote.chars().any(char::is_whitespace) {
+            return Err(AdbError::InvalidArgument);
+        }
+        let mut command = self.serial_prefix();
+        command.extend([
+            OsString::from("push"),
+            local.as_os_str().to_owned(),
+            OsString::from(remote),
+        ]);
+        self.expect_success(&command, INSTALL_TIMEOUT)?;
+        Ok(())
     }
 
     /// Reads one Android system property.
@@ -1093,6 +1137,45 @@ mod tests {
         session
             .install(&AppPackage::open(path).expect("open archive"))
             .expect("install archive");
+    }
+
+    #[test]
+    fn raw_shell_root_and_push_keep_arguments_separate() {
+        let directory = tempfile::tempdir().expect("temp directory");
+        let local = directory.path().join("query.sql");
+        fs::write(&local, b"select 1;").expect("fixture");
+        let runner = RecordedRunner::new([
+            success(
+                "value
+",
+            ),
+            success(
+                "restarting adbd as root
+",
+            ),
+            success(""),
+            success(
+                "1 file pushed
+",
+            ),
+        ]);
+        let calls = runner.clone();
+        let session =
+            AdbSession::new("adb.exe", "serial".to_owned(), Box::new(runner)).expect("session");
+        let output = session
+            .shell(&["content".to_owned(), "query".to_owned()])
+            .expect("shell output");
+        assert_eq!(text(&output.stdout).trim(), "value");
+        session.root().expect("root and wait");
+        session
+            .push(&local, "/data/local/tmp/query.sql")
+            .expect("push");
+        let calls = calls.calls();
+        assert_eq!(calls[0].args, ["-s", "serial", "shell", "content", "query"]);
+        assert_eq!(calls[1].args, ["-s", "serial", "root"]);
+        assert_eq!(calls[2].args, ["-s", "serial", "wait-for-device"]);
+        assert_eq!(calls[3].args[0..3], ["-s", "serial", "push"]);
+        assert_eq!(calls[3].args[4], "/data/local/tmp/query.sql");
     }
 
     fn write_zip(path: &Path, entries: &[(&str, &[u8])]) {

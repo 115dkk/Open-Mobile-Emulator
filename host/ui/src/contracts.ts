@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Open Mobile Emulator contributors
 // Read-only presentation contracts mirroring ome-runtime contract.rs field for field.
 
-export const CONTRACT_VERSION = 3;
+export const CONTRACT_VERSION = 4;
 
 export type AppPhase = 'wizard' | 'main';
 export type BlockerKind = 'virtualizationOff' | 'qemuMissing' | 'hypervisorPlatformOff';
@@ -95,6 +95,11 @@ export interface GuestView {
   readonly apiLevel: number | null;
   readonly capabilities: CapabilityReport;
   readonly deviceId: string | null;
+  readonly deviceIdDecimal: string | null;
+  readonly googleAccounts: number | null;
+  readonly registrationOpenedAt: string | null;
+  readonly addAccountSupported: boolean;
+  readonly pid: number | null;
   readonly adbAddress: string | null;
   readonly rootEnabled: boolean | null;
   readonly mediaVolume: number | null;
@@ -245,8 +250,8 @@ export interface ControllerBridge {
   artifactDownloadCancel(): Promise<AppSnapshot>;
   guestImageSelect(id: string): Promise<AppSnapshot>;
   guestCreate(imageId: string, sizeGib: number): Promise<AppSnapshot>;
-  guestSelect(name: string): Promise<AppSnapshot>;
-  guestDelete(name: string): Promise<AppSnapshot>;
+  guestSelect(id: string): Promise<AppSnapshot>;
+  guestDelete(id: string): Promise<AppSnapshot>;
   guestReinstall(name: string): Promise<AppSnapshot>;
   guestStart(): Promise<AppSnapshot>;
   guestStop(): Promise<AppSnapshot>;
@@ -283,6 +288,7 @@ export interface ControllerBridge {
   openHomeFolder(): Promise<AppSnapshot>;
   copyToClipboard(item: ClipboardItem): Promise<AppSnapshot>;
   openRegistrationPage(): Promise<AppSnapshot>;
+  googleAccountAddOpen(): Promise<AppSnapshot>;
   guestWindowToFront(): Promise<AppSnapshot>;
   /** Subscribe to snapshot pushes. */
   watchSnapshot(notify: (snapshot: AppSnapshot) => void): Promise<() => Promise<void>>;

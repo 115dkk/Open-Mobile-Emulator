@@ -249,7 +249,12 @@ fn representative_snapshot() -> AppSnapshot {
             android_version: Some("13".to_owned()),
             api_level: Some(33),
             capabilities: capabilities(),
-            device_id: Some("1234567890".to_owned()),
+            device_id: Some("499602d2".to_owned()),
+            device_id_decimal: Some("1234567890".to_owned()),
+            google_accounts: Some(1),
+            registration_opened_at: Some("2026-09-27T12:00:00+09:00".to_owned()),
+            add_account_supported: true,
+            pid: Some(4242),
             adb_address: Some("127.0.0.1:5555".to_owned()),
             root_enabled: Some(false),
             media_volume: Some(8),
@@ -350,10 +355,10 @@ fn every_command() -> Vec<Command> {
             size_gib: 32,
         },
         Command::GuestSelect {
-            name: "default".to_owned(),
+            id: "default".to_owned(),
         },
         Command::GuestDelete {
-            name: "old".to_owned(),
+            id: "old".to_owned(),
         },
         Command::GuestReinstall {
             name: "default".to_owned(),
@@ -444,6 +449,7 @@ fn every_command() -> Vec<Command> {
             item: ClipboardItem::DeviceId,
         },
         Command::OpenRegistrationPage,
+        Command::GoogleAccountAddOpen,
         Command::GuestWindowToFront,
     ]
 }

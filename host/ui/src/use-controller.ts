@@ -99,8 +99,8 @@ export function useController(bridge: ControllerBridge): ControllerState {
     artifactDownloadCancel: () => execute(() => bridge.artifactDownloadCancel()),
     guestImageSelect: (id) => execute(() => bridge.guestImageSelect(id)),
     guestCreate: (imageId, sizeGib) => execute(() => bridge.guestCreate(imageId, sizeGib)),
-    guestSelect: (name) => execute(() => bridge.guestSelect(name)),
-    guestDelete: (name) => execute(() => bridge.guestDelete(name)),
+    guestSelect: (id) => execute(() => bridge.guestSelect(id)),
+    guestDelete: (id) => execute(() => bridge.guestDelete(id)),
     guestReinstall: (name) => execute(() => bridge.guestReinstall(name)),
     guestStart: () => execute(() => bridge.guestStart()),
     guestStop: () => execute(() => bridge.guestStop()),
@@ -136,7 +136,8 @@ export function useController(bridge: ControllerBridge): ControllerState {
     openScreenshotsFolder: () => execute(() => bridge.openScreenshotsFolder()),
     openHomeFolder: () => execute(() => bridge.openHomeFolder()),
     copyToClipboard: (item) => execute(() => bridge.copyToClipboard(item)),
-    openRegistrationPage: () => execute(() => bridge.openRegistrationPage()),
+    openRegistrationPage: () => execute(() => bridge.openRegistrationPage()),
+    googleAccountAddOpen: () => execute(() => bridge.googleAccountAddOpen()),
     guestWindowToFront: () => execute(() => bridge.guestWindowToFront()),
   }), [bridge, execute]);
 

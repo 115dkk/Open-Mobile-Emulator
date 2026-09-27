@@ -54,6 +54,7 @@ fn main() {
         "open_home_folder",
         "copy_to_clipboard",
         "open_registration_page",
+        "google_account_add_open",
         "guest_window_to_front",
     ]);
     tauri_build::try_build(tauri_build::Attributes::new().app_manifest(manifest))

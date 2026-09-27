@@ -4,39 +4,122 @@
 
 mod admission;
 mod commands;
+mod desktop;
 mod events;
 mod tray;
 mod window;
 
-use std::path::PathBuf;
+use std::time::Duration;
 
-use ome_runtime::{AppIssue, AppRuntime, OmeHome, RuntimeDeps};
+use ome_adb::{AdbSession, ProcessRunner};
+use ome_runtime::{AppIssue, AppRuntime, Desktop, OmeHome, RuntimeDeps};
+#[cfg(windows)]
+use ome_supervisor::windows_adapter::WindowsProcessAdapter;
+use ome_supervisor::{Supervisor, SupervisorPolicy, TcpQmpFactory};
 use tauri::Manager;
 
-fn initialize_runtime() -> Result<AppRuntime, AppIssue> {
+use crate::desktop::WindowsDesktop;
+
+fn initialize_runtime(manifest_root: &std::path::Path) -> Result<AppRuntime, AppIssue> {
     let home = OmeHome::from_path(OmeHome::resolve()).map_err(|error| {
         eprintln!("OME home resolution failed: {error}");
         commands::storage_issue()
     })?;
     #[cfg(windows)]
-    let probe = Box::new(ome_runtime::WindowsProbe);
+    let probe = ome_runtime::WindowsProbe;
     #[cfg(not(windows))]
-    let probe = Box::new(ome_runtime::TableProbe::new());
+    let probe = ome_runtime::TableProbe::new();
+    let adb = ome_host_adb(&probe);
+    let desktop: Box<dyn Desktop> = Box::new(WindowsDesktop::default());
+    #[cfg(windows)]
+    let supervisor = Some(Box::new(Supervisor::new(
+        WindowsProcessAdapter,
+        TcpQmpFactory,
+        home.subdir("logs").map_err(|error| {
+            eprintln!("OME log directory resolution failed: {error}");
+            commands::storage_issue()
+        })?,
+        SupervisorPolicy::default(),
+    )) as Box<dyn ome_runtime::GuestProcess>);
+    #[cfg(not(windows))]
+    let supervisor = None;
     AppRuntime::open(
         home,
         RuntimeDeps {
-            probe,
+            probe: Box::new(probe),
             artifacts: None,
-            adb: None,
-            images_dir: Some(
-                PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../manifests/images"),
-            ),
-            artifacts_manifest: Some(
-                PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../manifests/artifacts.json"),
-            ),
+            adb,
+            supervisor,
+            desktop,
+            window_host: Box::new(ome_window_host::GuestWindowHost::default()),
+            family_adapter: None,
+            images_dir: Some(manifest_root.join("images")),
+            artifacts_manifest: Some(manifest_root.join("artifacts.json")),
             product_version: env!("CARGO_PKG_VERSION").to_owned(),
         },
     )
+}
+
+fn ome_host_adb(probe: &dyn ome_host_check::HostProbe) -> Option<AdbSession> {
+    let found = probe.adb().ok().flatten()?;
+    AdbSession::new(
+        found.program,
+        "127.0.0.1:5555".to_owned(),
+        Box::new(ProcessRunner),
+    )
+    .ok()
+}
+
+fn start_event_pump(app: tauri::AppHandle, shell: commands::ShellState) {
+    let receiver = shell.runtime.lock().ok().and_then(|guard| {
+        guard
+            .as_ref()
+            .ok()
+            .and_then(AppRuntime::subscribe_guest_events)
+    });
+    let Some(receiver) = receiver else { return };
+    if let Err(error) = std::thread::Builder::new()
+        .name("ome-runtime-events".to_owned())
+        .spawn(move || {
+            loop {
+                let event = receiver.recv_timeout(Duration::from_secs(1));
+                let Ok(mut guard) = shell.runtime.lock() else {
+                    break;
+                };
+                let Ok(runtime) = &mut *guard else {
+                    break;
+                };
+                let before = runtime.snapshot();
+                match event {
+                    Ok(event) => runtime.ingest_guest_event(event),
+                    Err(std::sync::mpsc::RecvTimeoutError::Timeout) => runtime.tick(),
+                    Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => break,
+                }
+                let after = runtime.snapshot();
+                drop(guard);
+                if after != before {
+                    events::snapshot(&app, &after);
+                    tray::update_power_label(&app, after.guest.state);
+                }
+                let exit_requested = shell
+                    .exit_after_stop
+                    .lock()
+                    .ok()
+                    .and_then(|deadline| *deadline);
+                if exit_requested.is_some_and(|requested| {
+                    matches!(
+                        after.guest.state,
+                        ome_runtime::GuestState::Stopped | ome_runtime::GuestState::Failed
+                    ) || requested.elapsed() >= Duration::from_secs(40)
+                }) {
+                    app.exit(0);
+                    break;
+                }
+            }
+        })
+    {
+        eprintln!("runtime event pump could not start: {error}");
+    }
 }
 
 /// Starts the native Open Mobile Emulator shell.
@@ -46,10 +129,31 @@ pub fn run() {
             window::show_main(app);
         }))
         .setup(|app| {
-            // Keep an open failure intact so app_snapshot reports it to the UI.
-            app.manage(commands::ShellState::new(initialize_runtime()));
+            // Mixed hosting is thread-affine, so keep the guard on Tauri's window thread.
+            #[cfg(windows)]
+            let dpi_guard = ome_platform_win::set_thread_dpi_hosting_mixed()
+                .map_err(|error| tauri::Error::Io(std::io::Error::other(error)))?;
+            let manifest_root = if cfg!(debug_assertions) {
+                std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../manifests")
+            } else {
+                app.path().resource_dir()?.join("manifests")
+            };
+            let shell = commands::ShellState::new(initialize_runtime(&manifest_root));
+            app.manage(shell.clone());
             window::install(app)?;
+            #[cfg(windows)]
+            if let Some(main) = app.get_webview_window("main") {
+                let raw = main.hwnd()?.0 as usize as u64;
+                if let Ok(mut guard) = shell.runtime.lock()
+                    && let Ok(runtime) = &mut *guard
+                {
+                    runtime.set_host_window(raw);
+                }
+            }
             tray::install(app)?;
+            #[cfg(windows)]
+            window::keep_dpi_guard(dpi_guard);
+            start_event_pump(app.handle().clone(), shell);
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -103,6 +207,7 @@ pub fn run() {
             commands::open_home_folder,
             commands::copy_to_clipboard,
             commands::open_registration_page,
+            commands::google_account_add_open,
             commands::guest_window_to_front,
         ])
         .run(tauri::generate_context!())

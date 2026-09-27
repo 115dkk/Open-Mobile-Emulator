@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Copyright (C) 2026 Open Mobile Emulator contributors
 use std::sync::{Arc, Mutex};
+use std::time::Instant;
 
 use ome_runtime::{
     AppIssue, AppRuntime, AppSnapshot, Binding, ClipboardItem, Command, HelpTopic, InputProfile,
@@ -13,6 +14,7 @@ use crate::{admission::CommandAdmission, events};
 #[derive(Clone)]
 pub(crate) struct ShellState {
     pub(crate) runtime: Arc<Mutex<Result<AppRuntime, AppIssue>>>,
+    pub(crate) exit_after_stop: Arc<Mutex<Option<Instant>>>,
     admission: CommandAdmission,
 }
 
@@ -20,6 +22,7 @@ impl ShellState {
     pub(crate) fn new(runtime: Result<AppRuntime, AppIssue>) -> Self {
         Self {
             runtime: Arc::new(Mutex::new(runtime)),
+            exit_after_stop: Arc::new(Mutex::new(None)),
             admission: CommandAdmission::default(),
         }
     }
@@ -106,7 +109,6 @@ command_no_args!(host_check_refresh, Command::HostCheckRefresh);
 command_no_args!(wizard_continue, Command::WizardContinue);
 command_no_args!(wizard_skip, Command::WizardSkip);
 command_no_args!(wizard_defer, Command::WizardDefer);
-command_no_args!(app_quit, Command::AppQuit);
 command_no_args!(whpx_enable, Command::WhpxEnable);
 command_no_args!(artifact_download_start, Command::ArtifactDownloadStart);
 command_no_args!(artifact_download_cancel, Command::ArtifactDownloadCancel);
@@ -126,7 +128,50 @@ command_no_args!(open_logs_folder, Command::OpenLogsFolder);
 command_no_args!(open_screenshots_folder, Command::OpenScreenshotsFolder);
 command_no_args!(open_home_folder, Command::OpenHomeFolder);
 command_no_args!(open_registration_page, Command::OpenRegistrationPage);
+command_no_args!(google_account_add_open, Command::GoogleAccountAddOpen);
 command_no_args!(guest_window_to_front, Command::GuestWindowToFront);
+
+pub(crate) fn request_app_exit(app: &AppHandle, state: &ShellState) {
+    let should_wait = state
+        .runtime
+        .lock()
+        .ok()
+        .and_then(|mut guard| {
+            let runtime = guard.as_mut().ok()?;
+            let snapshot = runtime.snapshot();
+            if matches!(
+                snapshot.guest.state,
+                ome_runtime::GuestState::Stopped | ome_runtime::GuestState::Failed
+            ) {
+                Some(false)
+            } else {
+                match runtime.apply(Command::GuestStop) {
+                    Ok(_) => Some(true),
+                    Err(issue) => {
+                        eprintln!("guest stop before app exit failed: {}", issue.code);
+                        Some(false)
+                    }
+                }
+            }
+        })
+        .unwrap_or(false);
+    if should_wait {
+        if let Ok(mut deadline) = state.exit_after_stop.lock() {
+            deadline.get_or_insert_with(Instant::now);
+        }
+    } else {
+        app.exit(0);
+    }
+}
+
+#[tauri::command]
+pub(crate) async fn app_quit(
+    app: AppHandle,
+    state: State<'_, ShellState>,
+) -> Result<AppSnapshot, AppIssue> {
+    request_app_exit(&app, &state);
+    app_snapshot(state).await
+}
 
 #[tauri::command]
 pub(crate) async fn open_help(
@@ -167,17 +212,17 @@ pub(crate) async fn guest_create(
 pub(crate) async fn guest_select(
     app: AppHandle,
     state: State<'_, ShellState>,
-    name: String,
+    id: String,
 ) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::GuestSelect { name }).await
+    apply(app, &state, Command::GuestSelect { id }).await
 }
 #[tauri::command]
 pub(crate) async fn guest_delete(
     app: AppHandle,
     state: State<'_, ShellState>,
-    name: String,
+    id: String,
 ) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::GuestDelete { name }).await
+    apply(app, &state, Command::GuestDelete { id }).await
 }
 #[tauri::command]
 pub(crate) async fn guest_reinstall(

@@ -1,0 +1,524 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+// Copyright (C) 2026 Open Mobile Emulator contributors
+//! Versioned per-guest metadata stored beside each persistent virtual disk.
+#![forbid(unsafe_code)]
+
+use std::fs::{self, File, OpenOptions};
+use std::io::{self, Read, Write};
+use std::path::{Component, Path, PathBuf};
+
+use ome_guest_image::{DeviceId, ProbeItem, ProbeOutcome, ProbeState};
+use serde::{Deserialize, Serialize};
+use thiserror::Error;
+
+/// Current `guest.json` schema version.
+pub const GUEST_SCHEMA_VERSION: u32 = 1;
+/// Maximum accepted metadata size.
+pub const MAX_GUEST_BYTES: usize = 256 * 1024;
+const ADOPTED_IMAGE_ID: &str = "bliss-16.9.7-android-13";
+const ADOPTED_ANDROID_VERSION: &str = "13";
+const ADOPTED_API_LEVEL: u32 = 33;
+
+/// Stable persisted state for one installed operating system.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct GuestRecord {
+    /// Safe directory and runtime identifier.
+    pub id: String,
+    /// Source image profile identifier.
+    pub image_id: String,
+    /// User-facing Android version.
+    pub android_version: String,
+    /// Android API level used to select a generation adapter.
+    pub api_level: u32,
+    /// Current virtual-disk file size.
+    pub disk_bytes: u64,
+    /// Creation time in RFC 3339 when known.
+    pub created_at: Option<String>,
+    /// Most recent successful process start.
+    pub last_started_at: Option<String>,
+    /// Stored first-boot capability result and values.
+    pub capabilities: StoredCapabilities,
+    /// GSF Android ID in both accepted forms.
+    pub device_id: Option<StoredDeviceId>,
+    /// Last time the registration page was opened for this operating system.
+    pub registration_opened_at: Option<String>,
+    /// Whether applications may request root, or unknown before probing.
+    pub root_enabled: Option<bool>,
+}
+
+impl GuestRecord {
+    /// Applies one complete capability probe result.
+    pub fn apply_probe(&mut self, outcome: &ProbeOutcome, probed_at: String) {
+        self.capabilities = StoredCapabilities {
+            probed_at: Some(probed_at),
+            items: outcome
+                .items
+                .iter()
+                .map(|(item, state)| StoredCapabilityItem {
+                    id: StoredProbeItem::from(*item),
+                    state: StoredProbeState::from(*state),
+                })
+                .collect(),
+            native_bridge: outcome.native_bridge.clone(),
+            media_volume: outcome.media_volume,
+            google_accounts: outcome.google_accounts,
+            foreground_package: outcome.foreground.clone(),
+            display: outcome.display.map(|display| StoredDisplay {
+                width: display.width,
+                height: display.height,
+                density_dpi: display.density_dpi,
+            }),
+            packages: outcome
+                .packages
+                .iter()
+                .map(|package| StoredPackage {
+                    package: package.package.clone(),
+                    version_code: package.version_code,
+                })
+                .collect(),
+        };
+        self.device_id = outcome.device_id.as_ref().map(StoredDeviceId::from);
+        self.root_enabled = outcome.root_enabled;
+    }
+}
+
+/// Persisted capability probe report and parsed values.
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoredCapabilities {
+    /// Probe time in RFC 3339.
+    pub probed_at: Option<String>,
+    /// Stable item list.
+    pub items: Vec<StoredCapabilityItem>,
+    /// Native bridge library when configured.
+    pub native_bridge: Option<String>,
+    /// Media stream volume index.
+    pub media_volume: Option<u32>,
+    /// Signed-in Google account count.
+    pub google_accounts: Option<u32>,
+    /// Foreground package at probe time.
+    pub foreground_package: Option<String>,
+    /// Display dimensions and density.
+    pub display: Option<StoredDisplay>,
+    /// Third-party packages observed by the probe.
+    pub packages: Vec<StoredPackage>,
+}
+
+/// Persisted capability item.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoredCapabilityItem {
+    /// Capability identifier.
+    pub id: StoredProbeItem,
+    /// Availability result.
+    pub state: StoredProbeState,
+}
+
+/// Stable serialized probe identifiers, independent from debug names in the image crate.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum StoredProbeItem {
+    BootMarker,
+    AppList,
+    DisplaySize,
+    MediaVolume,
+    DeviceId,
+    Screenshot,
+    ForegroundApp,
+    Multitouch,
+    NativeBridge,
+    Root,
+}
+
+impl From<ProbeItem> for StoredProbeItem {
+    fn from(value: ProbeItem) -> Self {
+        match value {
+            ProbeItem::BootMarker => Self::BootMarker,
+            ProbeItem::AppList => Self::AppList,
+            ProbeItem::DisplaySize => Self::DisplaySize,
+            ProbeItem::MediaVolume => Self::MediaVolume,
+            ProbeItem::DeviceId => Self::DeviceId,
+            ProbeItem::Screenshot => Self::Screenshot,
+            ProbeItem::ForegroundApp => Self::ForegroundApp,
+            ProbeItem::Multitouch => Self::Multitouch,
+            ProbeItem::NativeBridge => Self::NativeBridge,
+            ProbeItem::Root => Self::Root,
+        }
+    }
+}
+
+/// Stable serialized probe states.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum StoredProbeState {
+    Available,
+    Unavailable,
+    Unknown,
+}
+
+impl From<ProbeState> for StoredProbeState {
+    fn from(value: ProbeState) -> Self {
+        match value {
+            ProbeState::Available => Self::Available,
+            ProbeState::Unavailable => Self::Unavailable,
+            ProbeState::Unknown => Self::Unknown,
+        }
+    }
+}
+
+/// Persisted GSF Android ID.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoredDeviceId {
+    pub decimal: String,
+    pub hex: String,
+}
+
+impl From<&DeviceId> for StoredDeviceId {
+    fn from(value: &DeviceId) -> Self {
+        Self {
+            decimal: value.decimal.clone(),
+            hex: value.hex.clone(),
+        }
+    }
+}
+
+/// Persisted display value from a capability probe.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoredDisplay {
+    pub width: u32,
+    pub height: u32,
+    pub density_dpi: u32,
+}
+
+/// Persisted package value from a capability probe.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoredPackage {
+    pub package: String,
+    pub version_code: Option<u64>,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct GuestDocument {
+    version: u32,
+    id: String,
+    image_id: String,
+    android_version: String,
+    api_level: u32,
+    disk_bytes: u64,
+    created_at: Option<String>,
+    last_started_at: Option<String>,
+    capabilities: StoredCapabilities,
+    device_id: Option<StoredDeviceId>,
+    registration_opened_at: Option<String>,
+    root_enabled: Option<bool>,
+}
+
+impl From<&GuestRecord> for GuestDocument {
+    fn from(record: &GuestRecord) -> Self {
+        Self {
+            version: GUEST_SCHEMA_VERSION,
+            id: record.id.clone(),
+            image_id: record.image_id.clone(),
+            android_version: record.android_version.clone(),
+            api_level: record.api_level,
+            disk_bytes: record.disk_bytes,
+            created_at: record.created_at.clone(),
+            last_started_at: record.last_started_at.clone(),
+            capabilities: record.capabilities.clone(),
+            device_id: record.device_id.clone(),
+            registration_opened_at: record.registration_opened_at.clone(),
+            root_enabled: record.root_enabled,
+        }
+    }
+}
+
+impl From<GuestDocument> for GuestRecord {
+    fn from(document: GuestDocument) -> Self {
+        Self {
+            id: document.id,
+            image_id: document.image_id,
+            android_version: document.android_version,
+            api_level: document.api_level,
+            disk_bytes: document.disk_bytes,
+            created_at: document.created_at,
+            last_started_at: document.last_started_at,
+            capabilities: document.capabilities,
+            device_id: document.device_id,
+            registration_opened_at: document.registration_opened_at,
+            root_enabled: document.root_enabled,
+        }
+    }
+}
+
+/// Atomic metadata store under `<home>/vm`.
+#[derive(Clone, Debug)]
+pub struct GuestStore {
+    root: PathBuf,
+}
+
+impl GuestStore {
+    /// Creates a store descriptor. The caller owns creation of the fixed `vm` directory.
+    pub fn new(root: impl Into<PathBuf>) -> Self {
+        Self { root: root.into() }
+    }
+
+    /// Returns one validated guest directory.
+    pub fn guest_dir(&self, id: &str) -> Result<PathBuf, GuestStoreError> {
+        validate_id(id)?;
+        Ok(self.root.join(id))
+    }
+
+    /// Lists metadata documents and adopts disk-only directories in memory.
+    pub fn load_all(&self) -> Result<Vec<GuestRecord>, GuestStoreError> {
+        let mut records = Vec::new();
+        for entry in fs::read_dir(&self.root).map_err(GuestStoreError::Io)? {
+            let entry = entry.map_err(GuestStoreError::Io)?;
+            if !entry.file_type().map_err(GuestStoreError::Io)?.is_dir() {
+                continue;
+            }
+            let Some(id) = entry.file_name().to_str().map(str::to_owned) else {
+                return Err(GuestStoreError::InvalidId);
+            };
+            validate_id(&id)?;
+            let directory = entry.path();
+            let disk = directory.join("disk.qcow2");
+            let metadata = directory.join("guest.json");
+            if metadata.is_file() {
+                let mut record = load_document(&metadata)?;
+                if record.id != id {
+                    return Err(GuestStoreError::InvalidId);
+                }
+                if disk.is_file() {
+                    record.disk_bytes = disk.metadata().map_err(GuestStoreError::Io)?.len();
+                }
+                records.push(record);
+            } else if disk.is_file() {
+                records.push(GuestRecord {
+                    id,
+                    image_id: ADOPTED_IMAGE_ID.to_owned(),
+                    android_version: ADOPTED_ANDROID_VERSION.to_owned(),
+                    api_level: ADOPTED_API_LEVEL,
+                    disk_bytes: disk.metadata().map_err(GuestStoreError::Io)?.len(),
+                    created_at: None,
+                    last_started_at: None,
+                    capabilities: StoredCapabilities::default(),
+                    device_id: None,
+                    registration_opened_at: None,
+                    root_enabled: None,
+                });
+            }
+        }
+        records.sort_by(|left, right| left.id.cmp(&right.id));
+        Ok(records)
+    }
+
+    /// Writes one metadata document through a staging file and atomic rename.
+    pub fn save(&self, record: &GuestRecord) -> Result<(), GuestStoreError> {
+        validate_id(&record.id)?;
+        let directory = self.guest_dir(&record.id)?;
+        fs::create_dir_all(&directory).map_err(GuestStoreError::Io)?;
+        let path = directory.join("guest.json");
+        let staging = directory.join("guest.json.staging");
+        let bytes = serde_json::to_vec_pretty(&GuestDocument::from(record))
+            .map_err(GuestStoreError::Json)?;
+        if bytes.len() > MAX_GUEST_BYTES {
+            return Err(GuestStoreError::TooLarge);
+        }
+        let mut file = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&staging)
+            .map_err(GuestStoreError::Io)?;
+        let result = (|| {
+            file.write_all(&bytes).map_err(GuestStoreError::Io)?;
+            file.sync_all().map_err(GuestStoreError::Io)?;
+            drop(file);
+            fs::rename(&staging, &path).map_err(GuestStoreError::Io)
+        })();
+        if result.is_err() {
+            let _ = fs::remove_file(staging);
+        }
+        result
+    }
+
+    /// Loads the selected virtual-machine identifier from `<home>/state.json`.
+    pub fn load_active(&self) -> Result<Option<String>, GuestStoreError> {
+        let path = self
+            .root
+            .parent()
+            .ok_or(GuestStoreError::InvalidId)?
+            .join("state.json");
+        let bytes = match fs::read(&path) {
+            Ok(bytes) => bytes,
+            Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(None),
+            Err(error) => return Err(GuestStoreError::Io(error)),
+        };
+        let state: ActiveState = serde_json::from_slice(&bytes).map_err(GuestStoreError::Json)?;
+        if state.version != GUEST_SCHEMA_VERSION {
+            return Err(GuestStoreError::UnsupportedVersion);
+        }
+        if let Some(id) = state.active_guest.as_deref() {
+            validate_id(id)?;
+        }
+        Ok(state.active_guest)
+    }
+
+    /// Atomically persists the selected virtual-machine identifier.
+    pub fn save_active(&self, active_guest: Option<&str>) -> Result<(), GuestStoreError> {
+        if let Some(id) = active_guest {
+            validate_id(id)?;
+        }
+        let home = self.root.parent().ok_or(GuestStoreError::InvalidId)?;
+        let path = home.join("state.json");
+        let staging = home.join("state.json.staging");
+        let bytes = serde_json::to_vec_pretty(&ActiveState {
+            version: GUEST_SCHEMA_VERSION,
+            active_guest: active_guest.map(str::to_owned),
+        })
+        .map_err(GuestStoreError::Json)?;
+        let mut file = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&staging)
+            .map_err(GuestStoreError::Io)?;
+        let result = (|| {
+            file.write_all(&bytes).map_err(GuestStoreError::Io)?;
+            file.sync_all().map_err(GuestStoreError::Io)?;
+            drop(file);
+            fs::rename(&staging, &path).map_err(GuestStoreError::Io)
+        })();
+        if result.is_err() {
+            let _ = fs::remove_file(staging);
+        }
+        result
+    }
+
+    /// Removes one complete virtual-machine directory after runtime state validation.
+    pub fn delete(&self, id: &str) -> Result<(), GuestStoreError> {
+        let directory = self.guest_dir(id)?;
+        if directory.exists() {
+            fs::remove_dir_all(directory).map_err(GuestStoreError::Io)?;
+        }
+        Ok(())
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct ActiveState {
+    version: u32,
+    active_guest: Option<String>,
+}
+
+fn load_document(path: &Path) -> Result<GuestRecord, GuestStoreError> {
+    let metadata = path.metadata().map_err(GuestStoreError::Io)?;
+    if !metadata.is_file() || metadata.len() > MAX_GUEST_BYTES as u64 {
+        return Err(GuestStoreError::TooLarge);
+    }
+    let mut bytes = Vec::with_capacity(metadata.len() as usize);
+    File::open(path)
+        .map_err(GuestStoreError::Io)?
+        .take(MAX_GUEST_BYTES as u64 + 1)
+        .read_to_end(&mut bytes)
+        .map_err(GuestStoreError::Io)?;
+    if bytes.len() > MAX_GUEST_BYTES {
+        return Err(GuestStoreError::TooLarge);
+    }
+    let document: GuestDocument = serde_json::from_slice(&bytes).map_err(GuestStoreError::Json)?;
+    if document.version != GUEST_SCHEMA_VERSION {
+        return Err(GuestStoreError::UnsupportedVersion);
+    }
+    validate_id(&document.id)?;
+    Ok(document.into())
+}
+
+fn validate_id(id: &str) -> Result<(), GuestStoreError> {
+    let path = Path::new(id);
+    let one_normal_component = {
+        let mut components = path.components();
+        matches!(components.next(), Some(Component::Normal(_))) && components.next().is_none()
+    };
+    let valid_text = !id.is_empty()
+        && id.len() <= 80
+        && id
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_'));
+    if one_normal_component && valid_text {
+        Ok(())
+    } else {
+        Err(GuestStoreError::InvalidId)
+    }
+}
+
+/// Guest metadata storage failure.
+#[derive(Debug, Error)]
+pub enum GuestStoreError {
+    #[error("guest identifier is invalid")]
+    InvalidId,
+    #[error("guest metadata version is unsupported")]
+    UnsupportedVersion,
+    #[error("guest metadata is too large")]
+    TooLarge,
+    #[error("guest metadata JSON is invalid")]
+    Json(#[source] serde_json::Error),
+    #[error("guest metadata storage failed")]
+    Io(#[source] io::Error),
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn adopts_disk_only_directory_and_persists_flat_document_on_save() {
+        let directory = tempfile::tempdir().expect("temp directory");
+        let root = directory.path().join("vm");
+        let guest = root.join("default");
+        fs::create_dir_all(&guest).expect("guest directory");
+        fs::write(guest.join("disk.qcow2"), [0_u8; 11]).expect("disk");
+        let store = GuestStore::new(&root);
+        let record = store.load_all().expect("load").remove(0);
+        assert_eq!(record.id, "default");
+        assert_eq!(record.disk_bytes, 11);
+        assert_eq!(record.api_level, 33);
+        assert!(!guest.join("guest.json").exists());
+        store.save(&record).expect("save");
+        let document: serde_json::Value =
+            serde_json::from_slice(&fs::read(guest.join("guest.json")).expect("metadata bytes"))
+                .expect("metadata JSON");
+        assert_eq!(document["version"], 1);
+        assert_eq!(document["id"], "default");
+        assert!(document.get("guest").is_none());
+        assert_eq!(store.load_all().expect("reload"), [record]);
+    }
+
+    #[test]
+    fn replaces_an_existing_document_without_leaving_staging_data() {
+        let directory = tempfile::tempdir().expect("temp directory");
+        let root = directory.path().join("vm");
+        let guest = root.join("default");
+        fs::create_dir_all(&guest).expect("guest directory");
+        fs::write(guest.join("disk.qcow2"), [0_u8; 11]).expect("disk");
+        let store = GuestStore::new(&root);
+        let mut record = store.load_all().expect("load").remove(0);
+        store.save(&record).expect("first save");
+        record.last_started_at = Some("2026-09-27T12:00:00+09:00".to_owned());
+        store.save(&record).expect("replacement save");
+        assert_eq!(store.load_all().expect("reload"), [record]);
+        assert!(!guest.join("guest.json.staging").exists());
+    }
+
+    #[test]
+    fn rejects_directory_escape() {
+        let directory = tempfile::tempdir().expect("temp directory");
+        let store = GuestStore::new(directory.path());
+        assert!(matches!(
+            store.guest_dir("../other"),
+            Err(GuestStoreError::InvalidId)
+        ));
+    }
+}

@@ -112,7 +112,7 @@ const guestSummary = object<GuestSummary>({
   lastStartedAt: nullable(string), capabilities: capabilityReport,
 });
 const snapshot = object<AppSnapshot>({
-  contractVersion: (value, path) => { if (value !== 3) fail(path, 'contract version 3'); },
+  contractVersion: (value, path) => { if (value !== 4) fail(path, 'contract version 4'); },
   productVersion: string, phase: enumeration('wizard', 'main'),
   blocker: nullable(object({ kind: enumeration('virtualizationOff', 'qemuMissing', 'hypervisorPlatformOff') })),
   host: object<HostReport>({
@@ -135,7 +135,8 @@ const snapshot = object<AppSnapshot>({
     lastExit: nullable(object<LastExit>({ kind: enumeration('userStop', 'guestReset', 'bootTimeout', 'crash', 'startFailed'), at: string, logPath: nullable(string) })),
     imageId: nullable(string), androidVersion: nullable(string), apiLevel: nullable(number),
     capabilities: capabilityReport, deviceId: nullable(string), adbAddress: nullable(string), rootEnabled: nullable(boolean),
-    mediaVolume: nullable(number),
+    mediaVolume: nullable(number), deviceIdDecimal: nullable(string), googleAccounts: nullable(number),
+    registrationOpenedAt: nullable(string), addAccountSupported: boolean, pid: nullable(number),
   }),
   apps: object<AppsView>({
     available: boolean, install: nullable(transfer),
@@ -174,8 +175,8 @@ const commandShapes: Record<string, Record<string, Check>> = {
   hostCheckRefresh: {}, wizardContinue: {}, wizardSkip: {}, wizardDefer: {},
   openHelp: { topic: enumeration('virtualizationBios', 'hypervisorPlatform', 'googleAccount', 'adbSecurity', 'qemuSource', 'thirdPartyNotices', 'releaseNotes') },
   appQuit: {}, whpxEnable: {}, artifactDownloadStart: {}, artifactDownloadCancel: {}, guestImageSelect: { id: string },
-  guestCreate: { imageId: string, sizeGib: number }, guestSelect: { name: string },
-  guestDelete: { name: string }, guestReinstall: { name: string }, guestStart: {}, guestStop: {},
+  guestCreate: { imageId: string, sizeGib: number }, guestSelect: { id: string },
+  guestDelete: { id: string }, guestReinstall: { name: string }, guestStart: {}, guestStop: {},
   guestRestart: {}, guestRootSet: { enabled: boolean }, guestVolumeSet: { index: number }, stageRectChanged: { rect }, screenshotSave: {},
   appInstallPick: {}, appInstallCancel: {}, appUninstall: { package: string }, appLaunch: { package: string },
   inputProfileSelect: { id: nullable(string) }, inputSuspendToggle: {}, inputOverlayToggle: {}, inputProfileDelete: { id: string },
@@ -187,7 +188,7 @@ const commandShapes: Record<string, Record<string, Check>> = {
   stageFitSet: { fit: enumeration('fitWindow', 'oneToOne') },
   settingsSave: { settings: object<SettingsInput>(settingsInput) }, updateCheck: {}, updateInstall: {},
   diagnosticsExport: {}, openLogsFolder: {}, openScreenshotsFolder: {}, openHomeFolder: {},
-  copyToClipboard: { item: enumeration('deviceId', 'adbAddress') }, openRegistrationPage: {}, guestWindowToFront: {},
+  copyToClipboard: { item: enumeration('deviceId', 'adbAddress') }, openRegistrationPage: {}, googleAccountAddOpen: {}, guestWindowToFront: {},
 };
 
 describe('Rust/TypeScript contract fixtures', () => {

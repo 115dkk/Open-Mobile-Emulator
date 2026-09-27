@@ -165,3 +165,148 @@ pub fn wizard_cannot_skip() -> AppIssue {
         next_action: Some("화면의 안내에 따라 설정을 마치십시오.".to_owned()),
     }
 }
+
+/// Returns an issue when no installed operating system matches the request.
+pub fn guest_not_found() -> AppIssue {
+    AppIssue {
+        code: "operating_system_not_found".to_owned(),
+        message: "선택한 운영체제를 찾지 못했습니다.".to_owned(),
+        next_action: Some("설치된 운영체제 목록에서 다시 선택하십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when a destructive operation requires a stopped operating system.
+pub fn operating_system_running() -> AppIssue {
+    AppIssue {
+        code: "operating_system_running".to_owned(),
+        message: "운영체제가 실행 중이어서 요청한 작업을 하지 않았습니다.".to_owned(),
+        next_action: Some("운영체제를 끈 뒤 다시 시도하십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when a running, booted operating system is required.
+pub fn operating_system_not_running() -> AppIssue {
+    AppIssue {
+        code: "operating_system_not_running".to_owned(),
+        message: "운영체제가 실행 중이 아니어서 요청한 작업을 하지 못했습니다.".to_owned(),
+        next_action: Some(
+            "가상 머신을 시작하고 운영체제 부팅이 끝난 뒤 다시 시도하십시오.".to_owned(),
+        ),
+    }
+}
+
+/// Returns an issue when the selected generation lacks a command.
+pub fn operating_system_unsupported() -> AppIssue {
+    AppIssue {
+        code: "operating_system_unsupported".to_owned(),
+        message: "이 운영체제에서는 요청한 작업을 지원하지 않습니다.".to_owned(),
+        next_action: Some(
+            "다른 운영체제를 선택하거나 앱을 업데이트한 뒤 다시 시도하십시오.".to_owned(),
+        ),
+    }
+}
+
+/// Returns an issue when virtual-machine supervision is unavailable.
+pub fn process_unavailable() -> AppIssue {
+    AppIssue {
+        code: "virtual_machine_unavailable".to_owned(),
+        message: "가상 머신을 제어할 수 없어 요청한 작업을 하지 못했습니다.".to_owned(),
+        next_action: Some("앱을 종료한 뒤 다시 실행하십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when a start request was rejected synchronously.
+pub fn process_start_failed() -> AppIssue {
+    AppIssue {
+        code: "virtual_machine_start_failed".to_owned(),
+        message: "가상 머신이 시작하지 못했습니다.".to_owned(),
+        next_action: Some(
+            "다시 시작을 시도하십시오. 반복될 경우 로그를 첨부해 문제를 보고하십시오.".to_owned(),
+        ),
+    }
+}
+
+/// Returns an issue when validated runtime configuration could not be built.
+pub fn invalid_guest_configuration() -> AppIssue {
+    AppIssue {
+        code: "invalid_virtual_machine_configuration".to_owned(),
+        message: "가상 머신 설정값이 올바르지 않아 시작하지 않았습니다.".to_owned(),
+        next_action: Some("운영체제 설정을 확인한 뒤 다시 시도하십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when QEMU discovery has no usable executable.
+pub fn qemu_unavailable() -> AppIssue {
+    AppIssue {
+        code: "virtual_machine_files_missing".to_owned(),
+        message: "가상 머신 구성 요소를 찾을 수 없습니다.".to_owned(),
+        next_action: Some("앱을 다시 설치하십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when UEFI firmware discovery is incomplete.
+pub fn firmware_unavailable() -> AppIssue {
+    AppIssue {
+        code: "virtual_machine_firmware_missing".to_owned(),
+        message: "가상 머신 시작에 필요한 펌웨어를 찾을 수 없습니다.".to_owned(),
+        next_action: Some("앱을 다시 설치하십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when per-operating-system metadata cannot be read or saved.
+pub fn guest_storage_unavailable() -> AppIssue {
+    AppIssue {
+        code: "operating_system_storage_unavailable".to_owned(),
+        message: "운영체제 정보를 저장하지 못했습니다.".to_owned(),
+        next_action: Some(
+            "저장 공간과 앱의 파일 접근 권한을 확인한 뒤 다시 시도하십시오.".to_owned(),
+        ),
+    }
+}
+
+/// Returns an issue when native desktop integration rejects a trusted destination.
+pub fn desktop_unavailable() -> AppIssue {
+    AppIssue {
+        code: "desktop_open_failed".to_owned(),
+        message: "요청한 페이지나 폴더를 열지 못했습니다.".to_owned(),
+        next_action: Some("Windows 기본 앱 설정을 확인한 뒤 다시 시도하십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when clipboard access fails.
+pub fn clipboard_unavailable() -> AppIssue {
+    AppIssue {
+        code: "clipboard_unavailable".to_owned(),
+        message: "클립보드에 복사하지 못했습니다.".to_owned(),
+        next_action: Some(
+            "다른 앱이 클립보드를 사용 중인지 확인한 뒤 다시 시도하십시오.".to_owned(),
+        ),
+    }
+}
+
+/// Returns an issue when a snapshot-owned value is not available yet.
+pub fn value_unknown() -> AppIssue {
+    AppIssue {
+        code: "value_unknown".to_owned(),
+        message: "복사할 값을 아직 확인하지 못했습니다.".to_owned(),
+        next_action: Some("운영체제 부팅이 끝난 뒤 다시 시도하십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when the GSF ID has not been probed.
+pub fn device_id_unknown() -> AppIssue {
+    AppIssue {
+        code: "device_id_unknown".to_owned(),
+        message: "기기 ID를 아직 확인하지 못했습니다.".to_owned(),
+        next_action: Some("운영체제 부팅이 끝난 뒤 다시 시도하십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when the separate native window cannot be activated.
+pub fn window_unavailable() -> AppIssue {
+    AppIssue {
+        code: "operating_system_window_unavailable".to_owned(),
+        message: "운영체제 창을 앞으로 가져오지 못했습니다.".to_owned(),
+        next_action: Some("작업 표시줄에서 운영체제 창을 선택하십시오.".to_owned()),
+    }
+}

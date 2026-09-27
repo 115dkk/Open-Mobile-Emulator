@@ -38,11 +38,11 @@
   },
   {
     "kind": "guestSelect",
-    "name": "default"
+    "id": "default"
   },
   {
     "kind": "guestDelete",
-    "name": "old"
+    "id": "old"
   },
   {
     "kind": "guestReinstall",
@@ -306,6 +306,9 @@
   },
   {
     "kind": "openRegistrationPage"
+  },
+  {
+    "kind": "googleAccountAddOpen"
   },
   {
     "kind": "guestWindowToFront"

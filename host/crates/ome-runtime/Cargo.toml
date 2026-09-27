@@ -12,8 +12,10 @@ description = "Snapshot projection, settings persistence and command dispatch; t
 
 [dependencies]
 ome-guest-config = { path = "../ome-guest-config" }
+ome-supervisor = { path = "../ome-supervisor" }
 ome-artifacts = { path = "../ome-artifacts" }
 ome-host-check = { path = "../ome-host-check" }
+ome-window-host = { path = "../ome-window-host" }
 ome-adb = { path = "../ome-adb" }
 ome-input = { path = "../ome-input" }
 ome-guest-image = { path = "../ome-guest-image" }
@@ -22,8 +24,7 @@ ome-diagnostics = { path = "../ome-diagnostics" }
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
-
-[dev-dependencies]
+jiff.workspace = true
 tempfile = "3.23.0"
 
 [lints]

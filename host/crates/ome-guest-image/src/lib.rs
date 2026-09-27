@@ -149,10 +149,9 @@ impl GuestImageProfile {
             return Err(ProfileError::InvalidApiLevel(self.api_level));
         }
         if self.id.is_empty()
-            || !self
-                .id
-                .bytes()
-                .all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit() || byte == b'-')
+            || !self.id.bytes().all(|byte| {
+                byte.is_ascii_lowercase() || byte.is_ascii_digit() || byte == b'-' || byte == b'.'
+            })
         {
             return Err(ProfileError::InvalidId(self.id.clone()));
         }
@@ -424,6 +423,19 @@ mod tests {
             value.validate(),
             Err(ProfileError::InvalidDate(_))
         ));
+    }
+
+    #[test]
+    fn repository_manifest_profiles_load_and_validate() {
+        // Regression: the shipped profile ID `bliss-16.9.7-android-13` carries dots; rejecting it
+        // made the product fail at start-up with `image_profiles_invalid`.
+        let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../manifests/images");
+        let profiles = GuestImageProfile::load_all(&dir).expect("repository profiles load");
+        assert!(
+            profiles
+                .iter()
+                .any(|profile| profile.id == "bliss-16.9.7-android-13")
+        );
     }
 
     #[test]
