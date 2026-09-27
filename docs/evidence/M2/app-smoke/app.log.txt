@@ -1,1 +1,0 @@
-[0928/024248.802:ERROR:ui\gfx\win\window_impl.cc:172] Failed to unregister class Chrome_WidgetWin_0. Error = 1412
