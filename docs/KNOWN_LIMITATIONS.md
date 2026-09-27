@@ -3,6 +3,11 @@
 - The ARM translator is a proprietary Google binary (`libndk_translation`) that
   ships inside the Bliss OS image. This project did not write it and cannot fix
   it. Replacing it with an open-source translator is a post-release task (P2).
+  Google distributes the emulator images this translator comes from under the
+  Android SDK License Agreement, which grants use "solely to develop
+  applications for compatible implementations of Android" (section 3.1).
+  Running games is outside that scope (`docs/adr/0006-guest-image-distribution.md`).
+  Self-built guest images are released without Google files; see R3.
 - GPU acceleration is OpenGL only, through virglrenderer. Games that require
   Vulkan are unsupported until the gfxstream path exists (P1).
 - The guest is a Google-uncertified device. Play Store and in-app purchases are
