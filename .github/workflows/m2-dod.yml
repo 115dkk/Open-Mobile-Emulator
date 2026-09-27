@@ -1,0 +1,109 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+name: M2 wizard completion
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  wizard:
+    runs-on: windows-2025
+    timeout-minutes: 180
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      OME_DOD_OUTPUT: ${{ runner.temp }}\ome-dod-evidence
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up pinned Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: host/.node-version
+          cache: npm
+          cache-dependency-path: host/package-lock.json
+      - name: Cache Rust build output
+        uses: actions/cache@v4
+        with:
+          path: host/target
+          key: m2-dod-windows-2025-${{ hashFiles('host/Cargo.lock', 'host/rust-toolchain.toml') }}
+      - name: Build product
+        working-directory: host
+        run: |
+          rustup show active-toolchain
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          npm ci
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          npm run build
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          cargo build -p ome-app -p ome-setup --release --features custom-protocol
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Fetch and verify product QEMU
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $destination = Join-Path $env:RUNNER_TEMP 'ome-qemu-release'
+          New-Item -ItemType Directory -Path $destination -Force | Out-Null
+          gh release download qemu-v11.1.1-ome1 --pattern '*.zip' --dir $destination
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $archive = Join-Path $destination 'qemu-ome-v11.1.1-c3d48b7d1e89-win64.zip'
+          $expected = '9a79feccfcb71a1e695ca8ae48376a6274d7e09606054df77ab0f65fc85f8b17'
+          if ((Get-FileHash $archive -Algorithm SHA256).Hash.ToLowerInvariant() -cne $expected) {
+            throw 'QEMU archive digest mismatch'
+          }
+          Expand-Archive -LiteralPath $archive -DestinationPath host/target/release/qemu -Force
+      - name: Fetch private game fixture with read-only key
+        env:
+          OME_FIXTURES_DEPLOY_KEY: ${{ secrets.OME_FIXTURES_DEPLOY_KEY }}
+        run: |
+          $key = Join-Path $env:RUNNER_TEMP 'ome-fixtures-key'
+          try {
+            if ([string]::IsNullOrWhiteSpace($env:OME_FIXTURES_DEPLOY_KEY)) { throw 'Missing fixture deploy key' }
+            [IO.File]::WriteAllText($key, '', [Text.UTF8Encoding]::new($false))
+            $acl = [Security.AccessControl.FileSecurity]::new()
+            $acl.SetAccessRuleProtection($true, $false)
+            $identity = [Security.Principal.WindowsIdentity]::GetCurrent().User
+            $acl.SetOwner($identity)
+            $acl.AddAccessRule([Security.AccessControl.FileSystemAccessRule]::new($identity, 'FullControl', 'Allow'))
+            Set-Acl -LiteralPath $key -AclObject $acl
+            [IO.File]::WriteAllText($key, $env:OME_FIXTURES_DEPLOY_KEY.TrimEnd() + "`n", [Text.UTF8Encoding]::new($false))
+            $env:GIT_SSH_COMMAND = 'ssh -i "' + $key.Replace('\','/') + '" -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new'
+            git clone --depth 1 git@github.com:115dkk/ome-game-fixtures.git (Join-Path $env:RUNNER_TEMP 'fixtures')
+            if ($LASTEXITCODE) { throw 'Private fixture clone failed' }
+          } finally {
+            if (Test-Path -LiteralPath $key) { Remove-Item -LiteralPath $key -Force }
+            Remove-Item Env:OME_FIXTURES_DEPLOY_KEY -ErrorAction SilentlyContinue
+            Remove-Item Env:GIT_SSH_COMMAND -ErrorAction SilentlyContinue
+          }
+      - name: Run fresh-home wizard
+        working-directory: host
+        run: |
+          $env:OME_HOME = if (Test-Path 'D:\') { 'D:\ome-home' } else { Join-Path $env:RUNNER_TEMP 'ome-home' }
+          $env:OME_DOD_APP = Join-Path $PWD 'target/release/ome.exe'
+          $env:OME_DOD_GAME_APK_DIR = Join-Path $env:RUNNER_TEMP 'fixtures/com.epidgames.trickcalrevive'
+          New-Item -ItemType Directory -Path $env:OME_HOME -Force | Out-Null
+          node ../ci/dod/run-dod.mjs
+          $code = $LASTEXITCODE
+          $result = Get-Content (Join-Path $env:OME_DOD_OUTPUT 'dod-result.json') -Raw | ConvertFrom-Json
+          if ($code -ne 0 -or $result.outcome -ne 'passed' -or @($result.steps | Where-Object outcome -eq 'failed').Count) {
+            throw 'Wizard completion failed; see dod-result.json and screenshots'
+          }
+      - name: Check and stage evidence only
+        id: evidence
+        if: always()
+        run: |
+          if (!(Test-Path $env:OME_DOD_OUTPUT)) { throw 'No evidence folder was produced' }
+          $publish = Join-Path $env:RUNNER_TEMP 'ome-dod-publish'
+          pwsh -NoProfile -File ci/dod/publish-evidence.ps1 -Source $env:OME_DOD_OUTPUT -Destination $publish
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          "path=$publish" >> $env:GITHUB_OUTPUT
+      - name: Upload completion evidence
+        if: always() && steps.evidence.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: m2-wizard-evidence
+          path: ${{ steps.evidence.outputs.path }}
+          if-no-files-found: error
+          retention-days: 7
+          include-hidden-files: false

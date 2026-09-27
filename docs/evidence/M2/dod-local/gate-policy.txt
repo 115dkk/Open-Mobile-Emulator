@@ -1,0 +1,22 @@
+SUMMARY forbidden findings=0 candidates=858
+RESULT Check-Forbidden PASS
+SUMMARY manifest findings=0 artifacts=1
+RESULT Check-Manifest PASS
+SUMMARY spdx findings=0 checked=272 candidates=858
+RESULT Check-SpdxHeaders PASS
+UNSAFE host/crates/ome-platform-win/src/lib.rs missing-undocumented-block-deny
+SUMMARY unsafe-scope findings=1 checked=54
+RESULT Check-UnsafeScope FAIL(1)
+[95m
+[95mStarting discovery in 6 files.[0m
+[95mDiscovery found 42 tests in 308ms.[0m
+[95mRunning tests.[0m
+[32m[+] C:\Open Mobile Emulator\tests\ci\Check-Forbidden.Tests.ps1[0m[90m 3.09s (2.59s|369ms)[0m
+[32m[+] C:\Open Mobile Emulator\tests\ci\Check-Manifest.Tests.ps1[0m[90m 3.93s (3.84s|61ms)[0m
+[32m[+] C:\Open Mobile Emulator\tests\ci\Check-SpdxHeaders.Tests.ps1[0m[90m 2.42s (2.37s|31ms)[0m
+[32m[+] C:\Open Mobile Emulator\tests\ci\Check-UnsafeScope.Tests.ps1[0m[90m 2.93s (2.88s|33ms)[0m
+[32m[+] C:\Open Mobile Emulator\tests\launcher\OME.Common.Tests.ps1[0m[90m 424ms (294ms|65ms)[0m
+[32m[+] C:\Open Mobile Emulator\tests\launcher\Start-Guest.Tests.ps1[0m[90m 679ms (593ms|68ms)[0m
+[97mTests completed in 13.5s[0m
+[32mTests Passed: 42, [0m[90mFailed: 0, [0m[90mSkipped: 0, [0m[90mInconclusive: 0, [0m[37m[0m[90mNotRun: 0[0m
+RESULT Pester PASS

@@ -1,0 +1,171 @@
+{
+  "startedAt": "2026-09-27T18:16:40.890Z",
+  "outcome": "failed",
+  "steps": [
+    {
+      "name": "preflight",
+      "start": "2026-09-27T18:16:40.890Z",
+      "outcome": "passed",
+      "end": "2026-09-27T18:16:41.652Z",
+      "durationMs": 760
+    },
+    {
+      "name": "launch",
+      "start": "2026-09-27T18:16:41.653Z",
+      "outcome": "passed",
+      "end": "2026-09-27T18:16:44.614Z",
+      "durationMs": 2961
+    },
+    {
+      "name": "S1.1-host-check",
+      "start": "2026-09-27T18:16:44.615Z",
+      "outcome": "failed",
+      "error": "Error: Host check still blocks Continue after visible 다시 확인; no product bypass permitted\n    at file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:187:40\n    at async step (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:70:9)\n    at async file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:178:3",
+      "end": "2026-09-27T18:16:49.405Z",
+      "durationMs": 4790
+    },
+    {
+      "name": "cleanup",
+      "start": "2026-09-27T18:16:50.978Z",
+      "outcome": "passed",
+      "end": "2026-09-27T18:16:55.876Z",
+      "durationMs": 4897
+    },
+    {
+      "name": "S1.2-WHPX",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "S1.4-download",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "S1.5-installer",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "S1.6-first-boot",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "S1.7-game-install",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "game-launch",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "stop",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "quit",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    }
+  ],
+  "gaps": [
+    "pulled.json has no version fields; installed version can only be read after successful installation.",
+    "Host check blocks wizard: {\"kind\":\"virtualizationOff\"}; blocked rows: cpuVirtualization, hypervisorPlatform, rebootPending, whpxAvailable, diskSpace"
+  ],
+  "measurements": {},
+  "probeItems": [],
+  "softwareRenderingRetry": false,
+  "environment": {
+    "freeBytes": 85544419328,
+    "processes": [],
+    "killed": 0
+  },
+  "game": {
+    "package": "com.epidgames.trickcalrevive",
+    "versionName": null,
+    "versionCode": null
+  },
+  "qemu": {
+    "source": "C:\\Open Mobile Emulator\\host\\target\\debug\\qemu",
+    "sha256": "82f259806c13f907f9d7462e2f2a876d123c27b814ac0378ffd34f2059960b18",
+    "version": "QEMU emulator version 11.1.1 (v11.1.1-dirty)\r\nCopyright (c) 2003-2026 Fabrice Bellard and the QEMU Project developers\r\n"
+  },
+  "hostVerdict": {
+    "rows": [
+      {
+        "id": "cpuVirtualization",
+        "status": "blocked",
+        "detail": "프로세서 가상화 상태를 확인하지 못했습니다. 컴퓨터를 다시 시작한 뒤 다시 확인하십시오."
+      },
+      {
+        "id": "hypervisorPlatform",
+        "status": "attention",
+        "detail": "Windows 하이퍼바이저 플랫폼 상태를 확인하지 못했습니다. Windows 기능 설정을 확인하십시오."
+      },
+      {
+        "id": "rebootPending",
+        "status": "attention",
+        "detail": "다시 시작이 필요한지 확인하지 못했습니다. Windows 업데이트 상태를 확인하십시오."
+      },
+      {
+        "id": "whpxAvailable",
+        "status": "attention",
+        "detail": "가상화 실행 기능을 확인하지 못했습니다. 컴퓨터를 다시 시작한 뒤 다시 확인하십시오."
+      },
+      {
+        "id": "qemuPresent",
+        "status": "ready",
+        "detail": "가상 머신 실행 파일을 찾았습니다."
+      },
+      {
+        "id": "firmwarePresent",
+        "status": "ready",
+        "detail": "가상 머신 시작에 필요한 펌웨어를 찾았습니다."
+      },
+      {
+        "id": "adbPresent",
+        "status": "ready",
+        "detail": "운영체제 앱 관리 도구를 찾았습니다."
+      },
+      {
+        "id": "diskSpace",
+        "status": "blocked",
+        "detail": "남은 저장 공간을 확인하지 못했습니다. 저장 장치를 확인한 뒤 다시 시도하십시오."
+      }
+    ],
+    "ready": false,
+    "inspectedAt": "2026-09-28T03:16:42+09:00"
+  },
+  "error": "Error: Host check still blocks Continue after visible 다시 확인; no product bypass permitted\n    at file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:187:40\n    at async step (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:70:9)\n    at async file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:178:3",
+  "finalProcesses": [],
+  "temporaryHome": "C:\\Users\\USER\\AppData\\Local\\Temp\\claude\\C--Open-Mobile-Emulator\\5443167b-6434-41c7-b80b-6e15a0fef829\\scratchpad\\dod-home-final",
+  "endedAt": "2026-09-27T18:16:55.876Z"
+}
