@@ -1,0 +1,142 @@
+SPDX-License-Identifier: GPL-2.0-or-later
+M2 completion, round 2, 2026-09-28 KST
+
+RESULT: FAILED AT INSTALLER MENU AUTOMATION. NOT AN M2 COMPLETION CLAIM.
+The repaired host probe passed every row. The product downloaded and verified
+2,429,550,592 bytes from the manifest SourceForge URL, created the fresh disk and
+started its installer QEMU. Native keyboard automation did not select Installation
+reliably: the last attempt booted Live Android. No installed-disk first boot,
+capability probe or game install/launch was attempted after the failed assertion.
+
+Final attempt (round2e), 05:21:42–05:24:46 KST
+Step                         Duration       Outcome
+preflight                    839 ms         passed
+app launch/CDP/capture        4580 ms        passed
+S1.1 host check               1661 ms        passed, all eight rows Ready
+S1.2 WHPX                     1591 ms        passed, already enabled, step skipped
+S1.4 download screen          88568 ms       passed
+  download through verified  85312 ms       2,429,550,592 bytes; 28,478,415.60 B/s
+S1.5 installer                47001 ms       failed before partitioning
+cleanup                      37503 ms       passed, product stop then tray quit
+S1.6 installed first boot     not run
+capability probe             not run; probeItems=[]
+S1.7 game install             not run
+game launch/progression       not run; no game screenshots
+
+App exit=0; finalProcesses=[]. No driver forced cleanup was needed. QEMU shutdown
+went through the product's stop operation (its own timeout may terminate its VM).
+All five round-2 scratch homes' ISO/disk/partial files were removed AFTER every
+process had exited. cleanup-storage-and-processes.txt records each exact relative
+file and size. No developer home/default guest files were changed or deleted.
+
+Build/environment
+- Rebuilt current working tree with npm run build, then
+  cargo build -p ome-app -p ome-setup --features custom-protocol.
+  Both passed; Rust build completed in 9.73 seconds.
+- Windows 11 Education 22621 development host; fresh scratchpad OME_HOME each time.
+- Product bundle QEMU used unchanged beside debug executable, release
+  qemu-v11.1.1-ome1. Previously verified archive SHA-256:
+  9a79feccfcb71a1e695ca8ae48376a6274d7e09606054df77ab0f65fc85f8b17
+  QEMU executable SHA-256 recorded again in every result:
+  82f259806c13f907f9d7462e2f2a876d123c27b814ac0378ffd34f2059960b18
+- Private game APKs were only stat-checked; pulled.json was read. No APK bytes or
+  device identifiers were published. pulled.json has no version fields, so the
+  game version remains null rather than invented.
+
+Changes requested for round 2
+- Node now receives helper output as Buffer and explicitly decodes stdout/stderr
+  using UTF-8. Text files are explicitly UTF-8. Result and driver output contain
+  the literal 다시 확인, checked by UTF-8 decoding; no U+FFFD replacement characters
+  in the final run JSON/log. Earlier console mojibake was not copied forward.
+- Normal virgl installed-disk boot sends NO GRUB keys. The two disk-boot key steps
+  exist only inside softwareRenderingRetry. Not reached locally.
+- Installer completion no longer relies on a fixed 120-second sleep. It captures
+  the guest window and uses built-in Windows English OCR to require Congratulations
+  and installed successfully before clicking 설치 완료. Ceiling is ten minutes.
+  OCR helper was tested against M0/install-20-installed-successfully.png and read
+  the recorded final prompt. No package or OCR language download was performed.
+- Added GRUB-menu and partition-dialog assertions. No blind partition sequence
+  continues after the partition assertion fails.
+- SDL has multiple hidden helper windows. Native discovery now selects its one
+  visible SDL_app window belonging to the owned QEMU process.
+- A prestarted native watcher interrupts the short ISO GRUB countdown immediately
+  when the owned visible window appears. Later input uses SendInput and native
+  focus, with screenshots after each key step. No QMP/adb input bypass was used.
+- S1.7 code now completes the wizard and installs the four game files from 앱,
+  as directed for round 2. This path remains unexecuted.
+
+Five round-2 attempts
+round2: ISO verified in 80.368 s; helper rejected three SDL_app handles (hidden
+  helper windows plus the display). Product cleanup completed.
+round2b: visible-window filter allowed input, but GRUB timeout was missed. Live
+  Android reached Hi there. The ten-minute final-prompt assertion FAILED, correctly
+  preventing 설치 완료. Every planned key step was captured; all remained in scratch
+  because they did not constitute installation. Product cleanup completed.
+round2c: watcher captured GRUB with Installation present; Home+Down*4+Enter led to
+  Live boot rather than the installer. Partition-dialog assertion failed.
+round2d: preserving input-thread attachment did not fix selection; captured
+  selection still showed Live. Partition assertion failed.
+round2e (published final evidence): tried virtual-key SendInput plus a native
+  click to establish SDL focus. Captured GRUB still selected Live, then booted it.
+  Partition assertion failed; product cleanup completed.
+
+Raw final failure
+Error: Expected installer partition dialog; refusing blind partition keystrokes
+  at installGuest (ci/dod/run-dod.mjs:101)
+
+Observed facts do not yet establish whether the remaining cause is driver focus,
+SDL handling, reparenting or product input handling. Do not label it a confirmed
+product keyboard defect. Repeated identical failures were stopped rather than
+switching to QMP/adb, which would violate the wizard/native-input task contract.
+
+Published installer captures (all from final attempt)
+shots/installer-00-grub-menu.png
+shots/installer-01a-grub-select-installation.png
+shots/installer-01-grub-installation.png
+The selection capture shows Live still selected, not Installation. The subsequent
+capture shows the Bliss Live boot animation. No cfdisk/format/copy/final-success
+screen exists in the final attempt. No game progression exists.
+
+Other remaining gaps
+- Enabled WHPX is skipped, not displayed as a separate already-enabled screen.
+- S1.7 lacks launch/screenshot actions; installing/running from 앱 after 완료 is
+  explicitly used, so a strict wizard-only game launch is not certified.
+- Software-rendering retry still needs a visible resume control; that branch was
+  not exercised. No GL failure occurred in these attempts.
+- Game observation code does not yet classify a stable running title screen or
+  handle required guest/game dialogs. It reports needs-review, not false success,
+  after a completed fifteen-minute observation. That code remains untested.
+- The M0 final dialog OCR helper uses built-in Windows PowerShell 5.1 WinRT. It
+  works on this host; language availability on windows-2025 remains unverified.
+
+Evidence layout
+Current final attempt: dod-result.json, driver-output.txt, screenshots, DOM text,
+app-output.txt and logs/*.txt. Profile paths are scrubbed.
+Previous round-1 record retained as attempt-1-local-run.txt and
+attempt-1-dod-result.json. Intermediate round-2 result summaries are
+round2-result.json, round2b-result.json, round2c-result.json, round2d-result.json.
+No APK/XAPK/APKS, ISO, guest disk, fixture checkout or private key is published.
+
+Gates
+node --check: PASS
+PowerShell parser native.ps1, ocr.ps1, publish-evidence.ps1: PASS
+PSScriptAnalyzer: SKIP (module absent)
+ci/Invoke-AllChecks.ps1: exit 0
+  Check-Forbidden PASS; Check-Manifest PASS; Check-SpdxHeaders PASS
+  Check-UnsafeScope PASS; Pester 42 passed, 0 failed
+No workflow dispatched. No commit created. Product source was not edited.
+
+Exact PowerShell rerun (choose a NEW empty home/output each time)
+$root = 'C:/Open Mobile Emulator'
+$scratch = Join-Path $env:LOCALAPPDATA 'Temp/claude/C--Open-Mobile-Emulator/5443167b-6434-41c7-b80b-6e15a0fef829/scratchpad'
+$env:OME_DOD_APP = "$root/host/target/debug/ome.exe"
+$env:OME_HOME = "$scratch/dod-home-next"
+$env:OME_DOD_OUTPUT = "$scratch/dod-evidence-next"
+$env:OME_DOD_GAME_APK_DIR = Join-Path $env:LOCALAPPDATA 'OpenMobileEmulator/apks/com.epidgames.trickcalrevive'
+Set-Location "$root/host"
+cargo build -p ome-app -p ome-setup --features custom-protocol
+node ../ci/dod/run-dod.mjs
+
+Final tasklist
+qemu-system-x86_64.exe: INFO: No tasks are running which match the specified criteria.
+ome.exe: INFO: No tasks are running which match the specified criteria.

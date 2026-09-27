@@ -1,0 +1,174 @@
+{
+  "startedAt": "2026-09-27T21:56:53.797Z",
+  "outcome": "failed",
+  "steps": [
+    {
+      "name": "preflight",
+      "start": "2026-09-27T21:56:53.797Z",
+      "outcome": "passed",
+      "end": "2026-09-27T21:56:54.531Z",
+      "durationMs": 733
+    },
+    {
+      "name": "launch",
+      "start": "2026-09-27T21:56:54.532Z",
+      "outcome": "passed",
+      "end": "2026-09-27T21:56:57.942Z",
+      "durationMs": 3409
+    },
+    {
+      "name": "S1.1-host-check",
+      "start": "2026-09-27T21:56:57.943Z",
+      "outcome": "passed",
+      "end": "2026-09-27T21:56:59.614Z",
+      "durationMs": 1670
+    },
+    {
+      "name": "S1.2-WHPX",
+      "start": "2026-09-27T21:56:59.615Z",
+      "outcome": "passed",
+      "end": "2026-09-27T21:57:01.218Z",
+      "durationMs": 1603
+    },
+    {
+      "name": "S1.4-download",
+      "start": "2026-09-27T21:57:01.218Z",
+      "outcome": "passed",
+      "end": "2026-09-27T21:58:24.958Z",
+      "durationMs": 83739
+    },
+    {
+      "name": "S1.5-installer",
+      "start": "2026-09-27T21:58:24.959Z",
+      "outcome": "failed",
+      "error": "Error: native helper (1):  \u001b[31;1mException: \u001b[0mC:\\Open Mobile Emulator\\ci\\dod\\native.ps1:124\u001b[0m\r\n\u001b[31;1m\u001b[0m\u001b[36;1mLine |\u001b[0m\r\n\u001b[31;1m\u001b[0m\u001b[36;1m\u001b[36;1m 124 | \u001b[0m … ount -ne 1){\u001b[36;1mthrow \"SDL_app window count $($targets.Count) for owned Q …\u001b[0m\r\n\u001b[31;1m\u001b[0m\u001b[36;1m\u001b[36;1m\u001b[0m\u001b[36;1m\u001b[0m\u001b[36;1m     | \u001b[31;1m               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~에서\u001b[0m\r\n\u001b[31;1m\u001b[0m\u001b[36;1m\u001b[36;1m\u001b[0m\u001b[36;1m\u001b[0m\u001b[36;1m\u001b[31;1m\u001b[31;1m\u001b[36;1m     | \u001b[31;1mSDL_app window count 0 for owned QEMU 33140\u001b[0m\r\n\n    at native (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:31:29)\n    at capture (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:63:29)\n    at keys (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:88:30)\n    at async installGuest (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:103:3)\n    at async file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:261:5\n    at async step (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:72:9)\n    at async file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:235:3",
+      "end": "2026-09-27T21:59:10.766Z",
+      "durationMs": 45807
+    },
+    {
+      "name": "cleanup",
+      "start": "2026-09-27T21:59:12.925Z",
+      "outcome": "passed",
+      "end": "2026-09-27T22:00:20.484Z",
+      "durationMs": 67559
+    },
+    {
+      "name": "S1.6-first-boot",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "S1.7-game-install",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "game-launch",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "stop",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "quit",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    }
+  ],
+  "gaps": [
+    "pulled.json has no version fields; installed version can only be read after successful installation.",
+    "WHPX already enabled: product skips S1.2 instead of showing an already-on screen."
+  ],
+  "measurements": {
+    "downloadMs": 80292,
+    "downloadBytes": 2429550592,
+    "downloadAverageBytesPerSecond": 30258937.278931897
+  },
+  "probeItems": [],
+  "softwareRenderingRetry": false,
+  "utf8Check": "다시 확인",
+  "environment": {
+    "killed": 0,
+    "freeBytes": 74948882432,
+    "processes": []
+  },
+  "game": {
+    "package": "com.epidgames.trickcalrevive",
+    "versionName": null,
+    "versionCode": null
+  },
+  "qemu": {
+    "source": "C:\\Open Mobile Emulator\\host\\target\\debug\\qemu",
+    "sha256": "82f259806c13f907f9d7462e2f2a876d123c27b814ac0378ffd34f2059960b18",
+    "version": "QEMU emulator version 11.1.1 (v11.1.1-dirty)\r\nCopyright (c) 2003-2026 Fabrice Bellard and the QEMU Project developers\r\n"
+  },
+  "hostVerdict": {
+    "rows": [
+      {
+        "id": "cpuVirtualization",
+        "status": "ready",
+        "detail": "프로세서 가상화를 사용할 수 있습니다."
+      },
+      {
+        "id": "hypervisorPlatform",
+        "status": "ready",
+        "detail": "Windows 하이퍼바이저 플랫폼이 켜져 있습니다."
+      },
+      {
+        "id": "rebootPending",
+        "status": "ready",
+        "detail": "적용을 기다리는 다시 시작 작업이 없습니다."
+      },
+      {
+        "id": "whpxAvailable",
+        "status": "ready",
+        "detail": "가상화 실행 기능을 사용할 수 있습니다."
+      },
+      {
+        "id": "qemuPresent",
+        "status": "ready",
+        "detail": "가상 머신 실행 파일을 찾았습니다."
+      },
+      {
+        "id": "firmwarePresent",
+        "status": "ready",
+        "detail": "가상 머신 시작에 필요한 펌웨어를 찾았습니다."
+      },
+      {
+        "id": "adbPresent",
+        "status": "ready",
+        "detail": "운영체제 앱 관리 도구를 찾았습니다."
+      },
+      {
+        "id": "diskSpace",
+        "status": "ready",
+        "detail": "운영체제 설치에 필요한 저장 공간이 있습니다."
+      }
+    ],
+    "ready": true,
+    "inspectedAt": "2026-09-28T06:56:55+09:00"
+  },
+  "error": "Error: native helper (1):  \u001b[31;1mException: \u001b[0mC:\\Open Mobile Emulator\\ci\\dod\\native.ps1:124\u001b[0m\r\n\u001b[31;1m\u001b[0m\u001b[36;1mLine |\u001b[0m\r\n\u001b[31;1m\u001b[0m\u001b[36;1m\u001b[36;1m 124 | \u001b[0m … ount -ne 1){\u001b[36;1mthrow \"SDL_app window count $($targets.Count) for owned Q …\u001b[0m\r\n\u001b[31;1m\u001b[0m\u001b[36;1m\u001b[36;1m\u001b[0m\u001b[36;1m\u001b[0m\u001b[36;1m     | \u001b[31;1m               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~에서\u001b[0m\r\n\u001b[31;1m\u001b[0m\u001b[36;1m\u001b[36;1m\u001b[0m\u001b[36;1m\u001b[0m\u001b[36;1m\u001b[31;1m\u001b[31;1m\u001b[36;1m     | \u001b[31;1mSDL_app window count 0 for owned QEMU 33140\u001b[0m\r\n\n    at native (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:31:29)\n    at capture (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:63:29)\n    at keys (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:88:30)\n    at async installGuest (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:103:3)\n    at async file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:261:5\n    at async step (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:72:9)\n    at async file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:235:3",
+  "forcedCleanup": true,
+  "finalProcesses": [],
+  "temporaryHome": "C:\\Users\\USER\\AppData\\Local\\Temp\\claude\\C--Open-Mobile-Emulator\\5443167b-6434-41c7-b80b-6e15a0fef829\\scratchpad\\dod-home-round3d",
+  "endedAt": "2026-09-27T22:00:20.485Z"
+}

@@ -1,56 +1,57 @@
 {
-  "startedAt": "2026-09-27T19:53:11.626Z",
+  "startedAt": "2026-09-27T21:51:27.277Z",
   "outcome": "failed",
   "steps": [
     {
       "name": "preflight",
-      "start": "2026-09-27T19:53:11.626Z",
+      "start": "2026-09-27T21:51:27.277Z",
       "outcome": "passed",
-      "end": "2026-09-27T19:53:12.371Z",
-      "durationMs": 744
+      "end": "2026-09-27T21:51:28.062Z",
+      "durationMs": 784
     },
     {
       "name": "launch",
-      "start": "2026-09-27T19:53:12.372Z",
+      "start": "2026-09-27T21:51:28.063Z",
       "outcome": "passed",
-      "end": "2026-09-27T19:53:15.878Z",
-      "durationMs": 3506
+      "end": "2026-09-27T21:51:33.915Z",
+      "durationMs": 5851
     },
     {
       "name": "S1.1-host-check",
-      "start": "2026-09-27T19:53:15.879Z",
+      "start": "2026-09-27T21:51:33.916Z",
       "outcome": "passed",
-      "end": "2026-09-27T19:53:17.538Z",
-      "durationMs": 1658
+      "end": "2026-09-27T21:51:35.683Z",
+      "durationMs": 1767
     },
     {
       "name": "S1.2-WHPX",
-      "start": "2026-09-27T19:53:17.539Z",
+      "start": "2026-09-27T21:51:35.684Z",
       "outcome": "passed",
-      "end": "2026-09-27T19:53:19.130Z",
-      "durationMs": 1591
+      "end": "2026-09-27T21:51:37.258Z",
+      "durationMs": 1574
     },
     {
       "name": "S1.4-download",
-      "start": "2026-09-27T19:53:19.132Z",
-      "outcome": "passed",
-      "end": "2026-09-27T19:54:42.952Z",
-      "durationMs": 83820
-    },
-    {
-      "name": "S1.5-installer",
-      "start": "2026-09-27T19:54:42.953Z",
+      "start": "2026-09-27T21:51:37.259Z",
       "outcome": "failed",
-      "error": "Error: Timeout: owned SDL_app (native helper (1):  \u001b[31;1mException: \u001b[0mC:\\Open Mobile Emulator\\ci\\dod\\native.ps1:104\u001b[0m\r\n\u001b[31;1m\u001b[0m\u001b[36;1mLine |\u001b[0m\r\n\u001b[31;1m\u001b[0m\u001b[36;1m\u001b[36;1m 104 | \u001b[0m … ount -ne 1){\u001b[36;1mthrow \"SDL_app window count $($targets.Count) for owned Q …\u001b[0m\r\n\u001b[31;1m\u001b[0m\u001b[36;1m\u001b[36;1m\u001b[0m\u001b[36;1m\u001b[0m\u001b[36;1m     | \u001b[31;1m               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~에서\u001b[0m\r\n\u001b[31;1m\u001b[0m\u001b[36;1m\u001b[36;1m\u001b[0m\u001b[36;1m\u001b[0m\u001b[36;1m\u001b[31;1m\u001b[31;1m\u001b[36;1m     | \u001b[31;1mSDL_app window count 3 for owned QEMU 35704\u001b[0m\r\n)\n    at until (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:46:9)\n    at async file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:225:17\n    at async step (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:72:9)\n    at async file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:223:3",
-      "end": "2026-09-27T19:55:15.595Z",
-      "durationMs": 32642
+      "error": "Error: Artifact download failed\n    at file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:224:61\n    at async until (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:42:25)\n    at async file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:222:15\n    at async step (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:72:9)\n    at async file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:220:3",
+      "end": "2026-09-27T21:52:27.491Z",
+      "durationMs": 50232
     },
     {
       "name": "cleanup",
-      "start": "2026-09-27T19:55:17.272Z",
+      "start": "2026-09-27T21:52:29.019Z",
       "outcome": "passed",
-      "end": "2026-09-27T19:55:55.041Z",
-      "durationMs": 37768
+      "end": "2026-09-27T21:52:34.025Z",
+      "durationMs": 5005
+    },
+    {
+      "name": "S1.5-installer",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
     },
     {
       "name": "S1.6-first-boot",
@@ -97,18 +98,14 @@
     "pulled.json has no version fields; installed version can only be read after successful installation.",
     "WHPX already enabled: product skips S1.2 instead of showing an already-on screen."
   ],
-  "measurements": {
-    "downloadMs": 80368,
-    "downloadBytes": 2429550592,
-    "downloadAverageBytesPerSecond": 30230322.914592873
-  },
+  "measurements": {},
   "probeItems": [],
   "softwareRenderingRetry": false,
   "utf8Check": "다시 확인",
   "environment": {
     "processes": [],
     "killed": 0,
-    "freeBytes": 82387349504
+    "freeBytes": 79808585728
   },
   "game": {
     "package": "com.epidgames.trickcalrevive",
@@ -164,10 +161,10 @@
       }
     ],
     "ready": true,
-    "inspectedAt": "2026-09-28T04:53:13+09:00"
+    "inspectedAt": "2026-09-28T06:51:29+09:00"
   },
-  "error": "Error: Timeout: owned SDL_app (native helper (1):  \u001b[31;1mException: \u001b[0mC:\\Open Mobile Emulator\\ci\\dod\\native.ps1:104\u001b[0m\r\n\u001b[31;1m\u001b[0m\u001b[36;1mLine |\u001b[0m\r\n\u001b[31;1m\u001b[0m\u001b[36;1m\u001b[36;1m 104 | \u001b[0m … ount -ne 1){\u001b[36;1mthrow \"SDL_app window count $($targets.Count) for owned Q …\u001b[0m\r\n\u001b[31;1m\u001b[0m\u001b[36;1m\u001b[36;1m\u001b[0m\u001b[36;1m\u001b[0m\u001b[36;1m     | \u001b[31;1m               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~에서\u001b[0m\r\n\u001b[31;1m\u001b[0m\u001b[36;1m\u001b[36;1m\u001b[0m\u001b[36;1m\u001b[0m\u001b[36;1m\u001b[31;1m\u001b[31;1m\u001b[36;1m     | \u001b[31;1mSDL_app window count 3 for owned QEMU 35704\u001b[0m\r\n)\n    at until (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:46:9)\n    at async file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:225:17\n    at async step (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:72:9)\n    at async file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:223:3",
+  "error": "Error: Artifact download failed\n    at file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:224:61\n    at async until (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:42:25)\n    at async file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:222:15\n    at async step (file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:72:9)\n    at async file:///C:/Open%20Mobile%20Emulator/ci/dod/run-dod.mjs:220:3",
   "finalProcesses": [],
-  "temporaryHome": "C:\\Users\\USER\\AppData\\Local\\Temp\\claude\\C--Open-Mobile-Emulator\\5443167b-6434-41c7-b80b-6e15a0fef829\\scratchpad\\dod-home-round2",
-  "endedAt": "2026-09-27T19:55:55.041Z"
+  "temporaryHome": "C:\\Users\\USER\\AppData\\Local\\Temp\\claude\\C--Open-Mobile-Emulator\\5443167b-6434-41c7-b80b-6e15a0fef829\\scratchpad\\dod-home-round3",
+  "endedAt": "2026-09-27T21:52:34.026Z"
 }

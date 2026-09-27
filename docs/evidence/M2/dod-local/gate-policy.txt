@@ -1,21 +1,21 @@
-SUMMARY forbidden findings=0 candidates=885
+SUMMARY forbidden findings=0 candidates=904
 RESULT Check-Forbidden PASS
 SUMMARY manifest findings=0 artifacts=1
 RESULT Check-Manifest PASS
-SUMMARY spdx findings=0 checked=274 candidates=885
+SUMMARY spdx findings=0 checked=276 candidates=904
 RESULT Check-SpdxHeaders PASS
-SUMMARY unsafe-scope findings=0 checked=55
+SUMMARY unsafe-scope findings=0 checked=57
 RESULT Check-UnsafeScope PASS
 [95m
 [95mStarting discovery in 6 files.[0m
-[95mDiscovery found 42 tests in 291ms.[0m
+[95mDiscovery found 42 tests in 318ms.[0m
 [95mRunning tests.[0m
-[32m[+] C:\Open Mobile Emulator\tests\ci\Check-Forbidden.Tests.ps1[0m[90m 3.02s (2.54s|359ms)[0m
-[32m[+] C:\Open Mobile Emulator\tests\ci\Check-Manifest.Tests.ps1[0m[90m 4s (3.94s|40ms)[0m
-[32m[+] C:\Open Mobile Emulator\tests\ci\Check-SpdxHeaders.Tests.ps1[0m[90m 2.53s (2.47s|31ms)[0m
-[32m[+] C:\Open Mobile Emulator\tests\ci\Check-UnsafeScope.Tests.ps1[0m[90m 3.01s (2.96s|34ms)[0m
-[32m[+] C:\Open Mobile Emulator\tests\launcher\OME.Common.Tests.ps1[0m[90m 437ms (295ms|80ms)[0m
-[32m[+] C:\Open Mobile Emulator\tests\launcher\Start-Guest.Tests.ps1[0m[90m 690ms (626ms|48ms)[0m
-[97mTests completed in 13.71s[0m
+[32m[+] C:\Open Mobile Emulator\tests\ci\Check-Forbidden.Tests.ps1[0m[90m 3.57s (3s|450ms)[0m
+[32m[+] C:\Open Mobile Emulator\tests\ci\Check-Manifest.Tests.ps1[0m[90m 4.62s (4.54s|55ms)[0m
+[32m[+] C:\Open Mobile Emulator\tests\ci\Check-SpdxHeaders.Tests.ps1[0m[90m 2.96s (2.9s|45ms)[0m
+[32m[+] C:\Open Mobile Emulator\tests\ci\Check-UnsafeScope.Tests.ps1[0m[90m 3.58s (3.51s|54ms)[0m
+[32m[+] C:\Open Mobile Emulator\tests\launcher\OME.Common.Tests.ps1[0m[90m 495ms (337ms|73ms)[0m
+[32m[+] C:\Open Mobile Emulator\tests\launcher\Start-Guest.Tests.ps1[0m[90m 865ms (790ms|57ms)[0m
+[97mTests completed in 16.12s[0m
 [32mTests Passed: 42, [0m[90mFailed: 0, [0m[90mSkipped: 0, [0m[90mInconclusive: 0, [0m[37m[0m[90mNotRun: 0[0m
 RESULT Pester PASS

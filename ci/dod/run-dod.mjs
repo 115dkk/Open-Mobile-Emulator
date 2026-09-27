@@ -93,10 +93,18 @@ function recognize(name) {
   const value = JSON.parse(r.stdout.toString('utf8')); log('installer-ocr', { name, ...value }); return value.text;
 }
 async function installGuest(pid) {
+  // Clear the create/completion button's webview focus with a real noninteractive UI click.
+  // The product observes SendInput without consuming it; Enter otherwise activates that button.
+  await page.getByRole('heading', { name: '운영체제 설치', exact: true }).click();
   // docs/evidence/M0/guest-install.md 69-94. Never send these to an existing disk.
-  await capture('installer-00-grub-menu', pid);
-  if (!/installation/i.test(recognize('installer-00-grub-menu'))) throw new StopRun('Installer GRUB menu was not reached; no partition keys sent');
-  await keys(pid, '01a-grub-select-installation', 'HOME,DOWN,DOWN,DOWN,DOWN');
+  await until(async () => {
+    native(['-AppPid', String(app.pid), '-QemuPid', String(pid), '-Keys', 'HOME']);
+    await capture('installer-00-grub-menu', pid);
+    return /installation/i.test(recognize('installer-00-grub-menu'));
+  }, 60000, 'installer GRUB menu', 100);
+  await snapshot();
+  await keys(pid, '01a-grub-home', 'HOME');
+  for (let arrow = 1; arrow <= 4; arrow++) await keys(pid, `01a-grub-down-${arrow}`, 'DOWN');
   await keys(pid, '01-grub-installation', 'ENTER', null, 30000);
   if (!/partition/i.test(recognize('installer-01-grub-installation'))) throw new StopRun('Expected installer partition dialog; refusing blind partition keystrokes');
   await keys(pid, '02-partition-menu', null, 'c');

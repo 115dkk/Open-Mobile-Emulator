@@ -1,2 +1,2 @@
-Formatting 'C:\Users\USER\AppData\Local\Temp\claude\C--Open-Mobile-Emulator\5443167b-6434-41c7-b80b-6e15a0fef829\scratchpad\dod-home-round2e\vm\bliss-16-9-7-android-13\disk.qcow2', fmt=qcow2 cluster_size=65536 extended_l2=off compression_type=zlib size=34359738368 lazy_refcounts=off refcount_bits=16
-[0928/052442.328:ERROR:ui\gfx\win\window_impl.cc:172] Failed to unregister class Chrome_WidgetWin_0. Error = 1412
+Formatting 'C:\Users\USER\AppData\Local\Temp\claude\C--Open-Mobile-Emulator\5443167b-6434-41c7-b80b-6e15a0fef829\scratchpad\dod-home-round3f\vm\bliss-16-9-7-android-13\disk.qcow2', fmt=qcow2 cluster_size=65536 extended_l2=off compression_type=zlib size=34359738368 lazy_refcounts=off refcount_bits=16
+[0928/070832.183:ERROR:ui\gfx\win\window_impl.cc:172] Failed to unregister class Chrome_WidgetWin_0. Error = 1412

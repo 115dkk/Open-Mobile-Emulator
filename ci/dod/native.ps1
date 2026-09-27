@@ -55,41 +55,33 @@ public class W {
  [StructLayout(LayoutKind.Sequential)] public struct KEYBDINPUT {public ushort vk,scan; public uint flags,time; public UIntPtr extra;}
  [StructLayout(LayoutKind.Sequential)] public struct MOUSEINPUT {public int x,y;public uint data,flags,time;public UIntPtr extra;}
  [DllImport("user32.dll",SetLastError=true)] public static extern uint SendInput(uint n,INPUT[] inputs,int size);
- [DllImport("user32.dll")] public static extern IntPtr SetFocus(IntPtr h);
  [DllImport("user32.dll")] public static extern IntPtr GetAncestor(IntPtr h,uint flags);
- [DllImport("user32.dll")] public static extern bool AttachThreadInput(uint a,uint b,bool attach);
- [DllImport("kernel32.dll")] public static extern uint GetCurrentThreadId();
  [DllImport("user32.dll")] public static extern short VkKeyScan(char ch);
  [DllImport("user32.dll")] public static extern uint MapVirtualKey(uint code,uint map);
- [DllImport("user32.dll")] public static extern bool BringWindowToTop(IntPtr h);
  [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h,int cmd);
- public static void Focus(IntPtr h) {
-  var root=GetAncestor(h,2); ShowWindow(root,9);
-  uint p, current=GetCurrentThreadId();
-  uint foreground=GetWindowThreadProcessId(GetForegroundWindow(),out p);
-  uint target=GetWindowThreadProcessId(h,out p);
-  if(foreground!=current) AttachThreadInput(current,foreground,true);
-  if(target!=current && target!=foreground) AttachThreadInput(current,target,true);
-  // Keep input queues attached until this short-lived helper exits. Detaching before
-  // SendInput restores webview focus for a cross-process reparented SDL child.
-  BringWindowToTop(root);SetForegroundWindow(root);SetFocus(h);
-  if(GetForegroundWindow()!=root) throw new Exception("Target window is not foreground; refusing keyboard input or desktop capture");
- }
  [DllImport("user32.dll")] public static extern bool SetCursorPos(int x,int y);
- public static void ClickFocus(IntPtr h) {
-  R r; GetWindowRect(h,out r); SetCursorPos(r.L+20,r.T+20);
-  var down=new INPUT {type=0,u=new UNION {mi=new MOUSEINPUT {flags=2}}};
-  var up=new INPUT {type=0,u=new UNION {mi=new MOUSEINPUT {flags=4}}};
-  if(SendInput(2,new[]{down,up},Marshal.SizeOf<INPUT>())!=2) throw new Exception("Mouse focus SendInput failed");
-  System.Threading.Thread.Sleep(150);
+ public static void Focus(IntPtr h) {
+  var root=GetAncestor(h,2); ShowWindow(root,9); SetForegroundWindow(root);
+  for(int attempt=0;attempt<3 && GetForegroundWindow()!=root;attempt++) {
+   SetWindowPos(root,new IntPtr(-1),0,0,0,0,0x43);
+   try {
+    System.Threading.Thread.Sleep(250);
+    R r; GetWindowRect(root,out r); SetCursorPos(r.L+Math.Min(400,(r.Rt-r.L)/2),r.T+30);
+    var down=new INPUT {type=0,u=new UNION {mi=new MOUSEINPUT {flags=2}}};
+    var up=new INPUT {type=0,u=new UNION {mi=new MOUSEINPUT {flags=4}}};
+    if(SendInput(2,new[]{down,up},Marshal.SizeOf<INPUT>())!=2) throw new Exception("Title-bar click failed");
+    System.Threading.Thread.Sleep(180);
+   } finally {SetWindowPos(root,new IntPtr(-2),0,0,0,0,0x53);}
+  }
+  if(GetForegroundWindow()!=root) throw new Exception("Main window is not foreground; refusing input/capture");
  }
  public static void Key(ushort vk,bool up=false) {
-  uint flags=up?2u:0u;
-  if(vk>=0x21 && vk<=0x28) flags|=1;
-  var input=new INPUT {type=1,u=new UNION {ki=new KEYBDINPUT {vk=vk,scan=(ushort)MapVirtualKey(vk,0),flags=flags}}};
+  uint flags=8u | (up?2u:0u);
+  if((vk>=0x21 && vk<=0x28) || vk==0x2e) flags|=1;
+  var input=new INPUT {type=1,u=new UNION {ki=new KEYBDINPUT {scan=(ushort)MapVirtualKey(vk,0),flags=flags}}};
   if(SendInput(1,new[]{input},Marshal.SizeOf<INPUT>())!=1) throw new Exception("SendInput failed");
  }
- public static void Tap(ushort vk) {Key(vk);System.Threading.Thread.Sleep(45);Key(vk,true);System.Threading.Thread.Sleep(90);}
+ public static void Tap(ushort vk) {Key(vk);System.Threading.Thread.Sleep(180);Key(vk,true);System.Threading.Thread.Sleep(220);}
  public static void Type(string text) {foreach(char c in text) {
   short k=VkKeyScan(c);if(k==-1 || (k>>8)>1) throw new Exception("Unsupported keyboard character");
   bool shift=(k&256)!=0;if(shift)Key(0x10);Tap((ushort)(k&255));if(shift)Key(0x10,true);
@@ -104,6 +96,7 @@ public class W {
 $p=Get-Process -Id $AppPid
 $h=$p.MainWindowHandle
 if($h -eq 0){throw 'No main window'}
+$main=$h
 if ($WaitInstaller) {
  $deadline = [DateTime]::UtcNow.AddSeconds(30)
  do {
@@ -121,7 +114,7 @@ if ($WaitInstaller) {
  # Interrupt GRUB's short live-boot timeout as soon as the window is created.
  # Do not select an entry until the caller has captured and recognized the menu.
  $until = [DateTime]::UtcNow.AddSeconds(3)
- do { [W]::Focus($h); [W]::Tap(0x24); Start-Sleep -Milliseconds 100 } while ([DateTime]::UtcNow -lt $until)
+ do { [W]::Focus($main); [W]::Tap(0x24); Start-Sleep -Milliseconds 100 } while ([DateTime]::UtcNow -lt $until)
  @{pid=[W]::Pid($h);hwnd=$h.ToInt64();action='interrupt-installer-grub'} | ConvertTo-Json -Compress
  exit
 }
@@ -161,14 +154,13 @@ if ($FilePath) {
  exit
 }
 if ($Keys -or $Text) {
- [W]::Focus($h)
- if ($QemuPid) { [W]::ClickFocus($h) }
+ [W]::Focus($main)
  $map=@{HOME=0x24;END=0x23;UP=0x26;DOWN=0x28;LEFT=0x25;RIGHT=0x27;ENTER=0x0d;TAB=9;ESC=0x1b;BACKSPACE=8;SPACE=0x20}
  if($Keys){foreach($key in $Keys.Split(',')){
   if(!$map.ContainsKey($key)){throw "Unknown key $key"}
-  [W]::Focus($h); [W]::Tap($map[$key])
+  [W]::Focus($main); [W]::Tap($map[$key])
  }}
- if($Text){[W]::Focus($h);[W]::Type($Text)}
+ if($Text){[W]::Focus($main);[W]::Type($Text)}
  @{action='keys';hwnd=$h.ToInt64();pid=[W]::Pid($h);keys=$Keys;text=$Text} | ConvertTo-Json -Compress
  exit
 }
@@ -193,17 +185,10 @@ if($Quit){
  exit
 }
 if($Width -gt 0){if(![W]::MoveWindow($h,$X,$Y,$Width,$Height,$true)){throw 'MoveWindow failed'}}
-$foreground=[W]::SetForegroundWindow($h)
-$focus='SetForegroundWindow'
-if([W]::GetForegroundWindow() -ne $h){$ok=(New-Object -ComObject WScript.Shell).AppActivate($AppPid);$focus="AppActivate=$ok"}
-$topmost=$false
-if([W]::GetForegroundWindow() -ne $h){
- $topmost=[W]::SetWindowPos($h,[IntPtr](-1),0,0,0,0,0x43)
- $focus+="; temporary HWND_TOPMOST=$topmost"
-}
-[W]::Focus($h)
+[W]::Focus($main)
+$focus='main-window foreground; no SDL focus or input attachment'
 Start-Sleep -Milliseconds 600
-if ([W]::GetForegroundWindow() -ne [W]::GetAncestor($h,2)) { throw 'Foreground changed; refusing to capture another application' }
+if ([W]::GetForegroundWindow() -ne $main) { throw 'Foreground changed; refusing capture' }
 $r=[W+R]::new();[void][W]::GetWindowRect($h,[ref]$r)
 $crop=[W+R]::new();$dwm=if($QemuPid){[void][W]::GetWindowRect($h,[ref]$crop);0}else{[W]::DwmGetWindowAttribute($h,9,[ref]$crop,16)}
 if($dwm -ne 0){throw "DWM frame query failed $dwm"}
@@ -212,5 +197,4 @@ if($Shot){
  $b=[Drawing.Bitmap]::new(($crop.Rt-$crop.L),($crop.B-$crop.T));$g=[Drawing.Graphics]::FromImage($b)
  try{$g.CopyFromScreen($crop.L,$crop.T,0,0,$b.Size);$b.Save($Shot,[Drawing.Imaging.ImageFormat]::Png)}finally{$g.Dispose();$b.Dispose()}
 }
-if($topmost){[void][W]::SetWindowPos($h,[IntPtr](-2),0,0,0,0,0x53)}
 @{hwnd=$h.ToInt64();rect=$r;crop=$crop;focus=$focus;foreground=[W]::GetForegroundWindow().ToInt64();children=$children;shot=$Shot} | ConvertTo-Json -Depth 6 -Compress
