@@ -148,7 +148,7 @@ C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\qemu-system-x8
 
 ### `\\?\` 실행 파일 경로 실패
 
-첫 측정에서는 호스트 조사가 `Path::canonicalize`의 verbatim 경로를 그대로 넘겨 QEMU가 시작 전에 종료했다. d1a431d에서 QEMU와 adb 경로의 verbatim 접두사를 떼도록 고쳤다. 당시 stderr는 다음과 같았다.
+첫 측정에서는 호스트 조사가 `Path::canonicalize`의 verbatim 경로를 그대로 넘겨 QEMU가 시작 전에 종료했다. 52b3b7c에서 QEMU와 adb 경로의 verbatim 접두사를 떼도록 고쳤다. 당시 stderr는 다음과 같았다.
 
 ```text
 \\?\C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\qemu-system-x86_64.exe: -rtc base=utc: Could not open '\\?\C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin/../etc//qemu.conf': Invalid argument

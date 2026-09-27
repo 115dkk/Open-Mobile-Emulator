@@ -3,7 +3,7 @@
 
 # M2 제품 앱 스모크: 실제 UI를 CDP로 몰아 본 결과
 
-측정일은 2026-09-28 02:41 KST다. 6a1387e의 작업 트리에서 `cargo build -p ome-app --features
+측정일은 2026-09-28 02:41 KST다. 7451359의 작업 트리에서 `cargo build -p ome-app --features
 custom-protocol`로 만든 디버그 앱(임베디드 UI)을 개발 호스트의 `default` 게스트(Bliss 16.9.7, Android
 13)로 돌렸다. 앱은 `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=9333` 환경에서
 띄우고, Playwright가 `chromium.connectOverCDP`로 주 페이지(`http://tauri.localhost/`)와 오버레이

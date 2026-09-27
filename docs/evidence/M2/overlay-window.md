@@ -24,7 +24,7 @@ cargo test -p ome-runtime --test real_guest_spike measures_real_overlay_window_t
 |---|---|
 | 게스트 | `default`(Bliss 16.9.7, Android 13), `%LOCALAPPDATA%\OpenMobileEmulator\vm\default\disk.qcow2` |
 | QEMU | 자체 빌드 11.1.1, WHPX |
-| 앱 | `host/target/debug/ome.exe`(임베디드 UI, 815f9cb 이후 작업 트리) |
+| 앱 | `host/target/debug/ome.exe`(임베디드 UI, 5edcf82 이후 작업 트리) |
 | 검사 전 QEMU 프로세스 | 0 |
 | 검사 뒤 QEMU 프로세스 | 0 |
 
