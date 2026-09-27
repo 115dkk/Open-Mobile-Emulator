@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-input-profile-select"
+description = "Enables the input_profile_select command without any pre-configured scope."
+commands.allow = ["input_profile_select"]
+
+[[permission]]
+identifier = "deny-input-profile-select"
+description = "Denies the input_profile_select command without any pre-configured scope."
+commands.deny = ["input_profile_select"]

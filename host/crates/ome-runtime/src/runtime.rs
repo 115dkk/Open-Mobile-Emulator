@@ -1,34 +1,45 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Copyright (C) 2026 Open Mobile Emulator contributors
 
+use std::path::{Path, PathBuf};
+use std::time::{SystemTime, UNIX_EPOCH};
+
 use ome_adb::AdbSession;
-use ome_artifacts::ArtifactStore;
-use ome_host_check::{FeatureState, HostProbe, HostReadiness, Verdict};
-use ome_keymap::{KeymapProfile, load_presets};
+use ome_artifacts::{ArtifactStore, Manifest};
+use ome_guest_image::{
+    Distribution, GuestImageProfile, ImageStatus as ProfileStatus, Translator, recommended_index,
+    sort_newest_first,
+};
+use ome_host_check::{
+    FeatureState, HardwareLimits, HostProbe, HostReadiness, Verdict, hardware_limits,
+};
+use ome_input::{InputProfile, is_keyboard_code, load_profiles};
 use ome_wizard::{Facts, Outcome, Step, WizardState, advance, can_continue, can_skip};
 
 use crate::home::OmeHome;
 use crate::issues;
 use crate::settings::{Settings, SettingsError, SettingsStore};
 use crate::{
-    AppIssue, AppPhase, AppSnapshot, AppsView, CONTRACT_VERSION, Command, DisplayPreset,
-    DisplayView, GuestState, GuestView, HostCheckId, HostReport, HostRow, HostStatus, HostingMode,
-    KeymapProfileSummary, KeymapView, Orientation, SettingsView, Size, StageFit, UpdateState,
-    UpdateView, WizardStep, WizardView,
+    AppIssue, AppPhase, AppSnapshot, AppsView, Blocker, BlockerKind, CONTRACT_VERSION, Capability,
+    CapabilityReport, Command, CustomDisplay, DisplayPreset, DisplayView, GuestImageSummary,
+    GuestState, GuestView, HostCheckId, HostReport, HostRow, HostStatus, HostingMode,
+    ImageDistribution, ImageStatus, ImageTranslator, ImagesView, InputView, Orientation,
+    SettingsView, Size, StageFit, UpdateState, UpdateView, VsyncMode, WizardStep, WizardView,
 };
 
 /// Runtime dependencies supplied by the native shell.
-///
-/// All adapters are native-owned and fixed at open time; no command carries executable paths,
-/// network URLs, or arbitrary file-system paths from the webview.
 pub struct RuntimeDeps {
     /// Read-only host observation adapter.
     pub probe: Box<dyn HostProbe>,
     /// Verified artifact store when manifest loading succeeded.
     pub artifacts: Option<ArtifactStore>,
-    /// Guest adb session when the native shell discovered the executable.
+    /// Operating-system adb session when the shell discovered the executable.
     pub adb: Option<AdbSession>,
-    /// Product version presented in every snapshot.
+    /// Trusted directory containing image profiles.
+    pub images_dir: Option<PathBuf>,
+    /// Trusted external-artifact manifest used for profile sizes.
+    pub artifacts_manifest: Option<PathBuf>,
+    /// Product version shown in snapshots.
     pub product_version: String,
 }
 
@@ -38,26 +49,39 @@ impl std::fmt::Debug for RuntimeDeps {
             .debug_struct("RuntimeDeps")
             .field("artifacts", &self.artifacts.is_some())
             .field("adb", &self.adb.is_some())
+            .field("images_dir", &self.images_dir)
+            .field("artifacts_manifest", &self.artifacts_manifest)
             .field("product_version", &self.product_version)
             .finish_non_exhaustive()
     }
 }
 
-/// Native product runtime and single owner of snapshot projection and command decisions.
+/// Native product runtime and owner of snapshot projection and command decisions.
 pub struct AppRuntime {
     home: OmeHome,
     deps: RuntimeDeps,
     settings_store: SettingsStore,
     settings: Settings,
+    limits: HardwareLimits,
     host: HostReport,
+    blocker: Option<Blocker>,
     feature_state: FeatureState,
     wizard: WizardState,
     phase: AppPhase,
-    keymaps: Vec<RuntimeKeymap>,
-    active_keymap: Option<String>,
-    keymap_enabled: bool,
+    image_profiles: Vec<GuestImageProfile>,
+    artifact_manifest: Option<Manifest>,
+    selected_image: Option<String>,
+    input_profiles: Vec<InputProfile>,
+    active_input: Option<String>,
+    input_suspended: bool,
+    input_editing: bool,
+    input_auto_apply: bool,
+    suspend_hotkey: String,
     display_fit: StageFit,
     active_display: Option<String>,
+    custom_display: Option<CustomDisplay>,
+    refresh_rate_hz: Option<u32>,
+    vsync: VsyncMode,
     issue: Option<AppIssue>,
 }
 
@@ -72,29 +96,51 @@ impl std::fmt::Debug for AppRuntime {
     }
 }
 
-#[derive(Clone, Debug)]
-struct RuntimeKeymap {
-    profile: KeymapProfile,
-    bundled: bool,
-}
-
 impl AppRuntime {
-    /// Opens runtime storage, loads settings, and initializes a conservative snapshot.
-    ///
-    /// Opening creates fixed OME home directories but performs no host mutation, network request,
-    /// guest start, adb command, or browser action. Corrupt settings fail closed with an [`AppIssue`].
+    /// Opens runtime storage and loads trusted settings, profiles, and host-derived limits.
     pub fn open(home: OmeHome, deps: RuntimeDeps) -> Result<Self, AppIssue> {
         home.ensure().map_err(|_| issues::home_unavailable())?;
+        let limits = hardware_limits(
+            deps.probe.total_memory_bytes().ok(),
+            deps.probe.logical_processors().ok(),
+        );
         let settings_store = SettingsStore::new(home.as_path());
-        let settings = settings_store.load().map_err(settings_issue)?;
-        let keymaps = bundled_presets()
-            .into_iter()
-            .map(|profile| RuntimeKeymap {
-                profile,
-                bundled: true,
+        let settings = settings_store.load(&limits).map_err(settings_issue)?;
+        let mut image_profiles = match deps.images_dir.as_deref() {
+            Some(directory) => GuestImageProfile::load_all(directory)
+                .map_err(|_| issues::image_profiles_invalid())?,
+            None => Vec::new(),
+        };
+        sort_newest_first(&mut image_profiles);
+        let artifact_manifest = deps
+            .artifacts_manifest
+            .as_deref()
+            .map(Manifest::load)
+            .transpose()
+            .map_err(|_| issues::image_profiles_invalid())?;
+        if let Some(manifest) = artifact_manifest.as_ref()
+            && image_profiles.iter().any(|profile| {
+                !manifest
+                    .artifacts
+                    .iter()
+                    .any(|artifact| artifact.name == profile.artifact)
             })
-            .collect::<Vec<_>>();
-        let active_keymap = keymaps.first().map(|entry| entry.profile.id.clone());
+        {
+            return Err(issues::image_profiles_invalid());
+        }
+        let today = today_utc();
+        let selected_image = recommended_index(&image_profiles, &today)
+            .map(|index| image_profiles[index].id.clone())
+            .or_else(|| image_profiles.first().map(|profile| profile.id.clone()));
+        let mut input_profiles = bundled_profiles();
+        let directory =
+            home_profiles_directory(home.as_path()).map_err(|_| issues::home_unavailable())?;
+        if directory.is_dir() {
+            let user_profiles =
+                load_profiles(&directory).map_err(|_| issues::invalid_input_profile())?;
+            input_profiles.extend(user_profiles);
+        }
+        let active_input = input_profiles.first().map(|profile| profile.id.clone());
         let feature_state = deps
             .probe
             .hypervisor_platform()
@@ -104,27 +150,40 @@ impl AppRuntime {
             deps,
             settings_store,
             settings,
+            limits,
             host: empty_host_report(),
+            blocker: None,
             feature_state,
             wizard: WizardState::default(),
             phase: AppPhase::Wizard,
-            keymaps,
-            active_keymap,
-            keymap_enabled: true,
+            image_profiles,
+            artifact_manifest,
+            selected_image,
+            input_profiles,
+            active_input,
+            input_suspended: false,
+            input_editing: false,
+            input_auto_apply: true,
+            suspend_hotkey: "F12".to_owned(),
             display_fit: StageFit::FitWindow,
             active_display: Some("hd-720".to_owned()),
+            custom_display: None,
+            refresh_rate_hz: None,
+            vsync: VsyncMode::Off,
             issue: None,
         })
     }
 
-    /// Returns the complete read-only projection without performing I/O or observation.
+    /// Returns the complete read-only projection without performing I/O.
     pub fn snapshot(&self) -> AppSnapshot {
         AppSnapshot {
             contract_version: CONTRACT_VERSION,
             product_version: self.deps.product_version.clone(),
             phase: self.phase,
+            blocker: self.blocker,
             host: self.host.clone(),
             wizard: self.wizard_view(),
+            images: self.images_view(),
             guest: GuestView {
                 state: GuestState::Stopped,
                 boot_completed: false,
@@ -134,41 +193,64 @@ impl AppRuntime {
                 last_exit: None,
                 fps: None,
                 started_at: None,
+                image_id: self.selected_image.clone(),
+                android_version: self
+                    .selected_profile()
+                    .map(|profile| profile.android_version.clone()),
+                api_level: self.selected_profile().map(|profile| profile.api_level),
+                capabilities: CapabilityReport::default(),
+                device_id: None,
+                adb_address: Some(
+                    match self.settings.adb_access {
+                        crate::AdbAccess::Localhost => "127.0.0.1:5555",
+                        crate::AdbAccess::Network => "0.0.0.0:5555",
+                    }
+                    .to_owned(),
+                ),
+                root_enabled: None,
             },
             apps: AppsView {
                 available: false,
                 items: Vec::new(),
                 install: None,
             },
-            keymap: KeymapView {
-                profiles: self
-                    .keymaps
-                    .iter()
-                    .map(|entry| KeymapProfileSummary {
-                        id: entry.profile.id.clone(),
-                        name: entry.profile.name.clone(),
-                        bundled: entry.bundled,
-                        binding_count: u32::try_from(entry.profile.bindings.len())
-                            .unwrap_or(u32::MAX),
-                    })
-                    .collect(),
-                active_id: self.active_keymap.clone(),
-                enabled: self.keymap_enabled,
+            input: InputView {
+                profiles: self.input_profiles.clone(),
+                active_id: self.active_input.clone(),
+                suspended: self.input_suspended,
+                editing: self.input_editing,
+                auto_apply: self.input_auto_apply,
+                foreground_package: None,
+                multitouch: Capability::Unknown,
+                suspend_hotkey: self.suspend_hotkey.clone(),
             },
             display: DisplayView {
                 presets: display_presets(),
                 active_id: self.active_display.clone(),
+                custom: self.custom_display,
                 fit: self.display_fit,
+                refresh_rate_hz: self.refresh_rate_hz,
+                refresh_rates: refresh_rates(self.refresh_rate_hz),
+                // wiring: these become true when patched QEMU reports `refresh-rate` and
+                // `swap-interval` display options.
+                refresh_supported: false,
+                vsync: self.vsync,
+                vsync_supported: false,
             },
             settings: SettingsView {
                 memory_mib: self.settings.memory_mib,
+                memory_mib_min: self.limits.memory_mib_min,
+                memory_mib_max: self.limits.memory_mib_max,
                 vcpus: self.settings.vcpus,
+                vcpus_max: self.limits.vcpus_max,
                 gpu_mode: self.settings.gpu_mode,
                 close_action: self.settings.close_action,
                 show_fps: self.settings.show_fps,
                 auto_update_check: self.settings.auto_update_check,
                 home_dir: self.home.as_path().to_string_lossy().into_owned(),
                 disk_usage_bytes: None,
+                adb_access: self.settings.adb_access,
+                binding_overlay_default: self.settings.binding_overlay_default,
             },
             update: UpdateView {
                 current_version: self.deps.product_version.clone(),
@@ -180,13 +262,8 @@ impl AppRuntime {
     }
 
     /// Applies one typed command and returns the resulting complete snapshot.
-    ///
-    /// Wired commands mutate in-memory state only after their validation or persistence succeeds.
-    /// Unwired commands leave state unchanged and return the stable `not_wired` issue. The last issue
-    /// is retained in future snapshots until a successful command clears it.
     pub fn apply(&mut self, command: Command) -> Result<AppSnapshot, AppIssue> {
-        let result = self.apply_inner(command);
-        match result {
+        match self.apply_inner(command) {
             Ok(()) => {
                 self.issue = None;
                 Ok(self.snapshot())
@@ -206,74 +283,73 @@ impl AppRuntime {
             }
             Command::WizardContinue => self.wizard_continue(),
             Command::WizardSkip => self.wizard_skip(),
-            Command::WizardRestart => {
-                self.wizard = advance(self.wizard.clone(), Outcome::Restart);
-                self.phase = AppPhase::Wizard;
+            Command::GuestImageSelect { id } => self.select_image(id),
+            Command::InputProfileSelect { id } => self.select_input(id),
+            Command::InputSuspendToggle => {
+                self.input_suspended = !self.input_suspended;
                 Ok(())
             }
-            Command::WhpxEnable => Err(issues::not_wired()),
-            Command::SettingsSave { settings } => {
-                let validated = Settings::validate(settings).map_err(settings_issue)?;
-                self.settings_store
-                    .save(&validated)
-                    .map_err(settings_issue)?;
-                self.settings = validated;
+            Command::InputProfileDelete { id } => self.delete_input(id),
+            Command::InputProfileSave { profile } => self.save_input(profile),
+            Command::InputBindingUpsert {
+                profile_id,
+                binding,
+            } => self.upsert_binding(profile_id, binding),
+            Command::InputBindingRemove { profile_id, id } => self.remove_binding(profile_id, id),
+            Command::InputEditorToggle => {
+                self.input_editing = !self.input_editing;
                 Ok(())
             }
-            Command::KeymapSetActive { id } => {
-                if id
-                    .as_ref()
-                    .is_some_and(|id| !self.keymaps.iter().any(|entry| entry.profile.id == *id))
-                {
-                    return Err(issues::keymap_not_found());
+            Command::InputAutoApplySet { enabled } => {
+                self.input_auto_apply = enabled;
+                Ok(())
+            }
+            Command::InputSuspendHotkeySet { code } => {
+                if !is_keyboard_code(&code) {
+                    return Err(issues::invalid_suspend_hotkey());
                 }
-                self.active_keymap = id;
+                self.suspend_hotkey = code;
                 Ok(())
             }
-            Command::KeymapSetEnabled { enabled } => {
-                self.keymap_enabled = enabled;
+            Command::DisplayPresetApply { id } => self.apply_display_preset(id),
+            Command::DisplayCustomApply { size, density_dpi } => {
+                self.apply_custom_display(size, density_dpi)
+            }
+            Command::DisplayRefreshSet { hz } => {
+                if hz.is_some_and(|value| !(30..=240).contains(&value)) {
+                    return Err(issues::invalid_display());
+                }
+                self.refresh_rate_hz = hz;
                 Ok(())
             }
-            Command::KeymapDelete { id } => {
-                let Some(position) = self.keymaps.iter().position(|entry| entry.profile.id == id)
-                else {
-                    return Err(issues::keymap_not_found());
-                };
-                if self.keymaps[position].bundled {
-                    return Err(issues::keymap_bundled());
-                }
-                self.keymaps.remove(position);
-                if self.active_keymap.as_deref() == Some(id.as_str()) {
-                    self.active_keymap = None;
-                }
+            Command::DisplayVsyncSet { mode } => {
+                self.vsync = mode;
                 Ok(())
             }
             Command::StageFitSet { fit } => {
                 self.display_fit = fit;
                 Ok(())
             }
-            Command::DisplayPresetApply { id } => {
-                let preset = display_presets()
-                    .into_iter()
-                    .find(|preset| preset.id == id)
-                    .ok_or_else(issues::display_preset_not_found)?;
-                let Some(adb) = self.deps.adb.as_ref() else {
-                    self.active_display = Some(preset.id);
-                    return Ok(());
-                };
-                adb.set_display_size(preset.size.width, preset.size.height)
-                    .and_then(|()| adb.set_display_density(preset.density_dpi))
-                    .map_err(|_| issues::guest_connection_unavailable())?;
-                self.active_display = Some(preset.id);
+            Command::SettingsSave { settings } => {
+                let validated =
+                    Settings::validate(settings, &self.limits).map_err(settings_issue)?;
+                self.settings_store
+                    .save(&validated)
+                    .map_err(settings_issue)?;
+                self.settings = validated;
                 Ok(())
             }
-            Command::OpenRegistrationPage => Err(issues::not_wired()),
-            Command::ArtifactDownloadStart
+            Command::WhpxEnable
+            | Command::ArtifactDownloadStart
             | Command::ArtifactDownloadCancel
-            | Command::GuestDiskCreate { .. }
+            | Command::GuestCreate { .. }
+            | Command::GuestSelect { .. }
+            | Command::GuestDelete { .. }
+            | Command::GuestReinstall { .. }
             | Command::GuestStart
             | Command::GuestStop
             | Command::GuestRestart
+            | Command::GuestRootSet { .. }
             | Command::StageRectChanged { .. }
             | Command::ScreenshotSave
             | Command::AppInstallPick
@@ -284,8 +360,142 @@ impl AppRuntime {
             | Command::DiagnosticsExport
             | Command::OpenLogsFolder
             | Command::OpenScreenshotsFolder
+            | Command::OpenRegistrationPage
             | Command::GuestWindowToFront => Err(issues::not_wired()),
         }
+    }
+
+    fn select_image(&mut self, id: String) -> Result<(), AppIssue> {
+        let profile = self
+            .image_profiles
+            .iter()
+            .find(|profile| profile.id == id)
+            .ok_or_else(issues::image_not_found)?;
+        self.selected_image = Some(profile.id.clone());
+        Ok(())
+    }
+
+    fn select_input(&mut self, id: Option<String>) -> Result<(), AppIssue> {
+        if id
+            .as_ref()
+            .is_some_and(|id| !self.input_profiles.iter().any(|profile| profile.id == *id))
+        {
+            return Err(issues::input_profile_not_found());
+        }
+        self.active_input = id;
+        Ok(())
+    }
+
+    fn input_position(&self, id: &str) -> Result<usize, AppIssue> {
+        self.input_profiles
+            .iter()
+            .position(|profile| profile.id == id)
+            .ok_or_else(issues::input_profile_not_found)
+    }
+
+    fn delete_input(&mut self, id: String) -> Result<(), AppIssue> {
+        let position = self.input_position(&id)?;
+        if self.input_profiles[position].bundled {
+            return Err(issues::input_profile_bundled());
+        }
+        self.input_profiles.remove(position);
+        if self.active_input.as_deref() == Some(id.as_str()) {
+            self.active_input = None;
+        }
+        Ok(())
+    }
+
+    fn save_input(&mut self, profile: InputProfile) -> Result<(), AppIssue> {
+        profile
+            .validate()
+            .map_err(|_| issues::invalid_input_profile())?;
+        if let Some(position) = self
+            .input_profiles
+            .iter()
+            .position(|candidate| candidate.id == profile.id)
+        {
+            if self.input_profiles[position].bundled {
+                return Err(issues::input_profile_bundled());
+            }
+            self.input_profiles[position] = profile;
+        } else {
+            if profile.bundled {
+                return Err(issues::invalid_input_profile());
+            }
+            self.input_profiles.push(profile);
+        }
+        Ok(())
+    }
+
+    fn upsert_binding(
+        &mut self,
+        profile_id: String,
+        binding: crate::Binding,
+    ) -> Result<(), AppIssue> {
+        let position = self.input_position(&profile_id)?;
+        if self.input_profiles[position].bundled {
+            return Err(issues::input_profile_bundled());
+        }
+        let mut updated = self.input_profiles[position].clone();
+        if let Some(binding_position) = updated
+            .bindings
+            .iter()
+            .position(|candidate| candidate.id == binding.id)
+        {
+            updated.bindings[binding_position] = binding;
+        } else {
+            updated.bindings.push(binding);
+        }
+        updated
+            .validate()
+            .map_err(|_| issues::invalid_input_profile())?;
+        self.input_profiles[position] = updated;
+        Ok(())
+    }
+
+    fn remove_binding(&mut self, profile_id: String, id: String) -> Result<(), AppIssue> {
+        let position = self.input_position(&profile_id)?;
+        if self.input_profiles[position].bundled {
+            return Err(issues::input_profile_bundled());
+        }
+        let Some(binding_position) = self.input_profiles[position]
+            .bindings
+            .iter()
+            .position(|binding| binding.id == id)
+        else {
+            return Err(issues::invalid_input_profile());
+        };
+        self.input_profiles[position]
+            .bindings
+            .remove(binding_position);
+        Ok(())
+    }
+
+    fn apply_display_preset(&mut self, id: String) -> Result<(), AppIssue> {
+        let preset = display_presets()
+            .into_iter()
+            .find(|preset| preset.id == id)
+            .ok_or_else(issues::display_preset_not_found)?;
+        if let Some(adb) = self.deps.adb.as_ref() {
+            adb.set_display_size(preset.size.width, preset.size.height)
+                .and_then(|()| adb.set_display_density(preset.density_dpi))
+                .map_err(|_| issues::operating_system_connection_unavailable())?;
+        }
+        self.active_display = Some(preset.id);
+        self.custom_display = None;
+        Ok(())
+    }
+
+    fn apply_custom_display(&mut self, size: Size, density_dpi: u32) -> Result<(), AppIssue> {
+        validate_display(size, density_dpi)?;
+        if let Some(adb) = self.deps.adb.as_ref() {
+            adb.set_display_size(size.width, size.height)
+                .and_then(|()| adb.set_display_density(density_dpi))
+                .map_err(|_| issues::operating_system_connection_unavailable())?;
+        }
+        self.active_display = None;
+        self.custom_display = Some(CustomDisplay { size, density_dpi });
+        Ok(())
     }
 
     fn refresh_host(&mut self) {
@@ -294,12 +504,17 @@ impl AppRuntime {
             .probe
             .hypervisor_platform()
             .unwrap_or(FeatureState::Unknown);
+        self.limits = hardware_limits(
+            self.deps.probe.total_memory_bytes().ok(),
+            self.deps.probe.logical_processors().ok(),
+        );
         let report = HostReadiness::inspect(self.deps.probe.as_ref());
         self.host = HostReport {
             rows: report.rows.into_iter().map(convert_host_row).collect(),
             ready: report.verdict != Verdict::Blocked,
             inspected_at: None,
         };
+        self.blocker = blocker_from_host(&self.host);
     }
 
     fn wizard_continue(&mut self) -> Result<(), AppIssue> {
@@ -367,7 +582,6 @@ impl AppRuntime {
                 }),
             guest_installed: false,
             guest_booted: false,
-            registration_shown: true,
             app_install_resolved: true,
         }
     }
@@ -383,11 +597,81 @@ impl AppRuntime {
             },
             can_skip: can_skip(self.wizard.step),
             download: None,
-            gsf_id: None,
+            image_id: self.selected_image.clone(),
+            install_guide: self
+                .selected_profile()
+                .map(|profile| profile.install_guide.clone())
+                .unwrap_or_default(),
             disk_size_gib: 32,
             disk_free_bytes: None,
         }
     }
+
+    fn selected_profile(&self) -> Option<&GuestImageProfile> {
+        let selected = self.selected_image.as_deref()?;
+        self.image_profiles
+            .iter()
+            .find(|profile| profile.id == selected)
+    }
+
+    fn artifact_size(&self, name: &str) -> Option<u64> {
+        self.artifact_manifest
+            .as_ref()?
+            .artifacts
+            .iter()
+            .find(|artifact| artifact.name == name)
+            .map(|artifact| artifact.size_bytes)
+    }
+
+    fn images_view(&self) -> ImagesView {
+        let recommended = recommended_index(&self.image_profiles, &today_utc());
+        ImagesView {
+            profiles: self
+                .image_profiles
+                .iter()
+                .enumerate()
+                .map(|(index, profile)| {
+                    image_summary(
+                        profile,
+                        self.artifact_size(&profile.artifact),
+                        index == recommended.unwrap_or(usize::MAX),
+                    )
+                })
+                .collect(),
+            guests: Vec::new(),
+            active_guest: None,
+        }
+    }
+}
+
+fn today_utc() -> String {
+    let days = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs()
+        / 86_400;
+    let (year, month, day) = civil_from_days(i64::try_from(days).unwrap_or(i64::MAX));
+    format!("{year:04}-{month:02}-{day:02}")
+}
+
+// Howard Hinnant's public-domain civil calendar conversion for days since 1970-01-01.
+fn civil_from_days(days_since_epoch: i64) -> (i64, u32, u32) {
+    let z = days_since_epoch.saturating_add(719_468);
+    let era = if z >= 0 { z } else { z - 146_096 } / 146_097;
+    let day_of_era = z - era * 146_097;
+    let year_of_era =
+        (day_of_era - day_of_era / 1_460 + day_of_era / 36_524 - day_of_era / 146_096) / 365;
+    let mut year = year_of_era + era * 400;
+    let day_of_year = day_of_era - (365 * year_of_era + year_of_era / 4 - year_of_era / 100);
+    let month_prime = (5 * day_of_year + 2) / 153;
+    let day = day_of_year - (153 * month_prime + 2) / 5 + 1;
+    let month = month_prime + if month_prime < 10 { 3 } else { -9 };
+    year += i64::from(month <= 2);
+    (
+        year,
+        u32::try_from(month).expect("calendar month is positive"),
+        u32::try_from(day).expect("calendar day is positive"),
+    )
 }
 
 fn empty_host_report() -> HostReport {
@@ -398,18 +682,27 @@ fn empty_host_report() -> HostReport {
     }
 }
 
-fn bundled_presets() -> Vec<KeymapProfile> {
+fn bundled_profiles() -> Vec<InputProfile> {
     let embedded = include_str!("../../../presets/com.epidgames.trickcalrevive.json");
-    KeymapProfile::parse(embedded).into_iter().collect()
+    InputProfile::parse(embedded)
+        .map(|mut profile| {
+            profile.bundled = true;
+            vec![profile]
+        })
+        .unwrap_or_default()
 }
 
-/// Loads additional keymap profiles from a trusted native directory.
-///
-/// This helper returns only fully validated profiles and does not merge or overwrite IDs.
-pub fn load_keymap_directory(
-    directory: impl AsRef<std::path::Path>,
-) -> Result<Vec<KeymapProfile>, ome_keymap::ProfileError> {
-    load_presets(directory)
+fn home_profiles_directory(home: &Path) -> Result<PathBuf, std::io::Error> {
+    let directory = home.join("profiles");
+    std::fs::create_dir_all(&directory)?;
+    Ok(directory)
+}
+
+/// Loads validated input profiles from a trusted native directory.
+pub fn load_input_directory(
+    directory: impl AsRef<Path>,
+) -> Result<Vec<InputProfile>, ome_input::ProfileError> {
+    load_profiles(directory)
 }
 
 /// Returns the three fixed display presets exposed by the contract.
@@ -446,6 +739,86 @@ pub fn display_presets() -> Vec<DisplayPreset> {
             needs_reboot: true,
         },
     ]
+}
+
+fn refresh_rates(custom: Option<u32>) -> Vec<u32> {
+    let mut rates = vec![60, 75, 90, 120, 144];
+    if let Some(custom) = custom
+        && !rates.contains(&custom)
+    {
+        rates.push(custom);
+        rates.sort_unstable();
+    }
+    rates
+}
+
+fn validate_display(size: Size, density_dpi: u32) -> Result<(), AppIssue> {
+    let valid_dimension = |value: u32| (640..=7680).contains(&value) && value.is_multiple_of(8);
+    if !valid_dimension(size.width)
+        || !valid_dimension(size.height)
+        || !(120..=640).contains(&density_dpi)
+    {
+        Err(issues::invalid_display())
+    } else {
+        Ok(())
+    }
+}
+
+fn image_summary(
+    profile: &GuestImageProfile,
+    size_bytes: Option<u64>,
+    recommended: bool,
+) -> GuestImageSummary {
+    GuestImageSummary {
+        id: profile.id.clone(),
+        display_name: profile.display_name.clone(),
+        android_version: profile.android_version.clone(),
+        api_level: profile.api_level,
+        distribution: match profile.distribution {
+            Distribution::Bliss => ImageDistribution::Bliss,
+            Distribution::AndroidX86 => ImageDistribution::AndroidX86,
+            Distribution::SelfBuilt => ImageDistribution::SelfBuilt,
+        },
+        translator: match profile.translator {
+            Translator::Houdini => ImageTranslator::Houdini,
+            Translator::NdkTranslation => ImageTranslator::NdkTranslation,
+            Translator::Digitalis => ImageTranslator::Digitalis,
+            Translator::None => ImageTranslator::None,
+        },
+        size_bytes,
+        status: match profile.status {
+            ProfileStatus::Verified => ImageStatus::Verified,
+            ProfileStatus::Candidate => ImageStatus::Candidate,
+            ProfileStatus::Deprecated => ImageStatus::Deprecated,
+        },
+        released_at: profile.released_at.clone(),
+        verified_games: u32::try_from(profile.verifications.len()).unwrap_or(u32::MAX),
+        recommended,
+    }
+}
+
+fn blocker_from_host(report: &HostReport) -> Option<Blocker> {
+    let blocked = |id| {
+        report
+            .rows
+            .iter()
+            .any(|row| row.id == id && row.status == HostStatus::Blocked)
+    };
+    if blocked(HostCheckId::CpuVirtualization) {
+        Some(Blocker {
+            kind: BlockerKind::VirtualizationOff,
+        })
+    } else if blocked(HostCheckId::QemuPresent) || blocked(HostCheckId::FirmwarePresent) {
+        Some(Blocker {
+            kind: BlockerKind::QemuMissing,
+        })
+    } else if blocked(HostCheckId::HypervisorPlatform) {
+        Some(Blocker {
+            kind: BlockerKind::HypervisorPlatformOff,
+        })
+    } else {
+        None
+    }
 }
 
 fn settings_issue(error: SettingsError) -> AppIssue {
@@ -489,7 +862,6 @@ fn convert_step(step: Step) -> WizardStep {
         Step::ArtifactDownload => WizardStep::ArtifactDownload,
         Step::GuestInstall => WizardStep::GuestInstall,
         Step::FirstBoot => WizardStep::FirstBoot,
-        Step::GoogleRegistration => WizardStep::GoogleRegistration,
         Step::AppInstall => WizardStep::AppInstall,
         Step::Done => WizardStep::Done,
     }
@@ -502,7 +874,7 @@ mod tests {
     use ome_host_check::{HostCheckId as ProbeId, ProbeValue, QemuFound, TableProbe};
 
     use super::*;
-    use crate::{CloseAction, GpuMode};
+    use crate::{AdbAccess, CloseAction, GpuMode, SettingsInput};
 
     fn ready_probe(feature: FeatureState) -> TableProbe {
         TableProbe::new()
@@ -523,6 +895,8 @@ mod tests {
                 ProbeId::DiskSpace,
                 ProbeValue::Bytes(50 * 1024 * 1024 * 1024),
             )
+            .with_total_memory_bytes(ProbeValue::TotalMemoryBytes(64 * 1024 * 1024 * 1024))
+            .with_logical_processors(ProbeValue::LogicalProcessors(16))
     }
 
     fn runtime(feature: FeatureState) -> (tempfile::TempDir, AppRuntime) {
@@ -534,6 +908,8 @@ mod tests {
                 probe: Box::new(ready_probe(feature)),
                 artifacts: None,
                 adb: None,
+                images_dir: None,
+                artifacts_manifest: None,
                 product_version: "0.1.0".to_owned(),
             },
         )
@@ -542,12 +918,64 @@ mod tests {
     }
 
     #[test]
-    fn host_refresh_and_enabled_feature_skip_consent() {
+    fn image_profiles_load_with_manifest_size_and_recommendation() {
+        let directory = tempfile::tempdir().expect("temp directory");
+        let images = directory.path().join("images");
+        fs::create_dir(&images).expect("images directory");
+        fs::write(
+            images.join("profile.json"),
+            r#"{
+              "id":"test-13","display_name":"안드로이드 13","android_version":"13",
+              "api_level":33,"distribution":"bliss","artifact":"test-artifact",
+              "translator":"ndk_translation","boot_args":["quiet"],"grub_entry_hint":"Virgl",
+              "install_guide":["1","2","3","4","5","6"],
+              "qemu_overrides":["virtio_vga_gl"],"status":"verified",
+              "released_at":"2024-10-11","verifications":[]
+            }"#,
+        )
+        .expect("profile");
+        let manifest = directory.path().join("artifacts.json");
+        fs::write(
+            &manifest,
+            r#"{
+              "schema_version":1,"allowed_hosts":["example.com"],"artifacts":[{
+                "name":"test-artifact","version":"1","filename":"test.iso",
+                "url":"https://example.com/test.iso","size_bytes":1234,
+                "sha256":"0000000000000000000000000000000000000000000000000000000000000000",
+                "license":"test","provenance_note":"test","fetched_by":"installer"
+              }]
+            }"#,
+        )
+        .expect("manifest");
+        let home = OmeHome::from_path(directory.path().join("home")).expect("home");
+        let runtime = AppRuntime::open(
+            home,
+            RuntimeDeps {
+                probe: Box::new(ready_probe(FeatureState::Enabled)),
+                artifacts: None,
+                adb: None,
+                images_dir: Some(images),
+                artifacts_manifest: Some(manifest),
+                product_version: "0.1.0".to_owned(),
+            },
+        )
+        .expect("runtime");
+        let snapshot = runtime.snapshot();
+        assert_eq!(snapshot.images.profiles[0].size_bytes, Some(1234));
+        assert!(snapshot.images.profiles[0].recommended);
+        assert_eq!(snapshot.wizard.image_id.as_deref(), Some("test-13"));
+        assert_eq!(snapshot.wizard.install_guide.len(), 6);
+    }
+
+    #[test]
+    fn host_refresh_uses_limits_and_enabled_feature_skips_consent() {
         let (_directory, mut runtime) = runtime(FeatureState::Enabled);
         let snapshot = runtime
             .apply(Command::HostCheckRefresh)
             .expect("refresh succeeds");
         assert!(snapshot.host.ready);
+        assert_eq!(snapshot.settings.memory_mib_max, 61_440);
+        assert_eq!(snapshot.settings.vcpus_max, 16);
         let snapshot = runtime
             .apply(Command::WizardContinue)
             .expect("continue succeeds");
@@ -555,106 +983,117 @@ mod tests {
     }
 
     #[test]
-    fn disabled_feature_needs_attention_and_wizard_can_reach_consent() {
-        let (_directory, mut runtime) = runtime(FeatureState::Disabled);
-        let snapshot = runtime
-            .apply(Command::HostCheckRefresh)
-            .expect("refresh succeeds");
-        assert!(snapshot.host.ready);
-        let snapshot = runtime
-            .apply(Command::WizardContinue)
-            .expect("consent step is reachable");
-        assert_eq!(snapshot.wizard.step, WizardStep::WhpxConsent);
-        assert!(!snapshot.wizard.can_continue);
-        let issue = runtime
-            .apply(Command::WhpxEnable)
-            .expect_err("setup broker is not wired");
-        assert_eq!(issue.code, "not_wired");
-        let issue = runtime
-            .apply(Command::WizardContinue)
-            .expect_err("unwired setup cannot complete consent");
-        assert_eq!(issue.code, "wizard_cannot_continue");
-        assert_eq!(runtime.snapshot().wizard.step, WizardStep::WhpxConsent);
+    fn blocked_host_derives_blocker_in_rust() {
+        let directory = tempfile::tempdir().expect("temp directory");
+        let probe = ready_probe(FeatureState::Enabled)
+            .with(ProbeId::CpuVirtualization, ProbeValue::Bool(false));
+        let home = OmeHome::from_path(directory.path().join("home")).expect("home");
+        let mut runtime = AppRuntime::open(
+            home,
+            RuntimeDeps {
+                probe: Box::new(probe),
+                artifacts: None,
+                adb: None,
+                images_dir: None,
+                artifacts_manifest: None,
+                product_version: "0.1.0".to_owned(),
+            },
+        )
+        .expect("runtime");
+        let snapshot = runtime.apply(Command::HostCheckRefresh).expect("refresh");
+        assert_eq!(
+            snapshot.blocker,
+            Some(Blocker {
+                kind: BlockerKind::VirtualizationOff
+            })
+        );
     }
 
     #[test]
-    fn settings_save_persists_only_valid_input() {
+    fn settings_save_persists_host_valid_input() {
         let (directory, mut runtime) = runtime(FeatureState::Disabled);
         runtime
             .apply(Command::SettingsSave {
-                settings: crate::SettingsInput {
-                    memory_mib: 12_288,
-                    vcpus: 6,
+                settings: SettingsInput {
+                    memory_mib: 32_768,
+                    vcpus: 12,
                     gpu_mode: GpuMode::Software,
                     close_action: CloseAction::StopGuest,
                     show_fps: true,
                     auto_update_check: false,
+                    adb_access: AdbAccess::Network,
+                    binding_overlay_default: false,
                 },
             })
             .expect("save settings");
         let json =
             fs::read_to_string(directory.path().join("home/settings.json")).expect("settings file");
-        assert!(json.contains("12288"));
-        let issue = runtime
-            .apply(Command::SettingsSave {
-                settings: crate::SettingsInput {
-                    memory_mib: 1024,
-                    vcpus: 1,
-                    gpu_mode: GpuMode::Virgl,
-                    close_action: CloseAction::MinimizeToTray,
-                    show_fps: false,
-                    auto_update_check: true,
-                },
-            })
-            .expect_err("invalid settings fail");
-        assert_eq!(issue.code, "invalid_settings");
+        assert!(json.contains("32768"));
+        assert!(json.contains("network"));
     }
 
     #[test]
-    fn wizard_does_not_invent_completion_for_unwired_work() {
+    fn input_state_commands_validate_and_update_snapshot() {
         let (_directory, mut runtime) = runtime(FeatureState::Enabled);
-        runtime
-            .apply(Command::HostCheckRefresh)
-            .expect("refresh succeeds");
-        let snapshot = runtime
-            .apply(Command::WizardContinue)
-            .expect("enabled feature skips consent");
-        assert_eq!(snapshot.wizard.step, WizardStep::ArtifactDownload);
-        assert!(!snapshot.wizard.can_continue);
+        let bundled = runtime.snapshot().input.profiles[0].clone();
         let issue = runtime
-            .apply(Command::WizardContinue)
-            .expect_err("artifact completion is not invented");
-        assert_eq!(issue.code, "wizard_cannot_continue");
-    }
-
-    #[test]
-    fn display_id_updates_while_adb_is_absent() {
-        let (_directory, mut runtime) = runtime(FeatureState::Enabled);
-        let snapshot = runtime
-            .apply(Command::DisplayPresetApply {
-                id: "full-hd".to_owned(),
-            })
-            .expect("the preset is stored until adb is available");
-        assert_eq!(snapshot.display.active_id.as_deref(), Some("full-hd"));
-    }
-
-    #[test]
-    fn bundled_keymap_cannot_be_deleted() {
-        let (_directory, mut runtime) = runtime(FeatureState::Enabled);
-        let issue = runtime
-            .apply(Command::KeymapDelete {
-                id: "trickcal-default".to_owned(),
+            .apply(Command::InputProfileDelete {
+                id: bundled.id.clone(),
             })
             .expect_err("bundled profile is protected");
-        assert_eq!(issue.code, "keymap_bundled");
+        assert_eq!(issue.code, "input_profile_bundled");
+
+        let mut custom = bundled;
+        custom.id = "custom".to_owned();
+        custom.bundled = false;
+        runtime
+            .apply(Command::InputProfileSave {
+                profile: custom.clone(),
+            })
+            .expect("save custom profile");
+        let snapshot = runtime
+            .apply(Command::InputProfileSelect {
+                id: Some(custom.id.clone()),
+            })
+            .expect("select custom profile");
+        assert_eq!(snapshot.input.active_id.as_deref(), Some("custom"));
+        assert!(!snapshot.input.suspended);
+        assert!(
+            runtime
+                .apply(Command::InputSuspendToggle)
+                .expect("toggle")
+                .input
+                .suspended
+        );
     }
 
     #[test]
-    fn unwired_command_uses_stable_issue() {
+    fn display_state_commands_validate_and_update_snapshot() {
+        let (_directory, mut runtime) = runtime(FeatureState::Enabled);
+        let snapshot = runtime
+            .apply(Command::DisplayCustomApply {
+                size: Size {
+                    width: 1600,
+                    height: 904,
+                },
+                density_dpi: 240,
+            })
+            .expect("custom display");
+        assert_eq!(snapshot.display.active_id, None);
+        assert_eq!(snapshot.display.custom.expect("custom").size.width, 1600);
+        let snapshot = runtime
+            .apply(Command::DisplayRefreshSet { hz: Some(100) })
+            .expect("custom refresh");
+        assert!(snapshot.display.refresh_rates.contains(&100));
+        assert!(!snapshot.display.refresh_supported);
+    }
+
+    #[test]
+    fn process_command_uses_stable_unwired_issue() {
         let (_directory, mut runtime) = runtime(FeatureState::Enabled);
         let issue = runtime
             .apply(Command::GuestStart)
-            .expect_err("guest start is not wired");
+            .expect_err("process adapter is not wired");
         assert_eq!(issue.code, "not_wired");
         assert_eq!(runtime.snapshot().issue, Some(issue));
     }

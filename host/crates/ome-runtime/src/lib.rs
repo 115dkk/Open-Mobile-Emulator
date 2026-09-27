@@ -15,7 +15,7 @@ pub use home::{HomeError, OmeHome};
 pub use ome_host_check::TableProbe;
 #[cfg(windows)]
 pub use ome_host_check::WindowsProbe;
-pub use runtime::{AppRuntime, RuntimeDeps, display_presets, load_keymap_directory};
+pub use runtime::{AppRuntime, RuntimeDeps, display_presets, load_input_directory};
 pub use settings::{
     MAX_SETTINGS_BYTES, SETTINGS_SCHEMA_VERSION, Settings, SettingsError, SettingsStore,
 };

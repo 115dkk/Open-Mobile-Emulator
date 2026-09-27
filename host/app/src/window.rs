@@ -53,6 +53,9 @@ pub(crate) fn install(app: &tauri::App) -> tauri::Result<()> {
                 },
                 Err(_) => false,
             };
+            if !hide {
+                // wiring: send a graceful `GuestStop` before allowing the window to close.
+            }
             if hide {
                 api.prevent_close();
                 if let Err(error) = handle.hide() {

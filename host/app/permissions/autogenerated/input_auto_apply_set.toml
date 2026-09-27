@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-input-auto-apply-set"
+description = "Enables the input_auto_apply_set command without any pre-configured scope."
+commands.allow = ["input_auto_apply_set"]
+
+[[permission]]
+identifier = "deny-input-auto-apply-set"
+description = "Denies the input_auto_apply_set command without any pre-configured scope."
+commands.deny = ["input_auto_apply_set"]

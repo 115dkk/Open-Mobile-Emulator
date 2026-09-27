@@ -1,0 +1,83 @@
+$ cat /sys/class/drm/card0-Virtual-1/modes | head -5
+640x480
+5120x2160
+4096x2160
+3840x2160
+3840x2160
+
+$ dumpsys display | grep -E "mActiveSfDisplayMode|DisplayDeviceInfo" | cut -c1-600
+  DisplayDeviceInfo{"Built-in Screen": uniqueId="local:4632256312697818880", 640 x 480, modeId 24, defaultModeId 1, supportedModes [{id=1, width=640, height=480, fps=119.98768, alternativeRefreshRates=[60.000004]}, {id=2, width=5120, height=2160, fps=50.0, alternativeRefreshRates=[]}, {id=3, width=4096, height=2160, fps=50.0, alternativeRefreshRates=[]}, {id=4, width=3840, height=2160, fps=60.000004, alternativeRefreshRates=[50.0]}, {id=5, width=3840, height=2160, fps=50.0, alternativeRefreshRates=[60.000004]}, {id=6, width=1920, height=1440, fps=60.000004, alternativeRefreshRates=[]}, {id=7, 
+    mActiveSfDisplayMode=DisplayMode{id=23, width=640, height=480, xDpi=101.6, yDpi=101.6, refreshRate=60.000004, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16666666, group=1}
+
+$ dumpsys SurfaceFlinger | grep -iE "VSYNC period|refreshRate=" | head -6
+      present offset:         0 ns	     VSYNC period:  16666666 ns
+      {id=0, hwcId=2, resolution=640x480, refreshRate=119.99 Hz, dpi=101.60x101.60, group=1}
+      {id=1, hwcId=3, resolution=5120x2160, refreshRate=50.00 Hz, dpi=812.80x457.20, group=2}
+      {id=2, hwcId=4, resolution=4096x2160, refreshRate=50.00 Hz, dpi=650.24x457.20, group=3}
+      {id=3, hwcId=5, resolution=3840x2160, refreshRate=60.00 Hz, dpi=609.60x457.20, group=4}
+      {id=4, hwcId=7, resolution=3840x2160, refreshRate=50.00 Hz, dpi=609.60x457.20, group=4}
+
+$ cat /proc/cmdline
+cat: /proc/cmdline: Permission denied
+
+$ uname -r
+6.1.112-gloria-xanmod1
+
+$ ls /sys/module | grep -i -E "ksu|kernelsu"
+
+$ dmesg 2>&1 | grep -i -E "kernelsu|ksu" | head -5
+[    0.009786] ACPI: Early table checksum verification disabled
+[    0.814281] xor: automatically using best checksumming function   avx       
+[    0.893570] KernelSU: sucompat: execve_kp: 0
+[    0.894202] KernelSU: sucompat: newfstatat_kp: 0
+[    0.894781] KernelSU: sucompat: faccessat_kp: 0
+
+$ dumpsys package me.weishu.kernelsu | grep -E "versionName|codePath" | head -3
+    codePath=/data/app/~~kggNIiIBJAXMrEbGPozyxg==/me.weishu.kernelsu-CBLD3FbRCsbWm9AggUfzfA==
+    versionName=v1.0.1-39-g27bb2491
+
+$ cat /sys/devices/system/clocksource/clocksource0/current_clocksource
+hyperv_clocksource_tsc_page
+
+$ cat /sys/devices/system/clocksource/clocksource0/available_clocksource
+hyperv_clocksource_tsc_page hpet acpi_pm 
+
+$ dmesg 2>&1 | grep -i -E "hypervisor|hyper-v|hyperv|tsc|clocksource" | head -12
+[    0.000000] Hypervisor detected: Microsoft Hyper-V
+[    0.000000] Hyper-V: privilege flags low 0xa63, high 0x80000, hints 0x220, misc 0x48130
+[    0.000000] Hyper-V: Host Build 10.0.22621.6060-6-0
+[    0.000000] Hyper-V: LAPIC Timer Frequency: 0x3d0900
+[    0.000000] clocksource: hyperv_clocksource_tsc_page: mask: 0xffffffffffffffff max_cycles: 0x24e6a1710, max_idle_ns: 440795202120 ns
+[    0.000046] tsc: Marking TSC unstable due to running on Hyper-V
+[    0.000048] tsc: Detected 3686.401 MHz processor
+[    0.236293] Booting paravirtualized kernel on Hyper-V
+[    0.236295] clocksource: refined-jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645519600211568 ns
+[    0.239663] Hyper-V: PV spinlocks disabled
+[    0.297782] clocksource: hpet: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604467 ns
+[    0.301184] SRBDS: Unknown: Dependent on hypervisor status
+
+$ grep -m1 flags /proc/cpuinfo | tr " " "\n" | grep -E "^(avx|avx2|fma|bmi1|bmi2|sse4_2|popcnt|f16c|aes|pclmulqdq)$" | tr "\n" " "
+pclmulqdq fma sse4_2 popcnt aes avx f16c bmi1 avx2 bmi2 
+
+$ grep -m1 "model name" /proc/cpuinfo
+model name	: Intel Core Processor (Skylake, IBRS, no TSX)
+
+$ cat /system/etc/cpuinfo.arm64.txt | grep -c processor
+2
+
+$ getprop | grep -i -E "native.bridge|ndk_translation|berberis" | head -8
+[ro.dalvik.vm.native.bridge]: [libndk_translation.so]
+[ro.ndk_translation.version]: [0.2.3]
+[ro.vendor.enable.native.bridge.exec]: [1]
+[ro.vendor.enable.native.bridge.exec64]: [1]
+
+$ adb root; dmesg | grep -i ksu
+[    0.009786] ACPI: Early table checksum verification disabled
+[    0.814281] xor: automatically using best checksumming function   avx       
+[    0.893570] KernelSU: sucompat: execve_kp: 0
+[    0.894202] KernelSU: sucompat: newfstatat_kp: 0
+[    0.894781] KernelSU: sucompat: faccessat_kp: 0
+total 12
+drwx------  2 root   root   4096 2026-09-25 21:44 .
+drwxrwx--x 51 system system 4096 2026-09-27 12:02 ..
+

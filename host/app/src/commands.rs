@@ -2,7 +2,10 @@
 // Copyright (C) 2026 Open Mobile Emulator contributors
 use std::sync::{Arc, Mutex};
 
-use ome_runtime::{AppIssue, AppRuntime, AppSnapshot, Command, SettingsInput, StageFit, StageRect};
+use ome_runtime::{
+    AppIssue, AppRuntime, AppSnapshot, Binding, Command, InputProfile, SettingsInput, Size,
+    StageFit, StageRect, VsyncMode,
+};
 use tauri::{AppHandle, State};
 
 use crate::{admission::CommandAdmission, events};
@@ -60,8 +63,6 @@ pub(crate) async fn apply(
             Ok(runtime) => runtime.apply(command)?,
             Err(issue) => return Err(issue.clone()),
         };
-        // Emit before dropping the lease so a following command cannot publish
-        // its snapshot ahead of this one.
         events::snapshot(&app, &snapshot);
         Ok(snapshot)
     })
@@ -89,95 +90,88 @@ pub(crate) async fn app_snapshot(state: State<'_, ShellState>) -> Result<AppSnap
     })?
 }
 
-#[tauri::command]
-pub(crate) async fn host_check_refresh(
-    app: AppHandle,
-    state: State<'_, ShellState>,
-) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::HostCheckRefresh).await
+macro_rules! command_no_args {
+    ($name:ident, $variant:expr) => {
+        #[tauri::command]
+        pub(crate) async fn $name(
+            app: AppHandle,
+            state: State<'_, ShellState>,
+        ) -> Result<AppSnapshot, AppIssue> {
+            apply(app, &state, $variant).await
+        }
+    };
 }
 
-#[tauri::command]
-pub(crate) async fn wizard_continue(
-    app: AppHandle,
-    state: State<'_, ShellState>,
-) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::WizardContinue).await
-}
+command_no_args!(host_check_refresh, Command::HostCheckRefresh);
+command_no_args!(wizard_continue, Command::WizardContinue);
+command_no_args!(wizard_skip, Command::WizardSkip);
+command_no_args!(whpx_enable, Command::WhpxEnable);
+command_no_args!(artifact_download_start, Command::ArtifactDownloadStart);
+command_no_args!(artifact_download_cancel, Command::ArtifactDownloadCancel);
+command_no_args!(guest_start, Command::GuestStart);
+command_no_args!(guest_stop, Command::GuestStop);
+command_no_args!(guest_restart, Command::GuestRestart);
+command_no_args!(screenshot_save, Command::ScreenshotSave);
+command_no_args!(app_install_pick, Command::AppInstallPick);
+command_no_args!(input_suspend_toggle, Command::InputSuspendToggle);
+command_no_args!(input_editor_toggle, Command::InputEditorToggle);
+command_no_args!(update_check, Command::UpdateCheck);
+command_no_args!(update_install, Command::UpdateInstall);
+command_no_args!(diagnostics_export, Command::DiagnosticsExport);
+command_no_args!(open_logs_folder, Command::OpenLogsFolder);
+command_no_args!(open_screenshots_folder, Command::OpenScreenshotsFolder);
+command_no_args!(open_registration_page, Command::OpenRegistrationPage);
+command_no_args!(guest_window_to_front, Command::GuestWindowToFront);
 
 #[tauri::command]
-pub(crate) async fn wizard_skip(
+pub(crate) async fn guest_image_select(
     app: AppHandle,
     state: State<'_, ShellState>,
+    id: String,
 ) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::WizardSkip).await
+    apply(app, &state, Command::GuestImageSelect { id }).await
 }
-
 #[tauri::command]
-pub(crate) async fn wizard_restart(
+pub(crate) async fn guest_create(
     app: AppHandle,
     state: State<'_, ShellState>,
-) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::WizardRestart).await
-}
-
-#[tauri::command]
-pub(crate) async fn whpx_enable(
-    app: AppHandle,
-    state: State<'_, ShellState>,
-) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::WhpxEnable).await
-}
-
-#[tauri::command]
-pub(crate) async fn artifact_download_start(
-    app: AppHandle,
-    state: State<'_, ShellState>,
-) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::ArtifactDownloadStart).await
-}
-
-#[tauri::command]
-pub(crate) async fn artifact_download_cancel(
-    app: AppHandle,
-    state: State<'_, ShellState>,
-) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::ArtifactDownloadCancel).await
-}
-
-#[tauri::command]
-pub(crate) async fn guest_disk_create(
-    app: AppHandle,
-    state: State<'_, ShellState>,
+    image_id: String,
     size_gib: u32,
 ) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::GuestDiskCreate { size_gib }).await
+    apply(app, &state, Command::GuestCreate { image_id, size_gib }).await
 }
-
 #[tauri::command]
-pub(crate) async fn guest_start(
+pub(crate) async fn guest_select(
     app: AppHandle,
     state: State<'_, ShellState>,
+    name: String,
 ) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::GuestStart).await
+    apply(app, &state, Command::GuestSelect { name }).await
 }
-
 #[tauri::command]
-pub(crate) async fn guest_stop(
+pub(crate) async fn guest_delete(
     app: AppHandle,
     state: State<'_, ShellState>,
+    name: String,
 ) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::GuestStop).await
+    apply(app, &state, Command::GuestDelete { name }).await
 }
-
 #[tauri::command]
-pub(crate) async fn guest_restart(
+pub(crate) async fn guest_reinstall(
     app: AppHandle,
     state: State<'_, ShellState>,
+    name: String,
 ) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::GuestRestart).await
+    apply(app, &state, Command::GuestReinstall { name }).await
 }
-
+#[tauri::command]
+pub(crate) async fn guest_root_set(
+    app: AppHandle,
+    state: State<'_, ShellState>,
+    enabled: bool,
+) -> Result<AppSnapshot, AppIssue> {
+    apply(app, &state, Command::GuestRootSet { enabled }).await
+}
 #[tauri::command]
 pub(crate) async fn stage_rect_changed(
     app: AppHandle,
@@ -186,23 +180,6 @@ pub(crate) async fn stage_rect_changed(
 ) -> Result<AppSnapshot, AppIssue> {
     apply(app, &state, Command::StageRectChanged { rect }).await
 }
-
-#[tauri::command]
-pub(crate) async fn screenshot_save(
-    app: AppHandle,
-    state: State<'_, ShellState>,
-) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::ScreenshotSave).await
-}
-
-#[tauri::command]
-pub(crate) async fn app_install_pick(
-    app: AppHandle,
-    state: State<'_, ShellState>,
-) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::AppInstallPick).await
-}
-
 #[tauri::command]
 pub(crate) async fn app_uninstall(
     app: AppHandle,
@@ -211,7 +188,6 @@ pub(crate) async fn app_uninstall(
 ) -> Result<AppSnapshot, AppIssue> {
     apply(app, &state, Command::AppUninstall { package }).await
 }
-
 #[tauri::command]
 pub(crate) async fn app_launch(
     app: AppHandle,
@@ -220,34 +196,72 @@ pub(crate) async fn app_launch(
 ) -> Result<AppSnapshot, AppIssue> {
     apply(app, &state, Command::AppLaunch { package }).await
 }
-
 #[tauri::command]
-pub(crate) async fn keymap_set_active(
+pub(crate) async fn input_profile_select(
     app: AppHandle,
     state: State<'_, ShellState>,
     id: Option<String>,
 ) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::KeymapSetActive { id }).await
+    apply(app, &state, Command::InputProfileSelect { id }).await
 }
-
 #[tauri::command]
-pub(crate) async fn keymap_set_enabled(
-    app: AppHandle,
-    state: State<'_, ShellState>,
-    enabled: bool,
-) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::KeymapSetEnabled { enabled }).await
-}
-
-#[tauri::command]
-pub(crate) async fn keymap_delete(
+pub(crate) async fn input_profile_delete(
     app: AppHandle,
     state: State<'_, ShellState>,
     id: String,
 ) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::KeymapDelete { id }).await
+    apply(app, &state, Command::InputProfileDelete { id }).await
 }
-
+#[tauri::command]
+pub(crate) async fn input_profile_save(
+    app: AppHandle,
+    state: State<'_, ShellState>,
+    profile: InputProfile,
+) -> Result<AppSnapshot, AppIssue> {
+    apply(app, &state, Command::InputProfileSave { profile }).await
+}
+#[tauri::command]
+pub(crate) async fn input_binding_upsert(
+    app: AppHandle,
+    state: State<'_, ShellState>,
+    profile_id: String,
+    binding: Binding,
+) -> Result<AppSnapshot, AppIssue> {
+    apply(
+        app,
+        &state,
+        Command::InputBindingUpsert {
+            profile_id,
+            binding,
+        },
+    )
+    .await
+}
+#[tauri::command]
+pub(crate) async fn input_binding_remove(
+    app: AppHandle,
+    state: State<'_, ShellState>,
+    profile_id: String,
+    id: String,
+) -> Result<AppSnapshot, AppIssue> {
+    apply(app, &state, Command::InputBindingRemove { profile_id, id }).await
+}
+#[tauri::command]
+pub(crate) async fn input_auto_apply_set(
+    app: AppHandle,
+    state: State<'_, ShellState>,
+    enabled: bool,
+) -> Result<AppSnapshot, AppIssue> {
+    apply(app, &state, Command::InputAutoApplySet { enabled }).await
+}
+#[tauri::command]
+pub(crate) async fn input_suspend_hotkey_set(
+    app: AppHandle,
+    state: State<'_, ShellState>,
+    code: String,
+) -> Result<AppSnapshot, AppIssue> {
+    apply(app, &state, Command::InputSuspendHotkeySet { code }).await
+}
 #[tauri::command]
 pub(crate) async fn display_preset_apply(
     app: AppHandle,
@@ -256,7 +270,36 @@ pub(crate) async fn display_preset_apply(
 ) -> Result<AppSnapshot, AppIssue> {
     apply(app, &state, Command::DisplayPresetApply { id }).await
 }
-
+#[tauri::command]
+pub(crate) async fn display_custom_apply(
+    app: AppHandle,
+    state: State<'_, ShellState>,
+    size: Size,
+    density_dpi: u32,
+) -> Result<AppSnapshot, AppIssue> {
+    apply(
+        app,
+        &state,
+        Command::DisplayCustomApply { size, density_dpi },
+    )
+    .await
+}
+#[tauri::command]
+pub(crate) async fn display_refresh_set(
+    app: AppHandle,
+    state: State<'_, ShellState>,
+    hz: Option<u32>,
+) -> Result<AppSnapshot, AppIssue> {
+    apply(app, &state, Command::DisplayRefreshSet { hz }).await
+}
+#[tauri::command]
+pub(crate) async fn display_vsync_set(
+    app: AppHandle,
+    state: State<'_, ShellState>,
+    mode: VsyncMode,
+) -> Result<AppSnapshot, AppIssue> {
+    apply(app, &state, Command::DisplayVsyncSet { mode }).await
+}
 #[tauri::command]
 pub(crate) async fn stage_fit_set(
     app: AppHandle,
@@ -265,7 +308,6 @@ pub(crate) async fn stage_fit_set(
 ) -> Result<AppSnapshot, AppIssue> {
     apply(app, &state, Command::StageFitSet { fit }).await
 }
-
 #[tauri::command]
 pub(crate) async fn settings_save(
     app: AppHandle,
@@ -273,60 +315,4 @@ pub(crate) async fn settings_save(
     settings: SettingsInput,
 ) -> Result<AppSnapshot, AppIssue> {
     apply(app, &state, Command::SettingsSave { settings }).await
-}
-
-#[tauri::command]
-pub(crate) async fn update_check(
-    app: AppHandle,
-    state: State<'_, ShellState>,
-) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::UpdateCheck).await
-}
-
-#[tauri::command]
-pub(crate) async fn update_install(
-    app: AppHandle,
-    state: State<'_, ShellState>,
-) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::UpdateInstall).await
-}
-
-#[tauri::command]
-pub(crate) async fn diagnostics_export(
-    app: AppHandle,
-    state: State<'_, ShellState>,
-) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::DiagnosticsExport).await
-}
-
-#[tauri::command]
-pub(crate) async fn open_logs_folder(
-    app: AppHandle,
-    state: State<'_, ShellState>,
-) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::OpenLogsFolder).await
-}
-
-#[tauri::command]
-pub(crate) async fn open_screenshots_folder(
-    app: AppHandle,
-    state: State<'_, ShellState>,
-) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::OpenScreenshotsFolder).await
-}
-
-#[tauri::command]
-pub(crate) async fn open_registration_page(
-    app: AppHandle,
-    state: State<'_, ShellState>,
-) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::OpenRegistrationPage).await
-}
-
-#[tauri::command]
-pub(crate) async fn guest_window_to_front(
-    app: AppHandle,
-    state: State<'_, ShellState>,
-) -> Result<AppSnapshot, AppIssue> {
-    apply(app, &state, Command::GuestWindowToFront).await
 }

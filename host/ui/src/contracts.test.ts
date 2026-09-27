@@ -4,9 +4,11 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type {
-  AppIssue, AppSnapshot, AppsView, DisplayPreset, DisplayView, GuestView, HostReport,
-  HostRow, KeymapView, LastExit, Notice, SettingsInput, SettingsView, Size, StageRect,
-  TransferProgress, UpdateState, UpdateView, WizardView,
+  AppIssue, AppSnapshot, AppsView, Binding, BindingAction, CapabilityItem, CapabilityReport,
+  CustomDisplay, DisplayPreset, DisplayView, GuestImageSummary, GuestSummary, GuestView,
+  HostReport, HostRow, ImagesView, InputProfile, InputView, LastExit, LogicalPoint, Notice,
+  SettingsInput, SettingsView, Size, StageRect, TransferProgress, Trigger, UpdateState,
+  UpdateView, WizardView,
 } from './contracts';
 
 type Check = (value: unknown, path: string) => void;
@@ -35,14 +37,53 @@ const array = (check: Check): Check => (value, path) => {
 
 const issue = object<AppIssue>({ code: string, message: string, nextAction: nullable(string) });
 const size = object<Size>({ width: number, height: number });
+const point = object<LogicalPoint>({ x: number, y: number });
 const rect = object<StageRect>({ x: number, y: number, width: number, height: number, scaleFactor: number });
 const transfer = object<TransferProgress>({
   stage: enumeration('waiting', 'transferring', 'verifying', 'verified', 'failed', 'cancelled'),
   doneBytes: number, totalBytes: nullable(number), bytesPerSecond: nullable(number), label: string,
 });
+const capability = enumeration('available', 'unavailable', 'unknown');
+const capabilityItem = object<CapabilityItem>({
+  id: enumeration('bootMarker', 'appList', 'displaySize', 'mediaVolume', 'deviceId', 'screenshot', 'foregroundApp', 'multitouch', 'nativeBridge', 'root'),
+  state: capability,
+});
+const capabilityReport = object<CapabilityReport>({ probedAt: nullable(string), items: array(capabilityItem) });
+const trigger: Check = (value, path) => {
+  object<{ kind: string }>({ kind: string })(value, path);
+  const kind: unknown = Reflect.get(value as object, 'kind');
+  const variants = {
+    key: object<Extract<Trigger, { kind: 'key' }>>({ kind: enumeration('key'), code: string }),
+    mouseButton: object<Extract<Trigger, { kind: 'mouseButton' }>>({ kind: enumeration('mouseButton'), button: enumeration('left', 'right', 'middle') }),
+    wheel: object<Extract<Trigger, { kind: 'wheel' }>>({ kind: enumeration('wheel'), direction: enumeration('up', 'down') }),
+    keySet: object<Extract<Trigger, { kind: 'keySet' }>>({ kind: enumeration('keySet'), up: string, down: string, left: string, right: string }),
+  } satisfies Record<Trigger['kind'], Check>;
+  if (typeof kind !== 'string' || !Object.hasOwn(variants, kind)) fail(`${path}.kind`, 'trigger kind');
+  variants[kind as keyof typeof variants](value, path);
+};
+const action: Check = (value, path) => {
+  object<{ kind: string }>({ kind: string })(value, path);
+  const kind: unknown = Reflect.get(value as object, 'kind');
+  const variants = {
+    tap: object<Extract<BindingAction, { kind: 'tap' }>>({ kind: enumeration('tap'), at: point, hold: boolean }),
+    swipe: object<Extract<BindingAction, { kind: 'swipe' }>>({ kind: enumeration('swipe'), from: point, to: point, durationMs: number }),
+    joystick: object<Extract<BindingAction, { kind: 'joystick' }>>({ kind: enumeration('joystick'), center: point, radius: number }),
+    mouseTap: object<Extract<BindingAction, { kind: 'mouseTap' }>>({ kind: enumeration('mouseTap'), at: nullable(point) }),
+    wheelSwipe: object<Extract<BindingAction, { kind: 'wheelSwipe' }>>({ kind: enumeration('wheelSwipe'), at: point, distance: number }),
+    passThrough: object<Extract<BindingAction, { kind: 'passThrough' }>>({ kind: enumeration('passThrough') }),
+  } satisfies Record<BindingAction['kind'], Check>;
+  if (typeof kind !== 'string' || !Object.hasOwn(variants, kind)) fail(`${path}.kind`, 'action kind');
+  variants[kind as keyof typeof variants](value, path);
+};
+const binding = object<Binding>({ id: string, trigger, action });
+const profile = object<InputProfile>({
+  id: string, name: string, bundled: boolean, targetPackage: nullable(string), referenceAspect: size,
+  anchor: enumeration('center', 'edges'), bindings: array(binding),
+});
 const settingsInput: Shape<SettingsInput> = {
   memoryMib: number, vcpus: number, gpuMode: enumeration('virgl', 'software'),
-  closeAction: enumeration('minimizeToTray', 'stopGuest'), showFps: boolean, autoUpdateCheck: boolean,
+  closeAction: enumeration('stopGuest', 'minimizeToTray'), showFps: boolean, autoUpdateCheck: boolean,
+  adbAccess: enumeration('localhost', 'network'), bindingOverlayDefault: boolean,
 };
 const update: Check = (value, path) => {
   object<{ kind: string }>({ kind: string })(value, path);
@@ -59,9 +100,21 @@ const update: Check = (value, path) => {
   if (typeof kind !== 'string' || !Object.hasOwn(variants, kind)) fail(`${path}.kind`, 'update kind');
   variants[kind as keyof typeof variants](value, path);
 };
+const imageSummary = object<GuestImageSummary>({
+  id: string, displayName: string, androidVersion: string, apiLevel: number,
+  distribution: enumeration('bliss', 'androidX86', 'selfBuilt'),
+  translator: enumeration('houdini', 'ndkTranslation', 'digitalis', 'none'),
+  sizeBytes: nullable(number), status: enumeration('verified', 'candidate', 'deprecated'),
+  releasedAt: nullable(string), verifiedGames: number, recommended: boolean,
+});
+const guestSummary = object<GuestSummary>({
+  name: string, imageId: string, androidVersion: string, diskSizeGib: number,
+  lastStartedAt: nullable(string), capabilities: capabilityReport,
+});
 const snapshot = object<AppSnapshot>({
-  contractVersion: (value, path) => { if (value !== 1) fail(path, 'contract version 1'); },
+  contractVersion: (value, path) => { if (value !== 2) fail(path, 'contract version 2'); },
   productVersion: string, phase: enumeration('wizard', 'main'),
+  blocker: nullable(object({ kind: enumeration('virtualizationOff', 'qemuMissing', 'hypervisorPlatformOff') })),
   host: object<HostReport>({
     ready: boolean, inspectedAt: nullable(string),
     rows: array(object<HostRow>({
@@ -70,28 +123,37 @@ const snapshot = object<AppSnapshot>({
     })),
   }),
   wizard: object<WizardView>({
-    step: enumeration('hostCheck', 'whpxConsent', 'rebootPending', 'artifactDownload', 'guestInstall', 'firstBoot', 'googleRegistration', 'appInstall', 'done'),
-    canContinue: boolean, canSkip: boolean, download: nullable(transfer), gsfId: nullable(string), diskSizeGib: number, diskFreeBytes: nullable(number),
+    step: enumeration('hostCheck', 'whpxConsent', 'rebootPending', 'artifactDownload', 'guestInstall', 'firstBoot', 'appInstall', 'done'),
+    canContinue: boolean, canSkip: boolean, download: nullable(transfer), imageId: nullable(string),
+    installGuide: array(string), diskSizeGib: number, diskFreeBytes: nullable(number),
   }),
+  images: object<ImagesView>({ profiles: array(imageSummary), guests: array(guestSummary), activeGuest: nullable(string) }),
   guest: object<GuestView>({
     state: enumeration('stopped', 'starting', 'running', 'stopping', 'restarting', 'failed'),
     bootCompleted: boolean, adbConnected: boolean, hosting: enumeration('none', 'embedded', 'separateWindow'),
     resolution: nullable(size), fps: nullable(number), startedAt: nullable(string),
-    lastExit: nullable(object<LastExit>({ kind: enumeration('userStop', 'guestReset', 'unexpected'), at: string, logPath: nullable(string) })),
+    lastExit: nullable(object<LastExit>({ kind: enumeration('userStop', 'guestReset', 'bootTimeout', 'crash', 'startFailed'), at: string, logPath: nullable(string) })),
+    imageId: nullable(string), androidVersion: nullable(string), apiLevel: nullable(number),
+    capabilities: capabilityReport, deviceId: nullable(string), adbAddress: nullable(string), rootEnabled: nullable(boolean),
   }),
   apps: object<AppsView>({
     available: boolean, install: nullable(transfer),
     items: array(object<AppsView['items'][number]>({ package: string, label: string, versionName: nullable(string), installedAt: nullable(string) })),
   }),
-  keymap: object<KeymapView>({
-    activeId: nullable(string), enabled: boolean,
-    profiles: array(object<KeymapView['profiles'][number]>({ id: string, name: string, bundled: boolean, bindingCount: number })),
+  input: object<InputView>({
+    profiles: array(profile), activeId: nullable(string), suspended: boolean, editing: boolean,
+    autoApply: boolean, foregroundPackage: nullable(string), multitouch: capability, suspendHotkey: string,
   }),
   display: object<DisplayView>({
-    activeId: nullable(string), fit: enumeration('fitWindow', 'oneToOne'),
+    activeId: nullable(string), custom: nullable(object<CustomDisplay>({ size, densityDpi: number })),
+    fit: enumeration('fitWindow', 'oneToOne'), refreshRateHz: nullable(number), refreshRates: array(number),
+    refreshSupported: boolean, vsync: enumeration('off', 'on', 'adaptive'), vsyncSupported: boolean,
     presets: array(object<DisplayPreset>({ id: string, size, densityDpi: number, orientation: enumeration('landscape', 'portrait'), needsReboot: boolean })),
   }),
-  settings: object<SettingsView>({ ...settingsInput, homeDir: string, diskUsageBytes: nullable(number) }),
+  settings: object<SettingsView>({
+    ...settingsInput, memoryMibMin: number, memoryMibMax: number, vcpusMax: number,
+    homeDir: string, diskUsageBytes: nullable(number),
+  }),
   update: object<UpdateView>({ currentVersion: string, state: update }),
   notices: array(object<Notice>({ at: string, level: enumeration('info', 'warning', 'error'), message: string })),
   issue: nullable(issue),
@@ -107,18 +169,25 @@ function fixture(name: string): unknown {
 }
 
 const commandShapes: Record<string, Record<string, Check>> = {
-  hostCheckRefresh: {}, wizardContinue: {}, wizardSkip: {}, wizardRestart: {}, whpxEnable: {},
-  artifactDownloadStart: {}, artifactDownloadCancel: {}, guestDiskCreate: { sizeGib: number },
-  guestStart: {}, guestStop: {}, guestRestart: {}, stageRectChanged: { rect }, screenshotSave: {},
+  hostCheckRefresh: {}, wizardContinue: {}, wizardSkip: {}, whpxEnable: {},
+  artifactDownloadStart: {}, artifactDownloadCancel: {}, guestImageSelect: { id: string },
+  guestCreate: { imageId: string, sizeGib: number }, guestSelect: { name: string },
+  guestDelete: { name: string }, guestReinstall: { name: string }, guestStart: {}, guestStop: {},
+  guestRestart: {}, guestRootSet: { enabled: boolean }, stageRectChanged: { rect }, screenshotSave: {},
   appInstallPick: {}, appUninstall: { package: string }, appLaunch: { package: string },
-  keymapSetActive: { id: nullable(string) }, keymapSetEnabled: { enabled: boolean }, keymapDelete: { id: string },
-  displayPresetApply: { id: string }, stageFitSet: { fit: enumeration('fitWindow', 'oneToOne') },
+  inputProfileSelect: { id: nullable(string) }, inputSuspendToggle: {}, inputProfileDelete: { id: string },
+  inputProfileSave: { profile }, inputBindingUpsert: { profileId: string, binding },
+  inputBindingRemove: { profileId: string, id: string }, inputEditorToggle: {},
+  inputAutoApplySet: { enabled: boolean }, inputSuspendHotkeySet: { code: string },
+  displayPresetApply: { id: string }, displayCustomApply: { size, densityDpi: number },
+  displayRefreshSet: { hz: nullable(number) }, displayVsyncSet: { mode: enumeration('off', 'on', 'adaptive') },
+  stageFitSet: { fit: enumeration('fitWindow', 'oneToOne') },
   settingsSave: { settings: object<SettingsInput>(settingsInput) }, updateCheck: {}, updateInstall: {},
   diagnosticsExport: {}, openLogsFolder: {}, openScreenshotsFolder: {}, openRegistrationPage: {}, guestWindowToFront: {},
 };
 
 describe('Rust/TypeScript contract fixtures', () => {
-  it('requires every snapshot field and validates nested enums', () => {
+  it('requires every snapshot field and validates nested variants', () => {
     snapshot(fixture('snapshot.sample.json'), 'snapshot');
   });
 

@@ -1,0 +1,1 @@
+C:\Program Files\qemu\qemu-system-x86_64.exe: -drive if=pflash,format=raw,file=C:\Users\USER\vm\default\efivars.fd: Could not open 'C:\Users\USER\vm\default\efivars.fd': 지정된 경로를 찾을 수 없습니다.

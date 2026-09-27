@@ -1,0 +1,36 @@
+{
+  "id": "bliss-16.9.7-android-13",
+  "display_name": "안드로이드 13",
+  "android_version": "13",
+  "api_level": 33,
+  "distribution": "bliss",
+  "artifact": "bliss-os-16.9.7-gapps-x86_64-iso",
+  "translator": "ndk_translation",
+  "boot_args": [
+    "quiet",
+    "HWC=drm_minigbm",
+    "GRALLOC=minigbm_arcvm"
+  ],
+  "grub_entry_hint": "VM Options -> Live - QEMU/KVM - Virgl - SW-FFMPEG",
+  "install_guide": [
+    "ISO 메뉴에서 Installation을 선택합니다.",
+    "빈 디스크에 GPT 파티션 표와 512MB EFI 시스템 파티션을 만듭니다.",
+    "남은 공간에 Linux filesystem 파티션을 만들고 변경 사항을 기록합니다.",
+    "EFI 파티션은 FAT32로, 운영체제 파티션은 ext4로 포맷합니다.",
+    "OTA 업데이트는 No를 고르고 Grub2 EFI Bootloader를 설치합니다.",
+    "설치가 끝나면 가상 머신을 끄고 ISO 없이 다시 시작합니다."
+  ],
+  "qemu_overrides": [
+    "virtio_vga_gl",
+    "sdl_gl",
+    "edid_off"
+  ],
+  "status": "verified",
+  "released_at": "2024-10-11",
+  "verifications": [
+    {
+      "verified_at": "2026-09-26",
+      "evidence": "docs/evidence/M1/completion-checklist.md"
+    }
+  ]
+}

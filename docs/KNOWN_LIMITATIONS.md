@@ -48,8 +48,13 @@
 - QEMU's generated EDID offers the guest a single 75 Hz mode, which pins
   SurfaceFlinger's vsync to 13.3 ms and held the tested game at 38 fps. The
   launcher passes `edid=off` on the virgl device so the guest falls back to a
-  60 Hz mode (58 fps measured). Guests that need the EDID's resolution list
-  lose it; `xres`/`yres` on the device still set the default mode.
+  60 Hz mode (58 fps measured). With `edid=off` the guest still lists 35 DRM
+  modes from 1280x800 to 4096x2160, all at 56 to 60 Hz (2026-09-27,
+  `docs/evidence/M2/sizing-20260927/`); only the EDID's preferred mode and
+  refresh rate are lost. The SDL display backend never reports a refresh rate
+  to virtio-gpu (only GTK does), so a chosen refresh rate needs the OME patch
+  `qemu-build/patches/0002-ui-sdl2-refresh-rate-option.patch`, and host vsync
+  needs `0003-ui-sdl2-swap-interval-option.patch` (`docs/DECISION-hardware-display.md`).
 - The translator aborted once with `ndk_translation: Cannot process signal 11`
   while a native thread attached to the JVM (`docs/evidence/M0/crash-ndk-translation-1/`),
   after 170 s of a launch that was otherwise idle on a download prompt. It did
@@ -82,4 +87,18 @@
   ANGLE (`libEGL.dll`, `libGLESv2.dll`, BSD-3-Clause, about 12 MB), as the
   distribution build does (`docs/evidence/M1/custom-qemu-build.md`). Do not
   strip those files from a release.
+- App root does not work on Bliss 16.9.7 GApps 2024-10-11: the KernelSU manager
+  app is installed but the kernel side is absent (`/data/adb/ksu`, `ksud` and
+  `su` do not exist; Bliss support issue #99 reproduces). `adb root` works. The
+  product's root toggle is therefore absent for this image profile
+  (`docs/DECISION-root-adb.md`, `docs/evidence/M2/sizing-20260927/`).
+- adb on this guest has no key authentication (`ro.adb.secure=0`): any program
+  on the same PC that connects to `127.0.0.1:5555` gets a root shell. The
+  product keeps the port on loopback and shows a warning in Settings; opening
+  it to the network is an explicit opt-in.
+- A 16-vCPU, 32 GiB guest boots in 25 s on the development host (2026-09-27,
+  `docs/evidence/M2/sizing-20260927/`). The memory is committed as private
+  memory of the QEMU process, so the product's limits come from the host
+  (physical memory minus 4 GiB, logical processor count). More vCPUs do not
+  raise a game's thread count (the translator reports two cores to ARM code).
 - Multi-instance, macros, and scripted automation are not part of v1 (D9).

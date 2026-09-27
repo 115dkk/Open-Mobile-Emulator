@@ -1,0 +1,22 @@
+QEMU pid 15940, WorkingSet 7,037 MiB, PrivateMemory 33,434 MiB, Threads 83
+Host free RAM 40,269 MiB of 65,316 MiB
+Loaded graphics-related modules:
+  libepoxy-0.dll  C:\Open Mobile Emulator\qemu-build\out\bin\libepoxy-0.dll
+  SDL2.dll  C:\Open Mobile Emulator\qemu-build\out\bin\SDL2.dll
+  libvirglrenderer-1.dll  C:\Open Mobile Emulator\qemu-build\out\bin\libvirglrenderer-1.dll
+  OPENGL32.DLL  C:\Windows\SYSTEM32\OPENGL32.DLL
+  nvoglv64.dll  C:\Windows\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_436833bbb0f00476\nvoglv64.dll
+  libEGL.dll  C:\Open Mobile Emulator\qemu-build\out\bin\libEGL.dll
+  libGLESv2.dll  C:\Open Mobile Emulator\qemu-build\out\bin\libGLESv2.dll
+  dxgi.dll  C:\Windows\SYSTEM32\dxgi.dll
+QEMU pid 10048, WorkingSet 5,225 MiB, PrivateMemory 33,451 MiB, Threads 102
+Host free RAM 42,091 MiB of 65,316 MiB
+Loaded graphics-related modules:
+  libepoxy-0.dll  C:\Open Mobile Emulator\qemu-build\out\bin\libepoxy-0.dll
+  SDL2.dll  C:\Open Mobile Emulator\qemu-build\out\bin\SDL2.dll
+  libvirglrenderer-1.dll  C:\Open Mobile Emulator\qemu-build\out\bin\libvirglrenderer-1.dll
+  OPENGL32.DLL  C:\Windows\SYSTEM32\OPENGL32.DLL
+  nvoglv64.dll  C:\Windows\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_436833bbb0f00476\nvoglv64.dll
+  libEGL.dll  C:\Open Mobile Emulator\qemu-build\out\bin\libEGL.dll
+  libGLESv2.dll  C:\Open Mobile Emulator\qemu-build\out\bin\libGLESv2.dll
+  dxgi.dll  C:\Windows\SYSTEM32\dxgi.dll

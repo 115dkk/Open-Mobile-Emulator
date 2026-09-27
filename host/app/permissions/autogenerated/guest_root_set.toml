@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-guest-root-set"
+description = "Enables the guest_root_set command without any pre-configured scope."
+commands.allow = ["guest_root_set"]
+
+[[permission]]
+identifier = "deny-guest-root-set"
+description = "Denies the guest_root_set command without any pre-configured scope."
+commands.deny = ["guest_root_set"]

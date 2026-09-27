@@ -36,8 +36,14 @@ pub struct RawGuestConfig {
     pub cpu_model: Option<String>,
     /// Loopback QMP port.
     pub qmp_port: Option<i64>,
-    /// Loopback adb forwarding port.
+    /// adb forwarding port.
     pub adb_port: Option<i64>,
+    /// adb host binding (`localhost` or `network`).
+    pub adb_bind: Option<String>,
+    /// Requested display refresh rate in Hz.
+    pub refresh_rate_hz: Option<i64>,
+    /// Requested display size as `(width, height)`.
+    pub display_size: Option<(i64, i64)>,
     /// Audio backend (`dsound`, `sdl`, or `none`).
     pub audio: Option<String>,
     /// Display backend (`sdl` or `gtk`).
@@ -118,6 +124,16 @@ pub enum Audio {
     None,
 }
 
+/// adb host binding policy.
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum AdbBind {
+    /// Expose adb on host loopback only.
+    Localhost,
+    /// Expose adb on every host network interface.
+    Network,
+}
+
 /// QEMU window backend.
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "lowercase")]
@@ -139,6 +155,9 @@ pub struct GuestConfig {
     cpu_model: String,
     qmp_port: u16,
     adb_port: u16,
+    adb_bind: AdbBind,
+    refresh_rate_hz: Option<u32>,
+    display_size: Option<(u32, u32)>,
     audio: Audio,
     display: Display,
     extra_args: Vec<OsString>,
@@ -186,6 +205,15 @@ impl GuestConfig {
             1,
             65_535,
         )? as u16;
+        let adb_bind = parse_adb_bind(raw.adb_bind.as_deref().unwrap_or("localhost"))?;
+        let refresh_rate_hz = raw
+            .refresh_rate_hz
+            .map(|value| ranged("refresh_rate_hz", value, 30, 240).map(|value| value as u32))
+            .transpose()?;
+        let display_size = raw
+            .display_size
+            .map(|(width, height)| validate_display_size(width, height))
+            .transpose()?;
         let audio = parse_audio(raw.audio.as_deref().unwrap_or("dsound"))?;
         let display = parse_display(raw.display.as_deref().unwrap_or("sdl"))?;
 
@@ -198,6 +226,9 @@ impl GuestConfig {
             cpu_model,
             qmp_port,
             adb_port,
+            adb_bind,
+            refresh_rate_hz,
+            display_size,
             audio,
             display,
             extra_args: raw
@@ -244,9 +275,24 @@ impl GuestConfig {
         self.qmp_port
     }
 
-    /// Returns the loopback adb forwarding port.
+    /// Returns the adb forwarding port.
     pub fn adb_port(&self) -> u16 {
         self.adb_port
+    }
+
+    /// Returns the adb host binding policy.
+    pub fn adb_bind(&self) -> AdbBind {
+        self.adb_bind
+    }
+
+    /// Returns the requested display refresh rate.
+    pub fn refresh_rate_hz(&self) -> Option<u32> {
+        self.refresh_rate_hz
+    }
+
+    /// Returns the requested display size.
+    pub fn display_size(&self) -> Option<(u32, u32)> {
+        self.display_size
     }
 
     /// Returns the selected audio backend.
@@ -391,12 +437,26 @@ impl QemuInvocation {
             &mut args,
             "-device",
             match config.gpu() {
-                Gpu::Std => "VGA",
-                Gpu::Virtio => "virtio-vga",
+                Gpu::Std => "VGA".to_owned(),
+                Gpu::Virtio => "virtio-vga".to_owned(),
                 // edid=off avoids QEMU's generated 75 Hz EDID, which pinned
                 // the tested guest to 38 fps instead of its 60 Hz mode
-                // (docs/evidence/M0/findings-20260926.md).
-                Gpu::Virgl => "virtio-vga-gl,edid=off",
+                // (docs/evidence/M0/findings-20260926.md). With a requested
+                // refresh rate the EDID is on and the rate goes to the OME
+                // `refresh_rate` device property (mHz, patch 0002 in
+                // qemu-build/patches; docs/evidence/M2/qemu-display-options.md).
+                Gpu::Virgl => match config.refresh_rate_hz() {
+                    Some(hz) => {
+                        let mhz = hz * 1000;
+                        match config.display_size() {
+                            Some((width, height)) => format!(
+                                "virtio-vga-gl,edid=on,xres={width},yres={height},refresh_rate={mhz}"
+                            ),
+                            None => format!("virtio-vga-gl,edid=on,refresh_rate={mhz}"),
+                        }
+                    }
+                    None => "virtio-vga-gl,edid=off".to_owned(),
+                },
             },
         );
         let display = match (config.display(), config.gpu()) {
@@ -411,7 +471,11 @@ impl QemuInvocation {
             &mut args,
             "-netdev",
             format!(
-                "user,id=n0,hostfwd=tcp:127.0.0.1:{}-:5555",
+                "user,id=n0,hostfwd=tcp:{}:{}-:5555",
+                match config.adb_bind() {
+                    AdbBind::Localhost => "127.0.0.1",
+                    AdbBind::Network => "0.0.0.0",
+                },
                 config.adb_port()
             ),
         );
@@ -532,6 +596,29 @@ fn parse_accel(value: &str) -> Result<Accel, ConfigIssue> {
     }
 }
 
+fn parse_adb_bind(value: &str) -> Result<AdbBind, ConfigIssue> {
+    match value {
+        "localhost" => Ok(AdbBind::Localhost),
+        "network" => Ok(AdbBind::Network),
+        _ => Err(choice("adb_bind", value)),
+    }
+}
+
+fn validate_display_size(width: i64, height: i64) -> Result<(u32, u32), ConfigIssue> {
+    for (field, value) in [("display_width", width), ("display_height", height)] {
+        ranged(field, value, 640, 7680)?;
+        if value % 8 != 0 {
+            return Err(ConfigIssue::OutOfRange {
+                field,
+                min: 640,
+                max: 7680,
+                value,
+            });
+        }
+    }
+    Ok((width as u32, height as u32))
+}
+
 fn parse_audio(value: &str) -> Result<Audio, ConfigIssue> {
     match value {
         "dsound" => Ok(Audio::Dsound),
@@ -628,6 +715,9 @@ mod tests {
         assert_eq!(config.cpu_model(), "Skylake-Client-v4");
         assert_eq!(config.qmp_port(), 4444);
         assert_eq!(config.adb_port(), 5555);
+        assert_eq!(config.adb_bind(), AdbBind::Localhost);
+        assert_eq!(config.refresh_rate_hz(), None);
+        assert_eq!(config.display_size(), None);
         assert_eq!(config.audio(), Audio::Dsound);
         assert_eq!(config.display(), Display::Sdl);
     }
@@ -794,6 +884,9 @@ mod tests {
                 cpu_model: Some(input.cpu_model),
                 qmp_port: Some(input.qmp_port),
                 adb_port: Some(input.adb_port),
+                adb_bind: None,
+                refresh_rate_hz: None,
+                display_size: None,
                 audio: Some(input.audio),
                 display: Some(input.display),
                 extra_args: Some(input.extra_args.unwrap_or_default()),
@@ -820,6 +913,62 @@ mod tests {
                 .map(|item| item.to_string_lossy().into_owned())
                 .collect();
             assert_eq!(actual, fixture.args, "fixture {name}");
+        }
+    }
+
+    #[test]
+    fn refresh_and_network_settings_change_only_managed_arguments() {
+        let config = GuestConfig::validate(RawGuestConfig {
+            adb_bind: Some("network".to_owned()),
+            refresh_rate_hz: Some(120),
+            display_size: Some((1920, 1080)),
+            ..RawGuestConfig::default()
+        })
+        .expect("extended config");
+        let paths = GuestPaths {
+            disk: "disk.qcow2".into(),
+            firmware_code: "code.fd".into(),
+            firmware_vars: "vars.fd".into(),
+            iso: None,
+        };
+        let install = QemuInstall {
+            system_exe: "qemu-system-x86_64.exe".into(),
+        };
+        let args = QemuInvocation::for_boot(&config, &paths, &install)
+            .args()
+            .iter()
+            .map(|value| value.to_string_lossy().into_owned())
+            .collect::<Vec<_>>();
+        assert!(
+            args.contains(
+                &"virtio-vga-gl,edid=on,xres=1920,yres=1080,refresh_rate=120000".to_owned()
+            )
+        );
+        assert!(args.contains(&"sdl,show-cursor=on,gl=on".to_owned()));
+        assert!(args.contains(&"user,id=n0,hostfwd=tcp:0.0.0.0:5555-:5555".to_owned()));
+    }
+
+    #[test]
+    fn display_extension_validation_rejects_bad_values() {
+        for raw in [
+            RawGuestConfig {
+                refresh_rate_hz: Some(29),
+                ..RawGuestConfig::default()
+            },
+            RawGuestConfig {
+                display_size: Some((641, 720)),
+                ..RawGuestConfig::default()
+            },
+            RawGuestConfig {
+                display_size: Some((7688, 720)),
+                ..RawGuestConfig::default()
+            },
+            RawGuestConfig {
+                adb_bind: Some("public".to_owned()),
+                ..RawGuestConfig::default()
+            },
+        ] {
+            assert!(GuestConfig::validate(raw).is_err());
         }
     }
 

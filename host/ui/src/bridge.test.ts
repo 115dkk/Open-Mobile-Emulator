@@ -6,7 +6,7 @@ import { listen } from '@tauri-apps/api/event';
 import type { Event } from '@tauri-apps/api/event';
 import { controllerBridge } from './bridge';
 import { sampleSnapshot } from './fixtures';
-import type { AppSnapshot, TransferProgress } from './contracts';
+import type { AppSnapshot, Binding, InputProfile, TransferProgress } from './contracts';
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn(), isTauri: vi.fn() }));
 vi.mock('@tauri-apps/api/event', () => ({ listen: vi.fn() }));
@@ -15,6 +15,15 @@ beforeEach(() => {
   vi.mocked(isTauri).mockReturnValue(true);
   vi.mocked(invoke).mockResolvedValue(sampleSnapshot);
 });
+
+const binding: Binding = {
+  id: 'tap', trigger: { kind: 'key', code: 'Space' },
+  action: { kind: 'tap', at: { x: 0.5, y: 0.5 }, hold: false },
+};
+const profile: InputProfile = {
+  id: 'sample', name: 'Sample', bundled: false, targetPackage: null,
+  referenceAspect: { width: 16, height: 9 }, anchor: 'center', bindings: [binding],
+};
 
 describe('native bridge', () => {
   it('maps every typed command to the exact registered IPC name', async () => {
@@ -25,23 +34,36 @@ describe('native bridge', () => {
       [() => controllerBridge.hostCheckRefresh(), 'host_check_refresh', undefined],
       [() => controllerBridge.wizardContinue(), 'wizard_continue', undefined],
       [() => controllerBridge.wizardSkip(), 'wizard_skip', undefined],
-      [() => controllerBridge.wizardRestart(), 'wizard_restart', undefined],
       [() => controllerBridge.whpxEnable(), 'whpx_enable', undefined],
       [() => controllerBridge.artifactDownloadStart(), 'artifact_download_start', undefined],
       [() => controllerBridge.artifactDownloadCancel(), 'artifact_download_cancel', undefined],
-      [() => controllerBridge.guestDiskCreate(32), 'guest_disk_create', { sizeGib: 32 }],
+      [() => controllerBridge.guestImageSelect('image'), 'guest_image_select', { id: 'image' }],
+      [() => controllerBridge.guestCreate('image', 32), 'guest_create', { imageId: 'image', sizeGib: 32 }],
+      [() => controllerBridge.guestSelect('default'), 'guest_select', { name: 'default' }],
+      [() => controllerBridge.guestDelete('old'), 'guest_delete', { name: 'old' }],
+      [() => controllerBridge.guestReinstall('default'), 'guest_reinstall', { name: 'default' }],
       [() => controllerBridge.guestStart(), 'guest_start', undefined],
       [() => controllerBridge.guestStop(), 'guest_stop', undefined],
       [() => controllerBridge.guestRestart(), 'guest_restart', undefined],
+      [() => controllerBridge.guestRootSet(true), 'guest_root_set', { enabled: true }],
       [() => controllerBridge.stageRectChanged(rect), 'stage_rect_changed', { rect }],
       [() => controllerBridge.screenshotSave(), 'screenshot_save', undefined],
       [() => controllerBridge.appInstallPick(), 'app_install_pick', undefined],
       [() => controllerBridge.appUninstall('dev.ome.sample'), 'app_uninstall', { package: 'dev.ome.sample' }],
       [() => controllerBridge.appLaunch('dev.ome.sample'), 'app_launch', { package: 'dev.ome.sample' }],
-      [() => controllerBridge.keymapSetActive(null), 'keymap_set_active', { id: null }],
-      [() => controllerBridge.keymapSetEnabled(true), 'keymap_set_enabled', { enabled: true }],
-      [() => controllerBridge.keymapDelete('sample'), 'keymap_delete', { id: 'sample' }],
+      [() => controllerBridge.inputProfileSelect(null), 'input_profile_select', { id: null }],
+      [() => controllerBridge.inputSuspendToggle(), 'input_suspend_toggle', undefined],
+      [() => controllerBridge.inputProfileDelete('sample'), 'input_profile_delete', { id: 'sample' }],
+      [() => controllerBridge.inputProfileSave(profile), 'input_profile_save', { profile }],
+      [() => controllerBridge.inputBindingUpsert('sample', binding), 'input_binding_upsert', { profileId: 'sample', binding }],
+      [() => controllerBridge.inputBindingRemove('sample', 'tap'), 'input_binding_remove', { profileId: 'sample', id: 'tap' }],
+      [() => controllerBridge.inputEditorToggle(), 'input_editor_toggle', undefined],
+      [() => controllerBridge.inputAutoApplySet(true), 'input_auto_apply_set', { enabled: true }],
+      [() => controllerBridge.inputSuspendHotkeySet('F12'), 'input_suspend_hotkey_set', { code: 'F12' }],
       [() => controllerBridge.displayPresetApply('sample'), 'display_preset_apply', { id: 'sample' }],
+      [() => controllerBridge.displayCustomApply({ width: 1600, height: 904 }, 240), 'display_custom_apply', { size: { width: 1600, height: 904 }, densityDpi: 240 }],
+      [() => controllerBridge.displayRefreshSet(120), 'display_refresh_set', { hz: 120 }],
+      [() => controllerBridge.displayVsyncSet('adaptive'), 'display_vsync_set', { mode: 'adaptive' }],
       [() => controllerBridge.stageFitSet('fitWindow'), 'stage_fit_set', { fit: 'fitWindow' }],
       [() => controllerBridge.settingsSave(settings), 'settings_save', { settings }],
       [() => controllerBridge.updateCheck(), 'update_check', undefined],

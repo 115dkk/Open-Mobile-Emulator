@@ -70,6 +70,10 @@ pub trait HostProbe: Send + Sync {
     fn adb(&self) -> Probe<Option<String>>;
     /// Reports available bytes on the volume that holds OME home.
     fn free_disk_bytes(&self) -> Probe<u64>;
+    /// Reports total physical memory in bytes.
+    fn total_memory_bytes(&self) -> Probe<u64>;
+    /// Reports the number of logical processors visible to the host.
+    fn logical_processors(&self) -> Probe<u32>;
 }
 
 /// Identifier for one host-readiness row.
@@ -138,6 +142,40 @@ pub struct Report {
     pub rows: Vec<HostRow>,
     /// Aggregate verdict derived from the rows.
     pub verdict: Verdict,
+}
+
+/// Product hardware limits derived from read-only host observations.
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HardwareLimits {
+    /// Smallest memory value accepted by product settings.
+    pub memory_mib_min: u32,
+    /// Largest memory value accepted by product settings.
+    pub memory_mib_max: u32,
+    /// Largest virtual processor count accepted by product settings.
+    pub vcpus_max: u32,
+}
+
+/// Derives product settings limits from total physical memory and logical processor count.
+///
+/// Four GiB is reserved for Windows, the remaining memory is rounded down by one-GiB units,
+/// and the exposed maximum never drops below four GiB. Missing observations use 16 GiB and
+/// eight logical processors.
+pub fn hardware_limits(
+    total_memory_bytes: Option<u64>,
+    logical_processors: Option<u32>,
+) -> HardwareLimits {
+    const MIB: u64 = 1024 * 1024;
+    let memory_mib_max = total_memory_bytes.map_or(16_384, |bytes| {
+        let available = bytes.div_euclid(MIB).saturating_sub(4096);
+        let rounded = available.div_euclid(1024) * 1024;
+        u32::try_from(rounded.max(4096)).unwrap_or(u32::MAX)
+    });
+    HardwareLimits {
+        memory_mib_min: 4096,
+        memory_mib_max,
+        vcpus_max: logical_processors.unwrap_or(8).max(2),
+    }
 }
 
 /// Pure host-readiness evaluator.
@@ -253,32 +291,32 @@ impl HostReadiness {
                 HostCheckId::FirmwarePresent,
                 probe.firmware(),
                 HostStatus::Blocked,
-                "게스트 시작에 필요한 펌웨어를 찾았습니다.",
-                "게스트 시작에 필요한 펌웨어가 없습니다. 앱을 다시 설치하십시오.",
-                "게스트 시작에 필요한 펌웨어를 확인하지 못했습니다. 앱을 다시 설치한 뒤 다시 확인하십시오.",
+                "가상 머신 시작에 필요한 펌웨어를 찾았습니다.",
+                "가상 머신 시작에 필요한 펌웨어가 없습니다. 앱을 다시 설치하십시오.",
+                "가상 머신 시작에 필요한 펌웨어를 확인하지 못했습니다. 앱을 다시 설치한 뒤 다시 확인하십시오.",
             ),
             match probe.adb() {
                 Ok(Some(_)) => row(
                     HostCheckId::AdbPresent,
                     HostStatus::Ready,
-                    "게스트 앱 관리 도구를 찾았습니다.",
+                    "운영체제 앱 관리 도구를 찾았습니다.",
                 ),
                 Ok(None) => row(
                     HostCheckId::AdbPresent,
                     HostStatus::Attention,
-                    "게스트 앱 관리 도구가 없습니다. 앱 설치 기능을 쓰려면 개발 도구를 설치하십시오.",
+                    "운영체제 앱 관리 도구가 없습니다. 앱 설치 기능을 쓰려면 개발 도구를 설치하십시오.",
                 ),
                 Err(_) => row(
                     HostCheckId::AdbPresent,
                     HostStatus::Attention,
-                    "게스트 앱 관리 도구를 확인하지 못했습니다. 개발 도구 설치 상태를 확인하십시오.",
+                    "운영체제 앱 관리 도구를 확인하지 못했습니다. 개발 도구 설치 상태를 확인하십시오.",
                 ),
             },
             match probe.free_disk_bytes() {
                 Ok(bytes) if bytes >= MINIMUM_DISK_BYTES => row(
                     HostCheckId::DiskSpace,
                     HostStatus::Ready,
-                    "게스트 설치에 필요한 저장 공간이 있습니다.",
+                    "운영체제 설치에 필요한 저장 공간이 있습니다.",
                 ),
                 Ok(_) => row(
                     HostCheckId::DiskSpace,
@@ -332,8 +370,10 @@ fn row(id: HostCheckId, status: HostStatus, detail: &str) -> HostRow {
 /// Missing entries return [`ProbeError::Unwired`]; callers never receive guessed host state.
 #[derive(Clone, Debug, Default)]
 pub struct TableProbe {
-    /// Probe values keyed by stable row identifier.
+    /// Probe values keyed by stable readiness-row identifier.
     pub values: BTreeMap<HostCheckId, ProbeValue>,
+    total_memory: Option<ProbeValue>,
+    logical_processors: Option<ProbeValue>,
 }
 
 impl TableProbe {
@@ -345,6 +385,18 @@ impl TableProbe {
     /// Replaces one table value and returns the table for fluent fixture construction.
     pub fn with(mut self, id: HostCheckId, value: ProbeValue) -> Self {
         self.values.insert(id, value);
+        self
+    }
+
+    /// Replaces the total-memory fixture value.
+    pub fn with_total_memory_bytes(mut self, value: ProbeValue) -> Self {
+        self.total_memory = Some(value);
+        self
+    }
+
+    /// Replaces the logical-processor fixture value.
+    pub fn with_logical_processors(mut self, value: ProbeValue) -> Self {
+        self.logical_processors = Some(value);
         self
     }
 
@@ -370,6 +422,10 @@ pub enum ProbeValue {
     Adb(Option<String>),
     /// Free storage bytes.
     Bytes(u64),
+    /// Total physical memory bytes.
+    TotalMemoryBytes(u64),
+    /// Logical processor count.
+    LogicalProcessors(u32),
     /// Explicit observation failure.
     Error(ProbeError),
 }
@@ -415,6 +471,26 @@ impl HostProbe for TableProbe {
     fn free_disk_bytes(&self) -> Probe<u64> {
         match self.value(HostCheckId::DiskSpace)? {
             ProbeValue::Bytes(value) => Ok(*value),
+            _ => Err(ProbeError::InvalidData),
+        }
+    }
+
+    fn total_memory_bytes(&self) -> Probe<u64> {
+        match self.total_memory.as_ref().ok_or(ProbeError::Unwired)? {
+            ProbeValue::TotalMemoryBytes(value) => Ok(*value),
+            ProbeValue::Error(error) => Err(*error),
+            _ => Err(ProbeError::InvalidData),
+        }
+    }
+
+    fn logical_processors(&self) -> Probe<u32> {
+        match self
+            .logical_processors
+            .as_ref()
+            .ok_or(ProbeError::Unwired)?
+        {
+            ProbeValue::LogicalProcessors(value) => Ok(*value),
+            ProbeValue::Error(error) => Err(*error),
             _ => Err(ProbeError::InvalidData),
         }
     }
@@ -465,6 +541,14 @@ impl HostProbe for WindowsProbe {
     }
 
     fn free_disk_bytes(&self) -> Probe<u64> {
+        Err(ProbeError::Unwired)
+    }
+
+    fn total_memory_bytes(&self) -> Probe<u64> {
+        Err(ProbeError::Unwired)
+    }
+
+    fn logical_processors(&self) -> Probe<u32> {
         Err(ProbeError::Unwired)
     }
 }
@@ -578,5 +662,60 @@ mod tests {
                 .status,
             HostStatus::Blocked
         );
+    }
+
+    #[test]
+    fn hardware_limit_table_covers_rounding_minima_and_fallbacks() {
+        const GIB: u64 = 1024 * 1024 * 1024;
+        let cases = [
+            (
+                Some(64 * GIB),
+                Some(16),
+                HardwareLimits {
+                    memory_mib_min: 4096,
+                    memory_mib_max: 61_440,
+                    vcpus_max: 16,
+                },
+            ),
+            (
+                Some(10 * GIB + 512 * 1024 * 1024),
+                Some(1),
+                HardwareLimits {
+                    memory_mib_min: 4096,
+                    memory_mib_max: 6144,
+                    vcpus_max: 2,
+                },
+            ),
+            (
+                Some(2 * GIB),
+                Some(4),
+                HardwareLimits {
+                    memory_mib_min: 4096,
+                    memory_mib_max: 4096,
+                    vcpus_max: 4,
+                },
+            ),
+            (
+                None,
+                None,
+                HardwareLimits {
+                    memory_mib_min: 4096,
+                    memory_mib_max: 16_384,
+                    vcpus_max: 8,
+                },
+            ),
+        ];
+        for (memory, processors, expected) in cases {
+            assert_eq!(hardware_limits(memory, processors), expected);
+        }
+    }
+
+    #[test]
+    fn table_probe_exposes_hardware_observations() {
+        let probe = TableProbe::new()
+            .with_total_memory_bytes(ProbeValue::TotalMemoryBytes(123))
+            .with_logical_processors(ProbeValue::LogicalProcessors(12));
+        assert_eq!(probe.total_memory_bytes(), Ok(123));
+        assert_eq!(probe.logical_processors(), Ok(12));
     }
 }

@@ -8,6 +8,8 @@ mod events;
 mod tray;
 mod window;
 
+use std::path::PathBuf;
+
 use ome_runtime::{AppIssue, AppRuntime, OmeHome, RuntimeDeps};
 use tauri::Manager;
 
@@ -26,11 +28,18 @@ fn initialize_runtime() -> Result<AppRuntime, AppIssue> {
             probe,
             artifacts: None,
             adb: None,
+            images_dir: Some(
+                PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../manifests/images"),
+            ),
+            artifacts_manifest: Some(
+                PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../manifests/artifacts.json"),
+            ),
             product_version: env!("CARGO_PKG_VERSION").to_owned(),
         },
     )
 }
 
+/// Starts the native Open Mobile Emulator shell.
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app, _, _| {
@@ -48,23 +57,36 @@ pub fn run() {
             commands::host_check_refresh,
             commands::wizard_continue,
             commands::wizard_skip,
-            commands::wizard_restart,
             commands::whpx_enable,
             commands::artifact_download_start,
             commands::artifact_download_cancel,
-            commands::guest_disk_create,
+            commands::guest_image_select,
+            commands::guest_create,
+            commands::guest_select,
+            commands::guest_delete,
+            commands::guest_reinstall,
             commands::guest_start,
             commands::guest_stop,
             commands::guest_restart,
+            commands::guest_root_set,
             commands::stage_rect_changed,
             commands::screenshot_save,
             commands::app_install_pick,
             commands::app_uninstall,
             commands::app_launch,
-            commands::keymap_set_active,
-            commands::keymap_set_enabled,
-            commands::keymap_delete,
+            commands::input_profile_select,
+            commands::input_suspend_toggle,
+            commands::input_profile_delete,
+            commands::input_profile_save,
+            commands::input_binding_upsert,
+            commands::input_binding_remove,
+            commands::input_editor_toggle,
+            commands::input_auto_apply_set,
+            commands::input_suspend_hotkey_set,
             commands::display_preset_apply,
+            commands::display_custom_apply,
+            commands::display_refresh_set,
+            commands::display_vsync_set,
             commands::stage_fit_set,
             commands::settings_save,
             commands::update_check,

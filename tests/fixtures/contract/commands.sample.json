@@ -9,9 +9,6 @@
     "kind": "wizardSkip"
   },
   {
-    "kind": "wizardRestart"
-  },
-  {
     "kind": "whpxEnable"
   },
   {
@@ -21,8 +18,25 @@
     "kind": "artifactDownloadCancel"
   },
   {
-    "kind": "guestDiskCreate",
+    "kind": "guestImageSelect",
+    "id": "bliss-16.9.7-android-13"
+  },
+  {
+    "kind": "guestCreate",
+    "imageId": "bliss-16.9.7-android-13",
     "sizeGib": 32
+  },
+  {
+    "kind": "guestSelect",
+    "name": "default"
+  },
+  {
+    "kind": "guestDelete",
+    "name": "old"
+  },
+  {
+    "kind": "guestReinstall",
+    "name": "default"
   },
   {
     "kind": "guestStart"
@@ -32,6 +46,10 @@
   },
   {
     "kind": "guestRestart"
+  },
+  {
+    "kind": "guestRootSet",
+    "enabled": true
   },
   {
     "kind": "stageRectChanged",
@@ -58,20 +76,174 @@
     "package": "com.example.app"
   },
   {
-    "kind": "keymapSetActive",
-    "id": "trickcal-default"
+    "kind": "inputProfileSelect",
+    "id": "example-input"
   },
   {
-    "kind": "keymapSetEnabled",
+    "kind": "inputSuspendToggle"
+  },
+  {
+    "kind": "inputProfileDelete",
+    "id": "custom"
+  },
+  {
+    "kind": "inputProfileSave",
+    "profile": {
+      "id": "example-input",
+      "name": "Example input",
+      "bundled": false,
+      "targetPackage": "com.example.app",
+      "referenceAspect": {
+        "width": 16,
+        "height": 9
+      },
+      "anchor": "center",
+      "bindings": [
+        {
+          "id": "tap",
+          "trigger": {
+            "kind": "key",
+            "code": "Space"
+          },
+          "action": {
+            "kind": "tap",
+            "at": {
+              "x": 0.5,
+              "y": 0.5
+            },
+            "hold": true
+          }
+        },
+        {
+          "id": "swipe",
+          "trigger": {
+            "kind": "mouseButton",
+            "button": "left"
+          },
+          "action": {
+            "kind": "swipe",
+            "from": {
+              "x": 0.2,
+              "y": 0.5
+            },
+            "to": {
+              "x": 0.8,
+              "y": 0.5
+            },
+            "durationMs": 240
+          }
+        },
+        {
+          "id": "joystick",
+          "trigger": {
+            "kind": "keySet",
+            "up": "KeyW",
+            "down": "KeyS",
+            "left": "KeyA",
+            "right": "KeyD"
+          },
+          "action": {
+            "kind": "joystick",
+            "center": {
+              "x": 0.25,
+              "y": 0.75
+            },
+            "radius": 0.15
+          }
+        },
+        {
+          "id": "mouse",
+          "trigger": {
+            "kind": "mouseButton",
+            "button": "right"
+          },
+          "action": {
+            "kind": "mouseTap",
+            "at": null
+          }
+        },
+        {
+          "id": "wheel",
+          "trigger": {
+            "kind": "wheel",
+            "direction": "down"
+          },
+          "action": {
+            "kind": "wheelSwipe",
+            "at": {
+              "x": 0.5,
+              "y": 0.5
+            },
+            "distance": 0.2
+          }
+        },
+        {
+          "id": "pass",
+          "trigger": {
+            "kind": "key",
+            "code": "Enter"
+          },
+          "action": {
+            "kind": "passThrough"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "kind": "inputBindingUpsert",
+    "profileId": "example-input",
+    "binding": {
+      "id": "tap",
+      "trigger": {
+        "kind": "key",
+        "code": "Space"
+      },
+      "action": {
+        "kind": "tap",
+        "at": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "hold": true
+      }
+    }
+  },
+  {
+    "kind": "inputBindingRemove",
+    "profileId": "example-input",
+    "id": "tap"
+  },
+  {
+    "kind": "inputEditorToggle"
+  },
+  {
+    "kind": "inputAutoApplySet",
     "enabled": true
   },
   {
-    "kind": "keymapDelete",
-    "id": "custom"
+    "kind": "inputSuspendHotkeySet",
+    "code": "F12"
   },
   {
     "kind": "displayPresetApply",
     "id": "hd-720"
+  },
+  {
+    "kind": "displayCustomApply",
+    "size": {
+      "width": 1600,
+      "height": 904
+    },
+    "densityDpi": 240
+  },
+  {
+    "kind": "displayRefreshSet",
+    "hz": 120
+  },
+  {
+    "kind": "displayVsyncSet",
+    "mode": "on"
   },
   {
     "kind": "stageFitSet",
@@ -83,9 +255,11 @@
       "memoryMib": 8192,
       "vcpus": 4,
       "gpuMode": "virgl",
-      "closeAction": "minimizeToTray",
+      "closeAction": "stopGuest",
       "showFps": false,
-      "autoUpdateCheck": true
+      "autoUpdateCheck": true,
+      "adbAccess": "network",
+      "bindingOverlayDefault": false
     }
   },
   {

@@ -208,7 +208,7 @@ manifests/images/         게스트 이미지 프로필 JSON (3.15절). 산출�
   `SWP_FRAMECHANGED`, DPI 혼합 호스팅, 포커스 넘기기, QEMU 종료 시 분리.
 - 테스트 표면: 기하 계산은 순수 테스트. 실제 담기는 M2 첫 스파이크에서 SDL 픽스처로 잰다.
 
-### 3.9 ome-keymap (뼈대 첫 판; 3.16절 ome-input으로 넓힌다)
+### 3.9 ome-input
 
 - 뼈대 첫 판에는 키 → 탭/스와이프의 순수 매퍼와 프리셋 로더만 있다. 사용자가 2026-09-26 밤에
   요구한 입력 기능 전체(홀드, 가상 조이스틱, 마우스 버튼, 게임별 자동 적용, 논리 좌표,
@@ -406,14 +406,153 @@ M2 구현의 첫 작업은 창 담기다. `ome-platform-win`의 창 함수와 `o
   더한다. 해석기의 바인딩은 입력 종류에 무관하다.
 - **다른 변환기**(Digitalis): 이미지 프로필의 `translator` 값 하나와 `translator/` 계약이다.
 
-## 8. 뼈대 첫 판 뒤에 바로 고칠 계약
+## 8. 계약 두 번째 판 (2026-09-27 확정)
 
-뼈대 첫 판의 `contract.rs`는 `KeymapView`와 `keymap_*` 명령을 갖는다. 3.15~3.17절을 반영하는
-두 번째 판에서 다음이 바뀐다. 웹뷰와 Rust와 권한 목록을 한 커밋에서 같이 고친다.
+뼈대 첫 판의 `contract.rs`는 `KeymapView`와 `keymap_*` 명령, 여덟 단계 마법사, 고정 범위의 설정을
+갖는다. 두 번째 판은 3.15~3.17절과 사용자 결정(2026-09-27, `M2-SCREENS.md` 10절)을 반영한다.
+웹뷰(`contracts.ts`), Rust(`contract.rs`), 픽스처(`tests/fixtures/contract/`), 권한 목록
+(`host/app/capabilities/main.json`), 명령 목록(`TAURI_COMMANDS`, `build.rs`, `generate_handler!`)을
+한 커밋에서 같이 고친다. `CONTRACT_VERSION`은 2가 된다. 이 절이 두 번째 판의 정본이고 필드 이름은
+그대로 옮긴다(와이어는 camelCase).
 
-| 지금 | 다음 |
-|---|---|
-| `KeymapView { profiles, active_id, enabled }` | `InputView { profiles, active_id, suspended, editing, auto_apply, foreground_package, multitouch: Capability }` |
-| `keymap_set_active`, `keymap_set_enabled`, `keymap_delete` | `input_profile_select`, `input_suspend_toggle`, `input_profile_delete`, `input_profile_save { profile }`, `input_binding_upsert { binding }`, `input_binding_remove { id }`, `input_editor_toggle`, `input_auto_apply_set { enabled }` |
-| (없음) | `ImagesView { profiles: Vec<GuestImageSummary>, guests: Vec<GuestSummary>, active_guest }`, 명령 `guest_image_select { id }`, `guest_create { image_id, size_gib }`, `guest_select { name }` |
-| `GuestView` | `GuestView` + `image_id`, `android_version`, `api_level`, `capabilities: CapabilityReport` |
+### 8.1 마법사
+
+- `WizardStep`은 일곱 단계다. `hostCheck`, `whpxConsent`, `rebootPending`, `artifactDownload`,
+  `guestInstall`, `firstBoot`, `appInstall`, `done`. `googleRegistration`은 없다(사용자 결정
+  2026-09-27: 구글 등록은 첫 실행에서 요구하지 않고 설정의 운영체제 절에서 필요할 때만 보인다).
+- `WizardView`에서 `gsf_id`가 빠지고 `image_id: Option<String>`(S1.4에서 고른 이미지)과
+  `install_guide: Vec<String>`(고른 이미지 프로필의 설치 안내 문장, S1.5)이 들어온다.
+- 명령 `wizard_restart`는 없어진다(설정의 `처음부터 다시 설정` 삭제). `guest_disk_create`는
+  `guest_create { image_id, size_gib }`로 바뀐다.
+
+### 8.2 게스트 이미지와 게스트
+
+```
+ImagesView { profiles: Vec<GuestImageSummary>, guests: Vec<GuestSummary>, active_guest: Option<String> }
+GuestImageSummary {
+  id, display_name, android_version: String, api_level: u32,
+  distribution: Bliss | AndroidX86 | SelfBuilt,
+  translator: Houdini | NdkTranslation | Digitalis | None,
+  size_bytes: Option<u64>, status: Verified | Candidate | Deprecated,
+  released_at: Option<String>, verified_games: u32,
+  recommended: bool
+}
+GuestSummary { name, image_id, android_version, disk_size_gib: u32, last_started_at: Option<String>,
+               capabilities: CapabilityReport }
+CapabilityReport { probed_at: Option<String>, items: Vec<CapabilityItem> }
+CapabilityItem { id: CapabilityId, state: Available | Unavailable | Unknown }
+CapabilityId = bootMarker | appList | displaySize | mediaVolume | deviceId | screenshot |
+               foregroundApp | multitouch | nativeBridge | root
+```
+
+- 프로필은 `manifests/images/<id>.json`에서 새 크레이트 `ome-guest-image`가 읽는다(3.15절의 필드.
+  첫 파일은 Bliss 16.9.7, 안드로이드 13, `released_at` 2024-10-11, `status: verified`). 세대 어댑터와
+  능력 조사의 구현은 뒤 단계이고 두 번째 판에는 타입과 `recommended` 규칙, 로더만 있다.
+- `profiles`는 Rust가 `android_version` 내림차순으로 정렬해 준다. `recommended`는 Rust가 계산한다.
+  규칙(사용자 결정 2026-09-27): `status == Verified`이고 `released_at`이 28일보다 오래된 프로필 중
+  가장 새 것 하나만 `true`. 하나도 없으면 `Verified` 중 가장 새 것, 그것도 없으면 전부 `false`.
+  웹뷰는 이 값을 계산하지 않는다.
+- 명령: `guest_image_select { id }`, `guest_create { image_id, size_gib }`, `guest_select { name }`,
+  `guest_delete { name }`(디스크까지), `guest_reinstall { name }`(디스크를 지우고 같은 이미지로
+  설치 절차를 다시 시작. 설정의 `다시 설치`).
+- `GuestView`에 더해지는 필드: `image_id: Option<String>`, `android_version: Option<String>`,
+  `api_level: Option<u32>`, `capabilities: CapabilityReport`, `device_id: Option<String>`(GSF
+  안드로이드 ID, 부팅 뒤 읽었을 때), `adb_address: Option<String>`(예 `127.0.0.1:5555`),
+  `root_enabled: Option<bool>`(조사 전이면 None).
+- 명령 `guest_root_set { enabled }`: 세대 어댑터가 정한 방법으로 앱 루트 권한을 켜고 끈다.
+  `open_registration_page`는 남고, 실행 시 `device_id`를 클립보드에 복사한 뒤 기본 브라우저를 연다.
+
+### 8.3 입력
+
+`ome-keymap`은 `ome-input`으로 이름이 바뀌고 프로필 형식은 `version: 2`가 된다.
+
+```
+InputView { profiles: Vec<InputProfile>, active_id: Option<String>, suspended: bool, editing: bool,
+            auto_apply: bool, foreground_package: Option<String>, multitouch: Capability,
+            suspend_hotkey: String }
+Capability = Available | Unavailable | Unknown
+InputProfile { id, name, bundled: bool, target_package: Option<String>,
+               reference_aspect: Size, anchor: Center | Edges, bindings: Vec<Binding> }
+Binding { id: String, trigger: Trigger, action: BindingAction }
+Trigger = { kind: key, code }                        // W3C KeyboardEvent.code
+        | { kind: mouseButton, button: left|right|middle }
+        | { kind: wheel, direction: up|down }
+        | { kind: keySet, up, down, left, right }     // 가상 조이스틱의 네 키
+BindingAction = { kind: tap, at: LogicalPoint, hold: bool }
+              | { kind: swipe, from: LogicalPoint, to: LogicalPoint, duration_ms: u32 }
+              | { kind: joystick, center: LogicalPoint, radius: f64 }   // 반지름은 짧은 축 기준 0..1
+              | { kind: mouseTap, at: Option<LogicalPoint> }            // None = 누른 자리
+              | { kind: wheelSwipe, at: LogicalPoint, distance: f64 }
+              | { kind: passThrough }
+LogicalPoint { x: f64, y: f64 }   // 0.0..=1.0
+```
+
+- 명령: `input_profile_select { id: Option<String> }`, `input_suspend_toggle`,
+  `input_profile_delete { id }`, `input_profile_save { profile: InputProfile }`(새 프로필과 이름
+  바꾸기, 대상 앱 지정, 복제가 모두 이 하나로 간다. 동봉 프리셋은 저장을 거부한다),
+  `input_binding_upsert { profile_id, binding }`, `input_binding_remove { profile_id, id }`,
+  `input_editor_toggle`, `input_auto_apply_set { enabled }`, `input_suspend_hotkey_set { code }`.
+- 검증은 Rust가 한다. 좌표 범위, 트리거 중복(같은 프로필 안에서 같은 키 두 번), 조이스틱의 네
+  키가 서로 다름, `duration_ms > 0`, `radius`와 `distance`가 0 초과. 실패는 `AppIssue`다.
+- `Binding.action`은 `#[non_exhaustive]`이고 시퀀스(매크로)의 자리는 문서 주석으로만 표시한다(D9).
+
+### 8.4 표시
+
+```
+DisplayView { presets: Vec<DisplayPreset>, active_id: Option<String>, custom: Option<CustomDisplay>,
+              fit: StageFit, refresh_rate_hz: Option<u32>, refresh_rates: Vec<u32>, refresh_supported: bool,
+              vsync: VsyncMode, vsync_supported: bool }
+CustomDisplay { size: Size, density_dpi: u32 }
+VsyncMode = Off | On | Adaptive
+```
+
+- 명령: `display_preset_apply { id }`, `display_custom_apply { size, density_dpi }`(폭과 높이는
+  640..=7680, 8의 배수, DPI 120..=640), `display_refresh_set { hz: Option<u32> }`(None은 운영체제 기본인 60 Hz, Some은 30..=240,
+  목록은 60, 75, 90, 120, 144에 사용자 지정 하나), `display_vsync_set { mode }`, `stage_fit_set { fit }`.
+- 주사율은 QEMU 11.1의 virtio-gpu에서 장치 속성이 아니다. `refresh_rate`는 `DEFINE_EDID_PROPERTIES`를
+  쓰는 장치(`VGA`, `bochs-display`)에만 있고, virtio-gpu는 디스플레이 백엔드가 보내는 `QemuUIInfo.refresh_rate`
+  (`hw/display/virtio-gpu-base.c`)를 EDID에 넣는다. GTK 백엔드는 호스트 모니터의 주사율을 보내고 SDL
+  백엔드는 아무것도 보내지 않아 생성기 기본값 75 Hz가 된다(그래서 `edid=off`였다). 첫 시도(SDL 옵션으로
+  UI 정보를 보내는 패치)는 SDL 창의 시작 크기 640x480이 장치의 `xres`, `yres`를 덮어써 폐기했다
+  (`docs/evidence/M2/sizing-20260927/bootC-guest.txt`). 그래서 자체 패치 0002는 virtio-gpu에 장치 속성
+  `refresh_rate`(mHz, EDID 도우미와 같은 이름과 단위)를 더하고, UI 정보가 주사율 없이 오면 그 값을
+  유지한다. `ome-guest-config`는 주사율이 None이면 지금처럼 `virtio-vga-gl,edid=off`를 내고(런처 동등성
+  픽스처 그대로), Some(hz)면 `virtio-vga-gl,edid=on[,xres=<w>,yres=<h>],refresh_rate=<hz*1000>`을 낸다.
+  다시 시작해야 적용된다. `DisplayView.refresh_supported: bool`은 QEMU 번들의 `ome-patches.txt`에 0002가
+  있을 때만 참이고 그때만 주사율 행이 화면에 있다. 안드로이드 쪽은 EDID에 120 Hz 모드가 있어도 기본
+  60 Hz로 돌므로(부팅 C, `docs/DECISION-hardware-display.md` 3절) 세대 어댑터가 `settings put system
+  peak_refresh_rate`와 `min_refresh_rate`를 같은 값으로 맞춘다. 수직 동기화도 같다. QEMU SDL 디스플레이의
+  `SDL_GL_SetSwapInterval(0)` 고정값(`ui/sdl2.c`)을 `-display sdl,swap-interval=<-1|0|1>` 옵션으로 여는
+  자체 패치 0003이 있어야 하고, `vsync_supported = true`일 때만 화면에 행이 있다.
+
+### 8.5 설정
+
+```
+SettingsView { memory_mib, memory_mib_min: u32, memory_mib_max: u32, vcpus, vcpus_max: u32,
+               gpu_mode, close_action, show_fps, auto_update_check, home_dir, disk_usage_bytes,
+               adb_access: AdbAccess, binding_overlay_default: bool }
+SettingsInput { memory_mib, vcpus, gpu_mode, close_action, show_fps, auto_update_check,
+                adb_access, binding_overlay_default }
+AdbAccess = Localhost | Network
+CloseAction = StopGuest | MinimizeToTray      // 기본값 StopGuest (사용자 결정 2026-09-27)
+```
+
+- 한도는 호스트에서 온다. `HostProbe`에 `total_memory_bytes()`와 `logical_processors()`가 더해진다.
+  `memory_mib_max` = 호스트 물리 메모리 − 4096 MiB를 1024 단위로 내림(최소 4096),
+  `memory_mib_min` = 4096, `vcpus_max` = 호스트 논리 프로세서 수(최소 2). 기본값은 8192와 4 그대로.
+  `Settings::validate`와 `GuestConfig::validate`는 고정 상한(16384, 8) 대신 이 한도를 받는다.
+  QEMU와 WHPX에는 자체 상한이 없다(`target/i386/whpx/whpx-all.c`는 `smp.cpus`를 파티션 프로세서 수로
+  그대로 넘기고 q35의 `max_cpus`는 4096). 근거는 `docs/evidence/M2/sizing-20260927/`.
+- `adb_access`: `Localhost`면 지금처럼 `hostfwd=tcp:127.0.0.1:<port>-:5555`, `Network`면
+  `hostfwd=tcp:0.0.0.0:<port>-:5555`. 기본값 `Localhost`. 화면은 어느 쪽이든 경고를 보인다.
+- 트레이는 그대로 있다. 창을 닫을 때 게스트를 끄는 것이 기본이고 트레이로 내리는 것은 설정이다.
+
+### 8.6 막힘 화면과 문구
+
+- `AppSnapshot.blocker: Option<Blocker>`, `Blocker { kind: VirtualizationOff | QemuMissing |
+  HypervisorPlatformOff }`. `Some`이면 웹뷰는 S8을 그린다. 마법사와 무관하게 호스트 점검 결과에서
+  Rust가 정한다.
+- `GuestView.last_exit.kind`는 `userStop | guestReset | bootTimeout | crash | startFailed`가 되어
+  S2의 실패 문장을 원인별로 나눈다(`unexpected`는 `crash`로 바뀐다).
+- `AppIssue`의 문장은 `DESIGN.md` 9절의 어휘를 따른다. 화면에 `게스트`라는 말은 없고 `운영체제`와
+  `가상 머신`만 있다.

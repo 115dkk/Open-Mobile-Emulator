@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-display-custom-apply"
+description = "Enables the display_custom_apply command without any pre-configured scope."
+commands.allow = ["display_custom_apply"]
+
+[[permission]]
+identifier = "deny-display-custom-apply"
+description = "Denies the display_custom_apply command without any pre-configured scope."
+commands.deny = ["display_custom_apply"]

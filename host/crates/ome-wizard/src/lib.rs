@@ -7,7 +7,7 @@ use std::collections::BTreeSet;
 
 use serde::{Deserialize, Serialize};
 
-/// The nine first-run wizard states in product order.
+/// The eight first-run wizard states, covering seven user-facing steps plus completion.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Step {
@@ -23,8 +23,6 @@ pub enum Step {
     GuestInstall,
     /// First persistent guest boot.
     FirstBoot,
-    /// Optional uncertified-device registration guidance.
-    GoogleRegistration,
     /// Optional initial app installation.
     AppInstall,
     /// Terminal successful state.
@@ -80,8 +78,6 @@ pub struct Facts {
     pub guest_installed: bool,
     /// Guest reports first boot complete.
     pub guest_booted: bool,
-    /// Registration guidance has been shown.
-    pub registration_shown: bool,
     /// App-install choice has been resolved.
     pub app_install_resolved: bool,
 }
@@ -89,8 +85,8 @@ pub struct Facts {
 /// Applies one outcome without side effects.
 ///
 /// Invalid outcomes leave the state unchanged. Consent cannot be bypassed with [`Outcome::Skip`],
-/// optional registration and app installation can be skipped, [`Step::Done`] is terminal, and
-/// [`Outcome::Restart`] always clears completion history.
+/// optional app installation can be skipped, [`Step::Done`] is terminal, and [`Outcome::Restart`]
+/// always clears completion history.
 pub fn advance(mut state: WizardState, outcome: Outcome) -> WizardState {
     if outcome == Outcome::Restart {
         return WizardState::default();
@@ -106,8 +102,7 @@ pub fn advance(mut state: WizardState, outcome: Outcome) -> WizardState {
         (Step::RebootPending, Outcome::Continue) => Some(Step::ArtifactDownload),
         (Step::ArtifactDownload, Outcome::Continue) => Some(Step::GuestInstall),
         (Step::GuestInstall, Outcome::Continue) => Some(Step::FirstBoot),
-        (Step::FirstBoot, Outcome::Continue) => Some(Step::GoogleRegistration),
-        (Step::GoogleRegistration, Outcome::Continue | Outcome::Skip) => Some(Step::AppInstall),
+        (Step::FirstBoot, Outcome::Continue) => Some(Step::AppInstall),
         (Step::AppInstall, Outcome::Continue | Outcome::Skip) => Some(Step::Done),
         _ => None,
     };
@@ -118,9 +113,9 @@ pub fn advance(mut state: WizardState, outcome: Outcome) -> WizardState {
     state
 }
 
-/// Returns true only for optional registration and initial app installation.
+/// Returns true only for optional initial app installation.
 pub const fn can_skip(step: Step) -> bool {
-    matches!(step, Step::GoogleRegistration | Step::AppInstall)
+    matches!(step, Step::AppInstall)
 }
 
 /// Returns whether the primary action may run for the current state and observed facts.
@@ -135,7 +130,6 @@ pub const fn can_continue(step: Step, facts: Facts) -> bool {
         Step::ArtifactDownload => facts.artifact_verified,
         Step::GuestInstall => facts.guest_installed,
         Step::FirstBoot => facts.guest_booted,
-        Step::GoogleRegistration => facts.registration_shown,
         Step::AppInstall => facts.app_install_resolved,
         Step::Done => false,
     }
@@ -155,14 +149,13 @@ mod tests {
             Step::ArtifactDownload,
             Step::GuestInstall,
             Step::FirstBoot,
-            Step::GoogleRegistration,
             Step::AppInstall,
             Step::Done,
         ] {
             state = advance(state, Outcome::Continue);
             assert_eq!(state.step, expected);
         }
-        assert_eq!(state.completed.len(), 8);
+        assert_eq!(state.completed.len(), 7);
         assert_eq!(advance(state.clone(), Outcome::Continue), state);
     }
 
@@ -182,11 +175,6 @@ mod tests {
         assert_eq!(advance(consent.clone(), Outcome::Skip), consent);
         assert_eq!(advance(consent.clone(), Outcome::Continue), consent);
 
-        let registration = WizardState {
-            step: Step::GoogleRegistration,
-            completed: BTreeSet::new(),
-        };
-        assert_eq!(advance(registration, Outcome::Skip).step, Step::AppInstall);
         let install = WizardState {
             step: Step::AppInstall,
             completed: BTreeSet::new(),
@@ -220,7 +208,6 @@ mod tests {
             artifact_verified: true,
             guest_installed: true,
             guest_booted: true,
-            registration_shown: true,
             app_install_resolved: true,
         };
         for step in [
@@ -230,13 +217,11 @@ mod tests {
             Step::ArtifactDownload,
             Step::GuestInstall,
             Step::FirstBoot,
-            Step::GoogleRegistration,
             Step::AppInstall,
         ] {
             assert!(can_continue(step, facts), "{step:?}");
         }
         assert!(!can_continue(Step::Done, facts));
-        assert!(can_skip(Step::GoogleRegistration));
         assert!(can_skip(Step::AppInstall));
         assert!(!can_skip(Step::WhpxConsent));
     }

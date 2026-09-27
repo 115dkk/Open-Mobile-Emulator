@@ -15,7 +15,8 @@ ome-guest-config = { path = "../ome-guest-config" }
 ome-artifacts = { path = "../ome-artifacts" }
 ome-host-check = { path = "../ome-host-check" }
 ome-adb = { path = "../ome-adb" }
-ome-keymap = { path = "../ome-keymap" }
+ome-input = { path = "../ome-input" }
+ome-guest-image = { path = "../ome-guest-image" }
 ome-wizard = { path = "../ome-wizard" }
 ome-diagnostics = { path = "../ome-diagnostics" }
 serde.workspace = true

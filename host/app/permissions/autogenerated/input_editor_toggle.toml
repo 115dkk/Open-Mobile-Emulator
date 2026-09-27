@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-input-editor-toggle"
+description = "Enables the input_editor_toggle command without any pre-configured scope."
+commands.allow = ["input_editor_toggle"]
+
+[[permission]]
+identifier = "deny-input-editor-toggle"
+description = "Denies the input_editor_toggle command without any pre-configured scope."
+commands.deny = ["input_editor_toggle"]

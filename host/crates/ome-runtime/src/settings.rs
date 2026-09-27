@@ -6,32 +6,47 @@ use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
 
 use ome_guest_config::{GuestConfig, RawGuestConfig};
+use ome_host_check::HardwareLimits;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::{CloseAction, GpuMode, SettingsInput};
+use crate::{AdbAccess, CloseAction, GpuMode, SettingsInput};
 
 /// Maximum accepted settings document size.
 pub const MAX_SETTINGS_BYTES: usize = 64 * 1024;
 /// Current settings document schema version.
-pub const SETTINGS_SCHEMA_VERSION: u32 = 1;
+pub const SETTINGS_SCHEMA_VERSION: u32 = 2;
 
 /// Persisted product settings after validation.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Settings {
-    /// Guest memory offered by the UI, constrained to 4096..=16384 MiB.
+    /// Virtual-machine memory in MiB.
     pub memory_mib: u32,
-    /// Guest virtual processors offered by the UI, constrained to 2..=8.
+    /// Virtual processor count.
     pub vcpus: u32,
     /// Product GPU mode.
     pub gpu_mode: GpuMode,
     /// Window-close behavior.
     pub close_action: CloseAction,
-    /// Whether the runtime should expose guest FPS when available.
+    /// Whether runtime FPS is exposed when available.
     pub show_fps: bool,
     /// Whether startup may check for an update.
     pub auto_update_check: bool,
+    /// adb host exposure policy.
+    #[serde(default = "default_adb_access")]
+    pub adb_access: AdbAccess,
+    /// Whether binding markers are shown by default.
+    #[serde(default = "default_binding_overlay")]
+    pub binding_overlay_default: bool,
+}
+
+const fn default_adb_access() -> AdbAccess {
+    AdbAccess::Localhost
+}
+
+const fn default_binding_overlay() -> bool {
+    true
 }
 
 impl Default for Settings {
@@ -40,20 +55,21 @@ impl Default for Settings {
             memory_mib: 8192,
             vcpus: 4,
             gpu_mode: GpuMode::Virgl,
-            close_action: CloseAction::MinimizeToTray,
+            close_action: CloseAction::StopGuest,
             show_fps: false,
             auto_update_check: true,
+            adb_access: AdbAccess::Localhost,
+            binding_overlay_default: true,
         }
     }
 }
 
 impl Settings {
-    /// Validates frontend input using both the UI range and [`GuestConfig::validate`].
-    ///
-    /// No settings value exists until the guest configuration validator accepts the corresponding
-    /// memory, processor, and GPU fields.
-    pub fn validate(input: SettingsInput) -> Result<Self, SettingsError> {
-        if !(4096..=16_384).contains(&input.memory_mib) || !(2..=8).contains(&input.vcpus) {
+    /// Validates frontend input against host-derived product limits and broad QEMU limits.
+    pub fn validate(input: SettingsInput, limits: &HardwareLimits) -> Result<Self, SettingsError> {
+        if !(limits.memory_mib_min..=limits.memory_mib_max).contains(&input.memory_mib)
+            || !(2..=limits.vcpus_max).contains(&input.vcpus)
+        {
             return Err(SettingsError::InvalidInput);
         }
         GuestConfig::validate(RawGuestConfig {
@@ -63,6 +79,13 @@ impl Settings {
                 match input.gpu_mode {
                     GpuMode::Virgl => "virgl",
                     GpuMode::Software => "std",
+                }
+                .to_owned(),
+            ),
+            adb_bind: Some(
+                match input.adb_access {
+                    AdbAccess::Localhost => "localhost",
+                    AdbAccess::Network => "network",
                 }
                 .to_owned(),
             ),
@@ -76,7 +99,22 @@ impl Settings {
             close_action: input.close_action,
             show_fps: input.show_fps,
             auto_update_check: input.auto_update_check,
+            adb_access: input.adb_access,
+            binding_overlay_default: input.binding_overlay_default,
         })
+    }
+
+    fn as_input(&self) -> SettingsInput {
+        SettingsInput {
+            memory_mib: self.memory_mib,
+            vcpus: self.vcpus,
+            gpu_mode: self.gpu_mode,
+            close_action: self.close_action,
+            show_fps: self.show_fps,
+            auto_update_check: self.auto_update_check,
+            adb_access: self.adb_access,
+            binding_overlay_default: self.binding_overlay_default,
+        }
     }
 }
 
@@ -103,10 +141,11 @@ impl SettingsStore {
         }
     }
 
-    /// Loads a bounded versioned document, or default settings when no file exists.
+    /// Loads a bounded versioned document using current host limits.
     ///
-    /// An existing staging file is treated as an interrupted write and not promoted implicitly.
-    pub fn load(&self) -> Result<Settings, SettingsError> {
+    /// Schema version 1 is accepted and migrated in memory. Its saved close action is retained;
+    /// newly added fields use version-2 defaults. An interrupted staging write fails closed.
+    pub fn load(&self, limits: &HardwareLimits) -> Result<Settings, SettingsError> {
         if self.staging_path.exists() {
             return Err(SettingsError::RecoveryRequired);
         }
@@ -129,24 +168,20 @@ impl SettingsStore {
         }
         let document: SettingsDocument =
             serde_json::from_slice(&bytes).map_err(SettingsError::Json)?;
-        if document.schema_version != SETTINGS_SCHEMA_VERSION {
+        if !matches!(document.schema_version, 1 | SETTINGS_SCHEMA_VERSION) {
             return Err(SettingsError::UnsupportedVersion);
         }
-        Settings::validate(SettingsInput {
-            memory_mib: document.settings.memory_mib,
-            vcpus: document.settings.vcpus,
-            gpu_mode: document.settings.gpu_mode,
-            close_action: document.settings.close_action,
-            show_fps: document.settings.show_fps,
-            auto_update_check: document.settings.auto_update_check,
-        })
+        Self::validate_loaded(document.settings, limits)
+    }
+
+    fn validate_loaded(
+        settings: Settings,
+        limits: &HardwareLimits,
+    ) -> Result<Settings, SettingsError> {
+        Settings::validate(settings.as_input(), limits)
     }
 
     /// Serializes, syncs, and atomically renames a staging document over the current file.
-    ///
-    /// The previous document is untouched until the complete staging file has been synced. An
-    /// existing staging file is retained for explicit recovery and causes an error. A staging file
-    /// created by this call is removed when writing, syncing, or renaming fails.
     pub fn save(&self, settings: &Settings) -> Result<(), SettingsError> {
         let bytes = serde_json::to_vec_pretty(&SettingsDocument {
             schema_version: SETTINGS_SCHEMA_VERSION,
@@ -183,22 +218,22 @@ impl SettingsStore {
 /// Settings validation and persistence errors.
 #[derive(Debug, Error)]
 pub enum SettingsError {
-    /// UI or guest configuration validation rejected the input.
+    /// Input is outside host-derived product limits.
     #[error("settings input is invalid")]
     InvalidInput,
     /// JSON parsing or encoding failed.
     #[error("settings JSON is invalid")]
     Json(#[source] serde_json::Error),
-    /// The saved document uses an unsupported schema version.
+    /// Saved schema version is unsupported.
     #[error("settings version is unsupported")]
     UnsupportedVersion,
-    /// The saved document exceeds 64 KiB.
+    /// Saved document exceeds 64 KiB.
     #[error("settings document is too large")]
     TooLarge,
-    /// The saved path is not a regular file.
+    /// Saved path is not a regular file.
     #[error("settings document path is invalid")]
     InvalidDocument,
-    /// A staging file from an interrupted write requires explicit recovery.
+    /// A staging file from an interrupted write requires recovery.
     #[error("settings recovery is required")]
     RecoveryRequired,
     /// File-system I/O failed.
@@ -210,26 +245,49 @@ pub enum SettingsError {
 mod tests {
     use super::*;
 
-    #[test]
-    fn validation_enforces_ui_ranges_before_guest_ranges() {
-        let valid = Settings::validate(SettingsInput {
-            memory_mib: 16_384,
-            vcpus: 8,
+    fn limits() -> HardwareLimits {
+        HardwareLimits {
+            memory_mib_min: 4096,
+            memory_mib_max: 32_768,
+            vcpus_max: 16,
+        }
+    }
+
+    fn input(memory_mib: u32, vcpus: u32) -> SettingsInput {
+        SettingsInput {
+            memory_mib,
+            vcpus,
             gpu_mode: GpuMode::Software,
             close_action: CloseAction::StopGuest,
             show_fps: true,
             auto_update_check: false,
-        });
-        assert!(valid.is_ok());
-        let invalid = Settings::validate(SettingsInput {
-            memory_mib: 4095,
-            vcpus: 1,
-            gpu_mode: GpuMode::Virgl,
-            close_action: CloseAction::MinimizeToTray,
-            show_fps: false,
-            auto_update_check: true,
-        });
-        assert!(matches!(invalid, Err(SettingsError::InvalidInput)));
+            adb_access: AdbAccess::Localhost,
+            binding_overlay_default: true,
+        }
+    }
+
+    #[test]
+    fn validation_uses_host_limits() {
+        assert!(Settings::validate(input(32_768, 16), &limits()).is_ok());
+        for invalid in [
+            input(4095, 4),
+            input(33_792, 4),
+            input(8192, 1),
+            input(8192, 17),
+        ] {
+            assert!(matches!(
+                Settings::validate(invalid, &limits()),
+                Err(SettingsError::InvalidInput)
+            ));
+        }
+    }
+
+    #[test]
+    fn defaults_use_stop_localhost_and_visible_bindings() {
+        let settings = Settings::default();
+        assert_eq!(settings.close_action, CloseAction::StopGuest);
+        assert_eq!(settings.adb_access, AdbAccess::Localhost);
+        assert!(settings.binding_overlay_default);
     }
 
     #[test]
@@ -242,8 +300,34 @@ mod tests {
             ..Settings::default()
         };
         store.save(&settings).expect("save settings");
-        assert_eq!(store.load().expect("load settings"), settings);
+        assert_eq!(store.load(&limits()).expect("load settings"), settings);
         assert!(!directory.path().join("settings.json.staging").exists());
+    }
+
+    #[test]
+    fn version_one_migrates_new_fields_and_keeps_close_action() {
+        let directory = tempfile::tempdir().expect("temp directory");
+        fs::write(
+            directory.path().join("settings.json"),
+            r#"{
+                "schemaVersion": 1,
+                "settings": {
+                    "memoryMib": 8192,
+                    "vcpus": 4,
+                    "gpuMode": "virgl",
+                    "closeAction": "minimizeToTray",
+                    "showFps": false,
+                    "autoUpdateCheck": true
+                }
+            }"#,
+        )
+        .expect("write version one");
+        let settings = SettingsStore::new(directory.path())
+            .load(&limits())
+            .expect("migrate version one");
+        assert_eq!(settings.close_action, CloseAction::MinimizeToTray);
+        assert_eq!(settings.adb_access, AdbAccess::Localhost);
+        assert!(settings.binding_overlay_default);
     }
 
     #[test]
@@ -254,7 +338,7 @@ mod tests {
             vec![b'x'; MAX_SETTINGS_BYTES + 1],
         )
         .expect("write oversized document");
-        let result = SettingsStore::new(directory.path()).load();
+        let result = SettingsStore::new(directory.path()).load(&limits());
         assert!(matches!(result, Err(SettingsError::TooLarge)));
     }
 }

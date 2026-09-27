@@ -1,7 +1,10 @@
 {
-  "contractVersion": 1,
+  "contractVersion": 2,
   "productVersion": "0.1.0",
   "phase": "main",
+  "blocker": {
+    "kind": "hypervisorPlatformOff"
+  },
   "host": {
     "rows": [
       {
@@ -11,7 +14,7 @@
       }
     ],
     "ready": true,
-    "inspectedAt": "2026-09-26T12:00:00Z"
+    "inspectedAt": "2026-09-27T12:00:00Z"
   },
   "wizard": {
     "step": "done",
@@ -24,9 +27,84 @@
       "bytesPerSecond": 512,
       "label": "guest.iso"
     },
-    "gsfId": "1234567890",
+    "imageId": "bliss-16.9.7-android-13",
+    "installGuide": [
+      "Installation을 선택합니다."
+    ],
     "diskSizeGib": 32,
     "diskFreeBytes": 53687091200
+  },
+  "images": {
+    "profiles": [
+      {
+        "id": "bliss-16.9.7-android-13",
+        "displayName": "안드로이드 13",
+        "androidVersion": "13",
+        "apiLevel": 33,
+        "distribution": "bliss",
+        "translator": "ndkTranslation",
+        "sizeBytes": 2429550592,
+        "status": "verified",
+        "releasedAt": "2024-10-11",
+        "verifiedGames": 1,
+        "recommended": true
+      }
+    ],
+    "guests": [
+      {
+        "name": "default",
+        "imageId": "bliss-16.9.7-android-13",
+        "androidVersion": "13",
+        "diskSizeGib": 32,
+        "lastStartedAt": "2026-09-27T11:55:00Z",
+        "capabilities": {
+          "probedAt": "2026-09-27T12:00:00Z",
+          "items": [
+            {
+              "id": "bootMarker",
+              "state": "available"
+            },
+            {
+              "id": "appList",
+              "state": "unavailable"
+            },
+            {
+              "id": "displaySize",
+              "state": "unknown"
+            },
+            {
+              "id": "mediaVolume",
+              "state": "available"
+            },
+            {
+              "id": "deviceId",
+              "state": "available"
+            },
+            {
+              "id": "screenshot",
+              "state": "available"
+            },
+            {
+              "id": "foregroundApp",
+              "state": "available"
+            },
+            {
+              "id": "multitouch",
+              "state": "unknown"
+            },
+            {
+              "id": "nativeBridge",
+              "state": "available"
+            },
+            {
+              "id": "root",
+              "state": "available"
+            }
+          ]
+        }
+      }
+    ],
+    "activeGuest": "default"
   },
   "guest": {
     "state": "running",
@@ -38,12 +116,63 @@
       "height": 720
     },
     "lastExit": {
-      "kind": "guestReset",
-      "at": "2026-09-26T11:50:00Z",
+      "kind": "bootTimeout",
+      "at": "2026-09-27T11:50:00Z",
       "logPath": "logs/qemu-default.stderr.log"
     },
     "fps": 60,
-    "startedAt": "2026-09-26T11:55:00Z"
+    "startedAt": "2026-09-27T11:55:00Z",
+    "imageId": "bliss-16.9.7-android-13",
+    "androidVersion": "13",
+    "apiLevel": 33,
+    "capabilities": {
+      "probedAt": "2026-09-27T12:00:00Z",
+      "items": [
+        {
+          "id": "bootMarker",
+          "state": "available"
+        },
+        {
+          "id": "appList",
+          "state": "unavailable"
+        },
+        {
+          "id": "displaySize",
+          "state": "unknown"
+        },
+        {
+          "id": "mediaVolume",
+          "state": "available"
+        },
+        {
+          "id": "deviceId",
+          "state": "available"
+        },
+        {
+          "id": "screenshot",
+          "state": "available"
+        },
+        {
+          "id": "foregroundApp",
+          "state": "available"
+        },
+        {
+          "id": "multitouch",
+          "state": "unknown"
+        },
+        {
+          "id": "nativeBridge",
+          "state": "available"
+        },
+        {
+          "id": "root",
+          "state": "available"
+        }
+      ]
+    },
+    "deviceId": "1234567890",
+    "adbAddress": "127.0.0.1:5555",
+    "rootEnabled": false
   },
   "apps": {
     "available": true,
@@ -52,22 +181,122 @@
         "package": "com.example.app",
         "label": "Example",
         "versionName": "1.0",
-        "installedAt": "2026-09-26T11:00:00Z"
+        "installedAt": "2026-09-27T11:00:00Z"
       }
     ],
     "install": null
   },
-  "keymap": {
+  "input": {
     "profiles": [
       {
-        "id": "trickcal-default",
-        "name": "Default keymap",
-        "bundled": true,
-        "bindingCount": 3
+        "id": "example-input",
+        "name": "Example input",
+        "bundled": false,
+        "targetPackage": "com.example.app",
+        "referenceAspect": {
+          "width": 16,
+          "height": 9
+        },
+        "anchor": "center",
+        "bindings": [
+          {
+            "id": "tap",
+            "trigger": {
+              "kind": "key",
+              "code": "Space"
+            },
+            "action": {
+              "kind": "tap",
+              "at": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "hold": true
+            }
+          },
+          {
+            "id": "swipe",
+            "trigger": {
+              "kind": "mouseButton",
+              "button": "left"
+            },
+            "action": {
+              "kind": "swipe",
+              "from": {
+                "x": 0.2,
+                "y": 0.5
+              },
+              "to": {
+                "x": 0.8,
+                "y": 0.5
+              },
+              "durationMs": 240
+            }
+          },
+          {
+            "id": "joystick",
+            "trigger": {
+              "kind": "keySet",
+              "up": "KeyW",
+              "down": "KeyS",
+              "left": "KeyA",
+              "right": "KeyD"
+            },
+            "action": {
+              "kind": "joystick",
+              "center": {
+                "x": 0.25,
+                "y": 0.75
+              },
+              "radius": 0.15
+            }
+          },
+          {
+            "id": "mouse",
+            "trigger": {
+              "kind": "mouseButton",
+              "button": "right"
+            },
+            "action": {
+              "kind": "mouseTap",
+              "at": null
+            }
+          },
+          {
+            "id": "wheel",
+            "trigger": {
+              "kind": "wheel",
+              "direction": "down"
+            },
+            "action": {
+              "kind": "wheelSwipe",
+              "at": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "distance": 0.2
+            }
+          },
+          {
+            "id": "pass",
+            "trigger": {
+              "kind": "key",
+              "code": "Enter"
+            },
+            "action": {
+              "kind": "passThrough"
+            }
+          }
+        ]
       }
     ],
-    "activeId": "trickcal-default",
-    "enabled": true
+    "activeId": "example-input",
+    "suspended": true,
+    "editing": true,
+    "autoApply": true,
+    "foregroundPackage": "com.example.app",
+    "multitouch": "unavailable",
+    "suspendHotkey": "F12"
   },
   "display": {
     "presets": [
@@ -102,18 +331,42 @@
         "needsReboot": true
       }
     ],
-    "activeId": "hd-720",
-    "fit": "fitWindow"
+    "activeId": null,
+    "custom": {
+      "size": {
+        "width": 1600,
+        "height": 904
+      },
+      "densityDpi": 240
+    },
+    "fit": "fitWindow",
+    "refreshRateHz": 100,
+    "refreshRates": [
+      60,
+      75,
+      90,
+      100,
+      120,
+      144
+    ],
+    "refreshSupported": false,
+    "vsync": "adaptive",
+    "vsyncSupported": false
   },
   "settings": {
     "memoryMib": 8192,
+    "memoryMibMin": 4096,
+    "memoryMibMax": 61440,
     "vcpus": 4,
+    "vcpusMax": 16,
     "gpuMode": "virgl",
-    "closeAction": "minimizeToTray",
+    "closeAction": "stopGuest",
     "showFps": true,
     "autoUpdateCheck": true,
     "homeDir": "C:\\Users\\Example\\AppData\\Local\\OpenMobileEmulator",
-    "diskUsageBytes": 1024
+    "diskUsageBytes": 1024,
+    "adbAccess": "localhost",
+    "bindingOverlayDefault": true
   },
   "update": {
     "currentVersion": "0.1.0",
@@ -125,14 +378,14 @@
   },
   "notices": [
     {
-      "at": "2026-09-26T12:00:00Z",
+      "at": "2026-09-27T12:00:00Z",
       "level": "info",
-      "message": "게스트가 시작되었습니다."
+      "message": "가상 머신을 시작했습니다."
     }
   ],
   "issue": {
     "code": "not_wired",
-    "message": "아직 준비되지 않은 기능입니다.",
-    "nextAction": null
+    "message": "요청한 기능은 아직 준비되지 않았습니다.",
+    "nextAction": "다음 제품 업데이트 뒤 다시 시도하십시오."
   }
 }

@@ -1,0 +1,160 @@
+$ nproc
+16
+
+$ grep -c ^processor /proc/cpuinfo
+16
+
+$ head -3 /proc/meminfo
+MemTotal:       32853180 kB
+MemFree:        28527832 kB
+MemAvailable:   31046112 kB
+
+$ getprop ro.build.version.release
+13
+
+$ cat /sys/class/drm/card0-Virtual-1/modes
+1280x800
+4096x2160
+4096x2160
+2560x1600
+2560x1600
+1920x1440
+1856x1392
+1792x1344
+2048x1152
+1920x1200
+1920x1200
+1920x1080
+1600x1200
+1680x1050
+1680x1050
+1400x1050
+1400x1050
+1600x900
+1280x1024
+1440x900
+1440x900
+1280x960
+1366x768
+1366x768
+1360x768
+1280x800
+1280x800
+1280x768
+1280x768
+1280x720
+1024x768
+800x600
+800x600
+848x480
+640x480
+
+$ cat /sys/class/drm/card0-Virtual-1/status
+connected
+
+$ dumpsys display | grep -iE "refresh|DisplayMode|mode=|fps" | head -40
+  mSafeMode=false
+  mDefaultDisplayDefaultColorMode=0
+  DisplayDeviceInfo{"Built-in Screen": uniqueId="local:0", 1280 x 800, modeId 1, defaultModeId 1, supportedModes [{id=1, width=1280, height=800, fps=59.958603, alternativeRefreshRates=[]}, {id=2, width=4096, height=2160, fps=59.999966, alternativeRefreshRates=[]}, {id=3, width=2560, height=1600, fps=59.986588, alternativeRefreshRates=[]}, {id=4, width=1920, height=1440, fps=60.000004, alternativeRefreshRates=[]}, {id=5, width=1856, height=1392, fps=59.995186, alternativeRefreshRates=[]}, {id=6, width=1792, height=1344, fps=59.999794, alternativeRefreshRates=[]}, {id=7, width=2048, height=1152, fps=60.000004, alternativeRefreshRates=[]}, {id=8, width=1920, height=1200, fps=59.884605, alternativeRefreshRates=[]}, {id=9, width=1920, height=1080, fps=60.000004, alternativeRefreshRates=[]}, {id=10, width=1600, height=1200, fps=60.000004, alternativeRefreshRates=[]}, {id=11, width=1680, height=1050, fps=59.954254, alternativeRefreshRates=[]}, {id=12, width=1400, height=1050, fps=59.978443, alternativeRefreshRates=[]}, {id=13, width=1600, height=900, fps=60.000004, alternativeRefreshRates=[]}, {id=14, width=1280, height=1024, fps=60.01974, alternativeRefreshRates=[]}, {id=15, width=1440, height=900, fps=59.887447, alternativeRefreshRates=[]}, {id=16, width=1280, height=960, fps=60.000004, alternativeRefreshRates=[]}, {id=17, width=1366, height=768, fps=59.789547, alternativeRefreshRates=[]}, {id=18, width=1360, height=768, fps=60.015163, alternativeRefreshRates=[]}, {id=19, width=1280, height=768, fps=59.87023, alternativeRefreshRates=[]}, {id=20, width=1280, height=720, fps=60.000004, alternativeRefreshRates=[]}, {id=21, width=1024, height=768, fps=60.00384, alternativeRefreshRates=[]}, {id=22, width=800, height=600, fps=60.31654, alternativeRefreshRates=[56.250004]}, {id=23, width=800, height=600, fps=56.250004, alternativeRefreshRates=[60.31654]}, {id=24, width=848, height=480, fps=60.00043, alternativeRefreshRates=[]}, {id=25, width=640, height=480, fps=59.94048, alternativeRefreshRates=[]}], colorMode 0, supportedColorModes [0], hdrCapabilities HdrCapabilities{mSupportedHdrTypes=[], mMaxLuminance=500.0, mMaxAverageLuminance=500.0, mMinLuminance=0.0}, allmSupported false, gameContentTypeSupported false, density 160, 320.0 x 320.0 dpi, appVsyncOff 1000000, presDeadline 16678174, touch INTERNAL, rotation 0, type INTERNAL, address {port=0}, deviceProductInfo null, state ON, committedState ON, frameRateOverride , brightnessMinimum 0.0, brightnessMaximum 1.0, brightnessDefault 0.39763778, FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY, FLAG_ROTATES_WITH_CONTENT, FLAG_SECURE, FLAG_SUPPORTS_PROTECTED_BUFFERS, installOrientation 0}
+    mDisplayModeSpecs={baseModeId=1 allowGroupSwitching=false primaryRefreshRateRange=[0 Infinity] appRequestRefreshRateRange=[0 Infinity]}
+    mDisplayModeSpecsInvalid=false
+    mActiveColorMode=0
+    mSfDisplayModes=
+      DisplayMode{id=0, width=1280, height=800, xDpi=320.0, yDpi=320.0, refreshRate=59.958603, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16678174, group=1}
+      DisplayMode{id=1, width=4096, height=2160, xDpi=320.0, yDpi=320.0, refreshRate=59.999966, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16666676, group=2}
+      DisplayMode{id=2, width=2560, height=1600, xDpi=320.0, yDpi=320.0, refreshRate=59.986588, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16670393, group=3}
+      DisplayMode{id=3, width=1920, height=1440, xDpi=320.0, yDpi=320.0, refreshRate=60.000004, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16666666, group=4}
+      DisplayMode{id=4, width=1856, height=1392, xDpi=320.0, yDpi=320.0, refreshRate=59.995186, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16668004, group=5}
+      DisplayMode{id=5, width=1792, height=1344, xDpi=320.0, yDpi=320.0, refreshRate=59.999794, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16666724, group=6}
+      DisplayMode{id=6, width=2048, height=1152, xDpi=320.0, yDpi=320.0, refreshRate=60.000004, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16666666, group=7}
+      DisplayMode{id=7, width=1920, height=1200, xDpi=320.0, yDpi=320.0, refreshRate=59.884605, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16698783, group=8}
+      DisplayMode{id=8, width=1920, height=1080, xDpi=320.0, yDpi=320.0, refreshRate=60.000004, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16666666, group=9}
+      DisplayMode{id=9, width=1600, height=1200, xDpi=320.0, yDpi=320.0, refreshRate=60.000004, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16666666, group=10}
+      DisplayMode{id=10, width=1680, height=1050, xDpi=320.0, yDpi=320.0, refreshRate=59.954254, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16679384, group=11}
+      DisplayMode{id=11, width=1400, height=1050, xDpi=320.0, yDpi=320.0, refreshRate=59.978443, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16672657, group=12}
+      DisplayMode{id=12, width=1600, height=900, xDpi=320.0, yDpi=320.0, refreshRate=60.000004, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16666666, group=13}
+      DisplayMode{id=13, width=1280, height=1024, xDpi=320.0, yDpi=320.0, refreshRate=60.01974, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16661185, group=14}
+      DisplayMode{id=14, width=1440, height=900, xDpi=320.0, yDpi=320.0, refreshRate=59.887447, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16697990, group=15}
+      DisplayMode{id=15, width=1280, height=960, xDpi=320.0, yDpi=320.0, refreshRate=60.000004, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16666666, group=16}
+      DisplayMode{id=16, width=1366, height=768, xDpi=320.0, yDpi=320.0, refreshRate=59.789547, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16725332, group=17}
+      DisplayMode{id=17, width=1360, height=768, xDpi=320.0, yDpi=320.0, refreshRate=60.015163, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16662456, group=18}
+      DisplayMode{id=18, width=1280, height=768, xDpi=320.0, yDpi=320.0, refreshRate=59.87023, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16702792, group=19}
+      DisplayMode{id=19, width=1280, height=720, xDpi=320.0, yDpi=320.0, refreshRate=60.000004, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16666666, group=20}
+      DisplayMode{id=20, width=1024, height=768, xDpi=213.0, yDpi=213.0, refreshRate=60.00384, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16665600, group=21}
+      DisplayMode{id=21, width=800, height=600, xDpi=213.0, yDpi=213.0, refreshRate=60.31654, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16579200, group=22}
+      DisplayMode{id=22, width=800, height=600, xDpi=213.0, yDpi=213.0, refreshRate=56.250004, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=17777777, group=22}
+      DisplayMode{id=23, width=848, height=480, xDpi=213.0, yDpi=213.0, refreshRate=60.00043, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16666547, group=23}
+      DisplayMode{id=24, width=640, height=480, xDpi=213.0, yDpi=213.0, refreshRate=59.94048, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16683217, group=24}
+    mActiveSfDisplayMode=DisplayMode{id=0, width=1280, height=800, xDpi=320.0, yDpi=320.0, refreshRate=59.958603, appVsyncOffsetNanos=1000000, presentationDeadlineNanos=16678174, group=1}
+      DisplayModeRecord{mMode={id=1, width=1280, height=800, fps=59.958603, alternativeRefreshRates=[]}}
+      DisplayModeRecord{mMode={id=2, width=4096, height=2160, fps=59.999966, alternativeRefreshRates=[]}}
+      DisplayModeRecord{mMode={id=3, width=2560, height=1600, fps=59.986588, alternativeRefreshRates=[]}}
+      DisplayModeRecord{mMode={id=4, width=1920, height=1440, fps=60.000004, alternativeRefreshRates=[]}}
+      DisplayModeRecord{mMode={id=5, width=1856, height=1392, fps=59.995186, alternativeRefreshRates=[]}}
+      DisplayModeRecord{mMode={id=6, width=1792, height=1344, fps=59.999794, alternativeRefreshRates=[]}}
+      DisplayModeRecord{mMode={id=7, width=2048, height=1152, fps=60.000004, alternativeRefreshRates=[]}}
+Failed to write while dumping service display: Broken pipe
+
+$ dumpsys SurfaceFlinger | grep -iE "refresh|vsync period|fps" | head -20
+      present offset:         0 ns	     VSYNC period:  16678174 ns
+	Refresh Rate Map:
+      {id=0, hwcId=2, resolution=1280x800, refreshRate=59.96 Hz, dpi=320.00x320.00, group=1}
+      {id=1, hwcId=3, resolution=4096x2160, refreshRate=60.00 Hz, dpi=320.00x320.00, group=2}
+      {id=2, hwcId=5, resolution=2560x1600, refreshRate=59.99 Hz, dpi=320.00x320.00, group=3}
+      {id=3, hwcId=7, resolution=1920x1440, refreshRate=60.00 Hz, dpi=320.00x320.00, group=4}
+      {id=4, hwcId=8, resolution=1856x1392, refreshRate=60.00 Hz, dpi=320.00x320.00, group=5}
+      {id=5, hwcId=9, resolution=1792x1344, refreshRate=60.00 Hz, dpi=320.00x320.00, group=6}
+      {id=6, hwcId=10, resolution=2048x1152, refreshRate=60.00 Hz, dpi=320.00x320.00, group=7}
+      {id=7, hwcId=11, resolution=1920x1200, refreshRate=59.88 Hz, dpi=320.00x320.00, group=8}
+      {id=8, hwcId=13, resolution=1920x1080, refreshRate=60.00 Hz, dpi=320.00x320.00, group=9}
+      {id=9, hwcId=14, resolution=1600x1200, refreshRate=60.00 Hz, dpi=320.00x320.00, group=10}
+      {id=10, hwcId=15, resolution=1680x1050, refreshRate=59.95 Hz, dpi=320.00x320.00, group=11}
+      {id=11, hwcId=17, resolution=1400x1050, refreshRate=59.98 Hz, dpi=320.00x320.00, group=12}
+      {id=12, hwcId=19, resolution=1600x900, refreshRate=60.00 Hz, dpi=320.00x320.00, group=13}
+      {id=13, hwcId=20, resolution=1280x1024, refreshRate=60.02 Hz, dpi=320.00x320.00, group=14}
+      {id=14, hwcId=21, resolution=1440x900, refreshRate=59.89 Hz, dpi=320.00x320.00, group=15}
+      {id=15, hwcId=23, resolution=1280x960, refreshRate=60.00 Hz, dpi=320.00x320.00, group=16}
+      {id=16, hwcId=24, resolution=1366x768, refreshRate=59.79 Hz, dpi=320.00x320.00, group=17}
+      {id=17, hwcId=26, resolution=1360x768, refreshRate=60.02 Hz, dpi=320.00x320.00, group=18}
+Failed to write while dumping service SurfaceFlinger: Broken pipe
+
+$ wm size
+Physical size: 1280x800
+
+$ wm density
+Physical density: 160
+
+$ adb root (then root probes)
+restarting adbd as root
+
+$ id
+uid=0(root) gid=0(root) groups=0(root),1004(input),1007(log),1011(adb),1015(sdcard_rw),1028(sdcard_r),1078(ext_data_rw),1079(ext_obb_rw),3001(net_bt_admin),3002(net_bt),3003(inet),3006(net_bw_stats),3009(readproc),3011(uhid),3012(readtracefs) context=u:r:su:s0
+
+$ ls -la /data/adb 2>&1
+total 12
+drwx------  2 root   root   4096 2026-09-25 21:44 .
+drwxrwx--x 51 system system 4096 2026-09-27 10:59 ..
+
+$ ls -la /data/adb/ksu 2>&1
+ls: /data/adb/ksu: No such file or directory
+
+$ ls -l /data/adb/ksud 2>&1
+ls: /data/adb/ksud: No such file or directory
+
+$ which su
+
+$ su -v 2>&1
+/system/bin/sh: su: inaccessible or not found
+
+$ pm list packages | grep -i -E "kernelsu|magisk|superuser"
+package:me.weishu.kernelsu
+
+$ getprop ro.adb.secure
+0
+
+$ getprop ro.debuggable
+0
+
+$ getprop service.adb.root
+1
+

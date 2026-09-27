@@ -1,32 +1,64 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "trickcal-default",
-  "name": "Default keymap",
-  "note": "Positions are placeholders to be tuned in M2.",
+  "name": "기본 입력",
+  "targetPackage": "com.epidgames.trickcalrevive",
+  "referenceAspect": {
+    "width": 16,
+    "height": 9
+  },
+  "anchor": "center",
   "bindings": [
     {
-      "key": "Space",
+      "id": "space-tap",
+      "trigger": {
+        "kind": "key",
+        "code": "Space"
+      },
       "action": {
         "kind": "tap",
-        "x": 0.5,
-        "y": 0.5
+        "at": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "hold": false
       }
     },
     {
-      "key": "ArrowLeft",
+      "id": "left-swipe",
+      "trigger": {
+        "kind": "key",
+        "code": "ArrowLeft"
+      },
       "action": {
         "kind": "swipe",
-        "from": [0.65, 0.5],
-        "to": [0.35, 0.5],
+        "from": {
+          "x": 0.65,
+          "y": 0.5
+        },
+        "to": {
+          "x": 0.35,
+          "y": 0.5
+        },
         "durationMs": 240
       }
     },
     {
-      "key": "ArrowRight",
+      "id": "right-swipe",
+      "trigger": {
+        "kind": "key",
+        "code": "ArrowRight"
+      },
       "action": {
         "kind": "swipe",
-        "from": [0.35, 0.5],
-        "to": [0.65, 0.5],
+        "from": {
+          "x": 0.35,
+          "y": 0.5
+        },
+        "to": {
+          "x": 0.65,
+          "y": 0.5
+        },
         "durationMs": 240
       }
     }

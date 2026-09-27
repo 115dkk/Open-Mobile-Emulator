@@ -14,7 +14,8 @@ use crate::{
 
 pub(crate) fn install(app: &tauri::App) -> tauri::Result<()> {
     let show = MenuItem::with_id(app, "show", "창 보이기", true, None::<&str>)?;
-    let start = MenuItem::with_id(app, "guest-start", "게스트 시작", true, None::<&str>)?;
+    let start = MenuItem::with_id(app, "guest-start", "시작", true, None::<&str>)?;
+    // wiring: change this item to `끄기` while the virtual machine is running.
     let quit = MenuItem::with_id(app, "quit", "종료", true, None::<&str>)?;
     let menu = Menu::with_items(app, &[&show, &start, &quit])?;
     let mut tray = TrayIconBuilder::new()

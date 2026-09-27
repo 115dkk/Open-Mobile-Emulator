@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-guest-select"
+description = "Enables the guest_select command without any pre-configured scope."
+commands.allow = ["guest_select"]
+
+[[permission]]
+identifier = "deny-guest-select"
+description = "Denies the guest_select command without any pre-configured scope."
+commands.deny = ["guest_select"]

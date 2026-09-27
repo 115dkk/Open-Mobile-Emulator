@@ -9,6 +9,7 @@
 resolver = "3"
 members = [
     "crates/ome-platform-win",
+    "crates/ome-guest-image",
     "crates/ome-guest-config",
     "crates/ome-qmp",
     "crates/ome-supervisor",
@@ -16,7 +17,7 @@ members = [
     "crates/ome-host-check",
     "crates/ome-adb",
     "crates/ome-window-host",
-    "crates/ome-keymap",
+    "crates/ome-input",
     "crates/ome-wizard",
     "crates/ome-diagnostics",
     "crates/ome-runtime",

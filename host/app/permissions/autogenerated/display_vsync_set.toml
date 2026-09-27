@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-display-vsync-set"
+description = "Enables the display_vsync_set command without any pre-configured scope."
+commands.allow = ["display_vsync_set"]
+
+[[permission]]
+identifier = "deny-display-vsync-set"
+description = "Denies the display_vsync_set command without any pre-configured scope."
+commands.deny = ["display_vsync_set"]

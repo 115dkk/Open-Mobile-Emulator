@@ -2350,6 +2350,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "ome-guest-image"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 2.0.21",
+]
+
+[[package]]
 name = "ome-host-check"
 version = "0.1.0"
 dependencies = [
@@ -2358,7 +2368,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "ome-keymap"
+name = "ome-input"
 version = "0.1.0"
 dependencies = [
  "serde",
@@ -2391,8 +2401,9 @@ dependencies = [
  "ome-artifacts",
  "ome-diagnostics",
  "ome-guest-config",
+ "ome-guest-image",
  "ome-host-check",
- "ome-keymap",
+ "ome-input",
  "ome-wizard",
  "serde",
  "serde_json",
