@@ -345,9 +345,9 @@ mod tests {
 
     #[test]
     fn device_id_hex_matches_the_m0_evidence() {
-        let id = DeviceId::from_decimal(" 4121739…(가려짐)\n").expect("decimal id");
-        assert_eq!(id.decimal, "4121739…(가려짐)");
-        assert_eq!(id.hex, "39335c0a…(가려짐)");
+        let id = DeviceId::from_decimal(" 1311768467463790320\n").expect("decimal id");
+        assert_eq!(id.decimal, "1311768467463790320");
+        assert_eq!(id.hex, "123456789abcdef0");
         assert!(DeviceId::from_decimal("android_id|x").is_none());
     }
 

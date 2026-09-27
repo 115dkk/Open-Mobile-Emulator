@@ -1,0 +1,70 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+#
+# Manual probe: can a GitHub-hosted Windows runner run WHPX-accelerated QEMU?
+# It only reads the host, tries to enable the Windows Hypervisor Platform feature
+# without a restart, installs the distribution QEMU and starts an empty machine
+# with -accel whpx. The answer decides whether the M2 completion run
+# (wizard-only install on a clean machine) can happen on CI. Never triggered by
+# pushes: it costs Windows runner minutes and produces no product artifact.
+
+name: probe-whpx
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2022, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    steps:
+      - name: Host facts
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          "== os =="; (Get-CimInstance Win32_OperatingSystem).Caption; [Environment]::OSVersion.VersionString
+          "== cpu =="; Get-CimInstance Win32_Processor | Select-Object Name, NumberOfCores, NumberOfLogicalProcessors, VirtualizationFirmwareEnabled, SecondLevelAddressTranslationExtensions, VMMonitorModeExtensions | Format-List
+          "== computer =="; Get-CimInstance Win32_ComputerSystem | Select-Object Manufacturer, Model, HypervisorPresent, TotalPhysicalMemory | Format-List
+          "== systeminfo hyper-v lines =="; systeminfo | Select-String -Pattern 'Hyper-V', 'hypervisor', 'Virtualization', 'Second Level', 'Data Execution' | ForEach-Object { $_.Line }
+          "== optional features =="; foreach ($name in 'HypervisorPlatform', 'Microsoft-Hyper-V-All', 'Microsoft-Hyper-V-Hypervisor', 'VirtualMachinePlatform') { try { $f = Get-WindowsOptionalFeature -Online -FeatureName $name -ErrorAction Stop; "$name : $($f.State)" } catch { "$name : $($_.Exception.Message)" } }
+          "== hypervisor launch type =="; bcdedit /enum '{current}' 2>&1 | Select-String -Pattern 'hypervisorlaunchtype' | ForEach-Object { $_.Line }
+          "== WinHvPlatform.dll =="; Test-Path "$env:SystemRoot\System32\WinHvPlatform.dll"; Test-Path "$env:SystemRoot\System32\WinHvEmulation.dll"
+          "== vmcompute service =="; Get-Service vmcompute -ErrorAction SilentlyContinue | Select-Object Name, Status, StartType | Format-List
+      - name: Try to enable Windows Hypervisor Platform without a restart
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $log = Join-Path $env:RUNNER_TEMP 'dism-whpx.log'
+          & dism.exe /online /enable-feature /featurename:HypervisorPlatform /all /norestart /logpath:$log 2>&1 | ForEach-Object { $_ }
+          "dism exit code: $LASTEXITCODE (0 = enabled, 3010 = enabled but restart required)"
+          foreach ($name in 'HypervisorPlatform') { try { $f = Get-WindowsOptionalFeature -Online -FeatureName $name -ErrorAction Stop; "$name : $($f.State)" } catch { "$name : $($_.Exception.Message)" } }
+          "== WinHvPlatform.dll after =="; Test-Path "$env:SystemRoot\System32\WinHvPlatform.dll"
+      - name: Install distribution QEMU
+        shell: pwsh
+        run: |
+          choco install qemu --no-progress -y | Select-Object -Last 5
+          $qemu = Get-ChildItem 'C:\Program Files\qemu\qemu-system-x86_64.exe' -ErrorAction SilentlyContinue
+          if (-not $qemu) { $qemu = Get-ChildItem -Recurse -Filter qemu-system-x86_64.exe -Path 'C:\Program Files', 'C:\ProgramData\chocolatey' -ErrorAction SilentlyContinue | Select-Object -First 1 }
+          if (-not $qemu) { throw 'qemu-system-x86_64.exe not found after install' }
+          "QEMU_EXE=$($qemu.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          & $qemu.FullName --version
+          & $qemu.FullName -accel help
+      - name: Start an empty machine with WHPX
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          foreach ($accel in 'whpx', 'whpx,kernel-irqchip=off', 'tcg') {
+            "== -accel $accel =="
+            $out = Join-Path $env:RUNNER_TEMP "qemu-$($accel -replace '[^a-z]', '_').txt"
+            $p = Start-Process -FilePath $env:QEMU_EXE -ArgumentList @('-accel', $accel, '-machine', 'q35', '-cpu', 'Skylake-Client-v4', '-m', '256', '-smp', '2', '-display', 'none', '-nodefaults', '-no-reboot', '-serial', 'none', '-monitor', 'none', '-qmp', 'tcp:127.0.0.1:4455,server=on,wait=off') -NoNewWindow -PassThru -RedirectStandardError $out
+            Start-Sleep -Seconds 8
+            if ($p.HasExited) { "exited early with code $($p.ExitCode)" } else { "still running after 8 s (accelerator initialised); stopping"; Stop-Process -Id $p.Id -Force }
+            "-- stderr --"; if (Test-Path $out) { Get-Content $out | Select-Object -First 20 }
+          }

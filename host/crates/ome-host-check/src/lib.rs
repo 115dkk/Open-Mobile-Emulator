@@ -582,13 +582,12 @@ fn find_qemu() -> Option<QemuFound> {
         candidates.push((directory.join("qemu/bin"), "product-bundle"));
         candidates.push((directory.join("qemu"), "product-bundle"));
     }
-    let local_app_data = std::env::var_os("LOCALAPPDATA")
-        .map(PathBuf::from)
-        .unwrap_or_else(|| PathBuf::from("C:/Users/USER/AppData/Local"));
-    candidates.push((
-        local_app_data.join("OpenMobileEmulator/qemu-build/out/bin"),
-        "custom-build",
-    ));
+    if let Some(local_app_data) = std::env::var_os("LOCALAPPDATA").map(PathBuf::from) {
+        candidates.push((
+            local_app_data.join("OpenMobileEmulator/qemu-build/out/bin"),
+            "custom-build",
+        ));
+    }
     candidates.push((PathBuf::from("C:/Program Files/qemu"), "distribution"));
 
     for (directory, source) in candidates {

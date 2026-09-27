@@ -12,10 +12,20 @@ use std::time::{Duration, Instant};
 use ome_platform_win::{JobObject, ProcessLaunch, TestHostWindow};
 use ome_window_host::{GuestWindowHost, HostingTarget, Rect};
 
-const QEMU_CANDIDATES: [&str; 2] = [
-    r"C:\Users\USER\AppData\Local\OpenMobileEmulator\qemu-build\out\bin\qemu-system-x86_64.exe",
-    r"C:\Program Files\qemu\qemu-system-x86_64.exe",
-];
+/// The custom build under the developer's local application data, then the distribution install.
+fn qemu_candidates() -> Vec<PathBuf> {
+    let mut candidates = Vec::new();
+    if let Some(local_app_data) = std::env::var_os("LOCALAPPDATA") {
+        candidates.push(
+            PathBuf::from(local_app_data)
+                .join(r"OpenMobileEmulator\qemu-build\out\bin\qemu-system-x86_64.exe"),
+        );
+    }
+    candidates.push(PathBuf::from(
+        r"C:\Program Files\qemu\qemu-system-x86_64.exe",
+    ));
+    candidates
+}
 const QEMU_ARGUMENTS: [&str; 9] = [
     "-S",
     "-machine",
@@ -32,11 +42,7 @@ const QEMU_DEVICE: &str = "virtio-vga-gl";
 #[test]
 #[ignore = "requires an interactive Windows desktop and a QEMU SDL display"]
 fn hosts_qemu_sdl_window_and_reports_measurements() {
-    let Some(qemu) = QEMU_CANDIDATES
-        .iter()
-        .map(PathBuf::from)
-        .find(|path| path.is_file())
-    else {
+    let Some(qemu) = qemu_candidates().into_iter().find(|path| path.is_file()) else {
         println!("SKIP: no QEMU executable found in either configured location");
         return;
     };

@@ -163,7 +163,7 @@ fn parsers_cover_recorded_and_synthetic_output_for_every_generation() {
         for name in ["gsf-content.txt", "gsf-sqlite.txt"] {
             assert_eq!(
                 a.parse_device_id(&fixture(name)),
-                DeviceId::from_decimal("4121739…(가려짐)")
+                DeviceId::from_decimal("1311768467463790320")
             );
         }
         assert_eq!(a.parse_device_id(&fixture("permission-denied.txt")), None);
@@ -377,7 +377,7 @@ fn successful_probe_fills_all_fields_and_observes_order() {
         );
         assert_eq!(
             result.device_id,
-            DeviceId::from_decimal("4121739…(가려짐)")
+            DeviceId::from_decimal("1311768467463790320")
         );
         assert_eq!(
             result.native_bridge.as_deref(),
@@ -457,7 +457,7 @@ fn denied_content_falls_back_to_pushed_sql_with_one_root_request() {
     assert_eq!(state(&result, ProbeItem::DeviceId), ProbeState::Available);
     assert_eq!(
         result.device_id,
-        DeviceId::from_decimal("4121739…(가려짐)")
+        DeviceId::from_decimal("1311768467463790320")
     );
     assert_eq!(runner.roots.get(), 1);
     assert_eq!(
