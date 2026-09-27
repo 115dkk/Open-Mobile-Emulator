@@ -397,6 +397,12 @@ M2 구현의 첫 작업은 창 담기다. `ome-platform-win`의 창 함수와 `o
 멀티터치 이벤트가 안드로이드 터치로 닿는지, 슬롯 두 개(조이스틱 + 탭)가 동시에 동작하는지,
 `usb-tablet`의 마우스와 함께 써도 어긋나지 않는지를 잰다. 결과는
 `docs/evidence/M2/multitouch.md`에 남기고, 실패하면 단일 포인터 폴백만으로 v1을 낸다.
+결과(2026-09-27 저녁): 앞의 둘은 통과했다. 세 번째는 실패했다. `input-send-event`의 `btn`
+이벤트가 usb-tablet이 아니라 멀티터치 장치에 BTN_MOUSE로 들어가, 잡고 있던 터치가 풀린다. 그래서
+합성 단계는 마우스 버튼도 터치 접촉으로 합성하고(usb-tablet은 절대 좌표 이동에만 쓴다), 터치
+접촉을 잡고 있는 동안 `btn` 이벤트를 보내지 않는다. `mtt`의 begin/update는 슬롯과 tracking-id만
+정하고 좌표는 별도 `data` 이벤트로 보내며, end/cancel은 tracking-id -1이다. QMP 왕복 중앙값은
+2.2 ms였다.
 
 ## 7. 확장 지점
 
