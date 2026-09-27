@@ -1,0 +1,21 @@
+{
+  "extends": "../host/tsconfig.app.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "../host/types",
+    "rootDir": "../host/ui/src",
+    "composite": false,
+    "incremental": false,
+    "tsBuildInfoFile": null
+  },
+  "include": [
+    "../host/ui/src/components/*.tsx",
+    "../host/ui/src/components/index.ts"
+  ],
+  "exclude": [
+    "../host/ui/src/**/*.test.tsx",
+    "../host/ui/src/**/*.test.ts"
+  ]
+}

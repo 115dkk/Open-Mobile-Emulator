@@ -61,3 +61,11 @@ testResults.xml
 
 # Large raw logs collected by Invoke-GuestTest stay local; summaries and excerpts are committed
 docs/evidence/**/logcat-tail.txt
+
+# design-sync (claude.ai/design) staged scripts, build output and machine state
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules
+host/types/

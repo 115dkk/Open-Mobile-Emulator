@@ -1,0 +1,80 @@
+{
+  "projectId": "117247a5-b50f-4d61-b346-3a490467e636",
+  "shape": "package",
+  "pkg": "open-mobile-emulator",
+  "globalName": "OME",
+  "srcDir": "ui/src/components",
+  "tsconfig": "tsconfig.app.json",
+  "cssEntry": "types/ome-components.css",
+  "extraFonts": [
+    "types/ome-fonts.css"
+  ],
+  "guidelinesGlob": [
+    "../docs/DESIGN.md"
+  ],
+  "componentSrcMap": {
+    "Button": "ui/src/components/Button.tsx",
+    "Chip": "ui/src/components/Chip.tsx",
+    "Dialog": "ui/src/components/Dialog.tsx",
+    "EmptyState": "ui/src/components/EmptyState.tsx",
+    "Field": "ui/src/components/Field.tsx",
+    "Icon": "ui/src/components/Icon.tsx",
+    "IconButton": "ui/src/components/IconButton.tsx",
+    "IssueNotice": "ui/src/components/IssueNotice.tsx",
+    "ProgressBar": "ui/src/components/ProgressBar.tsx",
+    "Rail": "ui/src/components/Rail.tsx",
+    "ScreenHeader": "ui/src/components/ScreenHeader.tsx",
+    "Segmented": "ui/src/components/Segmented.tsx",
+    "Select": "ui/src/components/Select.tsx",
+    "SettingRow": "ui/src/components/SettingRow.tsx",
+    "Slider": "ui/src/components/Slider.tsx",
+    "StageFrame": "ui/src/components/StageFrame.tsx",
+    "StatusDot": "ui/src/components/StatusDot.tsx",
+    "StepList": "ui/src/components/StepList.tsx",
+    "Toggle": "ui/src/components/Toggle.tsx"
+  },
+  "buildCmd": "node .design-sync/prebuild.mjs",
+  "overrides": {
+    "Dialog": {
+      "cardMode": "single",
+      "viewport": "640x360"
+    },
+    "SettingRow": {
+      "cardMode": "column"
+    },
+    "ScreenHeader": {
+      "cardMode": "column"
+    },
+    "Rail": {
+      "cardMode": "single",
+      "primaryStory": "Running",
+      "viewport": "320x480"
+    },
+    "EmptyState": {
+      "cardMode": "column"
+    },
+    "IssueNotice": {
+      "cardMode": "column"
+    },
+    "ProgressBar": {
+      "cardMode": "column"
+    },
+    "Segmented": {
+      "cardMode": "column"
+    }
+  },
+  "dtsPropsFor": {
+    "Icon": "/** One of the bundled Lucide icon names. */\n  name: \"stage\" | \"apps\" | \"input\" | \"display\" | \"settings\" | \"refresh\" | \"check\" | \"alert-triangle\" | \"alert-circle\" | \"info\" | \"arrow-right\" | \"chevron-down\" | \"chevron-right\" | \"file-up\" | \"download\" | \"external-link\" | \"folder-open\" | \"camera\" | \"volume\" | \"power\" | \"play\" | \"pause\" | \"search\" | \"plus\" | \"minus\" | \"x\" | \"copy\" | \"mouse\" | \"pencil\" | \"trash\" | \"eye\" | \"eye-off\" | \"undo\" | \"save\" | \"app-window\" | \"hard-drive\" | \"smartphone\";\n  /** Pixel size of the square icon. 20 in navigation and toolbars, 18 in buttons, 16 inline. */\n  size?: number;\n  /** 1.5 next to regular text, 2 next to semibold text (DESIGN.md 6). */\n  strokeWidth?: number;\n  className?: string;",
+    "Button": "children: React.ReactNode;\n  /** `primary` is the one main action of a view. `danger` is a quiet red text button (row actions such as 제거); `danger-solid` confirms something that cannot be undone inside a dialog. */\n  variant?: \"primary\" | \"secondary\" | \"ghost\" | \"danger\" | \"danger-solid\";\n  /** `large` is the 44px wizard main button; the default is 40px. */\n  size?: \"default\" | \"large\";\n  /** Leading 18px icon. */\n  icon?: \"stage\" | \"apps\" | \"input\" | \"display\" | \"settings\" | \"refresh\" | \"check\" | \"alert-triangle\" | \"alert-circle\" | \"info\" | \"arrow-right\" | \"chevron-down\" | \"chevron-right\" | \"file-up\" | \"download\" | \"external-link\" | \"folder-open\" | \"camera\" | \"volume\" | \"power\" | \"play\" | \"pause\" | \"search\" | \"plus\" | \"minus\" | \"x\" | \"copy\" | \"mouse\" | \"pencil\" | \"trash\" | \"eye\" | \"eye-off\" | \"undo\" | \"save\" | \"app-window\" | \"hard-drive\" | \"smartphone\";\n  onClick?: () => void | Promise<void>;\n  disabled?: boolean;\n  type?: \"button\" | \"submit\";\n  className?: string;\n  autoFocus?: boolean;",
+    "Chip": "children: React.ReactNode;\n  /** Status colors only for real states (DESIGN.md 2); `muted` for everything else. */\n  tone?: \"muted\" | \"accent\" | \"success\" | \"warning\" | \"danger\";\n  /** Leading 14px icon. */\n  icon?: \"stage\" | \"apps\" | \"input\" | \"display\" | \"settings\" | \"refresh\" | \"check\" | \"alert-triangle\" | \"alert-circle\" | \"info\" | \"arrow-right\" | \"chevron-down\" | \"chevron-right\" | \"file-up\" | \"download\" | \"external-link\" | \"folder-open\" | \"camera\" | \"volume\" | \"power\" | \"play\" | \"pause\" | \"search\" | \"plus\" | \"minus\" | \"x\" | \"copy\" | \"mouse\" | \"pencil\" | \"trash\" | \"eye\" | \"eye-off\" | \"undo\" | \"save\" | \"app-window\" | \"hard-drive\" | \"smartphone\";",
+    "EmptyState": "title: string;\n  /** 32px icon above the title. */\n  icon?: \"stage\" | \"apps\" | \"input\" | \"display\" | \"settings\" | \"refresh\" | \"check\" | \"alert-triangle\" | \"alert-circle\" | \"info\" | \"arrow-right\" | \"chevron-down\" | \"chevron-right\" | \"file-up\" | \"download\" | \"external-link\" | \"folder-open\" | \"camera\" | \"volume\" | \"power\" | \"play\" | \"pause\" | \"search\" | \"plus\" | \"minus\" | \"x\" | \"copy\" | \"mouse\" | \"pencil\" | \"trash\" | \"eye\" | \"eye-off\" | \"undo\" | \"save\" | \"app-window\" | \"hard-drive\" | \"smartphone\";\n  /** One sentence at most. */\n  children?: React.ReactNode;\n  /** A single button, if there is something to do. */\n  action?: React.ReactNode;",
+    "Field": "label: string;\n  /** Hide the label visually and keep it as the accessible name (search boxes). */\n  labelHidden?: boolean;\n  value: string;\n  onChange: (value: string) => void;\n  type?: \"text\" | \"number\" | \"search\";\n  placeholder?: string;\n  /** Leading 18px icon inside the box. */\n  icon?: \"stage\" | \"apps\" | \"input\" | \"display\" | \"settings\" | \"refresh\" | \"check\" | \"alert-triangle\" | \"alert-circle\" | \"info\" | \"arrow-right\" | \"chevron-down\" | \"chevron-right\" | \"file-up\" | \"download\" | \"external-link\" | \"folder-open\" | \"camera\" | \"volume\" | \"power\" | \"play\" | \"pause\" | \"search\" | \"plus\" | \"minus\" | \"x\" | \"copy\" | \"mouse\" | \"pencil\" | \"trash\" | \"eye\" | \"eye-off\" | \"undo\" | \"save\" | \"app-window\" | \"hard-drive\" | \"smartphone\";\n  /** Unit after the input, for example `px` or `DPI`. */\n  suffix?: string;\n  min?: number;\n  max?: number;\n  step?: number;\n  /** One short sentence under the input, for example the allowed range. */\n  hint?: string;\n  invalid?: boolean;\n  disabled?: boolean;\n  onEnter?: () => void;",
+    "IconButton": "icon: \"stage\" | \"apps\" | \"input\" | \"display\" | \"settings\" | \"refresh\" | \"check\" | \"alert-triangle\" | \"alert-circle\" | \"info\" | \"arrow-right\" | \"chevron-down\" | \"chevron-right\" | \"file-up\" | \"download\" | \"external-link\" | \"folder-open\" | \"camera\" | \"volume\" | \"power\" | \"play\" | \"pause\" | \"search\" | \"plus\" | \"minus\" | \"x\" | \"copy\" | \"mouse\" | \"pencil\" | \"trash\" | \"eye\" | \"eye-off\" | \"undo\" | \"save\" | \"app-window\" | \"hard-drive\" | \"smartphone\";\n  /** Accessible name and tooltip. Icon-only buttons always carry one. */\n  label: string;\n  onClick?: () => void | Promise<void>;\n  /** When set, the button is a toggle and exposes `aria-pressed`. */\n  pressed?: boolean;\n  disabled?: boolean;\n  className?: string;",
+    "IssueNotice": "/** What happened (`message`), then what to do (`nextAction`, or null). Never the raw error. */\n  issue: { code: string; message: string; nextAction: string | null };",
+    "Segmented": "/** Accessible name of the group. */\n  label: string;\n  options: readonly { value: string; label: string; disabled?: boolean }[];\n  /** Selected value, or null when none is selected yet. */\n  value: string | null;\n  onChange: (value: string) => void | Promise<void>;\n  disabled?: boolean;",
+    "Select": "/** Accessible name; usually the setting row label. */\n  label: string;\n  options: readonly { value: string; label: string }[];\n  value: string;\n  onChange: (value: string) => void | Promise<void>;\n  disabled?: boolean;",
+    "StepList": "/** Each item: noun-phrase label; the symbol says done, in progress, pending or failed. `children` is an optional detail line (vertical lists only). */\n  items: readonly { id: string; label: string; state: \"done\" | \"active\" | \"pending\" | \"failed\"; children?: React.ReactNode }[];\n  /** Accessible name of the list. */\n  label: string;\n  /** `horizontal` joins the steps with arrows (download: 다운로드 중 → 무결성 확인 → 완료). */\n  orientation?: \"vertical\" | \"horizontal\";",
+    "Rail": "current: \"stage\" | \"apps\" | \"input\" | \"display\" | \"settings\";\n  onSelect: (item: \"stage\" | \"apps\" | \"input\" | \"display\" | \"settings\") => void;\n  /** Drives the status dot at the bottom. */\n  guestState: \"stopped\" | \"starting\" | \"running\" | \"stopping\" | \"restarting\" | \"failed\";\n  /** Product version shown under the dot. */\n  version: string;"
+  },
+  "readmeHeader": ".design-sync/conventions.md"
+}
