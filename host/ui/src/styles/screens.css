@@ -533,3 +533,971 @@
     transition: none;
   }
 }
+
+/* ==== Stage (S2): screen worker B ==== */
+/* Toolbar 44px, the stage frame with 12px around it, status bar 28px (DESIGN.md 4). Text drawn on
+   the frame uses --ome-on-stage and --ome-on-stage-muted from app.css, because the frame is the
+   darkest value in both themes. Component rules load after this file, so overrides of a shared
+   component inside the stage carry one more class. */
+
+.ome-stage {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.ome-stage-toolbar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-1);
+  height: var(--toolbar-height);
+  padding: 0 var(--space-2);
+  border-bottom: 1px solid var(--line);
+  background-color: var(--surface);
+}
+
+.ome-stage-toolbar-divider {
+  flex: none;
+  width: 1px;
+  height: var(--space-5);
+  margin: 0 var(--space-1);
+  background-color: var(--line);
+}
+
+.ome-stage-toolbar-end {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: auto;
+}
+
+/* Display preset: a native select drawn as a quiet toolbar button (icon, size, chevron). */
+
+.ome-stage-preset {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  color: var(--text);
+}
+
+.ome-stage-preset-icon,
+.ome-stage-preset-chevron {
+  position: absolute;
+  top: 50%;
+  display: flex;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.ome-stage-preset-icon {
+  left: var(--space-3);
+}
+
+.ome-stage-preset-chevron {
+  right: var(--space-2);
+  color: var(--muted);
+}
+
+.ome-stage-preset-input {
+  appearance: none;
+  height: var(--target-min);
+  padding: 0 calc(var(--space-2) + var(--space-4) + var(--space-2)) 0 calc(var(--space-3) + var(--space-5) + var(--space-2));
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background-color: transparent;
+  color: var(--text);
+  font: var(--type-readout);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--ease-standard);
+}
+
+.ome-stage-preset-input:hover {
+  background-color: var(--surface-raised);
+}
+
+.ome-stage-preset-input option {
+  background-color: var(--surface);
+  color: var(--text);
+}
+
+.ome-stage-issue {
+  flex: none;
+  padding: var(--space-3) var(--space-3) 0;
+}
+
+.ome-stage-area {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  padding: var(--space-3);
+}
+
+/* Stopped: one large start button and the last exit. */
+
+.ome-stage-start {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  text-align: center;
+}
+
+.ome-stage-start .ome-stage-start-button {
+  gap: var(--space-3);
+  height: calc(var(--space-12) + var(--space-2));
+  padding: 0 var(--space-8) 0 var(--space-6);
+  border-radius: var(--radius-stage);
+  font: var(--type-section);
+}
+
+.ome-stage-start .ome-stage-start-button .ome-icon {
+  fill: currentColor;
+}
+
+.ome-stage-caption {
+  font: var(--type-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--ome-on-stage-muted);
+}
+
+/* Starting: the boot steps, symbols only. */
+
+.ome-stage-boot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  width: 360px;
+  max-width: 100%;
+  padding: var(--space-6);
+}
+
+.ome-stage-boot .ome-step-label {
+  color: var(--ome-on-stage);
+}
+
+.ome-stage-boot .ome-step-pending .ome-step-label {
+  color: var(--ome-on-stage-muted);
+}
+
+/* Failed: title by cause, one sentence, two buttons, the log path under 세부 정보. */
+
+.ome-stage-failure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 560px;
+  max-width: 100%;
+  padding: var(--space-6);
+  color: var(--ome-on-stage);
+}
+
+.ome-stage-failure-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.ome-stage-failure-icon {
+  display: inline-flex;
+  color: var(--danger);
+}
+
+.ome-stage-failure-title {
+  font: var(--type-title);
+  color: var(--ome-on-stage);
+}
+
+.ome-stage-failure-body {
+  color: var(--ome-on-stage-muted);
+}
+
+.ome-stage-failure-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.ome-stage-details {
+  color: var(--ome-on-stage-muted);
+}
+
+.ome-stage-details summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: fit-content;
+  min-height: var(--target-min);
+  list-style: none;
+  cursor: pointer;
+}
+
+.ome-stage-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.ome-stage-details summary:hover {
+  color: var(--ome-on-stage);
+}
+
+.ome-stage-details-chevron {
+  display: inline-flex;
+  transition: transform var(--motion-fast) var(--ease-standard);
+}
+
+.ome-stage-details[open] .ome-stage-details-chevron {
+  transform: rotate(90deg);
+}
+
+.ome-stage-log {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.ome-stage-log-label {
+  font: var(--type-label);
+  color: var(--ome-on-stage-muted);
+}
+
+.ome-stage-log-path {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background-color: var(--surface);
+  color: var(--text);
+  user-select: text;
+}
+
+/* Status bar: 28px, one line; long items give way with an ellipsis, fps sits at the end. */
+
+.ome-stage-status {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-4);
+  height: var(--statusbar-height);
+  padding: 0 var(--space-3);
+  overflow: hidden;
+  border-top: 1px solid var(--line);
+  background-color: var(--surface);
+  color: var(--muted);
+  font: var(--type-label);
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.ome-stage-status-state,
+.ome-stage-status-paused {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  color: var(--text);
+}
+
+.ome-stage-status-state {
+  gap: var(--space-2);
+}
+
+.ome-stage-status-paused {
+  gap: var(--space-1);
+}
+
+.ome-stage-status-item {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+}
+
+.ome-stage-status-fps {
+  flex: none;
+  margin-left: auto;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ==== Apps (S3): screen worker B ==== */
+/* Header (title, search, buttons), the install line, the table, the count. While the operating
+   system is off the table keeps its last values at the disabled opacity. */
+
+.ome-apps {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ome-apps-search {
+  width: 240px;
+}
+
+.ome-apps-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: 0 var(--space-8) var(--space-8);
+}
+
+.ome-apps-list {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background-color: var(--surface);
+}
+
+.ome-apps-list-stale {
+  opacity: var(--disabled-opacity);
+}
+
+.ome-apps-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.ome-apps-col-name {
+  width: 216px;
+}
+
+.ome-apps-col-version {
+  width: 112px;
+}
+
+.ome-apps-col-date {
+  width: 136px;
+}
+
+.ome-apps-col-actions {
+  width: 184px;
+}
+
+.ome-apps-table th,
+.ome-apps-table td {
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.ome-apps-table th {
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-3);
+  color: var(--muted);
+  font: var(--type-label);
+}
+
+.ome-apps-table td {
+  height: calc(var(--space-12) + var(--space-2));
+}
+
+.ome-apps-table th:first-child,
+.ome-apps-table td:first-child {
+  padding-left: var(--space-4);
+}
+
+.ome-apps-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.ome-apps-name {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.ome-apps-version {
+  color: var(--muted);
+  font: var(--type-readout);
+  font-variant-numeric: tabular-nums;
+}
+
+.ome-apps-date {
+  color: var(--muted);
+  font: var(--type-caption);
+  font-variant-numeric: tabular-nums;
+}
+
+.ome-apps-table .ome-apps-actions-head,
+.ome-apps-table .ome-apps-actions {
+  text-align: right;
+}
+
+.ome-apps-actions {
+  white-space: nowrap;
+}
+
+.ome-apps-actions .ome-button + .ome-button {
+  margin-left: var(--space-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ome-stage-preset-input,
+  .ome-stage-details-chevron {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .ome-stage-preset-input,
+  .ome-stage-log-path,
+  .ome-apps-list {
+    border: 1px solid ButtonText;
+  }
+}
+
+/* ---- Input (S4): screen worker C. Profile list left, the applied profile right. ---- */
+
+.ome-input {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.ome-input-issue {
+  flex: none;
+  padding: var(--space-4) var(--space-8) 0;
+}
+
+.ome-input-panes {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.ome-input-list {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 280px;
+  padding: var(--space-6) var(--space-4);
+  border-right: 1px solid var(--line);
+  overflow: auto;
+}
+
+.ome-input-list > .ome-page-title {
+  padding: 0 var(--space-1);
+}
+
+.ome-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.ome-input-group > .ome-group-label {
+  padding: 0 var(--space-3);
+}
+
+.ome-input-profiles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ome-input-profile {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  min-height: 56px;
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: var(--radius-control);
+  background-color: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--ease-standard);
+}
+
+.ome-input-profile:hover {
+  background-color: var(--surface-raised);
+}
+
+.ome-input-profile[aria-current="true"] {
+  background-color: var(--accent-soft);
+}
+
+.ome-input-profile[aria-current="true"] .ome-input-profile-name {
+  font-weight: 600;
+}
+
+.ome-input-profile-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.ome-input-list-foot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: auto;
+  padding-top: var(--space-2);
+}
+
+.ome-input-auto {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 0 0 0 var(--space-3);
+}
+
+.ome-input-new {
+  width: 100%;
+}
+
+.ome-input-detail {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+  padding: var(--space-6) var(--space-8);
+  overflow: auto;
+}
+
+.ome-input-detail > .ome-empty {
+  flex: 1;
+}
+
+.ome-input-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+.ome-input-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  margin-right: auto;
+}
+
+.ome-input-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* The preview sits on the stage value, the darkest in both themes, so marker text is the light one. */
+.ome-input-preview {
+  display: flex;
+  flex: none;
+  justify-content: center;
+  padding: var(--space-4);
+  border-radius: var(--radius-card);
+  background-color: var(--stage-frame);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.ome-input-surface {
+  --ome-marker-text: var(--text);
+  --ome-marker-muted: var(--muted);
+  position: relative;
+  border-radius: 2px;
+  background-color: color-mix(in srgb, var(--surface) 8%, var(--stage-frame));
+  outline: 1px solid var(--image-outline);
+  outline-offset: -1px;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .ome-input-surface {
+    --ome-marker-text: var(--surface);
+    --ome-marker-muted: color-mix(in srgb, var(--surface) 70%, var(--stage-frame));
+  }
+}
+
+:root[data-theme="light"] .ome-input-surface {
+  --ome-marker-text: var(--surface);
+  --ome-marker-muted: color-mix(in srgb, var(--surface) 70%, var(--stage-frame));
+}
+
+.ome-input-surface-hit {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background-color: transparent;
+  cursor: crosshair;
+}
+
+.ome-input-surface-label {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-4);
+  color: var(--ome-marker-muted);
+  font: var(--type-label);
+  pointer-events: none;
+}
+
+.ome-input-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.ome-input-lines line,
+.ome-input-lines polyline {
+  vector-effect: non-scaling-stroke;
+}
+
+.ome-input-marker {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-width: var(--space-8);
+  height: var(--space-8);
+  padding: 0 var(--space-2);
+  border: 1.5px solid var(--accent);
+  border-radius: var(--space-4);
+  background-color: color-mix(in srgb, var(--stage-frame) 72%, transparent);
+  color: var(--ome-marker-text);
+  font: var(--type-label);
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* Hold: the same chip with one dot inside (DESIGN.md 8). */
+.ome-input-marker-hold::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--accent);
+}
+
+.ome-input-joystick {
+  position: absolute;
+  aspect-ratio: 1;
+  border: 1.5px dashed var(--accent);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.ome-input-pending {
+  position: absolute;
+  width: var(--space-8);
+  height: var(--space-8);
+  border: 2px dashed var(--accent-hover);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.ome-input-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ome-input-table th {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font: var(--type-label);
+  text-align: left;
+}
+
+.ome-input-table td {
+  height: var(--space-12);
+  padding: 0 var(--space-3);
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+.ome-input-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.ome-input-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: var(--space-6);
+  padding: 0 var(--space-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  background-color: var(--surface-raised);
+  font: var(--type-label);
+  white-space: nowrap;
+}
+
+.ome-input-position {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ome-input-remove {
+  width: var(--space-12);
+  text-align: right;
+}
+
+/* ---- Display (S5): screen worker C. Resolution cards, refresh rate, vertical sync, scaling. ---- */
+
+.ome-display {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding: 0 var(--space-8) var(--space-10);
+}
+
+.ome-display-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.ome-display-section + .ome-display-section {
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--line);
+}
+
+.ome-display-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.ome-display-row {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.ome-display-row > .ome-display-head {
+  flex: 1;
+}
+
+.ome-display-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-4);
+  width: 100%;
+}
+
+.ome-display-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+  padding: var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background-color: var(--surface);
+}
+
+.ome-display-card-active {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.ome-display-shape {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 140px;
+}
+
+.ome-display-shape-frame {
+  border: 1.5px solid var(--line-strong);
+  border-radius: var(--space-1);
+}
+
+.ome-display-shape-active {
+  border-color: var(--accent);
+}
+
+.ome-display-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.ome-display-card-size {
+  font: var(--type-section);
+  font-variant-numeric: tabular-nums;
+}
+
+.ome-display-card-meta {
+  font-variant-numeric: tabular-nums;
+}
+
+.ome-display-card-action {
+  display: flex;
+  align-items: center;
+  min-height: var(--target-min);
+  margin-top: auto;
+}
+
+.ome-display-applied {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+}
+
+.ome-display-applied .ome-icon {
+  color: var(--accent);
+}
+
+.ome-display-custom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.ome-display-custom > .ome-field:last-child {
+  grid-column: 1 / -1;
+}
+
+.ome-display-refresh-custom {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  width: 360px;
+  max-width: 100%;
+}
+
+.ome-display-refresh-custom > .ome-field {
+  flex: 1;
+}
+
+/* ---- Settings (S6): screen worker C. Section titles over setting rows, no cards. ---- */
+
+.ome-settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  max-width: 880px;
+  padding: 0 var(--space-8) var(--space-10);
+}
+
+.ome-settings-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.ome-settings-rows {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--space-1);
+}
+
+.ome-settings-lead {
+  padding: var(--space-3) 0 var(--space-1);
+}
+
+.ome-settings-note {
+  padding-top: var(--space-3);
+  color: var(--muted);
+}
+
+.ome-settings-value {
+  color: var(--text);
+  user-select: all;
+}
+
+.ome-settings-hotkey {
+  min-width: 112px;
+}
+
+.ome-settings-progress {
+  flex: 1;
+  min-width: 0;
+}
+
+.ome-settings-failed {
+  display: flex;
+  flex-direction: column;
+  color: var(--danger);
+}
+
+.ome-settings-failed-next {
+  color: var(--muted);
+}
+
+.ome-settings-events {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-4);
+}
+
+.ome-settings-event-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ome-settings-event {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.ome-settings-event-time {
+  flex: none;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ome-settings-event-mark {
+  display: inline-flex;
+  flex: none;
+  align-self: center;
+  width: var(--space-4);
+}
+
+.ome-settings-event-warning .ome-settings-event-mark {
+  color: var(--warning);
+}
+
+.ome-settings-event-error .ome-settings-event-mark {
+  color: var(--danger);
+}
+
+.ome-settings-event-text {
+  min-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ome-input-profile {
+    transition: none;
+  }
+}

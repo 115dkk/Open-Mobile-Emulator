@@ -6,12 +6,31 @@ import { useMemo, useState } from 'react';
 import { App } from './App';
 import { blockedGallery, fixtureBridge, mainGallery, wizardGallery } from './fixtures';
 import type { GalleryVariant } from './fixtures';
+// Stage and apps variants (screen worker B).
+import { appsGallery, stageGallery } from './fixtures';
+import { useRailPick } from './qa-rail-pick';
+// Input, display and settings variants (screen worker C).
+import { displayGallery, inputGallery, settingsGallery } from './fixtures';
 
 const GROUPS: readonly { readonly label: string; readonly variants: readonly GalleryVariant[] }[] = [
   { label: '첫 실행 마법사', variants: wizardGallery },
   { label: '막힘 화면', variants: blockedGallery },
   { label: '주 화면', variants: mainGallery },
+  { label: '무대 (S2)', variants: stageGallery },
+  { label: '앱 (S3)', variants: appsGallery },
+  { label: '입력 (S4)', variants: inputGallery },
+  { label: '표시 (S5)', variants: displayGallery },
+  { label: '설정 (S6)', variants: settingsGallery },
 ];
+
+/** Variants drawn on a rail screen other than the stage: variant id to rail label (worker B). */
+const RAIL_PICKS: ReadonlyMap<string, string> = new Map([
+  ...appsGallery.map((item) => [item.id, '앱'] as const),
+  // Worker C: the input, display and settings screens.
+  ...inputGallery.map((item) => [item.id, '입력'] as const),
+  ...displayGallery.map((item) => [item.id, '표시'] as const),
+  ...settingsGallery.map((item) => [item.id, '설정'] as const),
+]);
 
 type Theme = 'system' | 'dark' | 'light';
 
@@ -34,6 +53,7 @@ export function Gallery() {
   const [theme, setTheme] = useState<Theme>('system');
   const variant = allVariants().find((item) => item.id === selected);
   const bridge = useMemo(() => fixtureBridge(variant?.snapshot), [variant]);
+  useRailPick(selected, RAIL_PICKS);
 
   return (
     <>

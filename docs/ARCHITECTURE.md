@@ -547,6 +547,40 @@ CloseAction = StopGuest | MinimizeToTray      // 기본값 StopGuest (사용자 
   `hostfwd=tcp:0.0.0.0:<port>-:5555`. 기본값 `Localhost`. 화면은 어느 쪽이든 경고를 보인다.
 - 트레이는 그대로 있다. 창을 닫을 때 게스트를 끄는 것이 기본이고 트레이로 내리는 것은 설정이다.
 
+### 8.7 화면 A가 드러낸 빈자리 (2026-09-27, 세 번째 판에서 채운다)
+
+화면 워커가 마법사와 막힘 화면을 그리며 계약에 없는 동작을 셋 찾았다. 없는 동작은 없는 버튼으로
+두었고, 다음 명령이 들어오면 화면이 버튼을 되살린다.
+
+- `wizard_defer`: 마법사를 지금 단계에 저장한 채 닫고 무대로 간다(`나중에 하기`, S1.2의 `지금은
+  건너뛰기`와 Esc). `phase`는 `main`이 되고 마법사 상태는 그대로 남아 다음 실행에서 이어진다.
+  하이퍼바이저가 꺼진 채 미루면 무대는 `blocker: hypervisorPlatformOff`를 받는다. `wizard_skip`은
+  지금처럼 건너뛸 수 있는 단계(앱 설치)에서만 다음 단계로 간다.
+- `open_help { topic }`: `topic`은 열거형(`virtualizationBios`, `hypervisorPlatform`, `googleAccount`,
+  `adbSecurity`)이고 Rust가 `docs/` 안의 정해진 문서 또는 GitHub의 정해진 페이지(R10 목록)를 기본
+  브라우저로 연다. 웹뷰는 URL을 모른다. S8의 `켜는 방법`, 설정 고급 절의 도움말이 쓴다.
+- `app_quit`: 창을 닫고 앱을 끝낸다(S1.3의 `닫기`). 창 닫기 정책(운영체제 끄기)과 같은 경로를 탄다.
+- `guest_volume_set { index }`(0~15): 무대 도구 막대의 `볼륨`. 능력 조사 `mediaVolume`이 있을 때만 버튼이 있다.
+  `GuestView.media_volume: Option<u32>`가 현재 값이다.
+- `input_overlay_toggle`과 `InputView.overlay_visible: bool`: 무대 도구 막대의 `매핑 표시 켬/끔`. 지금은
+  `OverlayState.mode`가 Rust 안에만 있어 화면이 표지가 보이는지 알 수 없다.
+- `app_install_cancel`: 앱 설치 진행 줄의 `취소`.
+- `open_help`의 `topic`에 `qemuSource`(R4 소스 제공 링크), `thirdPartyNotices`, `releaseNotes`(업데이트의
+  릴리스 노트, Rust가 `UpdateState::Available.notes_url`을 연다)를 더한다. 정보 절의 `소스 코드 받기`,
+  `제3자 고지`, 업데이트의 릴리스 노트 링크가 쓴다.
+- `open_home_folder`: 저장 위치의 `폴더 열기`(`open_logs_folder`, `open_screenshots_folder`와 같은 꼴).
+- `copy_to_clipboard { item }`: `item`은 열거형 `deviceId | adbAddress`. 웹뷰는 자유 문자열을 보내지
+  않고 Rust가 스냅숏의 값을 복사한다. 설정 고급 절과 Google 계정 절의 `복사`.
+- `display_presets()`의 `needs_reboot`는 현재 방향과 카드의 방향이 다를 때만 참이다(지금은 셋 다 참).
+- `input_profile_save`로 새 프로필(없던 id)을 저장하면 그 프로필이 `active_id`가 된다. 이름 바꾸기나
+  대상 앱 지정처럼 있는 id를 저장하면 선택은 그대로다.
+- `blocker`는 마법사 밖(`phase == main`)에서 `HypervisorPlatform`이 꺼져 있으면 `hypervisorPlatformOff`다.
+  호스트 점검 행 자체는 마법사가 켤 수 있으므로 `Attention`으로 남는다.
+- 런타임의 고정값(`wizard_view`의 `download`, `disk_free_bytes`, `inspected_at`, `wizard_facts`의
+  `guest_installed`, `guest_booted`)은 산출물 저장소와 감독자, adb 어댑터가 붙을 때 실제 값이 된다.
+  파일 놓기(S1.7, 앱 화면)는 Tauri 껍데기의 `DragDrop` 이벤트가 검증된 경로를 런타임에 넘기는 일이고
+  웹뷰는 놓기 영역만 그린다.
+
 ### 8.6 막힘 화면과 문구
 
 - `AppSnapshot.blocker: Option<Blocker>`, `Blocker { kind: VirtualizationOff | QemuMissing |

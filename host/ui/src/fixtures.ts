@@ -282,3 +282,304 @@ export const mainSnapshot: AppSnapshot = {
 export const mainGallery: readonly GalleryVariant[] = [
   { id: 'main-stopped', label: 'S2 무대: 꺼짐', snapshot: mainSnapshot },
 ];
+
+// ---- Stage (S2) and apps (S3) variants: screen worker B. Other workers append their own blocks. ----
+
+export const stageDisplayPresets: AppSnapshot['display']['presets'] = [
+  { id: 'hd-landscape', size: { width: 1280, height: 720 }, densityDpi: 240, orientation: 'landscape', needsReboot: false },
+  { id: 'fhd-landscape', size: { width: 1920, height: 1080 }, densityDpi: 320, orientation: 'landscape', needsReboot: false },
+  { id: 'hd-portrait', size: { width: 720, height: 1280 }, densityDpi: 240, orientation: 'portrait', needsReboot: true },
+];
+
+export const stageInputProfile: AppSnapshot['input']['profiles'][number] = {
+  id: 'user-1', name: '내 프로필 1', bundled: false, targetPackage: 'com.example.sample.a',
+  referenceAspect: { width: 16, height: 9 }, anchor: 'center', bindings: [],
+};
+
+const stageProbe: AppSnapshot['guest']['capabilities'] = {
+  probedAt: '2026-09-26T20:01:00',
+  items: [
+    { id: 'bootMarker', state: 'available' }, { id: 'appList', state: 'available' },
+    { id: 'displaySize', state: 'available' }, { id: 'mediaVolume', state: 'available' },
+    { id: 'deviceId', state: 'available' }, { id: 'screenshot', state: 'available' },
+    { id: 'foregroundApp', state: 'available' }, { id: 'multitouch', state: 'unavailable' },
+    { id: 'nativeBridge', state: 'available' }, { id: 'root', state: 'unknown' },
+  ],
+};
+
+const stageLogPath = 'C:\\Users\\사용자\\AppData\\Local\\OpenMobileEmulator\\logs\\guest-20260926-1958.log';
+
+/** The rail shell with presets and an input profile, the operating system stopped after a normal exit. */
+export const stageSnapshot: AppSnapshot = {
+  ...mainSnapshot,
+  display: { ...mainSnapshot.display, presets: stageDisplayPresets, activeId: 'fhd-landscape' },
+  input: { ...mainSnapshot.input, profiles: [stageInputProfile], activeId: stageInputProfile.id },
+};
+
+type GuestPatch = Partial<AppSnapshot['guest']>;
+type StagePatch = Omit<Partial<AppSnapshot>, 'guest'>;
+
+function stageAt(guest: GuestPatch, patch: StagePatch = {}): AppSnapshot {
+  return { ...stageSnapshot, ...patch, guest: { ...stageSnapshot.guest, ...guest } };
+}
+
+const runningGuest: GuestPatch = {
+  state: 'running', hosting: 'embedded', bootCompleted: true, adbConnected: true, fps: 58,
+  startedAt: '2026-09-27T09:10:00', capabilities: stageProbe, deviceId: '3f2a9c41d07b5e68', rootEnabled: false,
+};
+
+const runningApps: AppSnapshot['apps'] = { available: true, items: sampleApps, install: null };
+
+function failedAt(kind: 'startFailed' | 'bootTimeout' | 'crash'): AppSnapshot {
+  return stageAt({ state: 'failed', lastExit: { kind, at: '2026-09-26T19:58:00', logPath: stageLogPath } });
+}
+
+/** A running operating system with apps, for the apps screen and the stage. */
+export const runningSnapshot: AppSnapshot = stageAt(runningGuest, { apps: runningApps });
+
+export const stageGallery: readonly GalleryVariant[] = [
+  { id: 'stage-stopped', label: 'S2 무대: 꺼짐, 정상 종료', snapshot: stageSnapshot },
+  {
+    id: 'stage-stopped-abnormal', label: 'S2 무대: 꺼짐, 비정상 종료',
+    snapshot: stageAt({ lastExit: { kind: 'crash', at: '2026-09-26T19:58:00', logPath: stageLogPath } }),
+  },
+  {
+    id: 'stage-starting', label: 'S2 무대: 시작 중',
+    snapshot: stageAt({ state: 'starting', hosting: 'embedded', lastExit: null }),
+  },
+  { id: 'stage-running', label: 'S2 무대: 실행 중', snapshot: runningSnapshot },
+  {
+    id: 'stage-running-auto', label: 'S2 무대: 실행 중, 자동 적용과 일시 중지, fps',
+    snapshot: stageAt(runningGuest, {
+      apps: runningApps,
+      input: { ...stageSnapshot.input, foregroundPackage: 'com.example.sample.a', suspended: true },
+      settings: { ...stageSnapshot.settings, showFps: true },
+    }),
+  },
+  {
+    id: 'stage-running-editing', label: 'S2 무대: 실행 중, 매핑 편집',
+    snapshot: stageAt(runningGuest, { apps: runningApps, input: { ...stageSnapshot.input, editing: true } }),
+  },
+  {
+    id: 'stage-running-separate', label: 'S2 무대: 실행 중, 별도 창',
+    snapshot: stageAt({ ...runningGuest, hosting: 'separateWindow' }, { apps: runningApps }),
+  },
+  {
+    id: 'stage-restarting', label: 'S2 무대: 다시 시작 중',
+    snapshot: stageAt({ ...runningGuest, state: 'restarting', bootCompleted: false, adbConnected: false, fps: null }),
+  },
+  {
+    id: 'stage-stopping', label: 'S2 무대: 끄는 중',
+    snapshot: stageAt({ ...runningGuest, state: 'stopping', adbConnected: false, fps: null }),
+  },
+  { id: 'stage-failed-start', label: 'S2 무대: 실패, 가상 머신 시작', snapshot: failedAt('startFailed') },
+  { id: 'stage-failed-boot', label: 'S2 무대: 실패, 운영체제 부팅', snapshot: failedAt('bootTimeout') },
+  { id: 'stage-failed-crash', label: 'S2 무대: 실패, 크래시', snapshot: failedAt('crash') },
+  {
+    id: 'stage-issue', label: 'S2 무대: 오류 알림',
+    snapshot: {
+      ...runningSnapshot,
+      issue: { code: 'screenshot_failed', message: '스크린샷을 저장하지 못했습니다.', nextAction: '저장 위치의 여유 공간을 확인하십시오.' },
+    },
+  },
+];
+
+export const appsGallery: readonly GalleryVariant[] = [
+  { id: 'apps-running', label: 'S3 앱: 목록', snapshot: runningSnapshot },
+  {
+    id: 'apps-installing', label: 'S3 앱: 설치 중',
+    snapshot: {
+      ...runningSnapshot,
+      apps: { ...runningApps, install: transfer('transferring', 0.41, 'sample-app-d.xapk', 180 * MIB) },
+    },
+  },
+  { id: 'apps-stopped', label: 'S3 앱: 운영체제 꺼짐', snapshot: { ...stageSnapshot, apps: { available: false, items: sampleApps, install: null } } },
+  { id: 'apps-empty', label: 'S3 앱: 앱 없음', snapshot: { ...runningSnapshot, apps: { available: true, items: [], install: null } } },
+];
+
+// ---- Input (S4), display (S5) and settings (S6) variants: screen worker C. Values only; profile,
+// preset and guest shapes are read off AppSnapshot so the contract import above stays untouched. ----
+
+type InputProfileFixture = AppSnapshot['input']['profiles'][number];
+type DisplayPresetFixture = AppSnapshot['display']['presets'][number];
+type GuestSummaryFixture = AppSnapshot['images']['guests'][number];
+
+const wide = { width: 16, height: 9 } as const;
+
+export const sampleInputProfiles: readonly InputProfileFixture[] = [
+  {
+    id: 'bundled-sample-a', name: '샘플 앱 A 기본 입력', bundled: true, targetPackage: 'com.example.sample.a',
+    referenceAspect: wide, anchor: 'center',
+    bindings: [
+      { id: 'space-tap', trigger: { kind: 'key', code: 'Space' }, action: { kind: 'tap', at: { x: 0.5, y: 0.5 }, hold: false } },
+      {
+        id: 'left-swipe', trigger: { kind: 'key', code: 'ArrowLeft' },
+        action: { kind: 'swipe', from: { x: 0.65, y: 0.5 }, to: { x: 0.35, y: 0.5 }, durationMs: 240 },
+      },
+      {
+        id: 'right-swipe', trigger: { kind: 'key', code: 'ArrowRight' },
+        action: { kind: 'swipe', from: { x: 0.35, y: 0.5 }, to: { x: 0.65, y: 0.5 }, durationMs: 240 },
+      },
+    ],
+  },
+  {
+    id: 'user-1', name: '내 프로필 1', bundled: false, targetPackage: 'com.example.sample.b',
+    referenceAspect: wide, anchor: 'center',
+    bindings: [
+      {
+        id: 'move', trigger: { kind: 'keySet', up: 'KeyW', down: 'KeyS', left: 'KeyA', right: 'KeyD' },
+        action: { kind: 'joystick', center: { x: 0.16, y: 0.72 }, radius: 0.16 },
+      },
+      { id: 'skill', trigger: { kind: 'key', code: 'KeyQ' }, action: { kind: 'tap', at: { x: 0.84, y: 0.42 }, hold: false } },
+      { id: 'guard', trigger: { kind: 'key', code: 'KeyE' }, action: { kind: 'tap', at: { x: 0.9, y: 0.7 }, hold: true } },
+      {
+        id: 'dash', trigger: { kind: 'key', code: 'Space' },
+        action: { kind: 'swipe', from: { x: 0.62, y: 0.8 }, to: { x: 0.76, y: 0.8 }, durationMs: 200 },
+      },
+      { id: 'menu', trigger: { kind: 'mouseButton', button: 'right' }, action: { kind: 'mouseTap', at: { x: 0.95, y: 0.08 } } },
+      { id: 'touch', trigger: { kind: 'mouseButton', button: 'left' }, action: { kind: 'mouseTap', at: null } },
+      { id: 'scroll-up', trigger: { kind: 'wheel', direction: 'up' }, action: { kind: 'wheelSwipe', at: { x: 0.5, y: 0.4 }, distance: 0.2 } },
+      { id: 'back', trigger: { kind: 'key', code: 'Escape' }, action: { kind: 'passThrough' } },
+    ],
+  },
+  {
+    id: 'user-2', name: '내 프로필 2', bundled: false, targetPackage: null, referenceAspect: wide, anchor: 'edges',
+    bindings: [
+      { id: 'confirm', trigger: { kind: 'key', code: 'Digit1' }, action: { kind: 'tap', at: { x: 0.5, y: 0.86 }, hold: false } },
+    ],
+  },
+];
+
+/** The three presets Rust exposes. Only the portrait card changes orientation from a landscape screen. */
+export const sampleDisplayPresets: readonly DisplayPresetFixture[] = [
+  { id: 'hd-720', size: { width: 1280, height: 720 }, densityDpi: 160, orientation: 'landscape', needsReboot: false },
+  { id: 'full-hd', size: { width: 1920, height: 1080 }, densityDpi: 240, orientation: 'landscape', needsReboot: false },
+  { id: 'portrait-720', size: { width: 720, height: 1280 }, densityDpi: 160, orientation: 'portrait', needsReboot: true },
+];
+
+const probedCapabilities: AppSnapshot['guest']['capabilities'] = {
+  probedAt: '2026-09-26T20:01:00',
+  items: [
+    { id: 'bootMarker', state: 'available' }, { id: 'appList', state: 'available' },
+    { id: 'displaySize', state: 'available' }, { id: 'mediaVolume', state: 'available' },
+    { id: 'deviceId', state: 'available' }, { id: 'screenshot', state: 'available' },
+    { id: 'foregroundApp', state: 'available' }, { id: 'multitouch', state: 'unavailable' },
+    { id: 'nativeBridge', state: 'available' }, { id: 'root', state: 'available' },
+  ],
+};
+
+const settingsGuests: readonly GuestSummaryFixture[] = [
+  {
+    name: 'android-13', imageId: 'sample-android-13', androidVersion: '13', diskSizeGib: 64,
+    lastStartedAt: '2026-09-26T19:58:04', capabilities: probedCapabilities,
+  },
+  {
+    name: 'android-15', imageId: 'sample-android-15', androidVersion: '15', diskSizeGib: 32,
+    lastStartedAt: null, capabilities: { probedAt: null, items: [] },
+  },
+];
+
+const sampleNotices: AppSnapshot['notices'] = [
+  { at: '2026-09-26T19:52:00', level: 'info', message: '호스트 점검 결과를 저장했습니다.' },
+  { at: '2026-09-26T19:58:04', level: 'info', message: '운영체제를 시작했습니다.' },
+  { at: '2026-09-26T19:58:31', level: 'info', message: '화면을 연결했습니다.' },
+  { at: '2026-09-26T19:59:12', level: 'info', message: '부팅을 마쳤습니다.' },
+  { at: '2026-09-26T20:03:40', level: 'warning', message: '앱 관리 연결이 끊겨 다시 연결했습니다.' },
+  { at: '2026-09-26T20:10:02', level: 'info', message: '샘플 앱 D 설치를 시작했습니다.' },
+];
+
+/** The rail screens after the wizard: a 64 GB, 16-thread host with two installed systems. */
+const railBase: AppSnapshot = {
+  ...mainSnapshot,
+  images: { profiles: sampleProfiles, guests: settingsGuests, activeGuest: 'android-13' },
+  guest: { ...mainSnapshot.guest, capabilities: probedCapabilities, rootEnabled: false },
+  input: { ...mainSnapshot.input, profiles: sampleInputProfiles, activeId: 'user-1' },
+  display: { ...mainSnapshot.display, presets: sampleDisplayPresets, activeId: 'full-hd' },
+  settings: {
+    ...mainSnapshot.settings,
+    memoryMibMax: 61440, vcpusMax: 16,
+    homeDir: 'C:\\Users\\사용자\\AppData\\Local\\OpenMobileEmulator', diskUsageBytes: Math.round(38.2 * GIB),
+  },
+  update: { currentVersion: '0.1.0', state: { kind: 'upToDate', checkedAt: '2026-09-26T09:10:00' } },
+  notices: sampleNotices,
+};
+
+/** The same system while it runs: adb connected, device ID read, apps listed. */
+export const railRunningSnapshot: AppSnapshot = {
+  ...railBase,
+  guest: {
+    ...railBase.guest, state: 'running', bootCompleted: true, adbConnected: true, hosting: 'embedded',
+    startedAt: '2026-09-26T19:58:04', lastExit: null, deviceId: '3f8a1c2e9b7d4051',
+  },
+  apps: { available: true, items: sampleApps, install: null },
+  input: { ...railBase.input, foregroundPackage: 'com.example.sample.b' },
+};
+
+export const railStoppedSnapshot: AppSnapshot = railBase;
+
+export const inputGallery: readonly GalleryVariant[] = [
+  { id: 'input-running', label: 'S4 입력: 실행 중', snapshot: railRunningSnapshot },
+  { id: 'input-stopped', label: 'S4 입력: 꺼짐', snapshot: railStoppedSnapshot },
+  {
+    id: 'input-bundled', label: 'S4 입력: 동봉 프리셋',
+    snapshot: { ...railRunningSnapshot, input: { ...railRunningSnapshot.input, activeId: 'bundled-sample-a' } },
+  },
+  {
+    id: 'input-empty', label: 'S4 입력: 프로필 없음',
+    snapshot: { ...railStoppedSnapshot, input: { ...railStoppedSnapshot.input, profiles: [], activeId: null } },
+  },
+];
+
+export const displayGallery: readonly GalleryVariant[] = [
+  { id: 'display-basic', label: 'S5 표시: 기본', snapshot: railRunningSnapshot },
+  {
+    id: 'display-refresh', label: 'S5 표시: 주사율과 수직 동기화',
+    snapshot: {
+      ...railRunningSnapshot,
+      display: { ...railRunningSnapshot.display, refreshSupported: true, refreshRateHz: 120, vsyncSupported: true, vsync: 'on' },
+    },
+  },
+  {
+    id: 'display-custom', label: 'S5 표시: 사용자 지정 해상도',
+    snapshot: {
+      ...railStoppedSnapshot,
+      display: {
+        ...railStoppedSnapshot.display, activeId: null, custom: { size: { width: 2560, height: 1440 }, densityDpi: 320 },
+        refreshSupported: true, refreshRateHz: 100, refreshRates: [60, 75, 90, 100, 120, 144],
+      },
+    },
+  },
+];
+
+export const settingsGallery: readonly GalleryVariant[] = [
+  { id: 'settings-stopped', label: 'S6 설정: 꺼짐', snapshot: railStoppedSnapshot },
+  { id: 'settings-running', label: 'S6 설정: 실행 중', snapshot: railRunningSnapshot },
+  {
+    id: 'settings-network', label: 'S6 설정: 다른 PC 연결 허용, 새 버전',
+    snapshot: {
+      ...railRunningSnapshot,
+      settings: { ...railRunningSnapshot.settings, adbAccess: 'network' },
+      update: { currentVersion: '0.1.0', state: { kind: 'available', version: '0.2.0', notesUrl: null } },
+    },
+  },
+  {
+    id: 'settings-update-downloading', label: 'S6 설정: 업데이트 다운로드 중',
+    snapshot: {
+      ...railStoppedSnapshot,
+      update: { currentVersion: '0.1.0', state: { kind: 'downloading', progress: transfer('transferring', 0.37, 'ome-0.2.0-setup.exe', 96 * MIB) } },
+    },
+  },
+  {
+    id: 'settings-update-failed', label: 'S6 설정: 업데이트 실패',
+    snapshot: {
+      ...railStoppedSnapshot,
+      update: {
+        currentVersion: '0.1.0',
+        state: {
+          kind: 'failed',
+          issue: { code: 'update_check_failed', message: '새 버전을 확인하지 못했습니다.', nextAction: '인터넷 연결을 확인한 뒤 다시 시도하십시오.' },
+        },
+      },
+    },
+  },
+];

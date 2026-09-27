@@ -9,16 +9,17 @@ import type {
   AppIssue, AppSnapshot, GuestImageSummary, GuestView, TransferProgress, TransferStage, WizardStep,
 } from '../contracts';
 import {
-  Button, Chip, Icon, IssueNotice, ProgressBar, Segmented, StageFrame, StatusDot, StepList,
+  Button, Icon, IssueNotice, ProgressBar, Segmented, StageFrame, StatusDot, StepList,
 } from '../components';
 import type { StepItem } from '../components';
 import {
   byteUnit, formatBytes, formatBytesIn, formatDuration, formatGib, formatPercent, formatRate, formatTimestamp,
 } from '../format';
 import {
-  CAPABILITY_LABEL, IMAGE_STATUS_LABEL, IMAGE_STATUS_TONE, bootSteps, hostLines,
+  CAPABILITY_LABEL, bootSteps, hostLines,
 } from '../presentation';
 import type { StepState } from '../presentation';
+import { ImageCards } from './ImageCards';
 import { useEscapeKey } from './use-escape-key';
 import { ESC_LINE, WhpxConsentBody } from './WhpxConsentBody';
 
@@ -163,42 +164,6 @@ function transferSteps(stage: TransferStage): StepItem[] {
 
 function sourceName(image: GuestImageSummary): string | null {
   return image.distribution === 'selfBuilt' ? null : 'SourceForge 공식 프로젝트';
-}
-
-function ImageCards({ images, selectedId, disabled, onSelect }: {
-  readonly images: readonly GuestImageSummary[];
-  readonly selectedId: string | null;
-  readonly disabled: boolean;
-  readonly onSelect: (id: string) => void;
-}) {
-  return (
-    <div className="ome-image-cards" role="radiogroup" aria-label="운영체제 이미지">
-      {images.map((image) => {
-        const checked = image.id === selectedId;
-        return (
-          <button
-            key={image.id}
-            type="button"
-            role="radio"
-            aria-checked={checked}
-            className="ome-image-card"
-            disabled={disabled}
-            onClick={() => { if (!checked) onSelect(image.id); }}
-          >
-            <span className="ome-image-card-head">
-              <span className="ome-image-card-name">{image.displayName}</span>
-              <Chip tone={IMAGE_STATUS_TONE[image.status]}>{IMAGE_STATUS_LABEL[image.status]}</Chip>
-            </span>
-            <span className="ome-image-card-meta">
-              <span>API {image.apiLevel}</span>
-              {image.sizeBytes !== null && <span>{formatBytes(image.sizeBytes)}</span>}
-            </span>
-            <span className="ome-image-card-meta">검증된 게임 {image.verifiedGames}개</span>
-          </button>
-        );
-      })}
-    </div>
-  );
 }
 
 function TransferPanel({ download }: { readonly download: TransferProgress }) {
