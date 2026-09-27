@@ -85,6 +85,14 @@ export const CAPABILITY_LABEL: Readonly<Record<CapabilityId, string>> = {
   root: '루트 권한',
 };
 
+/**
+ * The probe items a user gains or loses. `bootMarker` is the probe's own precondition (the boot
+ * marker it waits for), so it is never listed or counted on a screen.
+ */
+export function userFacingCapabilities<T extends { readonly id: CapabilityId }>(items: readonly T[]): T[] {
+  return items.filter((item) => item.id !== 'bootMarker');
+}
+
 export const IMAGE_STATUS_LABEL: Readonly<Record<ImageStatus, string>> = {
   verified: '검증됨',
   candidate: '검증 전',

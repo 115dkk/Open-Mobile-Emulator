@@ -342,8 +342,11 @@ manifests/images/         게스트 이미지 프로필 JSON (3.15절). 산출�
 
 - 인터페이스: `OverlayGeometry::for_stage(stage_rect_physical, guest_size) -> Rect`(순수. 무대 안의
   게스트 화면 영역과 같다), `OverlayState { mode: Hidden | Showing | Editing, profile_id,
-  suspended }`, 편집 프로토콜: 오버레이 웹뷰가 보내는 명령은 `input_binding_upsert { binding }`,
-  `input_binding_remove { id }`, `input_editor_toggle`뿐이고 좌표는 논리 좌표로 온다.
+  suspended }`, 편집 프로토콜: 오버레이 웹뷰는 편집 중인 바인딩을 초안으로 들고 있다가 `저장`에서
+  `input_profile_save { profile }` 하나로 보낸다. Rust가 프로필 전체를 한 번에 검증하므로 두 표지의
+  키를 맞바꾸는 편집도 중간 상태 없이 들어간다(바인딩 하나씩 `input_binding_upsert`로 보내면 첫
+  번째가 키 중복으로 거부된다). 그 밖에 보내는 명령은 `input_editor_toggle`뿐이고 좌표는 논리
+  좌표로 온다. `input_binding_upsert`와 `input_binding_remove`는 레일의 입력 화면이 쓴다.
 - 뒤에 숨는 것: 두 번째 Tauri 창(투명, 장식 없음, `main` 소유)을 무대에 맞춰 놓는 일, 편집 모드
   밖의 클릭 통과, 무대가 움직이거나 크기가 바뀔 때의 재배치(창 담기와 같은 `StageRect` 신호를
   받는다), 게스트가 꺼지면 숨김.

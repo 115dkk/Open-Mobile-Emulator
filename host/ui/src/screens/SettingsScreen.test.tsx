@@ -109,7 +109,7 @@ describe('settings screen (S6): 설치된 운영체제', () => {
     expect(Array.from(systems.querySelectorAll('.ome-setting-label'), (label) => label.textContent)).toEqual([
       'android-13', 'android-15', '시작할 운영체제', '운영체제 이미지',
     ]);
-    expect(within(systems).getByText('안드로이드 13 · 64 GB · 마지막 실행 2026-09-26 19:58 · 확인된 기능 9개')).toBeInTheDocument();
+    expect(within(systems).getByText('안드로이드 13 · 64 GB · 마지막 실행 2026-09-26 19:58 · 확인된 기능 8개')).toBeInTheDocument();
     expect(within(systems).getByText('안드로이드 15 · 32 GB')).toBeInTheDocument();
     expect(within(systems).getByText('새 운영체제 이미지는 앱 업데이트로 추가됩니다.')).toBeInTheDocument();
   });

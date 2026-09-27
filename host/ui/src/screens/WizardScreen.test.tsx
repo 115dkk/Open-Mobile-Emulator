@@ -188,6 +188,8 @@ describe('first-run wizard: S1.6 first boot', () => {
     expect(within(boot as HTMLElement).getByText('다시 시작을 시도할 수 있습니다. 반복될 경우 로그를 첨부해 문제를 보고하십시오.')).toBeInTheDocument();
     expect(within(steps).queryByText(/180|신호/)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: '취소' })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: '진단 묶음 내보내기' }));
+    expect(actions.diagnosticsExport).toHaveBeenCalledOnce();
     await userEvent.click(screen.getByRole('button', { name: '다시 시작' }));
     expect(actions.guestStart).toHaveBeenCalledOnce();
   });
@@ -196,6 +198,8 @@ describe('first-run wizard: S1.6 first boot', () => {
     const actions = show(variant('first-boot-done'));
     expect(screen.getByText('미디어 볼륨')).toBeInTheDocument();
     expect(screen.getByText('ARM 앱 실행')).toBeInTheDocument();
+    // The boot marker is the probe's precondition, not a feature the user gains (DESIGN.md 9).
+    expect(screen.queryByText('부팅 완료 신호')).toBeNull();
     expect(screen.getByText('미디어 볼륨과 기본 표시 프리셋을 적용했습니다.')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: '다음' }));
     expect(actions.wizardContinue).toHaveBeenCalledOnce();

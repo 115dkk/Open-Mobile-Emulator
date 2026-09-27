@@ -17,7 +17,7 @@ import {
 import type { IconName } from '../components';
 import { formatBytes, formatGib, formatPercent, formatTimestamp } from '../format';
 import { keyLabel } from '../input-profile';
-import { clockTime, googleAccountState } from '../presentation';
+import { clockTime, googleAccountState, userFacingCapabilities } from '../presentation';
 import type { StatusTone } from '../presentation';
 import { ImageCards } from './ImageCards';
 
@@ -141,7 +141,7 @@ function guestMeta(guest: GuestSummary): string {
   const parts = [`안드로이드 ${guest.androidVersion}`, formatGib(guest.diskSizeGib)];
   if (guest.lastStartedAt !== null) parts.push(`마지막 실행 ${formatTimestamp(guest.lastStartedAt)}`);
   if (guest.capabilities.probedAt !== null) {
-    const confirmed = guest.capabilities.items.filter((item) => item.state === 'available').length;
+    const confirmed = userFacingCapabilities(guest.capabilities.items).filter((item) => item.state === 'available').length;
     parts.push(`확인된 기능 ${String(confirmed)}개`);
   }
   return parts.join(' · ');

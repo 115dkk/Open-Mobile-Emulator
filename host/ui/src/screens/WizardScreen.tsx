@@ -18,7 +18,7 @@ import {
   byteUnit, formatBytes, formatBytesIn, formatDuration, formatGib, formatPercent, formatRate, formatTimestamp,
 } from '../format';
 import {
-  CAPABILITY_LABEL, FAILURE_NEXT_STEP, bootSteps, hostLines,
+  CAPABILITY_LABEL, FAILURE_NEXT_STEP, bootSteps, hostLines, userFacingCapabilities,
 } from '../presentation';
 import type { BootStep, StepState } from '../presentation';
 import { ImageCards } from './ImageCards';
@@ -359,7 +359,7 @@ function GuestInstallStep({ snapshot, actions }: StepProps) {
 }
 
 function CapabilityList({ guest }: { readonly guest: GuestView }) {
-  const items = guest.capabilities.items;
+  const items = userFacingCapabilities(guest.capabilities.items);
   if (items.length === 0) return null;
   return (
     <ul className="ome-capabilities">
@@ -402,6 +402,7 @@ function FirstBootStep({ snapshot, actions }: StepProps) {
       footer={(running || failed || wizard.canContinue) ? <>
         {running && <Button size="large" onClick={actions.guestStop}>취소</Button>}
         {/* The virtual machine has ended; the supervisor starts again from Failed. */}
+        {failed && <Button size="large" icon="download" onClick={actions.diagnosticsExport}>진단 묶음 내보내기</Button>}
         {failed && <Button size="large" variant="primary" icon="refresh" onClick={actions.guestStart}>다시 시작</Button>}
         {wizard.canContinue && <Button size="large" variant="primary" onClick={actions.wizardContinue}>다음</Button>}
       </> : undefined}
