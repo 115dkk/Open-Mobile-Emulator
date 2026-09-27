@@ -273,10 +273,15 @@ manifests/images/         게스트 이미지 프로필 JSON (3.15절). 산출�
 (ADR-0004). D2가 정한 Bliss 16.9.x(안드로이드 13)는 첫 프로필이고, 다른 세대는 프로필을 더해
 지원한다.
 
-- 인터페이스: `GuestImageProfile::load_all(dir) -> Vec<GuestImageProfile>`(`manifests/images/*.json`),
-  `profile.family() -> GuestFamily`, `FamilyAdapter::for_profile(&profile) -> Box<dyn FamilyAdapter>`,
-  `CapabilityProbe::run(&adb, &adapter) -> CapabilityReport`(첫 부팅 뒤 한 번, 결과는 게스트
-  메타데이터에 저장), `CompatEntry::load(package)`.
+- 인터페이스(2026-09-27 저녁 확정, `src/family.rs`): `GuestImageProfile::load_all(dir)`
+  (`manifests/images/*.json`), `GuestFamily::for_api_level(api)`, `adapter_for(api) -> Box<dyn
+  FamilyAdapter>`. 어댑터는 명령과 파서만 갖는다(`*_command() -> Option<ShellCommand>`, `None`이면 그
+  세대에 방법이 없다는 뜻이고, `parse_*`는 출력에서 값을 꺼낸다). 명령을 실제로 돌리는 것은
+  `ShellRunner`(`shell`, `root`, `push`)이며 런타임이 adb 세션으로 구현하고 테스트는 녹음 출력으로
+  구현한다. `CapabilityProbe::run(&runner, &adapter) -> ProbeOutcome`은 첫 부팅 뒤 한 번 돌아
+  항목별 `Available | Unavailable | Unknown`과 읽은 값(기기 ID, 미디어 볼륨, Google 계정 수, 전경 앱,
+  루트 상태, 화면, 앱 목록)을 돌려주고, 런타임이 `<home>/vm/<id>/guest.json`에 저장한다.
+  `CompatEntry::load(package)`.
 - 이미지 프로필의 필드: `id`, `display_name`(사용자 말로, 예: "안드로이드 13"), `android_version`,
   `api_level`, `distribution`(`bliss`, `android_x86`, `self_built`), `artifact`(`manifests/artifacts.json`의
   산출물 이름), `translator`(`houdini`, `ndk_translation`, `digitalis`, `none`; `translator/`
