@@ -135,6 +135,10 @@ pub trait WindowPlacement: Send {
     fn to_front(&mut self) -> Result<(), HostingIssue>;
     /// Reports live embedded state.
     fn is_attached(&self) -> bool;
+    /// Reports whether the embedded guest owns focus in the host GUI thread queue.
+    fn guest_has_keyboard_focus(&self) -> Result<bool, HostingIssue> {
+        Ok(false)
+    }
     /// Returns the hosted guest client rectangle in physical screen pixels when known.
     fn client_screen_rect(&self) -> Option<Rect> {
         None
@@ -162,6 +166,9 @@ impl WindowPlacement for GuestWindowHost {
     }
     fn is_attached(&self) -> bool {
         GuestWindowHost::is_attached(self)
+    }
+    fn guest_has_keyboard_focus(&self) -> Result<bool, HostingIssue> {
+        GuestWindowHost::guest_has_parent_thread_focus(self)
     }
     fn client_screen_rect(&self) -> Option<Rect> {
         let native = GuestWindowHost::guest_window(self)?
@@ -1875,18 +1882,29 @@ impl AppRuntime {
         }
     }
 
-    /// Routes one native keyboard observation through the gate, interpreter, or raw-key synth.
-    ///
-    /// QMP work occurs on the supervisor thread; this method only submits to its channel.
-    pub fn ingest_host_key(&mut self, event: ome_platform_win::KeyEvent, app_foreground: bool) {
-        let Ok(scan) = u16::try_from(event.scan) else {
+    /// Converts one webview keyboard event and routes it through the host-key pipeline.
+    pub fn ingest_browser_key(&mut self, code: &str, pressed: bool, app_foreground: bool) {
+        let key = HostKey::from_browser_code(code, pressed);
+        #[cfg(debug_assertions)]
+        eprintln!(
+            "[input] browser code={code} pressed={pressed} known={}",
+            key.is_some()
+        );
+        let Some(key) = key else {
+            self.unknown_key_observations = self.unknown_key_observations.saturating_add(1);
+            eprintln!(
+                "unknown browser keyboard code dropped: code={code} count={}",
+                self.unknown_key_observations
+            );
             return;
         };
-        let key = HostKey {
-            scan,
-            extended: event.extended,
-            pressed: event.pressed,
-        };
+        self.ingest_host_key(key, app_foreground);
+    }
+
+    /// Routes one host keyboard observation through the gate, interpreter, or raw-key synth.
+    ///
+    /// QMP work occurs on the supervisor thread; this method only submits to its channel.
+    pub fn ingest_host_key(&mut self, key: HostKey, app_foreground: bool) {
         let browser_code = key.browser_code();
         let active_profile = self
             .active_input
@@ -1909,7 +1927,22 @@ impl AppRuntime {
             active_profile_has_binding,
             suspend_hotkey: &self.suspend_hotkey,
         };
-        match Gate::admit(&key, &facts) {
+        let decision = Gate::admit(&key, &facts);
+        #[cfg(debug_assertions)]
+        eprintln!(
+            "[input] gate scan={:#x} extended={} pressed={} decision={decision:?} guest_running={} stage_visible={} foreground={} overlay_editing={} boot_completed={} suspended={} profile_binding={}",
+            key.scan,
+            key.extended,
+            key.pressed,
+            facts.guest_running,
+            facts.stage_visible,
+            facts.app_foreground,
+            facts.overlay_editing,
+            facts.boot_completed,
+            facts.suspended,
+            facts.active_profile_has_binding
+        );
+        match decision {
             Decision::Ignore => {
                 let outside_stage = self.guest_state != GuestState::Running
                     || !self.stage_visible
@@ -2020,6 +2053,11 @@ impl AppRuntime {
     /// Reports whether a stage currently exists in the webview.
     pub fn stage_visible(&self) -> bool {
         self.stage_visible
+    }
+
+    /// Reports whether the embedded guest owns focus in the host GUI thread queue.
+    pub fn guest_has_keyboard_focus(&self) -> Result<bool, HostingIssue> {
+        self.deps.window_host.guest_has_keyboard_focus()
     }
 
     /// Returns the attached guest client rectangle in physical screen pixels when known.
@@ -4030,12 +4068,10 @@ mod tests {
         runtime.stage_visible = true;
         runtime.boot_completed = true;
         runtime.active_input = None;
-        let event = |scan, pressed| ome_platform_win::KeyEvent {
-            vk: 0,
+        let event = |scan, pressed| HostKey {
             scan,
             pressed,
             extended: false,
-            injected: false,
         };
 
         runtime.ingest_host_key(event(0x1e, true), true);
@@ -4068,12 +4104,10 @@ mod tests {
         runtime.guest_state = GuestState::Running;
         runtime.stage_visible = true;
         runtime.boot_completed = false;
-        let event = |pressed| ome_platform_win::KeyEvent {
-            vk: 0x20,
+        let event = |pressed| HostKey {
             scan: 0x39,
             pressed,
             extended: false,
-            injected: false,
         };
         runtime.ingest_host_key(event(true), true);
         runtime.boot_completed = true;
@@ -4105,12 +4139,10 @@ mod tests {
         });
         for pressed in [true, false] {
             runtime.ingest_host_key(
-                ome_platform_win::KeyEvent {
-                    vk: 0x1b,
+                HostKey {
                     scan: 0x01,
                     pressed,
                     extended: false,
-                    injected: false,
                 },
                 true,
             );
@@ -4126,26 +4158,39 @@ mod tests {
         runtime.stage_visible = true;
         runtime.boot_completed = true;
         runtime.ingest_host_key(
-            ome_platform_win::KeyEvent {
-                vk: 0,
+            HostKey {
                 scan: 0x39,
                 pressed: true,
                 extended: false,
-                injected: true,
             },
             true,
         );
         runtime.ingest_host_key(
-            ome_platform_win::KeyEvent {
-                vk: 0,
+            HostKey {
                 scan: 0x1e,
                 pressed: true,
                 extended: false,
-                injected: true,
             },
             false,
         );
         assert!(supervisor.inputs.lock().expect("input lock").is_empty());
+    }
+
+    #[test]
+    fn browser_key_ingestion_maps_known_codes_and_counts_unknown_codes() {
+        let (_home, mut runtime, supervisor, _runner) =
+            lifecycle_runtime([], RecordingDesktop::default(), RecordingWindow::embedded());
+        runtime.guest_state = GuestState::Running;
+        runtime.stage_visible = true;
+        runtime.boot_completed = true;
+        runtime.active_input = None;
+
+        runtime.ingest_browser_key("KeyA", true, true);
+        runtime.ingest_browser_key("KeyA", false, true);
+        runtime.ingest_browser_key("Unidentified", true, true);
+
+        assert_eq!(supervisor.inputs.lock().expect("input lock").len(), 2);
+        assert_eq!(runtime.unknown_key_observations, 1);
     }
 
     #[test]

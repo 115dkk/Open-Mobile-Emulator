@@ -21,6 +21,11 @@ async function native(command: string, args?: Record<string, unknown>): Promise<
   return invoke<AppSnapshot>(command, args);
 }
 
+async function nativeVoid(command: string, args: Record<string, unknown>): Promise<void> {
+  requireNative();
+  return invoke<void>(command, args);
+}
+
 async function watch<T>(event: string, notify: (payload: T) => void): Promise<() => Promise<void>> {
   requireNative();
   const unlisten = await listen<T>(event, ({ payload }) => { notify(payload); });
@@ -55,6 +60,7 @@ export const controllerBridge: ControllerBridge = {
   appInstallCancel: () => native('app_install_cancel'),
   appUninstall: (pkg) => native('app_uninstall', { package: pkg }),
   appLaunch: (pkg) => native('app_launch', { package: pkg }),
+  inputHostKey: (code, pressed) => nativeVoid('input_host_key', { code, pressed }),
   inputProfileSelect: (id) => native('input_profile_select', { id }),
   inputSuspendToggle: () => native('input_suspend_toggle'),
   inputOverlayToggle: () => native('input_overlay_toggle'),

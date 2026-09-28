@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ScreenActions } from './actions';
 import type { AppIssue, AppSnapshot, ControllerBridge } from './contracts';
 
+let hostKeyWarningLogged = false;
+
 export function presentationIssue(error: unknown): AppIssue {
   if (typeof error === 'object' && error !== null &&
       'code' in error && typeof error.code === 'string' &&
@@ -85,8 +87,8 @@ export function useController(bridge: ControllerBridge): ControllerState {
     }
   }, []);
 
-  // Every bridge command, wrapped so its result lands in this state. The mapped ScreenActions
-  // type makes a missing command a compile error.
+  // Snapshot commands update this state; host keys bypass it. ScreenActions makes a missing
+  // command a compile error.
   const actions = useMemo<ScreenActions>(() => ({
     hostCheckRefresh: () => execute(() => bridge.hostCheckRefresh()),
     wizardContinue: () => execute(() => bridge.wizardContinue()),
@@ -114,6 +116,16 @@ export function useController(bridge: ControllerBridge): ControllerState {
     appInstallCancel: () => execute(() => bridge.appInstallCancel()),
     appUninstall: (pkg) => execute(() => bridge.appUninstall(pkg)),
     appLaunch: (pkg) => execute(() => bridge.appLaunch(pkg)),
+    inputHostKey: async (code, pressed) => {
+      try {
+        await bridge.inputHostKey(code, pressed);
+      } catch {
+        if (!hostKeyWarningLogged) {
+          hostKeyWarningLogged = true;
+          console.warn('Guest keyboard input could not be sent.');
+        }
+      }
+    },
     inputProfileSelect: (id) => execute(() => bridge.inputProfileSelect(id)),
     inputSuspendToggle: () => execute(() => bridge.inputSuspendToggle()),
     inputOverlayToggle: () => execute(() => bridge.inputOverlayToggle()),

@@ -8,7 +8,6 @@ use std::ffi::{OsStr, OsString};
 use std::fs::File;
 use std::io;
 use std::path::{Path, PathBuf};
-use std::sync::mpsc::Sender;
 use std::time::Duration;
 
 use thiserror::Error;
@@ -352,6 +351,20 @@ impl WindowHandle {
         }
     }
 
+    /// Returns the focused window in this window's GUI thread queue.
+    pub fn thread_focus(self) -> Result<Option<Self>, PlatformError> {
+        #[cfg(windows)]
+        {
+            ffi::window::thread_focus(self.0)
+                .map(|window| window.map(Self))
+                .map_err(PlatformError::Io)
+        }
+        #[cfg(not(windows))]
+        {
+            Err(PlatformError::Unsupported)
+        }
+    }
+
     /// Converts this top-level window to `WS_CHILD`, reparents it, and refreshes
     /// its non-client frame. The returned value must be retained for restoration.
     pub fn make_child_of(self, parent: WindowHandle) -> Result<PreviousStyle, PlatformError> {
@@ -406,7 +419,7 @@ impl WindowHandle {
         }
     }
 
-    /// Runs activation on `parent`'s owner thread and focuses this hosted child.
+    /// Activates `parent` on its owner thread without leaving focus on this hosted child.
     pub fn focus_as_child_of(self, parent: WindowHandle) -> Result<(), PlatformError> {
         #[cfg(windows)]
         {
@@ -495,6 +508,34 @@ pub fn foreground_window() -> u64 {
     }
 }
 
+/// Returns the window under one physical screen coordinate, or zero if none exists.
+pub fn window_at(x: i32, y: i32) -> u64 {
+    #[cfg(windows)]
+    {
+        ffi::mouse::window_at(x, y) as usize as u64
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = (x, y);
+        0
+    }
+}
+
+/// Moves the host cursor and injects one primary-button click.
+///
+/// This helper exists for native integration checks that verify embedded guest pointer input.
+pub fn click_primary_at(x: i32, y: i32) -> Result<(), PlatformError> {
+    #[cfg(windows)]
+    {
+        ffi::mouse::click_primary_at(x, y).map_err(PlatformError::Io)
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = (x, y);
+        Err(PlatformError::Unsupported)
+    }
+}
+
 /// Enumerates all top-level windows currently owned by `pid`.
 pub fn find_windows_of_process(pid: u32) -> Result<Vec<WindowHandle>, PlatformError> {
     #[cfg(windows)]
@@ -537,54 +578,6 @@ pub fn set_thread_dpi_hosting_mixed() -> Result<DpiHostingGuard, PlatformError> 
     #[cfg(not(windows))]
     {
         Err(PlatformError::Unsupported)
-    }
-}
-
-/// Low-level keyboard event observed by [`KeyboardHook`].
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct KeyEvent {
-    /// Win32 virtual-key code.
-    pub vk: u32,
-    /// Win32 scan code.
-    pub scan: u32,
-    /// `true` for key-down and `false` for key-up.
-    pub pressed: bool,
-    /// Whether Windows marked the key as extended.
-    pub extended: bool,
-    /// Whether Windows marked the event as injected.
-    pub injected: bool,
-}
-
-/// Owner of a dedicated `WH_KEYBOARD_LL` message-loop thread.
-#[cfg(windows)]
-#[derive(Debug)]
-pub struct KeyboardHook {
-    _inner: ffi::keyboard::KeyboardHook,
-}
-
-/// Placeholder keyboard hook on non-Windows hosts.
-#[cfg(not(windows))]
-#[derive(Debug)]
-pub struct KeyboardHook;
-
-impl KeyboardHook {
-    /// Installs a global observing hook and forwards compact events to `sink`.
-    ///
-    /// The callback never swallows input and retains no key history. Dropping
-    /// the owner asks the dedicated message loop to quit; that thread unhooks
-    /// before it exits, and the owner waits only up to a fixed bound.
-    pub fn install(sink: Sender<KeyEvent>) -> Result<Self, PlatformError> {
-        #[cfg(windows)]
-        {
-            ffi::keyboard::KeyboardHook::install(sink)
-                .map(|inner| Self { _inner: inner })
-                .map_err(PlatformError::Io)
-        }
-        #[cfg(not(windows))]
-        {
-            let _ = sink;
-            Err(PlatformError::Unsupported)
-        }
     }
 }
 
@@ -637,6 +630,19 @@ impl TestHostWindow {
         }
         #[cfg(not(windows))]
         {
+            Err(PlatformError::Unsupported)
+        }
+    }
+
+    /// Places the native test window in or out of the topmost Z-order band.
+    pub fn set_topmost(&self, enabled: bool) -> Result<(), PlatformError> {
+        #[cfg(windows)]
+        {
+            self.0.set_topmost(enabled).map_err(PlatformError::Io)
+        }
+        #[cfg(not(windows))]
+        {
+            let _ = enabled;
             Err(PlatformError::Unsupported)
         }
     }
@@ -808,15 +814,6 @@ mod tests {
                 "{input:?}"
             );
         }
-    }
-
-    #[cfg(windows)]
-    #[test]
-    #[ignore = "requires an interactive Windows desktop"]
-    fn keyboard_hook_installs_and_drops_without_panicking() {
-        let (sink, _events) = std::sync::mpsc::channel();
-        let hook = KeyboardHook::install(sink).expect("install keyboard hook");
-        drop(hook);
     }
 
     #[cfg(windows)]

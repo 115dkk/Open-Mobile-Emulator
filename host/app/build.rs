@@ -31,6 +31,7 @@ fn main() {
         "app_install_cancel",
         "app_uninstall",
         "app_launch",
+        "input_host_key",
         "input_profile_select",
         "input_suspend_toggle",
         "input_overlay_toggle",

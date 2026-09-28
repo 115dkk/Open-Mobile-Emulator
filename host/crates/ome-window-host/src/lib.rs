@@ -316,11 +316,12 @@ impl GuestWindowHost {
         Ok(())
     }
 
-    /// Brings the guest forward and gives it keyboard focus.
+    /// Brings the guest forward while leaving keyboard focus with the host.
     ///
-    /// Hosted children ask the parent window thread to run `SetActiveWindow`
-    /// followed by `SetFocus`; a detached remembered window receives a
-    /// best-effort foreground request. With no live window, the method is a no-op.
+    /// Hosted children ask the parent window thread to raise the child and activate
+    /// the parent. If the child held focus, the same callback returns it to the
+    /// parent. A detached remembered window receives a best-effort foreground
+    /// request. With no live window, the method is a no-op.
     pub fn to_front(&mut self) -> Result<(), HostingIssue> {
         let Some(guest) = self.guest else {
             return Ok(());
@@ -350,6 +351,21 @@ impl GuestWindowHost {
     /// Reports whether the discovered HWND still exists and belongs to the PID.
     pub fn guest_window_alive(&self) -> bool {
         self.guest.is_some_and(GuestWindow::alive)
+    }
+
+    /// Reports whether the embedded guest is the focused window in the parent's GUI queue.
+    pub fn guest_has_parent_thread_focus(&self) -> Result<bool, HostingIssue> {
+        let Some(hosted) = self.hosted.as_ref() else {
+            return Ok(false);
+        };
+        let Some(guest) = self.guest.filter(|guest| guest.alive()) else {
+            return Ok(false);
+        };
+        hosted
+            .parent
+            .thread_focus()
+            .map(|focused| focused == Some(guest.handle))
+            .map_err(|_| HostingIssue::Platform)
     }
 
     /// Returns the discovered guest window token for diagnostics and native tests.

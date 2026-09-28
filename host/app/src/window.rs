@@ -55,6 +55,7 @@ pub(crate) fn install(app: &tauri::App) -> tauri::Result<()> {
     })?;
     let window = tauri::WebviewWindowBuilder::from_config(app, config)?
         .on_navigation(local_navigation)
+        .devtools(cfg!(debug_assertions) && std::env::var_os("OME_DEVTOOLS").is_some())
         .build()?;
     let handle = window.clone();
     window.on_window_event(move |event| match event {

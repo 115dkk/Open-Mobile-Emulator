@@ -33,6 +33,7 @@
     "allow-app-install-cancel",
     "allow-app-uninstall",
     "allow-app-launch",
+    "allow-input-host-key",
     "allow-input-profile-select",
     "allow-input-suspend-toggle",
     "allow-input-overlay-toggle",

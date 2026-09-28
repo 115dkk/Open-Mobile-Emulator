@@ -121,4 +121,13 @@
   memory of the QEMU process, so the product's limits come from the host
   (physical memory minus 4 GiB, logical processor count). More vCPUs do not
   raise a game's thread count (the translator reports two cores to ARM code).
+- Keyboard input reaches the guest only while the product window has keyboard
+  focus and the stage is on screen: the main webview captures its own key
+  events and forwards them (`input_host_key`). There is no global keyboard
+  hook. The first implementation used one, and on the development host it
+  received nothing at all while the product window was the foreground window,
+  although the same keys arrived in the webview (2026-09-29,
+  `docs/evidence/M2/keyboard-capture.md`). While the stage is active, Enter and
+  Space go to the guest as well, so the stage screen's buttons are for the
+  mouse. Clicking the embedded guest does not move keyboard focus to it.
 - Multi-instance, macros, and scripted automation are not part of v1 (D9).

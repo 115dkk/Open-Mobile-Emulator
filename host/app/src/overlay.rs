@@ -162,6 +162,7 @@ fn create_overlay_window<R: tauri::Runtime, M: Manager<R>>(
         .always_on_top(false)
         .accept_first_mouse(true)
         .on_navigation(local_navigation)
+        .devtools(cfg!(debug_assertions) && std::env::var_os("OME_DEVTOOLS").is_some())
         .build()
 }
 

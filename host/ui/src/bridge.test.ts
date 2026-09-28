@@ -90,9 +90,19 @@ describe('native bridge', () => {
     }
   });
 
+  it.each([
+    ['KeyA', true],
+    ['KeyA', false],
+  ] as const)('forwards host key %s pressed=%s without a snapshot', async (code, pressed) => {
+    vi.mocked(invoke).mockResolvedValueOnce(undefined);
+    await expect(controllerBridge.inputHostKey(code, pressed)).resolves.toBeUndefined();
+    expect(invoke).toHaveBeenLastCalledWith('input_host_key', { code, pressed });
+  });
+
   it('rejects native calls and subscriptions outside Tauri', async () => {
     vi.mocked(isTauri).mockReturnValue(false);
     await expect(controllerBridge.snapshot()).rejects.toMatchObject({ code: 'native_app_required', message: '설치한 앱에서 실행하십시오.' });
+    await expect(controllerBridge.inputHostKey('KeyA', true)).rejects.toMatchObject({ code: 'native_app_required' });
     await expect(controllerBridge.watchSnapshot(vi.fn())).rejects.toMatchObject({ code: 'native_app_required' });
     await expect(controllerBridge.watchProgress(vi.fn())).rejects.toMatchObject({ code: 'native_app_required' });
     expect(invoke).not.toHaveBeenCalled();

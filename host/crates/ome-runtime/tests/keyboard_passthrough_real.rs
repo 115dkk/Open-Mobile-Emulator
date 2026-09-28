@@ -15,6 +15,9 @@ use std::time::{Duration, Instant};
 
 use ome_adb::{AdbSession, ProcessRunner};
 use ome_host_check::HostProbe;
+use ome_platform_win::{
+    TestHostWindow, WindowHandle, click_primary_at, set_thread_dpi_hosting_mixed, window_at,
+};
 use ome_runtime::{
     AdbPowerOff, AppRuntime, Command, Desktop, GuestState, OmeHome, RuntimeDeps, StageRect,
     WindowsProbe,
@@ -72,6 +75,52 @@ impl GetEvent {
         while self.lines.try_recv().is_ok() {}
     }
 
+    fn collect_pointer_click(&self, start: Instant, timeout: Duration) -> Vec<String> {
+        let mut found = Vec::new();
+        let mut observed = Vec::new();
+        let deadline = Instant::now() + timeout;
+        while Instant::now() < deadline {
+            let remaining = deadline.saturating_duration_since(Instant::now());
+            match self.lines.recv_timeout(remaining) {
+                Ok((seen, line)) => {
+                    let line = format!(
+                        "+{}ms {line}",
+                        seen.saturating_duration_since(start).as_millis()
+                    );
+                    if line.contains("BTN_TOUCH")
+                        || line.contains("ABS_MT_POSITION_X")
+                        || line.contains("BTN_MOUSE")
+                        || line.contains("BTN_LEFT")
+                        || line.contains("ABS_X")
+                    {
+                        println!("getevent {line}");
+                        found.push(line.clone());
+                    }
+                    if observed.len() < 30 {
+                        observed.push(line);
+                    }
+                    let has_position = found
+                        .iter()
+                        .any(|line| line.contains("ABS_MT_POSITION_X") || line.contains("ABS_X"));
+                    let has_button = found.iter().any(|line| {
+                        (line.contains("BTN_TOUCH")
+                            || line.contains("BTN_MOUSE")
+                            || line.contains("BTN_LEFT"))
+                            && line.contains("DOWN")
+                    });
+                    if has_position && has_button {
+                        break;
+                    }
+                }
+                Err(RecvTimeoutError::Timeout | RecvTimeoutError::Disconnected) => break,
+            }
+        }
+        if found.is_empty() {
+            println!("getevent unfiltered={observed:?}");
+        }
+        found
+    }
+
     fn collect_key_a(&self, start: Instant, timeout: Duration) -> Vec<String> {
         let mut found = Vec::new();
         let deadline = Instant::now() + timeout;
@@ -97,20 +146,6 @@ impl GetEvent {
         }
         found
     }
-
-    fn assert_no_f12(&self, timeout: Duration) {
-        let deadline = Instant::now() + timeout;
-        while Instant::now() < deadline {
-            match self
-                .lines
-                .recv_timeout(deadline.saturating_duration_since(Instant::now()))
-            {
-                Ok((_, line)) => assert!(!line.contains("KEY_F12"), "F12 reached guest: {line}"),
-                Err(RecvTimeoutError::Timeout) => break,
-                Err(RecvTimeoutError::Disconnected) => panic!("getevent stopped before timeout"),
-            }
-        }
-    }
 }
 
 impl Drop for GetEvent {
@@ -122,7 +157,7 @@ impl Drop for GetEvent {
 
 #[test]
 #[ignore = "requires an interactive Windows desktop, WHPX, QEMU, adb, and the adopted default guest"]
-fn qmp_keyboard_reaches_real_guest_when_unmapped_or_suspended() {
+fn browser_keyboard_and_mouse_reach_unfocused_real_guest() {
     let initial = qemu_processes();
     assert!(
         initial.is_empty(),
@@ -135,7 +170,7 @@ fn qmp_keyboard_reaches_real_guest_when_unmapped_or_suspended() {
     let final_processes = wait_for_no_qemu(Duration::from_secs(40));
     assert!(
         final_processes.is_empty(),
-        "QEMU remains after keyboard check: {final_processes:?}"
+        "QEMU remains after browser input check: {final_processes:?}"
     );
     if let Err(payload) = run {
         std::panic::resume_unwind(payload);
@@ -168,6 +203,9 @@ fn run_check() {
         policy,
     );
     let receiver = supervisor.subscribe();
+    let _dpi_guard = set_thread_dpi_hosting_mixed().expect("set mixed DPI hosting");
+    let parent = TestHostWindow::create("OME browser input verification", 1280, 720)
+        .expect("create test parent window");
     let mut runtime = AppRuntime::open(
         home,
         RuntimeDeps {
@@ -184,6 +222,7 @@ fn run_check() {
         },
     )
     .expect("open product runtime");
+    runtime.set_host_window(parent.handle().as_u64());
     assert!(
         runtime
             .snapshot()
@@ -213,57 +252,81 @@ fn run_check() {
 
     let check = catch_unwind(AssertUnwindSafe(|| {
         wait_for_boot(&mut runtime, &receiver);
+        runtime
+            .apply(Command::GuestWindowToFront)
+            .expect("bring hosted guest forward");
+        parent.set_topmost(true).expect("expose test parent");
+        thread::sleep(Duration::from_millis(500));
+        println!(
+            "foreground_after_front={:#x}",
+            ome_platform_win::foreground_window()
+        );
+        let focused_after_front = runtime
+            .guest_has_keyboard_focus()
+            .expect("query guest focus after to_front");
+        println!("focus_after_to_front_is_guest={focused_after_front}");
+        assert!(!focused_after_front, "guest had focus after to_front");
+
+        let guest_rect = runtime
+            .guest_client_screen_rect()
+            .expect("embedded guest client rect");
+        println!(
+            "guest_rect={},{} {}x{}",
+            guest_rect.x, guest_rect.y, guest_rect.width, guest_rect.height
+        );
         let getevent = GetEvent::start(&adb_program);
         thread::sleep(Duration::from_millis(500));
-        let key_a = |pressed| ome_platform_win::KeyEvent {
-            vk: 0x41,
-            scan: 0x1e,
-            pressed,
-            extended: false,
-            injected: false,
-        };
-        let hotkey = |pressed| ome_platform_win::KeyEvent {
-            vk: 0x7b,
-            scan: 0x58,
-            pressed,
-            extended: false,
-            injected: false,
-        };
-
         getevent.drain();
-        let first = Instant::now();
-        runtime.ingest_host_key(key_a(true), true);
-        runtime.ingest_host_key(key_a(false), true);
-        let first_lines = getevent.collect_key_a(first, Duration::from_secs(5));
-        assert_key_pair("unmapped", &first_lines);
-        println!("case=unmapped elapsed_ms={}", first.elapsed().as_millis());
-
-        runtime
-            .apply(Command::InputSuspendToggle)
-            .expect("suspend mappings");
-        assert!(runtime.snapshot().input.suspended);
-        getevent.drain();
-        let second = Instant::now();
-        runtime.ingest_host_key(key_a(true), true);
-        runtime.ingest_host_key(key_a(false), true);
-        let second_lines = getevent.collect_key_a(second, Duration::from_secs(5));
-        assert_key_pair("suspended", &second_lines);
-        println!("case=suspended elapsed_ms={}", second.elapsed().as_millis());
-
-        drop(getevent);
-        let getevent = GetEvent::start(&adb_program);
-        thread::sleep(Duration::from_millis(250));
-        getevent.drain();
-        let before = runtime.snapshot().input.suspended;
-        assert!(before);
-        let third = Instant::now();
-        runtime.ingest_host_key(hotkey(true), true);
-        runtime.ingest_host_key(hotkey(false), true);
-        assert_ne!(runtime.snapshot().input.suspended, before);
-        getevent.assert_no_f12(Duration::from_secs(1));
+        let touch_started = Instant::now();
+        let click_x = guest_rect.x + i32::try_from(guest_rect.width / 2).expect("width fits i32");
+        let click_y = guest_rect.y + i32::try_from(guest_rect.height / 2).expect("height fits i32");
+        println!("click_screen={click_x},{click_y}");
+        let hit = WindowHandle::from_u64(window_at(click_x, click_y)).expect("hit window");
+        println!("window_at_click_before={:#x}", hit.as_u64());
+        let hit_class = hit.class_name().expect("hit class");
+        println!("window_at_click_class={hit_class}");
+        assert_eq!(hit_class, "SDL_app");
+        click_primary_at(click_x, click_y).expect("click embedded guest");
+        let focused_after_click = runtime
+            .guest_has_keyboard_focus()
+            .expect("query guest focus after click");
+        println!("focus_immediately_after_click_is_guest={focused_after_click}");
+        let touch_lines = getevent.collect_pointer_click(touch_started, Duration::from_secs(5));
+        assert!(
+            !touch_lines.is_empty(),
+            "embedded guest click produced no touch event"
+        );
         println!(
-            "case=hotkey-toggle elapsed_ms={}",
-            third.elapsed().as_millis()
+            "case=mouse-touch elapsed_ms={}",
+            touch_started.elapsed().as_millis()
+        );
+
+        thread::sleep(Duration::from_millis(100));
+        if focused_after_click {
+            runtime
+                .apply(Command::GuestWindowToFront)
+                .expect("return focus to parent after click");
+            thread::sleep(Duration::from_millis(100));
+        }
+        let focused_after_correction = runtime
+            .guest_has_keyboard_focus()
+            .expect("query corrected guest focus");
+        println!("focus_after_click_is_guest={focused_after_click}");
+        println!("focus_after_correction_is_guest={focused_after_correction}");
+        assert!(
+            !focused_after_correction,
+            "guest retained focus after correction"
+        );
+
+        getevent.drain();
+        let key_started = Instant::now();
+        runtime.ingest_browser_key("KeyA", true, true);
+        runtime.ingest_browser_key("KeyA", false, true);
+        let key_lines = getevent.collect_key_a(key_started, Duration::from_secs(5));
+        assert_key_pair("browser", &key_lines);
+        println!(
+            "case=browser-key elapsed_ms={}",
+            key_started.elapsed().as_millis()
         );
     }));
 

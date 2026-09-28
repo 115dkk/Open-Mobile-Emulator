@@ -455,6 +455,16 @@ pub struct HostKey {
 }
 
 impl HostKey {
+    /// Builds a host-key observation from one W3C `KeyboardEvent.code` value.
+    pub fn from_browser_code(code: &str, pressed: bool) -> Option<Self> {
+        let (scan, extended) = keycodes::browser_code_to_scan(code)?;
+        Some(Self {
+            scan,
+            extended,
+            pressed,
+        })
+    }
+
     /// Returns this key's W3C `KeyboardEvent.code`, when the generated table knows it.
     pub fn browser_code(self) -> Option<&'static str> {
         keycodes::scan_to_browser_code(self.scan, self.extended)
@@ -543,15 +553,35 @@ impl KeySynth {
         let identity = (key.scan, key.extended);
         let Some(qcode) = keycodes::scan_to_qcode(key.scan, key.extended) else {
             self.unknown = self.unknown.saturating_add(1);
+            #[cfg(debug_assertions)]
+            eprintln!(
+                "[input] synth drop=unknown scan={:#x} extended={} pressed={}",
+                key.scan, key.extended, key.pressed
+            );
             return None;
         };
         if key.pressed {
             if !self.pressed.insert(identity) {
+                #[cfg(debug_assertions)]
+                eprintln!(
+                    "[input] synth drop=repeat scan={:#x} extended={} qcode={} pressed=true",
+                    key.scan, key.extended, qcode
+                );
                 return None;
             }
         } else if !self.pressed.remove(&identity) {
+            #[cfg(debug_assertions)]
+            eprintln!(
+                "[input] synth drop=stale-release scan={:#x} extended={} qcode={} pressed=false",
+                key.scan, key.extended, qcode
+            );
             return None;
         }
+        #[cfg(debug_assertions)]
+        eprintln!(
+            "[input] synth scan={:#x} extended={} qcode={} pressed={}",
+            key.scan, key.extended, qcode, key.pressed
+        );
         Some(serde_json::json!({
             "type": "key",
             "data": {
@@ -1025,6 +1055,19 @@ mod tests {
             ),
             Decision::ToggleSuspend
         );
+    }
+
+    #[test]
+    fn host_key_builds_from_browser_code() {
+        assert_eq!(
+            HostKey::from_browser_code("ArrowDown", true),
+            Some(HostKey {
+                scan: 0x50,
+                extended: true,
+                pressed: true,
+            })
+        );
+        assert_eq!(HostKey::from_browser_code("Unidentified", false), None);
     }
 
     #[test]

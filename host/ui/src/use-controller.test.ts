@@ -62,6 +62,42 @@ describe('presentation controller', () => {
     expect(copyToClipboard).toHaveBeenCalledWith('adbAddress');
   });
 
+  it('forwards host keys without replacing the snapshot or issue', async () => {
+    const issue = { code: 'existing_issue', message: '확인하십시오.', nextAction: null };
+    const snapshot = { ...sampleSnapshot, issue };
+    const inputHostKey = vi.fn<ControllerBridge['inputHostKey']>(() => Promise.resolve());
+    const bridge = { ...fixtureBridge(snapshot), inputHostKey };
+    const { result } = renderHook(() => useController(bridge));
+    await waitFor(() => { expect(result.current.snapshot).toBe(snapshot); });
+    await act(() => result.current.actions.inputHostKey('KeyA', true));
+    await act(() => result.current.actions.inputHostKey('KeyA', false));
+    expect(inputHostKey.mock.calls).toEqual([['KeyA', true], ['KeyA', false]]);
+    expect(result.current.snapshot).toBe(snapshot);
+    expect(result.current.issue).toBe(issue);
+  });
+
+  it('swallows host-key failures and warns only once across controller mounts', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const inputHostKey = vi.fn<ControllerBridge['inputHostKey']>(() => Promise.reject(new Error('unavailable')));
+    const bridge = { ...fixtureBridge(), inputHostKey };
+    const first = renderHook(() => useController(bridge));
+    await waitFor(() => { expect(first.result.current.snapshot).toBe(sampleSnapshot); });
+    await act(async () => {
+      await expect(first.result.current.actions.inputHostKey('KeyA', true)).resolves.toBeUndefined();
+      await expect(first.result.current.actions.inputHostKey('KeyA', false)).resolves.toBeUndefined();
+    });
+    expect(first.result.current.snapshot).toBe(sampleSnapshot);
+    expect(first.result.current.issue).toBeNull();
+    expect(warn).toHaveBeenCalledOnce();
+    first.unmount();
+    const second = renderHook(() => useController(bridge));
+    await waitFor(() => { expect(second.result.current.snapshot).toBe(sampleSnapshot); });
+    await act(() => second.result.current.actions.inputHostKey('KeyB', true));
+    expect(second.result.current.snapshot).toBe(sampleSnapshot);
+    expect(second.result.current.issue).toBeNull();
+    expect(warn).toHaveBeenCalledOnce();
+  });
+
   it('keeps the same actions object across renders', async () => {
     const bridge = fixtureBridge();
     const { result, rerender } = renderHook(() => useController(bridge));

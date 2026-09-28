@@ -23,6 +23,7 @@ import {
 import type { BootStep, StepState } from '../presentation';
 import { ImageCards } from './ImageCards';
 import { useEscapeKey } from './use-escape-key';
+import { useGuestKeyboard } from './use-guest-keyboard';
 import { ESC_LINE, WhpxConsentBody } from './WhpxConsentBody';
 
 const STEPS: readonly { readonly id: Exclude<WizardStep, 'done'>; readonly name: string }[] = [
@@ -290,6 +291,7 @@ function SeparateWindowNotice({ guest, actions }: { readonly guest: GuestView; r
 }
 
 function GuestInstallStep({ snapshot, actions }: StepProps) {
+  useGuestKeyboard(snapshot.guest.state === 'running' && !snapshot.input.editing, actions.inputHostKey);
   const { wizard, images, guest } = snapshot;
   const [size, setSize] = useState<DiskSize | null>(() => toDiskSize(wizard.diskSizeGib));
   const imageId = wizard.imageId;
@@ -379,6 +381,7 @@ function CapabilityList({ guest }: { readonly guest: GuestView }) {
 }
 
 function FirstBootStep({ snapshot, actions }: StepProps) {
+  useGuestKeyboard(snapshot.guest.state === 'running' && !snapshot.input.editing, actions.inputHostKey);
   const { guest, wizard } = snapshot;
   // The failed symbol and the noun phrase name the failure; the detail says what to do (DESIGN.md 9).
   const detail = (step: BootStep): ReactNode => {

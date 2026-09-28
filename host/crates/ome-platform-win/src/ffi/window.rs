@@ -157,6 +157,19 @@ pub(crate) fn has_keyboard_focus(raw: isize) -> io::Result<bool> {
     Ok(info.hwndFocus == window)
 }
 
+pub(crate) fn thread_focus(raw: isize) -> io::Result<Option<isize>> {
+    let window = hwnd(raw)?;
+    let thread_id = window_thread_id(window)?;
+    let mut info = GUITHREADINFO {
+        cbSize: std::mem::size_of::<GUITHREADINFO>() as u32,
+        ..Default::default()
+    };
+    // SAFETY: info is aligned, writable, declares its exact structure size, and
+    // remains live for the query. The call only reads GUI queue state.
+    unsafe { GetGUIThreadInfo(thread_id, &raw mut info) }.map_err(super::io_error)?;
+    Ok((!info.hwndFocus.0.is_null()).then_some(info.hwndFocus.0 as isize))
+}
+
 pub(crate) fn make_child_of_at(
     raw: isize,
     parent_raw: isize,
@@ -268,10 +281,8 @@ pub(crate) fn focus_child(raw: isize, parent_raw: isize) -> io::Result<()> {
         return Err(io::Error::last_os_error());
     }
     match FOCUS_RESULT.load(Ordering::Acquire) {
-        1 if focused_window(child)? => Ok(()),
-        1 => Err(io::Error::other(
-            "hosted child did not retain keyboard focus",
-        )),
+        1 if !focused_window(parent, child)? => Ok(()),
+        1 => Err(io::Error::other("hosted child retained keyboard focus")),
         error if error > 1 => Err(io::Error::from_raw_os_error(error)),
         _ => Err(io::Error::other(
             "parent thread did not run the focus callback",
@@ -498,19 +509,61 @@ unsafe extern "system" fn parent_focus_proc(code: i32, wparam: WPARAM, data: LPA
                 // SAFETY: this hook still observes only and must preserve the chain.
                 return unsafe { CallNextHookEx(None, code, wparam, data) };
             }
-            clear_last_error();
+            // SAFETY: the callback runs on the live top-level parent's thread.
+            // Raising it without activation makes its embedded child reachable
+            // even when foreground policy rejects SetForegroundWindow below.
+            let result = unsafe {
+                SetWindowPos(
+                    message.hwnd,
+                    Some(HWND_TOP),
+                    0,
+                    0,
+                    0,
+                    0,
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE,
+                )
+            }
+            .map_err(super::io_error);
+            if let Err(error) = result {
+                FOCUS_RESULT.store(error.raw_os_error().unwrap_or(1).max(2), Ordering::Release);
+                // SAFETY: this hook must preserve the chain for every message.
+                return unsafe { CallNextHookEx(None, code, wparam, data) };
+            }
+            // SAFETY: the validated hosted child remains live for this callback.
+            // Raising it among siblings does not activate it.
+            let result = unsafe {
+                SetWindowPos(
+                    child,
+                    Some(HWND_TOP),
+                    0,
+                    0,
+                    0,
+                    0,
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE,
+                )
+            }
+            .map_err(super::io_error);
+            if let Err(error) = result {
+                FOCUS_RESULT.store(error.raw_os_error().unwrap_or(1).max(2), Ordering::Release);
+                // SAFETY: this hook must preserve the chain for every message.
+                return unsafe { CallNextHookEx(None, code, wparam, data) };
+            }
             // SAFETY: this callback runs on the parent window's own thread and
             // the message target is that live parent HWND.
             let _ = unsafe { set_active_window_raw(message.hwnd) };
             // SAFETY: the same live parent is the foreground target. Windows may
-            // reject this by policy; SetFocus and the final focus query decide
-            // whether the hosted child accepted keyboard focus.
+            // reject this by foreground policy; focus correction remains local.
             let _ = unsafe { SetForegroundWindow(message.hwnd) };
-            clear_last_error();
-            // SAFETY: the hosted child and its parent share this thread's input
-            // state through the parent/child relationship. No ownership moves.
-            let previous = unsafe { set_focus_raw(child) };
-            let result = check_nullable_success(previous);
+            let result = match focused_window(message.hwnd, child) {
+                Ok(true) => {
+                    clear_last_error();
+                    // SAFETY: the callback runs on the parent owner thread and
+                    // message.hwnd remains its live top-level window.
+                    check_nullable_success(unsafe { set_focus_raw(message.hwnd) })
+                }
+                Ok(false) => Ok(()),
+                Err(error) => Err(error),
+            };
             FOCUS_RESULT.store(
                 match result {
                     Ok(()) => 1,
@@ -525,15 +578,40 @@ unsafe extern "system" fn parent_focus_proc(code: i32, wparam: WPARAM, data: LPA
     unsafe { CallNextHookEx(None, code, wparam, data) }
 }
 
-fn focused_window(child: HWND) -> io::Result<bool> {
-    let thread_id = window_thread_id(child)?;
+fn focused_window(thread_window: HWND, candidate: HWND) -> io::Result<bool> {
+    let thread_id = window_thread_id(thread_window)?;
     let mut info = GUITHREADINFO {
         cbSize: std::mem::size_of::<GUITHREADINFO>() as u32,
         ..Default::default()
     };
     // SAFETY: info is aligned and writable for one synchronous queue-state read.
     unsafe { GetGUIThreadInfo(thread_id, &raw mut info) }.map_err(super::io_error)?;
-    Ok(info.hwndFocus == child)
+    Ok(info.hwndFocus == candidate)
+}
+
+pub(crate) unsafe fn send_test_window_message(
+    window: HWND,
+    message: u32,
+    wparam: WPARAM,
+) -> io::Result<()> {
+    // SAFETY: callers pass one live test window and a private pointer-free
+    // message. The bounded call retains no caller-owned memory.
+    let result = unsafe {
+        SendMessageTimeoutW(
+            window,
+            message,
+            wparam,
+            LPARAM(0),
+            SMTO_ABORTIFHUNG,
+            1000,
+            None,
+        )
+    };
+    if result.0 == 0 {
+        Err(io::Error::last_os_error())
+    } else {
+        Ok(())
+    }
 }
 
 fn check_nullable_success(result: HWND) -> io::Result<()> {

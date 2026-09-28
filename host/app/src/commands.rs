@@ -15,6 +15,7 @@ use crate::{admission::CommandAdmission, events};
 pub(crate) struct ShellState {
     pub(crate) runtime: Arc<Mutex<Result<AppRuntime, AppIssue>>>,
     pub(crate) exit_after_stop: Arc<Mutex<Option<Instant>>>,
+    main_window: Arc<Mutex<Option<u64>>>,
     admission: CommandAdmission,
 }
 
@@ -23,7 +24,14 @@ impl ShellState {
         Self {
             runtime: Arc::new(Mutex::new(runtime)),
             exit_after_stop: Arc::new(Mutex::new(None)),
+            main_window: Arc::new(Mutex::new(None)),
             admission: CommandAdmission::default(),
+        }
+    }
+
+    pub(crate) fn set_main_window(&self, raw: u64) {
+        if let Ok(mut window) = self.main_window.lock() {
+            *window = Some(raw);
         }
     }
 }
@@ -78,6 +86,44 @@ pub(crate) async fn apply(
     .await
     .map_err(|error| {
         eprintln!("native command task failed: {error}");
+        worker_issue()
+    })?
+}
+
+#[tauri::command]
+pub(crate) async fn input_host_key(
+    app: AppHandle,
+    state: State<'_, ShellState>,
+    code: String,
+    pressed: bool,
+) -> Result<(), AppIssue> {
+    let runtime = Arc::clone(&state.runtime);
+    let main_window = Arc::clone(&state.main_window);
+    tauri::async_runtime::spawn_blocking(move || {
+        let main_window = main_window
+            .lock()
+            .map_err(|_| worker_issue())?
+            .ok_or_else(worker_issue)?;
+        let app_foreground = ome_platform_win::foreground_window() == main_window;
+        let mut guard = runtime.lock().map_err(|_| worker_issue())?;
+        let runtime = match &mut *guard {
+            Ok(runtime) => runtime,
+            Err(issue) => return Err(issue.clone()),
+        };
+        let suspended_before = runtime.snapshot().input.suspended;
+        runtime.ingest_browser_key(&code, pressed, app_foreground);
+        let snapshot = runtime.snapshot();
+        if snapshot.input.suspended != suspended_before {
+            let guest_rect = runtime.guest_client_screen_rect();
+            let stage_visible = runtime.stage_visible();
+            drop(guard);
+            events::snapshot(&app, &snapshot, guest_rect, stage_visible);
+        }
+        Ok(())
+    })
+    .await
+    .map_err(|error| {
+        eprintln!("host-key task failed: {error}");
         worker_issue()
     })?
 }

@@ -197,7 +197,18 @@ impl QmpChannel {
 
     /// Sends a complete QMP `input-send-event` event array.
     pub fn input_send_event(&mut self, events: &[Value]) -> Result<(), QmpError> {
-        self.execute_empty("input-send-event", Some(json!({ "events": events })))
+        #[cfg(debug_assertions)]
+        eprintln!(
+            "[input] qmp command=input-send-event events={}",
+            events.len()
+        );
+        let result = self.execute_empty("input-send-event", Some(json!({ "events": events })));
+        #[cfg(debug_assertions)]
+        match &result {
+            Ok(()) => eprintln!("[input] qmp reply=input-send-event ok"),
+            Err(error) => eprintln!("[input] qmp reply=input-send-event error={error}"),
+        }
+        result
     }
 
     /// Sends QEMU key names through the `send-key` command.

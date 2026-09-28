@@ -513,9 +513,26 @@ where
             epoch: self.shared.input_epoch.load(Ordering::Acquire),
             events,
         };
-        self.input_tx
+        #[cfg(debug_assertions)]
+        eprintln!(
+            "[input] supervisor enqueue state={state:?} epoch={} events={}",
+            message.epoch,
+            message.events.len()
+        );
+        let result = self
+            .input_tx
             .send(message)
-            .map_err(|_| InputError::ChannelUnavailable)
+            .map_err(|_| InputError::ChannelUnavailable);
+        #[cfg(debug_assertions)]
+        eprintln!(
+            "[input] supervisor enqueue-result={}",
+            if result.is_ok() {
+                "ok"
+            } else {
+                "channel-unavailable"
+            }
+        );
+        result
     }
 
     /// Returns the number of individual input events discarded by the supervisor.
@@ -765,13 +782,30 @@ fn receive_and_send_input(
     let Ok(message) = message else {
         return;
     };
+    #[cfg(debug_assertions)]
+    eprintln!(
+        "[input] supervisor dequeue state={state:?} worker_epoch={epoch} message_epoch={} events={}",
+        message.epoch,
+        message.events.len()
+    );
     if state != GuestState::Running || message.epoch != epoch {
         record_input_drop(shared, message.events.len(), "stale-process-epoch");
         return;
     }
-    if let Err(error) = qmp.input_send_event(&message.events) {
-        record_input_drop(shared, message.events.len(), "qmp-send-failed");
-        eprintln!("guest input QMP send failed: {error}");
+    match qmp.input_send_event(&message.events) {
+        Ok(()) => {
+            #[cfg(debug_assertions)]
+            eprintln!(
+                "[input] supervisor qmp-result=ok epoch={epoch} events={}",
+                message.events.len()
+            );
+        }
+        Err(error) => {
+            record_input_drop(shared, message.events.len(), "qmp-send-failed");
+            #[cfg(debug_assertions)]
+            eprintln!("[input] supervisor qmp-result=error epoch={epoch} error={error}");
+            eprintln!("guest input QMP send failed: {error}");
+        }
     }
 }
 
@@ -797,6 +831,8 @@ fn record_input_drop(shared: &Shared, count: usize, reason: &str) {
         .dropped_input
         .fetch_add(count, Ordering::AcqRel)
         .saturating_add(count);
+    #[cfg(debug_assertions)]
+    eprintln!("[input] supervisor drop count={count} total={total} reason={reason}");
     eprintln!("guest input dropped: count={count} total={total} reason={reason}");
 }
 

@@ -32,7 +32,7 @@
                                 │ 소유된 타입만 오간다(원시 핸들 없음)
 ┌───────────────────────────────▼──────────────────────────────────────────┐
 │ ome-platform-win  Win32 호출의 유일한 자리. unsafe는 src/ffi/* 안에만.    │
-│   OwnedHandle, JobObject, ProcessLaunch, 창 찾기/재부모화/DPI, 키 훅,     │
+│   OwnedHandle, JobObject, ProcessLaunch, 창 찾기/재부모화/DPI, 전경 창,   │
 │   승격 실행(runas), WHPX 가용성(WHvGetCapability)                         │
 └───────────────────────────────┬──────────────────────────────────────────┘
                                 │ 별도 프로세스 (링크 금지, D5·R4)
@@ -113,7 +113,7 @@ manifests/images/         게스트 이미지 프로필 JSON (3.15절). 산출�
   `ProcessLaunch`(표준 출력과 오류를 파일 핸들로 받아 자식 생성, 상속 핸들 목록 명시),
   `Child`(대기, 종료 코드, 종료 요청), `find_windows_of_process(pid)`, `WindowHandle`(클래스
   이름, 스타일 전환, 재부모화, 위치와 크기, DPI), `set_thread_dpi_hosting_mixed()`,
-  `KeyboardHook`(전용 메시지 루프 스레드, 채널로 키 이벤트), `launch_elevated(exe, verb)`
+  `foreground_window()`, `launch_elevated(exe, verb)`
   (ShellExecuteExW runas, 종료 코드 반환), `whpx_available()`(WHvGetCapability),
   `optional_feature_state(name)`.
 - 뒤에 숨는 것: 모든 `unsafe`. 크레이트 루트는 `#![deny(unsafe_code)]`이고 `src/ffi/*.rs`
@@ -124,10 +124,10 @@ manifests/images/         게스트 이미지 프로필 JSON (3.15절). 산출�
   창 담기는 SDL 창을 만드는 작은 픽스처 프로세스가 필요하므로 M2 첫 스파이크에서 만든다.
 - 확인한 사실(2026-09-26, ASTRA 조사): tauri 2.11.6은 `windows` 0.61에 의존하고 이 크레이트는
   0.62.2를 쓰므로 `WebviewWindow::hwnd()`가 주는 HWND는 정수 값으로 받아 이 크레이트의
-  `WindowHandle`로 다시 감싼다(두 버전의 뉴타입은 다른 타입이다). `WH_KEYBOARD_LL`은 전역
-  훅이라 전용 스레드의 메시지 루프에서 돌리고, 콜백은 1000 ms 안에 끝내며(윈도우 10 1709+
-  상한), 게스트 창이 전경일 때만 이벤트를 소비하고 어떤 키 입력도 기록하지 않는다.
-  `AttachThreadInput`은 `Win32_System_Threading` 기능에 있고 포커스 문제의 손쉬운 해법이
+  `WindowHandle`로 다시 감싼다(두 버전의 뉴타입은 다른 타입이다). 첫 구현의 `WH_KEYBOARD_LL`
+  전역 훅은 2026-09-29에 뺐다. 이 호스트에서는 앱 창이 전경이면 저수준 훅이 아무 키도 받지
+  못했고 같은 순간 웹뷰는 받았다(`docs/evidence/M2/keyboard-capture.md`). 키는 웹뷰가 받아
+  `input_host_key`로 넘긴다. `AttachThreadInput`은 `Win32_System_Threading` 기능에 있고 포커스 문제의 손쉬운 해법이
   아니다. SDL2의 기본 창 클래스 이름은 `SDL_app`이지만 호출자가 바꿀 수 있으므로 게스트 창은
   QEMU 프로세스 ID로 찾고 클래스 이름은 보조 확인에만 쓴다. 프로세스 간 `SetParent`는 자식
   프로세스의 DPI 인식을 재설정할 수 있으므로 스파이크가 이를 측정한다.
@@ -314,15 +314,15 @@ Pie(API 28)는 ADR-0008로 2026-09-28에 뺐다), 그 뒤로 새 안드로이드
 편의 기능이 더해질 수 있다(ADR-0005).
 
 파이프라인은 다섯 단계이고 단계마다 모듈이다. 현재 포착, 문, 키 합성은 구현되어 있다.
-`KeyboardHook`이 읽은 스캔 코드와 확장 플래그는 keycodemapdb에서 생성한 표로 브라우저 코드와
-QEMU qcode가 된다. 런타임은 전경 창, 무대 표시, 부팅 완료, 편집, 일시 중지, 선택 프로필을 문에
+메인 웹뷰가 받은 `KeyboardEvent.code`는 keycodemapdb에서 생성한 표로 스캔 코드와 확장 플래그가
+되고, 같은 표로 QEMU qcode가 된다. 런타임은 전경 창, 무대 표시, 부팅 완료, 편집, 일시 중지, 선택 프로필을 문에
 넘기며, 통과 입력은 감독자 채널을 거쳐 QMP `input-send-event`로 간다. 감독자 스레드만 QMP를
 소유하므로 입력 호출은 런타임을 막지 않는다. 실행 중이 아닐 때 온 입력은 버리고 개수를 로그에
 남긴다.
 
 | 단계 | 모듈 | 인터페이스 | 뒤에 숨는 것 |
 |---|---|---|---|
-| 포착 | `KeyboardHook`(구현), `MouseSource`(예정) | `KeyboardHook::install(Sender<KeyEvent>)` | 플랫폼 크레이트의 `WH_KEYBOARD_LL` 훅과 전용 스레드가 키 스캔 코드, 확장 여부, 눌림·뗌을 보낸다. 콜백은 입력을 막거나 기록하지 않는다. 마우스 훅은 아직 없다 |
+| 포착 | 웹뷰 `useGuestKeyboard`(구현), `MouseSource`(예정) | `input_host_key { code, pressed }` → `AppRuntime::ingest_browser_key` | 무대가 보이는 화면의 웹뷰가 `keydown`과 `keyup`을 받아 기본 동작을 막고 넘긴다. 대화상자와 입력란 안의 키는 넘기지 않고, 창이 포커스를 잃으면 눌린 키를 모두 뗀다. 전역 훅은 없다(2026-09-29, `docs/evidence/M2/keyboard-capture.md`). 마우스 캡처는 아직 없다 |
 | 문 | `Gate`(키 구현) | `admit(&HostKey, &GateFacts) -> Decision` | 게스트 실행, 무대 표시, 앱 전경 여부를 먼저 검사한다. F12 등 일시 중지 단축키의 누름만 상태를 바꾸고 게스트에는 보내지 않는다. 부팅 뒤 선택 프로필에 바인딩된 키만 해석하며, 그 밖의 키는 그대로 통과한다 |
 | 해석 | `Interpreter` | `on(HostInput, now) -> Vec<TouchOp>`(순수. 눌린 키 집합, 슬롯 배정, 조이스틱 상태를 내부에 갖는다) | 바인딩 종류(탭과 홀드, 스와이프, 가상 조이스틱, 마우스 버튼, 휠, 통과), 논리 좌표 → 게스트 픽셀 → QMP 축(0~32767) 변환, 기준점 정책으로 화면 비율 차이 흡수, 슬롯 최대 10개 |
 | 합성 | `TouchSynth`(예정), `KeySynth`(구현) | `KeySynth::apply(HostKey) -> Option<Value>` | `KeySynth`는 QMP `input-send-event` 키 JSON을 만들고 자동 반복 누름을 없앤다. 알 수 없는 스캔 코드는 세어 버린다. `TouchSynth`의 멀티터치 이벤트와 장치가 없을 때의 단일 포인터 폴백은 아직 없다 |
@@ -413,7 +413,9 @@ M2 구현의 첫 작업은 창 담기다. `ome-platform-win`의 창 함수와 `o
 스파이크가 실패하면 2안(별도 창 + 오버레이)으로 가고, 그 결정은 ADR로 남긴다.
 결과(2026-09-27 밤, 제품 런타임으로 실제 게스트를 두 번 띄움): 1안이 통과했다. `running` 뒤
 122 ms에 붙었고, 게스트 창 DPI는 붙이기 전후 96으로 같았으며, 부모를 960×600으로 바꾸자 게스트
-클라이언트 영역도 960×600이 됐고, `GuestWindowToFront` 뒤 게스트 HWND가 키보드 포커스를 가졌다.
+클라이언트 영역도 960×600이 됐고, `GuestWindowToFront` 뒤 게스트 HWND가 키보드 포커스를 가졌다(이
+포커스 이전은 2026-09-29에 뺐다. 키는 웹뷰가 받으므로 담긴 게스트 창은 포커스를 갖지 않는다.
+`docs/evidence/M2/keyboard-capture.md`).
 정지는 adb 전원 끄기(`reboot -p`)를 거쳐 2.1~2.3 s 만에 `stopped`와 `UserStop`으로 끝났다. 부팅은
 33~37 s, 능력 조사는 열 항목 중 일곱이 `available`이었다(이 게스트에는 멀티터치 장치와 앱 루트가
 없고, 전경 앱은 아직 읽지 않는다). 측정 중 결함 둘을 고쳤다. 호스트 조사가 돌려준 `\\?\` 경로에
@@ -534,7 +536,10 @@ LogicalPoint { x: f64, y: f64 }   // 0.0..=1.0
   `input_profile_delete { id }`, `input_profile_save { profile: InputProfile }`(새 프로필과 이름
   바꾸기, 대상 앱 지정, 복제가 모두 이 하나로 간다. 동봉 프리셋은 저장을 거부한다),
   `input_binding_upsert { profile_id, binding }`, `input_binding_remove { profile_id, id }`,
-  `input_editor_toggle`, `input_auto_apply_set { enabled }`, `input_suspend_hotkey_set { code }`.
+  `input_editor_toggle`, `input_auto_apply_set { enabled }`, `input_suspend_hotkey_set { code }`,
+  `input_host_key { code, pressed }`(7판, 2026-09-29. 메인 웹뷰가 받은 `KeyboardEvent.code`를 키마다
+  넘긴다. 스냅숏 대신 아무것도 돌려주지 않고 승인 임대를 거치지 않으므로 긴 명령 중에도 키가
+  바쁨으로 거절되지 않는다. 문의 판단은 Rust가 한다).
 - 검증은 Rust가 한다. 좌표 범위, 트리거 중복(같은 프로필 안에서 같은 키 두 번), 조이스틱의 네
   키가 서로 다름, `duration_ms > 0`, `radius`와 `distance`가 0 초과. 실패는 `AppIssue`다.
 - `Binding.action`은 `#[non_exhaustive]`이고 시퀀스(매크로)의 자리는 문서 주석으로만 표시한다(D9).

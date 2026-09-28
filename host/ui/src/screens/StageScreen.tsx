@@ -14,6 +14,7 @@ import { Button, Icon, IconButton, IssueNotice, Slider, StageFrame, StatusDot, S
 import { formatTimestamp } from '../format';
 import { keyLabel } from '../input-profile';
 import { FAILURE_NEXT_STEP, GUEST_STATE_LABEL, GUEST_STATE_TONE, bootSteps } from '../presentation';
+import { useGuestKeyboard } from './use-guest-keyboard';
 
 function sizeText(size: Size): string {
   return `${String(size.width)}x${String(size.height)}`;
@@ -269,6 +270,7 @@ function StageStatus({ snapshot }: { readonly snapshot: AppSnapshot }) {
 }
 
 export function StageScreen({ snapshot, actions }: ScreenProps) {
+  useGuestKeyboard(snapshot.guest.state === 'running' && !snapshot.input.editing, actions.inputHostKey);
   return (
     <div className="ome-stage">
       <h1 className="ome-visually-hidden">무대</h1>

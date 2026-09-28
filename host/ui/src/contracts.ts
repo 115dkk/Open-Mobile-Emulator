@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Open Mobile Emulator contributors
 // Read-only presentation contracts mirroring ome-runtime contract.rs field for field.
 
-export const CONTRACT_VERSION = 6;
+export const CONTRACT_VERSION = 7;
 
 export type AppPhase = 'wizard' | 'main';
 export type BlockerKind = 'virtualizationOff' | 'qemuMissing' | 'hypervisorPlatformOff';
@@ -282,6 +282,7 @@ export interface ControllerBridge {
   appInstallCancel(): Promise<AppSnapshot>;
   appUninstall(pkg: string): Promise<AppSnapshot>;
   appLaunch(pkg: string): Promise<AppSnapshot>;
+  inputHostKey(code: string, pressed: boolean): Promise<void>;
   inputProfileSelect(id: string | null): Promise<AppSnapshot>;
   inputSuspendToggle(): Promise<AppSnapshot>;
   inputOverlayToggle(): Promise<AppSnapshot>;

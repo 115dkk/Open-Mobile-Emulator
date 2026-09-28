@@ -14,17 +14,18 @@ use std::time::Duration;
 use windows::Win32::Foundation::{HINSTANCE, HWND, LPARAM, LRESULT, RECT, WPARAM};
 use windows::Win32::System::LibraryLoader::GetModuleHandleW;
 use windows::Win32::UI::WindowsAndMessaging::{
-    AdjustWindowRectEx, CS_HREDRAW, CS_VREDRAW, CreateWindowExW, DefWindowProcW, DestroyWindow,
-    DispatchMessageW, GetClientRect, GetMessageW, MSG, PostMessageW, PostQuitMessage,
-    RegisterClassW, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOZORDER, SetWindowPos, ShowWindow,
-    TranslateMessage, UnregisterClassW, WINDOW_EX_STYLE, WM_CLOSE, WM_DESTROY, WNDCLASSW,
-    WS_OVERLAPPEDWINDOW, WS_VISIBLE,
+    AdjustWindowRectEx, BringWindowToTop, CS_HREDRAW, CS_VREDRAW, CreateWindowExW, DefWindowProcW,
+    DestroyWindow, DispatchMessageW, GetClientRect, GetMessageW, HWND_NOTOPMOST, HWND_TOPMOST, MSG,
+    PostMessageW, PostQuitMessage, RegisterClassW, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE,
+    SWP_NOZORDER, SetWindowPos, ShowWindow, TranslateMessage, UnregisterClassW, WINDOW_EX_STYLE,
+    WM_APP, WM_CLOSE, WM_DESTROY, WNDCLASSW, WS_OVERLAPPEDWINDOW, WS_VISIBLE,
 };
 use windows::core::PCWSTR;
 
 const START_TIMEOUT: Duration = Duration::from_secs(5);
 const STOP_TIMEOUT: Duration = Duration::from_secs(2);
 static NEXT_CLASS: AtomicU64 = AtomicU64::new(1);
+const WM_OME_TOPMOST: u32 = WM_APP + 0x151;
 
 #[derive(Debug)]
 pub(crate) struct TestHostWindow {
@@ -88,6 +89,19 @@ impl TestHostWindow {
         // client is aligned and writable for exactly one RECT.
         unsafe { GetClientRect(window, &raw mut client) }.map_err(super::io_error)?;
         Ok((client.right - client.left, client.bottom - client.top))
+    }
+
+    pub(crate) fn set_topmost(&self, enabled: bool) -> io::Result<()> {
+        let window = hwnd(self.window)?;
+        // SAFETY: this pointer-free private message runs synchronously on the
+        // owner thread and returns after the Z-order change has completed.
+        unsafe {
+            super::window::send_test_window_message(
+                window,
+                WM_OME_TOPMOST,
+                WPARAM(usize::from(enabled)),
+            )
+        }
     }
 
     pub(crate) fn resize(&self, width: i32, height: i32) -> io::Result<()> {
@@ -262,6 +276,29 @@ unsafe extern "system" fn window_proc(
     lparam: LPARAM,
 ) -> LRESULT {
     match message {
+        WM_OME_TOPMOST => {
+            // SAFETY: this procedure owns the live test window and raises it in
+            // its Z-order before changing the topmost band.
+            let _ = unsafe { BringWindowToTop(window) };
+            // SAFETY: this procedure owns the live test window and uses one
+            // documented insertion pseudo-handle without changing its bounds.
+            let result = unsafe {
+                SetWindowPos(
+                    window,
+                    Some(if wparam.0 != 0 {
+                        HWND_TOPMOST
+                    } else {
+                        HWND_NOTOPMOST
+                    }),
+                    0,
+                    0,
+                    0,
+                    0,
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE,
+                )
+            };
+            LRESULT(isize::from(result.is_ok()))
+        }
         WM_CLOSE => {
             // SAFETY: Windows supplied this live HWND to its registered owner
             // procedure, which runs on the creating thread.

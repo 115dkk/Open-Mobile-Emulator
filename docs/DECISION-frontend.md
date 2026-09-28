@@ -103,6 +103,8 @@ M2 기능 명세 여덟 항목 중 스택에 따라 달라지는 것은 세 가�
   첫 스파이크에서 재어야 한다.
 - `WH_KEYBOARD_LL` 훅은 설치한 스레드의 메시지 루프에서 호출되고 `LowLevelHooksTimeout`
   (최대 1000 ms) 안에 돌아와야 하며, 넘기면 조용히 제거된다. 전용 스레드에 둔다.
+  (후기 2026-09-29: 이 훅은 이 호스트에서 앱 창이 전경일 때 아무 키도 받지 못해 뺐고, 키는 웹뷰가
+  받는다. `docs/evidence/M2/keyboard-capture.md`.)
 - 비패키지 앱의 토스트: 고전 경로는 AppUserModelID와 시작 메뉴 바로가기가 필수다
   ("Without a valid shortcut ... you cannot raise a toast notification from a desktop
   app"). Windows App SDK의 `AppNotificationManager.Register`는 바로가기 없이 등록하지만

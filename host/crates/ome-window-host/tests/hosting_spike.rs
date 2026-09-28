@@ -157,13 +157,12 @@ fn hosts_qemu_sdl_window_and_reports_measurements() {
                 == parent.handle().dpi().expect("rendered parent DPI")
     );
 
-    host.to_front().expect("focus hosted child");
+    host.to_front().expect("raise hosted child");
     thread::sleep(Duration::from_secs(1));
-    println!("focus_method=parent-thread SetActiveWindow(parent)+SetFocus(child)");
-    println!(
-        "guest_has_keyboard_focus={}",
-        guest.has_keyboard_focus().expect("query guest focus")
-    );
+    println!("focus_method=parent-thread raise child + activate/focus parent");
+    let guest_focused = guest.has_keyboard_focus().expect("query guest focus");
+    println!("guest_has_keyboard_focus={guest_focused}");
+    assert!(!guest_focused, "hosted child must not own keyboard focus");
 
     host.detach().expect("detach guest");
     println!(

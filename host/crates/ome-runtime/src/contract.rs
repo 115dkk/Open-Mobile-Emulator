@@ -14,7 +14,7 @@ pub use ome_input::{
 };
 
 /// Current Rust-to-webview contract version.
-pub const CONTRACT_VERSION: u32 = 6;
+pub const CONTRACT_VERSION: u32 = 7;
 
 /// The one read-only projection the webview renders.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -1171,6 +1171,7 @@ pub const TAURI_COMMANDS: &[&str] = &[
     "app_install_cancel",
     "app_uninstall",
     "app_launch",
+    "input_host_key",
     "input_profile_select",
     "input_suspend_toggle",
     "input_overlay_toggle",
