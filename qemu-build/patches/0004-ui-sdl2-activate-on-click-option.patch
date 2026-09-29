@@ -1,0 +1,136 @@
+From c80be67fa6fa49d1a75893275e347daf69306e87 Mon Sep 17 00:00:00 2001
+From: Open Mobile Emulator contributors <noreply@example.invalid>
+Date: Tue, 29 Sep 2026 00:04:00 +0000
+Subject: [PATCH] ui/sdl2: allow click delivery without window activation
+
+Let callers prevent mouse clicks from activating SDL windows on Windows
+while preserving delivery of the click itself.  Subclass each opted-in
+SDL HWND, answer WM_MOUSEACTIVATE with MA_NOACTIVATE, and restore SDL's
+original window procedure before destroying the window.  Other platforms
+accept and ignore the option.
+
+The ui/sdl2.c header carries the MIT license text.  qapi/ui.json has no
+file-local license header and is GPL-2.0-or-later under QEMU's LICENSE.
+This change is written for Open Mobile Emulator.
+
+Signed-off-by: Open Mobile Emulator contributors <noreply@example.invalid>
+---
+ qapi/ui.json | 13 +++++++++++--
+ ui/sdl2.c    | 64 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 75 insertions(+), 2 deletions(-)
+
+diff --git a/qapi/ui.json b/qapi/ui.json
+index 27b5d36..43fbeee 100644
+--- a/qapi/ui.json
++++ b/qapi/ui.json
+@@ -1481,11 +1481,19 @@
+ #     requests adaptive vsync, 0 immediate updates, and 1 vsync.
+ #     Defaults to 0.
+ #
++# @activate-on-click: Open Mobile Emulator: whether a mouse click on
++#     the SDL window may activate it.  Defaults to true.  When false,
++#     on Windows the window answers WM_MOUSEACTIVATE with
++#     MA_NOACTIVATE so a host that shows it as an owned popup keeps
++#     the keyboard focus; the click itself is still delivered.
++#     No effect on other platforms.
++#
+ # Since: 7.1
+ ##
+ { 'struct'  : 'DisplaySDL',
+-  'data'    : { '*grab-mod'     : 'HotKeyMod',
+-                '*swap-interval': 'int' } }
++  'data'    : { '*grab-mod'        : 'HotKeyMod',
++                '*swap-interval'   : 'int',
++                '*activate-on-click': 'bool' } }
+ 
+ ##
+ # @DisplayType:
+diff --git a/ui/sdl2.c b/ui/sdl2.c
+index 9e424eb..5d3b78c 100644
+--- a/ui/sdl2.c
++++ b/ui/sdl2.c
+@@ -71,6 +71,22 @@ static Notifier mouse_mode_notifier;
+ 
+ static void sdl_update_caption(struct sdl2_console *scon);
+ 
++#ifdef _WIN32
++static LRESULT CALLBACK sdl2_win32_noactivate_proc(HWND hwnd, UINT message,
++                                                    WPARAM wparam,
++                                                    LPARAM lparam)
++{
++    WNDPROC original;
++
++    if (message == WM_MOUSEACTIVATE) {
++        return MA_NOACTIVATE;
++    }
++
++    original = (WNDPROC)GetPropW(hwnd, L"OMESDLOriginalProc");
++    return CallWindowProcW(original, hwnd, message, wparam, lparam);
++}
++#endif
++
+ static struct sdl2_console *get_scon_from_window(uint32_t window_id)
+ {
+     int i;
+@@ -110,6 +126,37 @@ void sdl2_window_create(struct sdl2_console *scon)
+                                          surface_width(scon->surface),
+                                          surface_height(scon->surface),
+                                          flags);
++#ifdef _WIN32
++    if (scon->real_window &&
++        scon->opts->u.sdl.has_activate_on_click &&
++        !scon->opts->u.sdl.activate_on_click) {
++        SDL_SysWMinfo info = { 0 };
++        WNDPROC original;
++
++        SDL_VERSION(&info.version);
++        if (!SDL_GetWindowWMInfo(scon->real_window, &info)) {
++            warn_report("sdl: failed to obtain the Windows window handle: %s",
++                        SDL_GetError());
++        } else {
++            SetLastError(0);
++            original = (WNDPROC)SetWindowLongPtrW(
++                info.info.win.window, GWLP_WNDPROC,
++                (LONG_PTR)sdl2_win32_noactivate_proc);
++            if (!original) {
++                warn_report("sdl: failed to disable click activation: %lu",
++                            GetLastError());
++            } else if (!SetPropW(info.info.win.window,
++                                 L"OMESDLOriginalProc", (HANDLE)original)) {
++                DWORD error = GetLastError();
++
++                SetWindowLongPtrW(info.info.win.window, GWLP_WNDPROC,
++                                  (LONG_PTR)original);
++                warn_report("sdl: failed to save the original window "
++                            "procedure: %lu", error);
++            }
++        }
++    }
++#endif
+     if (scon->opengl) {
+         const char *driver = "opengl";
+         int swap_interval = scon->opts->u.sdl.has_swap_interval ?
+@@ -159,6 +206,23 @@ void sdl2_window_destroy(struct sdl2_console *scon)
+         SDL_DestroyRenderer(scon->real_renderer);
+         scon->real_renderer = NULL;
+     }
++#ifdef _WIN32
++    {
++        SDL_SysWMinfo info = { 0 };
++
++        SDL_VERSION(&info.version);
++        if (SDL_GetWindowWMInfo(scon->real_window, &info)) {
++            WNDPROC original = (WNDPROC)GetPropW(info.info.win.window,
++                                                 L"OMESDLOriginalProc");
++
++            if (original) {
++                SetWindowLongPtrW(info.info.win.window, GWLP_WNDPROC,
++                                  (LONG_PTR)original);
++                RemovePropW(info.info.win.window, L"OMESDLOriginalProc");
++            }
++        }
++    }
++#endif
+     SDL_DestroyWindow(scon->real_window);
+     scon->real_window = NULL;
+ }

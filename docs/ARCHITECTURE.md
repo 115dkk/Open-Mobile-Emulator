@@ -424,7 +424,9 @@ QEMU의 크기 변경 뒤 SDL의 크기 기록이 어긋난다. 그래서 게스
 WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW)으로 무대의 물리 화면 좌표에 놓는다. QEMU가 스스로 바꾼 크기는 런타임의 1초
 틱이 되돌리고, 메인 창의 이동·크기 변경 때도 다시 배치하며, z-순서는 오버레이, 게스트 팝업, 메인 창 순이다.
 QEMU는 `SDL_WINDOWS_DPI_AWARENESS=permonitorv2` 환경 변수로 띄운다(`QemuInvocation::environment`,
-`ProcessLaunch::environment`).
+`ProcessLaunch::environment`). 같은 날 저녁 실제 클릭 검증에서 소유된 팝업이 `WS_EX_NOACTIVATE`에도 클릭에
+활성화되고 SDL이 그 클릭을 버리는 것을 확인해(같은 증거 문서의 "클릭 활성화의 원인"), QEMU 패치 0004의
+`-display sdl,activate-on-click=off`를 담긴 게스트에만 붙인다(`GuestConfig.hosted_window`, ADR-0009 6번).
 정지는 adb 전원 끄기(`reboot -p`)를 거쳐 2.1~2.3 s 만에 `stopped`와 `UserStop`으로 끝났다. 부팅은
 33~37 s, 능력 조사는 열 항목 중 일곱이 `available`이었다(이 게스트에는 멀티터치 장치와 앱 루트가
 없고, 전경 앱은 아직 읽지 않는다). 측정 중 결함 둘을 고쳤다. 호스트 조사가 돌려준 `\\?\` 경로에

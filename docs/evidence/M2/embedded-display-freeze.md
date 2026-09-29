@@ -138,3 +138,30 @@ sdl,activate-on-click=off`를 더한다. 윈도우에서 이 옵션이 꺼져 �
 게스트에만 이 옵션을 붙이고(`GuestConfig.hosted_window`), 런처와 인자 대조 픽스처는 그대로다. 소유 관계를 버리는 대안
 (소유자 없는 팝업)은 활성화는 막지만 메인 창을 클릭할 때마다 팝업이 한 프레임 뒤로 갔다 오고 최소화도 따로 처리해야 해서
 택하지 않았다. `SDL_MOUSE_FOCUS_CLICKTHROUGH=1`로 버튼만 살리는 대안은 활성화 자체를 두므로 웹뷰가 키보드를 잃는다.
+
+## 패치 0004 뒤의 재검증 (워커 Q1, 2026-09-29)
+
+제품 밖의 WinForms 소유자 위에 QEMU SDL 창을 소유 팝업으로 놓고 `SendInput`으로 클릭했다. 패치 옵션을 켠 두 번의 실행과 옵션을 뺀 대조 실행에서 다음 값을 얻었다.
+
+```text
+patched-1 hover=owner afterDown=owner afterUp=owner sent=1/1
+patched-2 hover=owner afterDown=owner afterUp=owner sent=1/1
+control hover=owner afterDown=GUEST afterUp=GUEST sent=1/1
+```
+
+실제 `default` 게스트로 `keyboard_passthrough_real` 검사를 돌려 다음 값을 얻었다. 클릭 직후에도 전경은 게스트가 아니었고, 버튼 누름과 KeyA 누름·뗌이 게스트에 도착했다.
+
+```text
+foreground_immediately_after_click_is_guest=false
+pointer_position_events=2 pointer_down_events=1
+native_pointer_button_down_verified=true
+foreground_after_click_correction_is_guest=false
+focus_after_click_correction_is_guest=false
+key_a_down_events=1 key_a_up_events=1
+```
+
+새 QEMU 실행 파일은 `C:\Open Mobile Emulator\qemu-build\out\bin\qemu-system-x86_64.exe`다. 수정 시각은 `2026-09-29 23:12:13.840527000 +0900`, SHA-256은 `38ded7952400ad9163993beb4206ea809204fca5eabe212558a18f4b3ce98f96`이다. 외부 QEMU 체크아웃의 기준 커밋은 다음과 같다.
+
+```text
+c3d48b7 Update version for 11.1.1 release
+```

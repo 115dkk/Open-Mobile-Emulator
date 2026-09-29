@@ -142,4 +142,9 @@
   the main window; the product starts QEMU with
   `SDL_WINDOWS_DPI_AWARENESS=permonitorv2` so the popup renders in physical
   pixels. Only the SDL frontend is covered; the GTK frontend is not used.
+  An owned popup is activated by a mouse click even with `WS_EX_NOACTIVATE`,
+  which would make SDL drop the click and take the keyboard away from the
+  webview, so the product starts QEMU with `-display sdl,activate-on-click=off`
+  (OME QEMU patch 0004). A QEMU without that patch, such as a distribution
+  build, is not usable for hosting: clicks would activate the guest window.
 - Multi-instance, macros, and scripted automation are not part of v1 (D9).

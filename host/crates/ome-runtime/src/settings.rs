@@ -89,6 +89,7 @@ impl Settings {
                 }
                 .to_owned(),
             ),
+            hosted_window: Some(true),
             ..RawGuestConfig::default()
         })
         .map_err(|_| SettingsError::InvalidInput)?;

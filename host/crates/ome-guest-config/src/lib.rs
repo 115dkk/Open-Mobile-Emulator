@@ -48,6 +48,11 @@ pub struct RawGuestConfig {
     pub audio: Option<String>,
     /// Display backend (`sdl` or `gtk`).
     pub display: Option<String>,
+    /// Whether the product shows the SDL window as an owned popup over its stage; adds
+    /// `activate-on-click=off` to the SDL display so clicks do not activate the window
+    /// (ADR-0009, QEMU patch 0004).
+    #[serde(default)]
+    pub hosted_window: Option<bool>,
     /// Additional QEMU argument elements appended after all managed options.
     #[serde(default)]
     pub extra_args: Option<Vec<String>>,
@@ -160,6 +165,7 @@ pub struct GuestConfig {
     display_size: Option<(u32, u32)>,
     audio: Audio,
     display: Display,
+    hosted_window: bool,
     extra_args: Vec<OsString>,
 }
 
@@ -216,6 +222,7 @@ impl GuestConfig {
             .transpose()?;
         let audio = parse_audio(raw.audio.as_deref().unwrap_or("dsound"))?;
         let display = parse_display(raw.display.as_deref().unwrap_or("sdl"))?;
+        let hosted_window = raw.hosted_window.unwrap_or(false);
 
         Ok(Self {
             name,
@@ -231,6 +238,7 @@ impl GuestConfig {
             display_size,
             audio,
             display,
+            hosted_window,
             extra_args: raw
                 .extra_args
                 .unwrap_or_default()
@@ -386,9 +394,9 @@ impl QemuInvocation {
 
     /// Returns variables added to or overriding the QEMU process environment.
     ///
-    /// SDL must create its child window as per-monitor-v2 DPI aware to match the
-    /// Tauri parent; otherwise re-parenting can freeze presentation at non-96 DPI.
-    /// See `docs/evidence/M2/embedded-display-freeze.md`.
+    /// SDL must create its window as per-monitor-v2 DPI aware so the owned popup over
+    /// the stage renders in physical pixels; a DPI-unaware window froze its presentation
+    /// on a 200 % monitor. See `docs/evidence/M2/embedded-display-freeze.md`.
     pub fn environment(&self) -> &[(String, String)] {
         &self.environment
     }
@@ -482,14 +490,18 @@ impl QemuInvocation {
                 },
             },
         );
-        let display = match (config.display(), config.gpu()) {
-            (Display::Sdl, Gpu::Virgl) => "sdl,show-cursor=on,gl=on",
-            (Display::Gtk, Gpu::Virgl) => "gtk,show-cursor=on,gl=on",
-            (Display::Sdl, _) => "sdl,show-cursor=on",
-            (Display::Gtk, _) => "gtk,show-cursor=on",
+        let mut display = match (config.display(), config.gpu()) {
+            (Display::Sdl, Gpu::Virgl) => "sdl,show-cursor=on,gl=on".to_owned(),
+            (Display::Gtk, Gpu::Virgl) => "gtk,show-cursor=on,gl=on".to_owned(),
+            (Display::Sdl, _) => "sdl,show-cursor=on".to_owned(),
+            (Display::Gtk, _) => "gtk,show-cursor=on".to_owned(),
         };
+        if config.display() == Display::Sdl && config.hosted_window {
+            display.push_str(",activate-on-click=off");
+        }
+        let sdl_display = display.starts_with("sdl,");
         pair(&mut args, "-display", display);
-        let environment = if display.starts_with("sdl,") {
+        let environment = if sdl_display {
             vec![(
                 "SDL_WINDOWS_DPI_AWARENESS".to_owned(),
                 "permonitorv2".to_owned(),
@@ -914,6 +926,62 @@ mod tests {
     }
 
     #[test]
+    fn hosted_sdl_boot_and_install_invocations_disable_click_activation() {
+        let config = GuestConfig::validate(RawGuestConfig {
+            hosted_window: Some(true),
+            ..RawGuestConfig::default()
+        })
+        .expect("valid hosted SDL config");
+        let install = QemuInstall {
+            system_exe: "qemu-system-x86_64.exe".into(),
+        };
+        let boot_paths = GuestPaths {
+            disk: r"C:\vm\disk.qcow2".into(),
+            firmware_code: r"C:\fw\code.fd".into(),
+            firmware_vars: r"C:\vm\efivars.fd".into(),
+            iso: None,
+        };
+        let boot = QemuInvocation::for_boot(&config, &boot_paths, &install);
+        assert!(boot.args().contains(&OsString::from(
+            "sdl,show-cursor=on,gl=on,activate-on-click=off"
+        )));
+
+        let install_paths = GuestPaths {
+            iso: Some(r"C:\images\guest.iso".into()),
+            ..boot_paths
+        };
+        let installer = QemuInvocation::for_install(&config, &install_paths, &install)
+            .expect("install paths include ISO");
+        assert!(installer.args().contains(&OsString::from(
+            "sdl,show-cursor=on,gl=on,activate-on-click=off"
+        )));
+    }
+
+    #[test]
+    fn unhosted_sdl_invocation_keeps_click_activation_default() {
+        let config = GuestConfig::validate(RawGuestConfig::default()).expect("valid config");
+        let paths = GuestPaths {
+            disk: "disk.qcow2".into(),
+            firmware_code: "code.fd".into(),
+            firmware_vars: "vars.fd".into(),
+            iso: None,
+        };
+        let install = QemuInstall {
+            system_exe: "qemu-system-x86_64.exe".into(),
+        };
+        let invocation = QemuInvocation::for_boot(&config, &paths, &install);
+        let args = invocation
+            .args()
+            .iter()
+            .map(|value| value.to_string_lossy())
+            .collect::<Vec<_>>();
+        assert!(
+            args.iter()
+                .all(|value| !value.contains("activate-on-click"))
+        );
+    }
+
+    #[test]
     fn gtk_invocation_has_no_sdl_environment() {
         let config = GuestConfig::validate(RawGuestConfig {
             display: Some("gtk".to_owned()),
@@ -975,6 +1043,7 @@ mod tests {
                 display_size: None,
                 audio: Some(input.audio),
                 display: Some(input.display),
+                hosted_window: None,
                 extra_args: Some(input.extra_args.unwrap_or_default()),
             })
             .expect("fixture config validates");

@@ -1626,7 +1626,7 @@ impl AppRuntime {
             };
             extra_args.extend([
                 "-display".to_owned(),
-                format!("sdl,show-cursor=on,gl=on,swap-interval={interval}"),
+                format!("sdl,show-cursor=on,gl=on,activate-on-click=off,swap-interval={interval}"),
             ]);
         }
         GuestConfig::validate(RawGuestConfig {
@@ -1643,6 +1643,7 @@ impl AppRuntime {
             display_size: display_size.map(|size| (i64::from(size.width), i64::from(size.height))),
             audio: Some("dsound".to_owned()),
             display: Some("sdl".to_owned()),
+            hosted_window: Some(true),
             extra_args: Some(extra_args),
         })
         .map_err(|_| issues::invalid_guest_configuration())

@@ -32,6 +32,12 @@ M2 첫 스파이크는 QEMU의 SDL 창을 메인 창의 자식으로 재부모�
 4. QEMU는 `SDL_WINDOWS_DPI_AWARENESS=permonitorv2` 환경 변수로 띄워 팝업이 물리 픽셀로 선명하게 그려지게 한다.
 5. 스냅숏의 `hosting`은 이 방식도 `embedded`로 보고한다. 사용자에게는 무대 안의 게스트다. `separateWindow`는 이것마저
    실패했을 때의 대비책으로 남는다.
+6. 소유된 팝업은 `WS_EX_NOACTIVATE`가 있어도 클릭에 활성화되고, 소유자는 그 `WM_MOUSEACTIVATE`를 받지 않는다(같은 날
+   저녁 측정, `docs/evidence/M2/embedded-display-freeze.md`의 "클릭 활성화의 원인"). 활성화된 SDL 창은 그 클릭을 활성화용으로
+   버리므로 버튼이 게스트에 닿지 않고 웹뷰는 키보드를 잃는다. 그래서 QEMU 패치 0004로 `-display sdl,activate-on-click=off`를
+   더해 SDL 창의 프로시저가 `WM_MOUSEACTIVATE`에 `MA_NOACTIVATE`를 답하게 하고, 제품은 담긴 게스트에만 이 옵션을 붙인다
+   (`GuestConfig.hosted_window`). 소유 관계를 버리는 대안은 메인 창을 클릭할 때마다 팝업이 한 프레임 뒤로 갔다 오고 최소화를
+   따로 처리해야 해서 택하지 않았다.
 
 ## 결과
 

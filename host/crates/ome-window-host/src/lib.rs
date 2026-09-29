@@ -346,11 +346,7 @@ impl GuestWindowHost {
         let Some((guest, owner)) = self.live_hosted_guest() else {
             return Ok(());
         };
-        self.place_guest(guest, screen_rect(owner, rect)?)?;
-        guest
-            .handle
-            .focus_as_child_of(owner)
-            .map_err(|_| HostingIssue::Platform)
+        self.place_guest(guest, screen_rect(owner, rect)?)
     }
 
     /// Reports whether a live guest popup is top-level and owned by the registered host.
