@@ -92,6 +92,35 @@ function recognize(name) {
   if (r.status !== 0) throw new StopRun(`Installer OCR unavailable: ${r.stderr?.toString('utf8')}`);
   const value = JSON.parse(r.stdout.toString('utf8')); log('installer-ocr', { name, ...value }); return value.text;
 }
+const installerText = text => text.toLowerCase().replace(/\s+/g, ' ').trim();
+function installerScreen(text) {
+  // OCR sometimes splits a word ("fi lesystem", "Bl issOS") across text boxes.
+  const words = text.replace(/\s/g, '');
+  const has = phrase => words.includes(phrase.replace(/\s/g, ''));
+  if (has('congratulations') && has('installed successfully')) return 'done';
+  if (has('choose partition')) {
+    if (has('efi system partition')) return 'esp-chooser';
+    if (has('install blissos') || has('select a partition to install')) return 'system-chooser';
+    return 'unknown'; // A chooser must never fall through to a LEFT/RIGHT action.
+  }
+  if (has('choose filesystem')) {
+    if (has('ext4')) return 'filesystem-for-system';
+    if (has('fat32') || has('do not re-format')) return 'filesystem-for-esp';
+    return 'unknown';
+  }
+  if (has('warning') || (/\b\d+\s*(?:s\b|sec|second)/.test(text) && /\b[0o]k\b/.test(text) && !/\byes\b|\bno\b|reboot/i.test(text))) return 'warning-countdown';
+  if (has('error') || has('this is not an efi system partition')) return 'error';
+  if (has('ota')) return 'ota-confirm';
+  if (has('grub2') || has('choose efi boot')) return 'efi-boot-chooser';
+  if (has('confirm') && has('format')) return 'confirm-format';
+  if (has('question') && has('label')) return 'label-question';
+  if (has('installing') || has('expect to write')) return 'installing';
+  return 'unknown';
+}
+async function installerPid(pid) {
+  const current = (await snapshot()).guest.pid;
+  if (current !== pid) throw new StopRun(`Guest restarted during installer: expected QEMU ${pid}, snapshot guest.pid ${current}; refusing to follow a new process`);
+}
 async function installGuest(pid) {
   // Move the webview focus off the create/completion button with a real noninteractive UI click.
   // While the stage is active the product forwards every key to the guest and prevents the default.
@@ -125,28 +154,66 @@ async function installGuest(pid) {
   await keys(pid, '15-write-yes', null, 'yes');
   await keys(pid, '16-written', 'ENTER');
   await keys(pid, '17-quit-cfdisk', null, 'q', 7000);
-  await keys(pid, '18-select-esp', 'HOME,ENTER');
-  await keys(pid, '19-esp-fat32', 'DOWN,ENTER');
-  await keys(pid, '20-esp-label', 'ENTER');
-  await keys(pid, '21-esp-confirm', 'LEFT,ENTER', null, 4000);
-  await keys(pid, '22-select-system', 'HOME,DOWN,ENTER');
-  await keys(pid, '23-system-ext4', 'DOWN,ENTER');
-  await keys(pid, '24-system-label', 'ENTER');
-  await keys(pid, '25-system-confirm', 'LEFT,ENTER', null, 5000);
-  await keys(pid, '26-no-ota', 'RIGHT,ENTER');
-  await keys(pid, '27-efi-grub2', 'HOME,ENTER', null, 3000);
-  // M0 saw no system-rw prompt. Assert the final Run/Reboot dialog, not elapsed time.
-  let check = 0;
-  await until(async () => {
-    const label = `installer-28-completion-${String(check++).padStart(2, '0')}`;
-    await capture(label, pid);
-    const r = spawnSync('powershell.exe', ['-NoProfile', '-File', path.join(directory, 'ocr.ps1'), '-Image', path.join(output, 'shots', label + '.png')], { encoding: 'buffer', timeout: 30000 });
-    if (r.status !== 0) throw new StopRun(`Installer OCR unavailable: ${r.stderr?.toString('utf8')}`);
-    const recognized = JSON.parse(r.stdout.toString('utf8'));
-    log('installer-final-prompt-ocr', recognized);
-    const text = recognized.text.toLowerCase().replace(/[^a-z]/g, '');
-    return text.includes('congratulations') && text.includes('installedsuccessfully');
-  }, 10 * 60000, 'installer Congratulations / installed successfully / Run dialog', 15000);
+  const partitionText = installerText(recognize('installer-16-written')).replace(/\s/g, '');
+  if (!partitionText.includes('efisystem') || !partitionText.includes('linuxfilesystem')) {
+    throw new StopRun('cfdisk did not show both EFI System and Linux filesystem before Quit; refusing installer input');
+  }
+  const deadline = Date.now() + 12 * 60000;
+  let espFormatted = false, formatTarget, previousScreen, acted = false, unknownSince;
+  let check = 0, actionNumber = 30, errors = 0, done = false;
+  const lastTexts = [];
+  while (Date.now() < deadline) {
+    await delay(1500);
+    await installerPid(pid);
+    const label = `installer-screen-${String(check++).padStart(3, '0')}`;
+    try { await capture(label, pid); }
+    catch (error) { await installerPid(pid); throw error; }
+    const text = installerText(recognize(label));
+    const screen = installerScreen(text);
+    lastTexts.push(text); if (lastTexts.length > 4) lastTexts.shift();
+    if (screen !== previousScreen) acted = false;
+    previousScreen = screen;
+    if (screen === 'unknown') unknownSince ??= Date.now(); else unknownSince = undefined;
+    let action = 'wait', sequence;
+    if (screen === 'done') action = 'finish';
+    else if (!acted) {
+      switch (screen) {
+        case 'esp-chooser':
+          formatTarget = 'esp'; sequence = 'HOME,ENTER';
+          action = espFormatted ? 'select-vda1-without-reformat' : 'select-vda1'; break;
+        case 'filesystem-for-esp':
+          formatTarget = 'esp'; sequence = espFormatted ? 'HOME,ENTER' : 'DOWN,ENTER';
+          action = espFormatted ? 'do-not-reformat' : 'select-fat32'; break;
+        case 'system-chooser':
+          formatTarget = 'system'; sequence = 'HOME,DOWN,ENTER'; action = 'select-vda2'; break;
+        case 'filesystem-for-system':
+          formatTarget = 'system'; sequence = 'DOWN,ENTER'; action = 'select-ext4'; break;
+        case 'label-question': sequence = 'ENTER'; action = 'keep-label'; break;
+        case 'confirm-format':
+          if (!formatTarget) throw new StopRun(`Format confirmation without a classified target: ${text}`);
+          sequence = 'LEFT,ENTER'; action = `confirm-format-${formatTarget}`; break;
+        case 'ota-confirm': sequence = 'RIGHT,ENTER'; action = 'decline-ota'; break;
+        case 'efi-boot-chooser': sequence = 'HOME,ENTER'; action = 'select-grub2'; break;
+        case 'error':
+          errors++; action = errors > 3 ? 'stop-after-errors' : 'acknowledge-error';
+          if (errors <= 3) sequence = 'ENTER'; break;
+      }
+    }
+    log('installer-screen', { screen, action });
+    if (errors > 3) throw new StopRun(`More than three installer errors: ${JSON.stringify(lastTexts)}`);
+    if (unknownSince !== undefined && Date.now() - unknownSince >= 20000) throw new StopRun(`Unknown installer screen for 20 seconds: ${text}`);
+    if (screen === 'done') { done = true; break; }
+    if (sequence) {
+      if (Date.now() >= deadline) break;
+      await installerPid(pid);
+      try { await keys(pid, `${actionNumber++}-${screen}-${action}`, sequence); }
+      catch (error) { await installerPid(pid); throw error; }
+      await installerPid(pid);
+      if (screen === 'confirm-format' && formatTarget === 'esp') espFormatted = true;
+      acted = true;
+    }
+  }
+  if (!done) throw new StopRun(`Installer exceeded 12 minutes: ${JSON.stringify(lastTexts)}`);
   await capture('installer-28-copy-finished', pid);
 }
 async function stopGuest() {
@@ -176,7 +243,12 @@ try {
     const realHome = path.resolve(process.env.LOCALAPPDATA, 'OpenMobileEmulator').toLowerCase(); const h = home.toLowerCase();
     if (h === realHome || h.startsWith(realHome + path.sep) || realHome.startsWith(h + path.sep)) throw Error('Refusing developer product home or its ancestors/descendants');
     if (output === home || output.startsWith(home + path.sep)) throw Error('Evidence must be outside fresh home');
-    if (fs.existsSync(home) && fs.readdirSync(home).length) throw Error('OME_HOME must be empty');
+    // A fresh home may carry only a pre-verified ISO under artifacts/ (local reruns skip the 2.4 GB download).
+    if (fs.existsSync(home)) {
+      const entries = fs.readdirSync(home);
+      const seeded = entries.length === 1 && entries[0] === 'artifacts' && fs.readdirSync(path.join(home, 'artifacts')).every(n => n.endsWith('.iso') || n.endsWith('.iso.verified'));
+      if (entries.length && !seeded) throw Error('OME_HOME must be empty (or hold only artifacts/*.iso with .verified)');
+    }
     for (const file of [appPath, path.join(path.dirname(appPath), 'ome-setup.exe')]) if (!fs.statSync(file).isFile()) throw Error(`Missing input ${file}`);
     const pulled = JSON.parse(fs.readFileSync(path.join(gameDirectory, 'pulled.json'), 'utf8').replace(/^﻿/, ''));
     if (pulled.package !== 'com.epidgames.trickcalrevive') throw Error('Unexpected private fixture package');
@@ -194,6 +266,11 @@ try {
     result.qemu = { source: process.env.OME_DOD_QEMU_DIR ?? bundle, sha256: createHash('sha256').update(fs.readFileSync(exe)).digest('hex'), version: spawnSync(exe, ['--version'], { encoding: 'utf8' }).stdout };
     log('qemu-bundle', result.qemu); await freePort(); fs.mkdirSync(home, { recursive: true }); homeOwned = true;
   });
+  // Keep the monitor awake for the whole run: a sleeping display stops DWM composition and every capture
+  // would show stale content (docs/evidence/M2/embedded-display-freeze.md).
+  const keepAwake = spawn('powershell.exe', ['-NoProfile', '-File', path.join(directory, 'keep-awake.ps1')], { stdio: ['ignore', 'pipe', 'inherit'] });
+  keepAwake.stdout.once('data', chunk => log('keep-awake', JSON.parse(chunk.toString('utf8').trim())));
+  process.on('exit', () => { try { keepAwake.kill(); } catch {} });
   await step('launch', async () => {
     const fd = fs.openSync(path.join(output, 'app-output.txt'), 'w');
     app = spawn(appPath, [], { cwd: host, env: { ...process.env, OME_HOME: home, WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--remote-debugging-port=${port}` }, stdio: ['ignore', fd, fd] }); fs.closeSync(fd);
