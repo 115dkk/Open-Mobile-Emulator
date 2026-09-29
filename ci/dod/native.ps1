@@ -61,7 +61,11 @@ public class W {
  [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h,int cmd);
  [DllImport("user32.dll")] public static extern bool SetCursorPos(int x,int y);
  public static void Focus(IntPtr h) {
-  var root=GetAncestor(h,2); ShowWindow(root,9); SetForegroundWindow(root);
+  var root=GetAncestor(h,2);
+  // Already foreground: touch nothing. Restoring or re-raising the owner would also re-band its owned
+  // guest popup, and any host-side style change freezes that popup's GL presentation (ADR-0009 7번).
+  if(GetForegroundWindow()==root) return;
+  ShowWindow(root,9); SetForegroundWindow(root);
   for(int attempt=0;attempt<3 && GetForegroundWindow()!=root;attempt++) {
    SetWindowPos(root,new IntPtr(-1),0,0,0,0,0x43);
    try {
@@ -183,10 +187,16 @@ if($Quit){
  exit
 }
 if($Width -gt 0){if(![W]::MoveWindow($h,$X,$Y,$Width,$Height,$true)){throw 'MoveWindow failed'}}
-[W]::Focus($main)
-$focus='main-window foreground; no SDL focus or input attachment'
-Start-Sleep -Milliseconds 600
-if ([W]::GetForegroundWindow() -ne $main) { throw 'Foreground changed; refusing capture' }
+if ($QemuPid) {
+ # A guest-window capture is a screen copy of an owned popup that sits above the main window; it needs no
+ # foreground change, and raising the owner would re-band the popup and freeze its presentation.
+ $focus='guest capture; no focus change'
+} else {
+ [W]::Focus($main)
+ $focus='main-window foreground; no SDL focus or input attachment'
+ Start-Sleep -Milliseconds 600
+ if ([W]::GetForegroundWindow() -ne $main) { throw 'Foreground changed; refusing capture' }
+}
 $r=[W+R]::new();[void][W]::GetWindowRect($h,[ref]$r)
 $crop=[W+R]::new();$dwm=if($QemuPid){[void][W]::GetWindowRect($h,[ref]$crop);0}else{[W]::DwmGetWindowAttribute($h,9,[ref]$crop,16)}
 if($dwm -ne 0){throw "DWM frame query failed $dwm"}
