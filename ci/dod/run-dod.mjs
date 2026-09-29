@@ -307,9 +307,10 @@ try {
   await step('S1.4-download', async () => {
     const start = Date.now(); let nextProgress = 0;
     let s = await snapshot();
-    if (s.wizard.download?.stage === 'verified') {
-      // A seeded home (artifacts/*.iso with its .verified marker) is verified at first sight: the wizard shows 다음 only.
-      result.measurements.downloadSkipped = true; log('download-skipped', { reason: 'image already verified in the seeded home' });
+    const profile = s.images?.profiles?.find(p => p.id === s.wizard.imageId);
+    if (!s.wizard.download && s.wizard.canContinue && profile?.status === 'verified') {
+      // A seeded home (artifacts/*.iso with its .verified marker) is verified at first sight: download is null and the wizard shows 다음 only.
+      result.measurements.downloadSkipped = true; log('download-skipped', { reason: 'image already verified in the seeded home', profile: profile.id });
     } else {
       await click('다운로드');
       s = await until(async () => {
