@@ -103,9 +103,12 @@ function installerScreen(text) {
     if (has('install blissos') || has('select a partition to install')) return 'system-chooser';
     return 'unknown'; // A chooser must never fall through to a LEFT/RIGHT action.
   }
-  if (has('choose filesystem')) {
+  // OCR read this title as "Choose r i lesysten" (round 9); the body line "Please select a filesystem to
+  // format" and the option list are the reliable parts. The ESP chooser offers only "Do not re-format" and
+  // fat32 (read as "fdt3Z"); the system chooser is the one with ext4.
+  if (has('choose filesystem') || (/lesyste[mn]/.test(words) && (has('please select') || has('choose')))) {
     if (has('ext4')) return 'filesystem-for-system';
-    if (has('fat32') || has('do not re-format')) return 'filesystem-for-esp';
+    if (/fat3|fdt3/.test(words) || has('do not re')) return 'filesystem-for-esp';
     return 'unknown';
   }
   if (has('warning') || (/\b\d+\s*(?:s\b|sec|second)/.test(text) && /\b[0o]k\b/.test(text) && !/\byes\b|\bno\b|reboot/i.test(text))) return 'warning-countdown';
