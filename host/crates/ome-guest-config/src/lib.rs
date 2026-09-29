@@ -53,6 +53,14 @@ pub struct RawGuestConfig {
     /// (ADR-0009, QEMU patch 0004).
     #[serde(default)]
     pub hosted_window: Option<bool>,
+    /// The native HWND that owns the SDL window (ADR-0009 7번, QEMU patch 0005).
+    ///
+    /// With the SDL display, `Some(hwnd)` adds `owner-window=<hwnd>`: QEMU creates the
+    /// window borderless, hidden and owned by that window, never resizes it to the guest
+    /// resolution, and lets the host place it with the QMP command `x-ome-display-window`.
+    /// The option implies `activate-on-click=off`, so `hosted_window` adds nothing more.
+    #[serde(default)]
+    pub owner_window: Option<u64>,
     /// Additional QEMU argument elements appended after all managed options.
     #[serde(default)]
     pub extra_args: Option<Vec<String>>,
@@ -166,6 +174,7 @@ pub struct GuestConfig {
     audio: Audio,
     display: Display,
     hosted_window: bool,
+    owner_window: Option<u64>,
     extra_args: Vec<OsString>,
 }
 
@@ -239,6 +248,7 @@ impl GuestConfig {
             audio,
             display,
             hosted_window,
+            owner_window: raw.owner_window,
             extra_args: raw
                 .extra_args
                 .unwrap_or_default()
@@ -496,8 +506,13 @@ impl QemuInvocation {
             (Display::Sdl, _) => "sdl,show-cursor=on".to_owned(),
             (Display::Gtk, _) => "gtk,show-cursor=on".to_owned(),
         };
-        if config.display() == Display::Sdl && config.hosted_window {
-            display.push_str(",activate-on-click=off");
+        if config.display() == Display::Sdl {
+            // owner-window (QEMU patch 0005) implies activate-on-click=off (patch 0004).
+            match config.owner_window {
+                Some(owner) => display.push_str(&format!(",owner-window={owner}")),
+                None if config.hosted_window => display.push_str(",activate-on-click=off"),
+                None => {}
+            }
         }
         let sdl_display = display.starts_with("sdl,");
         pair(&mut args, "-display", display);
@@ -958,6 +973,45 @@ mod tests {
     }
 
     #[test]
+    fn hosted_sdl_invocation_with_owner_passes_owner_window_only() {
+        let config = GuestConfig::validate(RawGuestConfig {
+            hosted_window: Some(true),
+            owner_window: Some(0x0001_2345),
+            ..RawGuestConfig::default()
+        })
+        .expect("valid hosted SDL config with an owner");
+        let install = QemuInstall {
+            system_exe: "qemu-system-x86_64.exe".into(),
+        };
+        let boot_paths = GuestPaths {
+            disk: r"C:\vm\disk.qcow2".into(),
+            firmware_code: r"C:\fw\code.fd".into(),
+            firmware_vars: r"C:\vm\efivars.fd".into(),
+            iso: None,
+        };
+        let install_paths = GuestPaths {
+            iso: Some(r"C:\images\guest.iso".into()),
+            ..boot_paths.clone()
+        };
+        for invocation in [
+            QemuInvocation::for_boot(&config, &boot_paths, &install),
+            QemuInvocation::for_install(&config, &install_paths, &install)
+                .expect("install paths include ISO"),
+        ] {
+            let args = invocation
+                .args()
+                .iter()
+                .map(|value| value.to_string_lossy().into_owned())
+                .collect::<Vec<_>>();
+            assert!(args.contains(&"sdl,show-cursor=on,gl=on,owner-window=74565".to_owned()));
+            assert!(
+                args.iter()
+                    .all(|value| !value.contains("activate-on-click"))
+            );
+        }
+    }
+
+    #[test]
     fn unhosted_sdl_invocation_keeps_click_activation_default() {
         let config = GuestConfig::validate(RawGuestConfig::default()).expect("valid config");
         let paths = GuestPaths {
@@ -979,6 +1033,7 @@ mod tests {
             args.iter()
                 .all(|value| !value.contains("activate-on-click"))
         );
+        assert!(args.iter().all(|value| !value.contains("owner-window")));
     }
 
     #[test]
@@ -1044,6 +1099,7 @@ mod tests {
                 audio: Some(input.audio),
                 display: Some(input.display),
                 hosted_window: None,
+                owner_window: None,
                 extra_args: Some(input.extra_args.unwrap_or_default()),
             })
             .expect("fixture config validates");

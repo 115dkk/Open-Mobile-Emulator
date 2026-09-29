@@ -14,19 +14,20 @@ use windows::Win32::Foundation::{
 };
 use windows::Win32::Graphics::Gdi::ClientToScreen;
 use windows::Win32::UI::HiDpi::{
-    DPI_HOSTING_BEHAVIOR, DPI_HOSTING_BEHAVIOR_INVALID, DPI_HOSTING_BEHAVIOR_MIXED,
-    GetDpiForWindow, SetThreadDpiHostingBehavior,
+    DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2, DPI_HOSTING_BEHAVIOR, DPI_HOSTING_BEHAVIOR_INVALID,
+    DPI_HOSTING_BEHAVIOR_MIXED, GetDpiForWindow, SetProcessDpiAwarenessContext,
+    SetThreadDpiHostingBehavior,
 };
 use windows::Win32::UI::WindowsAndMessaging::{
     CWPSTRUCT, CallNextHookEx, EnumWindows, GA_PARENT, GUITHREADINFO, GW_OWNER, GWL_EXSTYLE,
     GWL_STYLE, GWLP_HWNDPARENT, GetAncestor, GetClassNameW, GetClientRect, GetForegroundWindow,
-    GetGUIThreadInfo, GetWindow, GetWindowLongPtrW, GetWindowRect, GetWindowThreadProcessId,
-    HC_ACTION, HHOOK, HWND_TOP, IsWindow, IsWindowVisible, SMTO_ABORTIFHUNG, SW_HIDE, SW_SHOW,
-    SW_SHOWNA, SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER,
-    SWP_SHOWWINDOW, SendMessageTimeoutW, SetForegroundWindow, SetWindowLongPtrW, SetWindowPos,
-    SetWindowsHookExW, ShowWindow, UnhookWindowsHookEx, WH_CALLWNDPROC, WM_APP, WS_CAPTION,
-    WS_CHILD, WS_EX_APPWINDOW, WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW, WS_MAXIMIZEBOX, WS_MINIMIZEBOX,
-    WS_POPUP, WS_SYSMENU, WS_THICKFRAME,
+    GetGUIThreadInfo, GetWindow, GetWindowLongPtrW, GetWindowRect, GetWindowTextW,
+    GetWindowThreadProcessId, HC_ACTION, HHOOK, HWND_TOP, IsWindow, IsWindowVisible,
+    SMTO_ABORTIFHUNG, SW_HIDE, SW_SHOW, SW_SHOWNA, SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOMOVE,
+    SWP_NOSIZE, SWP_NOZORDER, SWP_SHOWWINDOW, SendMessageTimeoutW, SetForegroundWindow,
+    SetWindowLongPtrW, SetWindowPos, SetWindowsHookExW, ShowWindow, UnhookWindowsHookEx,
+    WH_CALLWNDPROC, WM_APP, WS_CAPTION, WS_CHILD, WS_EX_APPWINDOW, WS_EX_NOACTIVATE,
+    WS_EX_TOOLWINDOW, WS_MAXIMIZEBOX, WS_MINIMIZEBOX, WS_POPUP, WS_SYSMENU, WS_THICKFRAME,
 };
 use windows::core::BOOL;
 
@@ -102,6 +103,38 @@ pub(crate) fn class_name(raw: isize) -> io::Result<String> {
         return Err(io::Error::last_os_error());
     }
     Ok(String::from_utf16_lossy(&buffer[..length as usize]))
+}
+
+pub(crate) fn title(raw: isize) -> io::Result<String> {
+    let window = hwnd(raw)?;
+    let mut buffer = [0_u16; 512];
+    // SAFETY: clearing thread-local last error accepts a plain code and has no pointer or
+    // ownership; it lets a zero length below tell an empty title from a failure.
+    unsafe { SetLastError(ERROR_SUCCESS) };
+    // SAFETY: window was checked non-null; buffer is aligned, writable and live, and the slice
+    // conveys its exact element count. For another process's window the call copies the stored
+    // caption without sending it a message.
+    let length = unsafe { GetWindowTextW(window, &mut buffer) };
+    if length == 0 {
+        let error = io::Error::last_os_error();
+        return if error.raw_os_error() == Some(0) {
+            Ok(String::new())
+        } else {
+            Err(error)
+        };
+    }
+    let length = usize::try_from(length).map_err(|_| io::Error::other("negative title length"))?;
+    Ok(String::from_utf16_lossy(
+        &buffer[..length.min(buffer.len())],
+    ))
+}
+
+pub(crate) fn set_process_dpi_awareness_per_monitor_v2() -> io::Result<()> {
+    // SAFETY: the call takes one predefined awareness-context constant, has no pointer or
+    // ownership, and changes only this process's default DPI awareness; Windows rejects it once
+    // the default has been set.
+    unsafe { SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2) }
+        .map_err(super::io_error)
 }
 
 pub(crate) fn is_visible(raw: isize) -> io::Result<bool> {
@@ -342,6 +375,20 @@ pub(crate) fn place_behind(
     let window = hwnd(raw)?;
     let insert_after = insert_after_raw.map(hwnd).transpose()?.or(Some(HWND_TOP));
     set_window_pos(window, insert_after, x, y, width, height, SWP_NOACTIVATE)
+}
+
+pub(crate) fn place_z_order(raw: isize, insert_after_raw: Option<isize>) -> io::Result<()> {
+    let window = hwnd(raw)?;
+    let insert_after = insert_after_raw.map(hwnd).transpose()?.or(Some(HWND_TOP));
+    set_window_pos(
+        window,
+        insert_after,
+        0,
+        0,
+        0,
+        0,
+        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE,
+    )
 }
 
 pub(crate) fn focus_child(raw: isize, parent_raw: isize) -> io::Result<()> {

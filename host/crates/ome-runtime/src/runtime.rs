@@ -25,7 +25,9 @@ use ome_input::{
     Decision, Gate, GateFacts, HostKey, InputProfile, KeyEvent as MappedKeyEvent, KeySynth, Mapper,
     is_keyboard_code, load_profiles, profile_has_key_binding,
 };
-use ome_supervisor::{GuestEvent, InputError, ProcessAdapter, QmpFactory, Supervisor};
+use ome_supervisor::{
+    DisplayWindowGeometry, GuestEvent, InputError, ProcessAdapter, QmpFactory, Supervisor,
+};
 use ome_window_host::{
     GuestWindowHost, HostingIssue, HostingTarget, StageGeometry, StageRect as NativeStageRect,
 };
@@ -73,6 +75,9 @@ pub trait GuestProcess: Send {
     fn request_stop(&self);
     /// Submits QMP input without waiting for the QMP response.
     fn send_input(&self, events: Vec<serde_json::Value>) -> Result<(), InputError>;
+    /// Submits a placement of the SDL display window (QMP `x-ome-display-window`, QEMU patch
+    /// 0005) in order with input, without waiting for the QMP response.
+    fn set_display_window(&self, geometry: DisplayWindowGeometry) -> Result<(), InputError>;
     /// Returns the current supervisor state.
     fn state(&self) -> ome_supervisor::GuestState;
     /// Subscribes to lifecycle events.
@@ -110,6 +115,10 @@ where
         Supervisor::send_input(self, events)
     }
 
+    fn set_display_window(&self, geometry: DisplayWindowGeometry) -> Result<(), InputError> {
+        Supervisor::set_display_window(self, geometry)
+    }
+
     fn state(&self) -> ome_supervisor::GuestState {
         Supervisor::state(self)
     }
@@ -120,22 +129,30 @@ where
 }
 
 /// Guest-window seam used by deterministic runtime tests.
+///
+/// QEMU creates the SDL window already owned by the host (`owner-window`, QEMU patch 0005). The
+/// host changes only its Z-order; position, size and visibility come back as a
+/// [`DisplayWindowGeometry`] that the runtime sends through the supervisor over QMP.
 pub trait WindowPlacement: Send {
-    /// Attaches one process window as a popup owned by the native host.
+    /// Finds the guest's owned popup and checks that the native host owns it.
     fn attach(&mut self, target: HostingTarget) -> Result<(), HostingIssue>;
-    /// Places the attached popup over a physical rectangle of the host client area.
-    fn place(&mut self, rect: ome_window_host::Rect) -> Result<(), HostingIssue>;
+    /// Remembers a physical rectangle of the host client area, applies the Z-order, and returns
+    /// the visible geometry to send; `None` when no live guest is attached.
+    fn place(
+        &mut self,
+        rect: ome_window_host::Rect,
+    ) -> Result<Option<DisplayWindowGeometry>, HostingIssue>;
     /// Registers the optional native overlay used as the popup's Z-order predecessor.
     fn set_overlay_window(&mut self, overlay: Option<ome_platform_win::WindowHandle>);
-    /// Restores placement if the guest changed its own top-level rectangle.
-    fn resync(&mut self) -> Result<bool, HostingIssue>;
-    /// Hides the attached popup.
-    fn hide(&mut self) -> Result<(), HostingIssue>;
-    /// Shows the attached popup without activation.
-    fn show(&mut self) -> Result<(), HostingIssue>;
-    /// Restores the guest's original top-level state.
+    /// Returns the expected geometry to resend when the popup's rectangle differs from it.
+    fn resync(&mut self) -> Result<Option<DisplayWindowGeometry>, HostingIssue>;
+    /// Returns the last geometry with `visible: false` to send.
+    fn hide(&mut self) -> Result<Option<DisplayWindowGeometry>, HostingIssue>;
+    /// Returns the last geometry with `visible: true` to send.
+    fn show(&mut self) -> Result<Option<DisplayWindowGeometry>, HostingIssue>;
+    /// Forgets the guest window; QEMU owns its lifetime.
     fn detach(&mut self) -> Result<(), HostingIssue>;
-    /// Raises the hosted popup without changing focus.
+    /// Changes only the popup's Z-order, without changing focus.
     fn to_front(&mut self) -> Result<(), HostingIssue>;
     /// Reports live owned-popup state.
     fn is_attached(&self) -> bool;
@@ -157,19 +174,22 @@ impl WindowPlacement for GuestWindowHost {
     fn attach(&mut self, target: HostingTarget) -> Result<(), HostingIssue> {
         GuestWindowHost::attach(self, target)
     }
-    fn place(&mut self, rect: ome_window_host::Rect) -> Result<(), HostingIssue> {
+    fn place(
+        &mut self,
+        rect: ome_window_host::Rect,
+    ) -> Result<Option<DisplayWindowGeometry>, HostingIssue> {
         GuestWindowHost::place(self, rect)
     }
     fn set_overlay_window(&mut self, overlay: Option<ome_platform_win::WindowHandle>) {
         GuestWindowHost::set_overlay_window(self, overlay);
     }
-    fn resync(&mut self) -> Result<bool, HostingIssue> {
+    fn resync(&mut self) -> Result<Option<DisplayWindowGeometry>, HostingIssue> {
         GuestWindowHost::resync(self)
     }
-    fn hide(&mut self) -> Result<(), HostingIssue> {
+    fn hide(&mut self) -> Result<Option<DisplayWindowGeometry>, HostingIssue> {
         GuestWindowHost::hide(self)
     }
-    fn show(&mut self) -> Result<(), HostingIssue> {
+    fn show(&mut self) -> Result<Option<DisplayWindowGeometry>, HostingIssue> {
         GuestWindowHost::show(self)
     }
     fn detach(&mut self) -> Result<(), HostingIssue> {
@@ -197,6 +217,29 @@ impl WindowPlacement for GuestWindowHost {
     }
     fn guest_window(&self) -> Option<ome_platform_win::WindowHandle> {
         GuestWindowHost::guest_window(self)
+    }
+}
+
+/// Display keep-awake seam used by deterministic runtime tests.
+///
+/// The user is watching a game, so while the guest runs the emulator keeps the display on the way
+/// video players do (`ES_CONTINUOUS | ES_DISPLAY_REQUIRED`); the system-sleep flag is not held. A
+/// sleeping monitor also stops DWM composition, which leaves the guest window showing stale frames
+/// (`docs/evidence/M2/embedded-display-freeze.md`).
+pub trait KeepAwake: Send {
+    /// Starts keeping the display on; dropping the returned guard stops it.
+    fn acquire(&self) -> Result<Box<dyn Send>, String>;
+}
+
+/// Keeps the display on through [`ome_platform_win::DisplayKeepAwake`].
+#[derive(Clone, Copy, Debug, Default)]
+pub struct SystemKeepAwake;
+
+impl KeepAwake for SystemKeepAwake {
+    fn acquire(&self) -> Result<Box<dyn Send>, String> {
+        ome_platform_win::DisplayKeepAwake::acquire()
+            .map(|guard| Box::new(guard) as Box<dyn Send>)
+            .map_err(|error| error.to_string())
     }
 }
 
@@ -318,6 +361,8 @@ pub struct AppRuntime {
     refresh_rate_hz: Option<u32>,
     vsync: VsyncMode,
     guest_state: GuestState,
+    keep_awake: Box<dyn KeepAwake>,
+    display_awake: Option<Box<dyn Send>>,
     pid: Option<u32>,
     boot_completed: bool,
     adb_connected: bool,
@@ -504,6 +549,8 @@ impl AppRuntime {
             refresh_rate_hz: None,
             vsync: VsyncMode::Off,
             guest_state: GuestState::Stopped,
+            keep_awake: Box::new(SystemKeepAwake),
+            display_awake: None,
             pid: None,
             boot_completed: false,
             adb_connected: false,
@@ -1624,9 +1671,15 @@ impl AppRuntime {
                 VsyncMode::On => 1,
                 VsyncMode::Adaptive => -1,
             };
+            // This later `-display` replaces the managed one, so it repeats the owner window
+            // (patch 0005, which implies activate-on-click=off).
+            let hosting = match self.host_window {
+                Some(owner) => format!("owner-window={owner}"),
+                None => "activate-on-click=off".to_owned(),
+            };
             extra_args.extend([
                 "-display".to_owned(),
-                format!("sdl,show-cursor=on,gl=on,activate-on-click=off,swap-interval={interval}"),
+                format!("sdl,show-cursor=on,gl=on,{hosting},swap-interval={interval}"),
             ]);
         }
         GuestConfig::validate(RawGuestConfig {
@@ -1644,6 +1697,7 @@ impl AppRuntime {
             audio: Some("dsound".to_owned()),
             display: Some("sdl".to_owned()),
             hosted_window: Some(true),
+            owner_window: self.host_window,
             extra_args: Some(extra_args),
         })
         .map_err(|_| issues::invalid_guest_configuration())
@@ -1847,25 +1901,46 @@ impl AppRuntime {
     fn place_guest_window(&mut self, rect: StageRect) -> Result<(), AppIssue> {
         self.last_stage_rect = Some(rect);
         self.stage_visible = true;
+        // The placement geometry is sent visible, so it also shows a popup hidden by StageHidden.
         self.try_place_guest_window();
-        if self.hosting == HostingMode::Embedded {
-            self.deps
-                .window_host
-                .show()
-                .map_err(|_| issues::window_unavailable())?;
-        }
         Ok(())
     }
 
     fn hide_guest_window(&mut self) -> Result<(), AppIssue> {
         self.stage_visible = false;
-        if self.hosting == HostingMode::Embedded {
-            self.deps
+        if self.hosting == HostingMode::Embedded
+            && let Some(geometry) = self
+                .deps
                 .window_host
                 .hide()
-                .map_err(|_| issues::window_unavailable())?;
+                .map_err(|_| issues::window_unavailable())?
+        {
+            self.send_display_window(geometry);
         }
         Ok(())
+    }
+
+    /// Sends one display-window geometry through the supervisor (QMP `x-ome-display-window`).
+    ///
+    /// A submission failure takes the same notice path as input failures. Returns whether the
+    /// geometry was submitted.
+    fn send_display_window(&mut self, geometry: DisplayWindowGeometry) -> bool {
+        let result = self
+            .deps
+            .supervisor
+            .as_deref()
+            .ok_or(InputError::ChannelUnavailable)
+            .and_then(|supervisor| supervisor.set_display_window(geometry));
+        #[cfg(debug_assertions)]
+        eprintln!(
+            "[stage] send guest window geometry={geometry:?} result={}",
+            if result.is_ok() { "ok" } else { "error" }
+        );
+        if result.is_err() {
+            eprintln!("guest display window submission failed");
+            self.record_qmp_submission_failure();
+        }
+        result.is_ok()
     }
 
     fn try_place_guest_window(&mut self) {
@@ -1904,17 +1979,19 @@ impl AppRuntime {
             height: rect.height,
             scale_factor: rect.scale_factor,
         };
-        if self
+        let sent = match self
             .deps
             .window_host
             .place(StageGeometry::physical(&native))
-            .is_ok()
-            && self.deps.window_host.is_attached()
         {
-            self.hosting = HostingMode::Embedded;
+            Ok(Some(geometry)) => self.send_display_window(geometry),
+            Ok(None) | Err(_) => false,
+        };
+        self.hosting = if sent && self.deps.window_host.is_attached() {
+            HostingMode::Embedded
         } else {
-            self.hosting = HostingMode::SeparateWindow;
-        }
+            HostingMode::SeparateWindow
+        };
     }
 
     /// Converts one webview keyboard event and routes it through the host-key pipeline.
@@ -2061,21 +2138,25 @@ impl AppRuntime {
             .ok_or(InputError::ChannelUnavailable)
             .and_then(|supervisor| supervisor.send_input(events));
         if result.is_err() {
-            self.input_send_errors = self.input_send_errors.saturating_add(1);
-            eprintln!(
-                "guest input submission failed: count={}",
-                self.input_send_errors
-            );
-            if !self.input_send_notice_shown {
-                self.input_send_notice_shown = true;
-                self.push_notice(Notice {
-                    at: local_rfc3339(),
-                    level: NoticeLevel::Warning,
-                    message:
-                        "키 입력을 운영체제에 보내지 못했습니다. 운영체제를 다시 시작하십시오."
-                            .to_owned(),
-                });
-            }
+            self.record_qmp_submission_failure();
+        }
+    }
+
+    /// Counts one failed submission to the supervisor's QMP queue and shows the notice once.
+    fn record_qmp_submission_failure(&mut self) {
+        self.input_send_errors = self.input_send_errors.saturating_add(1);
+        eprintln!(
+            "guest input submission failed: count={}",
+            self.input_send_errors
+        );
+        if !self.input_send_notice_shown {
+            self.input_send_notice_shown = true;
+            self.push_notice(Notice {
+                at: local_rfc3339(),
+                level: NoticeLevel::Warning,
+                message: "키 입력을 운영체제에 보내지 못했습니다. 운영체제를 다시 시작하십시오."
+                    .to_owned(),
+            });
         }
     }
 
@@ -2132,6 +2213,7 @@ impl AppRuntime {
     pub fn ingest_guest_event(&mut self, event: GuestEvent) {
         let previous = self.guest_state;
         self.guest_state = convert_guest_state(event.state);
+        self.sync_display_keep_awake();
         let exit_kind = if self.boot_timeout_pending
             && matches!(
                 event.state,
@@ -2262,16 +2344,32 @@ impl AppRuntime {
         }
     }
 
+    /// Holds the display keep-awake guard exactly while the guest is `Running`.
+    fn sync_display_keep_awake(&mut self) {
+        if self.guest_state != GuestState::Running {
+            self.display_awake = None;
+            return;
+        }
+        if self.display_awake.is_none() {
+            match self.keep_awake.acquire() {
+                Ok(guard) => self.display_awake = Some(guard),
+                Err(error) => eprintln!("display keep-awake unavailable: {error}"),
+            }
+        }
+    }
+
     /// Advances one non-blocking adb boot/account poll.
     pub fn tick(&mut self) {
         self.drain_worker_events();
         if self.guest_state != GuestState::Running {
             return;
         }
-        if self.hosting == HostingMode::Embedded && self.deps.window_host.resync().unwrap_or(false)
+        if self.hosting == HostingMode::Embedded
+            && let Ok(Some(geometry)) = self.deps.window_host.resync()
         {
             #[cfg(debug_assertions)]
-            eprintln!("[stage] restored guest popup placement after a guest resize");
+            eprintln!("[stage] resent guest window geometry");
+            self.send_display_window(geometry);
         }
         if !self.boot_completed {
             let boot_timeout = Duration::from_secs(180);
@@ -3576,6 +3674,7 @@ mod tests {
         starts: Arc<Mutex<Vec<(GuestConfig, GuestPaths, QemuInstall)>>>,
         stop_requests: Arc<Mutex<u32>>,
         inputs: Arc<Mutex<Vec<Vec<serde_json::Value>>>>,
+        display_windows: Arc<Mutex<Vec<DisplayWindowGeometry>>>,
     }
 
     impl Default for ScriptedGuest {
@@ -3585,6 +3684,7 @@ mod tests {
                 starts: Arc::new(Mutex::new(Vec::new())),
                 stop_requests: Arc::new(Mutex::new(0)),
                 inputs: Arc::new(Mutex::new(Vec::new())),
+                display_windows: Arc::new(Mutex::new(Vec::new())),
             }
         }
     }
@@ -3626,6 +3726,14 @@ mod tests {
             Ok(())
         }
 
+        fn set_display_window(&self, geometry: DisplayWindowGeometry) -> Result<(), InputError> {
+            self.display_windows
+                .lock()
+                .expect("display window lock")
+                .push(geometry);
+            Ok(())
+        }
+
         fn state(&self) -> ome_supervisor::GuestState {
             *self.state.lock().expect("guest state lock")
         }
@@ -3645,6 +3753,8 @@ mod tests {
         hide_count: Arc<Mutex<u32>>,
         show_count: Arc<Mutex<u32>>,
         detach_count: Arc<Mutex<u32>>,
+        /// Screen rectangle the fake popup reports; a placement applies it, a test may change it.
+        live_rect: Arc<Mutex<Option<ome_window_host::Rect>>>,
     }
 
     impl RecordingWindow {
@@ -3657,7 +3767,30 @@ mod tests {
                 hide_count: Arc::new(Mutex::new(0)),
                 show_count: Arc::new(Mutex::new(0)),
                 detach_count: Arc::new(Mutex::new(0)),
+                live_rect: Arc::new(Mutex::new(None)),
             }
+        }
+
+        /// The fake owner's client origin is the screen origin, so the screen rect is `rect`.
+        fn geometry(rect: ome_window_host::Rect, visible: bool) -> DisplayWindowGeometry {
+            DisplayWindowGeometry {
+                x: rect.x,
+                y: rect.y,
+                width: rect.width,
+                height: rect.height,
+                visible,
+            }
+        }
+
+        fn last_geometry(&self, visible: bool) -> Option<DisplayWindowGeometry> {
+            if !*self.attached.lock().expect("attached lock") {
+                return None;
+            }
+            self.placements
+                .lock()
+                .expect("placements lock")
+                .last()
+                .map(|rect| Self::geometry(*rect, visible))
         }
 
         fn separate() -> Self {
@@ -3676,25 +3809,37 @@ mod tests {
             Ok(())
         }
 
-        fn place(&mut self, rect: ome_window_host::Rect) -> Result<(), HostingIssue> {
+        fn place(
+            &mut self,
+            rect: ome_window_host::Rect,
+        ) -> Result<Option<DisplayWindowGeometry>, HostingIssue> {
             self.placements.lock().expect("placements lock").push(rect);
-            Ok(())
+            if !*self.attached.lock().expect("attached lock") {
+                return Ok(None);
+            }
+            *self.live_rect.lock().expect("live rect lock") = Some(rect);
+            Ok(Some(Self::geometry(rect, true)))
         }
 
         fn set_overlay_window(&mut self, _overlay: Option<ome_platform_win::WindowHandle>) {}
 
-        fn resync(&mut self) -> Result<bool, HostingIssue> {
-            Ok(false)
+        fn resync(&mut self) -> Result<Option<DisplayWindowGeometry>, HostingIssue> {
+            let Some(expected) = self.last_geometry(true) else {
+                return Ok(None);
+            };
+            let live = *self.live_rect.lock().expect("live rect lock");
+            let matches = live.is_some_and(|rect| Self::geometry(rect, true) == expected);
+            Ok((!matches).then_some(expected))
         }
 
-        fn hide(&mut self) -> Result<(), HostingIssue> {
+        fn hide(&mut self) -> Result<Option<DisplayWindowGeometry>, HostingIssue> {
             *self.hide_count.lock().expect("hide lock") += 1;
-            Ok(())
+            Ok(self.last_geometry(false))
         }
 
-        fn show(&mut self) -> Result<(), HostingIssue> {
+        fn show(&mut self) -> Result<Option<DisplayWindowGeometry>, HostingIssue> {
             *self.show_count.lock().expect("show lock") += 1;
-            Ok(())
+            Ok(self.last_geometry(true))
         }
 
         fn detach(&mut self) -> Result<(), HostingIssue> {
@@ -4617,7 +4762,7 @@ mod tests {
         let embedded = RecordingWindow::embedded();
         let targets = Arc::clone(&embedded.targets);
         let placements = Arc::clone(&embedded.placements);
-        let (_directory, mut runtime, _supervisor, _runner) =
+        let (_directory, mut runtime, supervisor, _runner) =
             lifecycle_runtime(std::iter::empty(), RecordingDesktop::default(), embedded);
         runtime.set_host_window(77);
         let rect = StageRect {
@@ -4640,6 +4785,17 @@ mod tests {
         assert_eq!(targets.lock().expect("targets lock").len(), 1);
         assert_eq!(placements.lock().expect("placements lock").len(), 1);
         assert_eq!(
+            *supervisor.display_windows.lock().expect("display windows"),
+            vec![DisplayWindowGeometry {
+                x: 2,
+                y: 3,
+                width: 450,
+                height: 300,
+                visible: true,
+            }],
+            "one visible geometry with the stage's screen rect goes over QMP"
+        );
+        assert_eq!(
             runtime.guest_client_screen_rect(),
             Some(Rect {
                 x: 2,
@@ -4658,10 +4814,19 @@ mod tests {
             .expect("replace rect");
         assert_eq!(targets.lock().expect("targets lock").len(), 1);
         assert_eq!(placements.lock().expect("placements lock").len(), 2);
+        assert_eq!(
+            supervisor
+                .display_windows
+                .lock()
+                .expect("display windows")
+                .last()
+                .map(|geometry| (geometry.width, geometry.visible)),
+            Some((600, true))
+        );
 
         let separate = RecordingWindow::separate();
         let separate_targets = Arc::clone(&separate.targets);
-        let (_directory, mut runtime, _supervisor, _runner) =
+        let (_directory, mut runtime, separate_supervisor, _runner) =
             lifecycle_runtime(std::iter::empty(), RecordingDesktop::default(), separate);
         runtime.set_host_window(77);
         runtime
@@ -4681,15 +4846,62 @@ mod tests {
             .apply(Command::StageRectChanged { rect })
             .expect("keep separate placement");
         assert_eq!(separate_targets.lock().expect("targets lock").len(), 1);
+        assert!(
+            separate_supervisor
+                .display_windows
+                .lock()
+                .expect("display windows")
+                .is_empty()
+        );
+    }
+
+    #[test]
+    fn guest_start_passes_the_host_window_as_the_sdl_owner() {
+        let (_directory, mut runtime, supervisor, _runner) = lifecycle_runtime(
+            std::iter::empty(),
+            RecordingDesktop::default(),
+            RecordingWindow::embedded(),
+        );
+        runtime.set_host_window(77);
+        runtime
+            .apply(Command::DisplayVsyncSet {
+                mode: VsyncMode::On,
+            })
+            .expect("vsync on");
+        runtime.apply(Command::GuestStart).expect("start request");
+        let starts = supervisor.starts.lock().expect("starts lock");
+        let (config, paths, install) = starts.first().expect("one start");
+        let args = ome_guest_config::QemuInvocation::for_boot(config, paths, install)
+            .args()
+            .iter()
+            .map(|value| value.to_string_lossy().into_owned())
+            .collect::<Vec<_>>();
+        let displays = args
+            .iter()
+            .zip(args.iter().skip(1))
+            .filter(|(flag, _)| *flag == "-display")
+            .map(|(_, value)| value.as_str())
+            .collect::<Vec<_>>();
+        assert_eq!(displays.len(), 2, "managed display plus the vsync override");
+        assert!(
+            displays
+                .iter()
+                .all(|value| value.contains(",owner-window=77")
+                    && !value.contains("activate-on-click")),
+            "{displays:?}"
+        );
+        assert_eq!(
+            displays[1],
+            "sdl,show-cursor=on,gl=on,owner-window=77,swap-interval=1"
+        );
     }
 
     #[test]
     fn stage_hidden_hides_embedded_window_and_next_rect_shows_it() {
         let embedded = RecordingWindow::embedded();
         let hides = Arc::clone(&embedded.hide_count);
-        let shows = Arc::clone(&embedded.show_count);
         let placements = Arc::clone(&embedded.placements);
-        let (_directory, mut runtime, _supervisor, _runner) =
+        let (_directory, mut runtime, supervisor, _runner) =
             lifecycle_runtime(std::iter::empty(), RecordingDesktop::default(), embedded);
         runtime.set_host_window(77);
         let rect = StageRect {
@@ -4721,9 +4933,138 @@ mod tests {
                 },
             })
             .expect("show stage");
-        assert_eq!(*shows.lock().expect("show count"), 1);
         assert_eq!(placements.lock().expect("placements").len(), 2);
         assert!(runtime.guest_client_screen_rect().is_some());
+        let sent = supervisor
+            .display_windows
+            .lock()
+            .expect("display windows")
+            .iter()
+            .map(|geometry| (geometry.width, geometry.visible))
+            .collect::<Vec<_>>();
+        assert_eq!(
+            sent,
+            vec![(450, true), (450, false), (600, true)],
+            "embed, hide with the last rect, then show with the next rect"
+        );
+    }
+
+    #[test]
+    fn tick_resends_the_geometry_when_the_popup_rect_differs() {
+        let embedded = RecordingWindow::embedded();
+        let live_rect = Arc::clone(&embedded.live_rect);
+        let (_directory, mut runtime, supervisor, _runner) =
+            lifecycle_runtime(std::iter::empty(), RecordingDesktop::default(), embedded);
+        runtime.set_host_window(77);
+        runtime
+            .apply(Command::StageRectChanged {
+                rect: StageRect {
+                    x: 1.0,
+                    y: 2.0,
+                    width: 300.0,
+                    height: 200.0,
+                    scale_factor: 1.5,
+                },
+            })
+            .expect("store rect");
+        runtime.ingest_guest_event(guest_event(
+            ome_supervisor::GuestState::Running,
+            Some(22),
+            None,
+        ));
+        assert_eq!(runtime.snapshot().guest.hosting, HostingMode::Embedded);
+        runtime.tick();
+        assert_eq!(
+            supervisor
+                .display_windows
+                .lock()
+                .expect("display windows")
+                .len(),
+            1,
+            "a matching popup rect sends nothing"
+        );
+
+        *live_rect.lock().expect("live rect lock") = Some(ome_window_host::Rect {
+            x: 2,
+            y: 3,
+            width: 640,
+            height: 480,
+        });
+        runtime.tick();
+        let sent = supervisor
+            .display_windows
+            .lock()
+            .expect("display windows")
+            .clone();
+        assert_eq!(sent.len(), 2);
+        assert_eq!(
+            sent[1],
+            DisplayWindowGeometry {
+                x: 2,
+                y: 3,
+                width: 450,
+                height: 300,
+                visible: true,
+            }
+        );
+    }
+
+    #[derive(Clone, Debug, Default)]
+    struct CountingKeepAwake {
+        acquired: Arc<Mutex<u32>>,
+        released: Arc<Mutex<u32>>,
+    }
+
+    struct CountingKeepAwakeGuard {
+        released: Arc<Mutex<u32>>,
+    }
+
+    impl Drop for CountingKeepAwakeGuard {
+        fn drop(&mut self) {
+            *self.released.lock().expect("released lock") += 1;
+        }
+    }
+
+    impl KeepAwake for CountingKeepAwake {
+        fn acquire(&self) -> Result<Box<dyn Send>, String> {
+            *self.acquired.lock().expect("acquired lock") += 1;
+            Ok(Box::new(CountingKeepAwakeGuard {
+                released: Arc::clone(&self.released),
+            }))
+        }
+    }
+
+    #[test]
+    fn display_keep_awake_is_held_exactly_while_running() {
+        let (_directory, mut runtime, _supervisor, _runner) = lifecycle_runtime(
+            std::iter::empty(),
+            RecordingDesktop::default(),
+            RecordingWindow::embedded(),
+        );
+        let keep_awake = CountingKeepAwake::default();
+        runtime.keep_awake = Box::new(keep_awake.clone());
+        let counts = |keep_awake: &CountingKeepAwake| {
+            (
+                *keep_awake.acquired.lock().expect("acquired lock"),
+                *keep_awake.released.lock().expect("released lock"),
+            )
+        };
+        let states = [
+            (ome_supervisor::GuestState::Starting, (0, 0)),
+            (ome_supervisor::GuestState::Running, (1, 0)),
+            (ome_supervisor::GuestState::Running, (1, 0)),
+            (ome_supervisor::GuestState::Restarting, (1, 1)),
+            (ome_supervisor::GuestState::Running, (2, 1)),
+            (ome_supervisor::GuestState::Stopping, (2, 2)),
+            (ome_supervisor::GuestState::Stopped, (2, 2)),
+            (ome_supervisor::GuestState::Starting, (2, 2)),
+            (ome_supervisor::GuestState::Running, (3, 2)),
+            (ome_supervisor::GuestState::Failed, (3, 3)),
+        ];
+        for (state, expected) in states {
+            runtime.ingest_guest_event(guest_event(state, Some(31), None));
+            assert_eq!(counts(&keep_awake), expected, "after {state:?}");
+        }
     }
 
     #[test]
@@ -4731,7 +5072,7 @@ mod tests {
         let separate = RecordingWindow::separate();
         let hides = Arc::clone(&separate.hide_count);
         let shows = Arc::clone(&separate.show_count);
-        let (_directory, mut runtime, _supervisor, _runner) =
+        let (_directory, mut runtime, supervisor, _runner) =
             lifecycle_runtime(std::iter::empty(), RecordingDesktop::default(), separate);
         runtime.set_host_window(77);
         let rect = StageRect {
@@ -4759,6 +5100,13 @@ mod tests {
             .expect("accept visible");
         assert_eq!(*hides.lock().expect("hide count"), 0);
         assert_eq!(*shows.lock().expect("show count"), 0);
+        assert!(
+            supervisor
+                .display_windows
+                .lock()
+                .expect("display windows")
+                .is_empty()
+        );
     }
 
     #[test]

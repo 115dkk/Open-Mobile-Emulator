@@ -1,20 +1,30 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Copyright (C) 2026 Open Mobile Emulator contributors
-//! Manual native spike for QEMU SDL owned-popup hosting.
+//! Manual native spike for QEMU SDL owned-popup hosting (QEMU patch 0005).
 #![forbid(unsafe_code)]
 
 use std::ffi::OsString;
 use std::fs::File;
+use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::thread;
 use std::time::{Duration, Instant};
 
-use ome_platform_win::{JobObject, ProcessLaunch, TestHostWindow};
+use ome_platform_win::{
+    JobObject, ProcessLaunch, TestHostWindow, set_process_dpi_awareness_per_monitor_v2,
+};
+use ome_qmp::QmpChannel;
 use ome_window_host::{GuestWindowHost, HostingTarget, Rect};
 
-/// The custom build under the developer's local application data, then the distribution install.
+const QMP_PORT: u16 = 44_470;
+
+/// The workspace's bundled QEMU, the custom build under the developer's local application data,
+/// then the distribution install. Only builds with patch 0005 accept `owner-window`.
 fn qemu_candidates() -> Vec<PathBuf> {
-    let mut candidates = Vec::new();
+    let mut candidates = vec![
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join(r"..\..\target\debug\qemu\bin\qemu-system-x86_64.exe"),
+    ];
     if let Some(local_app_data) = std::env::var_os("LOCALAPPDATA") {
         candidates.push(
             PathBuf::from(local_app_data)
@@ -33,8 +43,8 @@ const QEMU_ARGUMENTS: [&str; 9] = [
     "-m",
     "64",
     "-nodefaults",
-    "-display",
-    "sdl,gl=on",
+    "-qmp",
+    "tcp:127.0.0.1:44470,server=on,wait=off",
     "-device",
 ];
 const QEMU_DEVICE: &str = "virtio-vga-gl";
@@ -47,10 +57,17 @@ fn hosts_qemu_sdl_window_and_reports_measurements() {
         return;
     };
     println!("qemu={}", qemu.display());
-    println!("arguments={} {}", QEMU_ARGUMENTS.join(" "), QEMU_DEVICE);
+    // Physical coordinates, as in the per-monitor aware product shell and in QEMU's geometry.
+    set_process_dpi_awareness_per_monitor_v2().expect("become per-monitor DPI aware");
 
     let parent = TestHostWindow::create("OME window-hosting spike", 1280, 800)
         .expect("create parent window");
+    let display = format!("sdl,gl=on,owner-window={}", parent.handle().as_u64());
+    println!(
+        "arguments={} {} -display {display}",
+        QEMU_ARGUMENTS.join(" "),
+        QEMU_DEVICE
+    );
     println!(
         "parent_client_initial={:?}",
         parent.client_size().expect("parent size")
@@ -71,7 +88,7 @@ fn hosts_qemu_sdl_window_and_reports_measurements() {
     let arguments = QEMU_ARGUMENTS
         .iter()
         .copied()
-        .chain(std::iter::once(QEMU_DEVICE))
+        .chain([QEMU_DEVICE, "-display", display.as_str()])
         .map(OsString::from)
         .collect();
     let job = JobObject::kill_on_close().expect("create kill-on-close job");
@@ -142,7 +159,14 @@ fn hosts_qemu_sdl_window_and_reports_measurements() {
         width: 960,
         height: 540,
     };
-    host.place(placed).expect("place owned popup");
+    let geometry = host
+        .place(placed)
+        .expect("place owned popup")
+        .expect("attached host returns a geometry");
+    println!("geometry={geometry:?}");
+    let mut qmp = connect_qmp();
+    qmp.display_window(geometry)
+        .expect("QEMU applies the display window geometry");
     let parent_client = parent
         .handle()
         .client_screen_rect()
@@ -184,7 +208,7 @@ fn hosts_qemu_sdl_window_and_reports_measurements() {
         "raising popup must not transfer keyboard focus"
     );
 
-    host.detach().expect("detach guest");
+    host.detach().expect("forget guest");
     println!(
         "guest_dpi_after_detach={}",
         guest.dpi().expect("guest DPI after detach")
@@ -207,6 +231,20 @@ fn hosts_qemu_sdl_window_and_reports_measurements() {
     drop(job);
     drop(parent);
     let _ = std::fs::remove_dir_all(scratch);
+}
+
+fn connect_qmp() -> QmpChannel {
+    let address = SocketAddr::from(([127, 0, 0, 1], QMP_PORT));
+    let deadline = Instant::now() + Duration::from_secs(10);
+    loop {
+        match QmpChannel::connect(address, Duration::from_secs(2)) {
+            Ok(channel) => return channel,
+            Err(error) => {
+                assert!(Instant::now() < deadline, "QMP did not open: {error}");
+                thread::sleep(Duration::from_millis(100));
+            }
+        }
+    }
 }
 
 fn wait_for_client_screen_rect(

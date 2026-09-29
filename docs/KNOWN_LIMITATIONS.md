@@ -145,6 +145,12 @@
   An owned popup is activated by a mouse click even with `WS_EX_NOACTIVATE`,
   which would make SDL drop the click and take the keyboard away from the
   webview, so the product starts QEMU with `-display sdl,activate-on-click=off`
-  (OME QEMU patch 0004). A QEMU without that patch, such as a distribution
-  build, is not usable for hosting: clicks would activate the guest window.
+  (OME QEMU patch 0004). Changing the SDL window's style, owner or size from
+  outside QEMU freezes its OpenGL presentation until the guest's next mode
+  switch (2026-09-30, same evidence document), so the product lets QEMU create
+  the window already owned and borderless (`-display sdl,owner-window=`, patch
+  0005) and sets its position, size and visibility through the QMP command
+  `x-ome-display-window`; the window never follows the guest resolution on its
+  own. A QEMU without these patches, such as a distribution build, is not
+  usable for hosting: the guest window would activate on click and freeze.
 - Multi-instance, macros, and scripted automation are not part of v1 (D9).

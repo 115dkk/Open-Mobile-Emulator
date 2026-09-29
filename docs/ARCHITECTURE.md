@@ -204,10 +204,11 @@ manifests/images/         게스트 이미지 프로필 JSON (3.15절). 산출�
 - 인터페이스: `StageGeometry::physical(css_rect, scale) -> PhysicalRect`(순수),
   `GuestWindowHost::attach(parent_window, qemu_pid) -> Hosted`, `Hosted::place(rect)`,
   `Hosted::detach()`. 실패는 `HostingIssue`이고 호출자는 2안(별도 창)으로 간다.
-- 뒤에 숨는 것: SDL 창 찾기(pid + 클래스), 메인 창이 소유한 팝업으로 바꾸기(WS_POPUP, WS_EX_NOACTIVATE,
-  WS_EX_TOOLWINDOW, `GWLP_HWNDPARENT`, ADR-0009), 무대의 물리 화면 좌표 배치, QEMU가 스스로 바꾼 크기의 되돌림,
-  오버레이 뒤 z-순서, QEMU 종료 시 분리. 포커스는 어떤 경우에도 게스트 창에 주지 않는다. 재부모화(`SetParent`)는
-  스파이크 코드로만 남는다.
+- 뒤에 숨는 것: SDL 창 찾기(pid + 클래스, 숨은 창 포함), 소유자 확인, 무대의 물리 화면 좌표 계산, 오버레이 뒤
+  z-순서, 그리고 위치·크기·표시 여부를 담은 QMP `x-ome-display-window` 명령의 발행(ADR-0009 7번). 창은 QEMU가
+  `-display sdl,owner-window=<HWND>`(패치 0005)로 처음부터 메인 창이 소유한 테두리 없는 도구 창으로 만들므로
+  호스트는 스타일, 소유자, 크기를 바꾸지 않는다(바꾸면 GL 표시가 굳는다). 포커스는 어떤 경우에도 게스트 창에
+  주지 않는다. 재부모화(`SetParent`)와 팝업 전환(`make_owned_popup`)은 스파이크 코드로만 남는다.
 - 테스트 표면: 기하 계산은 순수 테스트. 실제 담기는 M2 첫 스파이크에서 SDL 픽스처로 잰다.
 
 ### 3.9 ome-input

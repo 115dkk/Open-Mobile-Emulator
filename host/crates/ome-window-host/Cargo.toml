@@ -12,6 +12,7 @@ description = "Stage geometry and hosting the guest window inside the stage"
 
 [dependencies]
 ome-platform-win = { path = "../ome-platform-win" }
+ome-qmp = { path = "../ome-qmp" }
 serde.workspace = true
 thiserror.workspace = true
 

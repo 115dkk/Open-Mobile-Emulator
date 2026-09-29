@@ -15,6 +15,7 @@ use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use ome_guest_config::{GuestConfig, GuestPaths, QemuInstall, QemuInvocation};
+pub use ome_qmp::DisplayWindowGeometry;
 use ome_qmp::{QmpChannel, QmpError, QmpEvent};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -239,6 +240,8 @@ pub trait QmpSession: Send {
     fn system_powerdown(&mut self) -> Result<(), QmpError>;
     /// Sends one complete QMP `input-send-event` array.
     fn input_send_event(&mut self, events: &[serde_json::Value]) -> Result<(), QmpError>;
+    /// Places the SDL display window through `x-ome-display-window` (QEMU patch 0005).
+    fn display_window(&mut self, geometry: DisplayWindowGeometry) -> Result<(), QmpError>;
     /// Returns the next queued QMP event, if one is immediately available.
     fn poll_event(&mut self) -> Option<QmpEvent>;
 }
@@ -250,6 +253,10 @@ impl QmpSession for QmpChannel {
 
     fn input_send_event(&mut self, events: &[serde_json::Value]) -> Result<(), QmpError> {
         QmpChannel::input_send_event(self, events)
+    }
+
+    fn display_window(&mut self, geometry: DisplayWindowGeometry) -> Result<(), QmpError> {
+        QmpChannel::display_window(self, geometry)
     }
 
     fn poll_event(&mut self) -> Option<QmpEvent> {
@@ -351,10 +358,29 @@ pub enum InputError {
     ChannelUnavailable,
 }
 
+/// One request the worker forwards to QMP, in submission order.
 #[derive(Debug)]
-struct InputMessage {
+enum QmpRequest {
+    /// One complete `input-send-event` array.
+    Input(Vec<serde_json::Value>),
+    /// One `x-ome-display-window` placement (QEMU patch 0005).
+    DisplayWindow(DisplayWindowGeometry),
+}
+
+impl QmpRequest {
+    /// Number of units counted when the request is dropped.
+    fn drop_count(&self) -> usize {
+        match self {
+            Self::Input(events) => events.len(),
+            Self::DisplayWindow(_) => 1,
+        }
+    }
+}
+
+#[derive(Debug)]
+struct QmpMessage {
     epoch: u64,
-    events: Vec<serde_json::Value>,
+    request: QmpRequest,
 }
 
 /// Failure returned synchronously by supervisor admission and setup.
@@ -386,8 +412,8 @@ where
     policy: SupervisorPolicy,
     shared: Arc<Shared>,
     worker_active: Arc<AtomicBool>,
-    input_tx: mpsc::Sender<InputMessage>,
-    input_rx: Arc<Mutex<mpsc::Receiver<InputMessage>>>,
+    input_tx: mpsc::Sender<QmpMessage>,
+    input_rx: Arc<Mutex<mpsc::Receiver<QmpMessage>>>,
 }
 
 impl<A, Q> std::fmt::Debug for Supervisor<A, Q>
@@ -504,21 +530,40 @@ where
         if events.is_empty() {
             return Ok(());
         }
+        self.enqueue(QmpRequest::Input(events))
+    }
+
+    /// Submits a placement of the SDL display window (QEMU patch 0005) without waiting for QMP.
+    ///
+    /// The placement shares the input queue, so it reaches QMP in order with input, and follows
+    /// the same rules: outside `Running` it is counted and discarded, and it carries the current
+    /// process epoch so a late placement never reaches a replacement guest process.
+    pub fn set_display_window(&self, geometry: DisplayWindowGeometry) -> Result<(), InputError> {
+        self.enqueue(QmpRequest::DisplayWindow(geometry))
+    }
+
+    fn enqueue(&self, request: QmpRequest) -> Result<(), InputError> {
         let state = *lock_unpoisoned(&self.shared.state);
         if state != GuestState::Running {
-            record_input_drop(&self.shared, events.len(), "guest-not-running");
+            record_input_drop(&self.shared, request.drop_count(), "guest-not-running");
             return Ok(());
         }
-        let message = InputMessage {
+        let message = QmpMessage {
             epoch: self.shared.input_epoch.load(Ordering::Acquire),
-            events,
+            request,
         };
         #[cfg(debug_assertions)]
-        eprintln!(
-            "[input] supervisor enqueue state={state:?} epoch={} events={}",
-            message.epoch,
-            message.events.len()
-        );
+        match &message.request {
+            QmpRequest::Input(events) => eprintln!(
+                "[input] supervisor enqueue state={state:?} epoch={} events={}",
+                message.epoch,
+                events.len()
+            ),
+            QmpRequest::DisplayWindow(geometry) => eprintln!(
+                "[stage] supervisor enqueue display-window state={state:?} epoch={} geometry={geometry:?}",
+                message.epoch
+            ),
+        }
         let result = self
             .input_tx
             .send(message)
@@ -586,7 +631,7 @@ struct WorkerContext<A, Q> {
     qmp_factory: Arc<Q>,
     shared: Arc<Shared>,
     worker_active: Arc<AtomicBool>,
-    input_rx: Arc<Mutex<mpsc::Receiver<InputMessage>>>,
+    input_rx: Arc<Mutex<mpsc::Receiver<QmpMessage>>>,
     log_dir: PathBuf,
     policy: SupervisorPolicy,
 }
@@ -776,7 +821,7 @@ fn next_input_epoch(shared: &Shared) -> u64 {
 
 fn receive_and_send_input(
     shared: &Shared,
-    receiver: &Mutex<mpsc::Receiver<InputMessage>>,
+    receiver: &Mutex<mpsc::Receiver<QmpMessage>>,
     epoch: u64,
     state: GuestState,
     qmp: &mut dyn QmpSession,
@@ -787,35 +832,49 @@ fn receive_and_send_input(
         return;
     };
     #[cfg(debug_assertions)]
-    eprintln!(
-        "[input] supervisor dequeue state={state:?} worker_epoch={epoch} message_epoch={} events={}",
-        message.epoch,
-        message.events.len()
-    );
+    match &message.request {
+        QmpRequest::Input(events) => eprintln!(
+            "[input] supervisor dequeue state={state:?} worker_epoch={epoch} message_epoch={} events={}",
+            message.epoch,
+            events.len()
+        ),
+        QmpRequest::DisplayWindow(_) => eprintln!(
+            "[stage] supervisor dequeue display-window state={state:?} worker_epoch={epoch} message_epoch={}",
+            message.epoch
+        ),
+    }
     if state != GuestState::Running || message.epoch != epoch {
-        record_input_drop(shared, message.events.len(), "stale-process-epoch");
+        record_input_drop(shared, message.request.drop_count(), "stale-process-epoch");
         return;
     }
-    match qmp.input_send_event(&message.events) {
-        Ok(()) => {
-            #[cfg(debug_assertions)]
-            eprintln!(
-                "[input] supervisor qmp-result=ok epoch={epoch} events={}",
-                message.events.len()
-            );
-        }
-        Err(error) => {
-            record_input_drop(shared, message.events.len(), "qmp-send-failed");
-            #[cfg(debug_assertions)]
-            eprintln!("[input] supervisor qmp-result=error epoch={epoch} error={error}");
-            eprintln!("guest input QMP send failed: {error}");
+    match message.request {
+        QmpRequest::Input(events) => match qmp.input_send_event(&events) {
+            Ok(()) => {
+                #[cfg(debug_assertions)]
+                eprintln!(
+                    "[input] supervisor qmp-result=ok epoch={epoch} events={}",
+                    events.len()
+                );
+            }
+            Err(error) => {
+                record_input_drop(shared, events.len(), "qmp-send-failed");
+                #[cfg(debug_assertions)]
+                eprintln!("[input] supervisor qmp-result=error epoch={epoch} error={error}");
+                eprintln!("guest input QMP send failed: {error}");
+            }
+        },
+        QmpRequest::DisplayWindow(geometry) => {
+            if let Err(error) = qmp.display_window(geometry) {
+                record_input_drop(shared, 1, "qmp-send-failed");
+                eprintln!("guest display window QMP send failed: {error}");
+            }
         }
     }
 }
 
 fn drain_stale_input(
     shared: &Shared,
-    receiver: &Mutex<mpsc::Receiver<InputMessage>>,
+    receiver: &Mutex<mpsc::Receiver<QmpMessage>>,
     current_epoch: u64,
 ) {
     let receiver = lock_unpoisoned(receiver);
@@ -825,7 +884,7 @@ fn drain_stale_input(
         } else {
             "stale-process-epoch"
         };
-        record_input_drop(shared, message.events.len(), reason);
+        record_input_drop(shared, message.request.drop_count(), reason);
     }
 }
 
@@ -1190,6 +1249,7 @@ mod tests {
     #[derive(Debug)]
     struct ChannelQmp {
         input_calls: mpsc::Sender<Vec<serde_json::Value>>,
+        display_calls: mpsc::Sender<DisplayWindowGeometry>,
         exited: Arc<AtomicBool>,
     }
 
@@ -1202,6 +1262,12 @@ mod tests {
         fn input_send_event(&mut self, events: &[serde_json::Value]) -> Result<(), QmpError> {
             self.input_calls
                 .send(events.to_vec())
+                .map_err(|_| QmpError::Closed)
+        }
+
+        fn display_window(&mut self, geometry: DisplayWindowGeometry) -> Result<(), QmpError> {
+            self.display_calls
+                .send(geometry)
                 .map_err(|_| QmpError::Closed)
         }
 
@@ -1223,9 +1289,15 @@ mod tests {
         }
     }
 
+    #[derive(Clone, Debug, PartialEq)]
+    enum RecordedCall {
+        Input(Vec<serde_json::Value>),
+        DisplayWindow(DisplayWindowGeometry),
+    }
+
     #[derive(Debug, Default)]
     struct RecordingQmp {
-        input_calls: Vec<Vec<serde_json::Value>>,
+        calls: Vec<RecordedCall>,
     }
 
     impl QmpSession for RecordingQmp {
@@ -1234,7 +1306,12 @@ mod tests {
         }
 
         fn input_send_event(&mut self, events: &[serde_json::Value]) -> Result<(), QmpError> {
-            self.input_calls.push(events.to_vec());
+            self.calls.push(RecordedCall::Input(events.to_vec()));
+            Ok(())
+        }
+
+        fn display_window(&mut self, geometry: DisplayWindowGeometry) -> Result<(), QmpError> {
+            self.calls.push(RecordedCall::DisplayWindow(geometry));
             Ok(())
         }
 
@@ -1264,10 +1341,12 @@ mod tests {
         ));
         let exited = Arc::new(AtomicBool::new(false));
         let (input_sender, input_receiver) = mpsc::channel();
+        let (display_sender, display_receiver) = mpsc::channel();
         let (environment_sender, environment_receiver) = mpsc::channel();
         let factory = RecordingQmpFactory {
             session: Arc::new(Mutex::new(Some(ChannelQmp {
                 input_calls: input_sender,
+                display_calls: display_sender,
                 exited: Arc::clone(&exited),
             }))),
         };
@@ -1340,6 +1419,22 @@ mod tests {
             vec![input]
         );
         assert!(started.elapsed() < Duration::from_millis(200));
+        let geometry = DisplayWindowGeometry {
+            x: 100,
+            y: 200,
+            width: 1280,
+            height: 720,
+            visible: true,
+        };
+        supervisor
+            .set_display_window(geometry)
+            .expect("submit display window");
+        assert_eq!(
+            display_receiver
+                .recv_timeout(Duration::from_millis(200))
+                .expect("worker forwards the display window"),
+            geometry
+        );
         supervisor.request_stop().expect("request stop");
         while supervisor.state() != GuestState::Stopped {
             events
@@ -1362,8 +1457,69 @@ mod tests {
             .expect("submit input");
         let mut qmp = RecordingQmp::default();
         supervisor.test_receive_input(epoch, &mut qmp);
-        assert_eq!(qmp.input_calls, vec![vec![event]]);
+        assert_eq!(qmp.calls, vec![RecordedCall::Input(vec![event])]);
         assert_eq!(supervisor.dropped_input_count(), 0);
+    }
+
+    #[test]
+    fn running_display_window_reaches_qmp_once_in_order_with_input() {
+        let supervisor = input_supervisor();
+        let epoch = supervisor.test_set_running();
+        let before = serde_json::json!({"type":"key","data":{"down":true}});
+        let after = serde_json::json!({"type":"key","data":{"down":false}});
+        let geometry = DisplayWindowGeometry {
+            x: -4,
+            y: 96,
+            width: 1600,
+            height: 900,
+            visible: true,
+        };
+        supervisor
+            .send_input(vec![before.clone()])
+            .expect("submit input before");
+        supervisor
+            .set_display_window(geometry)
+            .expect("submit display window");
+        supervisor
+            .send_input(vec![after.clone()])
+            .expect("submit input after");
+        let mut qmp = RecordingQmp::default();
+        for _ in 0..4 {
+            supervisor.test_receive_input(epoch, &mut qmp);
+        }
+        assert_eq!(
+            qmp.calls,
+            vec![
+                RecordedCall::Input(vec![before]),
+                RecordedCall::DisplayWindow(geometry),
+                RecordedCall::Input(vec![after]),
+            ]
+        );
+        assert_eq!(supervisor.dropped_input_count(), 0);
+    }
+
+    #[test]
+    fn display_window_before_running_or_from_a_stale_epoch_is_dropped_and_counted() {
+        let supervisor = input_supervisor();
+        let geometry = DisplayWindowGeometry {
+            x: 0,
+            y: 0,
+            width: 640,
+            height: 480,
+            visible: false,
+        };
+        supervisor
+            .set_display_window(geometry)
+            .expect("drop before running");
+        assert_eq!(supervisor.dropped_input_count(), 1);
+        let epoch = supervisor.test_set_running();
+        supervisor
+            .set_display_window(geometry)
+            .expect("submit display window");
+        let mut qmp = RecordingQmp::default();
+        supervisor.test_receive_input(epoch + 1, &mut qmp);
+        assert!(qmp.calls.is_empty());
+        assert_eq!(supervisor.dropped_input_count(), 2);
     }
 
     #[test]
@@ -1376,7 +1532,7 @@ mod tests {
         let epoch = supervisor.test_set_running();
         let mut qmp = RecordingQmp::default();
         supervisor.test_receive_input(epoch, &mut qmp);
-        assert!(qmp.input_calls.is_empty());
+        assert!(qmp.calls.is_empty());
     }
 
     #[test]

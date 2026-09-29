@@ -6,7 +6,8 @@
 use std::thread;
 use std::time::{Duration, Instant};
 
-use ome_platform_win::{PreviousStyle, WindowHandle, find_windows_of_process};
+use ome_platform_win::{WindowHandle, find_windows_of_process};
+pub use ome_qmp::DisplayWindowGeometry;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -172,16 +173,11 @@ pub struct HostingTarget {
     pub guest_process_id: u32,
 }
 
-#[derive(Debug)]
-struct HostedWindow {
-    owner: WindowHandle,
-    previous: PreviousStyle,
-}
-
 #[derive(Clone, Copy, Debug)]
 struct GuestWindow {
     handle: WindowHandle,
     process_id: u32,
+    owner: WindowHandle,
 }
 
 impl GuestWindow {
@@ -190,27 +186,44 @@ impl GuestWindow {
     }
 }
 
-/// Owns the reversible conversion of one QEMU SDL window into an owned top-level popup.
+/// Tracks the QEMU SDL window that QEMU created as a popup owned by the host window.
+///
+/// QEMU patch 0005 (`-display sdl,owner-window=<HWND>`, ADR-0009 7번) creates the window
+/// borderless, hidden, as a tool window with `WS_EX_NOACTIVATE`, already owned by the host, and
+/// never resizes it to the guest resolution. Any host-side change to the style, owner or size of
+/// that GL window freezes its presentation until the guest's next scanout
+/// (`docs/evidence/M2/embedded-display-freeze.md`), so this type never restyles, re-owns, resizes,
+/// shows or hides it. It changes only the Z-order and returns position, size and visibility as a
+/// [`DisplayWindowGeometry`] that the caller sends over QMP `x-ome-display-window`; QEMU applies
+/// it through SDL. QEMU owns the window's lifetime.
+///
+/// The geometry is in physical pixels, and QEMU runs per-monitor DPI aware. The calling process
+/// must be per-monitor DPI aware too (the Tauri shell is, through `tao`), or a scaled monitor
+/// hands it virtualized owner coordinates that no longer match QEMU's.
 #[derive(Debug, Default)]
 pub struct GuestWindowHost {
     guest: Option<GuestWindow>,
-    hosted: Option<HostedWindow>,
     overlay: Option<WindowHandle>,
     last_rect: Option<Rect>,
+    visible: bool,
     last_discovery_time: Option<Duration>,
     guest_dpi_before_attach: Option<u32>,
 }
 
 impl GuestWindowHost {
-    /// Attaches the guest's preferred visible top-level window as a non-activating owned popup.
+    /// Finds the guest's `SDL_app` window, hidden or visible, and checks that it is top-level and
+    /// owned by the host window. Nothing about the window is changed.
     ///
-    /// Discovery waits up to five seconds for a visible window, preferring `SDL_app` whenever it
-    /// appears in an enumeration. Style, extended style, and owner changes are rolled back
-    /// together when any native operation fails.
+    /// Discovery waits up to five seconds for the owned `SDL_app` window of console 0; QEMU
+    /// creates it hidden. QEMU makes one SDL window per console (the text consoles for the monitor,
+    /// serial and parallel ports included) and patch 0005 gives every one of them the owner, while
+    /// QMP `x-ome-display-window` drives console 0 only; its window is the one titled for console
+    /// 0 (see [`is_first_console_title`]), or the only owned window. When the process has `SDL_app`
+    /// windows but none of them qualifies, QEMU lacks patch 0005 or the configuration lacks
+    /// `owner_window`, and the guest is not hosted ([`HostingIssue::Platform`]).
     pub fn attach(&mut self, target: HostingTarget) -> Result<(), HostingIssue> {
         self.detach()?;
-        self.guest = None;
-        self.hosted = None;
+        self.visible = false;
         self.last_discovery_time = None;
         self.guest_dpi_before_attach = None;
         if target.parent_window == 0 || target.guest_process_id == 0 {
@@ -219,44 +232,38 @@ impl GuestWindowHost {
         let owner =
             WindowHandle::from_u64(target.parent_window).map_err(|_| HostingIssue::Platform)?;
         let discovery_started = Instant::now();
-        let guest = GuestWindow {
-            handle: discover_guest_window(target.guest_process_id)?,
-            process_id: target.guest_process_id,
-        };
+        let handle = discover_guest_window(target.guest_process_id, owner)?;
         self.last_discovery_time = Some(discovery_started.elapsed());
-        self.guest_dpi_before_attach =
-            Some(guest.handle.dpi().map_err(|_| HostingIssue::Platform)?);
-        let rect = self.last_rect.unwrap_or(Rect {
-            x: 0,
-            y: 0,
-            width: 0,
-            height: 0,
+        if !handle.is_top_level() || handle.owner() != Some(owner) {
+            return Err(HostingIssue::Platform);
+        }
+        self.guest_dpi_before_attach = Some(handle.dpi().map_err(|_| HostingIssue::Platform)?);
+        self.guest = Some(GuestWindow {
+            handle,
+            process_id: target.guest_process_id,
+            owner,
         });
-        let screen = screen_rect(owner, rect)?;
-        let (width, height) = native_dimensions(screen)?;
-        let previous = guest
-            .handle
-            .make_owned_popup(owner, screen.x, screen.y, width, height)
-            .map_err(|_| HostingIssue::Platform)?;
-        self.guest = Some(guest);
-        self.hosted = Some(HostedWindow { owner, previous });
         Ok(())
     }
 
-    /// Places an attached guest popup over a physical rectangle of the owner's client area.
+    /// Remembers a physical rectangle of the owner's client area, puts the popup in its Z-order
+    /// place, and returns the visible geometry the caller must send over QMP.
     ///
-    /// The rectangle is converted to screen coordinates with the owner's current client origin,
-    /// so calling again after the owner moves re-places the popup. The latest rectangle is
-    /// retained for the next attach. Calls made while no live guest is attached are accepted
-    /// without a native operation. A visible registered overlay is the insertion predecessor,
-    /// preserving overlay above guest above owner; otherwise the guest is placed at the top of
-    /// the non-topmost Z-order band.
-    pub fn place(&mut self, rect: Rect) -> Result<(), HostingIssue> {
+    /// The rectangle is converted to screen pixels with the owner's current client origin, so
+    /// calling again after the owner moves yields the corrected geometry. A visible registered
+    /// overlay is the Z-order predecessor, preserving overlay above guest above owner; otherwise
+    /// the popup goes to the top of the non-topmost band. An empty rectangle yields a hidden
+    /// one-pixel geometry, since QEMU rejects a zero size. Returns `Ok(None)` without a native
+    /// operation when no live guest is attached; the rectangle is still kept for the next attach.
+    pub fn place(&mut self, rect: Rect) -> Result<Option<DisplayWindowGeometry>, HostingIssue> {
         self.last_rect = Some(rect);
-        let Some((guest, owner)) = self.live_hosted_guest() else {
-            return Ok(());
+        self.visible = true;
+        let Some(guest) = self.live_guest() else {
+            return Ok(None);
         };
-        self.place_guest(guest, screen_rect(owner, rect)?)
+        let screen = screen_rect(guest.owner, rect)?;
+        self.apply_z_order(guest)?;
+        display_geometry(screen, true).map(Some)
     }
 
     /// Registers the native overlay window used as the popup's Z-order predecessor.
@@ -264,19 +271,33 @@ impl GuestWindowHost {
         self.overlay = overlay;
     }
 
-    /// Re-applies the last placement after QEMU changes its own top-level window size.
+    /// Checks the live popup against the expected screen rectangle.
     ///
-    /// The expected screen rectangle is recomputed from the owner's current client origin, so a
-    /// moved owner is corrected here as well. Returns `true` only when the live popup rectangle
-    /// differed and placement was applied.
-    pub fn resync(&mut self) -> Result<bool, HostingIssue> {
+    /// The expected rectangle is recomputed from the last rectangle and the owner's current client
+    /// origin, so a moved owner is caught here as well. Returns `Some(expected)` for the caller to
+    /// resend when the popup's window rectangle differs, and `None` when it matches, when the host
+    /// keeps the popup hidden, or when nothing is attached. Re-applies the Z-order below a visible
+    /// overlay.
+    pub fn resync(&mut self) -> Result<Option<DisplayWindowGeometry>, HostingIssue> {
         let Some(rect) = self.last_rect else {
-            return Ok(false);
+            return Ok(None);
         };
-        let Some((guest, owner)) = self.live_hosted_guest() else {
-            return Ok(false);
+        let Some(guest) = self.live_guest() else {
+            return Ok(None);
         };
-        let expected = screen_rect(owner, rect)?;
+        if let Some(overlay) = self.visible_overlay() {
+            guest
+                .handle
+                .place_z_order(Some(overlay))
+                .map_err(|_| HostingIssue::Platform)?;
+        }
+        if !self.visible {
+            return Ok(None);
+        }
+        let expected = display_geometry(screen_rect(guest.owner, rect)?, true)?;
+        if !expected.visible {
+            return Ok(None);
+        }
         let actual = guest
             .handle
             .window_rect()
@@ -286,75 +307,55 @@ impl GuestWindowHost {
             && actual.width == expected.width
             && actual.height == expected.height
         {
-            return Ok(false);
+            return Ok(None);
         }
-        self.place_guest(guest, expected)?;
-        Ok(true)
+        Ok(Some(expected))
     }
 
-    /// Hides the attached guest popup without detaching it.
-    pub fn hide(&mut self) -> Result<(), HostingIssue> {
-        let Some((guest, _owner)) = self.live_hosted_guest() else {
-            return Ok(());
-        };
-        guest.handle.hide().map_err(|_| HostingIssue::Platform)
-    }
-
-    /// Shows the attached guest popup without taking keyboard focus.
-    pub fn show(&mut self) -> Result<(), HostingIssue> {
-        let Some((guest, _owner)) = self.live_hosted_guest() else {
-            return Ok(());
-        };
-        guest
-            .handle
-            .show_inactive()
-            .map_err(|_| HostingIssue::Platform)
-    }
-
-    /// Restores the guest's saved style, extended style, and original relationship.
+    /// Returns the last geometry with `visible: false` for the caller to send.
     ///
-    /// A vanished or PID-reused HWND is treated as already detached.
+    /// The host itself never hides the window. Returns `Ok(None)` when no live guest is attached
+    /// or no rectangle is known yet.
+    pub fn hide(&mut self) -> Result<Option<DisplayWindowGeometry>, HostingIssue> {
+        self.visible = false;
+        self.current_geometry()
+    }
+
+    /// Returns the last geometry with `visible: true` for the caller to send.
+    ///
+    /// The host itself never shows the window; QEMU shows it without activation. Returns
+    /// `Ok(None)` when no live guest is attached or no rectangle is known yet.
+    pub fn show(&mut self) -> Result<Option<DisplayWindowGeometry>, HostingIssue> {
+        self.visible = true;
+        self.current_geometry()
+    }
+
+    /// Forgets the guest window. QEMU owns the window's lifetime, so nothing is restored.
     pub fn detach(&mut self) -> Result<(), HostingIssue> {
-        let Some(hosted) = self.hosted.take() else {
-            if self.guest.is_some_and(|guest| !guest.alive()) {
-                self.guest = None;
-            }
-            return Ok(());
-        };
-        let Some(guest) = self.guest else {
-            return Ok(());
-        };
-        if !guest.alive() {
-            self.guest = None;
-            return Ok(());
-        }
-        if let Err(_error) = guest.handle.restore_top_level(hosted.previous) {
-            self.hosted = Some(hosted);
-            return Err(HostingIssue::Platform);
-        }
+        self.guest = None;
         Ok(())
     }
 
-    /// Raises the guest popup without changing focus or activation.
+    /// Changes only the popup's Z-order, without focus or activation.
     ///
-    /// A visible registered overlay remains immediately above the guest. With no live hosted
-    /// popup or no remembered rectangle, the method is a no-op.
+    /// A visible registered overlay remains immediately above the guest. With no live guest or no
+    /// remembered rectangle, the method is a no-op.
     pub fn to_front(&mut self) -> Result<(), HostingIssue> {
-        let Some(rect) = self.last_rect else {
+        if self.last_rect.is_none() {
+            return Ok(());
+        }
+        let Some(guest) = self.live_guest() else {
             return Ok(());
         };
-        let Some((guest, owner)) = self.live_hosted_guest() else {
-            return Ok(());
-        };
-        self.place_guest(guest, screen_rect(owner, rect)?)
+        self.apply_z_order(guest)
     }
 
     /// Reports whether a live guest popup is top-level and owned by the registered host.
     pub fn is_attached(&self) -> bool {
-        let (Some(hosted), Some(guest)) = (self.hosted.as_ref(), self.guest) else {
+        let Some(guest) = self.guest else {
             return false;
         };
-        guest.alive() && guest.handle.is_top_level() && guest.handle.owner() == Some(hosted.owner)
+        guest.alive() && guest.handle.is_top_level() && guest.handle.owner() == Some(guest.owner)
     }
 
     /// Reports whether the discovered HWND still exists and belongs to the PID.
@@ -367,13 +368,10 @@ impl GuestWindowHost {
     /// Owned popups never receive focus through product hosting; this diagnostic remains for the
     /// former child-mode spike and verifies that the host queue did not retain the guest HWND.
     pub fn guest_has_parent_thread_focus(&self) -> Result<bool, HostingIssue> {
-        let Some(hosted) = self.hosted.as_ref() else {
-            return Ok(false);
-        };
         let Some(guest) = self.guest.filter(|guest| guest.alive()) else {
             return Ok(false);
         };
-        hosted
+        guest
             .owner
             .thread_focus()
             .map(|focused| focused == Some(guest.handle))
@@ -392,22 +390,30 @@ impl GuestWindowHost {
         self.last_discovery_time
     }
 
-    /// Returns the guest window DPI sampled immediately before the last attach.
+    /// Returns the guest window DPI sampled when the last attach found the window.
     pub fn guest_dpi_before_attach(&self) -> Option<u32> {
         self.guest_dpi_before_attach
     }
 
-    fn live_hosted_guest(&mut self) -> Option<(GuestWindow, WindowHandle)> {
-        let (Some(hosted), Some(guest)) = (self.hosted.as_ref(), self.guest) else {
-            return None;
-        };
+    fn live_guest(&mut self) -> Option<GuestWindow> {
+        let guest = self.guest?;
         if guest.alive() {
-            Some((guest, hosted.owner))
+            Some(guest)
         } else {
-            self.hosted = None;
             self.guest = None;
             None
         }
+    }
+
+    fn current_geometry(&mut self) -> Result<Option<DisplayWindowGeometry>, HostingIssue> {
+        let Some(rect) = self.last_rect else {
+            return Ok(None);
+        };
+        let Some(guest) = self.live_guest() else {
+            return Ok(None);
+        };
+        let visible = self.visible;
+        display_geometry(screen_rect(guest.owner, rect)?, visible).map(Some)
     }
 
     fn visible_overlay(&self) -> Option<WindowHandle> {
@@ -415,11 +421,10 @@ impl GuestWindowHost {
             .filter(|overlay| overlay.is_visible().unwrap_or(false))
     }
 
-    fn place_guest(&self, guest: GuestWindow, screen: Rect) -> Result<(), HostingIssue> {
-        let (width, height) = native_dimensions(screen)?;
+    fn apply_z_order(&self, guest: GuestWindow) -> Result<(), HostingIssue> {
         guest
             .handle
-            .place_behind(self.visible_overlay(), screen.x, screen.y, width, height)
+            .place_z_order(self.visible_overlay())
             .map_err(|_| HostingIssue::Platform)
     }
 }
@@ -437,42 +442,93 @@ fn screen_rect(owner: WindowHandle, rect: Rect) -> Result<Rect, HostingIssue> {
     })
 }
 
-impl Drop for GuestWindowHost {
-    fn drop(&mut self) {
-        let _ = self.detach();
-    }
+/// Builds the QMP geometry for a screen rectangle.
+///
+/// QEMU accepts sizes from one pixel to `i32::MAX`. A larger size is a platform failure; an empty
+/// rectangle becomes a hidden one-pixel window at the same position.
+fn display_geometry(screen: Rect, visible: bool) -> Result<DisplayWindowGeometry, HostingIssue> {
+    native_dimensions(screen)?;
+    let empty = screen.width == 0 || screen.height == 0;
+    Ok(DisplayWindowGeometry {
+        x: screen.x,
+        y: screen.y,
+        width: screen.width.max(1),
+        height: screen.height.max(1),
+        visible: visible && !empty,
+    })
 }
 
-fn discover_guest_window(pid: u32) -> Result<WindowHandle, HostingIssue> {
+fn discover_guest_window(pid: u32, owner: WindowHandle) -> Result<WindowHandle, HostingIssue> {
     let deadline = Instant::now() + DISCOVERY_TIMEOUT;
     loop {
         let windows = find_windows_of_process(pid).map_err(|_| HostingIssue::Platform)?;
-        if let Some(window) = preferred_visible_window(&windows) {
+        let sdl = sdl_windows(&windows);
+        let owned = sdl
+            .iter()
+            .copied()
+            .filter(|window| window.owner() == Some(owner))
+            .collect::<Vec<_>>();
+        if let Some(window) = first_console_window(&owned) {
             return Ok(window);
         }
         let now = Instant::now();
         if now >= deadline {
-            return Err(HostingIssue::WindowNotFound);
+            return Err(if sdl.is_empty() {
+                HostingIssue::WindowNotFound
+            } else {
+                HostingIssue::Platform
+            });
         }
         thread::sleep(DISCOVERY_INTERVAL.min(deadline.saturating_duration_since(now)));
     }
 }
 
-fn preferred_visible_window(windows: &[WindowHandle]) -> Option<WindowHandle> {
-    let mut first_visible = None;
-    for window in windows.iter().copied() {
-        if !window.is_visible().unwrap_or(false) {
-            continue;
-        }
-        first_visible.get_or_insert(window);
-        if window
-            .class_name()
-            .is_ok_and(|class_name| class_name == SDL_WINDOW_CLASS)
-        {
-            return Some(window);
-        }
-    }
-    first_visible
+/// Picks console 0's window among the owned `SDL_app` windows.
+///
+/// The window titled for console 0 wins; a single owned window (a QEMU without `-name` or with
+/// `-nodefaults`) is taken as it is.
+fn first_console_window(owned: &[WindowHandle]) -> Option<WindowHandle> {
+    let single = match owned {
+        [only] => Some(*only),
+        _ => None,
+    };
+    owned
+        .iter()
+        .copied()
+        .find(|window| {
+            window
+                .title()
+                .is_ok_and(|title| is_first_console_title(&title))
+        })
+        .or(single)
+}
+
+/// Reports whether an SDL window title names console 0.
+///
+/// QEMU titles each console's window `QEMU (<name>-<index>)` followed by an optional status such
+/// as ` [Stopped]` or ` - Press Ctrl-Alt-G to exit grab` (`ui/sdl2.c`, `sdl_update_caption`).
+/// Without `-name` every window is titled `QEMU`, which names no console.
+fn is_first_console_title(title: &str) -> bool {
+    let Some(rest) = title.strip_prefix("QEMU (") else {
+        return false;
+    };
+    rest.match_indices("-0)").any(|(index, marker)| {
+        let status = &rest[index + marker.len()..];
+        status.is_empty() || status.starts_with(" [") || status.starts_with(" - ")
+    })
+}
+
+/// Keeps the `SDL_app` windows, hidden or visible, in enumeration order.
+fn sdl_windows(windows: &[WindowHandle]) -> Vec<WindowHandle> {
+    windows
+        .iter()
+        .copied()
+        .filter(|window| {
+            window
+                .class_name()
+                .is_ok_and(|class_name| class_name == SDL_WINDOW_CLASS)
+        })
+        .collect()
 }
 
 fn native_dimensions(rect: Rect) -> Result<(i32, i32), HostingIssue> {
@@ -594,28 +650,118 @@ mod tests {
     }
 
     #[test]
-    fn unattached_place_and_detach_are_idempotent() {
+    fn unattached_calls_send_nothing_and_are_idempotent() {
         let mut host = GuestWindowHost::default();
-        host.place(Rect {
-            x: 0,
-            y: 0,
-            width: u32::MAX,
-            height: u32::MAX,
-        })
-        .expect("unattached place");
-        host.hide().expect("unattached hide");
-        host.show().expect("unattached show");
+        assert_eq!(
+            host.place(Rect {
+                x: 0,
+                y: 0,
+                width: u32::MAX,
+                height: u32::MAX,
+            })
+            .expect("unattached place"),
+            None
+        );
+        assert_eq!(host.hide().expect("unattached hide"), None);
+        assert_eq!(host.show().expect("unattached show"), None);
         host.detach().expect("unattached detach");
         host.to_front().expect("unattached raise");
-        assert!(!host.resync().expect("unattached resync"));
+        assert_eq!(host.resync().expect("unattached resync"), None);
         host.set_overlay_window(None);
         assert!(!host.is_attached());
         assert!(!host.guest_window_alive());
+        assert_eq!(host.guest_window(), None);
     }
 
     #[test]
-    fn window_preference_uses_no_ineligible_windows() {
-        assert_eq!(preferred_visible_window(&[]), None);
+    fn sdl_window_filter_keeps_nothing_from_nothing() {
+        assert!(sdl_windows(&[]).is_empty());
+        assert_eq!(first_console_window(&[]), None);
+    }
+
+    #[test]
+    fn only_console_zero_titles_are_first_console_titles() {
+        for title in [
+            "QEMU (OME default-0)",
+            "QEMU (OME default-0) [Stopped]",
+            "QEMU (OME default-0) - Press Ctrl-Alt-G to exit grab",
+            "QEMU (OME a-0)b-0)",
+        ] {
+            assert!(is_first_console_title(title), "{title}");
+        }
+        for title in [
+            "QEMU (OME default-1)",
+            "QEMU (OME default-10)",
+            "QEMU (OME default-1) [Stopped]",
+            "QEMU (OME a-0)b-1)",
+            "QEMU",
+            "",
+            "OME default-0)",
+        ] {
+            assert!(!is_first_console_title(title), "{title}");
+        }
+    }
+
+    #[test]
+    fn display_geometry_carries_the_screen_rect_and_visibility() {
+        let screen = Rect {
+            x: -8,
+            y: 40,
+            width: 1280,
+            height: 720,
+        };
+        assert_eq!(
+            display_geometry(screen, true),
+            Ok(DisplayWindowGeometry {
+                x: -8,
+                y: 40,
+                width: 1280,
+                height: 720,
+                visible: true,
+            })
+        );
+        assert_eq!(
+            display_geometry(screen, false).map(|geometry| geometry.visible),
+            Ok(false)
+        );
+    }
+
+    #[test]
+    fn display_geometry_of_an_empty_rect_is_hidden_at_one_pixel() {
+        assert_eq!(
+            display_geometry(
+                Rect {
+                    x: 5,
+                    y: 6,
+                    width: 0,
+                    height: 300,
+                },
+                true,
+            ),
+            Ok(DisplayWindowGeometry {
+                x: 5,
+                y: 6,
+                width: 1,
+                height: 300,
+                visible: false,
+            })
+        );
+    }
+
+    #[test]
+    fn display_geometry_rejects_sizes_qemu_cannot_take() {
+        assert_eq!(
+            display_geometry(
+                Rect {
+                    x: 0,
+                    y: 0,
+                    width: 1,
+                    height: i32::MAX as u32 + 1,
+                },
+                true,
+            ),
+            Err(HostingIssue::Platform)
+        );
     }
 
     #[test]

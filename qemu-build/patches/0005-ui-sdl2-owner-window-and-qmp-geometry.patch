@@ -1,0 +1,249 @@
+From 3ed4df2fa08d5bb266bc5a4afb01da4785ae80f5 Mon Sep 17 00:00:00 2001
+From: Open Mobile Emulator contributors <noreply@example.invalid>
+Date: Wed, 30 Sep 2026 00:00:00 +0000
+Subject: [PATCH] ui/sdl2: create owned window and control its geometry
+
+Let Open Mobile Emulator pass a Windows owner HWND when creating the SDL
+window.  The opted-in window starts as a hidden borderless owned popup,
+does not activate on click, and no longer follows guest resolution changes.
+Add an SDL-specific QMP command that moves, resizes, shows, or hides that
+window through SDL on QEMU's main loop thread.
+
+The ui/sdl2.c header carries the MIT license text.  qapi/ui.json has no
+file-local license header and is GPL-2.0-or-later under QEMU's LICENSE.
+This change is written for Open Mobile Emulator.
+
+Signed-off-by: Open Mobile Emulator contributors <noreply@example.invalid>
+---
+ qapi/ui.json |  38 +++++++++++++++++++-
+ ui/sdl2.c    | 113 ++++++++++++++++++++++++++++++++++++++++++++++++++++++-----
+ 2 files changed, 142 insertions(+), 9 deletions(-)
+
+diff --git a/qapi/ui.json b/qapi/ui.json
+index 43fbeee..102c661 100644
+--- a/qapi/ui.json
++++ b/qapi/ui.json
+@@ -1488,12 +1488,21 @@
+ #     the keyboard focus; the click itself is still delivered.
+ #     No effect on other platforms.
+ #
++# @owner-window: Open Mobile Emulator: Windows HWND (as an integer)
++#     that owns the SDL window.  When set, the window is created
++#     borderless, hidden, without a taskbar entry, with
++#     WS_EX_NOACTIVATE, owned by that window, and it never resizes
++#     itself to the guest resolution; the host positions, sizes and
++#     shows it with the x-ome-display-window command.  Implies
++#     activate-on-click=off.  No effect on other platforms.
++#
+ # Since: 7.1
+ ##
+ { 'struct'  : 'DisplaySDL',
+   'data'    : { '*grab-mod'        : 'HotKeyMod',
+                 '*swap-interval'   : 'int',
+-                '*activate-on-click': 'bool' } }
++                '*activate-on-click': 'bool',
++                '*owner-window'    : 'int' } }
+ 
+ ##
+ # @DisplayType:
+@@ -1594,6 +1603,33 @@
+ { 'command': 'query-display-options',
+   'returns': 'DisplayOptions' }
+ 
++##
++# @x-ome-display-window:
++#
++# Open Mobile Emulator: moves, resizes and shows or hides the SDL
++# display window from inside the SDL frontend, so the host never
++# touches the window itself.  Coordinates and sizes are physical
++# screen pixels.  Fails when the SDL display is not active or
++# owner-window is
++# not set.
++#
++# @x: Horizontal screen coordinate.
++#
++# @y: Vertical screen coordinate.
++#
++# @width: Window width.
++#
++# @height: Window height.
++#
++# @visible: Whether to show the window.
++#
++# Since: 11.1
++##
++{ 'command': 'x-ome-display-window',
++  'data': { 'x': 'int', 'y': 'int', 'width': 'int', 'height': 'int',
++            'visible': 'bool' },
++  'if': 'CONFIG_SDL' }
++
+ ##
+ # @DisplayReloadType:
+ #
+diff --git a/ui/sdl2.c b/ui/sdl2.c
+index 5d3b78c..3c46fc2 100644
+--- a/ui/sdl2.c
++++ b/ui/sdl2.c
+@@ -71,6 +71,15 @@ static Notifier mouse_mode_notifier;
+ 
+ static void sdl_update_caption(struct sdl2_console *scon);
+ 
++static bool sdl2_has_owner_window(const struct sdl2_console *scon)
++{
++#ifdef _WIN32
++    return scon->opts->u.sdl.has_owner_window;
++#else
++    return false;
++#endif
++}
++
+ #ifdef _WIN32
+ static LRESULT CALLBACK sdl2_win32_noactivate_proc(HWND hwnd, UINT message,
+                                                     WPARAM wparam,
+@@ -115,6 +124,10 @@ void sdl2_window_create(struct sdl2_console *scon)
+     if (scon->hidden) {
+         flags |= SDL_WINDOW_HIDDEN;
+     }
++    if (sdl2_has_owner_window(scon)) {
++        flags |= SDL_WINDOW_BORDERLESS | SDL_WINDOW_HIDDEN |
++                 SDL_WINDOW_SKIP_TASKBAR;
++    }
+ #ifdef CONFIG_OPENGL
+     if (scon->opengl) {
+         flags |= SDL_WINDOW_OPENGL;
+@@ -128,8 +141,9 @@ void sdl2_window_create(struct sdl2_console *scon)
+                                          flags);
+ #ifdef _WIN32
+     if (scon->real_window &&
+-        scon->opts->u.sdl.has_activate_on_click &&
+-        !scon->opts->u.sdl.activate_on_click) {
++        (sdl2_has_owner_window(scon) ||
++         (scon->opts->u.sdl.has_activate_on_click &&
++          !scon->opts->u.sdl.activate_on_click))) {
+         SDL_SysWMinfo info = { 0 };
+         WNDPROC original;
+ 
+@@ -138,19 +152,62 @@ void sdl2_window_create(struct sdl2_console *scon)
+             warn_report("sdl: failed to obtain the Windows window handle: %s",
+                         SDL_GetError());
+         } else {
++            HWND hwnd = info.info.win.window;
++
++            if (sdl2_has_owner_window(scon)) {
++                LONG_PTR ex_style;
++                LONG_PTR result;
++                DWORD error;
++
++                SetLastError(0);
++                result = SetWindowLongPtrW(
++                    hwnd, GWLP_HWNDPARENT,
++                    (LONG_PTR)(HWND)(intptr_t)
++                    scon->opts->u.sdl.owner_window);
++                error = GetLastError();
++                if (!result && error) {
++                    warn_report("sdl: failed to set the owner window: %lu",
++                                error);
++                }
++
++                SetLastError(0);
++                ex_style = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
++                error = GetLastError();
++                if (!ex_style && error) {
++                    warn_report("sdl: failed to read extended window style: "
++                                "%lu", error);
++                } else {
++                    SetLastError(0);
++                    result = SetWindowLongPtrW(
++                        hwnd, GWL_EXSTYLE,
++                        ex_style | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW);
++                    error = GetLastError();
++                    if (!result && error) {
++                        warn_report("sdl: failed to set extended window "
++                                    "style: %lu", error);
++                    }
++                }
++
++                if (!SetWindowPos(hwnd, NULL, 0, 0, 0, 0,
++                                  SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
++                                  SWP_NOACTIVATE | SWP_FRAMECHANGED)) {
++                    warn_report("sdl: failed to apply the owner window "
++                                "style: %lu", GetLastError());
++                }
++            }
++
+             SetLastError(0);
+             original = (WNDPROC)SetWindowLongPtrW(
+-                info.info.win.window, GWLP_WNDPROC,
++                hwnd, GWLP_WNDPROC,
+                 (LONG_PTR)sdl2_win32_noactivate_proc);
+             if (!original) {
+                 warn_report("sdl: failed to disable click activation: %lu",
+                             GetLastError());
+-            } else if (!SetPropW(info.info.win.window,
+-                                 L"OMESDLOriginalProc", (HANDLE)original)) {
++            } else if (!SetPropW(hwnd, L"OMESDLOriginalProc",
++                                 (HANDLE)original)) {
+                 DWORD error = GetLastError();
+ 
+-                SetWindowLongPtrW(info.info.win.window, GWLP_WNDPROC,
+-                                  (LONG_PTR)original);
++                SetWindowLongPtrW(hwnd, GWLP_WNDPROC, (LONG_PTR)original);
+                 warn_report("sdl: failed to save the original window "
+                             "procedure: %lu", error);
+             }
+@@ -229,7 +286,7 @@ void sdl2_window_destroy(struct sdl2_console *scon)
+ 
+ void sdl2_window_resize(struct sdl2_console *scon)
+ {
+-    if (!scon->real_window) {
++    if (!scon->real_window || sdl2_has_owner_window(scon)) {
+         return;
+     }
+ 
+@@ -238,6 +295,46 @@ void sdl2_window_resize(struct sdl2_console *scon)
+                       surface_height(scon->surface));
+ }
+ 
++void qmp_x_ome_display_window(int64_t x, int64_t y,
++                              int64_t width, int64_t height,
++                              bool visible, Error **errp)
++{
++    struct sdl2_console *scon;
++
++    if (!sdl2_console || sdl2_num_outputs == 0) {
++        error_setg(errp, "SDL display is not active");
++        return;
++    }
++
++    scon = &sdl2_console[0];
++    if (!scon->real_window) {
++        error_setg(errp, "SDL display window is not available");
++        return;
++    }
++    if (!sdl2_has_owner_window(scon)) {
++        error_setg(errp, "SDL display owner-window is not set");
++        return;
++    }
++    if (x < INT_MIN || x > INT_MAX || y < INT_MIN || y > INT_MAX) {
++        error_setg(errp, "SDL display coordinates are out of range");
++        return;
++    }
++    if (width <= 0 || width > INT_MAX ||
++        height <= 0 || height > INT_MAX) {
++        error_setg(errp, "SDL display size must be between 1 and %d pixels",
++                   INT_MAX);
++        return;
++    }
++
++    SDL_SetWindowPosition(scon->real_window, (int)x, (int)y);
++    SDL_SetWindowSize(scon->real_window, (int)width, (int)height);
++    if (visible) {
++        SDL_ShowWindow(scon->real_window);
++    } else {
++        SDL_HideWindow(scon->real_window);
++    }
++}
++
+ static void sdl2_redraw(struct sdl2_console *scon)
+ {
+     if (scon->opengl) {

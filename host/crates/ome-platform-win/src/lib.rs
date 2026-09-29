@@ -290,6 +290,18 @@ impl WindowHandle {
         }
     }
 
+    /// Returns the window's title text, empty when it has none.
+    pub fn title(self) -> Result<String, PlatformError> {
+        #[cfg(windows)]
+        {
+            ffi::window::title(self.0).map_err(PlatformError::Io)
+        }
+        #[cfg(not(windows))]
+        {
+            Err(PlatformError::Unsupported)
+        }
+    }
+
     /// Reports whether the window is visible.
     pub fn is_visible(self) -> Result<bool, PlatformError> {
         #[cfg(windows)]
@@ -476,6 +488,25 @@ impl WindowHandle {
         }
     }
 
+    /// Changes only the Z-order of this top-level window: directly behind `insert_after`, or at
+    /// the top when omitted.
+    ///
+    /// Position, size and activation stay untouched (`SWP_NOMOVE | SWP_NOSIZE |
+    /// SWP_NOACTIVATE`). Moving a window and changing its Z-order are the host changes that do not
+    /// freeze an SDL GL window (`docs/evidence/M2/embedded-display-freeze.md`).
+    pub fn place_z_order(self, insert_after: Option<WindowHandle>) -> Result<(), PlatformError> {
+        #[cfg(windows)]
+        {
+            ffi::window::place_z_order(self.0, insert_after.map(|window| window.0))
+                .map_err(PlatformError::Io)
+        }
+        #[cfg(not(windows))]
+        {
+            let _ = insert_after;
+            Err(PlatformError::Unsupported)
+        }
+    }
+
     /// Activates `parent` on its owner thread without leaving focus on this hosted child.
     pub fn focus_as_child_of(self, parent: WindowHandle) -> Result<(), PlatformError> {
         #[cfg(windows)]
@@ -658,6 +689,96 @@ pub fn click_primary_at(x: i32, y: i32) -> Result<(), PlatformError> {
     }
 }
 
+/// Returns the share of lit pixels in one physical screen region, from 0.0 to 1.0.
+///
+/// This helper exists for native integration checks that tell a live guest window from a frozen
+/// one. It copies the composed screen with GDI, samples every 12th pixel on each axis and counts a
+/// pixel as lit when its red, green and blue values sum above 60. A sleeping monitor stops DWM
+/// composition, so the copy then shows the last composed frame.
+pub fn screen_region_lit_share(
+    x: i32,
+    y: i32,
+    width: u32,
+    height: u32,
+) -> Result<f64, PlatformError> {
+    #[cfg(windows)]
+    {
+        ffi::screen::lit_share(x, y, width, height).map_err(PlatformError::Io)
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = (x, y, width, height);
+        Err(PlatformError::Unsupported)
+    }
+}
+
+/// Keeps the display on until dropped.
+///
+/// The user is watching a game, so while a guest runs the emulator keeps the display on the way
+/// video players do: `SetThreadExecutionState(ES_CONTINUOUS | ES_DISPLAY_REQUIRED)`. The
+/// system-sleep flag (`ES_SYSTEM_REQUIRED`) is not held. The state belongs to the calling thread,
+/// so the guard holds it on its own long-lived thread, which clears it (`ES_CONTINUOUS` alone)
+/// when the guard drops. A sleeping monitor also stops DWM composition, which leaves the guest
+/// window showing stale frames (`docs/evidence/M2/embedded-display-freeze.md`).
+#[derive(Debug)]
+pub struct DisplayKeepAwake {
+    release: Option<std::sync::mpsc::Sender<()>>,
+    holder: Option<std::thread::JoinHandle<()>>,
+}
+
+impl DisplayKeepAwake {
+    /// Starts the holder thread and returns once it holds the display requirement.
+    pub fn acquire() -> Result<Self, PlatformError> {
+        #[cfg(windows)]
+        {
+            let (release, released) = std::sync::mpsc::channel::<()>();
+            let (ready, acquired) = std::sync::mpsc::channel::<io::Result<()>>();
+            let holder = std::thread::Builder::new()
+                .name("ome-display-keep-awake".to_owned())
+                .spawn(move || {
+                    let result = ffi::power::require_display();
+                    let held = result.is_ok();
+                    let _ = ready.send(result);
+                    if held {
+                        // Returns when the guard drops its sender.
+                        let _ = released.recv();
+                        ffi::power::release_display();
+                    }
+                })
+                .map_err(PlatformError::Io)?;
+            match acquired.recv() {
+                Ok(Ok(())) => Ok(Self {
+                    release: Some(release),
+                    holder: Some(holder),
+                }),
+                Ok(Err(error)) => {
+                    let _ = holder.join();
+                    Err(PlatformError::Io(error))
+                }
+                Err(_) => {
+                    let _ = holder.join();
+                    Err(PlatformError::Io(io::Error::other(
+                        "display keep-awake thread ended before reporting",
+                    )))
+                }
+            }
+        }
+        #[cfg(not(windows))]
+        {
+            Err(PlatformError::Unsupported)
+        }
+    }
+}
+
+impl Drop for DisplayKeepAwake {
+    fn drop(&mut self) {
+        drop(self.release.take());
+        if let Some(holder) = self.holder.take() {
+            let _ = holder.join();
+        }
+    }
+}
+
 /// Enumerates all top-level windows currently owned by `pid`.
 pub fn find_windows_of_process(pid: u32) -> Result<Vec<WindowHandle>, PlatformError> {
     #[cfg(windows)]
@@ -669,6 +790,23 @@ pub fn find_windows_of_process(pid: u32) -> Result<Vec<WindowHandle>, PlatformEr
     #[cfg(not(windows))]
     {
         let _ = pid;
+        Err(PlatformError::Unsupported)
+    }
+}
+
+/// Makes this process per-monitor DPI aware (v2), so window and screen coordinates are physical.
+///
+/// The Tauri shell's event loop does the same (`tao`), and QEMU runs with
+/// `SDL_WINDOWS_DPI_AWARENESS=permonitorv2`; the QMP window geometry is in physical pixels.
+/// Native integration checks call this before creating any window so that they see the same
+/// coordinates as the product. Windows rejects the call once the process default is set.
+pub fn set_process_dpi_awareness_per_monitor_v2() -> Result<(), PlatformError> {
+    #[cfg(windows)]
+    {
+        ffi::window::set_process_dpi_awareness_per_monitor_v2().map_err(PlatformError::Io)
+    }
+    #[cfg(not(windows))]
+    {
         Err(PlatformError::Unsupported)
     }
 }

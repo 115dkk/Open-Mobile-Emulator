@@ -2503,6 +2503,7 @@ name = "ome-window-host"
 version = "0.1.0"
 dependencies = [
  "ome-platform-win",
+ "ome-qmp",
  "serde",
  "thiserror 2.0.21",
 ]

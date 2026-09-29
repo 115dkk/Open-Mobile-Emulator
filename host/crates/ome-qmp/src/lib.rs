@@ -65,6 +65,24 @@ pub struct RunState {
     pub singlestep: bool,
 }
 
+/// Screen placement of QEMU's SDL display window (QEMU patch 0005, `x-ome-display-window`).
+///
+/// Coordinates and sizes are physical screen pixels. QEMU applies them through SDL on its
+/// own main loop, so the host never moves, resizes, shows or hides the window itself.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct DisplayWindowGeometry {
+    /// Left edge in physical screen pixels.
+    pub x: i32,
+    /// Top edge in physical screen pixels.
+    pub y: i32,
+    /// Width in physical pixels.
+    pub width: u32,
+    /// Height in physical pixels.
+    pub height: u32,
+    /// Whether QEMU shows the window.
+    pub visible: bool,
+}
+
 /// A negotiated QMP connection over one TCP stream.
 ///
 /// The channel owns request IDs and queues every event observed while waiting
@@ -207,6 +225,32 @@ impl QmpChannel {
         match &result {
             Ok(()) => eprintln!("[input] qmp reply=input-send-event ok"),
             Err(error) => eprintln!("[input] qmp reply=input-send-event error={error}"),
+        }
+        result
+    }
+
+    /// Places, sizes and shows or hides the SDL display window through the OME command
+    /// `x-ome-display-window` (QEMU patch 0005; needs `-display sdl,owner-window=<hwnd>`).
+    pub fn display_window(&mut self, geometry: DisplayWindowGeometry) -> Result<(), QmpError> {
+        #[cfg(debug_assertions)]
+        eprintln!(
+            "[stage] qmp command=x-ome-display-window x={} y={} width={} height={} visible={}",
+            geometry.x, geometry.y, geometry.width, geometry.height, geometry.visible
+        );
+        let result = self.execute_empty(
+            "x-ome-display-window",
+            Some(json!({
+                "x": geometry.x,
+                "y": geometry.y,
+                "width": geometry.width,
+                "height": geometry.height,
+                "visible": geometry.visible,
+            })),
+        );
+        #[cfg(debug_assertions)]
+        match &result {
+            Ok(()) => eprintln!("[stage] qmp reply=x-ome-display-window ok"),
+            Err(error) => eprintln!("[stage] qmp reply=x-ome-display-window error={error}"),
         }
         result
     }
@@ -550,6 +594,36 @@ mod tests {
         channel
             .screendump(Path::new("shot.ppm"))
             .expect("screendump");
+        server.join().expect("server thread");
+    }
+
+    #[test]
+    fn display_window_request_carries_the_geometry() {
+        let (address, server) = server(|stream| {
+            let mut write = stream.try_clone().expect("clone writer");
+            let mut reader = handshake(stream);
+            let request = read_request(&mut reader);
+            assert_eq!(request["execute"], "x-ome-display-window");
+            assert_eq!(request["id"], "ome-1");
+            assert_eq!(
+                request["arguments"],
+                json!({ "x": -8, "y": 120, "width": 1280, "height": 720, "visible": false })
+            );
+            write
+                .write_all(b"{\"return\":{},\"id\":\"ome-1\"}\r\n")
+                .expect("write response");
+            keep_response_alive();
+        });
+        let mut channel = QmpChannel::connect(address, Duration::from_secs(1)).expect("connect");
+        channel
+            .display_window(DisplayWindowGeometry {
+                x: -8,
+                y: 120,
+                width: 1280,
+                height: 720,
+                visible: false,
+            })
+            .expect("display window");
         server.join().expect("server thread");
     }
 }

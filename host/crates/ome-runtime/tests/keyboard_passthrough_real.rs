@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Copyright (C) 2026 Open Mobile Emulator contributors
-//! Manual QMP keyboard pass-through check against the adopted Android guest.
+//! Manual check against the adopted Android guest: the QEMU-owned popup (patch 0005) is placed
+//! over QMP, stays live, and passes mouse and QMP keyboard input.
 #![forbid(unsafe_code)]
 #![cfg(windows)]
 
@@ -8,22 +9,26 @@ use std::io::{BufRead as _, BufReader};
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command as ProcessCommand, Stdio};
-use std::sync::Arc;
 use std::sync::mpsc::{self, Receiver, RecvTimeoutError};
+use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
 
 use ome_adb::{AdbSession, ProcessRunner};
+use ome_guest_config::{GuestConfig, GuestPaths, QemuInstall};
 use ome_host_check::HostProbe;
 use ome_platform_win::{
-    TestHostWindow, WindowHandle, click_primary_at, set_thread_dpi_hosting_mixed, window_at,
+    TestHostWindow, WindowHandle, click_primary_at, screen_region_lit_share,
+    set_process_dpi_awareness_per_monitor_v2, set_thread_dpi_hosting_mixed, window_at,
 };
 use ome_runtime::{
-    AdbPowerOff, AppRuntime, Command, Desktop, GuestState, OmeHome, RuntimeDeps, StageRect,
-    WindowsProbe,
+    AdbPowerOff, AppRuntime, Command, Desktop, GuestProcess, GuestState, OmeHome, RuntimeDeps,
+    StageRect, WindowsProbe,
 };
 use ome_supervisor::windows_adapter::WindowsProcessAdapter;
-use ome_supervisor::{GuestEvent, Supervisor, SupervisorPolicy, TcpQmpFactory};
+use ome_supervisor::{
+    DisplayWindowGeometry, GuestEvent, InputError, Supervisor, SupervisorPolicy, TcpQmpFactory,
+};
 use ome_window_host::GuestWindowHost;
 
 const GUEST_ID: &str = "default";
@@ -31,7 +36,64 @@ const BOOT_DEADLINE: Duration = Duration::from_secs(180);
 const STOP_DEADLINE: Duration = Duration::from_secs(40);
 const STARTUP_PLACEMENT_WINDOW: Duration = Duration::from_secs(40);
 const STARTUP_TICK_INTERVAL: Duration = Duration::from_millis(200);
+/// The first 15 s after `GuestStart` show the firmware and the GRUB menu's photo background.
+const LIVENESS_WINDOW: Duration = Duration::from_secs(15);
+const LIVENESS_INTERVAL: Duration = Duration::from_millis(500);
+/// A live popup over the GRUB photo is mostly lit; a frozen one stays near 0 or constant and low.
+const LIVENESS_MINIMUM: f64 = 0.6;
 const ADB_ADDRESS: &str = "127.0.0.1:5555";
+
+type SentGeometries = Arc<Mutex<Vec<(Instant, DisplayWindowGeometry)>>>;
+
+/// Delegates to the real supervisor and records every geometry the runtime sends over QMP.
+struct RecordingSupervisor {
+    inner: Supervisor<WindowsProcessAdapter, TcpQmpFactory>,
+    sent: SentGeometries,
+}
+
+impl GuestProcess for RecordingSupervisor {
+    fn start(
+        &mut self,
+        config: GuestConfig,
+        paths: GuestPaths,
+        install: QemuInstall,
+    ) -> Result<(), String> {
+        GuestProcess::start(&mut self.inner, config, paths, install)
+    }
+
+    fn start_install(
+        &mut self,
+        config: GuestConfig,
+        paths: GuestPaths,
+        install: QemuInstall,
+    ) -> Result<(), String> {
+        GuestProcess::start_install(&mut self.inner, config, paths, install)
+    }
+
+    fn request_stop(&self) {
+        GuestProcess::request_stop(&self.inner);
+    }
+
+    fn send_input(&self, events: Vec<serde_json::Value>) -> Result<(), InputError> {
+        GuestProcess::send_input(&self.inner, events)
+    }
+
+    fn set_display_window(&self, geometry: DisplayWindowGeometry) -> Result<(), InputError> {
+        self.sent
+            .lock()
+            .expect("sent geometries lock")
+            .push((Instant::now(), geometry));
+        GuestProcess::set_display_window(&self.inner, geometry)
+    }
+
+    fn state(&self) -> ome_supervisor::GuestState {
+        GuestProcess::state(&self.inner)
+    }
+
+    fn subscribe(&self) -> Receiver<GuestEvent> {
+        GuestProcess::subscribe(&self.inner)
+    }
+}
 
 #[derive(Debug, Default)]
 struct ClosedDesktop;
@@ -178,6 +240,10 @@ fn browser_keyboard_and_mouse_reach_unfocused_real_guest() {
 }
 
 fn run_check() {
+    // The product shell is per-monitor DPI aware (tao), so the runtime's window and screen
+    // coordinates are physical pixels, the unit QEMU takes the QMP window geometry in. Without
+    // this, a scaled monitor virtualizes this test's coordinates.
+    set_process_dpi_awareness_per_monitor_v2().expect("become per-monitor DPI aware");
     let repository = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../..");
     let home = OmeHome::resolved().expect("resolve product home");
     let probe = WindowsProbe::new(home.as_path().to_path_buf());
@@ -203,16 +269,24 @@ fn run_check() {
         policy,
     );
     let receiver = supervisor.subscribe();
+    let sent: SentGeometries = Arc::new(Mutex::new(Vec::new()));
     let _dpi_guard = set_thread_dpi_hosting_mixed().expect("set mixed DPI hosting");
     let parent = TestHostWindow::create("OME browser input verification", 1280, 720)
         .expect("create test parent window");
+    // Expose the host and its owned popup from the start so the liveness samples see the popup.
+    parent
+        .set_topmost(true)
+        .expect("expose test parent during startup");
     let mut runtime = AppRuntime::open(
         home,
         RuntimeDeps {
             probe: Box::new(probe),
             artifacts: None,
             adb: Some(adb),
-            supervisor: Some(Box::new(supervisor)),
+            supervisor: Some(Box::new(RecordingSupervisor {
+                inner: supervisor,
+                sent: Arc::clone(&sent),
+            })),
             desktop: Box::new(ClosedDesktop),
             window_host: Box::new(GuestWindowHost::default()),
             family_adapter: None,
@@ -248,10 +322,29 @@ fn run_check() {
             },
         })
         .expect("mark stage visible");
+    let start_requested = Instant::now();
     runtime.apply(Command::GuestStart).expect("start guest");
 
     let check = catch_unwind(AssertUnwindSafe(|| {
-        let placement = verify_startup_popup_placement(&mut runtime, &receiver, &parent);
+        let placement =
+            verify_startup_popup_placement(&mut runtime, &receiver, &parent, start_requested);
+        println!(
+            "liveness_samples_shown={} liveness_samples_not_shown={} liveness_max={:.3} liveness_consecutive_changes={}",
+            placement.lit_samples.len(),
+            placement.unshown_samples,
+            placement.lit_max(),
+            placement.lit_changes()
+        );
+        assert!(
+            placement.lit_max() >= LIVENESS_MINIMUM,
+            "guest popup looks frozen or unexposed: lit samples {:?}",
+            placement.lit_samples
+        );
+        assert!(
+            placement.lit_changes() > 0,
+            "guest popup frames did not change: lit samples {:?}",
+            placement.lit_samples
+        );
         wait_for_boot(&mut runtime, &receiver);
         let guest = guest_window(&runtime);
         let top_level = guest.is_top_level();
@@ -274,14 +367,55 @@ fn run_check() {
         assert!(no_activate, "guest popup lacks WS_EX_NOACTIVATE");
         let actual_after_boot = guest.window_rect().expect("guest window rect after boot");
         let expected_after_boot = expected_popup_rect(&parent);
+        let sent_after_boot = sent.lock().expect("sent geometries lock").clone();
+        let (first_sent_at, first_sent) = *sent_after_boot
+            .first()
+            .expect("runtime sent a display window geometry");
+        let (_, last_sent) = *sent_after_boot
+            .last()
+            .expect("runtime sent a display window geometry");
         println!(
-            "startup_ticks={} startup_rect_mismatch_count={} startup_largest_deviation_px={} startup_resync_count={} startup_largest_tick_interval_ms={} startup_elapsed_ms={}",
+            "startup_ticks={} startup_visible_rect_mismatch_count={} startup_largest_deviation_px={} startup_largest_tick_interval_ms={} startup_elapsed_ms={}",
             placement.ticks,
             placement.mismatch_count,
             placement.largest_deviation_px,
-            placement.resync_count,
             placement.largest_tick_interval.as_millis(),
             placement.elapsed.as_millis()
+        );
+        println!(
+            "geometries_sent={} first_sent_after_start_ms={} first_sent={},{} {}x{} visible={}",
+            sent_after_boot.len(),
+            first_sent_at
+                .saturating_duration_since(start_requested)
+                .as_millis(),
+            first_sent.x,
+            first_sent.y,
+            first_sent.width,
+            first_sent.height,
+            first_sent.visible
+        );
+        println!(
+            "popup_rect_after_boot_actual={},{} {}x{} sent={},{} {}x{} visible={}",
+            actual_after_boot.x,
+            actual_after_boot.y,
+            actual_after_boot.width,
+            actual_after_boot.height,
+            last_sent.x,
+            last_sent.y,
+            last_sent.width,
+            last_sent.height,
+            last_sent.visible
+        );
+        assert!(last_sent.visible, "the last geometry sent hides the popup");
+        assert_eq!(
+            (
+                actual_after_boot.x,
+                actual_after_boot.y,
+                actual_after_boot.width,
+                actual_after_boot.height
+            ),
+            (last_sent.x, last_sent.y, last_sent.width, last_sent.height),
+            "popup rect differs from the geometry the runtime sent"
         );
         println!(
             "popup_rect_after_boot_actual={},{} {}x{} expected={},{} {}x{}",
@@ -427,22 +561,42 @@ struct PlacementMeasurements {
     ticks: u32,
     mismatch_count: u32,
     largest_deviation_px: u32,
-    resync_count: u32,
     largest_tick_interval: Duration,
     elapsed: Duration,
+    /// Lit shares of the samples taken while the popup was visible and on top at its centre.
+    lit_samples: Vec<f64>,
+    unshown_samples: u32,
+}
+
+impl PlacementMeasurements {
+    fn lit_max(&self) -> f64 {
+        self.lit_samples.iter().copied().fold(0.0, f64::max)
+    }
+
+    fn lit_changes(&self) -> usize {
+        self.lit_samples
+            .windows(2)
+            .filter(|pair| pair[0] != pair[1])
+            .count()
+    }
 }
 
 fn verify_startup_popup_placement(
     runtime: &mut AppRuntime,
     receiver: &Receiver<GuestEvent>,
     parent: &TestHostWindow,
+    start_requested: Instant,
 ) -> PlacementMeasurements {
     let started = Instant::now();
     let deadline = started + STARTUP_PLACEMENT_WINDOW;
+    let liveness_end = start_requested + LIVENESS_WINDOW;
+    let mut next_sample = start_requested;
+    let mut lit_samples = Vec::new();
+    let mut unshown_samples = 0_u32;
+    let mut exposed = false;
     let mut ticks = 0_u32;
     let mut mismatch_count = 0_u32;
     let mut largest_deviation_px = 0_u32;
-    let mut resync_count = 0_u32;
     let mut previous_rect = None;
     let mut previous_tick = None;
     let mut largest_tick_interval = Duration::ZERO;
@@ -455,8 +609,18 @@ fn verify_startup_popup_placement(
             largest_tick_interval = largest_tick_interval.max(tick_at.duration_since(previous));
         }
         previous_tick = Some(tick_at);
-        if let Some(raw) = runtime.guest_window_handle() {
-            let guest = WindowHandle::from_u64(raw).expect("valid guest window token");
+        let guest = runtime
+            .guest_window_handle()
+            .map(|raw| WindowHandle::from_u64(raw).expect("valid guest window token"));
+        let visible = guest.is_some_and(|guest| guest.is_visible().unwrap_or(false));
+        if let Some(guest) = guest.filter(|_| visible) {
+            if !exposed {
+                // Re-assert the owner's topmost band now that its owned popup is shown.
+                parent
+                    .set_topmost(true)
+                    .expect("expose test parent and its popup");
+                exposed = true;
+            }
             let before = guest
                 .window_rect()
                 .expect("guest window rect during startup");
@@ -472,14 +636,30 @@ fn verify_startup_popup_placement(
                 );
             }
             previous_rect = Some(before);
-            let after = guest
-                .window_rect()
-                .expect("guest window rect after startup tick");
-            if before != expected && after == expected {
-                resync_count = resync_count.saturating_add(1);
+        }
+        let now = Instant::now();
+        if now < liveness_end && now >= next_sample {
+            next_sample = now + LIVENESS_INTERVAL;
+            let at = now.saturating_duration_since(start_requested).as_millis();
+            match guest.filter(|_| visible).and_then(liveness_sample) {
+                Some(share) => {
+                    println!("liveness_sample t=+{at}ms lit={share:.3}");
+                    lit_samples.push(share);
+                }
+                None => {
+                    println!(
+                        "liveness_sample t=+{at}ms not-shown attached={} visible={visible}",
+                        guest.is_some()
+                    );
+                    unshown_samples = unshown_samples.saturating_add(1);
+                }
             }
         }
-        thread::sleep(STARTUP_TICK_INTERVAL);
+        thread::sleep(if now < liveness_end {
+            STARTUP_TICK_INTERVAL.min(next_sample.saturating_duration_since(now))
+        } else {
+            STARTUP_TICK_INTERVAL
+        });
     }
     drain_guest_events(runtime, receiver);
     runtime.tick();
@@ -488,10 +668,25 @@ fn verify_startup_popup_placement(
         ticks,
         mismatch_count,
         largest_deviation_px,
-        resync_count,
         largest_tick_interval,
         elapsed: started.elapsed(),
+        lit_samples,
+        unshown_samples,
     }
+}
+
+/// Samples the popup's client area when the popup is the window under its own centre.
+fn liveness_sample(guest: WindowHandle) -> Option<f64> {
+    let rect = guest.client_screen_rect().ok()?;
+    if rect.width == 0 || rect.height == 0 {
+        return None;
+    }
+    let center_x = rect.x + i32::try_from(rect.width / 2).ok()?;
+    let center_y = rect.y + i32::try_from(rect.height / 2).ok()?;
+    if window_at(center_x, center_y) != guest.as_u64() {
+        return None;
+    }
+    screen_region_lit_share(rect.x, rect.y, rect.width, rect.height).ok()
 }
 
 fn guest_window(runtime: &AppRuntime) -> WindowHandle {
@@ -573,11 +768,14 @@ fn stop_through_runtime(runtime: &mut AppRuntime, receiver: &Receiver<GuestEvent
             break;
         }
     }
+    let stopped = runtime.snapshot().guest;
+    println!(
+        "guest_state_after_stop={:?} last_exit={:?}",
+        stopped.state,
+        stopped.last_exit.map(|exit| exit.kind)
+    );
     assert!(
-        matches!(
-            runtime.snapshot().guest.state,
-            GuestState::Stopped | GuestState::Failed
-        ),
+        matches!(stopped.state, GuestState::Stopped | GuestState::Failed),
         "guest did not stop within {}s",
         STOP_DEADLINE.as_secs()
     );
