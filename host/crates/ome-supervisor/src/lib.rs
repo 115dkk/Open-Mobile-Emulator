@@ -617,7 +617,11 @@ where
                 break;
             }
         };
-        if fs::write(&logs.command, format!("{}\n", invocation.printable())).is_err() {
+        let mut command_log = format!("{}\n", invocation.printable());
+        if !invocation.environment().is_empty() {
+            command_log.push_str(&format!("env: {}\n", invocation.printable_environment()));
+        }
+        if fs::write(&logs.command, command_log).is_err() {
             emit(&shared, GuestState::Failed, None, Some(logs));
             break;
         }
@@ -929,6 +933,11 @@ pub mod windows_adapter {
                 stdout,
                 stderr,
                 cwd: invocation.program().parent().map(Path::to_path_buf),
+                environment: invocation
+                    .environment()
+                    .iter()
+                    .map(|(name, value)| (name.as_str().into(), value.as_str().into()))
+                    .collect(),
             }
             .spawn_in_job(&job)
             .map_err(|error| SpawnError::Io(io::Error::other(error)))?;
@@ -1110,14 +1119,16 @@ mod tests {
     #[derive(Debug)]
     struct WaitingSpawn {
         child_exited: Arc<AtomicBool>,
+        environments: mpsc::Sender<Vec<(String, String)>>,
     }
 
     impl ProcessAdapter for WaitingSpawn {
         fn spawn(
             &mut self,
-            _invocation: &QemuInvocation,
+            invocation: &QemuInvocation,
             _logs: &LogPaths,
         ) -> Result<Box<dyn ChildProcess>, SpawnError> {
+            let _ = self.environments.send(invocation.environment().to_vec());
             Ok(Box::new(WaitingChild {
                 exited: Arc::clone(&self.child_exited),
             }))
@@ -1253,6 +1264,7 @@ mod tests {
         ));
         let exited = Arc::new(AtomicBool::new(false));
         let (input_sender, input_receiver) = mpsc::channel();
+        let (environment_sender, environment_receiver) = mpsc::channel();
         let factory = RecordingQmpFactory {
             session: Arc::new(Mutex::new(Some(ChannelQmp {
                 input_calls: input_sender,
@@ -1262,6 +1274,7 @@ mod tests {
         let mut supervisor = Supervisor::new(
             WaitingSpawn {
                 child_exited: Arc::clone(&exited),
+                environments: environment_sender,
             },
             factory,
             directory.clone(),
@@ -1282,14 +1295,36 @@ mod tests {
             system_exe: "qemu.exe".into(),
         };
         supervisor.start(config, paths, install).expect("start");
-        loop {
+        assert_eq!(
+            environment_receiver
+                .recv_timeout(Duration::from_secs(1))
+                .expect("invocation environment reached adapter"),
+            vec![(
+                "SDL_WINDOWS_DPI_AWARENESS".to_owned(),
+                "permonitorv2".to_owned()
+            )]
+        );
+        let running_logs = loop {
             let event = events
                 .recv_timeout(Duration::from_secs(1))
                 .expect("running event");
             if event.state == GuestState::Running {
-                break;
+                break event.logs.expect("running event has log paths");
             }
-        }
+        };
+        let command_log = fs::read_to_string(running_logs.command).expect("read command log");
+        let mut command_lines = command_log.lines();
+        assert!(
+            command_lines
+                .next()
+                .expect("command is the first line")
+                .starts_with("qemu.exe ")
+        );
+        assert_eq!(
+            command_lines.next(),
+            Some("env: SDL_WINDOWS_DPI_AWARENESS=permonitorv2")
+        );
+        assert_eq!(command_lines.next(), None);
         let input = serde_json::json!({
             "type":"key",
             "data":{"down":true,"key":{"type":"qcode","data":"a"}}

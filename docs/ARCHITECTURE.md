@@ -204,8 +204,10 @@ manifests/images/         게스트 이미지 프로필 JSON (3.15절). 산출�
 - 인터페이스: `StageGeometry::physical(css_rect, scale) -> PhysicalRect`(순수),
   `GuestWindowHost::attach(parent_window, qemu_pid) -> Hosted`, `Hosted::place(rect)`,
   `Hosted::detach()`. 실패는 `HostingIssue`이고 호출자는 2안(별도 창)으로 간다.
-- 뒤에 숨는 것: SDL 창 찾기(pid + 클래스), `WS_POPUP` 제거와 `WS_CHILD` 부여, `SetParent`,
-  `SWP_FRAMECHANGED`, DPI 혼합 호스팅, 포커스 넘기기, QEMU 종료 시 분리.
+- 뒤에 숨는 것: SDL 창 찾기(pid + 클래스), 메인 창이 소유한 팝업으로 바꾸기(WS_POPUP, WS_EX_NOACTIVATE,
+  WS_EX_TOOLWINDOW, `GWLP_HWNDPARENT`, ADR-0009), 무대의 물리 화면 좌표 배치, QEMU가 스스로 바꾼 크기의 되돌림,
+  오버레이 뒤 z-순서, QEMU 종료 시 분리. 포커스는 어떤 경우에도 게스트 창에 주지 않는다. 재부모화(`SetParent`)는
+  스파이크 코드로만 남는다.
 - 테스트 표면: 기하 계산은 순수 테스트. 실제 담기는 M2 첫 스파이크에서 SDL 픽스처로 잰다.
 
 ### 3.9 ome-input
@@ -416,6 +418,13 @@ M2 구현의 첫 작업은 창 담기다. `ome-platform-win`의 창 함수와 `o
 클라이언트 영역도 960×600이 됐고, `GuestWindowToFront` 뒤 게스트 HWND가 키보드 포커스를 가졌다(이
 포커스 이전은 2026-09-29에 뺐다. 키는 웹뷰가 받으므로 담긴 게스트 창은 포커스를 갖지 않는다.
 `docs/evidence/M2/keyboard-capture.md`).
+1안 폐기(2026-09-29, `docs/evidence/M2/embedded-display-freeze.md`, ADR-0009): 200 % 모니터에서 재부모화한 SDL
+자식은 DPI 인식이 없으면 가상화 표면이 무작위로 멈추고, PMv2로 만들면 WebView2의 DirectComposition 시각에 덮이며
+QEMU의 크기 변경 뒤 SDL의 크기 기록이 어긋난다. 그래서 게스트 창은 메인 창이 소유한 최상위 팝업(WS_POPUP,
+WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW)으로 무대의 물리 화면 좌표에 놓는다. QEMU가 스스로 바꾼 크기는 런타임의 1초
+틱이 되돌리고, 메인 창의 이동·크기 변경 때도 다시 배치하며, z-순서는 오버레이, 게스트 팝업, 메인 창 순이다.
+QEMU는 `SDL_WINDOWS_DPI_AWARENESS=permonitorv2` 환경 변수로 띄운다(`QemuInvocation::environment`,
+`ProcessLaunch::environment`).
 정지는 adb 전원 끄기(`reboot -p`)를 거쳐 2.1~2.3 s 만에 `stopped`와 `UserStop`으로 끝났다. 부팅은
 33~37 s, 능력 조사는 열 항목 중 일곱이 `available`이었다(이 게스트에는 멀티터치 장치와 앱 루트가
 없고, 전경 앱은 아직 읽지 않는다). 측정 중 결함 둘을 고쳤다. 호스트 조사가 돌려준 `\\?\` 경로에

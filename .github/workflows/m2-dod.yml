@@ -12,8 +12,6 @@ jobs:
     defaults:
       run:
         shell: pwsh
-    env:
-      OME_DOD_OUTPUT: ${{ runner.temp }}\ome-dod-evidence
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -78,6 +76,9 @@ jobs:
           }
       - name: Run fresh-home wizard
         working-directory: host
+        # The runner context is not allowed in job-level env; GitHub rejected the whole file.
+        env:
+          OME_DOD_OUTPUT: ${{ runner.temp }}\ome-dod-evidence
         run: |
           $env:OME_HOME = if (Test-Path 'D:\') { 'D:\ome-home' } else { Join-Path $env:RUNNER_TEMP 'ome-home' }
           $env:OME_DOD_APP = Join-Path $PWD 'target/release/ome.exe'
@@ -92,6 +93,8 @@ jobs:
       - name: Check and stage evidence only
         id: evidence
         if: always()
+        env:
+          OME_DOD_OUTPUT: ${{ runner.temp }}\ome-dod-evidence
         run: |
           if (!(Test-Path $env:OME_DOD_OUTPUT)) { throw 'No evidence folder was produced' }
           $publish = Join-Path $env:RUNNER_TEMP 'ome-dod-publish'

@@ -49,11 +49,32 @@ impl OverlayWindow {
     }
 
     fn create_window(&self) -> tauri::Result<WebviewWindow> {
-        create_overlay_window(
+        let window = create_overlay_window(
             &self.app,
             &self.main,
             WebviewUrl::App("overlay.html".into()),
-        )
+        )?;
+        #[cfg(windows)]
+        {
+            let raw = window.hwnd()?.0 as usize as u64;
+            let shell = self.app.state::<ShellState>();
+            let mut guard = shell.runtime.lock().map_err(|_| {
+                tauri::Error::Io(std::io::Error::other("runtime state is poisoned"))
+            })?;
+            if let Ok(runtime) = &mut *guard {
+                runtime.set_overlay_window(Some(raw));
+            }
+        }
+        Ok(window)
+    }
+
+    fn replace_guest_behind_overlay(&self) {
+        let shell = self.app.state::<ShellState>();
+        if let Ok(mut guard) = shell.runtime.lock()
+            && let Ok(runtime) = &mut *guard
+        {
+            runtime.host_window_moved();
+        }
     }
 
     /// Applies one complete placement, skipping an unchanged native state.
@@ -106,6 +127,8 @@ impl OverlayWindow {
         };
         apply_native(&window, &self.main, previous_mode, placement)?;
         state.last_applied = Some(next);
+        drop(state);
+        self.replace_guest_behind_overlay();
         Ok(())
     }
 

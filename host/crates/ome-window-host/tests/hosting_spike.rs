@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Copyright (C) 2026 Open Mobile Emulator contributors
-//! Manual native spike for QEMU SDL child-window hosting.
+//! Manual native spike for QEMU SDL owned-popup hosting.
 #![forbid(unsafe_code)]
 
 use std::ffi::OsString;
@@ -40,7 +40,7 @@ const QEMU_ARGUMENTS: [&str; 9] = [
 const QEMU_DEVICE: &str = "virtio-vga-gl";
 
 #[test]
-#[ignore = "requires an interactive Windows desktop and a QEMU SDL display"]
+#[ignore = "requires an interactive Windows desktop and a QEMU SDL owned-popup display"]
 fn hosts_qemu_sdl_window_and_reports_measurements() {
     let Some(qemu) = qemu_candidates().into_iter().find(|path| path.is_file()) else {
         println!("SKIP: no QEMU executable found in either configured location");
@@ -81,6 +81,10 @@ fn hosts_qemu_sdl_window_and_reports_measurements() {
         stdout,
         stderr,
         cwd: Some(scratch.clone()),
+        environment: vec![(
+            OsString::from("SDL_WINDOWS_DPI_AWARENESS"),
+            OsString::from("permonitorv2"),
+        )],
     }
     .spawn_in_job(&job)
     .expect("launch QEMU in job");
@@ -112,57 +116,73 @@ fn hosts_qemu_sdl_window_and_reports_measurements() {
         parent.handle().dpi().expect("parent DPI after")
     );
 
-    host.place(Rect {
-        x: 0,
-        y: 0,
-        width: 1280,
-        height: 800,
-    })
-    .expect("place at 1280 by 800");
-    wait_for_client_size(guest, (1280, 800));
+    assert!(guest.is_top_level(), "guest must remain top-level");
+    assert_eq!(guest.owner(), Some(parent.handle()), "guest owner mismatch");
+    assert!(
+        guest
+            .has_no_activate_style()
+            .expect("query WS_EX_NOACTIVATE"),
+        "guest popup lacks WS_EX_NOACTIVATE"
+    );
+    println!("guest_is_top_level={}", guest.is_top_level());
     println!(
-        "guest_client_after_1280x800={:?}",
-        guest.client_size().expect("large guest size")
+        "guest_owner_matches_parent={}",
+        guest.owner() == Some(parent.handle())
+    );
+    println!(
+        "guest_has_no_activate_style={}",
+        guest
+            .has_no_activate_style()
+            .expect("query WS_EX_NOACTIVATE")
     );
 
-    parent.resize(640, 400).expect("resize parent");
-    host.place(Rect {
-        x: 0,
-        y: 0,
-        width: 640,
-        height: 400,
-    })
-    .expect("place at 640 by 400");
-    wait_for_client_size(guest, (640, 400));
+    let placed = Rect {
+        x: 32,
+        y: 24,
+        width: 960,
+        height: 540,
+    };
+    host.place(placed).expect("place owned popup");
+    let parent_client = parent
+        .handle()
+        .client_screen_rect()
+        .expect("parent client screen rect");
+    let expected = ome_platform_win::ScreenRect {
+        x: parent_client.x + placed.x,
+        y: parent_client.y + placed.y,
+        width: placed.width,
+        height: placed.height,
+    };
+    wait_for_client_screen_rect(guest, expected);
+    let actual = guest
+        .client_screen_rect()
+        .expect("guest client screen rect");
     println!(
-        "parent_client_resized={:?}",
-        parent.client_size().expect("resized parent size")
+        "parent_client_origin={},{}",
+        parent_client.x, parent_client.y
     );
     println!(
-        "guest_client_after_640x400={:?}",
-        guest.client_size().expect("small guest size")
+        "guest_client_screen_rect={},{} {}x{}",
+        actual.x, actual.y, actual.width, actual.height
     );
-    println!(
-        "render_scale_parent_dpi={}",
-        parent.handle().dpi().expect("resized parent DPI")
-    );
-    println!(
-        "render_scale_guest_dpi={}",
-        guest.dpi().expect("resized guest DPI")
-    );
-    println!(
-        "child_rendered_at_parent_scale={}",
-        guest.client_size().expect("rendered guest size") == (640, 400)
-            && guest.dpi().expect("rendered guest DPI")
-                == parent.handle().dpi().expect("rendered parent DPI")
-    );
+    assert_eq!(actual, expected);
 
-    host.to_front().expect("raise hosted child");
+    parent
+        .handle()
+        .to_foreground()
+        .expect("activate test host before raising popup");
+    host.to_front().expect("raise hosted popup");
     thread::sleep(Duration::from_secs(1));
-    println!("focus_method=parent-thread raise child + activate/focus parent");
     let guest_focused = guest.has_keyboard_focus().expect("query guest focus");
-    println!("guest_has_keyboard_focus={guest_focused}");
-    assert!(!guest_focused, "hosted child must not own keyboard focus");
+    println!("guest_has_keyboard_focus_after_raise={guest_focused}");
+    println!(
+        "foreground_after_raise_is_guest={}",
+        ome_platform_win::foreground_window() == guest.as_u64()
+    );
+    assert!(
+        !guest_focused,
+        "raising popup must not transfer keyboard focus"
+    );
 
     host.detach().expect("detach guest");
     println!(
@@ -189,15 +209,18 @@ fn hosts_qemu_sdl_window_and_reports_measurements() {
     let _ = std::fs::remove_dir_all(scratch);
 }
 
-fn wait_for_client_size(window: ome_platform_win::WindowHandle, expected: (i32, i32)) {
+fn wait_for_client_screen_rect(
+    window: ome_platform_win::WindowHandle,
+    expected: ome_platform_win::ScreenRect,
+) {
     let deadline = Instant::now() + Duration::from_secs(2);
     loop {
-        if window.client_size().ok() == Some(expected) {
+        if window.client_screen_rect().ok() == Some(expected) {
             return;
         }
         assert!(
             Instant::now() < deadline,
-            "guest client size did not become {expected:?}"
+            "guest client screen rect did not become {expected:?}"
         );
         thread::sleep(Duration::from_millis(20));
     }

@@ -129,6 +129,8 @@ pub struct ProcessLaunch {
     pub stderr: File,
     /// Optional child working directory.
     pub cwd: Option<PathBuf>,
+    /// Variables added to or overriding the current environment for the child.
+    pub environment: Vec<(OsString, OsString)>,
 }
 
 impl ProcessLaunch {
@@ -393,7 +395,31 @@ impl WindowHandle {
         }
     }
 
-    /// Restores the saved style, extended style, and parent after child hosting.
+    /// Converts this window to a borderless, non-activating top-level popup owned by `owner`.
+    ///
+    /// Coordinates and dimensions are physical screen pixels. Style, extended style, and owner
+    /// changes are rolled back together if any native operation fails.
+    pub fn make_owned_popup(
+        self,
+        owner: WindowHandle,
+        x: i32,
+        y: i32,
+        width: i32,
+        height: i32,
+    ) -> Result<PreviousStyle, PlatformError> {
+        #[cfg(windows)]
+        {
+            ffi::window::make_owned_popup(self.0, owner.0, x, y, width, height)
+                .map_err(PlatformError::Io)
+        }
+        #[cfg(not(windows))]
+        {
+            let _ = (owner, x, y, width, height);
+            Err(PlatformError::Unsupported)
+        }
+    }
+
+    /// Restores the saved style, extended style, and original window relationship.
     pub fn restore_top_level(self, previous: PreviousStyle) -> Result<(), PlatformError> {
         #[cfg(windows)]
         {
@@ -419,6 +445,37 @@ impl WindowHandle {
         }
     }
 
+    /// Places this top-level window directly behind `insert_after`, or at the top when omitted.
+    ///
+    /// Coordinates and dimensions are physical screen pixels. The Z-order change is intentional;
+    /// the window is never activated.
+    pub fn place_behind(
+        self,
+        insert_after: Option<WindowHandle>,
+        x: i32,
+        y: i32,
+        width: i32,
+        height: i32,
+    ) -> Result<(), PlatformError> {
+        #[cfg(windows)]
+        {
+            ffi::window::place_behind(
+                self.0,
+                insert_after.map(|window| window.0),
+                x,
+                y,
+                width,
+                height,
+            )
+            .map_err(PlatformError::Io)
+        }
+        #[cfg(not(windows))]
+        {
+            let _ = (insert_after, x, y, width, height);
+            Err(PlatformError::Unsupported)
+        }
+    }
+
     /// Activates `parent` on its owner thread without leaving focus on this hosted child.
     pub fn focus_as_child_of(self, parent: WindowHandle) -> Result<(), PlatformError> {
         #[cfg(windows)]
@@ -437,6 +494,63 @@ impl WindowHandle {
         #[cfg(windows)]
         {
             ffi::window::to_foreground(self.0).map_err(PlatformError::Io)
+        }
+        #[cfg(not(windows))]
+        {
+            Err(PlatformError::Unsupported)
+        }
+    }
+
+    /// Returns the window rectangle in physical screen pixels.
+    pub fn window_rect(self) -> Result<ScreenRect, PlatformError> {
+        #[cfg(windows)]
+        {
+            ffi::window::window_rect(self.0)
+                .map(|(x, y, width, height)| ScreenRect {
+                    x,
+                    y,
+                    width,
+                    height,
+                })
+                .map_err(PlatformError::Io)
+        }
+        #[cfg(not(windows))]
+        {
+            Err(PlatformError::Unsupported)
+        }
+    }
+
+    /// Returns the owner of this top-level window, if one is registered.
+    pub fn owner(self) -> Option<Self> {
+        #[cfg(windows)]
+        {
+            ffi::window::owner(self.0).map(Self)
+        }
+        #[cfg(not(windows))]
+        {
+            None
+        }
+    }
+
+    /// Reports whether the window has no child-parent relationship.
+    ///
+    /// Owned popups remain top-level windows even though Win32 `GetParent` reports their owner.
+    pub fn is_top_level(self) -> bool {
+        #[cfg(windows)]
+        {
+            ffi::window::is_top_level(self.0)
+        }
+        #[cfg(not(windows))]
+        {
+            false
+        }
+    }
+
+    /// Reports whether `WS_EX_NOACTIVATE` is present in the extended style.
+    pub fn has_no_activate_style(self) -> Result<bool, PlatformError> {
+        #[cfg(windows)]
+        {
+            ffi::window::has_no_activate_style(self.0).map_err(PlatformError::Io)
         }
         #[cfg(not(windows))]
         {
@@ -488,12 +602,20 @@ impl WindowHandle {
     }
 }
 
-/// Style, extended style, and parent saved before changing a window to child mode.
+/// Style, extended style, and window relationship saved before native hosting.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct PreviousStyle {
     style: isize,
     ex_style: isize,
     parent: Option<isize>,
+    owner: Option<isize>,
+    hosting: PreviousHosting,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum PreviousHosting {
+    Child,
+    OwnedPopup,
 }
 
 /// Returns the current Windows foreground-window token, or zero when there is none.
@@ -817,6 +939,61 @@ mod tests {
     }
 
     #[cfg(windows)]
+    fn cmd_echo(variable: &str, environment: Vec<(OsString, OsString)>) -> String {
+        let directory = std::env::temp_dir().join(format!(
+            "ome-platform-win-env-{}-{}-{}",
+            variable,
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .expect("clock after epoch")
+                .as_nanos()
+        ));
+        std::fs::create_dir_all(&directory).expect("create environment test directory");
+        let stdout_path = directory.join("stdout.log");
+        let stderr_path = directory.join("stderr.log");
+        let launch = ProcessLaunch {
+            executable: PathBuf::from(r"C:\Windows\System32\cmd.exe"),
+            arguments: vec![
+                OsString::from("/d"),
+                OsString::from("/c"),
+                OsString::from(format!("echo %{variable}%")),
+            ],
+            stdout: File::create(&stdout_path).expect("create stdout"),
+            stderr: File::create(&stderr_path).expect("create stderr"),
+            cwd: None,
+            environment,
+        };
+        let child = launch.spawn().expect("spawn cmd");
+        assert_eq!(
+            child.wait(Some(Duration::from_secs(5))).expect("wait"),
+            WaitOutcome::Signaled
+        );
+        assert_eq!(child.try_wait().expect("exit code"), Some(0));
+        let output = std::fs::read_to_string(&stdout_path).expect("read stdout");
+        std::fs::remove_dir_all(directory).expect("remove environment test directory");
+        output
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn process_launch_adds_environment_variable() {
+        let output = cmd_echo(
+            "OME_Y1_TEST",
+            vec![(OsString::from("OME_Y1_TEST"), OsString::from("value"))],
+        );
+        assert_eq!(output.trim(), "value");
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn process_launch_empty_environment_list_inherits_path() {
+        let output = cmd_echo("PATH", Vec::new());
+        assert!(!output.trim().is_empty());
+        assert_ne!(output.trim(), "%PATH%");
+    }
+
+    #[cfg(windows)]
     #[test]
     fn process_launch_job_and_exit_code_work_together() {
         use std::io::{Read, Seek, SeekFrom};
@@ -844,6 +1021,7 @@ mod tests {
             stdout,
             stderr,
             cwd: None,
+            environment: Vec::new(),
         };
         let job = JobObject::kill_on_close().expect("create job");
         let child = launch.spawn_in_job(&job).expect("spawn cmd in job");

@@ -3,7 +3,8 @@
 //! `CreateProcessW` with a strict inherited-handle list.
 #![allow(unsafe_code)]
 
-use std::ffi::{OsStr, OsString};
+use std::cmp::Ordering;
+use std::ffi::{OsStr, OsString, c_void};
 use std::fs::File;
 use std::io;
 use std::mem::size_of;
@@ -15,17 +16,21 @@ use std::time::Duration;
 use windows::Win32::Foundation::{
     DUPLICATE_SAME_ACCESS, DuplicateHandle, HANDLE, WAIT_OBJECT_0, WAIT_TIMEOUT,
 };
+use windows::Win32::Globalization::{
+    CSTR_EQUAL, CSTR_GREATER_THAN, CSTR_LESS_THAN, CompareStringOrdinal,
+};
 use windows::Win32::Security::SECURITY_ATTRIBUTES;
 use windows::Win32::Storage::FileSystem::{
     CreateFileW, FILE_ATTRIBUTE_NORMAL, FILE_GENERIC_READ, FILE_SHARE_READ, FILE_SHARE_WRITE,
     OPEN_EXISTING,
 };
 use windows::Win32::System::Threading::{
-    CREATE_SUSPENDED, CreateProcessW, DeleteProcThreadAttributeList, EXTENDED_STARTUPINFO_PRESENT,
-    GetCurrentProcess, GetExitCodeProcess, InitializeProcThreadAttributeList,
-    LPPROC_THREAD_ATTRIBUTE_LIST, PROC_THREAD_ATTRIBUTE_HANDLE_LIST, PROCESS_CREATION_FLAGS,
-    PROCESS_INFORMATION, ResumeThread, STARTF_USESTDHANDLES, STARTUPINFOEXW, TerminateProcess,
-    UpdateProcThreadAttribute, WaitForSingleObject,
+    CREATE_SUSPENDED, CREATE_UNICODE_ENVIRONMENT, CreateProcessW, DeleteProcThreadAttributeList,
+    EXTENDED_STARTUPINFO_PRESENT, GetCurrentProcess, GetExitCodeProcess,
+    InitializeProcThreadAttributeList, LPPROC_THREAD_ATTRIBUTE_LIST,
+    PROC_THREAD_ATTRIBUTE_HANDLE_LIST, PROCESS_CREATION_FLAGS, PROCESS_INFORMATION, ResumeThread,
+    STARTF_USESTDHANDLES, STARTUPINFOEXW, TerminateProcess, UpdateProcThreadAttribute,
+    WaitForSingleObject,
 };
 use windows::core::{PCWSTR, PWSTR};
 
@@ -97,6 +102,7 @@ fn spawn_with_flags(
         stdout,
         stderr,
         cwd,
+        environment,
     } = launch;
     let stdin = open_null()?;
     let stdout = duplicate_file_handle(&stdout)?;
@@ -106,6 +112,17 @@ fn spawn_with_flags(
     let mut command_line = command_line(&executable, &arguments);
     let application = wide_null(executable.as_os_str());
     let current_directory = cwd.as_ref().map(|path| wide_null(path.as_os_str()));
+    let environment = environment_block(environment)?;
+    let environment_pointer = environment
+        .as_ref()
+        .map(|block| block.as_ptr().cast::<c_void>());
+    let creation_flags = EXTENDED_STARTUPINFO_PRESENT
+        | flags
+        | if environment.is_some() {
+            CREATE_UNICODE_ENVIRONMENT
+        } else {
+            PROCESS_CREATION_FLAGS(0)
+        };
 
     let mut startup = STARTUPINFOEXW::default();
     startup.StartupInfo.cb = size_of::<STARTUPINFOEXW>() as u32;
@@ -117,9 +134,11 @@ fn spawn_with_flags(
 
     let mut information = PROCESS_INFORMATION::default();
     // SAFETY: application and optional cwd are NUL-terminated and live for the
-    // call; command_line is a writable NUL-terminated buffer. Startup contains
-    // three live owned handles also present in the initialized attribute list.
-    // Every pointer is aligned to its Rust type, all lengths were supplied at
+    // call; command_line is a writable NUL-terminated buffer. The optional
+    // environment points to a live, double-NUL-terminated UTF-16 block and its
+    // presence sets CREATE_UNICODE_ENVIRONMENT. Startup contains three live
+    // owned handles also present in the initialized attribute list. Every
+    // pointer is aligned to its Rust type, all lengths were supplied at
     // allocation, output is a local structure, and no elevated token is used.
     unsafe {
         CreateProcessW(
@@ -128,8 +147,8 @@ fn spawn_with_flags(
             None,
             None,
             true,
-            EXTENDED_STARTUPINFO_PRESENT | flags,
-            None,
+            creation_flags,
+            environment_pointer,
             current_directory
                 .as_ref()
                 .map_or(PCWSTR::null(), |value| PCWSTR(value.as_ptr())),
@@ -167,6 +186,82 @@ fn spawn_with_flags(
         process,
         pid: information.dwProcessId,
     })
+}
+
+#[derive(Debug)]
+struct EnvironmentEntry {
+    name: Vec<u16>,
+    value: Vec<u16>,
+}
+
+impl EnvironmentEntry {
+    fn inherited(name: OsString, value: OsString) -> Self {
+        Self {
+            name: name.encode_wide().collect(),
+            value: value.encode_wide().collect(),
+        }
+    }
+
+    fn addition(name: OsString, value: OsString) -> io::Result<Self> {
+        let name: Vec<u16> = name.encode_wide().collect();
+        let value: Vec<u16> = value.encode_wide().collect();
+        if name.is_empty()
+            || name
+                .iter()
+                .any(|unit| *unit == 0 || *unit == u16::from(b'='))
+            || value.contains(&0)
+        {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "environment names must be non-empty and contain neither '=' nor NUL; values must not contain NUL",
+            ));
+        }
+        Ok(Self { name, value })
+    }
+}
+
+fn environment_block(additions: Vec<(OsString, OsString)>) -> io::Result<Option<Vec<u16>>> {
+    if additions.is_empty() {
+        return Ok(None);
+    }
+
+    let mut entries = Vec::new();
+    for (name, value) in std::env::vars_os() {
+        insert_environment_entry(&mut entries, EnvironmentEntry::inherited(name, value));
+    }
+    for (name, value) in additions {
+        insert_environment_entry(&mut entries, EnvironmentEntry::addition(name, value)?);
+    }
+    entries.sort_by(|left, right| compare_environment_names(&left.name, &right.name));
+
+    let mut block = Vec::new();
+    for entry in entries {
+        block.extend(entry.name);
+        block.push(u16::from(b'='));
+        block.extend(entry.value);
+        block.push(0);
+    }
+    block.push(0);
+    Ok(Some(block))
+}
+
+fn insert_environment_entry(entries: &mut Vec<EnvironmentEntry>, addition: EnvironmentEntry) {
+    entries
+        .retain(|entry| compare_environment_names(&entry.name, &addition.name) != Ordering::Equal);
+    entries.push(addition);
+}
+
+fn compare_environment_names(left: &[u16], right: &[u16]) -> Ordering {
+    // SAFETY: both slices are initialized UTF-16 code-unit arrays that remain
+    // live for the call. The generated binding passes their exact lengths, and
+    // case-insensitive ordinal comparison reads no terminating NUL.
+    let result = unsafe { CompareStringOrdinal(left, right, true) };
+    match result {
+        CSTR_LESS_THAN => Ordering::Less,
+        CSTR_EQUAL => Ordering::Equal,
+        CSTR_GREATER_THAN => Ordering::Greater,
+        _ => left.cmp(right),
+    }
 }
 
 fn duplicate_file_handle(file: &File) -> io::Result<OwnedHandle> {

@@ -14,7 +14,7 @@ const DISCOVERY_TIMEOUT: Duration = Duration::from_secs(5);
 const DISCOVERY_INTERVAL: Duration = Duration::from_millis(100);
 const SDL_WINDOW_CLASS: &str = "SDL_app";
 
-/// A rectangle in physical pixels relative to the host client area.
+/// A rectangle in physical pixels; the frame (host client area or screen) is stated per use.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Rect {
@@ -166,7 +166,7 @@ fn saturating_i32(value: i64) -> i32 {
 /// Opaque identifiers supplied by the native platform adapter.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct HostingTarget {
-    /// Host parent-window identifier, interpreted only by the native adapter.
+    /// Host owner-window identifier, interpreted only by the native adapter.
     pub parent_window: u64,
     /// Guest process identifier.
     pub guest_process_id: u32,
@@ -174,7 +174,7 @@ pub struct HostingTarget {
 
 #[derive(Debug)]
 struct HostedWindow {
-    parent: WindowHandle,
+    owner: WindowHandle,
     previous: PreviousStyle,
 }
 
@@ -190,23 +190,23 @@ impl GuestWindow {
     }
 }
 
-/// Owns the reversible conversion of one QEMU SDL window into a hosted child.
+/// Owns the reversible conversion of one QEMU SDL window into an owned top-level popup.
 #[derive(Debug, Default)]
 pub struct GuestWindowHost {
     guest: Option<GuestWindow>,
     hosted: Option<HostedWindow>,
+    overlay: Option<WindowHandle>,
     last_rect: Option<Rect>,
     last_discovery_time: Option<Duration>,
     guest_dpi_before_attach: Option<u32>,
 }
 
 impl GuestWindowHost {
-    /// Attaches the guest's preferred visible top-level window to the host parent.
+    /// Attaches the guest's preferred visible top-level window as a non-activating owned popup.
     ///
-    /// Discovery waits up to five seconds for a visible window, preferring
-    /// `SDL_app` whenever it appears in an enumeration. Style, extended style,
-    /// and parent changes are rolled back together
-    /// when any native operation fails.
+    /// Discovery waits up to five seconds for a visible window, preferring `SDL_app` whenever it
+    /// appears in an enumeration. Style, extended style, and owner changes are rolled back
+    /// together when any native operation fails.
     pub fn attach(&mut self, target: HostingTarget) -> Result<(), HostingIssue> {
         self.detach()?;
         self.guest = None;
@@ -216,7 +216,7 @@ impl GuestWindowHost {
         if target.parent_window == 0 || target.guest_process_id == 0 {
             return Err(HostingIssue::Platform);
         }
-        let parent =
+        let owner =
             WindowHandle::from_u64(target.parent_window).map_err(|_| HostingIssue::Platform)?;
         let discovery_started = Instant::now();
         let guest = GuestWindow {
@@ -232,67 +232,86 @@ impl GuestWindowHost {
             width: 0,
             height: 0,
         });
-        let (width, height) = native_dimensions(rect)?;
+        let screen = screen_rect(owner, rect)?;
+        let (width, height) = native_dimensions(screen)?;
         let previous = guest
             .handle
-            .make_child_of_at(parent, rect.x, rect.y, width, height)
+            .make_owned_popup(owner, screen.x, screen.y, width, height)
             .map_err(|_| HostingIssue::Platform)?;
         self.guest = Some(guest);
-        self.hosted = Some(HostedWindow { parent, previous });
+        self.hosted = Some(HostedWindow { owner, previous });
         Ok(())
     }
 
-    /// Places an attached guest window in a physical parent-client rectangle.
+    /// Places an attached guest popup over a physical rectangle of the owner's client area.
     ///
-    /// The latest rectangle is retained for the next attach. Calls made while no
-    /// live guest is attached are accepted without a native operation.
+    /// The rectangle is converted to screen coordinates with the owner's current client origin,
+    /// so calling again after the owner moves re-places the popup. The latest rectangle is
+    /// retained for the next attach. Calls made while no live guest is attached are accepted
+    /// without a native operation. A visible registered overlay is the insertion predecessor,
+    /// preserving overlay above guest above owner; otherwise the guest is placed at the top of
+    /// the non-topmost Z-order band.
     pub fn place(&mut self, rect: Rect) -> Result<(), HostingIssue> {
         self.last_rect = Some(rect);
-        let (Some(_hosted), Some(guest)) = (self.hosted.as_ref(), self.guest) else {
+        let Some((guest, owner)) = self.live_hosted_guest() else {
             return Ok(());
         };
-        if !guest.alive() {
-            self.hosted = None;
-            self.guest = None;
-            return Ok(());
-        }
-        let (width, height) = native_dimensions(rect)?;
-        guest
-            .handle
-            .set_bounds(rect.x, rect.y, width, height)
-            .map_err(|_| HostingIssue::Platform)
+        self.place_guest(guest, screen_rect(owner, rect)?)
     }
 
-    /// Hides the attached guest child without detaching it.
+    /// Registers the native overlay window used as the popup's Z-order predecessor.
+    pub fn set_overlay_window(&mut self, overlay: Option<WindowHandle>) {
+        self.overlay = overlay;
+    }
+
+    /// Re-applies the last placement after QEMU changes its own top-level window size.
+    ///
+    /// The expected screen rectangle is recomputed from the owner's current client origin, so a
+    /// moved owner is corrected here as well. Returns `true` only when the live popup rectangle
+    /// differed and placement was applied.
+    pub fn resync(&mut self) -> Result<bool, HostingIssue> {
+        let Some(rect) = self.last_rect else {
+            return Ok(false);
+        };
+        let Some((guest, owner)) = self.live_hosted_guest() else {
+            return Ok(false);
+        };
+        let expected = screen_rect(owner, rect)?;
+        let actual = guest
+            .handle
+            .window_rect()
+            .map_err(|_| HostingIssue::Platform)?;
+        if actual.x == expected.x
+            && actual.y == expected.y
+            && actual.width == expected.width
+            && actual.height == expected.height
+        {
+            return Ok(false);
+        }
+        self.place_guest(guest, expected)?;
+        Ok(true)
+    }
+
+    /// Hides the attached guest popup without detaching it.
     pub fn hide(&mut self) -> Result<(), HostingIssue> {
-        let (Some(_hosted), Some(guest)) = (self.hosted.as_ref(), self.guest) else {
+        let Some((guest, _owner)) = self.live_hosted_guest() else {
             return Ok(());
         };
-        if !guest.alive() {
-            self.hosted = None;
-            self.guest = None;
-            return Ok(());
-        }
         guest.handle.hide().map_err(|_| HostingIssue::Platform)
     }
 
-    /// Shows the attached guest child without taking keyboard focus.
+    /// Shows the attached guest popup without taking keyboard focus.
     pub fn show(&mut self) -> Result<(), HostingIssue> {
-        let (Some(_hosted), Some(guest)) = (self.hosted.as_ref(), self.guest) else {
+        let Some((guest, _owner)) = self.live_hosted_guest() else {
             return Ok(());
         };
-        if !guest.alive() {
-            self.hosted = None;
-            self.guest = None;
-            return Ok(());
-        }
         guest
             .handle
             .show_inactive()
             .map_err(|_| HostingIssue::Platform)
     }
 
-    /// Restores the guest's saved style, extended style, and parent.
+    /// Restores the guest's saved style, extended style, and original relationship.
     ///
     /// A vanished or PID-reused HWND is treated as already detached.
     pub fn detach(&mut self) -> Result<(), HostingIssue> {
@@ -316,36 +335,30 @@ impl GuestWindowHost {
         Ok(())
     }
 
-    /// Brings the guest forward while leaving keyboard focus with the host.
+    /// Raises the guest popup without changing focus or activation.
     ///
-    /// Hosted children ask the parent window thread to raise the child and activate
-    /// the parent. If the child held focus, the same callback returns it to the
-    /// parent. A detached remembered window receives a best-effort foreground
-    /// request. With no live window, the method is a no-op.
+    /// A visible registered overlay remains immediately above the guest. With no live hosted
+    /// popup or no remembered rectangle, the method is a no-op.
     pub fn to_front(&mut self) -> Result<(), HostingIssue> {
-        let Some(guest) = self.guest else {
+        let Some(rect) = self.last_rect else {
             return Ok(());
         };
-        if !guest.alive() {
-            self.hosted = None;
-            self.guest = None;
+        let Some((guest, owner)) = self.live_hosted_guest() else {
             return Ok(());
-        }
-        if let Some(hosted) = self.hosted.as_ref() {
-            return guest
-                .handle
-                .focus_as_child_of(hosted.parent)
-                .map_err(|_| HostingIssue::Platform);
-        }
+        };
+        self.place_guest(guest, screen_rect(owner, rect)?)?;
         guest
             .handle
-            .to_foreground()
+            .focus_as_child_of(owner)
             .map_err(|_| HostingIssue::Platform)
     }
 
-    /// Reports whether a live guest window is currently embedded.
+    /// Reports whether a live guest popup is top-level and owned by the registered host.
     pub fn is_attached(&self) -> bool {
-        self.hosted.is_some() && self.guest_window_alive()
+        let (Some(hosted), Some(guest)) = (self.hosted.as_ref(), self.guest) else {
+            return false;
+        };
+        guest.alive() && guest.handle.is_top_level() && guest.handle.owner() == Some(hosted.owner)
     }
 
     /// Reports whether the discovered HWND still exists and belongs to the PID.
@@ -353,7 +366,10 @@ impl GuestWindowHost {
         self.guest.is_some_and(GuestWindow::alive)
     }
 
-    /// Reports whether the embedded guest is the focused window in the parent's GUI queue.
+    /// Reports whether the guest owns focus in the host GUI thread queue.
+    ///
+    /// Owned popups never receive focus through product hosting; this diagnostic remains for the
+    /// former child-mode spike and verifies that the host queue did not retain the guest HWND.
     pub fn guest_has_parent_thread_focus(&self) -> Result<bool, HostingIssue> {
         let Some(hosted) = self.hosted.as_ref() else {
             return Ok(false);
@@ -362,7 +378,7 @@ impl GuestWindowHost {
             return Ok(false);
         };
         hosted
-            .parent
+            .owner
             .thread_focus()
             .map(|focused| focused == Some(guest.handle))
             .map_err(|_| HostingIssue::Platform)
@@ -384,6 +400,45 @@ impl GuestWindowHost {
     pub fn guest_dpi_before_attach(&self) -> Option<u32> {
         self.guest_dpi_before_attach
     }
+
+    fn live_hosted_guest(&mut self) -> Option<(GuestWindow, WindowHandle)> {
+        let (Some(hosted), Some(guest)) = (self.hosted.as_ref(), self.guest) else {
+            return None;
+        };
+        if guest.alive() {
+            Some((guest, hosted.owner))
+        } else {
+            self.hosted = None;
+            self.guest = None;
+            None
+        }
+    }
+
+    fn visible_overlay(&self) -> Option<WindowHandle> {
+        self.overlay
+            .filter(|overlay| overlay.is_visible().unwrap_or(false))
+    }
+
+    fn place_guest(&self, guest: GuestWindow, screen: Rect) -> Result<(), HostingIssue> {
+        let (width, height) = native_dimensions(screen)?;
+        guest
+            .handle
+            .place_behind(self.visible_overlay(), screen.x, screen.y, width, height)
+            .map_err(|_| HostingIssue::Platform)
+    }
+}
+
+/// Converts a rectangle relative to the owner's client area into physical screen pixels.
+fn screen_rect(owner: WindowHandle, rect: Rect) -> Result<Rect, HostingIssue> {
+    let origin = owner
+        .client_screen_rect()
+        .map_err(|_| HostingIssue::Platform)?;
+    Ok(Rect {
+        x: rect.x.saturating_add(origin.x),
+        y: rect.y.saturating_add(origin.y),
+        width: rect.width,
+        height: rect.height,
+    })
 }
 
 impl Drop for GuestWindowHost {
@@ -555,7 +610,9 @@ mod tests {
         host.hide().expect("unattached hide");
         host.show().expect("unattached show");
         host.detach().expect("unattached detach");
-        host.to_front().expect("unattached focus");
+        host.to_front().expect("unattached raise");
+        assert!(!host.resync().expect("unattached resync"));
+        host.set_overlay_window(None);
         assert!(!host.is_attached());
         assert!(!host.guest_window_alive());
     }

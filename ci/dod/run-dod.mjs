@@ -93,12 +93,14 @@ function recognize(name) {
   const value = JSON.parse(r.stdout.toString('utf8')); log('installer-ocr', { name, ...value }); return value.text;
 }
 async function installGuest(pid) {
-  // Clear the create/completion button's webview focus with a real noninteractive UI click.
-  // The product observes SendInput without consuming it; Enter otherwise activates that button.
+  // Move the webview focus off the create/completion button with a real noninteractive UI click.
+  // While the stage is active the product forwards every key to the guest and prevents the default.
   await page.getByRole('heading', { name: '운영체제 설치', exact: true }).click();
   // docs/evidence/M0/guest-install.md 69-94. Never send these to an existing disk.
+  // No keys before the menu is recognized: keys during the firmware phase reach the firmware now and
+  // left one variable store booting slowly (docs/evidence/M2/embedded-display-freeze.md). The ISO GRUB
+  // menu waits about 30 s, so recognition first, then one Home to reset its countdown.
   await until(async () => {
-    native(['-AppPid', String(app.pid), '-QemuPid', String(pid), '-Keys', 'HOME']);
     await capture('installer-00-grub-menu', pid);
     return /installation/i.test(recognize('installer-00-grub-menu'));
   }, 60000, 'installer GRUB menu', 100);

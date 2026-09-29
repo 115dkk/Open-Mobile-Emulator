@@ -130,4 +130,16 @@
   `docs/evidence/M2/keyboard-capture.md`). While the stage is active, Enter and
   Space go to the guest as well, so the stage screen's buttons are for the
   mouse. Clicking the embedded guest does not move keyboard focus to it.
+- The guest window is not a child of the main window. It is a borderless,
+  non-activating top-level popup owned by the main window and placed over the
+  stage (ADR-0009). Re-parenting failed on a 200 % monitor: a DPI-unaware
+  child froze its presentation at random, and a per-monitor-v2 child was
+  covered by WebView2's composition and lost SDL's size bookkeeping
+  (2026-09-29, `docs/evidence/M2/embedded-display-freeze.md`). Consequences:
+  QEMU resizes its window to the guest resolution at each mode switch and the
+  product puts it back within one second, so the guest can flash at its own
+  size briefly; other applications' windows can appear between the popup and
+  the main window; the product starts QEMU with
+  `SDL_WINDOWS_DPI_AWARENESS=permonitorv2` so the popup renders in physical
+  pixels. Only the SDL frontend is covered; the GTK frontend is not used.
 - Multi-instance, macros, and scripted automation are not part of v1 (D9).

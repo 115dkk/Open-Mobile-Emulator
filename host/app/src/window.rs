@@ -47,6 +47,15 @@ fn refresh_overlay(app: &tauri::AppHandle) {
     tauri::async_runtime::spawn_blocking(move || crate::overlay::refresh(&app));
 }
 
+fn host_window_moved(app: &tauri::AppHandle) {
+    let state = app.state::<ShellState>();
+    if let Ok(mut guard) = state.runtime.lock()
+        && let Ok(runtime) = &mut *guard
+    {
+        runtime.host_window_moved();
+    }
+}
+
 pub(crate) fn install(app: &tauri::App) -> tauri::Result<()> {
     let config = app.config().app.windows.first().ok_or_else(|| {
         tauri::Error::Io(std::io::Error::other(
@@ -98,7 +107,10 @@ pub(crate) fn install(app: &tauri::App) -> tauri::Result<()> {
         tauri::WindowEvent::Moved(_)
         | tauri::WindowEvent::Resized(_)
         | tauri::WindowEvent::ScaleFactorChanged { .. }
-        | tauri::WindowEvent::Focused(_) => refresh_overlay(handle.app_handle()),
+        | tauri::WindowEvent::Focused(_) => {
+            host_window_moved(handle.app_handle());
+            refresh_overlay(handle.app_handle());
+        }
         _ => {}
     });
     Ok(())

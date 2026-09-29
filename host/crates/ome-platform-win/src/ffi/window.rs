@@ -18,18 +18,19 @@ use windows::Win32::UI::HiDpi::{
     GetDpiForWindow, SetThreadDpiHostingBehavior,
 };
 use windows::Win32::UI::WindowsAndMessaging::{
-    CWPSTRUCT, CallNextHookEx, EnumWindows, GA_PARENT, GUITHREADINFO, GWL_EXSTYLE, GWL_STYLE,
-    GetAncestor, GetClassNameW, GetClientRect, GetForegroundWindow, GetGUIThreadInfo,
-    GetWindowLongPtrW, GetWindowThreadProcessId, HC_ACTION, HHOOK, HWND_TOP, IsWindow,
-    IsWindowVisible, SMTO_ABORTIFHUNG, SW_HIDE, SW_SHOW, SW_SHOWNA, SWP_FRAMECHANGED,
-    SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER, SWP_SHOWWINDOW, SendMessageTimeoutW,
-    SetForegroundWindow, SetWindowLongPtrW, SetWindowPos, SetWindowsHookExW, ShowWindow,
-    UnhookWindowsHookEx, WH_CALLWNDPROC, WM_APP, WS_CAPTION, WS_CHILD, WS_EX_APPWINDOW,
-    WS_MAXIMIZEBOX, WS_MINIMIZEBOX, WS_POPUP, WS_SYSMENU, WS_THICKFRAME,
+    CWPSTRUCT, CallNextHookEx, EnumWindows, GA_PARENT, GUITHREADINFO, GW_OWNER, GWL_EXSTYLE,
+    GWL_STYLE, GWLP_HWNDPARENT, GetAncestor, GetClassNameW, GetClientRect, GetForegroundWindow,
+    GetGUIThreadInfo, GetWindow, GetWindowLongPtrW, GetWindowRect, GetWindowThreadProcessId,
+    HC_ACTION, HHOOK, HWND_TOP, IsWindow, IsWindowVisible, SMTO_ABORTIFHUNG, SW_HIDE, SW_SHOW,
+    SW_SHOWNA, SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER,
+    SWP_SHOWWINDOW, SendMessageTimeoutW, SetForegroundWindow, SetWindowLongPtrW, SetWindowPos,
+    SetWindowsHookExW, ShowWindow, UnhookWindowsHookEx, WH_CALLWNDPROC, WM_APP, WS_CAPTION,
+    WS_CHILD, WS_EX_APPWINDOW, WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW, WS_MAXIMIZEBOX, WS_MINIMIZEBOX,
+    WS_POPUP, WS_SYSMENU, WS_THICKFRAME,
 };
 use windows::core::BOOL;
 
-use crate::PreviousStyle;
+use crate::{PreviousHosting, PreviousStyle};
 
 #[link(name = "user32")]
 unsafe extern "system" {
@@ -185,6 +186,8 @@ pub(crate) fn make_child_of_at(
         style: get_window_long(child, GWL_STYLE)?,
         ex_style: get_window_long(child, GWL_EXSTYLE)?,
         parent: get_parent(child),
+        owner: get_owner(child),
+        hosting: PreviousHosting::Child,
     };
     let removed_style = WS_POPUP.0
         | WS_CAPTION.0
@@ -201,6 +204,7 @@ pub(crate) fn make_child_of_at(
         set_parent(child, Some(parent))?;
         set_window_pos(
             child,
+            None,
             x,
             y,
             width,
@@ -215,20 +219,89 @@ pub(crate) fn make_child_of_at(
     Ok(previous)
 }
 
+pub(crate) fn make_owned_popup(
+    raw: isize,
+    owner_raw: isize,
+    x: i32,
+    y: i32,
+    width: i32,
+    height: i32,
+) -> io::Result<PreviousStyle> {
+    validate_dimensions(width, height)?;
+    let popup = hwnd(raw)?;
+    let owner = hwnd(owner_raw)?;
+    let previous = PreviousStyle {
+        style: get_window_long(popup, GWL_STYLE)?,
+        ex_style: get_window_long(popup, GWL_EXSTYLE)?,
+        parent: get_parent(popup),
+        owner: get_owner(popup),
+        hosting: PreviousHosting::OwnedPopup,
+    };
+    let removed_style =
+        WS_CAPTION.0 | WS_THICKFRAME.0 | WS_MINIMIZEBOX.0 | WS_MAXIMIZEBOX.0 | WS_SYSMENU.0;
+    let new_style = ((previous.style as u32 & !removed_style) | WS_POPUP.0) as isize;
+    let new_ex_style = ((previous.ex_style as u32 & !WS_EX_APPWINDOW.0)
+        | WS_EX_NOACTIVATE.0
+        | WS_EX_TOOLWINDOW.0) as isize;
+
+    let result = (|| {
+        set_window_long(popup, GWL_STYLE, new_style)?;
+        set_window_long(popup, GWL_EXSTYLE, new_ex_style)?;
+        set_owner(popup, Some(owner))?;
+        set_window_pos(
+            popup,
+            Some(HWND_TOP),
+            x,
+            y,
+            width,
+            height,
+            SWP_FRAMECHANGED | SWP_SHOWWINDOW | SWP_NOACTIVATE,
+        )
+    })();
+    if let Err(error) = result {
+        restore_best_effort(popup, previous);
+        return Err(error);
+    }
+    Ok(previous)
+}
+
 pub(crate) fn restore_top_level(raw: isize, previous: PreviousStyle) -> io::Result<()> {
-    let child = hwnd(raw)?;
+    let window = hwnd(raw)?;
     let mut first_error = None;
-    if let Err(error) = set_parent(child, previous.parent.map(|value| HWND(value as *mut _))) {
-        first_error = Some(error);
+    match previous.hosting {
+        PreviousHosting::Child => {
+            if let Err(error) =
+                set_parent(window, previous.parent.map(|value| HWND(value as *mut _)))
+            {
+                first_error = Some(error);
+            }
+        }
+        PreviousHosting::OwnedPopup => {
+            if let Err(error) = set_owner(window, None) {
+                first_error = Some(error);
+            }
+        }
     }
-    if let Err(error) = set_window_long(child, GWL_STYLE, previous.style) {
+    if let Err(error) = set_window_long(window, GWL_STYLE, previous.style) {
         first_error.get_or_insert(error);
     }
-    if let Err(error) = set_window_long(child, GWL_EXSTYLE, previous.ex_style) {
+    if let Err(error) = set_window_long(window, GWL_EXSTYLE, previous.ex_style) {
         first_error.get_or_insert(error);
+    }
+    if previous.hosting == PreviousHosting::OwnedPopup {
+        if let Some(parent) = previous.parent {
+            if let Err(error) = set_parent(window, Some(HWND(parent as *mut _))) {
+                first_error.get_or_insert(error);
+            }
+        } else if let Err(error) =
+            set_owner(window, previous.owner.map(|value| HWND(value as *mut _)))
+        {
+            first_error.get_or_insert(error);
+        }
     }
     if let Err(error) = set_window_pos(
-        child,
+        window,
+        None,
         0,
         0,
         0,
@@ -237,16 +310,38 @@ pub(crate) fn restore_top_level(raw: isize, previous: PreviousStyle) -> io::Resu
     ) {
         first_error.get_or_insert(error);
     }
-    // SAFETY: child remains a borrowed live HWND. SW_SHOW requests a visible
+    // SAFETY: window remains a borrowed live HWND. SW_SHOW requests a visible
     // top-level presentation; its BOOL reports prior visibility, not failure.
-    let _ = unsafe { ShowWindow(child, SW_SHOW) };
+    let _ = unsafe { ShowWindow(window, SW_SHOW) };
     first_error.map_or(Ok(()), Err)
 }
 
 pub(crate) fn set_bounds(raw: isize, x: i32, y: i32, width: i32, height: i32) -> io::Result<()> {
     validate_dimensions(width, height)?;
     let window = hwnd(raw)?;
-    set_window_pos(window, x, y, width, height, SWP_NOZORDER | SWP_NOACTIVATE)
+    set_window_pos(
+        window,
+        None,
+        x,
+        y,
+        width,
+        height,
+        SWP_NOZORDER | SWP_NOACTIVATE,
+    )
+}
+
+pub(crate) fn place_behind(
+    raw: isize,
+    insert_after_raw: Option<isize>,
+    x: i32,
+    y: i32,
+    width: i32,
+    height: i32,
+) -> io::Result<()> {
+    validate_dimensions(width, height)?;
+    let window = hwnd(raw)?;
+    let insert_after = insert_after_raw.map(hwnd).transpose()?.or(Some(HWND_TOP));
+    set_window_pos(window, insert_after, x, y, width, height, SWP_NOACTIVATE)
 }
 
 pub(crate) fn focus_child(raw: isize, parent_raw: isize) -> io::Result<()> {
@@ -311,6 +406,39 @@ pub(crate) fn to_foreground(raw: isize) -> io::Result<()> {
     // is therefore a normal best-effort result rather than a platform failure.
     let _ = unsafe { SetForegroundWindow(window) };
     Ok(())
+}
+
+pub(crate) fn window_rect(raw: isize) -> io::Result<(i32, i32, u32, u32)> {
+    let window = hwnd(raw)?;
+    let mut rect = RECT::default();
+    // SAFETY: window is a borrowed live HWND and rect is aligned and writable for exactly one
+    // RECT. The synchronous query retains neither the pointer nor ownership of the window.
+    unsafe { GetWindowRect(window, &raw mut rect) }.map_err(super::io_error)?;
+    let width = u32::try_from(rect.right - rect.left)
+        .map_err(|_| io::Error::other("window width is negative"))?;
+    let height = u32::try_from(rect.bottom - rect.top)
+        .map_err(|_| io::Error::other("window height is negative"))?;
+    Ok((rect.left, rect.top, width, height))
+}
+
+pub(crate) fn owner(raw: isize) -> Option<isize> {
+    let window = hwnd(raw).ok()?;
+    get_owner(window)
+}
+
+pub(crate) fn is_top_level(raw: isize) -> bool {
+    let Ok(window) = hwnd(raw) else {
+        return false;
+    };
+    // SAFETY: window is a borrowed live HWND. GA_ROOT returns the top-level ancestor without
+    // conflating an owned popup's owner with a child-parent relationship; no ownership changes.
+    unsafe { GetAncestor(window, windows::Win32::UI::WindowsAndMessaging::GA_ROOT) == window }
+}
+
+pub(crate) fn has_no_activate_style(raw: isize) -> io::Result<bool> {
+    let window = hwnd(raw)?;
+    let ex_style = get_window_long(window, GWL_EXSTYLE)? as u32;
+    Ok(ex_style & WS_EX_NOACTIVATE.0 != 0)
 }
 
 pub(crate) fn client_size(raw: isize) -> io::Result<(i32, i32)> {
@@ -409,6 +537,22 @@ fn set_parent(child: HWND, parent: Option<HWND>) -> io::Result<()> {
     Ok(())
 }
 
+fn set_owner(window: HWND, owner: Option<HWND>) -> io::Result<()> {
+    set_window_long(
+        window,
+        GWLP_HWNDPARENT,
+        owner.map_or(0, |owner| owner.0 as isize),
+    )
+}
+
+fn get_owner(window: HWND) -> Option<isize> {
+    // SAFETY: window is a borrowed live HWND. GW_OWNER reads only the owner relationship and
+    // returns null when no owner exists; no pointer or ownership is transferred.
+    unsafe { GetWindow(window, GW_OWNER) }
+        .ok()
+        .map(|owner| owner.0 as isize)
+}
+
 fn get_window_long(
     window: HWND,
     index: windows::Win32::UI::WindowsAndMessaging::WINDOW_LONG_PTR_INDEX,
@@ -448,23 +592,40 @@ fn set_window_long(
 
 fn set_window_pos(
     window: HWND,
+    insert_after: Option<HWND>,
     x: i32,
     y: i32,
     width: i32,
     height: i32,
     flags: windows::Win32::UI::WindowsAndMessaging::SET_WINDOW_POS_FLAGS,
 ) -> io::Result<()> {
-    // SAFETY: window is a borrowed live HWND. Coordinates, dimensions, and
-    // flags are plain values; no pointer, array bound, or ownership applies.
-    unsafe { SetWindowPos(window, None, x, y, width, height, flags) }.map_err(super::io_error)
+    // SAFETY: window and any insertion predecessor are borrowed live HWND values. Coordinates,
+    // dimensions, and flags are plain values; no pointer, array bound, or ownership applies.
+    unsafe { SetWindowPos(window, insert_after, x, y, width, height, flags) }
+        .map_err(super::io_error)
 }
 
-fn restore_best_effort(child: HWND, previous: PreviousStyle) {
-    let _ = set_parent(child, previous.parent.map(|value| HWND(value as *mut _)));
-    let _ = set_window_long(child, GWL_STYLE, previous.style);
-    let _ = set_window_long(child, GWL_EXSTYLE, previous.ex_style);
+fn restore_best_effort(window: HWND, previous: PreviousStyle) {
+    match previous.hosting {
+        PreviousHosting::Child => {
+            let _ = set_parent(window, previous.parent.map(|value| HWND(value as *mut _)));
+        }
+        PreviousHosting::OwnedPopup => {
+            let _ = set_owner(window, None);
+        }
+    }
+    let _ = set_window_long(window, GWL_STYLE, previous.style);
+    let _ = set_window_long(window, GWL_EXSTYLE, previous.ex_style);
+    if previous.hosting == PreviousHosting::OwnedPopup {
+        if let Some(parent) = previous.parent {
+            let _ = set_parent(window, Some(HWND(parent as *mut _)));
+        } else {
+            let _ = set_owner(window, previous.owner.map(|value| HWND(value as *mut _)));
+        }
+    }
     let _ = set_window_pos(
-        child,
+        window,
+        None,
         0,
         0,
         0,

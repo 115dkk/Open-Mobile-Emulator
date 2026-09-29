@@ -345,6 +345,7 @@ pub struct QemuInvocation {
     program: PathBuf,
     args: Vec<OsString>,
     printable: String,
+    environment: Vec<(String, String)>,
 }
 
 impl QemuInvocation {
@@ -381,6 +382,24 @@ impl QemuInvocation {
     /// Returns the Windows-quoted command line for the `.cmd.log` file.
     pub fn printable(&self) -> &str {
         &self.printable
+    }
+
+    /// Returns variables added to or overriding the QEMU process environment.
+    ///
+    /// SDL must create its child window as per-monitor-v2 DPI aware to match the
+    /// Tauri parent; otherwise re-parenting can freeze presentation at non-96 DPI.
+    /// See `docs/evidence/M2/embedded-display-freeze.md`.
+    pub fn environment(&self) -> &[(String, String)] {
+        &self.environment
+    }
+
+    /// Returns environment additions as space-separated `NAME=VALUE` pairs.
+    pub fn printable_environment(&self) -> String {
+        self.environment
+            .iter()
+            .map(|(name, value)| format!("{name}={value}"))
+            .collect::<Vec<_>>()
+            .join(" ")
     }
 
     fn build(
@@ -470,6 +489,14 @@ impl QemuInvocation {
             (Display::Gtk, _) => "gtk,show-cursor=on",
         };
         pair(&mut args, "-display", display);
+        let environment = if display.starts_with("sdl,") {
+            vec![(
+                "SDL_WINDOWS_DPI_AWARENESS".to_owned(),
+                "permonitorv2".to_owned(),
+            )]
+        } else {
+            Vec::new()
+        };
         pair(&mut args, "-device", "virtio-net-pci,netdev=n0");
         pair(
             &mut args,
@@ -512,6 +539,7 @@ impl QemuInvocation {
             program: install.system_exe.clone(),
             args,
             printable,
+            environment,
         }
     }
 }
@@ -850,6 +878,60 @@ mod tests {
             QemuInvocation::for_install(&config, &paths, &install),
             Err(InvocationError::MissingIso)
         );
+    }
+
+    #[test]
+    fn sdl_boot_and_install_invocations_set_per_monitor_v2_awareness() {
+        let config = GuestConfig::validate(RawGuestConfig::default()).expect("valid config");
+        let install = QemuInstall {
+            system_exe: "qemu-system-x86_64.exe".into(),
+        };
+        let expected = [(
+            "SDL_WINDOWS_DPI_AWARENESS".to_owned(),
+            "permonitorv2".to_owned(),
+        )];
+
+        let boot_paths = GuestPaths {
+            disk: "C:\\vm\\disk.qcow2".into(),
+            firmware_code: "C:\\fw\\code.fd".into(),
+            firmware_vars: "C:\\vm\\efivars.fd".into(),
+            iso: None,
+        };
+        let boot = QemuInvocation::for_boot(&config, &boot_paths, &install);
+        assert_eq!(boot.environment(), expected.as_slice());
+        assert_eq!(
+            boot.printable_environment(),
+            "SDL_WINDOWS_DPI_AWARENESS=permonitorv2"
+        );
+
+        let install_paths = GuestPaths {
+            iso: Some("C:\\images\\guest.iso".into()),
+            ..boot_paths
+        };
+        let installer = QemuInvocation::for_install(&config, &install_paths, &install)
+            .expect("install paths include ISO");
+        assert_eq!(installer.environment(), expected.as_slice());
+    }
+
+    #[test]
+    fn gtk_invocation_has_no_sdl_environment() {
+        let config = GuestConfig::validate(RawGuestConfig {
+            display: Some("gtk".to_owned()),
+            ..RawGuestConfig::default()
+        })
+        .expect("valid GTK config");
+        let paths = GuestPaths {
+            disk: "disk.qcow2".into(),
+            firmware_code: "code.fd".into(),
+            firmware_vars: "vars.fd".into(),
+            iso: None,
+        };
+        let install = QemuInstall {
+            system_exe: "qemu-system-x86_64.exe".into(),
+        };
+        let invocation = QemuInvocation::for_boot(&config, &paths, &install);
+        assert!(invocation.environment().is_empty());
+        assert_eq!(invocation.printable_environment(), "");
     }
 
     #[test]

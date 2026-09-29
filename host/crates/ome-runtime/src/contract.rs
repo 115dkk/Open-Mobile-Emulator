@@ -464,7 +464,7 @@ pub enum GuestState {
 pub enum HostingMode {
     /// No window is active.
     None,
-    /// Native window is embedded in the stage.
+    /// Native window is shown as an owned popup over the stage.
     Embedded,
     /// Native window remains separate.
     SeparateWindow,

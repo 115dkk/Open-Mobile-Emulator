@@ -121,19 +121,23 @@ where
 
 /// Guest-window seam used by deterministic runtime tests.
 pub trait WindowPlacement: Send {
-    /// Attaches one process window to its native parent.
+    /// Attaches one process window as a popup owned by the native host.
     fn attach(&mut self, target: HostingTarget) -> Result<(), HostingIssue>;
-    /// Places the attached window.
+    /// Places the attached popup over a physical rectangle of the host client area.
     fn place(&mut self, rect: ome_window_host::Rect) -> Result<(), HostingIssue>;
-    /// Hides the attached child window.
+    /// Registers the optional native overlay used as the popup's Z-order predecessor.
+    fn set_overlay_window(&mut self, overlay: Option<ome_platform_win::WindowHandle>);
+    /// Restores placement if the guest changed its own top-level rectangle.
+    fn resync(&mut self) -> Result<bool, HostingIssue>;
+    /// Hides the attached popup.
     fn hide(&mut self) -> Result<(), HostingIssue>;
-    /// Shows the attached child window without activation.
+    /// Shows the attached popup without activation.
     fn show(&mut self) -> Result<(), HostingIssue>;
-    /// Restores top-level window state.
+    /// Restores the guest's original top-level state.
     fn detach(&mut self) -> Result<(), HostingIssue>;
-    /// Activates the hosted or separate window.
+    /// Raises the hosted popup without changing focus.
     fn to_front(&mut self) -> Result<(), HostingIssue>;
-    /// Reports live embedded state.
+    /// Reports live owned-popup state.
     fn is_attached(&self) -> bool;
     /// Reports whether the embedded guest owns focus in the host GUI thread queue.
     fn guest_has_keyboard_focus(&self) -> Result<bool, HostingIssue> {
@@ -141,6 +145,10 @@ pub trait WindowPlacement: Send {
     }
     /// Returns the hosted guest client rectangle in physical screen pixels when known.
     fn client_screen_rect(&self) -> Option<Rect> {
+        None
+    }
+    /// Returns the hosted guest window for native diagnostics when known.
+    fn guest_window(&self) -> Option<ome_platform_win::WindowHandle> {
         None
     }
 }
@@ -151,6 +159,12 @@ impl WindowPlacement for GuestWindowHost {
     }
     fn place(&mut self, rect: ome_window_host::Rect) -> Result<(), HostingIssue> {
         GuestWindowHost::place(self, rect)
+    }
+    fn set_overlay_window(&mut self, overlay: Option<ome_platform_win::WindowHandle>) {
+        GuestWindowHost::set_overlay_window(self, overlay);
+    }
+    fn resync(&mut self) -> Result<bool, HostingIssue> {
+        GuestWindowHost::resync(self)
     }
     fn hide(&mut self) -> Result<(), HostingIssue> {
         GuestWindowHost::hide(self)
@@ -180,6 +194,9 @@ impl WindowPlacement for GuestWindowHost {
             width: native.width,
             height: native.height,
         })
+    }
+    fn guest_window(&self) -> Option<ome_platform_win::WindowHandle> {
+        GuestWindowHost::guest_window(self)
     }
 }
 
@@ -227,6 +244,7 @@ enum WorkerEvent {
     ArtifactFinished(Result<(), AppIssue>),
     InstallProgress(InstallProgress),
     InstallFinished(Result<Vec<AppItem>, AppIssue>),
+    BootPolled { generation: u64, completed: bool },
     UpdateChecked(Result<UpdateRelease, AppIssue>),
     UpdateProgress(TransferProgress),
     UpdateDownloaded(Result<DownloadedUpdate, AppIssue>),
@@ -303,7 +321,8 @@ pub struct AppRuntime {
     pid: Option<u32>,
     boot_completed: bool,
     adb_connected: bool,
-    adb_connect_attempted: bool,
+    boot_poll_pending: bool,
+    boot_generation: u64,
     boot_started: Option<Instant>,
     last_account_poll: Option<Instant>,
     apps: Vec<AppItem>,
@@ -488,7 +507,8 @@ impl AppRuntime {
             pid: None,
             boot_completed: false,
             adb_connected: false,
-            adb_connect_attempted: false,
+            boot_poll_pending: false,
+            boot_generation: 0,
             boot_started: None,
             last_account_poll: None,
             apps,
@@ -1407,6 +1427,20 @@ impl AppRuntime {
                         }
                     }
                 }
+                WorkerEvent::BootPolled {
+                    generation,
+                    completed,
+                } => {
+                    if generation == self.boot_generation {
+                        self.boot_poll_pending = false;
+                        if completed && self.guest_state == GuestState::Running {
+                            self.adb_connected = true;
+                            self.boot_completed = true;
+                            self.run_capability_probe();
+                            self.last_account_poll = Some(Instant::now());
+                        }
+                    }
+                }
                 WorkerEvent::UpdateChecked(result) => match result {
                     Ok(release) => {
                         let state = UpdateState::Available {
@@ -1527,7 +1561,7 @@ impl AppRuntime {
             });
         }
         self.boot_started = Some(Instant::now());
-        self.adb_connect_attempted = false;
+        self.boot_poll_pending = false;
         self.boot_completed = false;
         self.adb_connected = false;
         self.restart_pending = false;
@@ -2044,10 +2078,23 @@ impl AppRuntime {
         }
     }
 
-    /// Supplies the native parent window after the shell creates it.
-    pub fn set_host_window(&mut self, parent: u64) {
-        self.host_window = (parent != 0).then_some(parent);
+    /// Supplies the native owner window after the shell creates it.
+    pub fn set_host_window(&mut self, owner: u64) {
+        self.host_window = (owner != 0).then_some(owner);
         self.try_place_guest_window();
+    }
+
+    /// Re-places the guest after the native host moves, resizes, or changes scale.
+    pub fn host_window_moved(&mut self) {
+        self.try_place_guest_window();
+    }
+
+    /// Registers the optional native overlay used to keep it above the guest popup.
+    pub fn set_overlay_window(&mut self, raw: Option<u64>) {
+        let overlay = raw
+            .filter(|value| *value != 0)
+            .and_then(|value| ome_platform_win::WindowHandle::from_u64(value).ok());
+        self.deps.window_host.set_overlay_window(overlay);
     }
 
     /// Reports whether a stage currently exists in the webview.
@@ -2065,6 +2112,14 @@ impl AppRuntime {
         (self.stage_visible && self.hosting == HostingMode::Embedded)
             .then(|| self.deps.window_host.client_screen_rect())
             .flatten()
+    }
+
+    /// Returns the attached guest window token for native diagnostics when known.
+    pub fn guest_window_handle(&self) -> Option<u64> {
+        self.deps
+            .window_host
+            .guest_window()
+            .map(|window| window.as_u64())
     }
 
     /// Subscribes to lifecycle events without exposing the concrete supervisor type.
@@ -2115,7 +2170,8 @@ impl AppRuntime {
                 self.boot_started = Some(Instant::now());
                 self.boot_completed = false;
                 self.adb_connected = false;
-                self.adb_connect_attempted = false;
+                self.boot_generation = self.boot_generation.wrapping_add(1);
+                self.boot_poll_pending = false;
             }
             ome_supervisor::GuestState::Running => {
                 self.pid = event.pid;
@@ -2148,7 +2204,8 @@ impl AppRuntime {
                 });
                 self.boot_completed = false;
                 self.adb_connected = false;
-                self.adb_connect_attempted = false;
+                self.boot_generation = self.boot_generation.wrapping_add(1);
+                self.boot_poll_pending = false;
                 self.boot_started = Some(Instant::now());
                 self.hosted_pid = None;
                 self.hosting = HostingMode::None;
@@ -2161,7 +2218,8 @@ impl AppRuntime {
                 self.suspend_hotkey_down = false;
                 self.boot_completed = false;
                 self.adb_connected = false;
-                self.adb_connect_attempted = false;
+                self.boot_generation = self.boot_generation.wrapping_add(1);
+                self.boot_poll_pending = false;
                 self.boot_started = None;
                 self.last_account_poll = None;
                 self.hosting = HostingMode::None;
@@ -2187,7 +2245,8 @@ impl AppRuntime {
                 self.suspend_hotkey_down = false;
                 self.boot_completed = false;
                 self.adb_connected = false;
-                self.adb_connect_attempted = false;
+                self.boot_generation = self.boot_generation.wrapping_add(1);
+                self.boot_poll_pending = false;
                 self.boot_started = None;
                 self.last_account_poll = None;
                 self.hosting = HostingMode::None;
@@ -2208,6 +2267,11 @@ impl AppRuntime {
         if self.guest_state != GuestState::Running {
             return;
         }
+        if self.hosting == HostingMode::Embedded && self.deps.window_host.resync().unwrap_or(false)
+        {
+            #[cfg(debug_assertions)]
+            eprintln!("[stage] restored guest popup placement after a guest resize");
+        }
         if !self.boot_completed {
             let boot_timeout = Duration::from_secs(180);
             #[cfg(test)]
@@ -2222,18 +2286,26 @@ impl AppRuntime {
                 }
                 return;
             }
-            let Some(adb) = self.deps.adb.as_ref() else {
-                return;
-            };
-            if !self.adb_connect_attempted {
-                self.adb_connect_attempted = true;
-                self.adb_connected = adb.connect().is_ok();
-                return;
-            }
-            if adb.boot_completed().unwrap_or(false) {
-                self.adb_connected = true;
-                self.boot_completed = true;
-                self.run_capability_probe();
+            if !self.boot_poll_pending {
+                let Some(adb) = self.deps.adb.as_ref().cloned() else {
+                    return;
+                };
+                let generation = self.boot_generation;
+                let sender = self.worker_tx.clone();
+                if thread::Builder::new()
+                    .name("ome-boot-poll".to_owned())
+                    .spawn(move || {
+                        let connected = adb.connect().is_ok();
+                        let completed = connected && adb.boot_completed().unwrap_or(false);
+                        let _ = sender.send(WorkerEvent::BootPolled {
+                            generation,
+                            completed,
+                        });
+                    })
+                    .is_ok()
+                {
+                    self.boot_poll_pending = true;
+                }
             }
             return;
         }
@@ -3608,6 +3680,12 @@ mod tests {
             Ok(())
         }
 
+        fn set_overlay_window(&mut self, _overlay: Option<ome_platform_win::WindowHandle>) {}
+
+        fn resync(&mut self) -> Result<bool, HostingIssue> {
+            Ok(false)
+        }
+
         fn hide(&mut self) -> Result<(), HostingIssue> {
             *self.hide_count.lock().expect("hide lock") += 1;
             Ok(())
@@ -4350,7 +4428,11 @@ mod tests {
             None,
         ));
         runtime.tick();
-        runtime.tick();
+        let deadline = Instant::now() + Duration::from_secs(2);
+        while !runtime.snapshot().guest.boot_completed && Instant::now() < deadline {
+            thread::sleep(Duration::from_millis(5));
+            runtime.tick();
+        }
         let snapshot = runtime.snapshot();
         assert!(snapshot.guest.boot_completed);
         assert_eq!(snapshot.guest.pid, Some(4242));

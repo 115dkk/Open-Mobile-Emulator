@@ -29,6 +29,8 @@ use ome_window_host::GuestWindowHost;
 const GUEST_ID: &str = "default";
 const BOOT_DEADLINE: Duration = Duration::from_secs(180);
 const STOP_DEADLINE: Duration = Duration::from_secs(40);
+const STARTUP_PLACEMENT_WINDOW: Duration = Duration::from_secs(40);
+const STARTUP_TICK_INTERVAL: Duration = Duration::from_millis(200);
 const ADB_ADDRESS: &str = "127.0.0.1:5555";
 
 #[derive(Debug, Default)]
@@ -115,9 +117,7 @@ impl GetEvent {
                 Err(RecvTimeoutError::Timeout | RecvTimeoutError::Disconnected) => break,
             }
         }
-        if found.is_empty() {
-            println!("getevent unfiltered={observed:?}");
-        }
+        println!("getevent_pointer_observed={observed:?}");
         found
     }
 
@@ -251,7 +251,50 @@ fn run_check() {
     runtime.apply(Command::GuestStart).expect("start guest");
 
     let check = catch_unwind(AssertUnwindSafe(|| {
+        let placement = verify_startup_popup_placement(&mut runtime, &receiver, &parent);
         wait_for_boot(&mut runtime, &receiver);
+        let guest = guest_window(&runtime);
+        let top_level = guest.is_top_level();
+        let owner = guest.owner();
+        let no_activate = guest
+            .has_no_activate_style()
+            .expect("query WS_EX_NOACTIVATE");
+        println!("owned_popup_top_level={top_level}");
+        println!(
+            "owned_popup_owner_matches_host={}",
+            owner == Some(parent.handle())
+        );
+        println!("owned_popup_no_activate={no_activate}");
+        assert!(top_level, "guest popup is not top-level after boot");
+        assert_eq!(
+            owner,
+            Some(parent.handle()),
+            "guest popup owner differs from test host"
+        );
+        assert!(no_activate, "guest popup lacks WS_EX_NOACTIVATE");
+        let actual_after_boot = guest.window_rect().expect("guest window rect after boot");
+        let expected_after_boot = expected_popup_rect(&parent);
+        println!(
+            "startup_ticks={} startup_rect_mismatch_count={} startup_largest_deviation_px={} startup_resync_count={} startup_largest_tick_interval_ms={} startup_elapsed_ms={}",
+            placement.ticks,
+            placement.mismatch_count,
+            placement.largest_deviation_px,
+            placement.resync_count,
+            placement.largest_tick_interval.as_millis(),
+            placement.elapsed.as_millis()
+        );
+        println!(
+            "popup_rect_after_boot_actual={},{} {}x{} expected={},{} {}x{}",
+            actual_after_boot.x,
+            actual_after_boot.y,
+            actual_after_boot.width,
+            actual_after_boot.height,
+            expected_after_boot.x,
+            expected_after_boot.y,
+            expected_after_boot.width,
+            expected_after_boot.height
+        );
+        assert_eq!(actual_after_boot, expected_after_boot);
         runtime
             .apply(Command::GuestWindowToFront)
             .expect("bring hosted guest forward");
@@ -286,35 +329,72 @@ fn run_check() {
         let hit_class = hit.class_name().expect("hit class");
         println!("window_at_click_class={hit_class}");
         assert_eq!(hit_class, "SDL_app");
-        click_primary_at(click_x, click_y).expect("click embedded guest");
-        let focused_after_click = runtime
-            .guest_has_keyboard_focus()
-            .expect("query guest focus after click");
-        println!("focus_immediately_after_click_is_guest={focused_after_click}");
+        parent
+            .handle()
+            .to_foreground()
+            .expect("activate test host before pointer injection");
+        let foreground_before_click = ome_platform_win::foreground_window();
+        println!("foreground_before_click={foreground_before_click:#x}");
+        click_primary_at(click_x, click_y).expect("click guest popup");
+        let foreground_immediately_after_click = ome_platform_win::foreground_window();
+        println!("foreground_immediately_after_click={foreground_immediately_after_click:#x}");
+        println!(
+            "foreground_immediately_after_click_is_guest={}",
+            foreground_immediately_after_click == guest.as_u64()
+        );
         let touch_lines = getevent.collect_pointer_click(touch_started, Duration::from_secs(5));
         assert!(
             !touch_lines.is_empty(),
-            "embedded guest click produced no touch event"
+            "guest popup click produced no pointer event"
+        );
+        let pointer_position_count = touch_lines
+            .iter()
+            .filter(|line| line.contains("ABS_MT_POSITION_X") || line.contains("ABS_X"))
+            .count();
+        let pointer_down_count = touch_lines
+            .iter()
+            .filter(|line| {
+                (line.contains("BTN_TOUCH")
+                    || line.contains("BTN_MOUSE")
+                    || line.contains("BTN_LEFT"))
+                    && line.contains("DOWN")
+            })
+            .count();
+        println!(
+            "pointer_position_events={pointer_position_count} pointer_down_events={pointer_down_count}"
         );
         println!(
             "case=mouse-touch elapsed_ms={}",
             touch_started.elapsed().as_millis()
         );
+        assert!(pointer_position_count > 0, "pointer position event missing");
+        println!(
+            "native_pointer_button_down_verified={}",
+            pointer_down_count > 0
+        );
+        assert!(pointer_down_count > 0, "pointer button DOWN event missing");
 
+        runtime
+            .apply(Command::GuestWindowToFront)
+            .expect("restore host foreground after guest click");
         thread::sleep(Duration::from_millis(100));
-        if focused_after_click {
-            runtime
-                .apply(Command::GuestWindowToFront)
-                .expect("return focus to parent after click");
-            thread::sleep(Duration::from_millis(100));
-        }
-        let focused_after_correction = runtime
+        let foreground_after_click = ome_platform_win::foreground_window();
+        println!("foreground_after_click_correction={foreground_after_click:#x}");
+        println!(
+            "foreground_after_click_correction_is_guest={}",
+            foreground_after_click == guest.as_u64()
+        );
+        let focused_after_click = runtime
             .guest_has_keyboard_focus()
-            .expect("query corrected guest focus");
-        println!("focus_after_click_is_guest={focused_after_click}");
-        println!("focus_after_correction_is_guest={focused_after_correction}");
+            .expect("query guest focus after click correction");
+        println!("focus_after_click_correction_is_guest={focused_after_click}");
+        assert_ne!(
+            foreground_after_click,
+            guest.as_u64(),
+            "guest popup remained the foreground window after correction"
+        );
         assert!(
-            !focused_after_correction,
+            !focused_after_click,
             "guest retained focus after correction"
         );
 
@@ -324,6 +404,12 @@ fn run_check() {
         runtime.ingest_browser_key("KeyA", false, true);
         let key_lines = getevent.collect_key_a(key_started, Duration::from_secs(5));
         assert_key_pair("browser", &key_lines);
+        let key_down_count = key_lines
+            .iter()
+            .filter(|line| line.contains("DOWN"))
+            .count();
+        let key_up_count = key_lines.iter().filter(|line| line.contains("UP")).count();
+        println!("key_a_down_events={key_down_count} key_a_up_events={key_up_count}");
         println!(
             "case=browser-key elapsed_ms={}",
             key_started.elapsed().as_millis()
@@ -333,6 +419,122 @@ fn run_check() {
     stop_through_runtime(&mut runtime, &receiver);
     if let Err(payload) = check {
         std::panic::resume_unwind(payload);
+    }
+}
+
+#[derive(Debug)]
+struct PlacementMeasurements {
+    ticks: u32,
+    mismatch_count: u32,
+    largest_deviation_px: u32,
+    resync_count: u32,
+    largest_tick_interval: Duration,
+    elapsed: Duration,
+}
+
+fn verify_startup_popup_placement(
+    runtime: &mut AppRuntime,
+    receiver: &Receiver<GuestEvent>,
+    parent: &TestHostWindow,
+) -> PlacementMeasurements {
+    let started = Instant::now();
+    let deadline = started + STARTUP_PLACEMENT_WINDOW;
+    let mut ticks = 0_u32;
+    let mut mismatch_count = 0_u32;
+    let mut largest_deviation_px = 0_u32;
+    let mut resync_count = 0_u32;
+    let mut previous_rect = None;
+    let mut previous_tick = None;
+    let mut largest_tick_interval = Duration::ZERO;
+    while Instant::now() < deadline {
+        drain_guest_events(runtime, receiver);
+        let tick_at = Instant::now();
+        runtime.tick();
+        ticks = ticks.saturating_add(1);
+        if let Some(previous) = previous_tick {
+            largest_tick_interval = largest_tick_interval.max(tick_at.duration_since(previous));
+        }
+        previous_tick = Some(tick_at);
+        if let Some(raw) = runtime.guest_window_handle() {
+            let guest = WindowHandle::from_u64(raw).expect("valid guest window token");
+            let before = guest
+                .window_rect()
+                .expect("guest window rect during startup");
+            let expected = expected_popup_rect(parent);
+            if before != expected {
+                mismatch_count = mismatch_count.saturating_add(1);
+                largest_deviation_px = largest_deviation_px.max(rect_deviation(before, expected));
+            }
+            if previous_rect.is_some_and(|rect| rect != before) {
+                println!(
+                    "startup_popup_rect_changed={},{} {}x{}",
+                    before.x, before.y, before.width, before.height
+                );
+            }
+            previous_rect = Some(before);
+            let after = guest
+                .window_rect()
+                .expect("guest window rect after startup tick");
+            if before != expected && after == expected {
+                resync_count = resync_count.saturating_add(1);
+            }
+        }
+        thread::sleep(STARTUP_TICK_INTERVAL);
+    }
+    drain_guest_events(runtime, receiver);
+    runtime.tick();
+    ticks = ticks.saturating_add(1);
+    PlacementMeasurements {
+        ticks,
+        mismatch_count,
+        largest_deviation_px,
+        resync_count,
+        largest_tick_interval,
+        elapsed: started.elapsed(),
+    }
+}
+
+fn guest_window(runtime: &AppRuntime) -> WindowHandle {
+    let raw = runtime
+        .guest_window_handle()
+        .expect("runtime has an attached guest popup");
+    WindowHandle::from_u64(raw).expect("valid guest window token")
+}
+
+fn expected_popup_rect(parent: &TestHostWindow) -> ome_platform_win::ScreenRect {
+    let client = parent
+        .handle()
+        .client_screen_rect()
+        .expect("test host client screen rect");
+    ome_platform_win::ScreenRect {
+        x: client.x,
+        y: client.y,
+        width: 1280,
+        height: 720,
+    }
+}
+
+fn rect_deviation(
+    actual: ome_platform_win::ScreenRect,
+    expected: ome_platform_win::ScreenRect,
+) -> u32 {
+    actual
+        .x
+        .abs_diff(expected.x)
+        .max(actual.y.abs_diff(expected.y))
+        .max(actual.width.abs_diff(expected.width))
+        .max(actual.height.abs_diff(expected.height))
+}
+
+fn drain_guest_events(runtime: &mut AppRuntime, receiver: &Receiver<GuestEvent>) {
+    loop {
+        match receiver.try_recv() {
+            Ok(event) => runtime.ingest_guest_event(event),
+            Err(mpsc::TryRecvError::Empty) => return,
+            Err(mpsc::TryRecvError::Disconnected) => {
+                panic!("supervisor event channel disconnected")
+            }
+        }
     }
 }
 

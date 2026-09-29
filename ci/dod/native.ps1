@@ -111,11 +111,9 @@ if ($WaitInstaller) {
  } while ([DateTime]::UtcNow -lt $deadline)
  if ($targets.Count -ne 1) { throw 'Owned visible installer window did not appear' }
  $h = $targets[0]
- # Interrupt GRUB's short live-boot timeout as soon as the window is created.
- # Do not select an entry until the caller has captured and recognized the menu.
- $until = [DateTime]::UtcNow.AddSeconds(3)
- do { [W]::Focus($main); [W]::Tap(0x24); Start-Sleep -Milliseconds 100 } while ([DateTime]::UtcNow -lt $until)
- @{pid=[W]::Pid($h);hwnd=$h.ToInt64();action='interrupt-installer-grub'} | ConvertTo-Json -Compress
+ # Report the window only. Keys are sent after the caller has recognized the GRUB menu; the product
+ # forwards keys to the guest now, and keys during the firmware phase are not harmless.
+ @{pid=[W]::Pid($h);hwnd=$h.ToInt64();action='installer-window'} | ConvertTo-Json -Compress
  exit
 }
 if ($QemuPid) {
