@@ -1933,8 +1933,12 @@ impl AppRuntime {
             .and_then(|supervisor| supervisor.set_display_window(geometry));
         #[cfg(debug_assertions)]
         eprintln!(
-            "[stage] send guest window geometry={geometry:?} result={}",
-            if result.is_ok() { "ok" } else { "error" }
+            "[stage] send guest window geometry={geometry:?} result={} at={}",
+            if result.is_ok() { "ok" } else { "error" },
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|elapsed| elapsed.as_millis())
+                .unwrap_or(0)
         );
         if result.is_err() {
             eprintln!("guest display window submission failed");
