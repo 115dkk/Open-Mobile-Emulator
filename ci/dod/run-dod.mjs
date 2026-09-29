@@ -305,15 +305,22 @@ try {
     if (s.wizard.step !== 'artifactDownload') throw Error(`Unexpected wizard step ${s.wizard.step}`);
   });
   await step('S1.4-download', async () => {
-    const start = Date.now(); await click('다운로드'); let nextProgress = 0;
-    const s = await until(async () => {
-      const s = await snapshot(); const d = s.wizard.download;
-      if (['failed', 'cancelled'].includes(d?.stage)) throw new StopRun(`Artifact download ${d.stage}`);
-      if (Date.now() >= nextProgress) { log('download-progress', { progress: d }); nextProgress = Date.now() + 30000; }
-      return d?.stage === 'verified' && s;
-    }, 30 * 60000, 'verified artifact', 5000);
-    result.measurements.downloadMs = Date.now() - start; result.measurements.downloadBytes = s.wizard.download.doneBytes;
-    result.measurements.downloadAverageBytesPerSecond = s.wizard.download.doneBytes / (result.measurements.downloadMs / 1000);
+    const start = Date.now(); let nextProgress = 0;
+    let s = await snapshot();
+    if (s.wizard.download?.stage === 'verified') {
+      // A seeded home (artifacts/*.iso with its .verified marker) is verified at first sight: the wizard shows 다음 only.
+      result.measurements.downloadSkipped = true; log('download-skipped', { reason: 'image already verified in the seeded home' });
+    } else {
+      await click('다운로드');
+      s = await until(async () => {
+        const s = await snapshot(); const d = s.wizard.download;
+        if (['failed', 'cancelled'].includes(d?.stage)) throw new StopRun(`Artifact download ${d.stage}`);
+        if (Date.now() >= nextProgress) { log('download-progress', { progress: d }); nextProgress = Date.now() + 30000; }
+        return d?.stage === 'verified' && s;
+      }, 30 * 60000, 'verified artifact', 5000);
+      result.measurements.downloadMs = Date.now() - start; result.measurements.downloadBytes = s.wizard.download.doneBytes;
+      result.measurements.downloadAverageBytesPerSecond = s.wizard.download.doneBytes / (result.measurements.downloadMs / 1000);
+    }
     await capture('04-image-verified'); await click('다음'); await capture('05-disk-size');
   });
   await step('S1.5-installer', async () => {
