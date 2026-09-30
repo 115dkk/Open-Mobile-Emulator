@@ -39,6 +39,7 @@ CPUID, `WinHvPlatform.dll`)이라 이 느림과는 무관하다.
 | 16 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36656117032) | f885e67 | 취소(114분 뒤 손으로) | `launch`: 제품(pid 4996)은 떴지만 CDP 9333이 30초 안에 답하지 않음 |
 | 17 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36665957774) | 8fc8e5d | 실패(드라이버가 스스로 종료) | `launch`: 제품 창은 그려졌고 호스트 점검 여섯 줄이 모두 통과했지만 CDP는 120초 뒤에도 답하지 않음 |
 | 18 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36667090492) | 6b691bb | 실패(도우미 오류) | `launch`: `CreateProcessAsUser`로 제품이 떴지만(pid 4028, WebView2 자식 6116) 도우미가 `$Error`라는 읽기 전용 변수에 대입하다 죽어 pid를 알리지 못함. 증거 아티팩트 없음(고아 제품이 출력 파일을 쥐고 있어 게시 단계도 실패) |
+| 19 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36667569730) | 6ea7669 | 실패 | `launch`: 제한 토큰으로 뜬 제품(pid 5496, 중간 무결성)이 Tauri 설정 훅에서 패닉("the underlying handle is not available")으로 곧 종료. 이 길은 여기서 접는다 |
 
 ### 16회 (2026-09-30 01:39~03:42 UTC)
 
@@ -84,3 +85,19 @@ CPUID, `WinHvPlatform.dll`)이라 이 느림과는 무관하다.
 권한과 바탕 화면은 그대로다. 제품의 표준 출력과 오류 출력은 도우미가 파일로 받고, 도우미는 pid를 한 줄로
 알린 뒤 종료 코드를 기다린다. 사용자 PC에서 제품이 관리자 권한으로 뜨는 일은 없으므로 이것은 러너 쪽
 조정이지 제품의 동작 변경이 아니다.
+
+### 18·19회 (2026-09-30 04:02~04:17 UTC): 제한 토큰으로 띄우는 길은 접는다
+
+18회는 도우미가 PowerShell의 읽기 전용 `$Error`에 대입하다 죽어 pid를 알리지 못했다(제품은 떴다).
+19회는 도우미가 제대로 돌아 제품이 중간 무결성으로 떴지만(`childElevated: false`), 제품은 Tauri 설정
+훅에서 "Failed to setup app: error encountered during setup hook: the underlying handle is not
+available"로 패닉해 곧 끝났다(`dod-ci/run19-app-output.txt`). 120초 뒤의 바탕 화면 진단에는 창도
+프로세스도 없었다. 인위적으로 깎은 토큰 아래에서는 제품의 창이나 트레이 만들기가 실패한 것이다.
+
+이 길은 여기서 접는다. 관리자 세션의 토큰을 깎아 원격 디버깅 끝점을 여는 것은 WebView2가 둔 제한을
+돌아가는 일이고, 제품을 그 조건에 맞추는 것도 제품의 몫이 아니다. 드라이버는 6b691bb 이전처럼 제품을
+그대로 띄우고(CDP 대기 120초와 바탕 화면 진단은 남긴다), 도우미 스크립트는 지웠다. 남은 선택은
+사용자가 정한다. (가) 러너에 표준 사용자 계정을 만들어 드라이버 전체를 그 계정으로 돌린다(제품이
+설계된 실행 조건이지만, 작업 폴더와 픽스처의 권한을 그 계정에 열어야 한다). (나) 드라이버의 CDP를
+UI 자동화(UIA)로 바꾸고, 스냅숏은 제품이 진단 목적으로 파일에 쓰는 기능을 더해 읽는다(큰 작업).
+(다) 러너는 빌드와 호스트 점검까지만 쓰고, 마법사 완주는 실기로 돌린다.

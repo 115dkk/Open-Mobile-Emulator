@@ -1,0 +1,4 @@
+
+thread 'main' (8180) panicked at C:\Users\USER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tauri-2.11.6\src\app.rs:1425:11:
+Failed to setup app: error encountered during setup hook: the underlying handle is not available
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
