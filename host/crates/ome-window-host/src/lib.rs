@@ -234,6 +234,14 @@ impl GuestWindowHost {
         let discovery_started = Instant::now();
         let handle = discover_guest_window(target.guest_process_id, owner)?;
         self.last_discovery_time = Some(discovery_started.elapsed());
+        #[cfg(debug_assertions)]
+        eprintln!(
+            "[stage] guest popup discovered handle={:#x} after={}ms visible={:?} at={}",
+            handle.as_u64(),
+            discovery_started.elapsed().as_millis(),
+            handle.is_visible().ok(),
+            epoch_millis()
+        );
         if !handle.is_top_level() || handle.owner() != Some(owner) {
             return Err(HostingIssue::Platform);
         }
@@ -422,11 +430,26 @@ impl GuestWindowHost {
     }
 
     fn apply_z_order(&self, guest: GuestWindow) -> Result<(), HostingIssue> {
+        #[cfg(debug_assertions)]
+        eprintln!(
+            "[stage] popup z-order insert_after={:?} at={}",
+            self.visible_overlay().map(WindowHandle::as_u64),
+            epoch_millis()
+        );
         guest
             .handle
             .place_z_order(self.visible_overlay())
             .map_err(|_| HostingIssue::Platform)
     }
+}
+
+/// Wall-clock milliseconds for the debug traces, matching the runtime's `at=` stamps.
+#[cfg(debug_assertions)]
+fn epoch_millis() -> u128 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|elapsed| elapsed.as_millis())
+        .unwrap_or(0)
 }
 
 /// Converts a rectangle relative to the owner's client area into physical screen pixels.
