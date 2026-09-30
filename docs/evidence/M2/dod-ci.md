@@ -40,6 +40,8 @@ CPUID, `WinHvPlatform.dll`)이라 이 느림과는 무관하다.
 | 17 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36665957774) | 8fc8e5d | 실패(드라이버가 스스로 종료) | `launch`: 제품 창은 그려졌고 호스트 점검 여섯 줄이 모두 통과했지만 CDP는 120초 뒤에도 답하지 않음 |
 | 18 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36667090492) | 6b691bb | 실패(도우미 오류) | `launch`: `CreateProcessAsUser`로 제품이 떴지만(pid 4028, WebView2 자식 6116) 도우미가 `$Error`라는 읽기 전용 변수에 대입하다 죽어 pid를 알리지 못함. 증거 아티팩트 없음(고아 제품이 출력 파일을 쥐고 있어 게시 단계도 실패) |
 | 19 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36667569730) | 6ea7669 | 실패 | `launch`: 제한 토큰으로 뜬 제품(pid 5496, 중간 무결성)이 Tauri 설정 훅에서 패닉("the underlying handle is not available")으로 곧 종료. 이 길은 여기서 접는다 |
+| 20 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36674327649) | e87b262 | 실패(래퍼 오류) | 표준 사용자 `omeuser` 생성(관리자 아님), 권한 부여 1.4초, `Start-Process -Credential`로 그 계정의 pwsh 시작까지 됨. 래퍼가 셸 폴더 조회로 관리자의 AppData를 받아 그 아래 Temp를 만들다 접근 거부 |
+| 21 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36674900503) | e3b3c99 | (진행 중) | |
 
 ### 16회 (2026-09-30 01:39~03:42 UTC)
 
@@ -110,3 +112,13 @@ UI 자동화(UIA)로 바꾸고, 스냅숏은 제품이 진단 목적으로 파�
 계정으로 `ci/dod/run-as-user.ps1`을 띄운다. 래퍼는 프로필 경로(USERPROFILE, LOCALAPPDATA, APPDATA,
 TEMP)를 그 계정의 셸 폴더에서 다시 읽고, 드라이버에 필요한 값은 인자로 받아 환경에 넣은 뒤 드라이버를
 실행한다. 제품은 로그인한 표준 사용자 아래에서 뜨는 설계 조건 그대로 돌게 된다.
+
+### 20회 (2026-09-30 05:38~05:44 UTC): 표준 사용자로 시작은 된다
+
+`net user`로 만든 `omeuser`는 Administrators에 없었고, 체크아웃·노드·픽스처 읽기와 홈·증거 폴더 수정
+권한 부여는 1.4초에 끝났으며, 보조 로그온 서비스와 `Start-Process -Credential -LoadUserProfile`로 그
+계정의 pwsh가 러너의 바탕 화면 세션에서 시작됐다. 래퍼는 `[Environment]::GetFolderPath('LocalApplicationData')`
+가 `C:\Users\runneradmin\AppData\Local`을 돌려주어 그 아래 Temp를 만들다 접근 거부로 끝났다. 다른 사용자의
+자격 증명으로 시작한 프로세스는 호출자의 환경을 물려받고, 셸 폴더 조회는 `%USERPROFILE%`을 그 환경에서
+펼치기 때문이다. e3b3c99가 프로필 경로를 HKLM ProfileList의 SID 항목에서 읽고, 없으면 워크플로가 만든
+`D:\ome-user`를 쓰도록 고쳤다.
