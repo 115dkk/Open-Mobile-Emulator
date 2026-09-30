@@ -174,9 +174,14 @@ function installerScreen(text) {
   // fat32 (read as "fdt3Z"); the system chooser is the one with ext4.
   if (has('choose filesystem') || (/lesyste[mn]/.test(words) && (has('please select') || has('choose')))) {
     if (has('ext4')) return 'filesystem-for-system';
-    if (/fat3|fdt3/.test(words) || has('do not re')) return 'filesystem-for-esp';
+    // "Do not re-format" is offered only once the partition carries a filesystem (dev PC round 17:
+    // the second ESP pass after the format), so it decides on its own.
+    if (has('do not re')) return 'filesystem-for-esp-formatted';
+    if (/fat3|fdt3/.test(words)) return 'filesystem-for-esp';
     return 'unknown';
   }
+  // Second ESP pass: "Are you sure you want to pick vda1 as ESP?" with No highlighted (round 17).
+  if (has('pick') && has('as esp')) return 'confirm-pick-esp';
   if (has('warning') || (/\b\d+\s*(?:s\b|sec|second)/.test(text) && /\b[0o]k\b/.test(text) && !/\byes\b|\bno\b|reboot/i.test(text))) return 'warning-countdown';
   if (has('error') || has('this is not an efi system partition')) return 'error';
   if (has('ota')) return 'ota-confirm';
@@ -415,6 +420,11 @@ async function installGuest(pid) {
         case 'filesystem-for-esp':
           formatTarget = 'esp'; sequence = espFormatted ? 'HOME,ENTER' : 'DOWN,ENTER';
           action = espFormatted ? 'do-not-reformat' : 'select-fat32'; break;
+        case 'filesystem-for-esp-formatted':
+          formatTarget = 'esp'; espFormatted = true; sequence = 'HOME,ENTER'; action = 'do-not-reformat'; break;
+        // dialog's yes/no boxes take y and n directly; a doubled Enter (round 17) cannot land on
+        // the highlighted No that way.
+        case 'confirm-pick-esp': sequence = 'y'; action = 'confirm-pick-esp'; break;
         case 'system-chooser':
           formatTarget = 'system'; sequence = 'HOME,DOWN,ENTER'; action = 'select-vda2'; break;
         case 'filesystem-for-system':
@@ -422,8 +432,8 @@ async function installGuest(pid) {
         case 'label-question': sequence = 'ENTER'; action = 'keep-label'; break;
         case 'confirm-format':
           if (!formatTarget) throw new StopRun(`Format confirmation without a classified target: ${text}`);
-          sequence = 'LEFT,ENTER'; action = `confirm-format-${formatTarget}`; break;
-        case 'ota-confirm': sequence = 'RIGHT,ENTER'; action = 'decline-ota'; break;
+          sequence = 'y'; action = `confirm-format-${formatTarget}`; break;
+        case 'ota-confirm': sequence = 'n'; action = 'decline-ota'; break;
         case 'efi-boot-chooser': sequence = 'HOME,ENTER'; action = 'select-grub2'; break;
         case 'error':
           errors++; action = errors > 3 ? 'stop-after-errors' : 'acknowledge-error';
