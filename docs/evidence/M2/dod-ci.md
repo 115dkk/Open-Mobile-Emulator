@@ -279,3 +279,28 @@ UEFI System detected! Please select a (ESP) partition as EFI System Partition �
 거부하는 대신 전경 창의 클래스·PID·제목을 적고 계속한다. 키가 닿았는지는 그다음 캡처가 말해 준다.
 설치기 화면 순환은 행동 뒤 20초 동안 화면이 그대로면 한 번 더 행동한다(게이트가 떨어뜨린 키의 보정,
 같은 화면에서 두 번까지, 진행 중·카운트다운 화면은 제외).
+
+### 30회와 31회 (2026-09-30 09:37~09:49 UTC): cfdisk 순서는 끝까지 갔고, 세 군데가 어긋났다
+
+30회(0a7a0a8)는 GRUB, 파티션 대화 상자, `c`와 Enter, cfdisk 진입, 레이블 gpt까지 지나 cfdisk의 키 순서를
+끝까지 보냈다(`run30/key-sequence.txt`, 모든 키가 `settled`). 결과 표(`run30/cfdisk-table-before-quit.png`)는
+세 가지 어긋남을 보인다.
+
+- 크기 입력 `512M`에서 첫 글자 `5`가 빠져 12M 파티션이 됐다(`run30/cfdisk-size-prompt-12M.png`, 섹터
+  24576). 쓰기 확인의 `yes`도 받아들여지지 않아 "Did not write partition table to disk."가 남았다.
+  둘 다 전경 도우미가 동작한 직후의 첫 키였으므로, 키 앞에 300 ms를 쉬고 화면으로 확인한다.
+- 형식 목록에서 HOME, Enter는 `MBR partition scheme`을 골랐다. libfdisk의 GPT 형식 순서는 MBR partition
+  scheme, EFI System, BIOS boot …이라 EFI System은 둘째 항목이다(M0 기록의 "첫 항목"은 틀렸다). HOME,
+  DOWN, Enter로 바꾸고 표에 EFI System이 보이는지 확인한다.
+- 둘째 파티션은 만들어지지 않았다(위 어긋남의 연쇄).
+
+31회(9faedb7)는 Installation을 고른 뒤 30초 시점의 판독이 비어 있어 "Expected installer partition dialog"로
+멈췄다. 29·30회는 30초에 대화 상자가 읽혔으니 러너마다 부팅 속도가 다르다. 한 번 찍고 판정하는 대신
+대화 상자가 읽힐 때까지 최대 180초 기다린다.
+
+고침(드라이버). cfdisk 단계는 키를 보낸 뒤 기대하는 글이 화면에 읽힐 때까지 기다리고, 안 읽히면 같은 키를
+다시 보내는 `keysUntil`로 바꿨다(같은 화면에서 되풀이해도 안전한 순서만 고른다). 크기 입력은 프롬프트
+줄의 `512M`, 파티션 생성은 표의 `512M`, 형식은 표의 `EFI System`(아니면 목록을 다시 열어 두 번 더),
+둘째 파티션은 표의 `Linux filesystem`, 쓰기는 `W` 뒤 "Are you sure"와 `yes` Enter 뒤 "altered"
+(거부되면 세 번까지), 종료는 설치기의 "Choose Partition"으로 확인한다. 판독은 2를 Z, v를 u, W를 U로
+읽으므로 패턴이 그 변형을 허용한다.

@@ -1,0 +1,27 @@
+{"at":"2026-09-30T09:44:56.413Z","event":"installer-ocr","name":"installer-00-grub-menu-00","scale":2,"height":608,"width":872,"language":"en-US","text":""}
+{"at":"2026-09-30T09:44:58.615Z","event":"installer-ocr","name":"installer-00-grub-menu-01","scale":2,"height":608,"width":872,"language":"en-US","text":""}
+{"at":"2026-09-30T09:45:01.465Z","event":"installer-ocr","name":"installer-00-grub-menu-02","scale":2,"height":608,"width":872,"language":"en-US","text":"Acvarcet.:l zvptiüFIE. EnLer: BOOL SelecLed E: Edit Selected C: Grub Tet rni[ldl"}
+{"at":"2026-09-30T09:45:03.824Z","event":"installer-input","label":"01a-grub-home","path":"product","settled":true,"foreground":917532,"sent":["Home"]}
+{"at":"2026-09-30T09:45:08.749Z","event":"installer-input","label":"01a-grub-down-1","path":"product","settled":true,"foreground":917532,"sent":["ArrowDown"]}
+{"at":"2026-09-30T09:45:13.469Z","event":"installer-input","label":"01a-grub-down-2","path":"product","settled":true,"foreground":917532,"sent":["ArrowDown"]}
+{"at":"2026-09-30T09:45:17.833Z","event":"installer-input","label":"01a-grub-down-3","path":"product","settled":true,"foreground":917532,"sent":["ArrowDown"]}
+{"at":"2026-09-30T09:45:22.296Z","event":"installer-input","label":"01a-grub-down-4","path":"product","settled":true,"foreground":917532,"sent":["ArrowDown"]}
+{"at":"2026-09-30T09:45:26.755Z","event":"installer-input","label":"01-grub-installation","path":"product","settled":true,"foreground":917532,"sent":["Enter"]}
+{"at":"2026-09-30T09:46:00.699Z","event":"installer-ocr","name":"installer-01-grub-installation","scale":2,"height":608,"width":872,"language":"en-US","text":"Made by Androi d—x86 Project , Modif ied by Bl issLabs & Contributors Choose Partition UEFI System detected ! Please select a (ESP ) Hint: If you chose ESP already but got choose ESP aga in, no need to format if Part ition I Fi lesystem I Label partition as EFI System Partition restarted to this stage, please you already did . I Size I Drive namezmodel CreatezMod ify partit ions Restart the instal ler Open command—I ine shell Skip (Not Recommended) 0K > <Reboot>"}
+{"at":"2026-09-30T09:46:02.602Z","event":"installer-input","label":"02-partition-menu","path":"product","settled":true,"foreground":917532,"sent":["KeyC"]}
+{"at":"2026-09-30T09:46:06.603Z","event":"installer-input","label":"03-cfdisk-confirm","path":"product","settled":true,"foreground":917532,"sent":["Enter"]}
+{"at":"2026-09-30T09:46:10.743Z","event":"installer-input","label":"04-cfdisk-label","path":"product","settled":true,"foreground":917532,"sent":["Enter"]}
+{"at":"2026-09-30T09:46:14.805Z","event":"installer-input","label":"05-gpt","path":"product","settled":true,"foreground":917532,"sent":["Enter"]}
+{"at":"2026-09-30T09:46:18.928Z","event":"installer-input","label":"06-new-esp","path":"product","settled":true,"foreground":917532,"sent":["KeyN"]}
+{"at":"2026-09-30T09:46:25.431Z","event":"installer-input","label":"07-esp-size","path":"product","settled":true,"foreground":917532,"sent":["Backspace","Backspace","Backspace","Backspace","Backspace","Backspace","Backspace","Backspace","Backspace","Backspace","Backspace","Backspace","Backspace","Backspace","Backspace","Backspace","Digit5","Digit1","Digit2","Shift+KeyM"]}
+{"at":"2026-09-30T09:46:30.106Z","event":"installer-input","label":"08-create-esp","path":"product","settled":true,"foreground":917532,"sent":["Enter"]}
+{"at":"2026-09-30T09:46:34.849Z","event":"installer-input","label":"09-type-list","path":"product","settled":true,"foreground":917532,"sent":["KeyT"]}
+{"at":"2026-09-30T09:46:39.113Z","event":"installer-input","label":"10-efi-type","path":"product","settled":true,"foreground":917532,"sent":["Home","Enter"]}
+{"at":"2026-09-30T09:46:43.691Z","event":"installer-input","label":"11-free-space","path":"product","settled":true,"foreground":917532,"sent":["ArrowDown"]}
+{"at":"2026-09-30T09:46:48.695Z","event":"installer-input","label":"12-new-system","path":"product","settled":true,"foreground":917532,"sent":["KeyN"]}
+{"at":"2026-09-30T09:46:53.653Z","event":"installer-input","label":"13-system-size","path":"product","settled":true,"foreground":917532,"sent":["Enter"]}
+{"at":"2026-09-30T09:46:58.435Z","event":"installer-input","label":"14-write","path":"product","settled":true,"foreground":917532,"sent":["Shift+KeyW"]}
+{"at":"2026-09-30T09:47:03.521Z","event":"installer-input","label":"15-write-yes","path":"product","settled":true,"foreground":917532,"sent":["KeyY","KeyE","KeyS"]}
+{"at":"2026-09-30T09:47:08.463Z","event":"installer-input","label":"16-written","path":"product","settled":true,"foreground":16056936,"sent":["Enter"]}
+{"at":"2026-09-30T09:47:14.261Z","event":"installer-input","label":"17-quit-cfdisk","path":"product","settled":true,"foreground":917532,"sent":["KeyQ"]}
+{"at":"2026-09-30T09:47:24.383Z","event":"installer-ocr","name":"installer-16-written","scale":2,"height":608,"width":872,"language":"en-US","text":"Di sk: /deuzuda Size: 32 GiB, 34359738368 bytes, 67108864 sectors Label : gpt, identifier: 5FEEB6BF-6354-40AC-97C6-890940EZEAOA Deu ice / deuzudal F ree space Start 2048 Z66Z4 End 26623 67108830 Sectors 24576 6 ?08ZZ0? Size Type IZM MBR partition scheme 3ZG Partition UUID: 05E7C5CE-6818-4373-BFIF-5361F64Z47ZD Partition type: MBR partition scheme (OZ4DEE41-33E7-11D3-9D69-0008C781F39F) [ Delete ] [ Resize ] [ Type ] [ Help [ Urite ] [ Quit ] Did not write partition table to disk. Dump"}
