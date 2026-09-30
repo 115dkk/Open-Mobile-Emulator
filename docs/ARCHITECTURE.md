@@ -82,7 +82,9 @@ manifests/images/         게스트 이미지 프로필 JSON (3.15절). 산출�
 ```
 
 `ci/`에는 저장소 전체 게이트가 있다. M2에서 추가하는 것은 `ci/Check-UnsafeScope.ps1`
-(unsafe 위치 검사, 3.2절)과 SPDX 검사 확장(.tsx, .mjs, .css, .toml)이다.
+(unsafe 위치 검사, 3.2절), SPDX 검사 확장(.tsx, .mjs, .css, .toml), 그리고
+`ci/Check-ScriptSyntax.ps1`(모든 PowerShell 스크립트를 파서에 넣고 `ci/dod/*.mjs`를 `node --check`로
+확인. 구문 오류가 러너까지 가서 완료 실행 한 회차를 버리는 일을 막는다)이다.
 
 ## 3. 모듈과 인터페이스
 

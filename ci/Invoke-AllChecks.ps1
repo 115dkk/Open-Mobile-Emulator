@@ -76,6 +76,13 @@ if ($unsafeScopeResult -ne 0) {
     $failed = $true
 }
 
+$syntaxResult = Invoke-PolicyCheck `
+    -Name 'Check-ScriptSyntax' `
+    -ScriptPath (Join-Path $PSScriptRoot 'Check-ScriptSyntax.ps1')
+if ($syntaxResult -ne 0) {
+    $failed = $true
+}
+
 $pesterModule = Get-Module -ListAvailable Pester |
     Where-Object { $_.Version.Major -eq 5 } |
     Sort-Object Version -Descending |
