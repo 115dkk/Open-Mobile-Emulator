@@ -5,7 +5,7 @@ param(
  [int]$Width=0, [int]$Height=0, [int]$X=80, [int]$Y=60,
  [switch]$Quit, [switch]$Inventory, [string]$HomePath,
  [string]$Keys, [string]$Text, [string]$FilePath, [switch]$GameSelection,
- [int]$KillOwnedPid, [string]$ExpectedCreation, [switch]$WaitInstaller, [switch]$Desktop
+ [int]$KillOwnedPid, [string]$ExpectedCreation, [switch]$WaitInstaller, [switch]$Desktop, [switch]$Close
 )
 $ErrorActionPreference='Stop'
 [Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)
@@ -184,6 +184,13 @@ if ($Keys -or $Text) {
  }}
  if($Text){[W]::Focus($main);[W]::Type($Text)}
  @{action='keys';hwnd=$h.ToInt64();pid=[W]::Pid($h);keys=$Keys;text=$Text} | ConvertTo-Json -Compress
+ exit
+}
+if($Close){
+ # WM_CLOSE to the main window: the product's CloseRequested handler stops the guest and exits
+ # (close_action = stopGuest), the same as a person clicking the title-bar close button.
+ [void][W]::PostMessage($main,0x10,[IntPtr]0,[IntPtr]0)
+ @{action='window-close';hwnd=$main.ToInt64()} | ConvertTo-Json -Compress
  exit
 }
 if($Quit){

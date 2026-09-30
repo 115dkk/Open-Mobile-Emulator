@@ -43,6 +43,7 @@ CPUID, `WinHvPlatform.dll`)이라 이 느림과는 무관하다.
 | 20 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36674327649) | e87b262 | 실패(래퍼 오류) | 표준 사용자 `omeuser` 생성(관리자 아님), 권한 부여 1.4초, `Start-Process -Credential`로 그 계정의 pwsh 시작까지 됨. 래퍼가 셸 폴더 조회로 관리자의 AppData를 받아 그 아래 Temp를 만들다 접근 거부 |
 | 21 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36674900503) | e3b3c99 | 실패(`S1.5-installer`) | 표준 사용자로 CDP 접속 성공. 호스트 점검 8행 통과, WHPX 동의 건너뜀, ISO 2.4 GB 64초에 내려받아 검증, 디스크 만들기까지. QEMU가 `Could not initialize DirectSound: No sound driver is available`로 곧 종료(러너에 오디오 장치 없음) |
 | 22 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36675968945) | 1e8ebde | 실패(`S1.5-installer`) | 오디오는 `none`으로 넘어감(명령줄에 `-audiodev` 없음). 내려받기 38.8초(캐시 없음, 두 번째 받기). QEMU가 `No provider of glCreateShader found. Requires one of: Desktop OpenGL 2.0 / OpenGL ES 2.0 / GL_ARB_shader_objects`로 종료. 러너의 WGL 기본 컨텍스트는 GDI Generic 1.1 |
+| 23 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36677213522) | e6433d0 | 실패(`S1.4-download`) | OpenGL 조사가 동작해 시작 알림 "하드웨어 가속 그래픽이 없어 소프트웨어 렌더링으로 설정" 남고 `gpuMode: software`. 이번 SourceForge 미러는 3 MB/s였고 953 MB에서 전송이 끊겨 `artifact_download_failed`. 코드 밖의 일 |
 
 ### 16회 (2026-09-30 01:39~03:42 UTC)
 
@@ -163,3 +164,14 @@ WGL이라 쓰이지 않는다.
 알림을 남긴다. 드라이버는 첫 부팅에서 스냅숏의 `settings.gpuMode`가 `software`면 ISO 저자들의
 "No HW Acceleration" GRUB 항목을 고른다(표준 VGA에서는 기본 항목이 초기 사용자 공간에서 멈춘다,
 `docs/evidence/M0/guest-install.md`).
+
+### 23회 (2026-09-30 06:14~06:26 UTC): 그래픽 조사는 동작, 미러가 끊김
+
+시작 알림 "이 PC에는 하드웨어 가속 그래픽(OpenGL 2.0 이상)이 없어 소프트웨어 렌더링으로 설정했습니다."가
+스냅숏에 있었고 `settings.gpuMode`는 `software`였다(`dod-ci/run23/dod-result.json`). 내려받기는 이번
+미러에서 약 3 MB/s로 흘렀고(21·22회는 44 MB/s) 953 MB에서 끊겨 제품이 `artifact_download_failed`
+("운영체제 이미지를 다운로드하거나 검증하지 못했습니다. 네트워크 연결을 확인한 뒤 다시 시도하십시오.")를
+보였다. 드라이버는 사람이 하듯 `다운로드`를 한 번 더 누르고 그 사실을 기록하게 했다(두 번째 실패는
+그대로 실패). 정리 단계의 트레이 `종료`는 이번에도 메뉴가 열리지 않았다. 러너에서는 제품이 바탕 화면의
+explorer와 다른 사용자로 돌아 알림 아이콘이 등록되지 않는 것으로 보이므로, 드라이버는 그때 창 닫기
+(WM_CLOSE, 제품의 닫기 동작)로 끝내고 빈자리로 적는다.

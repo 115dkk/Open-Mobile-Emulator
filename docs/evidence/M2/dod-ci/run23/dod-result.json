@@ -1,0 +1,171 @@
+{
+  "startedAt": "2026-09-30T06:20:37.859Z",
+  "outcome": "failed",
+  "steps": [
+    {
+      "name": "preflight",
+      "start": "2026-09-30T06:20:37.859Z",
+      "outcome": "passed",
+      "end": "2026-09-30T06:20:38.811Z",
+      "durationMs": 950
+    },
+    {
+      "name": "launch",
+      "start": "2026-09-30T06:20:38.817Z",
+      "outcome": "passed",
+      "end": "2026-09-30T06:20:46.995Z",
+      "durationMs": 8177
+    },
+    {
+      "name": "S1.1-host-check",
+      "start": "2026-09-30T06:20:46.996Z",
+      "outcome": "passed",
+      "end": "2026-09-30T06:20:48.806Z",
+      "durationMs": 1810
+    },
+    {
+      "name": "S1.2-WHPX",
+      "start": "2026-09-30T06:20:48.807Z",
+      "outcome": "passed",
+      "end": "2026-09-30T06:20:50.608Z",
+      "durationMs": 1801
+    },
+    {
+      "name": "S1.4-download",
+      "start": "2026-09-30T06:20:50.608Z",
+      "outcome": "failed",
+      "error": "Error: Artifact download failed\n    at file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:342:63\n    at async until (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:42:25)\n    at async file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:340:11\n    at async step (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:80:9)\n    at async file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:331:3",
+      "end": "2026-09-30T06:25:51.475Z",
+      "durationMs": 300866
+    },
+    {
+      "name": "cleanup",
+      "start": "2026-09-30T06:25:53.311Z",
+      "outcome": "passed",
+      "end": "2026-09-30T06:26:03.847Z",
+      "durationMs": 10536
+    },
+    {
+      "name": "S1.5-installer",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "S1.6-first-boot",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "S1.7-game-install",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "game-launch",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "stop",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "quit",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    }
+  ],
+  "gaps": [
+    "pulled.json has no version fields; installed version can only be read after successful installation.",
+    "WHPX already enabled: product skips S1.2 instead of showing an already-on screen."
+  ],
+  "measurements": {},
+  "probeItems": [],
+  "softwareRenderingRetry": false,
+  "utf8Check": "다시 확인",
+  "environment": {
+    "freeBytes": 154720305152,
+    "killed": 0,
+    "processes": []
+  },
+  "game": {
+    "package": "com.epidgames.trickcalrevive",
+    "versionName": null,
+    "versionCode": null
+  },
+  "qemu": {
+    "source": "D:\\a\\Open-Mobile-Emulator\\Open-Mobile-Emulator\\host\\target\\release\\qemu",
+    "sha256": "7139f05b86ee9f946475c0f33b05504d8b76317f7fe7ef0321a5396775576d6a",
+    "version": "QEMU emulator version 11.1.1 (v11.1.1-dirty)\r\nCopyright (c) 2003-2026 Fabrice Bellard and the QEMU Project developers\r\n"
+  },
+  "hostVerdict": {
+    "rows": [
+      {
+        "id": "cpuVirtualization",
+        "status": "ready",
+        "detail": "사용할 수 있습니다."
+      },
+      {
+        "id": "hypervisorPlatform",
+        "status": "ready",
+        "detail": "켜져 있습니다."
+      },
+      {
+        "id": "rebootPending",
+        "status": "ready",
+        "detail": "필요하지 않습니다."
+      },
+      {
+        "id": "whpxAvailable",
+        "status": "ready",
+        "detail": "켜져 있고 실행 준비가 되어 있습니다."
+      },
+      {
+        "id": "qemuPresent",
+        "status": "ready",
+        "detail": "준비되어 있습니다."
+      },
+      {
+        "id": "firmwarePresent",
+        "status": "ready",
+        "detail": "준비되어 있습니다."
+      },
+      {
+        "id": "adbPresent",
+        "status": "ready",
+        "detail": "준비되어 있습니다."
+      },
+      {
+        "id": "diskSpace",
+        "status": "ready",
+        "detail": "설치에 충분한 여유가 있습니다."
+      }
+    ],
+    "ready": true,
+    "inspectedAt": "2026-09-30T06:20:40+00:00"
+  },
+  "error": "Error: Artifact download failed\n    at file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:342:63\n    at async until (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:42:25)\n    at async file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:340:11\n    at async step (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:80:9)\n    at async file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:331:3",
+  "forcedCleanup": true,
+  "finalProcesses": [],
+  "temporaryHome": "D:\\ome-home",
+  "endedAt": "2026-09-30T06:26:03.848Z"
+}

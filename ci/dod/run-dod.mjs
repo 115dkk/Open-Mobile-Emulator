@@ -237,7 +237,14 @@ async function stopGuest() {
   await until(async () => ['stopped', 'failed'].includes((await snapshot()).guest.state), 60000, 'guest stopped');
 }
 async function quitApp() {
-  log('tray-quit', native(['-AppPid', String(app.pid), '-Quit']));
+  // The tray menu is the product's own quit path. On the hosted runner the product runs as a
+  // different user than the desktop's explorer, its notification icon never registers, and the
+  // menu does not open (runs 21 to 23); closing the main window is the next thing a person does.
+  try { log('tray-quit', native(['-AppPid', String(app.pid), '-Quit'])); }
+  catch (error) {
+    gap(`Tray 종료 did not open a menu in this session; closed the main window instead: ${error.message.split('\n')[0]}`);
+    log('window-close', native(['-AppPid', String(app.pid), '-Close']));
+  }
   await until(() => exited, 30000, 'app exit', 200);
 }
 async function guestScreenshot(name) {
@@ -336,13 +343,24 @@ try {
       // A seeded home (artifacts/*.iso with its .verified marker) is verified at first sight: download is null and the wizard shows 다음 only.
       result.measurements.downloadSkipped = true; log('download-skipped', { reason: 'image already verified in the seeded home', profile: profile.id });
     } else {
+      // A SourceForge mirror dropped the 2.4 GB transfer at 953 MB in CI run 23 (3 MB/s that time,
+      // 44 MB/s the two runs before). A person presses 다운로드 again; the driver does so once and
+      // records it, so a second failure is still the run's verdict.
+      let attempts = 0;
       await click('다운로드');
       s = await until(async () => {
         const s = await snapshot(); const d = s.wizard.download;
-        if (['failed', 'cancelled'].includes(d?.stage)) throw new StopRun(`Artifact download ${d.stage}`);
+        if (['failed', 'cancelled'].includes(d?.stage)) {
+          if (attempts++ >= 1) throw new StopRun(`Artifact download ${d.stage} twice: ${JSON.stringify(d)}`);
+          log('download-retry', { attempt: attempts + 1, previous: d, issue: s.issue });
+          result.measurements.downloadRetries = attempts;
+          await capture(`04a-download-failed-${attempts}`);
+          await click('다운로드');
+          return false;
+        }
         if (Date.now() >= nextProgress) { log('download-progress', { progress: d }); nextProgress = Date.now() + 30000; }
         return d?.stage === 'verified' && s;
-      }, 30 * 60000, 'verified artifact', 5000);
+      }, 45 * 60000, 'verified artifact', 5000);
       result.measurements.downloadMs = Date.now() - start; result.measurements.downloadBytes = s.wizard.download.doneBytes;
       result.measurements.downloadAverageBytesPerSecond = s.wizard.download.doneBytes / (result.measurements.downloadMs / 1000);
     }
