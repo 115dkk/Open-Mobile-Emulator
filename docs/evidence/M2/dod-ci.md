@@ -42,6 +42,7 @@ CPUID, `WinHvPlatform.dll`)이라 이 느림과는 무관하다.
 | 19 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36667569730) | 6ea7669 | 실패 | `launch`: 제한 토큰으로 뜬 제품(pid 5496, 중간 무결성)이 Tauri 설정 훅에서 패닉("the underlying handle is not available")으로 곧 종료. 이 길은 여기서 접는다 |
 | 20 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36674327649) | e87b262 | 실패(래퍼 오류) | 표준 사용자 `omeuser` 생성(관리자 아님), 권한 부여 1.4초, `Start-Process -Credential`로 그 계정의 pwsh 시작까지 됨. 래퍼가 셸 폴더 조회로 관리자의 AppData를 받아 그 아래 Temp를 만들다 접근 거부 |
 | 21 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36674900503) | e3b3c99 | 실패(`S1.5-installer`) | 표준 사용자로 CDP 접속 성공. 호스트 점검 8행 통과, WHPX 동의 건너뜀, ISO 2.4 GB 64초에 내려받아 검증, 디스크 만들기까지. QEMU가 `Could not initialize DirectSound: No sound driver is available`로 곧 종료(러너에 오디오 장치 없음) |
+| 22 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36675968945) | 1e8ebde | 실패(`S1.5-installer`) | 오디오는 `none`으로 넘어감(명령줄에 `-audiodev` 없음). 내려받기 38.8초(캐시 없음, 두 번째 받기). QEMU가 `No provider of glCreateShader found. Requires one of: Desktop OpenGL 2.0 / OpenGL ES 2.0 / GL_ARB_shader_objects`로 종료. 러너의 WGL 기본 컨텍스트는 GDI Generic 1.1 |
 
 ### 16회 (2026-09-30 01:39~03:42 UTC)
 
@@ -142,3 +143,23 @@ or the given GUID is not a valid DirectSound device ID". 러너에는 오디오 
 그 밖에는 `dsound`를 유지한다(결정적 테스트 둘). 부수 관찰: 정리 단계의 트레이 `종료`가
 "Tray popup did not appear"로 실패해 강제 종료로 끝났다. 완주가 되면 마지막 `quit` 단계에서 같은
 일이 날 수 있으므로 지켜본다. 업데이트 확인은 러너에서 `update_check_failed`였다(네트워크).
+
+### 22회 (2026-09-30 05:59~06:07 UTC): 소리는 지났고, 이번엔 OpenGL
+
+오디오 조사가 동작해 QEMU 명령줄에 `-audiodev`가 없었고(`dod-ci/run22/`), QEMU는 DirectSound를 지나
+SDL GL 창을 만들었다. 그다음 stderr는 `sdl: failed to set swap interval 0: That operation is not
+supported`(GDI 일반 OpenGL 1.1의 전형적인 답) 두 줄 뒤에 libepoxy의 "No provider of glCreateShader
+found. Requires one of: Desktop OpenGL 2.0, OpenGL ES 2.0, GL_ARB_shader_objects"로 끝났다. 러너에는
+디스플레이 드라이버가 없어(Microsoft Hyper-V Video) WGL이 Microsoft의 소프트웨어 OpenGL 1.1을 주고,
+virglrenderer는 셰이더 없이는 돌지 못한다. ANGLE(libEGL, libGLESv2)은 번들에 있지만 SDL의 기본은
+WGL이라 쓰이지 않는다.
+
+드라이버에는 GL 실패 때 설정의 소프트웨어 렌더링을 켜고 이어가는 경로가 있었지만, 마법사를 `나중에
+하기`로 닫은 뒤 되돌아올 단추가 제품에 없어 그 경로는 성립하지 않는다(그 판정 문구도 이 메시지와
+맞지 않았다). 그래서 오디오와 같은 방식으로 제품이 고른다. `ome-platform-win`이 숨은 창에 기본 WGL
+컨텍스트를 한 번 만들어 `GL_VERSION`과 `GL_RENDERER`를 읽고(`opengl_capability`), `ome-host-check`의
+`OpenGlCapability::supports_virgl`(주 버전 2 이상이고 렌더러가 `GDI Generic`이 아님)이 판정하며,
+런타임은 시작할 때 설정이 virgl이고 조사가 확실히 '안 됨'이면 소프트웨어 렌더링으로 바꿔 저장하고
+알림을 남긴다. 드라이버는 첫 부팅에서 스냅숏의 `settings.gpuMode`가 `software`면 ISO 저자들의
+"No HW Acceleration" GRUB 항목을 고른다(표준 VGA에서는 기본 항목이 초기 사용자 공간에서 멈춘다,
+`docs/evidence/M0/guest-install.md`).

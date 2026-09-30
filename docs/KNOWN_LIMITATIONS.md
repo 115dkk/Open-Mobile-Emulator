@@ -153,4 +153,14 @@
   `x-ome-display-window`; the window never follows the guest resolution on its
   own. A QEMU without these patches, such as a distribution build, is not
   usable for hosting: the guest window would activate on click and freeze.
+- A host whose default OpenGL context is Microsoft's software fallback (`GDI Generic`,
+  OpenGL 1.1: no display driver, a basic VM display adapter, some remote sessions)
+  cannot run virgl; QEMU exits with `No provider of glCreateShader found`
+  (2026-09-30, `docs/evidence/M2/dod-ci.md`, run 22 on a GitHub windows-2025
+  runner). The product probes a plain WGL context once at start-up and, when it
+  reports no OpenGL 2.0 renderer, switches the graphics setting to software
+  rendering and says so in a notice; the setting stays editable. A host without
+  any audio output device cannot open DirectSound either, and QEMU treats that
+  as fatal too (run 21); the product then starts the guest without an audio
+  backend.
 - Multi-instance, macros, and scripted automation are not part of v1 (D9).

@@ -426,7 +426,23 @@ impl AppRuntime {
             deps.probe.logical_processors().ok(),
         );
         let settings_store = SettingsStore::new(home.as_path());
-        let settings = settings_store.load(&limits).map_err(settings_issue)?;
+        let mut settings = settings_store.load(&limits).map_err(settings_issue)?;
+        // virgl needs OpenGL 2.0 with shaders on the host. A machine whose default context is
+        // Microsoft's GDI Generic 1.1 (no display driver, a basic VM adapter) cannot run it, and
+        // QEMU would exit on start (docs/evidence/M2/dod-ci.md, run 22). Only a probe that reports a
+        // real answer changes the setting; the user can still flip it back in Settings.
+        let mut startup_notices = Vec::new();
+        if settings.gpu_mode == crate::GpuMode::Virgl
+            && matches!(deps.probe.opengl_capability(), Ok(capability) if !capability.supports_virgl())
+        {
+            settings.gpu_mode = crate::GpuMode::Software;
+            settings_store.save(&settings).map_err(settings_issue)?;
+            startup_notices.push(Notice {
+                at: local_rfc3339(),
+                level: NoticeLevel::Info,
+                message: "이 PC에는 하드웨어 가속 그래픽(OpenGL 2.0 이상)이 없어 소프트웨어 렌더링으로 설정했습니다.".to_owned(),
+            });
+        }
         let guest_store =
             GuestStore::new(home.subdir("vm").map_err(|_| issues::home_unavailable())?);
         let guests = guest_store.load_all().map_err(guest_store_issue)?;
@@ -589,7 +605,7 @@ impl AppRuntime {
             boot_timeout_pending: false,
             #[cfg(test)]
             boot_timeout_override: None,
-            notices: Vec::new(),
+            notices: startup_notices,
             update_state,
             issue: None,
         };
@@ -3577,7 +3593,9 @@ mod tests {
     use ome_guest_image::{
         Attempt, DeviceId, DisplayInfo, GuestFamily, PackageEntry, ShellCommand,
     };
-    use ome_host_check::{AdbFound, HostCheckId as ProbeId, ProbeValue, QemuFound, TableProbe};
+    use ome_host_check::{
+        AdbFound, HostCheckId as ProbeId, OpenGlCapability, ProbeValue, QemuFound, TableProbe,
+    };
     use ome_supervisor::LogPaths;
 
     use super::*;
@@ -4884,6 +4902,63 @@ mod tests {
             .iter()
             .map(|value| value.to_string_lossy().into_owned())
             .collect()
+    }
+
+    #[test]
+    fn open_switches_to_software_rendering_when_opengl_is_gdi_generic() {
+        let (_directory, mut runtime, supervisor, _runner) = lifecycle_runtime_with_probe(
+            std::iter::empty(),
+            RecordingDesktop::default(),
+            RecordingWindow::embedded(),
+            |probe| {
+                probe.with_opengl_capability(ProbeValue::OpenGl(OpenGlCapability {
+                    version: "1.1.0".to_owned(),
+                    renderer: "GDI Generic".to_owned(),
+                }))
+            },
+        );
+        let snapshot = runtime.snapshot();
+        assert!(
+            snapshot
+                .notices
+                .iter()
+                .any(|notice| notice.message.contains("소프트웨어 렌더링")),
+            "{:?}",
+            snapshot.notices
+        );
+        runtime.apply(Command::GuestStart).expect("start request");
+        let args = first_start_args(&supervisor);
+        assert!(
+            !args.iter().any(|value| value.contains("virtio-vga-gl")),
+            "{args:?}"
+        );
+        assert!(args.iter().any(|value| value == "VGA"), "{args:?}");
+    }
+
+    #[test]
+    fn open_keeps_virgl_when_opengl_is_real_or_unknown() {
+        for adjust in [
+            Box::new(|probe: TableProbe| {
+                probe.with_opengl_capability(ProbeValue::OpenGl(OpenGlCapability {
+                    version: "4.6.0 NVIDIA 566.03".to_owned(),
+                    renderer: "NVIDIA GeForce RTX 2080 SUPER/PCIe/SSE2".to_owned(),
+                }))
+            }) as Box<dyn FnOnce(TableProbe) -> TableProbe>,
+            Box::new(|probe: TableProbe| probe),
+        ] {
+            let (_directory, mut runtime, supervisor, _runner) = lifecycle_runtime_with_probe(
+                std::iter::empty(),
+                RecordingDesktop::default(),
+                RecordingWindow::embedded(),
+                adjust,
+            );
+            assert!(runtime.snapshot().notices.is_empty());
+            runtime.apply(Command::GuestStart).expect("start request");
+            let args = first_start_args(&supervisor);
+            // The fixture profile carries no virgl override, so the virtio family without GL is the
+            // hardware-accelerated choice here; std VGA would mean the software fallback.
+            assert!(args.iter().any(|value| value == "virtio-vga"), "{args:?}");
+        }
     }
 
     #[test]

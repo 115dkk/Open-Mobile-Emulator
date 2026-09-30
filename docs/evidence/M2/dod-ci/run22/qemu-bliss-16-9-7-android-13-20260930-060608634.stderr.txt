@@ -1,0 +1,18 @@
+D:\a\Open-Mobile-Emulator\Open-Mobile-Emulator\host\target\release\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+D:\a\Open-Mobile-Emulator\Open-Mobile-Emulator\host\target\release\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=07h,ecx=00h].EDX.spec-ctrl [bit 26]
+D:\a\Open-Mobile-Emulator\Open-Mobile-Emulator\host\target\release\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+D:\a\Open-Mobile-Emulator\Open-Mobile-Emulator\host\target\release\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+D:\a\Open-Mobile-Emulator\Open-Mobile-Emulator\host\target\release\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=07h,ecx=00h].EDX.spec-ctrl [bit 26]
+D:\a\Open-Mobile-Emulator\Open-Mobile-Emulator\host\target\release\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+D:\a\Open-Mobile-Emulator\Open-Mobile-Emulator\host\target\release\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+D:\a\Open-Mobile-Emulator\Open-Mobile-Emulator\host\target\release\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=07h,ecx=00h].EDX.spec-ctrl [bit 26]
+D:\a\Open-Mobile-Emulator\Open-Mobile-Emulator\host\target\release\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+D:\a\Open-Mobile-Emulator\Open-Mobile-Emulator\host\target\release\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+D:\a\Open-Mobile-Emulator\Open-Mobile-Emulator\host\target\release\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=07h,ecx=00h].EDX.spec-ctrl [bit 26]
+D:\a\Open-Mobile-Emulator\Open-Mobile-Emulator\host\target\release\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+D:\a\Open-Mobile-Emulator\Open-Mobile-Emulator\host\target\release\qemu\bin\qemu-system-x86_64.exe: warning: sdl: failed to set swap interval 0: That operation is not supported
+D:\a\Open-Mobile-Emulator\Open-Mobile-Emulator\host\target\release\qemu\bin\qemu-system-x86_64.exe: warning: sdl: failed to set swap interval 0: That operation is not supported
+No provider of glCreateShader found.  Requires one of:
+    Desktop OpenGL 2.0
+    OpenGL ES 2.0
+    GL_ARB_shader_objects

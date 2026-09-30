@@ -1010,6 +1010,26 @@ pub fn audio_output_devices() -> u32 {
     ffi::audio::output_devices()
 }
 
+/// Version and renderer strings of the OpenGL implementation a plain WGL context receives.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct OpenGlCapability {
+    /// `GL_VERSION`, for example `4.6.0 NVIDIA 566.03` or `1.1.0`.
+    pub version: String,
+    /// `GL_RENDERER`, for example `NVIDIA GeForce RTX 2080 SUPER/PCIe/SSE2` or `GDI Generic`.
+    pub renderer: String,
+}
+
+/// Creates a hidden window and a default WGL context once and reports what OpenGL it provides.
+///
+/// An error means no OpenGL context could be created at all.
+#[cfg(windows)]
+pub fn opengl_capability() -> io::Result<OpenGlCapability> {
+    ffi::opengl::capability().map(|capability| OpenGlCapability {
+        version: capability.version,
+        renderer: capability.renderer,
+    })
+}
+
 /// Reports whether the Windows Hypervisor Platform is present.
 ///
 /// A missing `WinHvPlatform.dll` is a normal `Ok(false)` result.

@@ -96,6 +96,8 @@ pub trait HostProbe: Send + Sync {
     fn logical_processors(&self) -> Probe<u32>;
     /// Number of audio output devices the host exposes; zero means no sound backend can open.
     fn audio_output_devices(&self) -> Probe<u32>;
+    /// What OpenGL a plain window context receives; decides whether virgl can run at all.
+    fn opengl_capability(&self) -> Probe<OpenGlCapability>;
 }
 
 /// Identifier for one host-readiness row.
@@ -392,6 +394,31 @@ fn row(id: HostCheckId, status: HostStatus, detail: &str) -> HostRow {
     }
 }
 
+/// Version and renderer strings of the OpenGL implementation the host's default context provides.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct OpenGlCapability {
+    /// `GL_VERSION` as reported by the driver.
+    pub version: String,
+    /// `GL_RENDERER` as reported by the driver.
+    pub renderer: String,
+}
+
+impl OpenGlCapability {
+    /// Whether virglrenderer can work on this implementation: OpenGL 2.0 or newer with a real
+    /// renderer. Microsoft's software fallback (`GDI Generic`, OpenGL 1.1) has no shaders, and
+    /// QEMU exits on it with `No provider of glCreateShader found`.
+    pub fn supports_virgl(&self) -> bool {
+        let major = self
+            .version
+            .trim_start()
+            .split(|character: char| !character.is_ascii_digit())
+            .next()
+            .and_then(|digits| digits.parse::<u32>().ok())
+            .unwrap_or(0);
+        major >= 2 && !self.renderer.trim_start().starts_with("GDI Generic")
+    }
+}
+
 /// Table-backed probe for deterministic tests and non-native previews.
 ///
 /// Missing entries return [`ProbeError::Unwired`]; callers never receive guessed host state.
@@ -402,6 +429,7 @@ pub struct TableProbe {
     total_memory: Option<ProbeValue>,
     logical_processors: Option<ProbeValue>,
     audio_output_devices: Option<ProbeValue>,
+    opengl: Option<ProbeValue>,
 }
 
 impl TableProbe {
@@ -434,6 +462,12 @@ impl TableProbe {
         self
     }
 
+    /// Replaces the OpenGL capability fixture value.
+    pub fn with_opengl_capability(mut self, value: ProbeValue) -> Self {
+        self.opengl = Some(value);
+        self
+    }
+
     fn value(&self, id: HostCheckId) -> Probe<&ProbeValue> {
         match self.values.get(&id) {
             Some(ProbeValue::Error(error)) => Err(*error),
@@ -460,6 +494,8 @@ pub enum ProbeValue {
     TotalMemoryBytes(u64),
     /// Audio output device count.
     AudioOutputDevices(u32),
+    /// OpenGL version and renderer of the default context.
+    OpenGl(OpenGlCapability),
     /// Logical processor count.
     LogicalProcessors(u32),
     /// Explicit observation failure.
@@ -538,6 +574,14 @@ impl HostProbe for TableProbe {
             .ok_or(ProbeError::Unwired)?
         {
             ProbeValue::AudioOutputDevices(value) => Ok(*value),
+            ProbeValue::Error(error) => Err(*error),
+            _ => Err(ProbeError::InvalidData),
+        }
+    }
+
+    fn opengl_capability(&self) -> Probe<OpenGlCapability> {
+        match self.opengl.as_ref().ok_or(ProbeError::Unwired)? {
+            ProbeValue::OpenGl(value) => Ok(value.clone()),
             ProbeValue::Error(error) => Err(*error),
             _ => Err(ProbeError::InvalidData),
         }
@@ -652,6 +696,15 @@ impl HostProbe for WindowsProbe {
 
     fn audio_output_devices(&self) -> Probe<u32> {
         Ok(ome_platform_win::audio_output_devices())
+    }
+
+    fn opengl_capability(&self) -> Probe<OpenGlCapability> {
+        ome_platform_win::opengl_capability()
+            .map(|capability| OpenGlCapability {
+                version: capability.version,
+                renderer: capability.renderer,
+            })
+            .map_err(|_| ProbeError::Unavailable)
     }
 }
 
@@ -858,6 +911,25 @@ mod tests {
                 HostCheckId::DiskSpace,
                 ProbeValue::Bytes(40 * 1024 * 1024 * 1024),
             )
+    }
+
+    #[test]
+    fn opengl_capability_needs_a_real_renderer_with_shaders() {
+        let capability = |version: &str, renderer: &str| OpenGlCapability {
+            version: version.to_owned(),
+            renderer: renderer.to_owned(),
+        };
+        assert!(
+            capability(
+                "4.6.0 NVIDIA 566.03",
+                "NVIDIA GeForce RTX 2080 SUPER/PCIe/SSE2"
+            )
+            .supports_virgl()
+        );
+        assert!(capability("3.1 Mesa 24.0", "llvmpipe (LLVM 17.0.6, 256 bits)").supports_virgl());
+        assert!(!capability("1.1.0", "GDI Generic").supports_virgl());
+        assert!(!capability("2.1", "GDI Generic").supports_virgl());
+        assert!(!capability("", "").supports_virgl());
     }
 
     #[test]

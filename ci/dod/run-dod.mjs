@@ -379,7 +379,12 @@ try {
   });
   await step('S1.6-first-boot', async () => {
     const start = Date.now();
-    if (result.softwareRenderingRetry) {
+    // The product itself picks software rendering on a host without OpenGL 2.0 (GDI Generic); the
+    // installed GRUB default then hangs in early userspace under std VGA, so the first boot needs the
+    // ISO authors' "No HW Acceleration" entry (docs/evidence/M0/guest-install.md, attempt 4 and 5).
+    const softwareRendering = result.softwareRenderingRetry || (await snapshot()).settings.gpuMode === 'software';
+    result.measurements.softwareRendering = softwareRendering;
+    if (softwareRendering) {
       const pid = await qemuWindow();
       await keys(pid, '29-disk-vm-options', 'HOME,DOWN,DOWN,DOWN,DOWN,ENTER', null, 500);
       await keys(pid, '30-disk-boot', 'HOME,DOWN,ENTER', null, 3000);
