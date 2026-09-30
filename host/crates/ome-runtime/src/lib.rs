@@ -5,6 +5,7 @@
 #![forbid(unsafe_code)]
 
 mod adapters;
+mod app_install;
 pub mod contract;
 pub mod desktop;
 pub mod guest_store;

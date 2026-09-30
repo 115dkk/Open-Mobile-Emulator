@@ -604,6 +604,7 @@ impl AdbSession {
 fn command_failed(output: Output) -> AdbError {
     AdbError::CommandFailed {
         exit_code: output.exit_code,
+        stderr: text(&output.stderr).trim().to_owned(),
     }
 }
 
@@ -653,10 +654,12 @@ pub enum AdbError {
     #[error("adb runner failed")]
     Run(#[source] RunError),
     /// adb returned a nonzero exit code or a textual connection failure.
-    #[error("adb command failed with exit code {exit_code}")]
+    #[error("adb command failed with exit code {exit_code}: {stderr}")]
     CommandFailed {
         /// Native adb exit code.
         exit_code: i32,
+        /// Standard error emitted by adb.
+        stderr: String,
     },
     /// Guest boot did not complete before the overall deadline.
     #[error("guest boot timed out")]
@@ -747,6 +750,13 @@ pub enum AppPackage {
         /// Existing APK path checked by [`AppPackage::open`].
         path: PathBuf,
     },
+    /// Existing loose APK files that make up one base-and-splits package.
+    SplitSet {
+        /// Base APK installed first.
+        base: PathBuf,
+        /// Split APKs in lexical order.
+        splits: Vec<PathBuf>,
+    },
     /// A ZIP-based XAPK or APKS archive and ordered safe entry names.
     Archive {
         /// Existing archive path.
@@ -787,10 +797,86 @@ impl AppPackage {
         }
     }
 
+    /// Opens and validates loose base and split APK files selected together.
+    pub fn open_split_set(paths: &[PathBuf]) -> Result<Self, PackageError> {
+        if paths.len() < 2 {
+            return Err(PackageError::SplitSetTooSmall);
+        }
+        let mut names = Vec::with_capacity(paths.len());
+        let mut parent = None;
+        for path in paths {
+            if !path.is_file() {
+                return Err(PackageError::Missing);
+            }
+            let extension = path
+                .extension()
+                .and_then(|value| value.to_str())
+                .map(str::to_ascii_lowercase)
+                .ok_or(PackageError::UnsupportedExtension)?;
+            if extension != "apk" {
+                return Err(PackageError::UnsupportedExtension);
+            }
+            let current_parent = path.parent().ok_or(PackageError::InvalidSplitSet)?;
+            if let Some(expected_parent) = parent {
+                if current_parent != expected_parent {
+                    return Err(PackageError::SplitSetDifferentDirectories);
+                }
+            } else {
+                parent = Some(current_parent);
+            }
+            let name = path
+                .file_name()
+                .and_then(|value| value.to_str())
+                .ok_or(PackageError::InvalidSplitSet)?;
+            names.push(name.to_ascii_lowercase());
+        }
+
+        let explicit_bases = names
+            .iter()
+            .enumerate()
+            .filter_map(|(index, name)| (name == "base.apk").then_some(index))
+            .collect::<Vec<_>>();
+        let base_index = match explicit_bases.as_slice() {
+            [index] => *index,
+            [] => {
+                let candidates = names
+                    .iter()
+                    .enumerate()
+                    .filter_map(|(index, name)| is_base_candidate(name).then_some(index))
+                    .collect::<Vec<_>>();
+                match candidates.as_slice() {
+                    [index] => *index,
+                    _ => return Err(PackageError::InvalidSplitSet),
+                }
+            }
+            _ => return Err(PackageError::InvalidSplitSet),
+        };
+        if names
+            .iter()
+            .enumerate()
+            .any(|(index, name)| index != base_index && !is_split_name(name))
+        {
+            return Err(PackageError::InvalidSplitSet);
+        }
+
+        let base = paths[base_index].clone();
+        let mut splits = paths
+            .iter()
+            .enumerate()
+            .filter_map(|(index, path)| (index != base_index).then_some(path.clone()))
+            .collect::<Vec<_>>();
+        splits.sort();
+        Ok(Self::SplitSet { base, splits })
+    }
+
     /// Returns install order as displayable source paths or archive member names.
     pub fn members(&self) -> Vec<String> {
         match self {
             Self::Apk { path } => vec![path.to_string_lossy().into_owned()],
+            Self::SplitSet { base, splits } => std::iter::once(base)
+                .chain(splits)
+                .map(|path| path.to_string_lossy().into_owned())
+                .collect(),
             Self::Archive { base, splits, .. } => std::iter::once(base.clone())
                 .chain(splits.iter().cloned())
                 .collect(),
@@ -860,6 +946,12 @@ impl AppPackage {
                 paths: vec![path.clone()],
                 temporary: None,
             }),
+            Self::SplitSet { base, splits } => Ok(PreparedInstall {
+                paths: std::iter::once(base.clone())
+                    .chain(splits.iter().cloned())
+                    .collect(),
+                temporary: None,
+            }),
             Self::Archive { path, base, splits } => {
                 let directory = unique_extract_directory()?;
                 fs::create_dir(&directory).map_err(PackageError::Io)?;
@@ -880,12 +972,16 @@ impl AppPackage {
 }
 
 fn is_base_candidate(name: &str) -> bool {
+    !is_split_name(name)
+}
+
+fn is_split_name(name: &str) -> bool {
     let leaf = Path::new(name)
         .file_name()
         .and_then(|value| value.to_str())
         .unwrap_or(name)
         .to_ascii_lowercase();
-    !leaf.contains("config.") && !leaf.starts_with("split_")
+    leaf.contains("config.") || leaf.starts_with("split_")
 }
 
 fn unique_extract_directory() -> Result<PathBuf, PackageError> {
@@ -971,6 +1067,15 @@ pub enum PackageError {
     /// The archive contains no installable APK member.
     #[error("package archive contains no APK")]
     NoApkEntries,
+    /// A loose split set has fewer than two APKs.
+    #[error("split APK set must contain at least two files")]
+    SplitSetTooSmall,
+    /// Loose split APKs are not all in one directory.
+    #[error("split APK set spans multiple directories")]
+    SplitSetDifferentDirectories,
+    /// A loose split set has no unique base or contains a non-split member.
+    #[error("split APK set is invalid")]
+    InvalidSplitSet,
     /// A unique extraction directory could not be selected.
     #[error("temporary package directory is unavailable")]
     TemporaryDirectory,
@@ -1060,7 +1165,10 @@ mod tests {
             AdbSession::new("adb.exe", "127.0.0.1:5555".to_owned(), runner).expect("session");
         assert!(matches!(
             session.connect(),
-            Err(AdbError::CommandFailed { exit_code: 0 })
+            Err(AdbError::CommandFailed {
+                exit_code: 0,
+                stderr
+            }) if stderr.is_empty()
         ));
     }
 
@@ -1111,6 +1219,88 @@ mod tests {
             .wait_for_boot(Duration::from_secs(20))
             .expect("boot succeeds");
         assert_eq!(clock.now(), Duration::from_secs(4));
+    }
+
+    fn write_apks(directory: &Path, names: &[&str]) -> Vec<PathBuf> {
+        names
+            .iter()
+            .map(|name| {
+                let path = directory.join(name);
+                fs::write(&path, b"apk").expect("write APK fixture");
+                path
+            })
+            .collect()
+    }
+
+    #[test]
+    fn opens_loose_split_set_and_orders_base_first() {
+        let directory = tempfile::tempdir().expect("temp directory");
+        let paths = write_apks(
+            directory.path(),
+            &[
+                "split_gpdeku.config.arm64_v8a.apk",
+                "split_gpdeku.apk",
+                "base.apk",
+                "split_config.arm64_v8a.apk",
+            ],
+        );
+        let package = AppPackage::open_split_set(&paths).expect("open split set");
+        let prepared = package.prepare_install().expect("prepare split set");
+        assert_eq!(
+            prepared.paths,
+            vec![
+                directory.path().join("base.apk"),
+                directory.path().join("split_config.arm64_v8a.apk"),
+                directory.path().join("split_gpdeku.apk"),
+                directory.path().join("split_gpdeku.config.arm64_v8a.apk"),
+            ]
+        );
+        assert!(prepared.temporary.is_none());
+    }
+
+    #[test]
+    fn rejects_loose_split_set_spanning_directories() {
+        let first = tempfile::tempdir().expect("first directory");
+        let second = tempfile::tempdir().expect("second directory");
+        let base = write_apks(first.path(), &["base.apk"]).remove(0);
+        let split = write_apks(second.path(), &["split_config.en.apk"]).remove(0);
+        assert!(matches!(
+            AppPackage::open_split_set(&[base, split]),
+            Err(PackageError::SplitSetDifferentDirectories)
+        ));
+    }
+
+    #[test]
+    fn rejects_loose_split_set_with_two_bases() {
+        let directory = tempfile::tempdir().expect("temp directory");
+        let paths = write_apks(directory.path(), &["first.apk", "second.apk"]);
+        assert!(matches!(
+            AppPackage::open_split_set(&paths),
+            Err(PackageError::InvalidSplitSet)
+        ));
+    }
+
+    #[test]
+    fn rejects_loose_split_set_without_base() {
+        let directory = tempfile::tempdir().expect("temp directory");
+        let paths = write_apks(
+            directory.path(),
+            &["split_config.en.apk", "split_config.arm64_v8a.apk"],
+        );
+        assert!(matches!(
+            AppPackage::open_split_set(&paths),
+            Err(PackageError::InvalidSplitSet)
+        ));
+    }
+
+    #[test]
+    fn rejects_single_loose_apk_as_split_set() {
+        let directory = tempfile::tempdir().expect("temp directory");
+        let paths = write_apks(directory.path(), &["base.apk"]);
+        assert!(matches!(
+            AppPackage::open_split_set(&paths),
+            Err(PackageError::SplitSetTooSmall)
+        ));
     }
 
     #[test]

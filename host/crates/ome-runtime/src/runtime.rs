@@ -10,7 +10,7 @@ use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use jiff::{Unit, Zoned};
-use ome_adb::{AdbSession, AppPackage};
+use ome_adb::AdbSession;
 use ome_artifacts::{ArtifactStore, Manifest, StoreError, StoreProgress};
 use ome_guest_config::{GuestConfig, GuestPaths, QemuInstall, RawGuestConfig};
 use ome_guest_image::{
@@ -37,6 +37,7 @@ use serde::Deserialize;
 use sha2::{Digest, Sha256};
 
 use crate::adapters::AdbShellRunner;
+use crate::app_install::group_install_units;
 use crate::desktop::Desktop;
 use crate::guest_store::{
     GuestRecord, GuestStore, GuestStoreError, StoredProbeItem, StoredProbeState,
@@ -862,6 +863,7 @@ impl AppRuntime {
         if paths.is_empty() {
             return Ok(self.snapshot());
         }
+        let units = group_install_units(paths);
         if self.install_cancel.is_some() {
             return Err(issues::operation_in_progress());
         }
@@ -871,11 +873,12 @@ impl AppRuntime {
             .as_ref()
             .cloned()
             .ok_or_else(issues::operating_system_connection_unavailable)?;
-        let total = u64::try_from(paths.len()).unwrap_or(u64::MAX);
+        let total = u64::try_from(units.len()).unwrap_or(u64::MAX);
         let cancel = Arc::new(AtomicBool::new(false));
         self.install_cancel = Some(Arc::clone(&cancel));
         self.install_progress = Some(install_progress(
-            paths[0]
+            units[0]
+                .label()
                 .file_name()
                 .and_then(|name| name.to_str())
                 .unwrap_or("앱 파일"),
@@ -889,11 +892,12 @@ impl AppRuntime {
             .spawn(move || {
                 let mut done = 0_u64;
                 let mut failure = None;
-                for path in paths {
+                for unit in units {
                     if done > 0 && cancel.load(Ordering::Acquire) {
                         break;
                     }
-                    let label = path
+                    let label = unit
+                        .label()
                         .file_name()
                         .and_then(|name| name.to_str())
                         .unwrap_or("앱 파일")
@@ -904,14 +908,16 @@ impl AppRuntime {
                         done,
                         total,
                     )));
-                    let package = match AppPackage::open(&path) {
+                    let package = match unit.open() {
                         Ok(package) => package,
                         Err(_) => {
                             failure = Some(issues::app_package_invalid());
                             break;
                         }
                     };
-                    if adb.install(&package).is_err() {
+                    if let Err(error) = adb.install(&package) {
+                        #[cfg(debug_assertions)]
+                        eprintln!("[apps] install failed: {error}");
                         failure = Some(issues::app_install_failed());
                         break;
                     }
