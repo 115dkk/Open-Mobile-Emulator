@@ -162,7 +162,8 @@ jobs:
           $omeHome = if (Test-Path 'D:\') { 'D:\ome-home' } else { Join-Path $env:RUNNER_TEMP 'ome-home' }
           $fixtures = Join-Path $env:RUNNER_TEMP 'fixtures'
           $node = (Get-Command node).Source
-          New-Item -ItemType Directory -Path $omeHome, $env:OME_DOD_OUTPUT -Force | Out-Null
+          $userRoot = if (Test-Path 'D:\') { 'D:\ome-user' } else { Join-Path $env:RUNNER_TEMP 'ome-user' }
+          New-Item -ItemType Directory -Path $omeHome, $env:OME_DOD_OUTPUT, $userRoot -Force | Out-Null
           # A local standard user with a random password that lives only in this step.
           $user = 'omeuser'
           $alphabet = [char[]]'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'
@@ -179,7 +180,7 @@ jobs:
             icacls $path /grant "${user}:(OI)(CI)RX" /Q | Out-Null
             if ($LASTEXITCODE) { throw "icacls read grant failed on $path" }
           }
-          foreach ($path in @($omeHome, $env:OME_DOD_OUTPUT)) {
+          foreach ($path in @($omeHome, $env:OME_DOD_OUTPUT, $userRoot)) {
             icacls $path /grant "${user}:(OI)(CI)M" /Q | Out-Null
             if ($LASTEXITCODE) { throw "icacls modify grant failed on $path" }
           }
@@ -194,7 +195,7 @@ jobs:
             '-Repo', $repo, '-Node', $node, '-OmeHome', $omeHome,
             '-App', (Join-Path $repo 'host\target\release\ome.exe'),
             '-GameDir', (Join-Path $fixtures 'com.epidgames.trickcalrevive'),
-            '-Output', $env:OME_DOD_OUTPUT)
+            '-Output', $env:OME_DOD_OUTPUT, '-UserRoot', $userRoot)
           $credential = [pscredential]::new($user, $secure)
           $process = Start-Process -FilePath (Get-Command pwsh).Source -ArgumentList $arguments -WorkingDirectory (Join-Path $repo 'host') -Credential $credential -LoadUserProfile -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru -Wait
           $code = $process.ExitCode
