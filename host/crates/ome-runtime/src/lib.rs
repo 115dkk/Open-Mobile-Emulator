@@ -10,6 +10,7 @@ pub mod contract;
 pub mod desktop;
 pub mod guest_store;
 pub mod home;
+mod home_state;
 pub mod issues;
 pub mod operations;
 pub mod runtime;

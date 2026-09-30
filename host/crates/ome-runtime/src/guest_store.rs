@@ -8,8 +8,11 @@ use std::io::{self, Read, Write};
 use std::path::{Component, Path, PathBuf};
 
 use ome_guest_image::{DeviceId, ProbeItem, ProbeOutcome, ProbeState};
+use ome_wizard::WizardState;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
+
+use crate::home_state;
 
 /// Current `guest.json` schema version.
 pub const GUEST_SCHEMA_VERSION: u32 = 1;
@@ -347,24 +350,8 @@ impl GuestStore {
 
     /// Loads the selected virtual-machine identifier from `<home>/state.json`.
     pub fn load_active(&self) -> Result<Option<String>, GuestStoreError> {
-        let path = self
-            .root
-            .parent()
-            .ok_or(GuestStoreError::InvalidId)?
-            .join("state.json");
-        let bytes = match fs::read(&path) {
-            Ok(bytes) => bytes,
-            Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(None),
-            Err(error) => return Err(GuestStoreError::Io(error)),
-        };
-        let state: ActiveState = serde_json::from_slice(&bytes).map_err(GuestStoreError::Json)?;
-        if state.version != GUEST_SCHEMA_VERSION {
-            return Err(GuestStoreError::UnsupportedVersion);
-        }
-        if let Some(id) = state.active_guest.as_deref() {
-            validate_id(id)?;
-        }
-        Ok(state.active_guest)
+        let home = self.root.parent().ok_or(GuestStoreError::InvalidId)?;
+        Ok(home_state::load(home)?.active_guest)
     }
 
     /// Atomically persists the selected virtual-machine identifier.
@@ -373,28 +360,23 @@ impl GuestStore {
             validate_id(id)?;
         }
         let home = self.root.parent().ok_or(GuestStoreError::InvalidId)?;
-        let path = home.join("state.json");
-        let staging = home.join("state.json.staging");
-        let bytes = serde_json::to_vec_pretty(&ActiveState {
-            version: GUEST_SCHEMA_VERSION,
-            active_guest: active_guest.map(str::to_owned),
-        })
-        .map_err(GuestStoreError::Json)?;
-        let mut file = OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .open(&staging)
-            .map_err(GuestStoreError::Io)?;
-        let result = (|| {
-            file.write_all(&bytes).map_err(GuestStoreError::Io)?;
-            file.sync_all().map_err(GuestStoreError::Io)?;
-            drop(file);
-            fs::rename(&staging, &path).map_err(GuestStoreError::Io)
-        })();
-        if result.is_err() {
-            let _ = fs::remove_file(staging);
-        }
-        result
+        let mut state = home_state::load(home)?;
+        state.active_guest = active_guest.map(str::to_owned);
+        home_state::save(home, &state)
+    }
+
+    /// Loads first-run wizard progress from `<home>/state.json`.
+    pub fn load_wizard(&self) -> Result<Option<WizardState>, GuestStoreError> {
+        let home = self.root.parent().ok_or(GuestStoreError::InvalidId)?;
+        Ok(home_state::load(home)?.wizard)
+    }
+
+    /// Atomically persists first-run wizard progress while preserving guest selection.
+    pub fn save_wizard(&self, wizard: &WizardState) -> Result<(), GuestStoreError> {
+        let home = self.root.parent().ok_or(GuestStoreError::InvalidId)?;
+        let mut state = home_state::load(home)?;
+        state.wizard = Some(wizard.clone());
+        home_state::save(home, &state)
     }
 
     /// Removes one complete virtual-machine directory after runtime state validation.
@@ -405,13 +387,6 @@ impl GuestStore {
         }
         Ok(())
     }
-}
-
-#[derive(Serialize, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct ActiveState {
-    version: u32,
-    active_guest: Option<String>,
 }
 
 fn load_document(path: &Path) -> Result<GuestRecord, GuestStoreError> {
@@ -436,7 +411,7 @@ fn load_document(path: &Path) -> Result<GuestRecord, GuestStoreError> {
     Ok(document.into())
 }
 
-fn validate_id(id: &str) -> Result<(), GuestStoreError> {
+pub(crate) fn validate_id(id: &str) -> Result<(), GuestStoreError> {
     let path = Path::new(id);
     let one_normal_component = {
         let mut components = path.components();
@@ -520,5 +495,42 @@ mod tests {
             store.guest_dir("../other"),
             Err(GuestStoreError::InvalidId)
         ));
+    }
+
+    #[test]
+    fn save_active_preserves_saved_wizard() {
+        let directory = tempfile::tempdir().expect("temp directory");
+        let root = directory.path().join("vm");
+        fs::create_dir(&root).expect("guest root");
+        let store = GuestStore::new(root);
+        let wizard = WizardState {
+            step: ome_wizard::Step::FirstBoot,
+            completed: std::collections::BTreeSet::from([ome_wizard::Step::HostCheck]),
+        };
+
+        store.save_wizard(&wizard).expect("save wizard");
+        store.save_active(Some("default")).expect("save active");
+
+        assert_eq!(store.load_wizard().expect("load wizard"), Some(wizard));
+    }
+
+    #[test]
+    fn save_wizard_preserves_saved_active_guest() {
+        let directory = tempfile::tempdir().expect("temp directory");
+        let root = directory.path().join("vm");
+        fs::create_dir(&root).expect("guest root");
+        let store = GuestStore::new(root);
+        let wizard = WizardState {
+            step: ome_wizard::Step::FirstBoot,
+            completed: std::collections::BTreeSet::from([ome_wizard::Step::HostCheck]),
+        };
+
+        store.save_active(Some("default")).expect("save active");
+        store.save_wizard(&wizard).expect("save wizard");
+
+        assert_eq!(
+            store.load_active().expect("load active").as_deref(),
+            Some("default")
+        );
     }
 }

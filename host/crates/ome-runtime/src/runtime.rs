@@ -448,6 +448,22 @@ impl AppRuntime {
             GuestStore::new(home.subdir("vm").map_err(|_| issues::home_unavailable())?);
         let guests = guest_store.load_all().map_err(guest_store_issue)?;
         let saved_active = guest_store.load_active().map_err(guest_store_issue)?;
+        let (wizard, phase) = match guest_store.load_wizard() {
+            Ok(Some(wizard)) => {
+                let phase = if wizard.step == Step::Done {
+                    AppPhase::Main
+                } else {
+                    AppPhase::Wizard
+                };
+                (wizard, phase)
+            }
+            Ok(None) => (WizardState::default(), AppPhase::Wizard),
+            Err(error) => {
+                #[cfg(debug_assertions)]
+                eprintln!("[wizard] failed to load state: {error}");
+                (WizardState::default(), AppPhase::Wizard)
+            }
+        };
         let active_guest = saved_active
             .filter(|id| guests.iter().any(|guest| guest.id == *id))
             .or_else(|| guests.first().map(|guest| guest.id.clone()));
@@ -541,8 +557,8 @@ impl AppRuntime {
             host: empty_host_report(),
             blocker: None,
             feature_state,
-            wizard: WizardState::default(),
-            phase: AppPhase::Wizard,
+            wizard,
+            phase,
             image_profiles,
             artifact_manifest,
             selected_image,
@@ -737,6 +753,7 @@ impl AppRuntime {
             Command::WizardSkip => self.wizard_skip(),
             Command::WizardDefer => {
                 self.phase = AppPhase::Main;
+                self.persist_wizard();
                 Ok(())
             }
             Command::GuestImageSelect { id } => self.select_image(id),
@@ -1099,12 +1116,15 @@ impl AppRuntime {
             Ok(0) => {
                 self.feature_state = FeatureState::Enabled;
                 self.wizard = advance(self.wizard.clone(), Outcome::WhpxEnabledNeedsReboot);
+                self.persist_wizard();
                 self.wizard = advance(self.wizard.clone(), Outcome::Continue);
+                self.persist_wizard();
                 Ok(())
             }
             Ok(3010) => {
                 self.feature_state = FeatureState::Enabled;
                 self.wizard = advance(self.wizard.clone(), Outcome::WhpxEnabledNeedsReboot);
+                self.persist_wizard();
                 Ok(())
             }
             Ok(1223) => Err(issues::whpx_enable_declined()),
@@ -2808,6 +2828,7 @@ impl AppRuntime {
             self.stop_guest()?;
             self.installing_guest = false;
             self.wizard = advance(self.wizard.clone(), outcome);
+            self.persist_wizard();
             return Ok(());
         }
         let before = self.wizard.step;
@@ -2818,6 +2839,7 @@ impl AppRuntime {
         if self.wizard.step == Step::Done {
             self.phase = AppPhase::Main;
         }
+        self.persist_wizard();
         Ok(())
     }
 
@@ -2829,7 +2851,15 @@ impl AppRuntime {
         if self.wizard.step == Step::Done {
             self.phase = AppPhase::Main;
         }
+        self.persist_wizard();
         Ok(())
+    }
+
+    fn persist_wizard(&mut self) {
+        if let Err(error) = self.guest_store.save_wizard(&self.wizard) {
+            #[cfg(debug_assertions)]
+            eprintln!("[wizard] failed to save state: {error}");
+        }
     }
 
     fn wizard_facts(&self) -> Facts {
@@ -4149,10 +4179,8 @@ mod tests {
         }
     }
 
-    fn runtime(feature: FeatureState) -> (tempfile::TempDir, AppRuntime) {
-        let directory = tempfile::tempdir().expect("temp directory");
-        let home = OmeHome::from_path(directory.path().join("home")).expect("home");
-        let runtime = AppRuntime::open(
+    fn open_test_runtime(home: OmeHome, feature: FeatureState) -> AppRuntime {
+        AppRuntime::open(
             home,
             RuntimeDeps {
                 probe: Box::new(ready_probe(feature)),
@@ -4167,7 +4195,13 @@ mod tests {
                 product_version: "0.1.0".to_owned(),
             },
         )
-        .expect("runtime");
+        .expect("runtime")
+    }
+
+    fn runtime(feature: FeatureState) -> (tempfile::TempDir, AppRuntime) {
+        let directory = tempfile::tempdir().expect("temp directory");
+        let home = OmeHome::from_path(directory.path().join("home")).expect("home");
+        let runtime = open_test_runtime(home, feature);
         (directory, runtime)
     }
 
@@ -4232,6 +4266,52 @@ mod tests {
         assert!(snapshot.host.ready);
         assert_eq!(snapshot.host.rows.len(), 8);
         assert!(snapshot.host.inspected_at.is_some());
+    }
+
+    #[test]
+    fn completed_wizard_restores_main_phase() {
+        let (directory, mut runtime) = runtime(FeatureState::Enabled);
+        runtime.wizard = WizardState {
+            step: Step::AppInstall,
+            completed: std::collections::BTreeSet::from([Step::HostCheck]),
+        };
+        runtime.apply(Command::WizardSkip).expect("complete wizard");
+        drop(runtime);
+
+        let home = OmeHome::from_path(directory.path().join("home")).expect("home");
+        let snapshot = open_test_runtime(home, FeatureState::Enabled).snapshot();
+        assert_eq!(snapshot.phase, AppPhase::Main);
+        assert_eq!(snapshot.wizard.step, WizardStep::Done);
+    }
+
+    #[test]
+    fn middle_wizard_step_restores_wizard_phase() {
+        let (directory, runtime) = runtime(FeatureState::Enabled);
+        runtime
+            .guest_store
+            .save_wizard(&WizardState {
+                step: Step::FirstBoot,
+                completed: std::collections::BTreeSet::from([
+                    Step::HostCheck,
+                    Step::ArtifactDownload,
+                    Step::GuestInstall,
+                ]),
+            })
+            .expect("save wizard");
+        drop(runtime);
+
+        let home = OmeHome::from_path(directory.path().join("home")).expect("home");
+        let snapshot = open_test_runtime(home, FeatureState::Enabled).snapshot();
+        assert_eq!(snapshot.phase, AppPhase::Wizard);
+        assert_eq!(snapshot.wizard.step, WizardStep::FirstBoot);
+    }
+
+    #[test]
+    fn missing_saved_wizard_uses_initial_state() {
+        let (_directory, runtime) = runtime(FeatureState::Enabled);
+        let snapshot = runtime.snapshot();
+        assert_eq!(snapshot.phase, AppPhase::Wizard);
+        assert_eq!(snapshot.wizard.step, WizardStep::HostCheck);
     }
 
     #[test]
