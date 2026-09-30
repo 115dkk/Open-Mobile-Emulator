@@ -496,17 +496,26 @@ async function guestScreenshot(name) {
 // later cost the game its download service (docs/evidence/M0/findings-20260926.md 3). The button is
 // read from the guest screenshot and tapped through the embedded guest window as a mouse click.
 // Nothing else on the guest screen is touched: no account creation, no game interaction.
-async function answerPermissionPrompt(name, file) {
-  const seen = recognizeImage(name, file);
-  const words = seen.text.toLowerCase().replace(/\s+/g, '');
-  if (!words.includes('sendyounotifications')) return false;
+async function answerPermissionPrompt(name, seen) {
   const button = (seen.lines ?? []).find(line => /^a[il1]+ow$/i.test(line.text.trim()));
   if (!button) { log('permission-prompt-unreadable', { name, lines: seen.lines }); return false; }
-  const at = { x: (button.x + button.w / 2) / seen.width, y: (button.y + button.h / 2) / seen.height };
+  const target = { x: (button.x + button.w / 2) / seen.width, y: (button.y + button.h / 2) / seen.height };
   const pid = await qemuWindow();
-  const tap = native(['-AppPid', String(app.pid), '-QemuPid', String(pid), '-Tap', `${at.x.toFixed(4)},${at.y.toFixed(4)}`]);
-  log('permission-prompt', { name, button, at, ...tap });
+  const tap = native(['-AppPid', String(app.pid), '-QemuPid', String(pid), '-Tap', `${target.x.toFixed(4)},${target.y.toFixed(4)}`]);
+  log('permission-prompt', { name, button, target, ...tap });
   await delay(3000); await guestScreenshot(`${name}-after-allow`); return true;
+}
+// What the English OCR reads on each game capture (dev PC round 26). The splash is an icon on black
+// (no text); the permission prompt names notifications; the game's title and data-download screens
+// carry the publisher's copyright line, and the download prompt its size in GB (read as `S.IGB`),
+// the voice-data ON/OFF toggle and the Wi-Fi advice. Korean text is not read by this engine.
+function gameScreen(text) {
+  const words = text.toLowerCase().replace(/\s+/g, '');
+  if (words.includes('sendyounotifications')) return 'permission-prompt';
+  const download = /[0-9s][.,][0-9il]+gb/.test(words) || (/wi.?fi/.test(words) && words.includes('off'));
+  if (download) return 'download-prompt';
+  if (/epidgames|rightsreserved/.test(words)) return 'game-ui';
+  return words ? 'unknown' : 'blank';
 }
 // Whole-run watchdog: write the result and end the driver instead of idling until the job timeout.
 const deadlineMinutes = Number(process.env.OME_DOD_DEADLINE_MIN ?? 100);
@@ -690,20 +699,30 @@ try {
     // No account creation or unapproved game interaction. Fifteen minutes of product captures
     // document whether a consent/resource-download dialog blocks reaching the title screen. The
     // OS's notification permission prompt is answered (answerPermissionPrompt); dev PC round 25 sat
-    // on it for the whole observation.
-    let permissionAnswers = 0;
+    // on it for the whole observation. Each capture is read (gameScreen) so the run can certify
+    // the game's own data-download prompt without a human eye (dev PC round 26 reached it in
+    // three minutes and held it to the end).
+    let permissionAnswers = 0; const screens = [];
     for (let minute = 0; minute <= 15; minute++) {
       if (minute) await delay(60000);
       await snapshot(); const name = `game-${String(minute).padStart(2, '0')}`; const file = await guestScreenshot(name);
-      if (permissionAnswers < 2 && await answerPermissionPrompt(name, file)) permissionAnswers++;
+      const seen = recognizeImage(name, file); const screen = gameScreen(seen.text);
+      screens.push({ minute, screen }); log('game-screen', { name, screen });
+      if (screen === 'permission-prompt' && permissionAnswers < 2 && await answerPermissionPrompt(name, seen)) permissionAnswers++;
     }
     result.measurements.permissionPromptAnswers = permissionAnswers;
+    result.game.screens = screens;
+    result.game.reachedDownloadPrompt = screens.some(s => s.screen === 'download-prompt');
+    // The last capture must still be the game's own screen: a crash back to the launcher or a
+    // black frame after the prompt would leave the run for a human to judge.
+    const last = screens.at(-1)?.screen;
+    result.game.visualReviewRequired = !(result.game.reachedDownloadPrompt && ['download-prompt', 'game-ui'].includes(last));
     result.measurements.gameLaunchObservationMs = Date.now() - start;
-    result.game.visualReviewRequired = true; await capture('13-game-final-stage');
+    await capture('13-game-final-stage');
   });
   await step('stop', async () => { const start = Date.now(); await stopGuest(); result.measurements.stopMs = Date.now() - start; await capture('14-stopped'); });
   await step('quit', quitApp);
-  // An unexamined title/download/login screenshot cannot certify a running game.
+  // A game capture nobody read (neither the OCR above nor a person) cannot certify a running game.
   result.outcome = result.game.visualReviewRequired ? 'needs-review' : 'passed';
 } catch (error) {
   result.error = error.stack; log('failure', { error: error.stack });
