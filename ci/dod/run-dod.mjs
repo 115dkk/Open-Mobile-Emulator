@@ -183,7 +183,10 @@ function installerScreen(text) {
   if (has('grub2') || has('choose efi boot')) return 'efi-boot-chooser';
   // Console OCR reads Confirm as "Cont Irm", Question as "Uuestion" and Would as "Uould" (CI run 39).
   if (/con[ft][il]rm/.test(words) && has('format')) return 'confirm-format';
-  if (/[qu]uestion/.test(words) && (has('label') || has('customize') || has('drive name'))) return 'label-question';
+  // The title reads "Uuestion" on the runner and "wuesuon" on the dev PC (round 15), so the body
+  // sentence identifies the question as well.
+  if ((/[qwu]ues[tu]i?on/.test(words) && (has('label') || has('customize') || has('drive name')))
+    || has('customize the formatted') || has('press enter to skip')) return 'label-question';
   if (has('installing') || has('expect to write')) return 'installing';
   return 'unknown';
 }
