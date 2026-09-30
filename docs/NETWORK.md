@@ -8,7 +8,7 @@ on disk and are attached by the user by hand.
 |---|---|---|---|---|
 | Guest ISO download | `downloads.sourceforge.net` and the SourceForge mirror pool under `dl.sourceforge.net` | installer, `launcher/Get-Artifacts.ps1` | HTTPS | URL and SHA-256 come from `manifests/artifacts.json`. The first host redirects to a mirror. |
 | Google emulator system image for blob-carrying image profiles | `dl.google.com` | installer, only after the user accepts the image's license (R3, ADR-0006); development image builder (`vendor_google_emu-x86`, never shipped) | HTTPS | URL and SHA-256 come from `manifests/artifacts.json` (`fetched_by: installer`). Extraction happens on the user's PC; nothing from the image is uploaded or redistributed. The installer part waits for CLAUDE.md section 8 item 9 |
-| Self-update | `api.github.com`, `github.com`, `objects.githubusercontent.com` | product (M2 item 7) | HTTPS | Release lookup and signed asset download, user-initiated |
+| Self-update | `api.github.com`, `github.com`, `objects.githubusercontent.com` | product (M2 item 7) | HTTPS | Release lookup once at start while the `auto_update_check` setting is on (default on) and on the settings button; asset download and install only when the user clicks |
 
 Not used on purpose: the Tauri installer's WebView2 bootstrapper download
 (`go.microsoft.com` and its redirects). `host/app/tauri.conf.json` sets
