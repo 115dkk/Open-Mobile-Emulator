@@ -240,6 +240,20 @@ async function grubSelect(pid, prefix, targetRow, expectedRows) {
   }
   throw new StopRun(`GRUB selection did not reach row ${targetRow} within 14 frames`);
 }
+// Presses Enter on the verified selection and confirms it took: the menu is gone (an entry boots)
+// or a submenu with `submenuRows` entries shows. A lost Enter is pressed again; a moved selection stops.
+async function grubEnter(pid, label, selectedRow, submenuRows = null) {
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    const suffix = attempt > 1 ? `-retry${attempt}` : '';
+    await keys(pid, `${label}${suffix}`, 'ENTER', null, 1500);
+    const highlight = (await capture(`installer-${label}-after${suffix}`, pid, { highlight: true })).highlight;
+    const menuGone = !highlight || highlight.row < 0 || highlight.entries.length === 0;
+    if (submenuRows === null ? menuGone : highlight?.entries.length === submenuRows) { log('grub-entered', { label, attempt }); return; }
+    if (!menuGone && highlight.row !== selectedRow) throw new StopRun(`GRUB selection is on row ${highlight.row}, not ${selectedRow}, before Enter took effect`);
+    log('grub-enter-retry', { label, attempt, highlight });
+  }
+  throw new StopRun(`GRUB Enter on ${label} did not take effect after three presses`);
+}
 async function installGuest(pid) {
   // Move the webview focus off the create/completion button with a real noninteractive UI click.
   // While the stage is active the product forwards every key to the guest and prevents the default.
@@ -254,7 +268,7 @@ async function installGuest(pid) {
   // ISO menu: Live, Live w/ FFMPEG, Live PC-Mode, Live PC-Mode w/ FFMPEG, Installation, VM Options,
   // Debugging, Advanced options (docs/evidence/M0/guest-install.md).
   await grubSelect(pid, 'installer-01a-grub-select', 4, 8);
-  await keys(pid, '01-grub-installation', 'ENTER', null, 3000);
+  await grubEnter(pid, '01-grub-installation', 4);
   // The installer's first dialog took 30 s in runs 29 and 30 and longer in run 31: poll for it.
   await waitScreen(pid, 'installer-01-partition-dialog', /partit\s*ion/i, 180000);
   // docs/evidence/M0/guest-install.md 69-94, each step verified on screen before the next.
@@ -538,10 +552,9 @@ try {
       // hd0,gpt1; VM Options holds Virgl, No HW Acceleration and their debug variants.
       await keys(pid, '29a-grub-home', 'HOME');
       await grubSelect(pid, 'first-boot-grub-select', 4, 8);
-      await keys(pid, '29-disk-vm-options', 'ENTER', null, 1500);
-      await waitGrubMenu(pid, 'first-boot-vm-options-menu');
+      await grubEnter(pid, '29-disk-vm-options', 4, 4);
       await grubSelect(pid, 'first-boot-vm-select', 1, 4);
-      await keys(pid, '30-disk-boot', 'ENTER', null, 3000);
+      await grubEnter(pid, '30-disk-boot', 1);
     } else log('first-boot-default', { note: 'Normal virgl path: leave installed GRUB default unchanged; no keys sent.' });
     const s = await until(async () => { const s = await snapshot(); return s.guest.bootCompleted && s.guest.capabilities.items.some(i => i.state !== 'unknown') && s; }, 10 * 60000, 'first boot and probe', 3000);
     result.measurements.firstBootMs = Date.now() - start; result.probeItems = s.guest.capabilities.items;
