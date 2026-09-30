@@ -100,6 +100,13 @@ async function qemuWindow() {
 // runner's scheduling jitter stretched one DOWN past the firmware's 500 ms typematic threshold
 // (CI run 27: one press moved the selection six rows). OME_DOD_SDL_KEYS=1 restores that path.
 const BROWSER_KEYS = { HOME: 'Home', END: 'End', UP: 'ArrowUp', DOWN: 'ArrowDown', LEFT: 'ArrowLeft', RIGHT: 'ArrowRight', ENTER: 'Enter', TAB: 'Tab', ESC: 'Escape', BACKSPACE: 'Backspace', SPACE: 'Space' };
+const TEXT_CODES = { ' ': 'Space', '.': 'Period', '-': 'Minus', '/': 'Slash', '_': 'Shift+Minus', '+': 'Shift+Equal', '=': 'Equal', ',': 'Comma' };
+function textChord(character) {
+  if (/^[a-z]$/.test(character)) return `Key${character.toUpperCase()}`;
+  if (/^[A-Z]$/.test(character)) return `Shift+Key${character}`;
+  if (/^[0-9]$/.test(character)) return `Digit${character}`;
+  return TEXT_CODES[character] ?? null;
+}
 async function sdlKeys(pid, label, keySequence, text, waitMs) {
   log('installer-input', { label, path: 'sdl', ...native(['-AppPid', String(app.pid), '-QemuPid', String(pid), ...(keySequence ? ['-Keys', keySequence] : []), ...(text ? ['-Text', text] : [])]) });
   await delay(waitMs); await capture(`installer-${label}`, pid);
@@ -114,7 +121,13 @@ async function keys(pid, label, keySequence, text, waitMs = 800) {
     if (!browser) throw new StopRun(`Unknown key ${key}`);
     await page.keyboard.press(browser); sent.push(browser); await delay(120);
   }
-  if (text) { await page.keyboard.type(text, { delay: 120 }); sent.push(`text:${text}`); }
+  for (const character of text ?? '') {
+    // keyboard.type() marks a capital with the shift modifier flag only; the product forwards
+    // event.code, so Shift must be its own press for cfdisk's capital W to arrive as W.
+    const chord = textChord(character);
+    if (!chord) throw new StopRun(`Unmapped character ${JSON.stringify(character)}`);
+    await page.keyboard.press(chord); sent.push(chord); await delay(120);
+  }
   log('installer-input', { label, path: 'product', hwnd: focus.hwnd, foreground: focus.foreground, sent });
   await delay(waitMs); await capture(`installer-${label}`, pid);
 }
