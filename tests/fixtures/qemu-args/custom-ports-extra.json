@@ -64,6 +64,10 @@
     "reboot=shutdown",
     "-rtc",
     "base=utc",
+    "-serial",
+    "none",
+    "-parallel",
+    "none",
     "-nodefaults",
     "-no-reboot"
   ]

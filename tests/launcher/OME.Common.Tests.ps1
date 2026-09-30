@@ -78,7 +78,7 @@ Describe 'Get-OmeQemuArguments' {
     It 'appends extra arguments after the RTC value' {
         $arguments = Get-OmeQemuArguments @script:BaseArguments -ExtraArgs @('-nodefaults', '-no-reboot')
 
-        $arguments[-4..-1] | Should -Be @('-rtc', 'base=utc', '-nodefaults', '-no-reboot')
+        $arguments[-8..-1] | Should -Be @('-rtc', 'base=utc', '-serial', 'none', '-parallel', 'none', '-nodefaults', '-no-reboot')
     }
 }
 

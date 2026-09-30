@@ -64,6 +64,10 @@
     "-action",
     "reboot=shutdown",
     "-rtc",
-    "base=utc"
+    "base=utc",
+    "-serial",
+    "none",
+    "-parallel",
+    "none"
   ]
 }

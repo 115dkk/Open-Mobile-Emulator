@@ -1234,6 +1234,12 @@ function Get-OmeQemuArguments {
     $arguments.Add('reboot=shutdown')
     $arguments.Add('-rtc')
     $arguments.Add('base=utc')
+    # No serial0/parallel0 virtual consoles: their hidden SDL GL windows can leave the thread
+    # without a current GL context and blank the display (docs/evidence/M2/embedded-display-freeze.md).
+    $arguments.Add('-serial')
+    $arguments.Add('none')
+    $arguments.Add('-parallel')
+    $arguments.Add('none')
     foreach ($extraArgument in $ExtraArgs) {
         $arguments.Add($extraArgument)
     }

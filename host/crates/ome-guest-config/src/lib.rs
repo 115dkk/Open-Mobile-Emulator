@@ -555,6 +555,14 @@ impl QemuInvocation {
         // restart it (docs/evidence/M0/guest-install.md).
         pair(&mut args, "-action", "reboot=shutdown");
         pair(&mut args, "-rtc", "base=utc");
+        // Without these QEMU adds serial0 and parallel0 as virtual consoles, and the SDL
+        // frontend gives each a hidden GL window. Making one of those hidden windows current
+        // fails now and then and leaves the thread without a GL context while SDL still
+        // believes the display window is current, so the next surface texture is never created
+        // and the display shows black until the next mode switch
+        // (docs/evidence/M2/embedded-display-freeze.md, 2026-10-01).
+        pair(&mut args, "-serial", "none");
+        pair(&mut args, "-parallel", "none");
         args.extend(config.extra_args().iter().cloned());
 
         let printable = std::iter::once(install.system_exe.as_os_str())
