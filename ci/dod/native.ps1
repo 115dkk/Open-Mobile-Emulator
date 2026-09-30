@@ -254,9 +254,10 @@ if($Foreground){
  for($i=0;$i -lt 12;$i++){
   Start-Sleep -Milliseconds 50
   $now=[W]::GetForegroundWindow()
-  if($now -ne $main -and -not $others.ContainsKey($now.ToInt64())){
+  $key="$($now.ToInt64())"   # ConvertTo-Json accepts only string keys (CI run 34)
+  if($now -ne $main -and -not $others.ContainsKey($key)){
    $t=[Text.StringBuilder]::new(256); [void][W]::GetWindowText($now,$t,256)
-   $others[$now.ToInt64()]=@{class=[W]::Class($now);pid=[W]::Pid($now);title=$t.ToString()}
+   $others[$key]=@{class=[W]::Class($now);pid=[W]::Pid($now);title=$t.ToString()}
   }
  }
  @{action='foreground';settled=$settled;main=$main.ToInt64();foreground=$fg.ToInt64();foregroundClass=[W]::Class($fg);foregroundPid=[W]::Pid($fg);foregroundTitle=$title.ToString();others=$others} | ConvertTo-Json -Depth 4 -Compress
