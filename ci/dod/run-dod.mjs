@@ -174,14 +174,16 @@ function installerScreen(text) {
   // fat32 (read as "fdt3Z"); the system chooser is the one with ext4.
   if (has('choose filesystem') || (/lesyste[mn]/.test(words) && (has('please select') || has('choose')))) {
     if (has('ext4')) return 'filesystem-for-system';
-    // "Do not re-format" is offered only once the partition carries a filesystem (dev PC round 17:
-    // the second ESP pass after the format), so it decides on its own.
-    if (has('do not re')) return 'filesystem-for-esp-formatted';
-    if (/fat3|fdt3/.test(words)) return 'filesystem-for-esp';
+    // The ESP list is always "Do not re-format" then fat32 (round 19 showed it on a fresh partition
+    // too); whether the ESP was formatted already is tracked from the screens that formatted it.
+    if (/fat3|fdt3/.test(words) || has('do not re')) return 'filesystem-for-esp';
     return 'unknown';
   }
   // Second ESP pass: "Are you sure you want to pick vda1 as ESP?" with No highlighted (round 17).
   if (has('pick') && has('as esp')) return 'confirm-pick-esp';
+  // "Cannot mount /dev/vda1. Do you want to format it?" (round 19, after "Do not re-format" on a
+  // partition that had no filesystem yet).
+  if (has('cannot mount') || (has('mount') && has('want to format'))) return 'mount-failed-format';
   if (has('warning') || (/\b\d+\s*(?:s\b|sec|second)/.test(text) && /\b[0o]k\b/.test(text) && !/\byes\b|\bno\b|reboot/i.test(text))) return 'warning-countdown';
   if (has('error') || has('this is not an efi system partition')) return 'error';
   if (has('ota')) return 'ota-confirm';
@@ -418,10 +420,10 @@ async function installGuest(pid) {
           formatTarget = 'esp'; sequence = 'HOME,ENTER';
           action = espFormatted ? 'select-vda1-without-reformat' : 'select-vda1'; break;
         case 'filesystem-for-esp':
-          formatTarget = 'esp'; sequence = espFormatted ? 'HOME,ENTER' : 'DOWN,ENTER';
+          formatTarget = 'esp'; sequence = espFormatted ? 'HOME,ENTER' : 'HOME,DOWN,ENTER';
           action = espFormatted ? 'do-not-reformat' : 'select-fat32'; break;
-        case 'filesystem-for-esp-formatted':
-          formatTarget = 'esp'; espFormatted = true; sequence = 'HOME,ENTER'; action = 'do-not-reformat'; break;
+        case 'mount-failed-format':
+          espFormatted = true; sequence = 'y'; action = 'format-unmountable'; break;
         // dialog's yes/no boxes take y and n directly; a doubled Enter (round 17) cannot land on
         // the highlighted No that way.
         case 'confirm-pick-esp': sequence = 'y'; action = 'confirm-pick-esp'; break;
