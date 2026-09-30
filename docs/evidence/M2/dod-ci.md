@@ -382,3 +382,16 @@ QEMU도 같은 방식으로 떴다(31회의 창 목록에 명령줄을 제목으
 자식을 띄우고, `ome-platform-win`의 `spawn`과 `spawn_in_job`(QEMU)도 같은 플래그를 더한다. 자식의 출력은
 이미 파이프나 파일로 가므로 잃는 것이 없다. 사용자 PC에서도 게스트가 도는 동안 콘솔 창이 깜박이던 셈이니
 제품의 결함이다. 드라이버는 항목 수가 기대와 다른 프레임을 네 번까지 다시 읽고 그동안 키를 보내지 않는다.
+
+### 37회 (2026-09-30 11:04~11:15 UTC): 콘솔 창이 사라지자 키는 하나도 안 떨어졌다
+
+전경 표본은 모든 키에서 비었다(`others: {}`). HOME과 DOWN 넷이 정확히 5행에 닿았고, Enter 한 번, 파티션 목록
+판독, `c`와 Enter, Confirm의 Enter, 레이블 gpt의 Enter가 모두 첫 시도에 지났다(`run37/key-sequence.txt`).
+`n`도 먹어 cfdisk가 "Partition size: 32G"를 냈는데(`run37/cfdisk-size-prompt-read-as-part-it-ion.png`) OCR이
+그 줄을 "Part it ion size: 3ZG"로 띄어 읽어 패턴 `/partit\s*ion\s*size/`가 놓쳤고, 되풀이 조건(표가 보임)은
+프롬프트 아래에도 표가 보이므로 참이라 `n`이 두 번 더 입력란에 들어갔다("3ZGnn").
+
+고침(드라이버). 설치기 화면 패턴은 판독 문자열의 공백을 모두 지우고 소문자로 만든 것에 맞춘다
+(`squash`, 예: `partitionsize`, `labeltype`, `cfdiskprogram`, `choosepartition.*modify`). 되풀이 조건은
+정규식 대신 함수도 받아, 표는 보이되 크기 프롬프트·형식 목록·쓰기 질문이 없을 때(`tableOnly`)처럼 떠나려는
+화면을 정확히 가른다. 30·35·37회의 판독 문자열로 패턴 여덟 개를 검증했다.
