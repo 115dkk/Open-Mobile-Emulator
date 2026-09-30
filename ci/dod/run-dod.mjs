@@ -33,7 +33,7 @@ const native = args => {
 };
 const inventory = () => native(['-Inventory', '-HomePath', home]);
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-let app, page, browser, exited = false, appIdentity, homeOwned = false;
+let app, page, browser, keepAwake, exited = false, appIdentity, homeOwned = false;
 const ownedQemu = new Map();
 class StopRun extends Error {}
 async function until(fn, timeout, label, interval = 1000) {
@@ -55,13 +55,21 @@ function rememberProcesses() {
   }
   return data;
 }
+// A blocked product main thread (a modal dialog, a hung command) leaves an invoke pending forever, and
+// until() only checks its deadline between attempts; CI run 16 sat 114 minutes past every bounded wait
+// with no evidence written. Every await on the product therefore carries its own bound.
+const withTimeout = (promise, ms, label) => Promise.race([promise, new Promise((_, reject) => { setTimeout(() => reject(Error(`Timeout: ${label} after ${ms} ms`)), ms).unref(); })]);
 async function snapshot() {
-  const s = await page.evaluate(() => window.__TAURI_INTERNALS__.invoke('app_snapshot'));
+  const s = await withTimeout(page.evaluate(() => window.__TAURI_INTERNALS__.invoke('app_snapshot')), 20000, 'app_snapshot invoke');
   log('snapshot', { snapshot: s }); return s;
 }
 async function capture(name, qemuPid) {
   log('capture', { name, ...native(['-AppPid', String(app.pid), ...(qemuPid ? ['-QemuPid', String(qemuPid)] : []), '-Shot', path.join(output, 'shots', `${name}.png`)]) });
   fs.writeFileSync(path.join(output, `${name}.txt`), scrub(await page.locator('body').innerText()), 'utf8');
+}
+async function desktopCapture(name) {
+  try { log('desktop', { name, ...native(['-AppPid', String(app.pid), '-Desktop', '-Shot', path.join(output, 'shots', `${name}.png`)]) }); }
+  catch (error) { log('desktop-capture-failed', { name, error: error.message }); }
 }
 const click = async name => { log('click', { name }); await page.getByRole('button', { name, exact: true }).click(); };
 const rail = async name => { await page.getByRole('navigation', { name: '주 메뉴' }).getByRole('button', { name, exact: true }).click(); await delay(400); };
@@ -239,6 +247,17 @@ async function guestScreenshot(name) {
   const file = await until(() => fs.existsSync(shots) && fs.readdirSync(shots).find(n => n.endsWith('.png') && !before.has(n)), 15000, 'product screenshot');
   fs.copyFileSync(path.join(shots, file), path.join(output, name + '.png'));
 }
+// Whole-run watchdog: write the result and end the driver instead of idling until the job timeout.
+const deadlineMinutes = Number(process.env.OME_DOD_DEADLINE_MIN ?? 100);
+setTimeout(() => {
+  log('watchdog', { minutes: deadlineMinutes, steps: result.steps.map(s => `${s.name}=${s.outcome}`) });
+  result.outcome = 'failed'; result.error = `Watchdog: the run exceeded ${deadlineMinutes} minutes`;
+  for (const owned of [...ownedQemu.values(), ...(appIdentity ? [appIdentity] : [])]) {
+    try { native(['-KillOwnedPid', String(owned.pid), '-ExpectedCreation', owned.creation]); result.forcedCleanup = true; }
+    catch (error) { log('watchdog-cleanup-failed', { pid: owned.pid, error: error.message }); }
+  }
+  result.endedAt = new Date().toISOString(); writeJson('dod-result.json', result); process.exit(1);
+}, deadlineMinutes * 60000).unref();
 try {
   await step('preflight', async () => {
     const pre = inventory(); log('preflight', { ...pre, utf8Check: result.utf8Check }); result.environment = pre;
@@ -271,16 +290,18 @@ try {
   });
   // Keep the monitor awake for the whole run: a sleeping display stops DWM composition and every capture
   // would show stale content (docs/evidence/M2/embedded-display-freeze.md).
-  const keepAwake = spawn('powershell.exe', ['-NoProfile', '-File', path.join(directory, 'keep-awake.ps1')], { stdio: ['ignore', 'pipe', 'inherit'] });
+  keepAwake = spawn('powershell.exe', ['-NoProfile', '-File', path.join(directory, 'keep-awake.ps1')], { stdio: ['ignore', 'pipe', 'inherit'] });
   keepAwake.stdout.once('data', chunk => log('keep-awake', JSON.parse(chunk.toString('utf8').trim())));
-  process.on('exit', () => { try { keepAwake.kill(); } catch {} });
+  process.on('exit', () => { try { keepAwake?.kill(); } catch {} });
   await step('launch', async () => {
     const fd = fs.openSync(path.join(output, 'app-output.txt'), 'w');
     app = spawn(appPath, [], { cwd: host, env: { ...process.env, OME_HOME: home, WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--remote-debugging-port=${port}` }, stdio: ['ignore', fd, fd] }); fs.closeSync(fd);
     app.on('exit', (code, signal) => { exited = true; log('app-exit', { pid: app.pid, code, signal }); });
     app.on('error', error => { exited = true; log('app-spawn-error', { error: error.message }); });
     log('app-start', { pid: app.pid }); rememberProcesses();
-    await until(async () => (await fetch(`http://127.0.0.1:${port}/json/version`)).ok, 30000, 'CDP');
+    // 120 s: the hosted runner (2 cores, Hyper-V video) starts WebView2 cold; run 16 gave up at 30 s with no diagnostics.
+    try { await until(async () => (await fetch(`http://127.0.0.1:${port}/json/version`)).ok, 120000, 'CDP'); }
+    catch (error) { await desktopCapture('launch-no-cdp'); throw error; }
     browser = await chromium.connectOverCDP(`http://127.0.0.1:${port}`);
     page = await until(() => browser.contexts().flatMap(c => c.pages()).find(p => /^(http:\/\/tauri\.localhost|tauri:\/\/localhost)\/(?:index\.html)?$/.test(p.url())), 15000, 'main page');
     page.setDefaultTimeout(12000); page.on('pageerror', e => log('pageerror', { error: e.message }));
@@ -338,7 +359,7 @@ try {
     const watched = new Promise(resolve => watcher.once('exit', code => resolve(code)));
     await delay(1800); await click('디스크 만들기'); let pid;
     try {
-      if (await watched !== 0) throw Error(`Installer watcher failed: ${watcherErr}`);
+      if (await withTimeout(watched, 90000, 'installer watcher exit') !== 0) throw Error(`Installer watcher failed: ${watcherErr}`);
       const observed = JSON.parse(watcherOut); log('installer-watcher', observed); pid = observed.pid;
       rememberProcesses(); if (!ownedQemu.has(pid)) throw Error('Installer process identity not confirmed');
     }
@@ -423,6 +444,10 @@ try {
   for (const name of plannedSteps) if (!result.steps.some(s => s.name === name)) result.steps.push({ name, start: null, end: null, durationMs: null, outcome: 'not-run', reason: 'An earlier step failed; no bypass attempted' });
   result.endedAt = new Date().toISOString(); writeJson('dod-result.json', result);
   const appOutput = path.join(output, 'app-output.txt'); if (fs.existsSync(appOutput)) fs.writeFileSync(appOutput, scrub(fs.readFileSync(appOutput, 'utf8')), 'utf8');
-  if (browser) await browser.close().catch(() => {});
+  if (browser) await withTimeout(browser.close(), 10000, 'browser close').catch(() => {});
 }
-process.exitCode = result.outcome === 'passed' ? 0 : 1;
+// The keep-awake helper's piped stdout kept the event loop alive after the run had ended, so the driver
+// never exited on its own (CI run 16: finished at 01:48, still running when the job was cancelled at
+// 03:41). End the helper and the process explicitly.
+try { keepAwake?.kill(); } catch {}
+process.exit(result.outcome === 'passed' ? 0 : 1);

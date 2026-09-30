@@ -5,7 +5,7 @@ param(
  [int]$Width=0, [int]$Height=0, [int]$X=80, [int]$Y=60,
  [switch]$Quit, [switch]$Inventory, [string]$HomePath,
  [string]$Keys, [string]$Text, [string]$FilePath, [switch]$GameSelection,
- [int]$KillOwnedPid, [string]$ExpectedCreation, [switch]$WaitInstaller
+ [int]$KillOwnedPid, [string]$ExpectedCreation, [switch]$WaitInstaller, [switch]$Desktop
 )
 $ErrorActionPreference='Stop'
 [Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)
@@ -42,6 +42,7 @@ public class W {
  [DllImport("user32.dll")] public static extern bool MoveWindow(IntPtr h,int x,int y,int w,int he,bool repaint);
  [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr h);
  [DllImport("user32.dll",CharSet=CharSet.Unicode)] public static extern int GetClassName(IntPtr h,StringBuilder s,int c);
+ [DllImport("user32.dll",CharSet=CharSet.Unicode)] public static extern int GetWindowText(IntPtr h,StringBuilder s,int c);
  [DllImport("user32.dll")] public static extern IntPtr SetThreadDpiAwarenessContext(IntPtr c);
  [DllImport("user32.dll")] public static extern bool PostMessage(IntPtr h,uint m,IntPtr w,IntPtr l);
  [DllImport("user32.dll")] public static extern IntPtr SendMessage(IntPtr h,uint m,IntPtr w,IntPtr l);
@@ -97,6 +98,25 @@ public class W {
 }
 '@
 [void][W]::SetThreadDpiAwarenessContext([IntPtr](-4))
+if ($Desktop) {
+ # Diagnostics when the product has no main window yet (CI run 16: CDP never answered, app output empty):
+ # every top-level window of the app process and of its children, plus the whole virtual screen.
+ Add-Type -AssemblyName System.Windows.Forms
+ $family = @($AppPid) + @(Get-CimInstance Win32_Process -Filter "ParentProcessId = $AppPid" | ForEach-Object { [int]$_.ProcessId })
+ $windows = @([W]::All() | Where-Object { $family -contains [W]::Pid($_) } | ForEach-Object {
+  $r=[W+R]::new();[void][W]::GetWindowRect($_,[ref]$r)
+  $t=[Text.StringBuilder]::new(512);[void][W]::GetWindowText($_,$t,512)
+  @{hwnd=$_.ToInt64();pid=[W]::Pid($_);class=[W]::Class($_);title=$t.ToString();visible=[W]::IsWindowVisible($_);rect=$r}
+ })
+ $bounds=[System.Windows.Forms.SystemInformation]::VirtualScreen
+ if($Shot){
+  $b=[Drawing.Bitmap]::new($bounds.Width,$bounds.Height);$g=[Drawing.Graphics]::FromImage($b)
+  try{$g.CopyFromScreen($bounds.Left,$bounds.Top,0,0,$b.Size);$b.Save($Shot,[Drawing.Imaging.ImageFormat]::Png)}finally{$g.Dispose();$b.Dispose()}
+ }
+ $processes=@(Get-CimInstance Win32_Process -Filter "ProcessId = $AppPid OR ParentProcessId = $AppPid" | ForEach-Object { @{pid=[int]$_.ProcessId;name=$_.Name;command=$_.CommandLine} })
+ @{action='desktop';screen="$($bounds.Width)x$($bounds.Height)";foreground=[W]::GetForegroundWindow().ToInt64();windows=$windows;processes=$processes;shot=$Shot} | ConvertTo-Json -Depth 6 -Compress
+ exit
+}
 $p=Get-Process -Id $AppPid
 $h=$p.MainWindowHandle
 if($h -eq 0){throw 'No main window'}
