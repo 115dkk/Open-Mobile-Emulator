@@ -1,0 +1,174 @@
+{
+  "startedAt": "2026-09-30T10:40:22.298Z",
+  "outcome": "failed",
+  "steps": [
+    {
+      "name": "preflight",
+      "start": "2026-09-30T10:40:22.299Z",
+      "outcome": "passed",
+      "end": "2026-09-30T10:40:23.128Z",
+      "durationMs": 821
+    },
+    {
+      "name": "launch",
+      "start": "2026-09-30T10:40:23.134Z",
+      "outcome": "passed",
+      "end": "2026-09-30T10:40:31.158Z",
+      "durationMs": 8024
+    },
+    {
+      "name": "S1.1-host-check",
+      "start": "2026-09-30T10:40:31.158Z",
+      "outcome": "passed",
+      "end": "2026-09-30T10:40:33.119Z",
+      "durationMs": 1960
+    },
+    {
+      "name": "S1.2-WHPX",
+      "start": "2026-09-30T10:40:33.121Z",
+      "outcome": "passed",
+      "end": "2026-09-30T10:40:35.135Z",
+      "durationMs": 2013
+    },
+    {
+      "name": "S1.4-download",
+      "start": "2026-09-30T10:40:35.135Z",
+      "outcome": "passed",
+      "end": "2026-09-30T10:41:29.506Z",
+      "durationMs": 54368
+    },
+    {
+      "name": "S1.5-installer",
+      "start": "2026-09-30T10:41:29.507Z",
+      "outcome": "failed",
+      "error": "Error: Installer screen after 04-gpt never showed /free\\s*space/i\n    at keysUntil (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:219:9)\n    at async installGuest (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:278:3)\n    at async file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:537:5\n    at async step (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:82:9)\n    at async file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:511:3",
+      "end": "2026-09-30T10:44:52.644Z",
+      "durationMs": 203137
+    },
+    {
+      "name": "cleanup",
+      "start": "2026-09-30T10:44:54.466Z",
+      "outcome": "passed",
+      "end": "2026-09-30T10:45:11.732Z",
+      "durationMs": 17266
+    },
+    {
+      "name": "S1.6-first-boot",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "S1.7-game-install",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "game-launch",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "stop",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "quit",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    }
+  ],
+  "gaps": [
+    "pulled.json has no version fields; installed version can only be read after successful installation.",
+    "WHPX already enabled: product skips S1.2 instead of showing an already-on screen."
+  ],
+  "measurements": {
+    "downloadMs": 50211,
+    "downloadBytes": 2429550592,
+    "downloadAverageBytesPerSecond": 48386819.46187091
+  },
+  "probeItems": [],
+  "softwareRenderingRetry": false,
+  "utf8Check": "다시 확인",
+  "environment": {
+    "killed": 0,
+    "processes": [],
+    "freeBytes": 154712477696
+  },
+  "game": {
+    "package": "com.epidgames.trickcalrevive",
+    "versionName": null,
+    "versionCode": null
+  },
+  "qemu": {
+    "source": "D:\\a\\Open-Mobile-Emulator\\Open-Mobile-Emulator\\host\\target\\release\\qemu",
+    "sha256": "7139f05b86ee9f946475c0f33b05504d8b76317f7fe7ef0321a5396775576d6a",
+    "version": "QEMU emulator version 11.1.1 (v11.1.1-dirty)\r\nCopyright (c) 2003-2026 Fabrice Bellard and the QEMU Project developers\r\n"
+  },
+  "hostVerdict": {
+    "rows": [
+      {
+        "id": "cpuVirtualization",
+        "status": "ready",
+        "detail": "사용할 수 있습니다."
+      },
+      {
+        "id": "hypervisorPlatform",
+        "status": "ready",
+        "detail": "켜져 있습니다."
+      },
+      {
+        "id": "rebootPending",
+        "status": "ready",
+        "detail": "필요하지 않습니다."
+      },
+      {
+        "id": "whpxAvailable",
+        "status": "ready",
+        "detail": "켜져 있고 실행 준비가 되어 있습니다."
+      },
+      {
+        "id": "qemuPresent",
+        "status": "ready",
+        "detail": "준비되어 있습니다."
+      },
+      {
+        "id": "firmwarePresent",
+        "status": "ready",
+        "detail": "준비되어 있습니다."
+      },
+      {
+        "id": "adbPresent",
+        "status": "ready",
+        "detail": "준비되어 있습니다."
+      },
+      {
+        "id": "diskSpace",
+        "status": "ready",
+        "detail": "설치에 충분한 여유가 있습니다."
+      }
+    ],
+    "ready": true,
+    "inspectedAt": "2026-09-30T10:40:25+00:00"
+  },
+  "error": "Error: Installer screen after 04-gpt never showed /free\\s*space/i\n    at keysUntil (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:219:9)\n    at async installGuest (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:278:3)\n    at async file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:537:5\n    at async step (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:82:9)\n    at async file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:511:3",
+  "forcedCleanup": true,
+  "finalProcesses": [],
+  "temporaryHome": "D:\\ome-home",
+  "endedAt": "2026-09-30T10:45:11.732Z"
+}

@@ -14,15 +14,35 @@ function sender() {
   return vi.fn<(code: string, pressed: boolean) => Promise<void>>(() => Promise.resolve());
 }
 
+/** Lets queued sends run: each waits for the previous send's promise. */
+const flush = () => new Promise<void>((resolve) => { setTimeout(resolve, 0); });
+
 describe('guest keyboard forwarding', () => {
-  it('forwards down and up and prevents browser defaults', () => {
+  it('forwards down and up and prevents browser defaults', async () => {
     const send = sender();
     const { unmount } = renderHook(() => useGuestKeyboard(true, send));
     expect(key('keydown').defaultPrevented).toBe(true);
     expect(key('keyup').defaultPrevented).toBe(true);
+    await flush();
     expect(send.mock.calls).toEqual([['KeyA', true], ['KeyA', false]]);
     unmount();
+    await flush();
     expect(send).toHaveBeenCalledTimes(2);
+  });
+
+  it('sends one event at a time so a release never overtakes its press', async () => {
+    let resolveFirst = (): void => undefined;
+    const send = vi.fn<(code: string, pressed: boolean) => Promise<void>>()
+      .mockImplementationOnce(() => new Promise<void>((resolve) => { resolveFirst = resolve; }))
+      .mockImplementation(() => Promise.resolve());
+    renderHook(() => useGuestKeyboard(true, send));
+    key('keydown');
+    key('keyup');
+    await flush();
+    expect(send.mock.calls).toEqual([['KeyA', true]]);
+    resolveFirst();
+    await flush();
+    expect(send.mock.calls).toEqual([['KeyA', true], ['KeyA', false]]);
   });
 
   it('does nothing when inactive', () => {
@@ -33,12 +53,13 @@ describe('guest keyboard forwarding', () => {
     expect(send).not.toHaveBeenCalled();
   });
 
-  it('ignores repeated keydown but still forwards keyup', () => {
+  it('ignores repeated keydown but still forwards keyup', async () => {
     const send = sender();
     renderHook(() => useGuestKeyboard(true, send));
     key('keydown');
     expect(key('keydown', window, { repeat: true }).defaultPrevented).toBe(false);
     key('keyup', window, { repeat: true });
+    await flush();
     expect(send.mock.calls).toEqual([['KeyA', true], ['KeyA', false]]);
   });
 
@@ -99,7 +120,7 @@ describe('guest keyboard forwarding', () => {
     expect(send).not.toHaveBeenCalled();
   });
 
-  it.each(['Enter', 'Space'])('forwards %s on focused buttons and prevents default activation', (code) => {
+  it.each(['Enter', 'Space'])('forwards %s on focused buttons and prevents default activation', async (code) => {
     const send = sender();
     renderHook(() => useGuestKeyboard(true, send));
     const button = document.createElement('button');
@@ -108,11 +129,12 @@ describe('guest keyboard forwarding', () => {
     try {
       expect(key('keydown', button, { code }).defaultPrevented).toBe(true);
       expect(key('keyup', button, { code }).defaultPrevented).toBe(true);
+      await flush();
       expect(send.mock.calls).toEqual([[code, true], [code, false]]);
     } finally { button.remove(); }
   });
 
-  it('releases all held keys once on blur', () => {
+  it('releases all held keys once on blur', async () => {
     const send = sender();
     const { unmount } = renderHook(() => useGuestKeyboard(true, send));
     key('keydown');
@@ -120,58 +142,67 @@ describe('guest keyboard forwarding', () => {
     window.dispatchEvent(new Event('blur'));
     window.dispatchEvent(new Event('blur'));
     unmount();
+    await flush();
     expect(send.mock.calls).toEqual([['KeyA', true], ['KeyB', true], ['KeyA', false], ['KeyB', false]]);
   });
 
-  it('releases held keys only when the document becomes hidden', () => {
+  it('releases held keys only when the document becomes hidden', async () => {
     const send = sender();
     renderHook(() => useGuestKeyboard(true, send));
     key('keydown');
     const visibility = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible');
     document.dispatchEvent(new Event('visibilitychange'));
+    await flush();
     expect(send).toHaveBeenCalledOnce();
     visibility.mockReturnValue('hidden');
     document.dispatchEvent(new Event('visibilitychange'));
     document.dispatchEvent(new Event('visibilitychange'));
+    await flush();
     expect(send.mock.calls).toEqual([['KeyA', true], ['KeyA', false]]);
   });
 
-  it('releases held keys when inactive and can listen again', () => {
+  it('releases held keys when inactive and can listen again', async () => {
     const send = sender();
     const { rerender } = renderHook(({ active }) => useGuestKeyboard(active, send), { initialProps: { active: true } });
     key('keydown');
     rerender({ active: false });
     expect(key('keydown').defaultPrevented).toBe(false);
+    await flush();
     expect(send.mock.calls).toEqual([['KeyA', true], ['KeyA', false]]);
     rerender({ active: true });
     key('keydown');
     key('keyup');
+    await flush();
     expect(send).toHaveBeenCalledTimes(4);
   });
 
-  it('releases on unmount and sends nothing afterwards', () => {
+  it('releases on unmount and sends nothing afterwards', async () => {
     const send = sender();
     const { unmount } = renderHook(() => useGuestKeyboard(true, send));
     key('keydown');
     unmount();
+    await flush();
     expect(send.mock.calls).toEqual([['KeyA', true], ['KeyA', false]]);
     expect(key('keydown').defaultPrevented).toBe(false);
     expect(key('keyup').defaultPrevented).toBe(false);
     window.dispatchEvent(new Event('blur'));
     vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
     document.dispatchEvent(new Event('visibilitychange'));
+    await flush();
     expect(send).toHaveBeenCalledTimes(2);
   });
 
-  it('uses the latest sender without releasing held keys on a rerender', () => {
+  it('uses the latest sender without releasing held keys on a rerender', async () => {
     const first = sender();
     const second = sender();
     const { rerender, unmount } = renderHook(({ send }) => useGuestKeyboard(true, send), { initialProps: { send: first } });
     key('keydown');
     rerender({ send: second });
+    await flush();
     expect(first.mock.calls).toEqual([['KeyA', true]]);
     expect(second).not.toHaveBeenCalled();
     unmount();
+    await flush();
     expect(second.mock.calls).toEqual([['KeyA', false]]);
   });
 });

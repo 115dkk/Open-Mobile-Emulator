@@ -114,6 +114,16 @@ function textChord(character) {
   if (/^[0-9]$/.test(character)) return `Digit${character}`;
   return TEXT_CODES[character] ?? null;
 }
+// keyboard.press() fires keydown and keyup within a millisecond; the product handles each
+// forwarded event on its own blocking task, so the release could overtake the press (a press with
+// no release, then the next press of that key suppressed as a repeat: CI runs 30 and 35 lost about
+// one key in three). A person's press lasts tens of milliseconds, so the driver's does too.
+async function pressSlow(chord) {
+  const parts = chord.split('+');
+  for (const part of parts) { await page.keyboard.down(part); await delay(40); }
+  await delay(40);
+  for (const part of [...parts].reverse()) { await page.keyboard.up(part); await delay(40); }
+}
 async function sdlKeys(pid, label, keySequence, text, waitMs) {
   log('installer-input', { label, path: 'sdl', ...native(['-AppPid', String(app.pid), '-QemuPid', String(pid), ...(keySequence ? ['-Keys', keySequence] : []), ...(text ? ['-Text', text] : [])]) });
   await delay(waitMs); await capture(`installer-${label}`, pid);
@@ -131,16 +141,16 @@ async function keys(pid, label, keySequence, text, waitMs = 800) {
     // A named key from BROWSER_KEYS, or one character typed as a chord (capitals with Shift).
     const browser = BROWSER_KEYS[key] ?? (key.length === 1 ? textChord(key) : null);
     if (!browser) throw new StopRun(`Unknown key ${key}`);
-    await page.keyboard.press(browser); sent.push(browser); await delay(150);
+    await pressSlow(browser); sent.push(browser); await delay(150);
   }
   for (const character of text ?? '') {
     // keyboard.type() marks a capital with the shift modifier flag only; the product forwards
     // event.code, so Shift must be its own press for cfdisk's capital W to arrive as W.
     const chord = textChord(character);
     if (!chord) throw new StopRun(`Unmapped character ${JSON.stringify(character)}`);
-    await page.keyboard.press(chord); sent.push(chord); await delay(120);
+    await pressSlow(chord); sent.push(chord); await delay(120);
   }
-  log('installer-input', { label, path: 'product', settled: focus.settled, foreground: focus.foreground, sent });
+  log('installer-input', { label, path: 'product', settled: focus.settled, foreground: focus.foreground, others: focus.others, sent });
   await delay(waitMs); await capture(`installer-${label}`, pid);
 }
 function recognize(name) {
@@ -206,9 +216,23 @@ async function waitScreen(pid, label, pattern, timeoutMs = 60000) {
 }
 // Sends keys and requires `pattern` on the screen within `settleMs`; sends the same keys again up to
 // `attempts` times. Callers pick sequences that are safe to repeat on the screen they expect to leave.
-async function keysUntil(pid, label, keySequence, text, pattern, { settleMs = 10000, attempts = 3, waitMs = 800 } = {}) {
+// `retryWhen` names the screen the keys are meant to leave: the keys are sent again only while that
+// screen is still showing, never into whatever else appeared (CI run 35 pressed Enter into the
+// dialog after the one it meant, twice).
+async function keysUntil(pid, label, keySequence, text, pattern, { settleMs = 10000, attempts = 3, waitMs = 800, retryWhen = null } = {}) {
+  let last = '';
   for (let attempt = 1; attempt <= attempts; attempt++) {
     const name = attempt === 1 ? label : `${label}-retry${attempt}`;
+    if (attempt > 1 && retryWhen) {
+      const frame = `installer-${name}-before`;
+      await capture(frame, pid); last = recognize(frame).replace(/\s+/g, ' ');
+      if (pattern.test(last)) return last;
+      if (!retryWhen.test(last)) {
+        log('installer-retry-held', { label, attempt, seen: last.slice(0, 200) });
+        try { return await waitScreen(pid, `installer-${name}-wait`, pattern, settleMs); }
+        catch (error) { if (error instanceof StopRun) throw error; continue; }
+      }
+    }
     await keys(pid, name, keySequence, text, waitMs);
     try { return await waitScreen(pid, `installer-${name}-check`, pattern, settleMs); }
     catch (error) {
@@ -216,13 +240,19 @@ async function keysUntil(pid, label, keySequence, text, pattern, { settleMs = 10
       log('installer-expect-miss', { label, attempt, pattern: String(pattern) });
     }
   }
-  throw new StopRun(`Installer screen after ${label} never showed ${pattern}`);
+  throw new StopRun(`Installer screen after ${label} never showed ${pattern}; last ${last.slice(0, 200)}`);
 }
 const CFDISK = {
   size512M: /size:\s*5\s*[1I]\s*[2Z]\s*M/i,
   efiSystem: /EFI\s*Syste/i,
   linuxFilesystem: /Linux\s*fi\s*lesyste/i,
   typeList: /Linux\s*(root|swap|home|server)|EFI\s*Syste|BIOS\s*boot/i,
+  table: /free\s*space|\[\s*(Quit|Write|Urite|Type|Delete)\s*\]/i,
+  sizePrompt: /partit\s*ion\s*size/i,
+  labelType: /label\s*type/i,
+  confirmTool: /cfdisk\s*program|cgd\s*isk/i,
+  partitionList: /choose\s*partit[\s\S]*mod\s*ify/i,
+  installerInfo: /don.?t\s*kno[wu]\s*what\s*this\s*is|documentation\s*for\s*more/i,
 };
 // Moves the GRUB selection to `targetRow` one key at a time, reading the selection bar from each
 // frame (native.ps1 -Highlight). A lost or repeated key is corrected by the next frame instead of
@@ -270,42 +300,58 @@ async function installGuest(pid) {
   await grubSelect(pid, 'installer-01a-grub-select', 4, 8);
   await grubEnter(pid, '01-grub-installation', 4);
   // The installer's first dialog took 30 s in runs 29 and 30 and longer in run 31: poll for it.
-  await waitScreen(pid, 'installer-01-partition-dialog', /partit\s*ion/i, 180000);
+  // The installer first shows a message box ("UEFI System detected! Please select a partition as
+  // an EFI System Partition ... OK"), then the Choose Partition list with Create/Modify partitions.
+  // Only the list takes the c hotkey (CI run 35 sent it into the message box). The box takes Enter
+  // when it has not gone on its own after fifteen seconds.
+  {
+    let frame = 0, infoSince = null;
+    await until(async () => {
+      const name = `installer-01-partition-dialog-${String(frame++).padStart(2, '0')}`;
+      await capture(name, pid); const text = recognize(name).replace(/\s+/g, ' ');
+      if (CFDISK.partitionList.test(text)) return true;
+      if (CFDISK.installerInfo.test(text)) {
+        infoSince ??= Date.now();
+        if (Date.now() - infoSince >= 15000) { await keys(pid, `01b-dismiss-info-${frame}`, 'ENTER', null, 500); infoSince = null; }
+      }
+      return false;
+    }, 180000, 'installer Choose Partition list', 100);
+  }
   // docs/evidence/M0/guest-install.md 69-94, each step verified on screen before the next.
   // `c` highlights Create/Modify partitions, Enter opens the cfdisk-or-cgdisk question.
-  await keysUntil(pid, '02-create-modify', 'c,ENTER', null, /cfdisk|cgdisk/i);
-  await keysUntil(pid, '03-continue-cfdisk', 'ENTER', null, /label\s*type|gpt/i);
-  await keysUntil(pid, '04-gpt', 'ENTER', null, /free\s*space/i);
-  await keysUntil(pid, '05-new-esp', 'n', null, /partit\s*ion\s*size/i);
+  await keysUntil(pid, '02-create-modify', 'c,ENTER', null, CFDISK.confirmTool, { retryWhen: CFDISK.partitionList, settleMs: 15000 });
+  await keysUntil(pid, '03-continue-cfdisk', 'ENTER', null, CFDISK.labelType, { retryWhen: CFDISK.confirmTool });
+  await keysUntil(pid, '04-gpt', 'ENTER', null, CFDISK.table, { retryWhen: CFDISK.labelType });
+  await keysUntil(pid, '05-new-esp', 'n', null, CFDISK.sizePrompt, { retryWhen: CFDISK.table });
   // The size field is prefilled with the free size; clear it, then type. A lost character shows on
   // the prompt line, and the retry clears and types again.
-  await keysUntil(pid, '06-esp-size', `${Array(8).fill('BACKSPACE').join(',')},5,1,2,M`, null, CFDISK.size512M, { settleMs: 6000 });
-  await keysUntil(pid, '07-create-esp', 'ENTER', null, /5\s*[1I]\s*[2Z]\s*M/i);
+  await keysUntil(pid, '06-esp-size', `${Array(8).fill('BACKSPACE').join(',')},5,1,2,M`, null, CFDISK.size512M, { settleMs: 6000, retryWhen: CFDISK.sizePrompt });
+  await keysUntil(pid, '07-create-esp', 'ENTER', null, /5\s*[1I]\s*[2Z]\s*M/i, { retryWhen: CFDISK.sizePrompt });
   // libfdisk lists GPT types as MBR partition scheme, EFI System, BIOS boot, ...: EFI System is second
   // (CI run 30 landed on the first). Reopen the list when the table shows anything else.
   for (let attempt = 1; ; attempt++) {
-    await keysUntil(pid, `08-type-list${attempt > 1 ? `-retry${attempt}` : ''}`, 't', null, CFDISK.typeList);
-    const table = await keysUntil(pid, `09-efi-type${attempt > 1 ? `-retry${attempt}` : ''}`, 'HOME,DOWN,ENTER', null, /free\s*space/i, { attempts: 1 });
+    await keysUntil(pid, `08-type-list${attempt > 1 ? `-retry${attempt}` : ''}`, 't', null, CFDISK.typeList, { retryWhen: CFDISK.table });
+    const table = await keysUntil(pid, `09-efi-type${attempt > 1 ? `-retry${attempt}` : ''}`, 'HOME,DOWN,ENTER', null, CFDISK.table, { retryWhen: CFDISK.typeList });
     if (CFDISK.efiSystem.test(table)) break;
     if (attempt >= 3) throw new StopRun(`Partition 1 type is not EFI System after three tries: ${table.slice(0, 300)}`);
     log('installer-type-retry', { attempt, table: table.slice(0, 300) });
   }
   // Down onto the free-space row (Down again stays there), New, default size = the rest.
-  await keysUntil(pid, '10-new-system', 'DOWN,n', null, /partit\s*ion\s*size/i);
-  const tableBeforeWrite = await keysUntil(pid, '11-system-size', 'ENTER', null, CFDISK.linuxFilesystem);
+  await keysUntil(pid, '10-new-system', 'DOWN,n', null, CFDISK.sizePrompt, { retryWhen: CFDISK.table });
+  const tableBeforeWrite = await keysUntil(pid, '11-system-size', 'ENTER', null, CFDISK.linuxFilesystem, { retryWhen: CFDISK.sizePrompt });
   if (!CFDISK.efiSystem.test(tableBeforeWrite)) throw new StopRun(`Table lost EFI System before write: ${tableBeforeWrite.slice(0, 300)}`);
   // Write needs a capital W and the literal word yes; the confirmation shows what was typed, and a
   // refused write reads "Did not write partition table to disk".
   let written = '';
   for (let attempt = 1; attempt <= 3 && !/altered|synci/i.test(written); attempt++) {
-    await keysUntil(pid, `12-write${attempt > 1 ? `-retry${attempt}` : ''}`, 'W', null, /are\s*you\s*sure|type\s*.?yes/i);
+    await keysUntil(pid, `12-write${attempt > 1 ? `-retry${attempt}` : ''}`, 'W', null, /are\s*you\s*sure|type\s*.?yes/i, { retryWhen: CFDISK.table });
     await keys(pid, `13-write-yes${attempt > 1 ? `-retry${attempt}` : ''}`, 'y,e,s,ENTER', null, 1500);
     written = await waitScreen(pid, `installer-13-write-result${attempt > 1 ? `-retry${attempt}` : ''}`, /altered|synci|did\s*not\s*write/i, 15000);
     if (!/altered|synci/i.test(written)) log('installer-write-refused', { attempt, seen: written.slice(0, 200) });
   }
   if (!/altered|synci/i.test(written)) throw new StopRun('cfdisk did not write the partition table after three tries');
   // Quit returns to the installer, which restarts itself and lists the new partitions.
-  await keysUntil(pid, '14-quit-cfdisk', 'q', null, /choose\s*partit|please\s*select|restart\s*the\s*instal/i, { settleMs: 30000, waitMs: 4000 });
+  await keysUntil(pid, '14-quit-cfdisk', 'q', null, /choose\s*partit|please\s*select|restart\s*the\s*instal/i, { settleMs: 30000, waitMs: 4000, retryWhen: CFDISK.table });
   const deadline = Date.now() + 12 * 60000;
   let espFormatted = false, formatTarget, previousScreen, acted = false, unknownSince, actedAt, attempts = 0;
   let check = 0, actionNumber = 30, errors = 0, done = false;

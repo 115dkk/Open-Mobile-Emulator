@@ -4,10 +4,22 @@ import { useEffect, useEffectEvent } from 'react';
 
 /** Forwards stage keys; Rust owns admission, hotkeys and profile interpretation. */
 export function useGuestKeyboard(active: boolean, send: (code: string, pressed: boolean) => Promise<void>): void {
-  const forward = useEffectEvent((code: string, pressed: boolean) => { void send(code, pressed); });
+  const forward = useEffectEvent((code: string, pressed: boolean) => send(code, pressed));
   useEffect(() => {
     if (!active) return undefined;
     const pressed = new Set<string>();
+    // One event at a time, in order. Each forwarded event runs on its own native task, so a release
+    // sent a millisecond after its press could otherwise overtake it: the guest would then hold the
+    // key, and the next press of it would be dropped as a repeat.
+    const queue: [string, boolean][] = [];
+    let busy = false;
+    const pump = (): void => {
+      const next = queue.shift();
+      if (next === undefined) { busy = false; return; }
+      busy = true;
+      void forward(next[0], next[1]).catch(() => undefined).then(pump);
+    };
+    const enqueue = (code: string, down: boolean) => { queue.push([code, down]); if (!busy) pump(); };
     const listener = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.isComposing || event.code === '') return;
       if (event.target instanceof Element && event.target.closest(
@@ -18,10 +30,10 @@ export function useGuestKeyboard(active: boolean, send: (code: string, pressed: 
       event.preventDefault();
       if (down) pressed.add(event.code);
       else pressed.delete(event.code);
-      forward(event.code, down);
+      enqueue(event.code, down);
     };
     const release = () => {
-      for (const code of pressed) forward(code, false);
+      for (const code of pressed) enqueue(code, false);
       pressed.clear();
     };
     const visibilityChanged = () => {

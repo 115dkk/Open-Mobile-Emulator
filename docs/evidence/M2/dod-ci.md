@@ -342,3 +342,28 @@ Int64 핸들을 키로 하는 해시테이블에 담았는데 ConvertTo-Json은 
 이 컨테이너의 pwsh 7.5.2로 `ci/dod/*.ps1`을 파서에 넣어 구문 오류가 없는 것과 같은 모양의 해시테이블이
 직렬화되는 것을 확인했다. 또 GRUB의 Enter도 프레임으로 확인한다(4a05fa8): 메뉴가 사라졌는지 또는 기대한
 항목 수의 하위 메뉴가 떴는지 보고, 사라진 Enter는 다시 누르며, 선택 행이 움직여 있으면 멈춘다.
+
+### 35회 (2026-09-30 10:34~10:45 UTC): GRUB은 확인하며 지났고, 설치기 대화 상자 앞뒤에서 키가 셋에 하나꼴로 떨어졌다
+
+프레임으로 확인하는 GRUB 이동이 동작했다. DOWN을 다섯 번 보내 넷을 움직였고(하나는 닿지 않았고 프레임이
+잡았다) `Installation`(5행)에서 Enter를 확인한 뒤 설치기가 떴다(`run35/key-sequence.txt`). 그다음이 문제였다.
+
+- 파티션 대화 상자 대기 `/partition/`은 그 앞의 안내 상자("UEFI System detected! Please select a partition as
+  an EFI System Partition (ESP). If you don't know what this is, visit BlissOS Documentation … OK",
+  `run35/installer-uefi-message-box.png`)에 먼저 걸렸고, `c`와 Enter는 그 상자로 갔다. 이어 첫 항목에 Enter가
+  들어가 "Error: This is not an EFI System Partition"이 났고 설치기가 스스로 다시 시작했다. 되풀이한 `c`,
+  Enter 가운데 셋째가 목록에 닿아 "Confirm: redirect to cfdisk … cgdisk?"가 떴다(`run35/installer-confirm-cfdisk.png`).
+- 그 뒤 `/label type|gpt/`는 Confirm 문구의 "GPT disks"에 걸려 거짓 양성이 났고, Enter는 세 번 가운데 한 번만
+  닿았다(Confirm → label type은 둘째 시도에서, gpt 선택은 세 번 모두 실패).
+
+키가 떨어지는 까닭은 제품 쪽에 있다. `keyboard.press()`는 keydown과 keyup을 1 ms 안에 내고, 웹뷰 훅은 둘을
+각각 `input_host_key`로 던지며, 그 명령은 저마다 별도의 블로킹 작업으로 돌아 뗌이 누름을 앞지를 수 있다. 그러면
+누름만 게스트에 가서 키가 눌린 채 남고(펌웨어·콘솔의 반복), 같은 키의 다음 누름은 합성기가 반복으로 보고
+버린다. 30회의 첫 글자 유실과 35회의 "셋에 하나"가 이 무늬다. 사람의 누름은 수십 ms 이상이라 겪지 않는다.
+
+고침 둘. 제품: `useGuestKeyboard`가 키 이벤트를 큐에 넣고 앞의 전송이 끝난 뒤 다음을 보낸다(순서 보장,
+`sends one event at a time so a release never overtakes its press` 테스트). 드라이버: 누름과 뗌 사이를
+40 ms 이상 두고(`pressSlow`), 파티션 목록 대기는 "Choose Partition"과 "Create/Modify"를 함께 요구하며 안내
+상자가 15초 넘게 남으면 Enter로 닫고, 되풀이 전송은 떠나려는 화면이 아직 보일 때만 한다(`retryWhen`).
+문구 패턴은 `gpt` 단독을 버리고 "label type", "cfdisk program", 표의 메뉴 막대처럼 화면마다 고유한 것으로 바꿨다.
+전경 도우미의 표본(`others`)도 이제 키 기록에 실린다.
