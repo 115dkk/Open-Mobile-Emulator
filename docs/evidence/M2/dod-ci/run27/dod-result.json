@@ -1,0 +1,174 @@
+{
+  "startedAt": "2026-09-30T09:12:36.109Z",
+  "outcome": "failed",
+  "steps": [
+    {
+      "name": "preflight",
+      "start": "2026-09-30T09:12:36.109Z",
+      "outcome": "passed",
+      "end": "2026-09-30T09:12:37.013Z",
+      "durationMs": 903
+    },
+    {
+      "name": "launch",
+      "start": "2026-09-30T09:12:37.019Z",
+      "outcome": "passed",
+      "end": "2026-09-30T09:12:47.369Z",
+      "durationMs": 10349
+    },
+    {
+      "name": "S1.1-host-check",
+      "start": "2026-09-30T09:12:47.370Z",
+      "outcome": "passed",
+      "end": "2026-09-30T09:12:49.177Z",
+      "durationMs": 1807
+    },
+    {
+      "name": "S1.2-WHPX",
+      "start": "2026-09-30T09:12:49.179Z",
+      "outcome": "passed",
+      "end": "2026-09-30T09:12:50.973Z",
+      "durationMs": 1794
+    },
+    {
+      "name": "S1.4-download",
+      "start": "2026-09-30T09:12:50.974Z",
+      "outcome": "passed",
+      "end": "2026-09-30T09:14:09.729Z",
+      "durationMs": 78755
+    },
+    {
+      "name": "S1.5-installer",
+      "start": "2026-09-30T09:14:09.730Z",
+      "outcome": "failed",
+      "error": "Error: Expected installer partition dialog; refusing blind partition keystrokes\n    at installGuest (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:161:78)\n    at async file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:405:5\n    at async step (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:80:9)\n    at async file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:379:3",
+      "end": "2026-09-30T09:15:41.771Z",
+      "durationMs": 92040
+    },
+    {
+      "name": "cleanup",
+      "start": "2026-09-30T09:15:45.011Z",
+      "outcome": "passed",
+      "end": "2026-09-30T09:16:28.891Z",
+      "durationMs": 43881
+    },
+    {
+      "name": "S1.6-first-boot",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "S1.7-game-install",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "game-launch",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "stop",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "quit",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    }
+  ],
+  "gaps": [
+    "pulled.json has no version fields; installed version can only be read after successful installation.",
+    "WHPX already enabled: product skips S1.2 instead of showing an already-on screen.",
+    "Tray 종료 did not open a menu in this session; closed the main window instead: native helper (1):  \u001b[31;1mException: \u001b[0mD:\\a\\Open-Mobile-Emulator\\Open-Mobile-Emulator\\ci\\dod\\native.ps1:202\u001b[0m\r"
+  ],
+  "measurements": {
+    "downloadMs": 75301,
+    "downloadBytes": 2429550592,
+    "downloadAverageBytesPerSecond": 32264519.621253368
+  },
+  "probeItems": [],
+  "softwareRenderingRetry": false,
+  "utf8Check": "다시 확인",
+  "environment": {
+    "freeBytes": 154719551488,
+    "processes": [],
+    "killed": 0
+  },
+  "game": {
+    "package": "com.epidgames.trickcalrevive",
+    "versionName": null,
+    "versionCode": null
+  },
+  "qemu": {
+    "source": "D:\\a\\Open-Mobile-Emulator\\Open-Mobile-Emulator\\host\\target\\release\\qemu",
+    "sha256": "7139f05b86ee9f946475c0f33b05504d8b76317f7fe7ef0321a5396775576d6a",
+    "version": "QEMU emulator version 11.1.1 (v11.1.1-dirty)\r\nCopyright (c) 2003-2026 Fabrice Bellard and the QEMU Project developers\r\n"
+  },
+  "hostVerdict": {
+    "rows": [
+      {
+        "id": "cpuVirtualization",
+        "status": "ready",
+        "detail": "사용할 수 있습니다."
+      },
+      {
+        "id": "hypervisorPlatform",
+        "status": "ready",
+        "detail": "켜져 있습니다."
+      },
+      {
+        "id": "rebootPending",
+        "status": "ready",
+        "detail": "필요하지 않습니다."
+      },
+      {
+        "id": "whpxAvailable",
+        "status": "ready",
+        "detail": "켜져 있고 실행 준비가 되어 있습니다."
+      },
+      {
+        "id": "qemuPresent",
+        "status": "ready",
+        "detail": "준비되어 있습니다."
+      },
+      {
+        "id": "firmwarePresent",
+        "status": "ready",
+        "detail": "준비되어 있습니다."
+      },
+      {
+        "id": "adbPresent",
+        "status": "ready",
+        "detail": "준비되어 있습니다."
+      },
+      {
+        "id": "diskSpace",
+        "status": "ready",
+        "detail": "설치에 충분한 여유가 있습니다."
+      }
+    ],
+    "ready": true,
+    "inspectedAt": "2026-09-30T09:12:40+00:00"
+  },
+  "error": "Error: Expected installer partition dialog; refusing blind partition keystrokes\n    at installGuest (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:161:78)\n    at async file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:405:5\n    at async step (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:80:9)\n    at async file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:379:3",
+  "finalProcesses": [],
+  "temporaryHome": "D:\\ome-home",
+  "endedAt": "2026-09-30T09:16:28.892Z"
+}

@@ -240,3 +240,24 @@ OCR 확대는 동작했다(`run26/grub-ocr-sequence.txt`, 매 판독에 `scale 2
 경로, `다시 설치`(디스크를 지우고 처음부터)가 뜬다(`installer_failure_blocks_install_completion_until_the_installer_ends_normally`,
 `install-failed` 화면 픽스처와 UI 테스트). 위 실패 캡처처럼 설치기가 살아 있는데 Live로 들어간 경우는
 제품이 알 수 없으므로 그대로 사용자의 판단에 둔다(안내 6번).
+
+### 27회 (2026-09-30 09:06~09:16 UTC): 메뉴는 알아봤고, DOWN 한 번이 여섯 칸을 갔다
+
+바닥줄 신호는 두 번째 프레임(09:14:36)에서 잡혔고 드라이버는 HOME, DOWN 넷, ENTER를 보냈다
+(`run27/grub-key-sequence.txt`). 프레임을 보면 HOME 뒤 선택은 첫 항목, 첫 DOWN 뒤 둘째 항목이었는데
+(`run27/grub-down-1.png`), 둘째 DOWN 뒤에는 마지막 여덟째 항목 `Advanced options ->`에 가 있었다
+(`run27/grub-down-2.png`). 한 번 누른 DOWN이 여섯 칸을 간 것이다. 셋째와 넷째 DOWN은 바닥에서 멈췄고
+ENTER는 그 항목을 열어 부팅 배너로 이어졌다(`run27/after-enter.png`). 드라이버는 다음 화면에서
+`partition`을 못 찾아 "refusing blind partition keystrokes"로 멈췄다(맹목 키 입력 거부가 의도대로 동작).
+
+원인은 키 반복이다. 호스트 쪽 SDL 경로(`native.ps1`의 `Tap`)는 키를 약 180 ms 누르고 떼는데, EDK2의
+USB 키보드 드라이버는 500 ms 넘게 눌린 키를 33 ms마다 반복한다. 러너는 Hyper-V 안의 중첩 가상화라
+QEMU 주 루프나 게스트가 잠깐 멈추면 뗌이 늦게 닿고, 그 한 번이 여섯 칸이 됐다. 개발 PC에서는 같은
+코드가 한 번도 반복을 내지 않았다.
+
+고침. 키를 사람이 치듯 제품 창으로 보낸다. Playwright가 웹뷰에 `keydown`·`keyup`을 넣으면 제품의
+`useGuestKeyboard`가 `input_host_key`로 넘기고, 런타임의 입력 게이트는 게스트가 부팅 완료 신호를 내기
+전에는 프로필에 묶인 키까지 전부 원시 키로 QMP `input-send-event`에 보낸다(`ome-input::Gate::admit`,
+설치기와 설치된 GRUB 모두 그 조건이다). 누름과 뗌이 각각 QMP 명령이라 게스트 펌웨어가 반복을 낼 만큼
+눌린 상태가 생기지 않고, QEMU의 HID 큐는 두 보고를 차례로 내주므로 짧은 눌림도 잃지 않는다. 게이트가
+제품 주창을 전경으로 요구하므로 키 앞에 주창을 전경으로 올린다. `OME_DOD_SDL_KEYS=1`이면 예전 경로다.

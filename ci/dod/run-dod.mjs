@@ -91,8 +91,31 @@ async function qemuWindow() {
     native(['-AppPid', String(app.pid), '-QemuPid', String(s.guest.pid)]); return s.guest.pid;
   }, 30000, 'owned SDL_app');
 }
+// Installer and GRUB keys go the way a person's do: into the product window, whose webview forwards
+// each press and release to QEMU over QMP (`input-send-event`). Before the guest reports its boot
+// marker the ome-input gate passes every key through raw, profile bindings included, so this path is
+// open for the whole installer and for the installed GRUB. The press and the release are separate
+// QMP commands a few milliseconds apart, so the guest firmware never sees a key held long enough to
+// repeat. The host-side SDL path (SendInput into the QEMU window) held each key about 180 ms and the
+// runner's scheduling jitter stretched one DOWN past the firmware's 500 ms typematic threshold
+// (CI run 27: one press moved the selection six rows). OME_DOD_SDL_KEYS=1 restores that path.
+const BROWSER_KEYS = { HOME: 'Home', END: 'End', UP: 'ArrowUp', DOWN: 'ArrowDown', LEFT: 'ArrowLeft', RIGHT: 'ArrowRight', ENTER: 'Enter', TAB: 'Tab', ESC: 'Escape', BACKSPACE: 'Backspace', SPACE: 'Space' };
+async function sdlKeys(pid, label, keySequence, text, waitMs) {
+  log('installer-input', { label, path: 'sdl', ...native(['-AppPid', String(app.pid), '-QemuPid', String(pid), ...(keySequence ? ['-Keys', keySequence] : []), ...(text ? ['-Text', text] : [])]) });
+  await delay(waitMs); await capture(`installer-${label}`, pid);
+}
 async function keys(pid, label, keySequence, text, waitMs = 800) {
-  log('installer-input', { label, ...native(['-AppPid', String(app.pid), '-QemuPid', String(pid), ...(keySequence ? ['-Keys', keySequence] : []), ...(text ? ['-Text', text] : [])]) });
+  if (process.env.OME_DOD_SDL_KEYS === '1') return sdlKeys(pid, label, keySequence, text, waitMs);
+  // The gate admits keys only while the main window is the foreground window.
+  const focus = native(['-AppPid', String(app.pid)]);
+  const sent = [];
+  for (const key of keySequence ? keySequence.split(',') : []) {
+    const browser = BROWSER_KEYS[key];
+    if (!browser) throw new StopRun(`Unknown key ${key}`);
+    await page.keyboard.press(browser); sent.push(browser); await delay(120);
+  }
+  if (text) { await page.keyboard.type(text, { delay: 120 }); sent.push(`text:${text}`); }
+  log('installer-input', { label, path: 'product', hwnd: focus.hwnd, foreground: focus.foreground, sent });
   await delay(waitMs); await capture(`installer-${label}`, pid);
 }
 function recognize(name) {
