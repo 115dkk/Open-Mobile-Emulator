@@ -13,6 +13,15 @@ use thiserror::Error;
 
 const DISCOVERY_TIMEOUT: Duration = Duration::from_secs(5);
 const DISCOVERY_INTERVAL: Duration = Duration::from_millis(100);
+/// How long the popup stays hidden after its first placement before the host reveals it.
+///
+/// Showing the freshly created GL window while QEMU presents its first frames froze the
+/// presentation in three of four product runs (first show 0.8 to 1.0 s after the guest was
+/// started; `docs/evidence/M2/embedded-display-freeze.md`, 2026-09-30 완료 실행 7~10회차), while
+/// every probe that showed it 1.7 s or later after creation stayed live. The first geometry is
+/// therefore sent hidden, so QEMU applies position and size while the window is still hidden, and
+/// the reveal follows on a later tick.
+const REVEAL_DELAY: Duration = Duration::from_millis(2000);
 const SDL_WINDOW_CLASS: &str = "SDL_app";
 
 /// A rectangle in physical pixels; the frame (host client area or screen) is stated per use.
@@ -206,6 +215,10 @@ pub struct GuestWindowHost {
     overlay: Option<WindowHandle>,
     last_rect: Option<Rect>,
     visible: bool,
+    /// Whether the popup may be shown yet; false from attach until [`REVEAL_DELAY`] has passed
+    /// since the first placement.
+    revealed: bool,
+    reveal_at: Option<Instant>,
     last_discovery_time: Option<Duration>,
     guest_dpi_before_attach: Option<u32>,
 }
@@ -224,6 +237,8 @@ impl GuestWindowHost {
     pub fn attach(&mut self, target: HostingTarget) -> Result<(), HostingIssue> {
         self.detach()?;
         self.visible = false;
+        self.revealed = false;
+        self.reveal_at = None;
         self.last_discovery_time = None;
         self.guest_dpi_before_attach = None;
         if target.parent_window == 0 || target.guest_process_id == 0 {
@@ -247,7 +262,7 @@ impl GuestWindowHost {
     }
 
     /// Remembers a physical rectangle of the owner's client area, puts the popup in its Z-order
-    /// place, and returns the visible geometry the caller must send over QMP.
+    /// place, and returns the geometry the caller must send over QMP.
     ///
     /// The rectangle is converted to screen pixels with the owner's current client origin, so
     /// calling again after the owner moves yields the corrected geometry. A visible registered
@@ -255,6 +270,11 @@ impl GuestWindowHost {
     /// the popup goes to the top of the non-topmost band. An empty rectangle yields a hidden
     /// one-pixel geometry, since QEMU rejects a zero size. Returns `Ok(None)` without a native
     /// operation when no live guest is attached; the rectangle is still kept for the next attach.
+    ///
+    /// Until [`REVEAL_DELAY`] has passed since the first placement after an attach, the geometry
+    /// is returned hidden (`visible: false`): QEMU applies position and size while the window is
+    /// still hidden, and [`GuestWindowHost::resync`] returns the visible geometry once the delay
+    /// is over.
     pub fn place(&mut self, rect: Rect) -> Result<Option<DisplayWindowGeometry>, HostingIssue> {
         self.last_rect = Some(rect);
         self.visible = true;
@@ -263,7 +283,11 @@ impl GuestWindowHost {
         };
         let screen = screen_rect(guest.owner, rect)?;
         self.apply_z_order(guest)?;
-        display_geometry(screen, true).map(Some)
+        if !self.revealed {
+            self.reveal_at
+                .get_or_insert_with(|| Instant::now() + REVEAL_DELAY);
+        }
+        display_geometry(screen, self.revealed).map(Some)
     }
 
     /// Registers the native overlay window used as the popup's Z-order predecessor.
@@ -277,7 +301,8 @@ impl GuestWindowHost {
     /// origin, so a moved owner is caught here as well. Returns `Some(expected)` for the caller to
     /// resend when the popup's window rectangle differs, and `None` when it matches, when the host
     /// keeps the popup hidden, or when nothing is attached. Re-applies the Z-order below a visible
-    /// overlay.
+    /// overlay. The first call after [`REVEAL_DELAY`] has passed since the first placement
+    /// returns the visible geometry that reveals the popup.
     pub fn resync(&mut self) -> Result<Option<DisplayWindowGeometry>, HostingIssue> {
         let Some(rect) = self.last_rect else {
             return Ok(None);
@@ -292,6 +317,13 @@ impl GuestWindowHost {
                 .map_err(|_| HostingIssue::Platform)?;
         }
         if !self.visible {
+            return Ok(None);
+        }
+        if !self.revealed {
+            if self.reveal_at.is_some_and(|at| Instant::now() >= at) {
+                self.revealed = true;
+                return display_geometry(screen_rect(guest.owner, rect)?, true).map(Some);
+            }
             return Ok(None);
         }
         let expected = display_geometry(screen_rect(guest.owner, rect)?, true)?;
@@ -324,7 +356,9 @@ impl GuestWindowHost {
     /// Returns the last geometry with `visible: true` for the caller to send.
     ///
     /// The host itself never shows the window; QEMU shows it without activation. Returns
-    /// `Ok(None)` when no live guest is attached or no rectangle is known yet.
+    /// `Ok(None)` when no live guest is attached or no rectangle is known yet. Before the first
+    /// reveal (see [`GuestWindowHost::place`]) the geometry stays hidden and
+    /// [`GuestWindowHost::resync`] reveals the popup later.
     pub fn show(&mut self) -> Result<Option<DisplayWindowGeometry>, HostingIssue> {
         self.visible = true;
         self.current_geometry()
@@ -412,7 +446,7 @@ impl GuestWindowHost {
         let Some(guest) = self.live_guest() else {
             return Ok(None);
         };
-        let visible = self.visible;
+        let visible = self.visible && self.revealed;
         display_geometry(screen_rect(guest.owner, rect)?, visible).map(Some)
     }
 
