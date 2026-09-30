@@ -181,8 +181,9 @@ function installerScreen(text) {
   if (has('error') || has('this is not an efi system partition')) return 'error';
   if (has('ota')) return 'ota-confirm';
   if (has('grub2') || has('choose efi boot')) return 'efi-boot-chooser';
-  if (has('confirm') && has('format')) return 'confirm-format';
-  if (has('question') && has('label')) return 'label-question';
+  // Console OCR reads Confirm as "Cont Irm", Question as "Uuestion" and Would as "Uould" (CI run 39).
+  if (/con[ft][il]rm/.test(words) && has('format')) return 'confirm-format';
+  if (/[qu]uestion/.test(words) && (has('label') || has('customize') || has('drive name'))) return 'label-question';
   if (has('installing') || has('expect to write')) return 'installing';
   return 'unknown';
 }

@@ -408,3 +408,19 @@ type: EFI System, MBR partition scheme, Intel Fast Flash, BIOS boot, …"이고 
 
 고침(드라이버). 목록 판독에서 `efisyste`와 `mbrpartitionscheme`의 위치를 비교해 EFI가 앞이면 HOME, Enter,
 아니면 HOME, DOWN, Enter를 보내고, 표에 EFI System이 없으면 다음 시도에서 순서를 바꾼다(`installer-type-order`).
+
+### 39회 (2026-09-30 11:31~11:42 UTC): cfdisk를 끝내고 설치기 대화 상자 순환에 들어갔다
+
+키 유실 없이 cfdisk 전체가 첫 시도에 지났다(`run39/key-sequence.txt`). 형식 목록 판독에서 EFI가 MBR보다 앞이라
+HOME, Enter를 보냈고 표는 `/dev/vda1 512M EFI System`, 둘째 파티션은 `/dev/vda2 31.5G Linux filesystem`, `W`와
+`yes`로 "The partition table has been altered"까지 갔다(`run39/cfdisk-table-written.png`). `q` 뒤 설치기가 다시
+시작해 안내 상자와 ESP 선택 목록이 떴고, 순환은 `esp-chooser`(vda1), `filesystem-for-esp`(fat32,
+`run39/installer-choose-filesystem-vda1.png`)를 알아보고 행동했다. 그다음 "Question: Would you like to customize
+the formatted drive name? … press Enter to skip: ESP"(`run39/installer-label-question.png`)를 분류하지 못해 20초
+뒤 멈췄다. 판독이 Question을 "Uuestion", Would를 "Uould"로 읽었고 규칙은 `question`과 `label`을 함께 요구했는데
+이 문구에는 label이 없다.
+
+고침(드라이버, 러너에서 미검증). 분류 규칙이 `[qu]uestion`과 `label|customize|drive name`으로 `label-question`을,
+`con[ft][il]rm`(35회의 "Cont Irm")과 `format`으로 `confirm-format`을 알아본다. 이 회차 뒤 사용자 신호로 개발 PC에
+공을 넘겼다(`handoff-20260930.md`). 남은 순환(포맷 확인, 시스템 파티션 ext4, OTA 거부, GRUB2, 복사, 완료)과
+첫 부팅, 앱 설치, 게임 실행은 드라이버가 아직 실제로 지나 본 적이 없다.

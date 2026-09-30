@@ -1,0 +1,174 @@
+{
+  "startedAt": "2026-09-30T11:36:51.577Z",
+  "outcome": "failed",
+  "steps": [
+    {
+      "name": "preflight",
+      "start": "2026-09-30T11:36:51.577Z",
+      "outcome": "passed",
+      "end": "2026-09-30T11:36:52.265Z",
+      "durationMs": 686
+    },
+    {
+      "name": "launch",
+      "start": "2026-09-30T11:36:52.270Z",
+      "outcome": "passed",
+      "end": "2026-09-30T11:37:02.289Z",
+      "durationMs": 10019
+    },
+    {
+      "name": "S1.1-host-check",
+      "start": "2026-09-30T11:37:02.290Z",
+      "outcome": "passed",
+      "end": "2026-09-30T11:37:03.860Z",
+      "durationMs": 1570
+    },
+    {
+      "name": "S1.2-WHPX",
+      "start": "2026-09-30T11:37:03.861Z",
+      "outcome": "passed",
+      "end": "2026-09-30T11:37:05.411Z",
+      "durationMs": 1550
+    },
+    {
+      "name": "S1.4-download",
+      "start": "2026-09-30T11:37:05.411Z",
+      "outcome": "passed",
+      "end": "2026-09-30T11:37:54.570Z",
+      "durationMs": 49158
+    },
+    {
+      "name": "S1.5-installer",
+      "start": "2026-09-30T11:37:54.571Z",
+      "outcome": "failed",
+      "error": "Error: Unknown installer screen for 20 seconds: made by androi d—x86 project , uould you modif ied by bl isslabs & contributors uuestion i ike to customize the formatted drive name ? you can change it here or press enter to skip: esp 0k >\n    at installGuest (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:426:81)\n    at async file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:606:5\n    at async step (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:82:9)\n    at async file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:580:3",
+      "end": "2026-09-30T11:41:12.753Z",
+      "durationMs": 198182
+    },
+    {
+      "name": "cleanup",
+      "start": "2026-09-30T11:41:14.476Z",
+      "outcome": "passed",
+      "end": "2026-09-30T11:41:30.780Z",
+      "durationMs": 16304
+    },
+    {
+      "name": "S1.6-first-boot",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "S1.7-game-install",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "game-launch",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "stop",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "quit",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    }
+  ],
+  "gaps": [
+    "pulled.json has no version fields; installed version can only be read after successful installation.",
+    "WHPX already enabled: product skips S1.2 instead of showing an already-on screen."
+  ],
+  "measurements": {
+    "downloadMs": 45249,
+    "downloadBytes": 2429550592,
+    "downloadAverageBytesPerSecond": 53692912.373754114
+  },
+  "probeItems": [],
+  "softwareRenderingRetry": false,
+  "utf8Check": "다시 확인",
+  "environment": {
+    "freeBytes": 232942829568,
+    "killed": 0,
+    "processes": []
+  },
+  "game": {
+    "package": "com.epidgames.trickcalrevive",
+    "versionName": null,
+    "versionCode": null
+  },
+  "qemu": {
+    "source": "D:\\a\\Open-Mobile-Emulator\\Open-Mobile-Emulator\\host\\target\\release\\qemu",
+    "sha256": "7139f05b86ee9f946475c0f33b05504d8b76317f7fe7ef0321a5396775576d6a",
+    "version": "QEMU emulator version 11.1.1 (v11.1.1-dirty)\r\nCopyright (c) 2003-2026 Fabrice Bellard and the QEMU Project developers\r\n"
+  },
+  "hostVerdict": {
+    "rows": [
+      {
+        "id": "cpuVirtualization",
+        "status": "ready",
+        "detail": "사용할 수 있습니다."
+      },
+      {
+        "id": "hypervisorPlatform",
+        "status": "ready",
+        "detail": "켜져 있습니다."
+      },
+      {
+        "id": "rebootPending",
+        "status": "ready",
+        "detail": "필요하지 않습니다."
+      },
+      {
+        "id": "whpxAvailable",
+        "status": "ready",
+        "detail": "켜져 있고 실행 준비가 되어 있습니다."
+      },
+      {
+        "id": "qemuPresent",
+        "status": "ready",
+        "detail": "준비되어 있습니다."
+      },
+      {
+        "id": "firmwarePresent",
+        "status": "ready",
+        "detail": "준비되어 있습니다."
+      },
+      {
+        "id": "adbPresent",
+        "status": "ready",
+        "detail": "준비되어 있습니다."
+      },
+      {
+        "id": "diskSpace",
+        "status": "ready",
+        "detail": "설치에 충분한 여유가 있습니다."
+      }
+    ],
+    "ready": true,
+    "inspectedAt": "2026-09-30T11:36:55+00:00"
+  },
+  "error": "Error: Unknown installer screen for 20 seconds: made by androi d—x86 project , uould you modif ied by bl isslabs & contributors uuestion i ike to customize the formatted drive name ? you can change it here or press enter to skip: esp 0k >\n    at installGuest (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:426:81)\n    at async file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:606:5\n    at async step (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:82:9)\n    at async file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:580:3",
+  "forcedCleanup": true,
+  "finalProcesses": [],
+  "temporaryHome": "D:\\ome-home",
+  "endedAt": "2026-09-30T11:41:30.781Z"
+}
