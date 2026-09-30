@@ -196,7 +196,8 @@ function installerScreen(text) {
   // sentence identifies the question as well.
   if ((/[qwu]ues[tu]i?on/.test(words) && (has('label') || has('customize') || has('drive name')))
     || has('customize the formatted') || has('press enter to skip')) return 'label-question';
-  if (has('installing') || has('expect to write')) return 'installing';
+  // "Expect to write 2307771 KB..." reads as "urite" on the dev PC (round 21).
+  if (has('installing') || /expectto[uw]rite|\d{5,}kb/.test(words)) return 'installing';
   return 'unknown';
 }
 async function installerPid(pid) {
