@@ -4,7 +4,7 @@ param(
  [int]$AppPid, [int]$QemuPid, [string]$Shot,
  [int]$Width=0, [int]$Height=0, [int]$X=80, [int]$Y=60,
  [switch]$Quit, [switch]$Inventory, [string]$HomePath,
- [string]$Keys, [string]$Text, [string]$FilePath, [switch]$GameSelection,
+ [string]$Keys, [string]$Text, [string]$FilePath, [switch]$GameSelection, [string]$Tap,
  [int]$KillOwnedPid, [string]$ExpectedCreation, [switch]$WaitInstaller, [switch]$Desktop, [switch]$Close,
  [switch]$Foreground, [switch]$Highlight
 )
@@ -90,6 +90,17 @@ public class W {
   if(SendInput(1,new[]{input},Marshal.SizeOf<INPUT>())!=1) throw new Exception("SendInput failed");
  }
  public static void Tap(ushort vk) {Key(vk);System.Threading.Thread.Sleep(180);Key(vk,true);System.Threading.Thread.Sleep(220);}
+ // A left click at a screen point (physical pixels): the cursor moves there, then the button goes
+ // down and up through SendInput, the way a person clicks the embedded guest window.
+ public static void ClickAt(int x,int y) {
+  if(!SetCursorPos(x,y)) throw new Exception("SetCursorPos failed");
+  System.Threading.Thread.Sleep(120);
+  var down=new INPUT {type=0,u=new UNION {mi=new MOUSEINPUT {flags=2}}};
+  if(SendInput(1,new[]{down},Marshal.SizeOf<INPUT>())!=1) throw new Exception("Mouse down failed");
+  System.Threading.Thread.Sleep(90);
+  var up=new INPUT {type=0,u=new UNION {mi=new MOUSEINPUT {flags=4}}};
+  if(SendInput(1,new[]{up},Marshal.SizeOf<INPUT>())!=1) throw new Exception("Mouse up failed");
+ }
  public static void Type(string text) {foreach(char c in text) {
   short k=VkKeyScan(c);if(k==-1 || (k>>8)>1) throw new Exception("Unsupported keyboard character");
   bool shift=(k&256)!=0;if(shift)Key(0x10);Tap((ushort)(k&255));if(shift)Key(0x10,true);
@@ -225,6 +236,22 @@ if ($FilePath) {
  while([W]::IsWindowVisible($dialog) -and [DateTime]::UtcNow -lt $until){Start-Sleep -Milliseconds 100}
  if([W]::IsWindowVisible($dialog)){throw 'File dialog did not close'}
  @{action='file-dialog';closed=$true;privateSelection=[bool]$GameSelection;method='win32'} | ConvertTo-Json -Compress
+ exit
+}
+if ($Tap) {
+ # A tap on the guest at a fraction of the owned SDL window (`fx,fy`, 0 to 1). SDL turns the click's
+ # position into usb-tablet absolute coordinates over the window's client area, so a fraction of the
+ # window is the same fraction of the guest screen whatever the stage's size or scaling. The popup
+ # takes the click itself, as it does a person's; the owner window is neither raised nor focused.
+ if (-not $QemuPid) { throw 'Tap needs -QemuPid' }
+ $parts = $Tap.Split(','); if ($parts.Count -ne 2) { throw "Tap wants 'fx,fy', got '$Tap'" }
+ $culture = [Globalization.CultureInfo]::InvariantCulture
+ $fx = [double]::Parse($parts[0], $culture); $fy = [double]::Parse($parts[1], $culture)
+ if ($fx -lt 0 -or $fx -gt 1 -or $fy -lt 0 -or $fy -gt 1) { throw "Tap fraction out of range: $Tap" }
+ $r=[W+R]::new();[void][W]::GetWindowRect($h,[ref]$r)
+ $x=[int][Math]::Round($r.L + $fx * ($r.Rt - $r.L)); $y=[int][Math]::Round($r.T + $fy * ($r.B - $r.T))
+ [W]::ClickAt($x,$y)
+ @{action='tap';hwnd=$h.ToInt64();pid=[W]::Pid($h);x=$x;y=$y;rect=$r;fraction=@{x=$fx;y=$fy}} | ConvertTo-Json -Depth 3 -Compress
  exit
 }
 if ($Keys -or $Text) {

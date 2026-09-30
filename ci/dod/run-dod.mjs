@@ -153,11 +153,12 @@ async function keys(pid, label, keySequence, text, waitMs = 800) {
   log('installer-input', { label, path: 'product', settled: focus.settled, foreground: focus.foreground, others: focus.others, sent });
   await delay(waitMs); await capture(`installer-${label}`, pid);
 }
-function recognize(name) {
-  const r = spawnSync('powershell.exe', ['-NoProfile', '-File', path.join(directory, 'ocr.ps1'), '-Image', path.join(output, 'shots', name + '.png')], { encoding: 'buffer', timeout: 30000 });
+function recognizeImage(name, file) {
+  const r = spawnSync('powershell.exe', ['-NoProfile', '-File', path.join(directory, 'ocr.ps1'), '-Image', file], { encoding: 'buffer', timeout: 30000 });
   if (r.status !== 0) throw new StopRun(`Installer OCR unavailable: ${r.stderr?.toString('utf8')}`);
-  const value = JSON.parse(r.stdout.toString('utf8')); log('installer-ocr', { name, ...value }); return value.text;
+  const value = JSON.parse(r.stdout.toString('utf8')); const { lines, ...rest } = value; log('installer-ocr', { name, ...rest }); return value;
 }
+const recognize = name => recognizeImage(name, path.join(output, 'shots', name + '.png')).text;
 const installerText = text => text.toLowerCase().replace(/\s+/g, ' ').trim();
 function installerScreen(text) {
   // OCR sometimes splits a word ("fi lesystem", "Bl issOS") across text boxes.
@@ -488,7 +489,24 @@ async function guestScreenshot(name) {
   const before = new Set(fs.existsSync(shots) ? fs.readdirSync(shots) : []);
   await click('스크린샷');
   const file = await until(() => fs.existsSync(shots) && fs.readdirSync(shots).find(n => n.endsWith('.png') && !before.has(n)), 15000, 'product screenshot');
-  fs.copyFileSync(path.join(shots, file), path.join(output, name + '.png'));
+  const copy = path.join(output, name + '.png'); fs.copyFileSync(path.join(shots, file), copy); return copy;
+}
+// The guest's own notification permission prompt (Android 13 asks on the game's first start) is the
+// one dialog the driver answers, with Allow, as a person does: M0 recorded that a declined prompt
+// later cost the game its download service (docs/evidence/M0/findings-20260926.md 3). The button is
+// read from the guest screenshot and tapped through the embedded guest window as a mouse click.
+// Nothing else on the guest screen is touched: no account creation, no game interaction.
+async function answerPermissionPrompt(name, file) {
+  const seen = recognizeImage(name, file);
+  const words = seen.text.toLowerCase().replace(/\s+/g, '');
+  if (!words.includes('sendyounotifications')) return false;
+  const button = (seen.lines ?? []).find(line => /^a[il1]+ow$/i.test(line.text.trim()));
+  if (!button) { log('permission-prompt-unreadable', { name, lines: seen.lines }); return false; }
+  const at = { x: (button.x + button.w / 2) / seen.width, y: (button.y + button.h / 2) / seen.height };
+  const pid = await qemuWindow();
+  const tap = native(['-AppPid', String(app.pid), '-QemuPid', String(pid), '-Tap', `${at.x.toFixed(4)},${at.y.toFixed(4)}`]);
+  log('permission-prompt', { name, button, at, ...tap });
+  await delay(3000); await guestScreenshot(`${name}-after-allow`); return true;
 }
 // Whole-run watchdog: write the result and end the driver instead of idling until the job timeout.
 const deadlineMinutes = Number(process.env.OME_DOD_DEADLINE_MIN ?? 100);
@@ -670,11 +688,16 @@ try {
     const start = Date.now();
     await page.getByRole('row').filter({ hasText: result.game.package }).getByRole('button', { name: '실행', exact: true }).click(); await rail('무대');
     // No account creation or unapproved game interaction. Fifteen minutes of product captures
-    // document whether a consent/resource-download dialog blocks reaching the title screen.
+    // document whether a consent/resource-download dialog blocks reaching the title screen. The
+    // OS's notification permission prompt is answered (answerPermissionPrompt); dev PC round 25 sat
+    // on it for the whole observation.
+    let permissionAnswers = 0;
     for (let minute = 0; minute <= 15; minute++) {
       if (minute) await delay(60000);
-      await snapshot(); await guestScreenshot(`game-${String(minute).padStart(2, '0')}`);
+      await snapshot(); const name = `game-${String(minute).padStart(2, '0')}`; const file = await guestScreenshot(name);
+      if (permissionAnswers < 2 && await answerPermissionPrompt(name, file)) permissionAnswers++;
     }
+    result.measurements.permissionPromptAnswers = permissionAnswers;
     result.measurements.gameLaunchObservationMs = Date.now() - start;
     result.game.visualReviewRequired = true; await capture('13-game-final-stage');
   });

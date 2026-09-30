@@ -52,6 +52,20 @@ try {
         $engine = [Windows.Media.Ocr.OcrEngine]::TryCreateFromLanguage([Windows.Globalization.Language]::new('en-US'))
         if ($null -eq $engine) { throw 'Built-in English OCR is unavailable; cannot assert installer completion' }
         $result = Wait-WinRt ($engine.RecognizeAsync($bitmap)) ([Windows.Media.Ocr.OcrResult])
-        @{text=$result.Text; language=$engine.RecognizerLanguage.LanguageTag; width=$width; height=$height; scale=$scale} | ConvertTo-Json -Compress
+        # Each recognized line with its box in the unscaled image's pixels (the union of its words), so
+        # a caller can aim at a button it reads (the guest's notification permission prompt, dev PC
+        # round 25). The engine gives boxes per word only.
+        $lines = @($result.Lines | ForEach-Object {
+            $x0 = [double]::MaxValue; $y0 = [double]::MaxValue; $x1 = 0.0; $y1 = 0.0
+            foreach ($word in $_.Words) {
+                $box = $word.BoundingRect
+                if ($box.X -lt $x0) { $x0 = $box.X }
+                if ($box.Y -lt $y0) { $y0 = $box.Y }
+                if (($box.X + $box.Width) -gt $x1) { $x1 = $box.X + $box.Width }
+                if (($box.Y + $box.Height) -gt $y1) { $y1 = $box.Y + $box.Height }
+            }
+            @{text=$_.Text; x=[int][Math]::Floor($x0 / $scale); y=[int][Math]::Floor($y0 / $scale); w=[int][Math]::Ceiling(($x1 - $x0) / $scale); h=[int][Math]::Ceiling(($y1 - $y0) / $scale)}
+        })
+        @{text=$result.Text; lines=$lines; language=$engine.RecognizerLanguage.LanguageTag; width=$width; height=$height; scale=$scale} | ConvertTo-Json -Compress -Depth 4
     } finally { $bitmap.Dispose() }
 } finally { $stream.Dispose() }
