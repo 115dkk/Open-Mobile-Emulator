@@ -38,10 +38,10 @@ export const HOST_STATUS_TONE: Readonly<Record<HostStatus, StatusTone>> = {
 const HOST_GROUPS: readonly { readonly label: string; readonly ids: readonly HostCheckId[] }[] = [
   { label: 'CPU 가상화', ids: ['cpuVirtualization'] },
   { label: 'Windows 하이퍼바이저 플랫폼', ids: ['hypervisorPlatform', 'whpxAvailable'] },
-  { label: '다시 시작 대기', ids: ['rebootPending'] },
+  { label: 'Windows 다시 시작', ids: ['rebootPending'] },
   { label: '가상 머신 구성 요소', ids: ['qemuPresent', 'firmwarePresent'] },
   { label: '앱 설치 도구', ids: ['adbPresent'] },
-  { label: '디스크 여유 공간', ids: ['diskSpace'] },
+  { label: '디스크 공간', ids: ['diskSpace'] },
 ];
 
 const STATUS_RANK: Readonly<Record<HostStatus, number>> = { ready: 0, attention: 1, blocked: 2 };
@@ -64,8 +64,9 @@ export function hostLines(rows: readonly HostRow[]): HostLine[] {
       if (worst === undefined || STATUS_RANK[row.status] > STATUS_RANK[worst.status]) worst = row;
     }
     if (worst === undefined) continue;
-    // Nothing waiting for a restart is not an achievement; the mockup draws it dimmed.
-    const tone = worst.id === 'rebootPending' && worst.status === 'ready' ? 'muted' : HOST_STATUS_TONE[worst.status];
+    // Every ready row is green, the restart row included: a grey dot beside "필요하지 않습니다" read as
+    // something still pending (user decision 2026-09-30).
+    const tone = HOST_STATUS_TONE[worst.status];
     lines.push({ label: group.label, status: worst.status, tone, detail: worst.detail });
   }
   return lines;

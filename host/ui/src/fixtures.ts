@@ -116,18 +116,18 @@ const GIB = 1024 * 1024 * 1024;
 const MIB = 1024 * 1024;
 
 export const hostRowsReady: readonly HostRow[] = [
-  { id: 'cpuVirtualization', status: 'ready', detail: '프로세서 가상화를 사용할 수 있습니다.' },
-  { id: 'hypervisorPlatform', status: 'attention', detail: 'Windows 하이퍼바이저 플랫폼이 꺼져 있습니다. 다음 단계에서 동의하면 켭니다.' },
-  { id: 'rebootPending', status: 'ready', detail: '적용을 기다리는 다시 시작 작업이 없습니다.' },
-  { id: 'whpxAvailable', status: 'attention', detail: '가상화 실행 기능이 아직 준비되지 않았습니다. Windows 하이퍼바이저 플랫폼을 켜십시오.' },
-  { id: 'qemuPresent', status: 'ready', detail: '가상 머신 실행 파일을 찾았습니다.' },
-  { id: 'firmwarePresent', status: 'ready', detail: '가상 머신 시작에 필요한 펌웨어를 찾았습니다.' },
-  { id: 'adbPresent', status: 'ready', detail: '운영체제 앱 관리 도구를 찾았습니다.' },
-  { id: 'diskSpace', status: 'ready', detail: '운영체제 설치에 필요한 저장 공간이 있습니다.' },
+  { id: 'cpuVirtualization', status: 'ready', detail: '사용할 수 있습니다.' },
+  { id: 'hypervisorPlatform', status: 'attention', detail: '꺼져 있습니다. 다음 단계에서 동의하면 켭니다.' },
+  { id: 'rebootPending', status: 'ready', detail: '필요하지 않습니다.' },
+  { id: 'whpxAvailable', status: 'attention', detail: '아직 실행 준비가 되지 않았습니다. 다음 단계에서 켜면 사용할 수 있습니다.' },
+  { id: 'qemuPresent', status: 'ready', detail: '준비되어 있습니다.' },
+  { id: 'firmwarePresent', status: 'ready', detail: '준비되어 있습니다.' },
+  { id: 'adbPresent', status: 'ready', detail: '준비되어 있습니다.' },
+  { id: 'diskSpace', status: 'ready', detail: '설치에 충분한 여유가 있습니다.' },
 ];
 
 export const hostRowsBlocked: readonly HostRow[] = hostRowsReady.map((row): HostRow => row.id === 'diskSpace'
-  ? { id: 'diskSpace', status: 'blocked', detail: '저장 공간이 40GB보다 적습니다. 파일을 정리한 뒤 다시 확인하십시오.' }
+  ? { id: 'diskSpace', status: 'blocked', detail: '여유가 40 GB보다 적습니다. 파일을 정리한 뒤 다시 확인하십시오.' }
   : row);
 
 export const sampleProfiles: readonly GuestImageSummary[] = [

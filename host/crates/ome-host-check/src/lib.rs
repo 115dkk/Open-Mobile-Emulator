@@ -205,6 +205,11 @@ pub struct HostReadiness;
 impl HostReadiness {
     /// Inspects every probe and returns all rows even when individual reads fail.
     ///
+    /// Each detail is the verdict for its row and never repeats the row's label: the wizard shows
+    /// them as `Windows 다시 시작 / 필요하지 않습니다.` and `디스크 공간 / 설치에 충분한 여유가
+    /// 있습니다.` (user decision 2026-09-30). Grouped rows (hypervisor platform with WHPX, QEMU with
+    /// firmware) share one label, so their sentences read under it as well.
+    ///
     /// CPU virtualization off, missing virtual-machine executable or firmware, less than 40 GiB,
     /// and an enabled feature with a pending reboot are blocking. A disabled feature, missing
     /// optional debugging tool, and unknown feature state require attention.
@@ -220,81 +225,81 @@ impl HostReadiness {
                 HostCheckId::CpuVirtualization,
                 probe.cpu_virtualization(),
                 HostStatus::Blocked,
-                "프로세서 가상화를 사용할 수 있습니다.",
-                "프로세서 가상화가 꺼져 있습니다. 컴퓨터의 펌웨어 설정에서 켠 뒤 다시 확인하십시오.",
-                "프로세서 가상화 상태를 확인하지 못했습니다. 컴퓨터를 다시 시작한 뒤 다시 확인하십시오.",
+                "사용할 수 있습니다.",
+                "꺼져 있습니다. 컴퓨터의 펌웨어(BIOS) 설정에서 켠 뒤 다시 확인하십시오.",
+                "상태를 확인하지 못했습니다. 컴퓨터를 다시 시작한 뒤 다시 확인하십시오.",
             ),
             match feature {
                 Ok(FeatureState::Enabled) => row(
                     HostCheckId::HypervisorPlatform,
                     HostStatus::Ready,
-                    "Windows 하이퍼바이저 플랫폼이 켜져 있습니다.",
+                    "켜져 있습니다.",
                 ),
                 Ok(FeatureState::Disabled) => row(
                     HostCheckId::HypervisorPlatform,
                     HostStatus::Attention,
-                    "Windows 하이퍼바이저 플랫폼이 꺼져 있습니다. 다음 단계에서 동의하면 켭니다.",
+                    "꺼져 있습니다. 다음 단계에서 동의하면 켭니다.",
                 ),
                 Ok(FeatureState::Absent) => row(
                     HostCheckId::HypervisorPlatform,
                     HostStatus::Attention,
-                    "Windows 하이퍼바이저 플랫폼 구성 요소가 없습니다. 다음 단계에서 동의하면 설치합니다.",
+                    "구성 요소가 설치되어 있지 않습니다. 다음 단계에서 동의하면 설치합니다.",
                 ),
                 Ok(FeatureState::Unknown) | Err(_) => row(
                     HostCheckId::HypervisorPlatform,
                     HostStatus::Attention,
-                    "Windows 하이퍼바이저 플랫폼 상태를 확인하지 못했습니다. Windows 기능 설정을 확인하십시오.",
+                    "상태를 확인하지 못했습니다. Windows 기능 설정을 확인하십시오.",
                 ),
             },
             match reboot {
                 Ok(true) if feature_enabled => row(
                     HostCheckId::RebootPending,
                     HostStatus::Blocked,
-                    "기능 변경을 적용하려면 다시 시작해야 합니다. 작업을 저장하고 컴퓨터를 다시 시작하십시오.",
+                    "기능을 적용하려면 지금 필요합니다. 작업을 저장한 뒤 컴퓨터를 다시 시작하십시오.",
                 ),
                 Ok(true) => row(
                     HostCheckId::RebootPending,
                     HostStatus::Attention,
-                    "Windows가 다시 시작을 기다리고 있습니다. 설정을 진행하기 전에 다시 시작하는 편이 좋습니다.",
+                    "Windows가 다시 시작을 기다리고 있습니다. 계속하기 전에 다시 시작하는 편이 좋습니다.",
                 ),
                 Ok(false) => row(
                     HostCheckId::RebootPending,
                     HostStatus::Ready,
-                    "적용을 기다리는 다시 시작 작업이 없습니다.",
+                    "필요하지 않습니다.",
                 ),
                 Err(_) => row(
                     HostCheckId::RebootPending,
                     HostStatus::Attention,
-                    "다시 시작이 필요한지 확인하지 못했습니다. Windows 업데이트 상태를 확인하십시오.",
+                    "필요한지 확인하지 못했습니다. Windows 업데이트 상태를 확인하십시오.",
                 ),
             },
             match probe.whpx_available() {
                 Ok(true) => row(
                     HostCheckId::WhpxAvailable,
                     HostStatus::Ready,
-                    "가상화 실행 기능을 사용할 수 있습니다.",
+                    "켜져 있고 실행 준비가 되어 있습니다.",
                 ),
                 Ok(false) if feature_enabled => row(
                     HostCheckId::WhpxAvailable,
                     HostStatus::Blocked,
-                    "가상화 실행 기능을 사용할 수 없습니다. 컴퓨터를 다시 시작한 뒤 다시 확인하십시오.",
+                    "켜져 있지만 아직 실행할 수 없습니다. 컴퓨터를 다시 시작한 뒤 다시 확인하십시오.",
                 ),
                 Ok(false) => row(
                     HostCheckId::WhpxAvailable,
                     HostStatus::Attention,
-                    "가상화 실행 기능이 아직 준비되지 않았습니다. Windows 하이퍼바이저 플랫폼을 켜십시오.",
+                    "아직 실행 준비가 되지 않았습니다. 다음 단계에서 켜면 사용할 수 있습니다.",
                 ),
                 Err(_) => row(
                     HostCheckId::WhpxAvailable,
                     HostStatus::Attention,
-                    "가상화 실행 기능을 확인하지 못했습니다. 컴퓨터를 다시 시작한 뒤 다시 확인하십시오.",
+                    "실행 준비 상태를 확인하지 못했습니다. 컴퓨터를 다시 시작한 뒤 다시 확인하십시오.",
                 ),
             },
             match probe.qemu() {
                 Ok(Some(_)) => row(
                     HostCheckId::QemuPresent,
                     HostStatus::Ready,
-                    "가상 머신 실행 파일을 찾았습니다.",
+                    "준비되어 있습니다.",
                 ),
                 Ok(None) => row(
                     HostCheckId::QemuPresent,
@@ -311,42 +316,42 @@ impl HostReadiness {
                 HostCheckId::FirmwarePresent,
                 probe.firmware(),
                 HostStatus::Blocked,
-                "가상 머신 시작에 필요한 펌웨어를 찾았습니다.",
-                "가상 머신 시작에 필요한 펌웨어가 없습니다. 앱을 다시 설치하십시오.",
-                "가상 머신 시작에 필요한 펌웨어를 확인하지 못했습니다. 앱을 다시 설치한 뒤 다시 확인하십시오.",
+                "준비되어 있습니다.",
+                "펌웨어가 없습니다. 앱을 다시 설치하십시오.",
+                "펌웨어를 확인하지 못했습니다. 앱을 다시 설치한 뒤 다시 확인하십시오.",
             ),
             match probe.adb() {
                 Ok(Some(_)) => row(
                     HostCheckId::AdbPresent,
                     HostStatus::Ready,
-                    "운영체제 앱 관리 도구를 찾았습니다.",
+                    "준비되어 있습니다.",
                 ),
                 Ok(None) => row(
                     HostCheckId::AdbPresent,
                     HostStatus::Attention,
-                    "운영체제 앱 관리 도구가 없습니다. 앱 설치 기능을 쓰려면 개발 도구를 설치하십시오.",
+                    "없습니다. 앱 설치 기능을 쓰려면 개발 도구를 설치하십시오.",
                 ),
                 Err(_) => row(
                     HostCheckId::AdbPresent,
                     HostStatus::Attention,
-                    "운영체제 앱 관리 도구를 확인하지 못했습니다. 개발 도구 설치 상태를 확인하십시오.",
+                    "확인하지 못했습니다. 개발 도구 설치 상태를 확인하십시오.",
                 ),
             },
             match probe.free_disk_bytes() {
                 Ok(bytes) if bytes >= MINIMUM_DISK_BYTES => row(
                     HostCheckId::DiskSpace,
                     HostStatus::Ready,
-                    "운영체제 설치에 필요한 저장 공간이 있습니다.",
+                    "설치에 충분한 여유가 있습니다.",
                 ),
                 Ok(_) => row(
                     HostCheckId::DiskSpace,
                     HostStatus::Blocked,
-                    "저장 공간이 40GB보다 적습니다. 파일을 정리한 뒤 다시 확인하십시오.",
+                    "여유가 40 GB보다 적습니다. 파일을 정리한 뒤 다시 확인하십시오.",
                 ),
                 Err(_) => row(
                     HostCheckId::DiskSpace,
                     HostStatus::Blocked,
-                    "남은 저장 공간을 확인하지 못했습니다. 저장 장치를 확인한 뒤 다시 시도하십시오.",
+                    "여유를 확인하지 못했습니다. 저장 장치를 확인한 뒤 다시 시도하십시오.",
                 ),
             },
         ];

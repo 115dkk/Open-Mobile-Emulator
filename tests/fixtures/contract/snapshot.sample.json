@@ -10,7 +10,7 @@
       {
         "id": "cpuVirtualization",
         "status": "ready",
-        "detail": "프로세서 가상화를 사용할 수 있습니다."
+        "detail": "사용할 수 있습니다."
       }
     ],
     "ready": true,

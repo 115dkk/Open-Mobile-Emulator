@@ -184,7 +184,7 @@ fn representative_snapshot() -> AppSnapshot {
             rows: vec![HostRow {
                 id: HostCheckId::CpuVirtualization,
                 status: HostStatus::Ready,
-                detail: "프로세서 가상화를 사용할 수 있습니다.".to_owned(),
+                detail: "사용할 수 있습니다.".to_owned(),
             }],
             ready: true,
             inspected_at: Some("2026-09-27T12:00:00Z".to_owned()),

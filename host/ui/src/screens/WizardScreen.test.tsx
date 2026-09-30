@@ -40,9 +40,9 @@ describe('first-run wizard: S1.1 host check', () => {
     expect(screen.getByText('이 PC에서는 Open Mobile Emulator를 사용할 수 있습니다.')).toBeInTheDocument();
     const rows = within(screen.getByRole('list')).getAllByRole('listitem');
     expect(rows.map((row) => row.querySelector('.ome-host-label')?.textContent)).toEqual([
-      'CPU 가상화', 'Windows 하이퍼바이저 플랫폼', '다시 시작 대기', '가상 머신 구성 요소', '앱 설치 도구', '디스크 여유 공간',
+      'CPU 가상화', 'Windows 하이퍼바이저 플랫폼', 'Windows 다시 시작', '가상 머신 구성 요소', '앱 설치 도구', '디스크 공간',
     ]);
-    expect(screen.getByText('Windows 하이퍼바이저 플랫폼이 꺼져 있습니다. 다음 단계에서 동의하면 켭니다.')).toBeInTheDocument();
+    expect(screen.getByText('꺼져 있습니다. 다음 단계에서 동의하면 켭니다.')).toBeInTheDocument();
     expect(screen.getByText('2026-09-26 19:52 확인')).toBeInTheDocument();
   });
 
@@ -57,7 +57,7 @@ describe('first-run wizard: S1.1 host check', () => {
   it('says the PC cannot be used and holds 계속 when a row blocks', () => {
     show(variant('host-blocked'));
     expect(screen.getByText('이 PC에서는 Open Mobile Emulator를 사용할 수 없습니다.')).toBeInTheDocument();
-    expect(screen.getByText('저장 공간이 40GB보다 적습니다. 파일을 정리한 뒤 다시 확인하십시오.')).toBeInTheDocument();
+    expect(screen.getByText('여유가 40 GB보다 적습니다. 파일을 정리한 뒤 다시 확인하십시오.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '계속' })).toBeDisabled();
   });
 
