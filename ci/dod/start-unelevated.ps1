@@ -74,14 +74,20 @@ $startup.cb = [Runtime.InteropServices.Marshal]::SizeOf($startup)
 $startup.dwFlags = 0x100
 $startup.hStdInput = [IntPtr]::Zero; $startup.hStdOutput = $handle; $startup.hStdError = $handle
 $info = [Lua+PROCESS_INFORMATION]::new()
-$created = [Lua]::CreateProcessAsUser($restricted, $FilePath, ('"' + $FilePath + '"'), [IntPtr]::Zero, [IntPtr]::Zero, $true, 0x400, $block, $WorkingDirectory, [ref]$startup, [ref]$info)
-$error = [Runtime.InteropServices.Marshal]::GetLastWin32Error()
-[Runtime.InteropServices.Marshal]::FreeHGlobal($block)
-$stream.Dispose()
-if (!$created) { throw "CreateProcessAsUser failed: Win32 error $error" }
-[void][Lua]::CloseHandle($info.hThread)
+try {
+    $created = [Lua]::CreateProcessAsUser($restricted, $FilePath, ('"' + $FilePath + '"'), [IntPtr]::Zero, [IntPtr]::Zero, $true, 0x400, $block, $WorkingDirectory, [ref]$startup, [ref]$info)
+    # $Error is PowerShell's own read-only variable; CI run 18 died here on that name after the product had
+    # already started, which left an unowned product behind.
+    $createError = [Runtime.InteropServices.Marshal]::GetLastWin32Error()
+} finally {
+    [Runtime.InteropServices.Marshal]::FreeHGlobal($block)
+    $stream.Dispose()
+}
+if (!$created) { throw "CreateProcessAsUser failed: Win32 error $createError" }
+# The pid line comes before anything else that could fail, so the driver always owns what was started.
 @{pid=$info.dwProcessId; callerElevated=[bool]$before; childElevated=[bool]$after; integrity='medium (S-1-16-8192)'} | ConvertTo-Json -Compress
 [Console]::Out.Flush()
+[void][Lua]::CloseHandle($info.hThread)
 [void][Lua]::WaitForSingleObject($info.hProcess, 0xFFFFFFFF)
 $code = [uint32]0
 [void][Lua]::GetExitCodeProcess($info.hProcess, [ref]$code)

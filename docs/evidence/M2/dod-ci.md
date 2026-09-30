@@ -38,6 +38,7 @@ CPUID, `WinHvPlatform.dll`)이라 이 느림과는 무관하다.
 |---|---|---|---|
 | 16 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36656117032) | f885e67 | 취소(114분 뒤 손으로) | `launch`: 제품(pid 4996)은 떴지만 CDP 9333이 30초 안에 답하지 않음 |
 | 17 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36665957774) | 8fc8e5d | 실패(드라이버가 스스로 종료) | `launch`: 제품 창은 그려졌고 호스트 점검 여섯 줄이 모두 통과했지만 CDP는 120초 뒤에도 답하지 않음 |
+| 18 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36667090492) | 6b691bb | 실패(도우미 오류) | `launch`: `CreateProcessAsUser`로 제품이 떴지만(pid 4028, WebView2 자식 6116) 도우미가 `$Error`라는 읽기 전용 변수에 대입하다 죽어 pid를 알리지 못함. 증거 아티팩트 없음(고아 제품이 출력 파일을 쥐고 있어 게시 단계도 실패) |
 
 ### 16회 (2026-09-30 01:39~03:42 UTC)
 
