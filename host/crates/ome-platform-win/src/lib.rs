@@ -1002,6 +1002,14 @@ pub fn logical_processors() -> u32 {
     ffi::host::logical_processors()
 }
 
+/// Reports how many waveform-audio output devices Windows exposes right now.
+///
+/// Zero means DirectSound cannot open, so the guest must run without an audio backend.
+#[cfg(windows)]
+pub fn audio_output_devices() -> u32 {
+    ffi::audio::output_devices()
+}
+
 /// Reports whether the Windows Hypervisor Platform is present.
 ///
 /// A missing `WinHvPlatform.dll` is a normal `Ok(false)` result.

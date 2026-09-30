@@ -1,0 +1,1 @@
+D:\a\Open-Mobile-Emulator\Open-Mobile-Emulator\host\target\release\qemu\bin\qemu-system-x86_64.exe: Could not initialize DirectSound: No sound driver is available for use, or the given GUID is not a valid DirectSound device ID

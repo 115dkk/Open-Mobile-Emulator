@@ -1682,6 +1682,13 @@ impl AppRuntime {
                 format!("sdl,show-cursor=on,gl=on,{hosting},swap-interval={interval}"),
             ]);
         }
+        // A host without an audio output device cannot open DirectSound, and QEMU exits on a failed
+        // `-audiodev dsound` (docs/evidence/M2/dod-ci.md, run 21 on a hosted runner). Only a probe
+        // that positively reports zero devices turns sound off; an unavailable probe keeps the default.
+        let audio = match self.deps.probe.audio_output_devices() {
+            Ok(0) => "none",
+            _ => "dsound",
+        };
         GuestConfig::validate(RawGuestConfig {
             name: Some(guest.id.clone()),
             memory_mib: Some(i64::from(self.settings.memory_mib)),
@@ -1694,7 +1701,7 @@ impl AppRuntime {
             adb_bind: Some(adb_bind.to_owned()),
             refresh_rate_hz: self.refresh_rate_hz.map(i64::from),
             display_size: display_size.map(|size| (i64::from(size.width), i64::from(size.height))),
-            audio: Some("dsound".to_owned()),
+            audio: Some(audio.to_owned()),
             display: Some("sdl".to_owned()),
             hosted_window: Some(true),
             owner_window: self.host_window,
@@ -4007,6 +4014,15 @@ mod tests {
         desktop: RecordingDesktop,
         window: RecordingWindow,
     ) -> (tempfile::TempDir, AppRuntime, ScriptedGuest, RecordedRunner) {
+        lifecycle_runtime_with_probe(outputs, desktop, window, |probe| probe)
+    }
+
+    fn lifecycle_runtime_with_probe(
+        outputs: impl IntoIterator<Item = Result<Output, ome_adb::RecordedError>>,
+        desktop: RecordingDesktop,
+        window: RecordingWindow,
+        adjust_probe: impl FnOnce(TableProbe) -> TableProbe,
+    ) -> (tempfile::TempDir, AppRuntime, ScriptedGuest, RecordedRunner) {
         let directory = tempfile::tempdir().expect("temp directory");
         let home_path = directory.path().join("home");
         let guest_dir = home_path.join("vm/default");
@@ -4041,6 +4057,7 @@ mod tests {
                     program: adb.to_string_lossy().into_owned(),
                 })),
             );
+        let probe = adjust_probe(probe);
         let session = AdbSession::new(&adb, "127.0.0.1:5555".to_owned(), Box::new(runner))
             .expect("adb session");
         let runtime = AppRuntime::open(
@@ -4857,6 +4874,58 @@ mod tests {
                 .expect("display windows")
                 .is_empty()
         );
+    }
+
+    fn first_start_args(supervisor: &ScriptedGuest) -> Vec<String> {
+        let starts = supervisor.starts.lock().expect("starts lock");
+        let (config, paths, install) = starts.first().expect("one start");
+        ome_guest_config::QemuInvocation::for_boot(config, paths, install)
+            .args()
+            .iter()
+            .map(|value| value.to_string_lossy().into_owned())
+            .collect()
+    }
+
+    #[test]
+    fn guest_start_omits_audio_when_the_host_has_no_output_device() {
+        let (_directory, mut runtime, supervisor, _runner) = lifecycle_runtime_with_probe(
+            std::iter::empty(),
+            RecordingDesktop::default(),
+            RecordingWindow::embedded(),
+            |probe| probe.with_audio_output_devices(ProbeValue::AudioOutputDevices(0)),
+        );
+        runtime.apply(Command::GuestStart).expect("start request");
+        let args = first_start_args(&supervisor);
+        assert!(
+            !args
+                .iter()
+                .any(|value| value == "-audiodev" || value.contains("audiodev=")),
+            "{args:?}"
+        );
+    }
+
+    #[test]
+    fn guest_start_keeps_directsound_when_output_devices_exist_or_are_unknown() {
+        for adjust in [
+            Box::new(|probe: TableProbe| {
+                probe.with_audio_output_devices(ProbeValue::AudioOutputDevices(2))
+            }) as Box<dyn FnOnce(TableProbe) -> TableProbe>,
+            Box::new(|probe: TableProbe| probe),
+        ] {
+            let (_directory, mut runtime, supervisor, _runner) = lifecycle_runtime_with_probe(
+                std::iter::empty(),
+                RecordingDesktop::default(),
+                RecordingWindow::embedded(),
+                adjust,
+            );
+            runtime.apply(Command::GuestStart).expect("start request");
+            let args = first_start_args(&supervisor);
+            assert!(
+                args.windows(2)
+                    .any(|pair| pair[0] == "-audiodev" && pair[1] == "dsound,id=snd0"),
+                "{args:?}"
+            );
+        }
     }
 
     #[test]

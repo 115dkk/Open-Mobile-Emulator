@@ -41,7 +41,7 @@ CPUID, `WinHvPlatform.dll`)이라 이 느림과는 무관하다.
 | 18 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36667090492) | 6b691bb | 실패(도우미 오류) | `launch`: `CreateProcessAsUser`로 제품이 떴지만(pid 4028, WebView2 자식 6116) 도우미가 `$Error`라는 읽기 전용 변수에 대입하다 죽어 pid를 알리지 못함. 증거 아티팩트 없음(고아 제품이 출력 파일을 쥐고 있어 게시 단계도 실패) |
 | 19 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36667569730) | 6ea7669 | 실패 | `launch`: 제한 토큰으로 뜬 제품(pid 5496, 중간 무결성)이 Tauri 설정 훅에서 패닉("the underlying handle is not available")으로 곧 종료. 이 길은 여기서 접는다 |
 | 20 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36674327649) | e87b262 | 실패(래퍼 오류) | 표준 사용자 `omeuser` 생성(관리자 아님), 권한 부여 1.4초, `Start-Process -Credential`로 그 계정의 pwsh 시작까지 됨. 래퍼가 셸 폴더 조회로 관리자의 AppData를 받아 그 아래 Temp를 만들다 접근 거부 |
-| 21 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36674900503) | e3b3c99 | (진행 중) | |
+| 21 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36674900503) | e3b3c99 | 실패(`S1.5-installer`) | 표준 사용자로 CDP 접속 성공. 호스트 점검 8행 통과, WHPX 동의 건너뜀, ISO 2.4 GB 64초에 내려받아 검증, 디스크 만들기까지. QEMU가 `Could not initialize DirectSound: No sound driver is available`로 곧 종료(러너에 오디오 장치 없음) |
 
 ### 16회 (2026-09-30 01:39~03:42 UTC)
 
@@ -122,3 +122,23 @@ TEMP)를 그 계정의 셸 폴더에서 다시 읽고, 드라이버에 필요한
 자격 증명으로 시작한 프로세스는 호출자의 환경을 물려받고, 셸 폴더 조회는 `%USERPROFILE%`을 그 환경에서
 펼치기 때문이다. e3b3c99가 프로필 경로를 HKLM ProfileList의 SID 항목에서 읽고, 없으면 워크플로가 만든
 `D:\ome-user`를 쓰도록 고쳤다.
+
+### 21회 (2026-09-30 05:45~05:54 UTC): 표준 사용자로 마법사가 돈다. 막힌 곳은 소리
+
+래퍼는 `omeuser`로 떴고 CDP가 붙었다. 드라이버 단계와 시간은 preflight 0.8초, launch 7.1초,
+호스트 점검 1.9초(8행 모두 준비. 새 문구 "필요하지 않습니다.", "설치에 충분한 여유가 있습니다."가
+그대로 보인다), WHPX 동의 1.8초(이미 켜져 있어 건너뜀), 내려받기 63.9초(2,429,550,592바이트, 약
+44 MB/s, 검증 완료), 설치기 31초 실패다. 원문은 `dod-ci/run21/`이다.
+
+`디스크 만들기`를 누르자 제품이 32 GiB qcow2를 만들고 QEMU를 띄웠지만 QEMU는 곧 끝났다
+(`run21/qemu-…stderr.txt`): "Could not initialize DirectSound: No sound driver is available for use,
+or the given GUID is not a valid DirectSound device ID". 러너에는 오디오 장치가 없고, QEMU는
+`-audiodev dsound` 초기화 실패를 치명적으로 다룬다. 감독자는 `startFailed`로 기록했고 드라이버의
+설치기 감시자는 창이 없어 30초 뒤 끝났다(드라이버의 GL 재시도 규칙은 이 문구와 맞지 않는다).
+
+오디오 장치가 없는 PC는 러너만이 아니므로 제품이 고친다. `ome-platform-win`이 `waveOutGetNumDevs`로
+출력 장치 수를 읽고(`audio_output_devices`), `ome-host-check`의 `HostProbe`에 그 관찰이 더해지며,
+런타임은 게스트 설정을 만들 때 장치가 0이라고 확실히 보고될 때만 오디오 백엔드를 `none`으로 두고
+그 밖에는 `dsound`를 유지한다(결정적 테스트 둘). 부수 관찰: 정리 단계의 트레이 `종료`가
+"Tray popup did not appear"로 실패해 강제 종료로 끝났다. 완주가 되면 마지막 `quit` 단계에서 같은
+일이 날 수 있으므로 지켜본다. 업데이트 확인은 러너에서 `update_check_failed`였다(네트워크).

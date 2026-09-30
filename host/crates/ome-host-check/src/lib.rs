@@ -94,6 +94,8 @@ pub trait HostProbe: Send + Sync {
     fn total_memory_bytes(&self) -> Probe<u64>;
     /// Reports the number of logical processors visible to the host.
     fn logical_processors(&self) -> Probe<u32>;
+    /// Number of audio output devices the host exposes; zero means no sound backend can open.
+    fn audio_output_devices(&self) -> Probe<u32>;
 }
 
 /// Identifier for one host-readiness row.
@@ -399,6 +401,7 @@ pub struct TableProbe {
     pub values: BTreeMap<HostCheckId, ProbeValue>,
     total_memory: Option<ProbeValue>,
     logical_processors: Option<ProbeValue>,
+    audio_output_devices: Option<ProbeValue>,
 }
 
 impl TableProbe {
@@ -422,6 +425,12 @@ impl TableProbe {
     /// Replaces the logical-processor fixture value.
     pub fn with_logical_processors(mut self, value: ProbeValue) -> Self {
         self.logical_processors = Some(value);
+        self
+    }
+
+    /// Replaces the audio-output-device fixture value.
+    pub fn with_audio_output_devices(mut self, value: ProbeValue) -> Self {
+        self.audio_output_devices = Some(value);
         self
     }
 
@@ -449,6 +458,8 @@ pub enum ProbeValue {
     Bytes(u64),
     /// Total physical memory bytes.
     TotalMemoryBytes(u64),
+    /// Audio output device count.
+    AudioOutputDevices(u32),
     /// Logical processor count.
     LogicalProcessors(u32),
     /// Explicit observation failure.
@@ -515,6 +526,18 @@ impl HostProbe for TableProbe {
             .ok_or(ProbeError::Unwired)?
         {
             ProbeValue::LogicalProcessors(value) => Ok(*value),
+            ProbeValue::Error(error) => Err(*error),
+            _ => Err(ProbeError::InvalidData),
+        }
+    }
+
+    fn audio_output_devices(&self) -> Probe<u32> {
+        match self
+            .audio_output_devices
+            .as_ref()
+            .ok_or(ProbeError::Unwired)?
+        {
+            ProbeValue::AudioOutputDevices(value) => Ok(*value),
             ProbeValue::Error(error) => Err(*error),
             _ => Err(ProbeError::InvalidData),
         }
@@ -625,6 +648,10 @@ impl HostProbe for WindowsProbe {
 
     fn logical_processors(&self) -> Probe<u32> {
         Ok(ome_platform_win::logical_processors())
+    }
+
+    fn audio_output_devices(&self) -> Probe<u32> {
+        Ok(ome_platform_win::audio_output_devices())
     }
 }
 

@@ -3,6 +3,7 @@
 //! Private Win32 FFI modules. Raw handles and pointers do not leave this tree.
 #![allow(unsafe_code)]
 
+pub(crate) mod audio;
 pub(crate) mod elevation;
 pub(crate) mod handle;
 pub(crate) mod host;
