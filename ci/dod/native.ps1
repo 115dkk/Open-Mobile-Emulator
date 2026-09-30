@@ -47,6 +47,8 @@ public class W {
  [DllImport("user32.dll")] public static extern IntPtr SetThreadDpiAwarenessContext(IntPtr c);
  [DllImport("user32.dll")] public static extern bool PostMessage(IntPtr h,uint m,IntPtr w,IntPtr l);
  [DllImport("user32.dll")] public static extern IntPtr SendMessage(IntPtr h,uint m,IntPtr w,IntPtr l);
+ [DllImport("user32.dll",CharSet=CharSet.Unicode)] public static extern IntPtr SendMessageW(IntPtr h,uint m,IntPtr w,string l);
+ [DllImport("user32.dll")] public static extern int GetDlgCtrlID(IntPtr h);
  [DllImport("user32.dll")] public static extern int GetMenuItemCount(IntPtr m);
  [DllImport("user32.dll")] public static extern uint GetMenuItemID(IntPtr m,int i);
  [DllImport("user32.dll",CharSet=CharSet.Unicode)] public static extern int GetMenuString(IntPtr m,uint i,StringBuilder s,int c,uint f);
@@ -197,32 +199,32 @@ if ($QemuPid) {
  $h=$targets[0]
 }
 if ($FilePath) {
- Add-Type -AssemblyName UIAutomationClient
- Add-Type -AssemblyName UIAutomationTypes
  $until=[DateTime]::UtcNow.AddSeconds(15)
  do {
   $dialogs=@([W]::All() | Where-Object { [W]::Pid($_) -eq $AppPid -and [W]::Class($_) -eq '#32770' -and [W]::IsWindowVisible($_) })
   if(!$dialogs.Count){Start-Sleep -Milliseconds 100}
  } until($dialogs.Count -or [DateTime]::UtcNow -gt $until)
  if($dialogs.Count -ne 1){throw 'Expected one owned file dialog'}
- $dialog=$dialogs[0]; [W]::Focus($dialog)
- $element=[Windows.Automation.AutomationElement]::FromHandle($dialog)
- $combo=$element.FindFirst([Windows.Automation.TreeScope]::Descendants,
-  [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::AutomationIdProperty,'1148'))
- if($null -eq $combo){throw 'File-name control 1148 not found'}
- $edit=$combo.FindFirst([Windows.Automation.TreeScope]::Subtree,
-  [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::ControlTypeProperty,[Windows.Automation.ControlType]::Edit))
- if($null -eq $edit){throw 'File-name edit not found'}
- $value=$edit.GetCurrentPattern([Windows.Automation.ValuePattern]::Pattern)
+ $dialog=$dialogs[0]
  $selection = if ($GameSelection) {
   (@('base.apk','split_config.arm64_v8a.apk','split_gpdeku.apk','split_gpdeku.config.arm64_v8a.apk') |
    ForEach-Object { '"' + (Join-Path $FilePath $_) + '"' }) -join ' '
  } else { $FilePath }
- $value.SetValue($selection); $edit.SetFocus(); [W]::Tap(0x0d)
+ # UI Automation on the dev PC (Windows 11 22621, dev PC round 23) shows the file-name control 1148 as
+ # panes without a value pattern, so the selection goes in through Win32 the way the dialog's own
+ # message loop takes it: WM_SETTEXT into the Edit with control id 1148, then the OK button (IDOK)
+ # through WM_COMMAND. Verified with a WinForms OpenFileDialog: ShowDialog returned OK with the path.
+ Start-Sleep -Milliseconds 300
+ $edit=@([W]::Children($dialog) | Where-Object { [W]::Class($_) -eq 'Edit' -and [W]::GetDlgCtrlID($_) -eq 1148 }) | Select-Object -First 1
+ if($null -eq $edit){throw 'File-name edit (control id 1148) not found'}
+ [void][W]::SendMessageW($edit,0x000C,[IntPtr]::Zero,$selection)
+ $ok=@([W]::Children($dialog) | Where-Object { [W]::Class($_) -eq 'Button' -and [W]::GetDlgCtrlID($_) -eq 1 }) | Select-Object -First 1
+ if($null -eq $ok){throw 'OK button (control id 1) not found'}
+ [void][W]::PostMessage($dialog,0x0111,[IntPtr]::new(1),$ok)
  $until=[DateTime]::UtcNow.AddSeconds(15)
  while([W]::IsWindowVisible($dialog) -and [DateTime]::UtcNow -lt $until){Start-Sleep -Milliseconds 100}
  if([W]::IsWindowVisible($dialog)){throw 'File dialog did not close'}
- @{action='file-dialog';closed=$true;privateSelection=[bool]$GameSelection} | ConvertTo-Json -Compress
+ @{action='file-dialog';closed=$true;privateSelection=[bool]$GameSelection;method='win32'} | ConvertTo-Json -Compress
  exit
 }
 if ($Keys -or $Text) {
