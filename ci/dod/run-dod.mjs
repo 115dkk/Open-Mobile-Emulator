@@ -163,7 +163,9 @@ function installerScreen(text) {
   // OCR sometimes splits a word ("fi lesystem", "Bl issOS") across text boxes.
   const words = text.replace(/\s/g, '');
   const has = phrase => words.includes(phrase.replace(/\s/g, ''));
-  if (has('congratulations') && has('installed successfully')) return 'done';
+  // "Congratulations! BlissOS-16.9.7 is installed successfully." reads as "congratu muons ! bi issos"
+  // on the dev PC (round 22); either half of the sentence is enough.
+  if (has('installed successful') || /congratu/.test(words)) return 'done';
   if (has('choose partition')) {
     if (has('efi system partition')) return 'esp-chooser';
     if (has('install blissos') || has('select a partition to install')) return 'system-chooser';
