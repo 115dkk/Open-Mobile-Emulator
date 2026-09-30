@@ -37,7 +37,7 @@ CPUID, `WinHvPlatform.dll`)이라 이 느림과는 무관하다.
 | 실행 | 커밋 | 결과 | 드라이버가 간 곳 |
 |---|---|---|---|
 | 16 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36656117032) | f885e67 | 취소(114분 뒤 손으로) | `launch`: 제품(pid 4996)은 떴지만 CDP 9333이 30초 안에 답하지 않음 |
-| 17 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36665957774) | 8fc8e5d | (진행 중) | |
+| 17 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36665957774) | 8fc8e5d | 실패(드라이버가 스스로 종료) | `launch`: 제품 창은 그려졌고 호스트 점검 여섯 줄이 모두 통과했지만 CDP는 120초 뒤에도 답하지 않음 |
 
 ### 16회 (2026-09-30 01:39~03:42 UTC)
 
@@ -58,3 +58,28 @@ CPUID, `WinHvPlatform.dll`)이라 이 느림과는 무관하다.
 (기본 100분, 넘기면 결과를 쓰고 소유 프로세스를 끝낸 뒤 종료), 끝에서 도우미를 죽이고 `process.exit`.
 그리고 CDP 대기를 120초로 늘리고, 그래도 답이 없으면 `native.ps1 -Desktop`으로 앱 프로세스와 자식의
 최상위 창 목록, 프로세스 목록, 가상 화면 전체 스크린샷을 남긴다.
+
+### 17회 (2026-09-30 03:47~03:53 UTC)
+
+빌드는 16회가 저장한 캐시로 끝났고(`cache-hit`), 준비 단계는 OCR 인식기 1개, WebView2 있음, 화면
+1920x1080으로 지나갔다. 드라이버는 launch에서 CDP를 120초 기다렸고, 답이 없자 `native.ps1 -Desktop`이
+남긴 창 목록과 화면(`dod-ci/run17-launch-window.png`)이 처음으로 제품의 상태를 보여 주었다.
+
+- 제품 창 `Open Mobile Emulator`(`Tauri Window`, 1296x839)가 떠 있고, 마법사 1/7 호스트 점검이
+  "이 PC에서는 Open Mobile Emulator를 사용할 수 있습니다"와 함께 여섯 줄을 모두 통과로 보였다(CPU
+  가상화, Windows 하이퍼바이저 플랫폼 켜짐, 다시 시작 대기 없음, 가상 머신 구성 요소, 앱 설치 도구,
+  디스크 여유 공간). 곧 러너에서 제품이 QEMU ome3와 펌웨어, adb를 찾고 WHPX가 준비됐다고 판정한다.
+- WebView2 브라우저 프로세스(`msedgewebview2.exe` 153.0.4234.48)의 명령줄에 `--remote-debugging-port`가
+  없었다. 드라이버가 `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS`로 넘긴 값이 적용되지 않은 것이다. 개발
+  PC에서는 같은 방법이 통했다(`app-smoke.md`).
+- 차이는 권한이다. 러너는 모든 잡을 UAC가 꺼진 관리자 `runneradmin`으로 돌리므로 제품이 높은 무결성
+  수준으로 뜬다. WebView2 150부터 높은 무결성으로 뜬 호스트에서는 DevTools 원격 디버깅 끝점이 열리지
+  않는다(MicrosoftEdge/WebView2Feedback#5640, 149에서는 되던 것이 150.0.4078.48부터 안 됨). 개발 PC의
+  드라이버는 보통 사용자 권한으로 돈다.
+
+그래서 드라이버는 제품을 `ci/dod/start-unelevated.ps1`로 띄운다. 이 도우미는 자기 토큰에서
+`CreateRestrictedToken(LUA_TOKEN)`으로 UAC가 걸러 낸 것과 같은 토큰을 만들고 무결성 수준을 중간
+(`S-1-16-8192`)으로 내린 뒤 `CreateProcessAsUser`로 제품을 시작한다. 새 사용자를 만들지 않으므로 파일
+권한과 바탕 화면은 그대로다. 제품의 표준 출력과 오류 출력은 도우미가 파일로 받고, 도우미는 pid를 한 줄로
+알린 뒤 종료 코드를 기다린다. 사용자 PC에서 제품이 관리자 권한으로 뜨는 일은 없으므로 이것은 러너 쪽
+조정이지 제품의 동작 변경이 아니다.

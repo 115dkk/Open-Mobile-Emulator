@@ -294,11 +294,29 @@ try {
   keepAwake.stdout.once('data', chunk => log('keep-awake', JSON.parse(chunk.toString('utf8').trim())));
   process.on('exit', () => { try { keepAwake?.kill(); } catch {} });
   await step('launch', async () => {
-    const fd = fs.openSync(path.join(output, 'app-output.txt'), 'w');
-    app = spawn(appPath, [], { cwd: host, env: { ...process.env, OME_HOME: home, WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--remote-debugging-port=${port}` }, stdio: ['ignore', fd, fd] }); fs.closeSync(fd);
-    app.on('exit', (code, signal) => { exited = true; log('app-exit', { pid: app.pid, code, signal }); });
-    app.on('error', error => { exited = true; log('app-spawn-error', { error: error.message }); });
-    log('app-start', { pid: app.pid }); rememberProcesses();
+    // The product starts through start-unelevated.ps1 with a UAC-style filtered token: the hosted
+    // runner is an elevated administrator, and WebView2 150+ opens no remote-debugging endpoint for an
+    // elevated host (runs 16 and 17: window up, CDP silent). The helper inherits this environment,
+    // prints {pid} once the product runs and {exit} when it ends.
+    app = { pid: null };
+    const launcher = spawn('pwsh', ['-NoProfile', '-File', path.join(directory, 'start-unelevated.ps1'), '-FilePath', appPath, '-WorkingDirectory', host, '-OutputFile', path.join(output, 'app-output.txt')],
+      { env: { ...process.env, OME_HOME: home, WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--remote-debugging-port=${port}` }, stdio: ['ignore', 'pipe', 'pipe'] });
+    let pending = '', launcherErr = '';
+    launcher.stdout.setEncoding('utf8'); launcher.stderr.setEncoding('utf8');
+    launcher.stderr.on('data', chunk => { launcherErr += chunk; });
+    launcher.stdout.on('data', chunk => {
+      pending += chunk; let index;
+      while ((index = pending.indexOf('\n')) >= 0) {
+        const line = pending.slice(0, index).trim(); pending = pending.slice(index + 1);
+        if (!line) continue;
+        const message = JSON.parse(line);
+        if (message.pid) { app.pid = message.pid; log('app-start', message); }
+        if (message.exit !== undefined) { exited = true; log('app-exit', { pid: app.pid, code: message.exit }); }
+      }
+    });
+    launcher.on('exit', code => { if (!app.pid) { exited = true; log('app-spawn-error', { code, error: launcherErr.trim() }); } });
+    await until(() => app.pid, 30000, 'product pid from the launcher');
+    rememberProcesses();
     // 120 s: the hosted runner (2 cores, Hyper-V video) starts WebView2 cold; run 16 gave up at 30 s with no diagnostics.
     try { await until(async () => (await fetch(`http://127.0.0.1:${port}/json/version`)).ok, 120000, 'CDP'); }
     catch (error) { await desktopCapture('launch-no-cdp'); throw error; }
