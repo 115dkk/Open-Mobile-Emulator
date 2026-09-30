@@ -24,6 +24,9 @@ import type { BootStep, StepState } from '../presentation';
 import { ImageCards } from './ImageCards';
 import { useEscapeKey } from './use-escape-key';
 import { useGuestKeyboard } from './use-guest-keyboard';
+
+/** Bytes in one GiB, the unit of the disk size choices. */
+const GIB = 1024 ** 3;
 import { ESC_LINE, WhpxConsentBody } from './WhpxConsentBody';
 
 const STEPS: readonly { readonly id: Exclude<WizardStep, 'done'>; readonly name: string }[] = [
@@ -313,6 +316,19 @@ function GuestInstallStep({ snapshot, actions }: StepProps) {
   const imageId = wizard.imageId;
 
   if (images.activeGuest === null) {
+    // The person approves the installation here and nothing more (ADR-0010): the button reads
+    // 설치하기 and the caption says whether the free space allows the chosen disk, the way other
+    // install wizards do. A disk larger than the free space cannot be approved.
+    const sizeBytes = size === null ? null : Number(size) * GIB;
+    const enough = wizard.diskFreeBytes === null || sizeBytes === null || wizard.diskFreeBytes >= sizeBytes;
+    const note =
+      wizard.diskFreeBytes === null
+        ? null
+        : size === null
+          ? `여유 공간 ${formatBytes(wizard.diskFreeBytes)}`
+          : enough
+            ? `여유 공간 ${formatBytes(wizard.diskFreeBytes)}. ${formatGib(Number(size))} 디스크로 설치할 수 있습니다.`
+            : `여유 공간 ${formatBytes(wizard.diskFreeBytes)}. ${formatGib(Number(size))} 디스크를 만들 공간이 부족합니다.`;
     return (
       <WizardLayout
         issue={snapshot.issue}
@@ -322,13 +338,13 @@ function GuestInstallStep({ snapshot, actions }: StepProps) {
             size="large"
             variant="primary"
             icon="hard-drive"
-            disabled={imageId === null || size === null}
+            disabled={imageId === null || size === null || !enough}
             onClick={() => {
               if (imageId !== null && size !== null) return actions.guestCreate(imageId, Number(size));
               return undefined;
             }}
           >
-            디스크 만들기
+            설치하기
           </Button>
         }
       >
@@ -341,9 +357,7 @@ function GuestInstallStep({ snapshot, actions }: StepProps) {
             value={size}
             onChange={setSize}
           />
-          {wizard.diskFreeBytes !== null && (
-            <p className="ome-caption">여유 공간 {formatBytes(wizard.diskFreeBytes)}</p>
-          )}
+          {note !== null && <p className="ome-caption">{note}</p>}
         </div>
       </WizardLayout>
     );

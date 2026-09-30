@@ -638,7 +638,7 @@ try {
     watcher.stdout.setEncoding('utf8'); watcher.stderr.setEncoding('utf8');
     watcher.stdout.on('data', s => { watcherOut += s; }); watcher.stderr.on('data', s => { watcherErr += s; });
     const watched = new Promise(resolve => watcher.once('exit', code => resolve(code)));
-    await delay(1800); await click('디스크 만들기'); let pid;
+    await delay(1800); await click('설치하기'); let pid;
     try {
       if (await withTimeout(watched, 90000, 'installer watcher exit') !== 0) throw Error(`Installer watcher failed: ${watcherErr}`);
       const observed = JSON.parse(watcherOut); log('installer-watcher', observed); pid = observed.pid;

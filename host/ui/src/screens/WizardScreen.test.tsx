@@ -149,13 +149,14 @@ describe('first-run wizard: S1.4 image download', () => {
 });
 
 describe('first-run wizard: S1.5 install', () => {
-  it('creates the disk with the chosen size and shows free space', async () => {
+  it('approves the installation with the chosen size and says the free space allows it', async () => {
     const actions = show(variant('install-disk'));
     expect(screen.getByRole('heading', { level: 1, name: '운영체제 설치' })).toBeInTheDocument();
     expect(screen.getByRole('radio', { name: '64 GB' })).toHaveAttribute('aria-checked', 'true');
-    expect(screen.getByText('여유 공간 412 GB')).toBeInTheDocument();
+    expect(screen.getByText('여유 공간 412 GB. 64 GB 디스크로 설치할 수 있습니다.')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('radio', { name: '128 GB' }));
-    await userEvent.click(screen.getByRole('button', { name: '디스크 만들기' }));
+    expect(screen.getByText('여유 공간 412 GB. 128 GB 디스크로 설치할 수 있습니다.')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: '설치하기' }));
     expect(actions.guestCreate).toHaveBeenCalledWith('sample-android-13', 128);
   });
 
