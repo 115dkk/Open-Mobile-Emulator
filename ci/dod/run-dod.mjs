@@ -187,7 +187,8 @@ function installerScreen(text) {
   if (has('warning') || (/\b\d+\s*(?:s\b|sec|second)/.test(text) && /\b[0o]k\b/.test(text) && !/\byes\b|\bno\b|reboot/i.test(text))) return 'warning-countdown';
   if (has('error') || has('this is not an efi system partition')) return 'error';
   if (has('ota')) return 'ota-confirm';
-  if (has('grub2') || has('choose efi boot')) return 'efi-boot-chooser';
+  // Read as "Chouse EEI BUUt ... GrubZ EFI Bootloader" on the dev PC (round 20).
+  if (/grub[2z]/.test(words) || has('choose efi boot') || has('since you are using uefi') || has('boot options for')) return 'efi-boot-chooser';
   // Console OCR reads Confirm as "Cont Irm", Question as "Uuestion" and Would as "Uould" (CI run 39).
   // "Cont Irm" on the runner, "Cont Irn" on the dev PC (round 16).
   if (/con[ft][il1]r[mn]/.test(words) && has('format')) return 'confirm-format';
