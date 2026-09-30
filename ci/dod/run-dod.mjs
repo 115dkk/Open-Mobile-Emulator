@@ -258,7 +258,9 @@ const CFDISK = {
   sizePrompt: /partitionsize/,
   labelType: /labeltype/,
   confirmTool: /cfdiskprogram|cgdisk/,
-  partitionList: /choosepartition.*modify/,
+  // The list's blue entries are dropped by the OCR at times (dev PC round 11 read the header row and
+  // stopped), so the hint that only this dialog carries also identifies it.
+  partitionList: /choosepartition.*(modify|hint:?ifyouchoseesp|chooseespagain)/,
   installerInfo: /don.?tkno[wu]whatthisis|documentationformore/,
   writeQuestion: /areyousure|type.?yes/,
   writeResult: /altered|synci|didnotwrite/,
