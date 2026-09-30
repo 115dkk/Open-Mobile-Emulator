@@ -249,7 +249,9 @@ async function keysUntil(pid, label, keySequence, text, pattern, { settleMs = 10
 }
 // Matched against squash()ed text. The console OCR reads 2 as z, 1 as i or l, v as u, w as u.
 const CFDISK = {
-  size512M: /size:?5[1il][2z]m/,
+  // The dev PC's OCR interleaves the prompt with the table columns ("Partition size Start 2048 End
+  // ... : 512M"), so the typed value is also accepted right after its colon.
+  size512M: /(size:?|:)5[1il][2z]m/,
   row512M: /5[1il][2z]m/,
   efiSystem: /efisyste/,
   linuxFilesystem: /linuxfi?lesyste/,
