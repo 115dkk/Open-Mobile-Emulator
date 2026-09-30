@@ -1,0 +1,102 @@
+== step: Runner facts ==
+shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+##[endgroup]
+== os ==
+Microsoft Windows Server 2025 Datacenter
+Microsoft Windows NT 10.0.26100.0
+== cpu ==
+Name                      : AMD EPYC 7763 64-Core Processor
+NumberOfCores             : 2
+NumberOfLogicalProcessors : 4
+== memory ==
+16.0 GiB
+== drives ==
+Name FreeGiB UsedGiB
+---- ------- -------
+C      30.90  118.60
+D     145.00    5.00
+Temp   30.90  118.60
+== session ==
+UserInteractive: True
+Session: 2
+User: runneradmin
+== screen ==
+\\.\DISPLAY1 1024x768 primary=True
+== video ==
+Name                 : Microsoft Hyper-V Video
+DriverVersion        : 10.0.26100.1150
+VideoModeDescription : 1024 x 768 x 4294967296 colors
+Status               : OK
+== hypervisor ==
+True
+HypervisorPlatform : Enabled
+== webview2 ==
+HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5} pv=153.0.4234.48
+HKLM:\SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5} absent
+HKCU:\SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5} absent
+153.0.4234.48
+PlatformExperiencesHelper
+SetupMetrics
+== ocr capability ==
+Name                                   State
+----                                   -----
+Language.OCR~~~ar-SA~0.0.1.0      NotPresent
+Language.OCR~~~bg-BG~0.0.1.0      NotPresent
+Language.OCR~~~bs-LATN-BA~0.0.1.0 NotPresent
+Language.OCR~~~cs-CZ~0.0.1.0      NotPresent
+Language.OCR~~~da-DK~0.0.1.0      NotPresent
+Language.OCR~~~de-DE~0.0.1.0      NotPresent
+Language.OCR~~~el-GR~0.0.1.0      NotPresent
+Language.OCR~~~en-GB~0.0.1.0      NotPresent
+Language.OCR~~~en-US~0.0.1.0       Installed
+Language.OCR~~~es-ES~0.0.1.0      NotPresent
+Language.OCR~~~es-MX~0.0.1.0      NotPresent
+Language.OCR~~~fi-FI~0.0.1.0      NotPresent
+Language.OCR~~~fr-CA~0.0.1.0      NotPresent
+Language.OCR~~~fr-FR~0.0.1.0      NotPresent
+Language.OCR~~~hr-HR~0.0.1.0      NotPresent
+Language.OCR~~~hu-HU~0.0.1.0      NotPresent
+Language.OCR~~~it-IT~0.0.1.0      NotPresent
+Language.OCR~~~ja-JP~0.0.1.0      NotPresent
+Language.OCR~~~ko-KR~0.0.1.0      NotPresent
+Language.OCR~~~nb-NO~0.0.1.0      NotPresent
+Language.OCR~~~nl-NL~0.0.1.0      NotPresent
+Language.OCR~~~pl-PL~0.0.1.0      NotPresent
+Language.OCR~~~pt-BR~0.0.1.0      NotPresent
+Language.OCR~~~pt-PT~0.0.1.0      NotPresent
+Language.OCR~~~ro-RO~0.0.1.0      NotPresent
+Language.OCR~~~ru-RU~0.0.1.0      NotPresent
+Language.OCR~~~sk-SK~0.0.1.0      NotPresent
+Language.OCR~~~sl-SI~0.0.1.0      NotPresent
+Language.OCR~~~sr-CYRL-RS~0.0.1.0 NotPresent
+Language.OCR~~~sr-LATN-RS~0.0.1.0 NotPresent
+Language.OCR~~~sv-SE~0.0.1.0      NotPresent
+Language.OCR~~~tr-TR~0.0.1.0      NotPresent
+Language.OCR~~~zh-CN~0.0.1.0      NotPresent
+Language.OCR~~~zh-HK~0.0.1.0      NotPresent
+Language.OCR~~~zh-TW~0.0.1.0      NotPresent
+== ocr engines (Windows PowerShell) ==
+\.LanguageTag : The term '\.LanguageTag' is not recognized as the name of a cmdlet, function, script file, or operable
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:163
++ ... AvailableRecognizerLanguages | ForEach-Object { \.LanguageTag }; 'cou ...
++                                                     ~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (\.LanguageTag:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+count=1
+== tools ==
+Name           Version          Source
+----           -------          ------
+pwsh.exe       7.6.6.0          C:\Program Files\PowerShell\7\pwsh.exe
+powershell.exe 10.0.26100.33438 C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+gh.exe         0.0.0.0          C:\Program Files\GitHub CLI\gh.exe
+git.exe        2.55.0.5         C:\Program Files\Git\bin\git.exe
+ssh.exe        9.5.6.2          C:\Windows\System32\OpenSSH\ssh.exe
+node.exe       24.1.0.0         C:\hostedtoolcache\windows\node\24.1.0\x64\node.exe
+== step: Ensure Windows OCR, WebView2 runtime and a 1920x1080 desktop ==
+shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+##[endgroup]
+OCR recognizers present: 1
+WebView2 runtime present
+ChangeDisplaySettings 1920x1080 -> 0 (0 = DISP_CHANGE_SUCCESSFUL)
+screen before 1024x768, after 1920x1080
