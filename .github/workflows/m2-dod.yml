@@ -21,11 +21,16 @@ jobs:
           node-version-file: host/.node-version
           cache: npm
           cache-dependency-path: host/package-lock.json
-      - name: Cache Rust build output
-        uses: actions/cache@v4
+      # restore/save instead of the combined action: the combined action saves only when the job
+      # succeeds, and every completion run so far has failed, so each run rebuilt for seven minutes.
+      - name: Restore Rust build output
+        id: rust-cache
+        uses: actions/cache/restore@v4
         with:
           path: host/target
           key: m2-dod-windows-2025-${{ hashFiles('host/Cargo.lock', 'host/rust-toolchain.toml') }}
+          restore-keys: |
+            m2-dod-windows-2025-
       - name: Build product
         working-directory: host
         run: |
@@ -37,6 +42,76 @@ jobs:
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           cargo build -p ome-app -p ome-setup --release --features custom-protocol
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Save Rust build output
+        if: always() && steps.rust-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: host/target
+          key: ${{ steps.rust-cache.outputs.cache-primary-key }}
+      - name: Runner facts
+        # Read-only. The completion run needs an interactive desktop, a WebView2 runtime for the
+        # product window, and the built-in Windows OCR (ci/dod/ocr.ps1) for the installer screens.
+        run: |
+          $ErrorActionPreference = 'Continue'
+          "== os =="; (Get-CimInstance Win32_OperatingSystem).Caption; [Environment]::OSVersion.VersionString
+          "== cpu =="; Get-CimInstance Win32_Processor | Select-Object Name, NumberOfCores, NumberOfLogicalProcessors | Format-List
+          "== memory =="; "{0:N1} GiB" -f ((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB)
+          "== drives =="; Get-PSDrive -PSProvider FileSystem | Select-Object Name, @{n='FreeGiB';e={[math]::Round($_.Free/1GB,1)}}, @{n='UsedGiB';e={[math]::Round($_.Used/1GB,1)}} | Format-Table
+          "== session =="; "UserInteractive: $([Environment]::UserInteractive)"; "Session: $((Get-Process -Id $PID).SessionId)"; "User: $env:USERNAME"
+          "== screen =="; Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Screen]::AllScreens | ForEach-Object { "$($_.DeviceName) $($_.Bounds.Width)x$($_.Bounds.Height) primary=$($_.Primary)" }
+          "== video =="; Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion, VideoModeDescription, Status | Format-List
+          "== hypervisor =="; (Get-CimInstance Win32_ComputerSystem).HypervisorPresent; foreach ($name in 'HypervisorPlatform') { try { $f = Get-WindowsOptionalFeature -Online -FeatureName $name -ErrorAction Stop; "$name : $($f.State)" } catch { "$name : $($_.Exception.Message)" } }
+          "== webview2 =="; foreach ($key in 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}', 'HKLM:\SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}', 'HKCU:\SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}') { if (Test-Path $key) { "$key pv=$((Get-ItemProperty $key).pv)" } else { "$key absent" } }
+          Get-ChildItem 'C:\Program Files (x86)\Microsoft\EdgeWebView\Application' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
+          "== ocr capability =="; Get-WindowsCapability -Online -Name 'Language.OCR*' -ErrorAction SilentlyContinue | Select-Object Name, State | Format-Table
+          "== ocr engines (Windows PowerShell) =="; powershell.exe -NoProfile -Command "[void][Windows.Media.Ocr.OcrEngine,Windows.Foundation,ContentType=WindowsRuntime]; [Windows.Media.Ocr.OcrEngine]::AvailableRecognizerLanguages | ForEach-Object { \$_.LanguageTag }; 'count=' + [Windows.Media.Ocr.OcrEngine]::AvailableRecognizerLanguages.Count"
+          "== tools =="; (Get-Command pwsh, powershell.exe, gh, git, ssh, node -ErrorAction SilentlyContinue | Select-Object Name, Version, Source | Format-Table | Out-String)
+      - name: Ensure Windows OCR, WebView2 runtime and a 1920x1080 desktop
+        # Runner preparation only, never product behaviour. Windows Server images may lack the OCR
+        # language component and the Evergreen WebView2 runtime that Windows 11 carries.
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $ocrCount = [int](powershell.exe -NoProfile -Command "[void][Windows.Media.Ocr.OcrEngine,Windows.Foundation,ContentType=WindowsRuntime]; [Windows.Media.Ocr.OcrEngine]::AvailableRecognizerLanguages.Count")
+          if ($ocrCount -eq 0) {
+            "No OCR recognizer; adding Language.OCR~~~en-US"
+            $capability = Get-WindowsCapability -Online -Name 'Language.OCR~~~en-US*' | Select-Object -First 1
+            if ($capability) { Add-WindowsCapability -Online -Name $capability.Name | Format-List } else { 'No Language.OCR~~~en-US capability offered' }
+            powershell.exe -NoProfile -Command "[void][Windows.Media.Ocr.OcrEngine,Windows.Foundation,ContentType=WindowsRuntime]; 'engines after: ' + [Windows.Media.Ocr.OcrEngine]::AvailableRecognizerLanguages.Count"
+          } else { "OCR recognizers present: $ocrCount" }
+          $webview = 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}'
+          if (!(Test-Path $webview) -and !(Test-Path 'C:\Program Files (x86)\Microsoft\EdgeWebView\Application')) {
+            "No WebView2 runtime; installing the Evergreen runtime"
+            $bootstrapper = Join-Path $env:RUNNER_TEMP 'MicrosoftEdgeWebview2Setup.exe'
+            Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/p/?LinkId=2124703' -OutFile $bootstrapper
+            $p = Start-Process -FilePath $bootstrapper -ArgumentList '/silent', '/install' -Wait -PassThru
+            "bootstrapper exit code: $($p.ExitCode)"
+            if (Test-Path $webview) { "pv=$((Get-ItemProperty $webview).pv)" } else { 'WebView2 registry key still absent' }
+          } else { 'WebView2 runtime present' }
+          Add-Type -AssemblyName System.Windows.Forms
+          $before = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+          if ($before.Width -lt 1600 -or $before.Height -lt 900) {
+            Add-Type @'
+          using System; using System.Runtime.InteropServices;
+          public static class Display {
+            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)] public struct DEVMODE {
+              [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)] public string dmDeviceName; public short dmSpecVersion, dmDriverVersion, dmSize, dmDriverExtra; public int dmFields;
+              public int dmPositionX, dmPositionY, dmDisplayOrientation, dmDisplayFixedOutput; public short dmColor, dmDuplex, dmYResolution, dmTTOption, dmCollate;
+              [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)] public string dmFormName; public short dmLogPixels; public int dmBitsPerPel, dmPelsWidth, dmPelsHeight, dmDisplayFlags, dmDisplayFrequency, dmICMMethod, dmICMIntent, dmMediaType, dmDitherType, dmReserved1, dmReserved2, dmPanningWidth, dmPanningHeight; }
+            [DllImport("user32.dll")] public static extern bool EnumDisplaySettings(string deviceName, int modeNum, ref DEVMODE devMode);
+            [DllImport("user32.dll")] public static extern int ChangeDisplaySettings(ref DEVMODE devMode, int flags);
+            public static int Set(int width, int height) {
+              var mode = new DEVMODE(); mode.dmSize = (short)Marshal.SizeOf(typeof(DEVMODE));
+              if (!EnumDisplaySettings(null, -1, ref mode)) return -100;
+              mode.dmPelsWidth = width; mode.dmPelsHeight = height; mode.dmFields = 0x80000 | 0x100000;
+              return ChangeDisplaySettings(ref mode, 0);
+            }
+          }
+          '@
+            "ChangeDisplaySettings 1920x1080 -> $([Display]::Set(1920, 1080)) (0 = DISP_CHANGE_SUCCESSFUL)"
+            Start-Sleep -Seconds 2
+          }
+          $after = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+          "screen before $($before.Width)x$($before.Height), after $($after.Width)x$($after.Height)"
       - name: Fetch and verify product QEMU
         env:
           GH_TOKEN: ${{ github.token }}
@@ -87,7 +162,13 @@ jobs:
           node ../ci/dod/run-dod.mjs
           $code = $LASTEXITCODE
           $result = Get-Content (Join-Path $env:OME_DOD_OUTPUT 'dod-result.json') -Raw | ConvertFrom-Json
-          if ($code -ne 0 -or $result.outcome -ne 'passed' -or @($result.steps | Where-Object outcome -eq 'failed').Count) {
+          $failedSteps = @($result.steps | Where-Object outcome -eq 'failed')
+          "driver exit code $code, outcome $($result.outcome), failed steps: $($failedSteps.name -join ', ')"
+          # 'needs-review' means every step passed and only the game screenshots await a human eye
+          # (the driver never certifies a running game by itself); it is not a failure of the run.
+          if ($result.outcome -eq 'needs-review' -and !$failedSteps.Count) {
+            Write-Output '::notice title=M2 wizard completion::All driver steps passed; game screenshots need visual review'
+          } elseif ($code -ne 0 -or $result.outcome -ne 'passed' -or $failedSteps.Count) {
             throw 'Wizard completion failed; see dod-result.json and screenshots'
           }
       - name: Check and stage evidence only
