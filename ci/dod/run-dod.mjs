@@ -84,13 +84,18 @@ async function step(name, fn) {
 async function freePort() {
   await new Promise((resolve, reject) => { const s = net.createServer(); s.once('error', reject); s.listen(port, '127.0.0.1', () => s.close(resolve)); });
 }
-async function qemuWindow() {
+// `excludePid` is the installer's QEMU: after 설치 완료 the product sends system_powerdown, the
+// installer's userspace ignores it, and the supervisor kills the process at its 30 s deadline
+// (ome-supervisor STOP_DEADLINE) before starting the installed disk. Until then the snapshot still
+// names the old process, and the first boot's window is the one with a new PID.
+async function qemuWindow(excludePid = null, timeout = 30000) {
   return until(async () => {
     const s = await snapshot(); rememberProcesses();
-    if (!s.guest.pid || !ownedQemu.has(s.guest.pid)) return false;
+    if (!s.guest.pid || !ownedQemu.has(s.guest.pid) || s.guest.pid === excludePid) return false;
     native(['-AppPid', String(app.pid), '-QemuPid', String(s.guest.pid)]); return s.guest.pid;
-  }, 30000, 'owned SDL_app');
+  }, timeout, 'owned SDL_app');
 }
+let installerQemuPid = null;
 // Installer and GRUB keys go the way a person's do: into the product window, whose webview forwards
 // each press and release to QEMU over QMP (`input-send-event`). Before the guest reports its boot
 // marker the ome-input gate passes every key through raw, profile bindings included, so this path is
@@ -444,7 +449,7 @@ try {
         await resume.click(); await click('다시 시작'); pid = await qemuWindow();
       } else throw error;
     }
-    await installGuest(pid); result.measurements.installMs = Date.now() - start;
+    await installGuest(pid); result.measurements.installMs = Date.now() - start; installerQemuPid = pid;
     await capture('06-install-complete'); await click('설치 완료');
   });
   await step('S1.6-first-boot', async () => {
@@ -455,7 +460,7 @@ try {
     const softwareRendering = result.softwareRenderingRetry || (await snapshot()).settings.gpuMode === 'software';
     result.measurements.softwareRendering = softwareRendering;
     if (softwareRendering) {
-      const pid = await qemuWindow();
+      const pid = await qemuWindow(installerQemuPid, 120000);
       // Keys before the menu would reach the firmware (docs/evidence/M2/embedded-display-freeze.md).
       await waitGrubMenu(pid, 'first-boot-grub-menu');
       await keys(pid, '29-disk-vm-options', 'HOME,DOWN,DOWN,DOWN,DOWN,ENTER', null, 500);
