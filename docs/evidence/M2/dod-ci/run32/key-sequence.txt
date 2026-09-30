@@ -1,0 +1,6 @@
+{"at":"2026-09-30T10:02:04.808Z","event":"installer-input","label":"01a-grub-home","path":"product","settled":true,"foreground":524342,"sent":["Home"]}
+{"at":"2026-09-30T10:02:09.533Z","event":"installer-input","label":"01a-grub-down-1","path":"product","settled":true,"foreground":524342,"sent":["ArrowDown"]}
+{"at":"2026-09-30T10:02:13.771Z","event":"installer-input","label":"01a-grub-down-2","path":"product","settled":true,"foreground":524342,"sent":["ArrowDown"]}
+{"at":"2026-09-30T10:02:18.035Z","event":"installer-input","label":"01a-grub-down-3","path":"product","settled":true,"foreground":524342,"sent":["ArrowDown"]}
+{"at":"2026-09-30T10:02:23.323Z","event":"installer-input","label":"01a-grub-down-4","path":"product","settled":true,"foreground":524342,"sent":["ArrowDown"]}
+{"at":"2026-09-30T10:02:28.527Z","event":"installer-input","label":"01-grub-installation","path":"product","settled":true,"foreground":524342,"sent":["Enter"]}

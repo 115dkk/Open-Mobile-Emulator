@@ -304,3 +304,22 @@ UEFI System detected! Please select a (ESP) partition as EFI System Partition �
 둘째 파티션은 표의 `Linux filesystem`, 쓰기는 `W` 뒤 "Are you sure"와 `yes` Enter 뒤 "altered"
 (거부되면 세 번까지), 종료는 설치기의 "Choose Partition"으로 확인한다. 판독은 2를 Z, v를 u, W를 U로
 읽으므로 패턴이 그 변형을 허용한다.
+
+### 32회 (2026-09-30 09:54~10:06 UTC): DOWN 하나가 사라져 PC-Mode Live로 들어갔다
+
+제품 키 경로로 HOME과 DOWN 넷을 보냈고 모두 `settled`였는데, 넷째 DOWN 뒤 선택은 넷째 항목 `Live PC-Mode
+w/ FFMPEG`에 있었다(`run32/grub-down-4-pc-mode-selected.png`). 키 하나가 게스트에 닿지 않은 것이다.
+Enter는 그 Live 항목을 부팅했고 콘솔에 "PC MODE … will not work once … modules are loaded" 배너가 남은 채
+표준 VGA에서 초기 사용자 공간이 멈췄다(M0 시도 4와 같은 증상). 드라이버는 파티션 대화 상자를 180초 기다리다
+끝났다. 30회의 첫 글자 유실과 같은 종류다. 전경 도우미는 주창이 전경이라고 보고했으므로 키가 떨어지는
+순간은 그 보고 사이에 있다. 도우미가 이제 정착 뒤 600 ms 동안 전경을 12번 표본해 주창이 아닌 창의
+클래스·PID·제목을 적는다(다음 회차의 진단).
+
+키를 믿는 대신 화면으로 확인한다. `native.ps1 -Highlight`는 게스트 캡처에서 GRUB 테마의 선택 막대(가로로
+넓은 파란 픽셀 띠)와 항목 행(글 왼쪽 열의 파란 연꽃·꺾쇠 아이콘, 선택 행에서는 흰색)을 찾아 선택된 행
+번호와 항목 수를 돌려준다. 규칙은 모두 창 크기의 비율이라 러너의 872x608과 개발 PC의 1744x1216에서 같은
+답을 낸다(`run32/grubrow-prototype.py`, 27~32회와 개발 PC 프레임에서 0·1·7·1·4·3행을 맞게 읽었다).
+드라이버의 `grubSelect`는 프레임을 읽고 목표 행과 다르면 DOWN 또는 UP을 하나 보낸 뒤 다시 읽기를 목표에
+닿을 때까지(최대 14프레임) 되풀이하고, 항목 수가 기대(주 메뉴 8, VM Options 4)와 다르면 멈춘다. 설치기
+GRUB(Installation, 5행)과 첫 부팅의 설치된 GRUB(VM Options 5행, 하위 메뉴 No HW Acceleration 2행) 모두
+이 방식이다.

@@ -63,9 +63,11 @@ async function snapshot() {
   const s = await withTimeout(page.evaluate(() => window.__TAURI_INTERNALS__.invoke('app_snapshot')), 20000, 'app_snapshot invoke');
   log('snapshot', { snapshot: s }); return s;
 }
-async function capture(name, qemuPid) {
-  log('capture', { name, ...native(['-AppPid', String(app.pid), ...(qemuPid ? ['-QemuPid', String(qemuPid)] : []), '-Shot', path.join(output, 'shots', `${name}.png`)]) });
+async function capture(name, qemuPid, options = {}) {
+  const shot = native(['-AppPid', String(app.pid), ...(qemuPid ? ['-QemuPid', String(qemuPid)] : []), '-Shot', path.join(output, 'shots', `${name}.png`), ...(options.highlight ? ['-Highlight'] : [])]);
+  log('capture', { name, ...shot });
   fs.writeFileSync(path.join(output, `${name}.txt`), scrub(await page.locator('body').innerText()), 'utf8');
+  return shot;
 }
 async function desktopCapture(name) {
   try { log('desktop', { name, ...native(['-AppPid', String(app.pid), '-Desktop', '-Shot', path.join(output, 'shots', `${name}.png`)]) }); }
@@ -222,6 +224,22 @@ const CFDISK = {
   linuxFilesystem: /Linux\s*fi\s*lesyste/i,
   typeList: /Linux\s*(root|swap|home|server)|EFI\s*Syste|BIOS\s*boot/i,
 };
+// Moves the GRUB selection to `targetRow` one key at a time, reading the selection bar from each
+// frame (native.ps1 -Highlight). A lost or repeated key is corrected by the next frame instead of
+// trusted (CI runs 27 and 32 each booted the wrong entry after blind Down presses).
+async function grubSelect(pid, prefix, targetRow, expectedRows) {
+  let frame = 0;
+  for (let attempt = 0; attempt < 14; attempt++) {
+    const shot = await capture(`${prefix}-${String(frame++).padStart(2, '0')}`, pid, { highlight: true });
+    const highlight = shot.highlight;
+    if (!highlight || highlight.row < 0) { await delay(500); continue; }
+    if (highlight.entries.length !== expectedRows) throw new StopRun(`GRUB menu shows ${highlight.entries.length} rows, expected ${expectedRows}: ${JSON.stringify(highlight)}`);
+    if (highlight.row === targetRow) { log('grub-selected', { prefix, row: highlight.row, entries: highlight.entries }); return highlight; }
+    const key = highlight.row < targetRow ? 'DOWN' : 'UP';
+    await keys(pid, `${prefix}-${String(frame++).padStart(2, '0')}-${key.toLowerCase()}`, key, null, 600);
+  }
+  throw new StopRun(`GRUB selection did not reach row ${targetRow} within 14 frames`);
+}
 async function installGuest(pid) {
   // Move the webview focus off the create/completion button with a real noninteractive UI click.
   // While the stage is active the product forwards every key to the guest and prevents the default.
@@ -233,7 +251,9 @@ async function installGuest(pid) {
   await waitGrubMenu(pid, 'installer-00-grub-menu');
   await snapshot();
   await keys(pid, '01a-grub-home', 'HOME');
-  for (let arrow = 1; arrow <= 4; arrow++) await keys(pid, `01a-grub-down-${arrow}`, 'DOWN');
+  // ISO menu: Live, Live w/ FFMPEG, Live PC-Mode, Live PC-Mode w/ FFMPEG, Installation, VM Options,
+  // Debugging, Advanced options (docs/evidence/M0/guest-install.md).
+  await grubSelect(pid, 'installer-01a-grub-select', 4, 8);
   await keys(pid, '01-grub-installation', 'ENTER', null, 3000);
   // The installer's first dialog took 30 s in runs 29 and 30 and longer in run 31: poll for it.
   await waitScreen(pid, 'installer-01-partition-dialog', /partit\s*ion/i, 180000);
@@ -514,8 +534,14 @@ try {
       const pid = await qemuWindow(installerQemuPid, 120000);
       // Keys before the menu would reach the firmware (docs/evidence/M2/embedded-display-freeze.md).
       await waitGrubMenu(pid, 'first-boot-grub-menu');
-      await keys(pid, '29-disk-vm-options', 'HOME,DOWN,DOWN,DOWN,DOWN,ENTER', null, 500);
-      await keys(pid, '30-disk-boot', 'HOME,DOWN,ENTER', null, 3000);
+      // Installed menu: four Bliss entries, VM Options, Debugging, Advanced options, BlissOS at
+      // hd0,gpt1; VM Options holds Virgl, No HW Acceleration and their debug variants.
+      await keys(pid, '29a-grub-home', 'HOME');
+      await grubSelect(pid, 'first-boot-grub-select', 4, 8);
+      await keys(pid, '29-disk-vm-options', 'ENTER', null, 1500);
+      await waitGrubMenu(pid, 'first-boot-vm-options-menu');
+      await grubSelect(pid, 'first-boot-vm-select', 1, 4);
+      await keys(pid, '30-disk-boot', 'ENTER', null, 3000);
     } else log('first-boot-default', { note: 'Normal virgl path: leave installed GRUB default unchanged; no keys sent.' });
     const s = await until(async () => { const s = await snapshot(); return s.guest.bootCompleted && s.guest.capabilities.items.some(i => i.state !== 'unknown') && s; }, 10 * 60000, 'first boot and probe', 3000);
     result.measurements.firstBootMs = Date.now() - start; result.probeItems = s.guest.capabilities.items;
