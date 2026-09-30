@@ -323,3 +323,13 @@ Enter는 그 Live 항목을 부팅했고 콘솔에 "PC MODE … will not work on
 닿을 때까지(최대 14프레임) 되풀이하고, 항목 수가 기대(주 메뉴 8, VM Options 4)와 다르면 멈춘다. 설치기
 GRUB(Installation, 5행)과 첫 부팅의 설치된 GRUB(VM Options 5행, 하위 메뉴 No HW Acceleration 2행) 모두
 이 방식이다.
+
+### 33회 (2026-09-30 10:11~10:20 UTC): 판독기가 컴파일되지 않았다
+
+GRUB 메뉴까지 갔고 첫 `-Highlight` 캡처에서 멈췄다. `Add-Type -ReferencedAssemblies`에 System.Drawing만
+넘기자 러너의 pwsh가 기본 참조 집합을 빼 `List<>`를 못 찾았고, 결과 변수 `$highlight`는 스위치 `$Highlight`와
+같은 변수라(PowerShell은 대소문자를 가리지 않는다) 일반 캡처의 JSON에 스위치 객체가 실렸다. 판독기를 컴파일
+없는 PowerShell 함수(`Get-GrubHighlight`, GetPixel 표본 약 3만 개)로 바꾸고 변수 이름을 `$grubHighlight`로
+나눴다. 이 컨테이너에 pwsh 7.5.2를 받아 캡처 프레임의 RGB 덤프를 가짜 비트맵으로 넣어 돌린 결과
+(`run32/grub-highlight-mock-test.ps1`), 27·29·32회와 개발 PC 프레임에서 0·7·4·3·(메뉴 없음)·0행을 맞게
+읽었고 프레임당 0.4~1.7초였다.
