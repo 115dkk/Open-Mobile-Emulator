@@ -2406,9 +2406,13 @@ impl AppRuntime {
             let boot_timeout = Duration::from_secs(180);
             #[cfg(test)]
             let boot_timeout = self.boot_timeout_override.unwrap_or(boot_timeout);
-            if self
-                .boot_started
-                .is_some_and(|started| started.elapsed() >= boot_timeout)
+            // The installer session boots the ISO without adb and runs as long as the person
+            // takes; the deadline is for a boot that should have reached Android
+            // (dev PC rounds 17 and 18, 2026-10-01: the stop landed 180 s into the install).
+            if !self.installing_guest
+                && self
+                    .boot_started
+                    .is_some_and(|started| started.elapsed() >= boot_timeout)
             {
                 self.boot_timeout_pending = true;
                 if let Some(supervisor) = self.deps.supervisor.as_deref() {
@@ -4770,6 +4774,33 @@ mod tests {
                 .kind,
             ExitKind::BootTimeout
         );
+    }
+
+    #[test]
+    fn installer_session_is_exempt_from_the_boot_timeout() {
+        let (_directory, mut runtime, supervisor, _runner) = lifecycle_runtime(
+            std::iter::empty(),
+            RecordingDesktop::default(),
+            RecordingWindow::embedded(),
+        );
+        runtime.ingest_guest_event(guest_event(
+            ome_supervisor::GuestState::Starting,
+            None,
+            None,
+        ));
+        runtime.ingest_guest_event(guest_event(
+            ome_supervisor::GuestState::Running,
+            Some(11),
+            None,
+        ));
+        runtime.installing_guest = true;
+        runtime.boot_timeout_override = Some(Duration::ZERO);
+        runtime.tick();
+        assert_eq!(*supervisor.stop_requests.lock().expect("stop lock"), 0);
+
+        runtime.installing_guest = false;
+        runtime.tick();
+        assert_eq!(*supervisor.stop_requests.lock().expect("stop lock"), 1);
     }
 
     #[test]
