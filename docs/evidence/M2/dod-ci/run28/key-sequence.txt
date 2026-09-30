@@ -1,0 +1,4 @@
+{"at":"2026-09-30T09:31:20.293Z","event":"installer-ocr","name":"installer-00-grub-menu-00","scale":2,"height":608,"width":872,"language":"en-US","text":""}
+{"at":"2026-09-30T09:31:24.072Z","event":"installer-ocr","name":"installer-00-grub-menu-01","scale":2,"height":608,"width":872,"language":"en-US","text":"Acvarcet.:l zvptiüFIE. EnLer: BOOL SelecLed E: Edit Selected C: Grub Tet rni[ldl"}
+{"at":"2026-09-30T09:31:26.757Z","event":"installer-input","label":"01a-grub-home","path":"product","hwnd":589920,"foreground":589920,"sent":["Home"]}
+{"at":"2026-09-30T09:31:31.867Z","event":"installer-input","label":"01a-grub-down-1","path":"product","hwnd":589920,"foreground":918110,"sent":["ArrowDown"]}

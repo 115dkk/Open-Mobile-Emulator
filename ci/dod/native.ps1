@@ -5,7 +5,8 @@ param(
  [int]$Width=0, [int]$Height=0, [int]$X=80, [int]$Y=60,
  [switch]$Quit, [switch]$Inventory, [string]$HomePath,
  [string]$Keys, [string]$Text, [string]$FilePath, [switch]$GameSelection,
- [int]$KillOwnedPid, [string]$ExpectedCreation, [switch]$WaitInstaller, [switch]$Desktop, [switch]$Close
+ [int]$KillOwnedPid, [string]$ExpectedCreation, [switch]$WaitInstaller, [switch]$Desktop, [switch]$Close,
+ [switch]$Foreground
 )
 $ErrorActionPreference='Stop'
 [Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)
@@ -184,6 +185,21 @@ if ($Keys -or $Text) {
  }}
  if($Text){[W]::Focus($main);[W]::Type($Text)}
  @{action='keys';hwnd=$h.ToInt64();pid=[W]::Pid($h);keys=$Keys;text=$Text} | ConvertTo-Json -Compress
+ exit
+}
+if($Foreground){
+ # Bring the main window to the foreground for the product's key gate and report what holds the
+ # foreground afterwards without refusing: on the hosted runner another window briefly takes it back
+ # (CI run 28, hwnd 918110 once), and the screenshot after each key is the check that matters.
+ $settled=$false; $until=[DateTime]::UtcNow.AddSeconds(3)
+ do {
+  try { [W]::Focus($main) } catch { }
+  Start-Sleep -Milliseconds 150
+  if([W]::GetForegroundWindow() -eq $main){ $settled=$true; break }
+ } until([DateTime]::UtcNow -gt $until)
+ $fg=[W]::GetForegroundWindow()
+ $title=[Text.StringBuilder]::new(256); [void][W]::GetWindowText($fg,$title,256)
+ @{action='foreground';settled=$settled;main=$main.ToInt64();foreground=$fg.ToInt64();foregroundClass=[W]::Class($fg);foregroundPid=[W]::Pid($fg);foregroundTitle=$title.ToString()} | ConvertTo-Json -Compress
  exit
 }
 if($Close){

@@ -114,7 +114,8 @@ async function sdlKeys(pid, label, keySequence, text, waitMs) {
 async function keys(pid, label, keySequence, text, waitMs = 800) {
   if (process.env.OME_DOD_SDL_KEYS === '1') return sdlKeys(pid, label, keySequence, text, waitMs);
   // The gate admits keys only while the main window is the foreground window.
-  const focus = native(['-AppPid', String(app.pid)]);
+  const focus = native(['-AppPid', String(app.pid), '-Foreground']);
+  if (!focus.settled) log('foreground-unsettled', { label, ...focus });
   const sent = [];
   for (const key of keySequence ? keySequence.split(',') : []) {
     const browser = BROWSER_KEYS[key];
@@ -128,7 +129,7 @@ async function keys(pid, label, keySequence, text, waitMs = 800) {
     if (!chord) throw new StopRun(`Unmapped character ${JSON.stringify(character)}`);
     await page.keyboard.press(chord); sent.push(chord); await delay(120);
   }
-  log('installer-input', { label, path: 'product', hwnd: focus.hwnd, foreground: focus.foreground, sent });
+  log('installer-input', { label, path: 'product', settled: focus.settled, foreground: focus.foreground, sent });
   await delay(waitMs); await capture(`installer-${label}`, pid);
 }
 function recognize(name) {
@@ -216,7 +217,7 @@ async function installGuest(pid) {
     throw new StopRun('cfdisk did not show both EFI System and Linux filesystem before Quit; refusing installer input');
   }
   const deadline = Date.now() + 12 * 60000;
-  let espFormatted = false, formatTarget, previousScreen, acted = false, unknownSince;
+  let espFormatted = false, formatTarget, previousScreen, acted = false, unknownSince, actedAt, attempts = 0;
   let check = 0, actionNumber = 30, errors = 0, done = false;
   const lastTexts = [];
   while (Date.now() < deadline) {
@@ -228,7 +229,12 @@ async function installGuest(pid) {
     const text = installerText(recognize(label));
     const screen = installerScreen(text);
     lastTexts.push(text); if (lastTexts.length > 4) lastTexts.shift();
-    if (screen !== previousScreen) acted = false;
+    if (screen !== previousScreen) { acted = false; attempts = 0; }
+    // A key the product's gate dropped (the main window lost the foreground for a moment) leaves the
+    // screen unchanged; one more attempt after 20 s, never a third, keeps a slow screen from doubling up.
+    else if (acted && attempts < 2 && Date.now() - actedAt >= 20000 && !['installing', 'warning-countdown', 'done', 'unknown'].includes(screen)) {
+      log('installer-retry', { screen, attempts }); acted = false;
+    }
     previousScreen = screen;
     if (screen === 'unknown') unknownSince ??= Date.now(); else unknownSince = undefined;
     let action = 'wait', sequence;
@@ -267,7 +273,7 @@ async function installGuest(pid) {
       catch (error) { await installerPid(pid); throw error; }
       await installerPid(pid);
       if (screen === 'confirm-format' && formatTarget === 'esp') espFormatted = true;
-      acted = true;
+      acted = true; actedAt = Date.now(); attempts++;
     }
   }
   if (!done) throw new StopRun(`Installer exceeded 12 minutes: ${JSON.stringify(lastTexts)}`);

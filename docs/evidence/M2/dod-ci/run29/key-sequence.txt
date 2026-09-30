@@ -1,0 +1,10 @@
+{"at":"2026-09-30T09:32:14.263Z","event":"installer-ocr","name":"installer-00-grub-menu-00","scale":2,"height":608,"width":872,"language":"en-US","text":""}
+{"at":"2026-09-30T09:32:16.310Z","event":"installer-ocr","name":"installer-00-grub-menu-01","scale":2,"height":608,"width":872,"language":"en-US","text":""}
+{"at":"2026-09-30T09:32:18.598Z","event":"installer-ocr","name":"installer-00-grub-menu-02","scale":2,"height":608,"width":872,"language":"en-US","text":"Acvarcet.:l zvptiüFIE. EnLer: BOOL SelecLed E: Edit Selected C: Grub Tet rni[ldl"}
+{"at":"2026-09-30T09:32:20.974Z","event":"installer-input","label":"01a-grub-home","path":"product","hwnd":459072,"foreground":459072,"sent":["Home"]}
+{"at":"2026-09-30T09:32:24.687Z","event":"installer-input","label":"01a-grub-down-1","path":"product","hwnd":459072,"foreground":459072,"sent":["ArrowDown"]}
+{"at":"2026-09-30T09:32:29.453Z","event":"installer-input","label":"01a-grub-down-2","path":"product","hwnd":459072,"foreground":459072,"sent":["ArrowDown"]}
+{"at":"2026-09-30T09:32:33.488Z","event":"installer-input","label":"01a-grub-down-3","path":"product","hwnd":459072,"foreground":459072,"sent":["ArrowDown"]}
+{"at":"2026-09-30T09:32:37.540Z","event":"installer-input","label":"01a-grub-down-4","path":"product","hwnd":459072,"foreground":459072,"sent":["ArrowDown"]}
+{"at":"2026-09-30T09:32:41.577Z","event":"installer-input","label":"01-grub-installation","path":"product","hwnd":459072,"foreground":459072,"sent":["Enter"]}
+{"at":"2026-09-30T09:33:14.393Z","event":"installer-ocr","name":"installer-01-grub-installation","scale":2,"height":608,"width":872,"language":"en-US","text":"Made by Androi d—x86 Project , Modif ied by Bl issLabs & Contributors Choose Partition UEFI System detected ! Please select a (ESP ) Hint: If you chose ESP already but got choose ESP aga in, no need to format if Part ition I Fi lesystem I Label partition as EFI System Partition restarted to this stage, please you already did . I Size I Drive namezmodel CreatezMod ify partit ions Restart the instal ler Open command—I ine shell Skip (Not Recommended) 0K > <Reboot>"}
