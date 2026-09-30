@@ -128,7 +128,9 @@ if ($Desktop) {
   try{$g.CopyFromScreen($bounds.Left,$bounds.Top,0,0,$b.Size);$b.Save($Shot,[Drawing.Imaging.ImageFormat]::Png)}finally{$g.Dispose();$b.Dispose()}
  }
  $processes=@(Get-CimInstance Win32_Process -Filter "ProcessId = $AppPid OR ParentProcessId = $AppPid" | ForEach-Object { @{pid=[int]$_.ProcessId;name=$_.Name;command=$_.CommandLine} })
- @{action='desktop';screen="$($bounds.Width)x$($bounds.Height)";foreground=[W]::GetForegroundWindow().ToInt64();windows=$windows;processes=$processes;shot=$Shot} | ConvertTo-Json -Depth 6 -Compress
+ $fg=[W]::GetForegroundWindow(); $fgTitle=[Text.StringBuilder]::new(512); [void][W]::GetWindowText($fg,$fgTitle,512)
+ $foregroundWindow=@{hwnd=$fg.ToInt64();pid=[W]::Pid($fg);class=[W]::Class($fg);title=$fgTitle.ToString()}
+ @{action='desktop';screen="$($bounds.Width)x$($bounds.Height)";foreground=$fg.ToInt64();foregroundWindow=$foregroundWindow;windows=$windows;processes=$processes;shot=$Shot} | ConvertTo-Json -Depth 6 -Compress
  exit
 }
 # GRUB gfxmenu geometry from the capture: the selection bar is a wide run of blue pixels, the entry

@@ -214,11 +214,26 @@ async function installerPid(pid) {
 const GRUB_MENU = /installation|edit\s*selected|boot\s*selected|grub\s*te/i;
 async function waitGrubMenu(pid, prefix) {
   let attempt = 0;
-  await until(async () => {
-    const name = `${prefix}-${String(attempt++).padStart(2, '0')}`;
-    await capture(name, pid);
-    return GRUB_MENU.test(recognize(name));
-  }, 60000, `${prefix} GRUB menu`, 100);
+  try {
+    await until(async () => {
+      const name = `${prefix}-${String(attempt++).padStart(2, '0')}`;
+      await capture(name, pid);
+      return GRUB_MENU.test(recognize(name));
+    }, 60000, `${prefix} GRUB menu`, 100);
+  } catch (error) {
+    // The stage capture is a screen copy, so a window over the stage is what the OCR reads (dev PC
+    // round 30: the person's chat window covered the stage and the ISO GRUB timed out into the
+    // default entry). Name that window so the failure is attributed to the desktop, not the product.
+    let desktop = null;
+    try { desktop = native(['-AppPid', String(app.pid), '-Desktop']); } catch {}
+    const foreground = desktop?.foregroundWindow;
+    const family = desktop?.processes?.map(p => p.pid) ?? [];
+    if (foreground && !family.includes(foreground.pid) && !ownedQemu.has(foreground.pid)) {
+      log('stage-occluded', { prefix, foreground });
+      throw new StopRun(`${error.message}; the foreground window belongs to another program (${foreground.class} "${foreground.title}", pid ${foreground.pid}), so the stage was covered while the menu was awaited`);
+    }
+    throw error;
+  }
 }
 // Waits until the guest screen reads `pattern`, keeping every frame as `${label}-NN`; returns the text.
 // Console OCR at this scale turns 2 into Z, v into u and W into U, so callers write tolerant patterns.
