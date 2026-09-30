@@ -182,7 +182,8 @@ function installerScreen(text) {
   if (has('ota')) return 'ota-confirm';
   if (has('grub2') || has('choose efi boot')) return 'efi-boot-chooser';
   // Console OCR reads Confirm as "Cont Irm", Question as "Uuestion" and Would as "Uould" (CI run 39).
-  if (/con[ft][il]rm/.test(words) && has('format')) return 'confirm-format';
+  // "Cont Irm" on the runner, "Cont Irn" on the dev PC (round 16).
+  if (/con[ft][il1]r[mn]/.test(words) && has('format')) return 'confirm-format';
   // The title reads "Uuestion" on the runner and "wuesuon" on the dev PC (round 15), so the body
   // sentence identifies the question as well.
   if ((/[qwu]ues[tu]i?on/.test(words) && (has('label') || has('customize') || has('drive name')))
