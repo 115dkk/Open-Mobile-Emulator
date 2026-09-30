@@ -44,6 +44,7 @@ CPUID, `WinHvPlatform.dll`)이라 이 느림과는 무관하다.
 | 21 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36674900503) | e3b3c99 | 실패(`S1.5-installer`) | 표준 사용자로 CDP 접속 성공. 호스트 점검 8행 통과, WHPX 동의 건너뜀, ISO 2.4 GB 64초에 내려받아 검증, 디스크 만들기까지. QEMU가 `Could not initialize DirectSound: No sound driver is available`로 곧 종료(러너에 오디오 장치 없음) |
 | 22 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36675968945) | 1e8ebde | 실패(`S1.5-installer`) | 오디오는 `none`으로 넘어감(명령줄에 `-audiodev` 없음). 내려받기 38.8초(캐시 없음, 두 번째 받기). QEMU가 `No provider of glCreateShader found. Requires one of: Desktop OpenGL 2.0 / OpenGL ES 2.0 / GL_ARB_shader_objects`로 종료. 러너의 WGL 기본 컨텍스트는 GDI Generic 1.1 |
 | 23 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36677213522) | e6433d0 | 실패(`S1.4-download`) | OpenGL 조사가 동작해 시작 알림 "하드웨어 가속 그래픽이 없어 소프트웨어 렌더링으로 설정" 남고 `gpuMode: software`. 이번 SourceForge 미러는 3 MB/s였고 953 MB에서 전송이 끊겨 `artifact_download_failed`. 코드 밖의 일 |
+| 24 (https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36678351622) | 3f9f7ce | 취소(117분 뒤 손으로) | 드라이버는 06:33에 시작해 스스로 끝났지만(끝난 시각 미상) 워크플로의 `Start-Process -Wait`가 제품이 띄운 adb 서버(자손)를 기다리며 멈췄고, 그 adb가 출력 파일 핸들을 쥐고 있어 증거 게시도 실패. 잡 정리에서 고아 프로세스로 `adb`(pid 2120)만 종료됨. 드라이버 출력은 남지 않음 |
 
 ### 16회 (2026-09-30 01:39~03:42 UTC)
 
@@ -175,3 +176,15 @@ WGL이라 쓰이지 않는다.
 그대로 실패). 정리 단계의 트레이 `종료`는 이번에도 메뉴가 열리지 않았다. 러너에서는 제품이 바탕 화면의
 explorer와 다른 사용자로 돌아 알림 아이콘이 등록되지 않는 것으로 보이므로, 드라이버는 그때 창 닫기
 (WM_CLOSE, 제품의 닫기 동작)로 끝내고 빈자리로 적는다.
+
+### 24회 (2026-09-30 06:28~08:30 UTC): 드라이버는 끝났는데 워크플로가 adb 서버를 기다렸다
+
+이 회차의 드라이버 출력은 남지 않았다. 워크플로가 드라이버의 표준 출력을 `Start-Process -Wait`가 돌아온 뒤
+잡 로그에 싣는데, `-Wait`는 지정한 프로세스의 모든 자손이 끝날 때까지 기다린다. 잡 정리가 종료한 고아
+프로세스는 `adb`(pid 2120) 하나뿐이었고 ome.exe, QEMU, node는 없었다. 즉 드라이버는 스스로 끝났고(결과는
+미상), 제품이 띄운 adb 서버만 남아 `-Wait`를 붙들었으며, 그 adb가 물려받은 출력 파일 핸들 때문에
+증거 게시 단계도 "being used by another process"로 실패했다. 117분 뒤 손으로 취소했다.
+
+고침: `Start-Process -PassThru` 뒤 `WaitForExit(115분)`으로 드라이버 프로세스 하나만 기다리고, 끝나면
+`omeuser` 소유의 adb·제품·QEMU·WebView2·node·powershell 프로세스를 종료한 뒤 출력을 싣는다. 증거 단계도
+읽기 전에 같은 정리를 한다.

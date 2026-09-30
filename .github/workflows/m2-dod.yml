@@ -197,8 +197,22 @@ jobs:
             '-GameDir', (Join-Path $fixtures 'com.epidgames.trickcalrevive'),
             '-Output', $env:OME_DOD_OUTPUT, '-UserRoot', $userRoot)
           $credential = [pscredential]::new($user, $secure)
-          $process = Start-Process -FilePath (Get-Command pwsh).Source -ArgumentList $arguments -WorkingDirectory (Join-Path $repo 'host') -Credential $credential -LoadUserProfile -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru -Wait
-          $code = $process.ExitCode
+          # Not -Wait: it waits for every descendant, and the adb server the product starts outlives the
+          # driver and holds the redirected output handle (run 24 sat two hours after the driver ended).
+          $process = Start-Process -FilePath (Get-Command pwsh).Source -ArgumentList $arguments -WorkingDirectory (Join-Path $repo 'host') -Credential $credential -LoadUserProfile -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru
+          if (!$process.WaitForExit(115 * 60 * 1000)) {
+            "driver still running after 115 minutes; stopping it"
+            Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+            $process.WaitForExit(30000) | Out-Null
+          }
+          $process.Refresh(); $code = $process.ExitCode
+          # Whatever the driver's user left behind (adb server, a product or QEMU the cleanup could not
+          # own) goes now, so the output files are released and the evidence step can read them.
+          $names = @('adb.exe', 'ome.exe', 'qemu-system-x86_64.exe', 'msedgewebview2.exe', 'node.exe', 'powershell.exe', 'pwsh.exe', 'conhost.exe')
+          foreach ($leftover in Get-CimInstance Win32_Process | Where-Object { $names -contains $_.Name }) {
+            $owner = Invoke-CimMethod -InputObject $leftover -MethodName GetOwner -ErrorAction SilentlyContinue
+            if ($owner.User -eq $user) { "leftover of ${user}: $($leftover.Name) pid $($leftover.ProcessId)"; Stop-Process -Id $leftover.ProcessId -Force -ErrorAction SilentlyContinue }
+          }
           "== driver stdout =="; Get-Content $stdout
           "== driver stderr =="; Get-Content $stderr
           $resultPath = Join-Path $env:OME_DOD_OUTPUT 'dod-result.json'
@@ -220,6 +234,13 @@ jobs:
           OME_DOD_OUTPUT: ${{ runner.temp }}\ome-dod-evidence
         run: |
           if (!(Test-Path $env:OME_DOD_OUTPUT)) { throw 'No evidence folder was produced' }
+          # A cancelled or stopped wizard step leaves the standard user's processes holding the output
+          # files; release them before reading (run 24).
+          $names = @('adb.exe', 'ome.exe', 'qemu-system-x86_64.exe', 'msedgewebview2.exe', 'node.exe', 'powershell.exe', 'pwsh.exe')
+          foreach ($leftover in Get-CimInstance Win32_Process | Where-Object { $names -contains $_.Name }) {
+            $owner = Invoke-CimMethod -InputObject $leftover -MethodName GetOwner -ErrorAction SilentlyContinue
+            if ($owner.User -eq 'omeuser') { "leftover: $($leftover.Name) pid $($leftover.ProcessId)"; Stop-Process -Id $leftover.ProcessId -Force -ErrorAction SilentlyContinue }
+          }
           $publish = Join-Path $env:RUNNER_TEMP 'ome-dod-publish'
           pwsh -NoProfile -File ci/dod/publish-evidence.ps1 -Source $env:OME_DOD_OUTPUT -Destination $publish
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
