@@ -345,11 +345,16 @@ async function installGuest(pid) {
   // the prompt line, and the retry clears and types again.
   await keysUntil(pid, '06-esp-size', `${Array(8).fill('BACKSPACE').join(',')},5,1,2,M`, null, CFDISK.size512M, { settleMs: 6000, retryWhen: CFDISK.sizePrompt });
   await keysUntil(pid, '07-create-esp', 'ENTER', null, CFDISK.row512M, { retryWhen: CFDISK.sizePrompt });
-  // libfdisk lists GPT types as MBR partition scheme, EFI System, BIOS boot, ...: EFI System is second
-  // (CI run 30 landed on the first). Reopen the list when the table shows anything else.
+  // The type list opens on Linux filesystem; Home goes to its first entry. CI run 38 read the list
+  // as EFI System, MBR partition scheme, Intel Fast Flash, ... (run 30 had landed on MBR partition
+  // scheme with Home, Enter), so the list text decides how many Down presses EFI System needs.
   for (let attempt = 1; ; attempt++) {
-    await keysUntil(pid, `08-type-list${attempt > 1 ? `-retry${attempt}` : ''}`, 't', null, CFDISK.typeList, { retryWhen: tableOnly });
-    const table = await keysUntil(pid, `09-efi-type${attempt > 1 ? `-retry${attempt}` : ''}`, 'HOME,DOWN,ENTER', null, CFDISK.table, { retryWhen: CFDISK.typeList });
+    const list = await keysUntil(pid, `08-type-list${attempt > 1 ? `-retry${attempt}` : ''}`, 't', null, CFDISK.typeList, { retryWhen: tableOnly });
+    const efiAt = list.indexOf('efisyste'), mbrAt = list.indexOf('mbrpartitionscheme');
+    const efiFirst = efiAt >= 0 && (mbrAt < 0 || efiAt < mbrAt);
+    const sequence = (efiFirst === (attempt % 2 === 1)) ? 'HOME,ENTER' : 'HOME,DOWN,ENTER';
+    log('installer-type-order', { attempt, efiAt, mbrAt, sequence });
+    const table = await keysUntil(pid, `09-efi-type${attempt > 1 ? `-retry${attempt}` : ''}`, sequence, null, CFDISK.table, { retryWhen: CFDISK.typeList });
     if (CFDISK.efiSystem.test(table)) break;
     if (attempt >= 3) throw new StopRun(`Partition 1 type is not EFI System after three tries: ${table.slice(0, 300)}`);
     log('installer-type-retry', { attempt, table: table.slice(0, 300) });

@@ -395,3 +395,16 @@ QEMU도 같은 방식으로 떴다(31회의 창 목록에 명령줄을 제목으
 (`squash`, 예: `partitionsize`, `labeltype`, `cfdiskprogram`, `choosepartition.*modify`). 되풀이 조건은
 정규식 대신 함수도 받아, 표는 보이되 크기 프롬프트·형식 목록·쓰기 질문이 없을 때(`tableOnly`)처럼 떠나려는
 화면을 정확히 가른다. 30·35·37회의 판독 문자열로 패턴 여덟 개를 검증했다.
+
+### 38회 (2026-09-30 11:17~11:29 UTC): 512M 파티션까지 만들었고, 형식 목록의 첫 항목은 EFI System이었다
+
+키 유실 없이 GRUB, 설치기 대화 상자, cfdisk 진입, gpt, `n`, 크기 `512M`(섹터 1,048,576), 파티션 생성까지 첫
+시도에 지났다(`run38/key-sequence.txt`). 형식 단계에서 멈췄다. `t`로 연 목록의 판독과 프레임은 "Select partition
+type: EFI System, MBR partition scheme, Intel Fast Flash, BIOS boot, …"이고 커서는 Linux filesystem에 있었다
+(`run38/cfdisk-type-list-efi-first.png`). HOME, DOWN, Enter는 둘째 항목 MBR partition scheme을 골랐다
+(`run38/cfdisk-table-512M-mbr-type.png`). 30회의 HOME, Enter가 MBR을 골랐던 관찰(그래서 DOWN을 더한 것)과
+어긋나며, 30회는 SDL 키 경로에서 키가 새던 회차라 그 관찰을 믿을 수 없다. M0 기록("EFI System이 첫 항목")과
+38회 프레임이 일치한다.
+
+고침(드라이버). 목록 판독에서 `efisyste`와 `mbrpartitionscheme`의 위치를 비교해 EFI가 앞이면 HOME, Enter,
+아니면 HOME, DOWN, Enter를 보내고, 표에 EFI System이 없으면 다음 시도에서 순서를 바꾼다(`installer-type-order`).
