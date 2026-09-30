@@ -555,9 +555,13 @@ where
         #[cfg(debug_assertions)]
         match &message.request {
             QmpRequest::Input(events) => eprintln!(
-                "[input] supervisor enqueue state={state:?} epoch={} events={}",
+                "[input] supervisor enqueue state={state:?} epoch={} events={} at={}",
                 message.epoch,
-                events.len()
+                events.len(),
+                SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .map(|elapsed| elapsed.as_millis())
+                    .unwrap_or(0)
             ),
             QmpRequest::DisplayWindow(geometry) => eprintln!(
                 "[stage] supervisor enqueue display-window state={state:?} epoch={} geometry={geometry:?}",
@@ -834,9 +838,13 @@ fn receive_and_send_input(
     #[cfg(debug_assertions)]
     match &message.request {
         QmpRequest::Input(events) => eprintln!(
-            "[input] supervisor dequeue state={state:?} worker_epoch={epoch} message_epoch={} events={}",
+            "[input] supervisor dequeue state={state:?} worker_epoch={epoch} message_epoch={} events={} at={}",
             message.epoch,
-            events.len()
+            events.len(),
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .map(|elapsed| elapsed.as_millis())
+                .unwrap_or(0)
         ),
         QmpRequest::DisplayWindow(_) => eprintln!(
             "[stage] supervisor dequeue display-window state={state:?} worker_epoch={epoch} message_epoch={}",
@@ -852,8 +860,12 @@ fn receive_and_send_input(
             Ok(()) => {
                 #[cfg(debug_assertions)]
                 eprintln!(
-                    "[input] supervisor qmp-result=ok epoch={epoch} events={}",
-                    events.len()
+                    "[input] supervisor qmp-result=ok epoch={epoch} events={} at={}",
+                    events.len(),
+                    SystemTime::now()
+                        .duration_since(UNIX_EPOCH)
+                        .map(|elapsed| elapsed.as_millis())
+                        .unwrap_or(0)
                 );
             }
             Err(error) => {

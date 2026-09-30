@@ -2069,7 +2069,7 @@ impl AppRuntime {
         let decision = Gate::admit(&key, &facts);
         #[cfg(debug_assertions)]
         eprintln!(
-            "[input] gate scan={:#x} extended={} pressed={} decision={decision:?} guest_running={} stage_visible={} foreground={} overlay_editing={} boot_completed={} suspended={} profile_binding={}",
+            "[input] gate scan={:#x} extended={} pressed={} decision={decision:?} guest_running={} stage_visible={} foreground={} overlay_editing={} boot_completed={} suspended={} profile_binding={} at={}",
             key.scan,
             key.extended,
             key.pressed,
@@ -2079,7 +2079,11 @@ impl AppRuntime {
             facts.overlay_editing,
             facts.boot_completed,
             facts.suspended,
-            facts.active_profile_has_binding
+            facts.active_profile_has_binding,
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|elapsed| elapsed.as_millis())
+                .unwrap_or(0)
         );
         match decision {
             Decision::Ignore => {
