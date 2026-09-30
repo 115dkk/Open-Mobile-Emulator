@@ -23,8 +23,17 @@ pub struct ProcessCommandRunner;
 
 impl NativeProcessRunner for ProcessCommandRunner {
     fn run(&self, program: &Path, args: &[OsString]) -> Result<i32, String> {
-        Command::new(program)
-            .args(args)
+        let mut command = Command::new(program);
+        command.args(args);
+        // A console child of a windowed application otherwise opens a console window on the
+        // desktop and takes the foreground (CI run 36, docs/evidence/M2/dod-ci.md).
+        #[cfg(windows)]
+        {
+            use std::os::windows::process::CommandExt;
+            const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+            command.creation_flags(CREATE_NO_WINDOW);
+        }
+        command
             .status()
             .map(|status| status.code().unwrap_or(-1))
             .map_err(|error| error.to_string())

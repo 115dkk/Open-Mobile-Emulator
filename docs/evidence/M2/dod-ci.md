@@ -367,3 +367,18 @@ Int64 핸들을 키로 하는 해시테이블에 담았는데 ConvertTo-Json은 
 상자가 15초 넘게 남으면 Enter로 닫고, 되풀이 전송은 떠나려는 화면이 아직 보일 때만 한다(`retryWhen`).
 문구 패턴은 `gpt` 단독을 버리고 "label type", "cfdisk program", 표의 메뉴 막대처럼 화면마다 고유한 것으로 바꿨다.
 전경 도우미의 표본(`others`)도 이제 키 기록에 실린다.
+
+### 36회 (2026-09-30 10:51~11:01 UTC): 전경을 훔치는 창은 제품이 띄우는 adb의 콘솔 창이었다
+
+전경 도우미의 표본이 답을 냈다(`run36/foreground-others.txt`). 키마다 주창이 아닌 전경 창이 하나씩 잡혔고 모두
+`ConsoleWindowClass`, 제목 `C:\Program Files (x86)\Android\android-sdk\platform-tools\adb.exe`, PID는
+매번 달랐다. 제품은 부팅 완료를 알려고 몇 초마다 adb를 실행하는데, 창 있는 앱이 콘솔 자식을 그냥 띄우면
+자식마다 새 콘솔 창이 바탕 화면에 떠서 잠깐 전경을 가져가고 게스트 창 위를 덮는다. 프레임에 그 창이 찍혔다
+(`run36/grub-frame-covered-by-adb-console.png`, 왼쪽 위의 검은 창이 GRUB 항목 두 줄을 가려 판독기가 8행 대신
+6행을 봤고 드라이버가 멈췄다). 28회의 918110, 30·32·35회의 사라진 키, 흔들리던 OCR이 전부 이 창이다.
+QEMU도 같은 방식으로 떴다(31회의 창 목록에 명령줄을 제목으로 단 QEMU의 창이 보인다).
+
+고침(제품). `ome-adb`의 `ProcessRunner`와 런타임의 `ProcessCommandRunner`(qemu-img)는 `CREATE_NO_WINDOW`로
+자식을 띄우고, `ome-platform-win`의 `spawn`과 `spawn_in_job`(QEMU)도 같은 플래그를 더한다. 자식의 출력은
+이미 파이프나 파일로 가므로 잃는 것이 없다. 사용자 PC에서도 게스트가 도는 동안 콘솔 창이 깜박이던 셈이니
+제품의 결함이다. 드라이버는 항목 수가 기대와 다른 프레임을 네 번까지 다시 읽고 그동안 키를 보내지 않는다.

@@ -1,0 +1,174 @@
+{
+  "startedAt": "2026-09-30T10:57:35.565Z",
+  "outcome": "failed",
+  "steps": [
+    {
+      "name": "preflight",
+      "start": "2026-09-30T10:57:35.566Z",
+      "outcome": "passed",
+      "end": "2026-09-30T10:57:39.614Z",
+      "durationMs": 4047
+    },
+    {
+      "name": "launch",
+      "start": "2026-09-30T10:57:39.621Z",
+      "outcome": "passed",
+      "end": "2026-09-30T10:57:47.036Z",
+      "durationMs": 7415
+    },
+    {
+      "name": "S1.1-host-check",
+      "start": "2026-09-30T10:57:47.037Z",
+      "outcome": "passed",
+      "end": "2026-09-30T10:57:48.907Z",
+      "durationMs": 1870
+    },
+    {
+      "name": "S1.2-WHPX",
+      "start": "2026-09-30T10:57:48.908Z",
+      "outcome": "passed",
+      "end": "2026-09-30T10:57:50.680Z",
+      "durationMs": 1771
+    },
+    {
+      "name": "S1.4-download",
+      "start": "2026-09-30T10:57:50.680Z",
+      "outcome": "passed",
+      "end": "2026-09-30T10:58:39.369Z",
+      "durationMs": 48688
+    },
+    {
+      "name": "S1.5-installer",
+      "start": "2026-09-30T10:58:39.370Z",
+      "outcome": "failed",
+      "error": "Error: GRUB menu shows 6 rows, expected 8: {\"bar\":270,\"row\":1,\"entries\":[240,271,304,338,372,406],\"barHeight\":30}\n    at grubSelect (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:266:58)\n    at async installGuest (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:300:3)\n    at async file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:583:5\n    at async step (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:82:9)\n    at async file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:557:3",
+      "end": "2026-09-30T10:59:55.372Z",
+      "durationMs": 76002
+    },
+    {
+      "name": "cleanup",
+      "start": "2026-09-30T10:59:57.541Z",
+      "outcome": "passed",
+      "end": "2026-09-30T11:00:41.779Z",
+      "durationMs": 44238
+    },
+    {
+      "name": "S1.6-first-boot",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "S1.7-game-install",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "game-launch",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "stop",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "quit",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    }
+  ],
+  "gaps": [
+    "pulled.json has no version fields; installed version can only be read after successful installation.",
+    "WHPX already enabled: product skips S1.2 instead of showing an already-on screen.",
+    "Tray 종료 did not open a menu in this session; closed the main window instead: native helper (1):  \u001b[31;1mException: \u001b[0mD:\\a\\Open-Mobile-Emulator\\Open-Mobile-Emulator\\ci\\dod\\native.ps1:279\u001b[0m\r"
+  ],
+  "measurements": {
+    "downloadMs": 45177,
+    "downloadBytes": 2429550592,
+    "downloadAverageBytesPerSecond": 53778484.450052015
+  },
+  "probeItems": [],
+  "softwareRenderingRetry": false,
+  "utf8Check": "다시 확인",
+  "environment": {
+    "killed": 0,
+    "freeBytes": 154712182784,
+    "processes": []
+  },
+  "game": {
+    "package": "com.epidgames.trickcalrevive",
+    "versionName": null,
+    "versionCode": null
+  },
+  "qemu": {
+    "source": "D:\\a\\Open-Mobile-Emulator\\Open-Mobile-Emulator\\host\\target\\release\\qemu",
+    "sha256": "7139f05b86ee9f946475c0f33b05504d8b76317f7fe7ef0321a5396775576d6a",
+    "version": "QEMU emulator version 11.1.1 (v11.1.1-dirty)\r\nCopyright (c) 2003-2026 Fabrice Bellard and the QEMU Project developers\r\n"
+  },
+  "hostVerdict": {
+    "rows": [
+      {
+        "id": "cpuVirtualization",
+        "status": "ready",
+        "detail": "사용할 수 있습니다."
+      },
+      {
+        "id": "hypervisorPlatform",
+        "status": "ready",
+        "detail": "켜져 있습니다."
+      },
+      {
+        "id": "rebootPending",
+        "status": "ready",
+        "detail": "필요하지 않습니다."
+      },
+      {
+        "id": "whpxAvailable",
+        "status": "ready",
+        "detail": "켜져 있고 실행 준비가 되어 있습니다."
+      },
+      {
+        "id": "qemuPresent",
+        "status": "ready",
+        "detail": "준비되어 있습니다."
+      },
+      {
+        "id": "firmwarePresent",
+        "status": "ready",
+        "detail": "준비되어 있습니다."
+      },
+      {
+        "id": "adbPresent",
+        "status": "ready",
+        "detail": "준비되어 있습니다."
+      },
+      {
+        "id": "diskSpace",
+        "status": "ready",
+        "detail": "설치에 충분한 여유가 있습니다."
+      }
+    ],
+    "ready": true,
+    "inspectedAt": "2026-09-30T10:57:41+00:00"
+  },
+  "error": "Error: GRUB menu shows 6 rows, expected 8: {\"bar\":270,\"row\":1,\"entries\":[240,271,304,338,372,406],\"barHeight\":30}\n    at grubSelect (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:266:58)\n    at async installGuest (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:300:3)\n    at async file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:583:5\n    at async step (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:82:9)\n    at async file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:557:3",
+  "finalProcesses": [],
+  "temporaryHome": "D:\\ome-home",
+  "endedAt": "2026-09-30T11:00:41.780Z"
+}

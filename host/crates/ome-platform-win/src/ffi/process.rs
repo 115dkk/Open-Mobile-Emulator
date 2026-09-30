@@ -25,9 +25,9 @@ use windows::Win32::Storage::FileSystem::{
     OPEN_EXISTING,
 };
 use windows::Win32::System::Threading::{
-    CREATE_SUSPENDED, CREATE_UNICODE_ENVIRONMENT, CreateProcessW, DeleteProcThreadAttributeList,
-    EXTENDED_STARTUPINFO_PRESENT, GetCurrentProcess, GetExitCodeProcess,
-    InitializeProcThreadAttributeList, LPPROC_THREAD_ATTRIBUTE_LIST,
+    CREATE_NO_WINDOW, CREATE_SUSPENDED, CREATE_UNICODE_ENVIRONMENT, CreateProcessW,
+    DeleteProcThreadAttributeList, EXTENDED_STARTUPINFO_PRESENT, GetCurrentProcess,
+    GetExitCodeProcess, InitializeProcThreadAttributeList, LPPROC_THREAD_ATTRIBUTE_LIST,
     PROC_THREAD_ATTRIBUTE_HANDLE_LIST, PROCESS_CREATION_FLAGS, PROCESS_INFORMATION, ResumeThread,
     STARTF_USESTDHANDLES, STARTUPINFOEXW, TerminateProcess, UpdateProcThreadAttribute,
     WaitForSingleObject,
@@ -80,15 +80,18 @@ impl Child {
     }
 }
 
+// The children are console programs (QEMU, qemu-img) whose output goes to the redirected files;
+// without CREATE_NO_WINDOW a windowed parent gives each one a console window on the desktop that
+// takes the foreground when it opens (CI run 36, docs/evidence/M2/dod-ci.md).
 pub(crate) fn spawn(launch: ProcessLaunch) -> Result<Child, crate::PlatformError> {
-    spawn_with_flags(launch, PROCESS_CREATION_FLAGS(0), None)
+    spawn_with_flags(launch, CREATE_NO_WINDOW, None)
 }
 
 pub(crate) fn spawn_in_job(
     launch: ProcessLaunch,
     job: &JobObject,
 ) -> Result<Child, crate::PlatformError> {
-    spawn_with_flags(launch, CREATE_SUSPENDED, Some(job))
+    spawn_with_flags(launch, CREATE_SUSPENDED | CREATE_NO_WINDOW, Some(job))
 }
 
 fn spawn_with_flags(

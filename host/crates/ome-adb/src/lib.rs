@@ -68,6 +68,25 @@ pub trait CommandRunner: Send + Sync {
     -> Result<Output, RunError>;
 }
 
+/// Keeps a console child from opening its own console window.
+///
+/// The product is a windowed application, so every `adb` it runs would otherwise get a fresh
+/// console window that appears on the desktop, takes the foreground for a moment, and covers the
+/// operating-system window; the boot poll runs adb every few seconds (CI run 36,
+/// docs/evidence/M2/dod-ci.md).
+fn hide_console_window(command: &mut Command) {
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+        command.creation_flags(CREATE_NO_WINDOW);
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = command;
+    }
+}
+
 /// Production runner using `std::process::Command` without a shell.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct ProcessRunner;
@@ -79,13 +98,14 @@ impl CommandRunner for ProcessRunner {
         args: &[OsString],
         timeout: Duration,
     ) -> Result<Output, RunError> {
-        let mut child = Command::new(program)
+        let mut command = Command::new(program);
+        command
             .args(args)
             .stdin(Stdio::null())
             .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .spawn()
-            .map_err(RunError::Spawn)?;
+            .stderr(Stdio::piped());
+        hide_console_window(&mut command);
+        let mut child = command.spawn().map_err(RunError::Spawn)?;
         let stdout = child.stdout.take().ok_or(RunError::MissingPipe)?;
         let stderr = child.stderr.take().ok_or(RunError::MissingPipe)?;
         let stdout_reader = thread::spawn(move || read_pipe(stdout));

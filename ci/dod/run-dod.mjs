@@ -258,12 +258,19 @@ const CFDISK = {
 // frame (native.ps1 -Highlight). A lost or repeated key is corrected by the next frame instead of
 // trusted (CI runs 27 and 32 each booted the wrong entry after blind Down presses).
 async function grubSelect(pid, prefix, targetRow, expectedRows) {
-  let frame = 0;
+  let frame = 0, oddFrames = 0;
   for (let attempt = 0; attempt < 14; attempt++) {
     const shot = await capture(`${prefix}-${String(frame++).padStart(2, '0')}`, pid, { highlight: true });
     const highlight = shot.highlight;
     if (!highlight || highlight.row < 0) { await delay(500); continue; }
-    if (highlight.entries.length !== expectedRows) throw new StopRun(`GRUB menu shows ${highlight.entries.length} rows, expected ${expectedRows}: ${JSON.stringify(highlight)}`);
+    if (highlight.entries.length !== expectedRows) {
+      // A window over the guest hides rows (CI run 36: an adb console window); read again before
+      // giving up, and never send a key on a partial reading.
+      log('grub-rows-unexpected', { prefix, oddFrames, highlight });
+      if (++oddFrames >= 4) throw new StopRun(`GRUB menu shows ${highlight.entries.length} rows, expected ${expectedRows}: ${JSON.stringify(highlight)}`);
+      await delay(700); continue;
+    }
+    oddFrames = 0;
     if (highlight.row === targetRow) { log('grub-selected', { prefix, row: highlight.row, entries: highlight.entries }); return highlight; }
     const key = highlight.row < targetRow ? 'DOWN' : 'UP';
     await keys(pid, `${prefix}-${String(frame++).padStart(2, '0')}-${key.toLowerCase()}`, key, null, 600);
