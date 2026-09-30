@@ -1,0 +1,4 @@
+Formatting 'D:\ome-home\vm\bliss-16-9-7-android-13\disk.qcow2', fmt=qcow2 cluster_size=65536 extended_l2=off compression_type=zlib size=34359738368 lazy_refcounts=off refcount_bits=16
+guest input dropped: count=1 total=1 reason=guest-not-running
+Error removing system tray icon
+[0930/084118.395:ERROR:ui\gfx\win\window_impl.cc:172] Failed to unregister class Chrome_WidgetWin_0. Error = 1412

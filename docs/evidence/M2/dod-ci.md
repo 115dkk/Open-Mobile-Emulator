@@ -188,3 +188,31 @@ explorer와 다른 사용자로 돌아 알림 아이콘이 등록되지 않는 �
 고침: `Start-Process -PassThru` 뒤 `WaitForExit(115분)`으로 드라이버 프로세스 하나만 기다리고, 끝나면
 `omeuser` 소유의 adb·제품·QEMU·WebView2·node·powershell 프로세스를 종료한 뒤 출력을 싣는다. 증거 단계도
 읽기 전에 같은 정리를 한다.
+
+### 25회 (2026-09-30 08:32~08:41 UTC): 드라이버 출력이 처음 실렸고, OCR이 GRUB 메뉴를 못 읽었다
+
+24회의 고침이 맞았다. 드라이버는 스스로 끝났고 그 출력이 잡 로그에 실렸으며 증거 게시와 업로드도
+통과했다(`dod-ci/run25/`). 단계별로 preflight 0.8초, launch 7.4초, 호스트 점검 2.0초(8행 준비),
+WHPX 1.7초(건너뜀), 내려받기 43.5초(2,429,550,592바이트, 약 60 MB/s, 검증 완료), 설치기 65.6초 실패다.
+
+`디스크 만들기` 뒤 제품은 qcow2를 만들고 QEMU를 표준 VGA, 오디오 없음으로 띄웠다(`run25/qemu-installer.cmd.txt`.
+stderr는 Skylake-Client-v4의 CPUID 경고 세 가지뿐). 설치기 창은 872x608 픽셀이었다. 드라이버는 60초 동안
+2.5초마다 창을 찍어 OCR에 넣었는데, 08:39:42부터 30초 동안 읽힌 글은 GRUB 바닥줄 "Enter: Boot Selected
+E: Edit Selected"의 깨진 판독("EnLev: BooL SelecL*'d Edit Selected Tet")뿐이었고 메뉴 항목은 한 줄도
+없었다. 그 사이 GRUB의 30초 카운트다운이 기본 항목(Live)을 부팅해 08:40:20에는 Bliss 부팅 배너("Have a
+Truly Blissful Experience", Virtual A/B 경고)가 읽혔고, 드라이버는 `installation`을 끝내 보지 못해 끝났다.
+실패 화면 캡처는 "Foreground changed; refusing capture"로 막혔다(설치기 창이 전경).
+
+원인은 배율이다. 제품은 설치기 창을 무대의 논리 크기 872x608에 맞추는데, 개발 PC는 200% 배율이라
+같은 창이 1744x1216 물리 픽셀이고(`dod-local/shots/installer-00-grub-menu.png`, 그 회차의 OCR은 항목
+여덟 줄을 다 읽었다) 러너는 100% 배율이라 872x608이다. Windows OCR은 그 크기의 GRUB 항목 글자(약 11픽셀)를
+읽지 못한다. 고침은 드라이버 쪽이다. `ci/dod/ocr.ps1`이 판독 전에 이미지를 정수 배로 키운다(Fant 보간,
+너비가 약 1600픽셀 이상이 되는 가장 작은 배수, `OcrEngine.MaxImageDimension` 안). 872x608은 2배, 개발
+PC의 1744x1216은 그대로다. 저장하는 스크린샷은 화면 복사 원본이고 판독 결과에 `scale`을 함께 적는다.
+실패 캡처는 전경 검사에 막히면 바탕 화면 복사로 대신한다.
+
+부수 관찰: 마지막 캡처(`run25/installer-00-grub-menu-last-capture.png`)는 Live 부팅이 해상도를 바꾼 뒤의
+창 자리를 찍은 것으로 위 315픽셀은 제품 무대의 어두운 배경과 스크롤 막대, 아래는 검정이다. 게스트가
+해상도를 바꾸는 순간 창이 어떻게 놓이는지는 설치가 진행되면 다시 본다. 정리 단계의 트레이 `종료`는 이번에도
+메뉴가 열리지 않아 창 닫기로 끝냈고, 제품 출력에 "Error removing system tray icon"이 남았다(러너의
+사용자 분리, 23회 참고).

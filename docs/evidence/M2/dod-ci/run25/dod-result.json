@@ -1,0 +1,174 @@
+{
+  "startedAt": "2026-09-30T08:38:33.008Z",
+  "outcome": "failed",
+  "steps": [
+    {
+      "name": "preflight",
+      "start": "2026-09-30T08:38:33.009Z",
+      "outcome": "passed",
+      "end": "2026-09-30T08:38:33.827Z",
+      "durationMs": 818
+    },
+    {
+      "name": "launch",
+      "start": "2026-09-30T08:38:33.834Z",
+      "outcome": "passed",
+      "end": "2026-09-30T08:38:41.190Z",
+      "durationMs": 7355
+    },
+    {
+      "name": "S1.1-host-check",
+      "start": "2026-09-30T08:38:41.190Z",
+      "outcome": "passed",
+      "end": "2026-09-30T08:38:43.184Z",
+      "durationMs": 1993
+    },
+    {
+      "name": "S1.2-WHPX",
+      "start": "2026-09-30T08:38:43.185Z",
+      "outcome": "passed",
+      "end": "2026-09-30T08:38:44.878Z",
+      "durationMs": 1692
+    },
+    {
+      "name": "S1.4-download",
+      "start": "2026-09-30T08:38:44.879Z",
+      "outcome": "passed",
+      "end": "2026-09-30T08:39:28.420Z",
+      "durationMs": 43541
+    },
+    {
+      "name": "S1.5-installer",
+      "start": "2026-09-30T08:39:28.421Z",
+      "outcome": "failed",
+      "error": "Error: Timeout: installer GRUB menu\n    at until (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:46:9)\n    at async installGuest (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:143:3)\n    at async file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:395:5\n    at async step (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:80:9)\n    at async file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:369:3",
+      "end": "2026-09-30T08:40:34.017Z",
+      "durationMs": 65595
+    },
+    {
+      "name": "cleanup",
+      "start": "2026-09-30T08:40:37.474Z",
+      "outcome": "passed",
+      "end": "2026-09-30T08:41:21.648Z",
+      "durationMs": 44173
+    },
+    {
+      "name": "S1.6-first-boot",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "S1.7-game-install",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "game-launch",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "stop",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    },
+    {
+      "name": "quit",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "not-run",
+      "reason": "An earlier step failed; no bypass attempted"
+    }
+  ],
+  "gaps": [
+    "pulled.json has no version fields; installed version can only be read after successful installation.",
+    "WHPX already enabled: product skips S1.2 instead of showing an already-on screen.",
+    "Tray 종료 did not open a menu in this session; closed the main window instead: native helper (1):  \u001b[31;1mException: \u001b[0mD:\\a\\Open-Mobile-Emulator\\Open-Mobile-Emulator\\ci\\dod\\native.ps1:202\u001b[0m\r"
+  ],
+  "measurements": {
+    "downloadMs": 40187,
+    "downloadBytes": 2429550592,
+    "downloadAverageBytesPerSecond": 60456132.381118275
+  },
+  "probeItems": [],
+  "softwareRenderingRetry": false,
+  "utf8Check": "다시 확인",
+  "environment": {
+    "killed": 0,
+    "freeBytes": 154720321536,
+    "processes": []
+  },
+  "game": {
+    "package": "com.epidgames.trickcalrevive",
+    "versionName": null,
+    "versionCode": null
+  },
+  "qemu": {
+    "source": "D:\\a\\Open-Mobile-Emulator\\Open-Mobile-Emulator\\host\\target\\release\\qemu",
+    "sha256": "7139f05b86ee9f946475c0f33b05504d8b76317f7fe7ef0321a5396775576d6a",
+    "version": "QEMU emulator version 11.1.1 (v11.1.1-dirty)\r\nCopyright (c) 2003-2026 Fabrice Bellard and the QEMU Project developers\r\n"
+  },
+  "hostVerdict": {
+    "rows": [
+      {
+        "id": "cpuVirtualization",
+        "status": "ready",
+        "detail": "사용할 수 있습니다."
+      },
+      {
+        "id": "hypervisorPlatform",
+        "status": "ready",
+        "detail": "켜져 있습니다."
+      },
+      {
+        "id": "rebootPending",
+        "status": "ready",
+        "detail": "필요하지 않습니다."
+      },
+      {
+        "id": "whpxAvailable",
+        "status": "ready",
+        "detail": "켜져 있고 실행 준비가 되어 있습니다."
+      },
+      {
+        "id": "qemuPresent",
+        "status": "ready",
+        "detail": "준비되어 있습니다."
+      },
+      {
+        "id": "firmwarePresent",
+        "status": "ready",
+        "detail": "준비되어 있습니다."
+      },
+      {
+        "id": "adbPresent",
+        "status": "ready",
+        "detail": "준비되어 있습니다."
+      },
+      {
+        "id": "diskSpace",
+        "status": "ready",
+        "detail": "설치에 충분한 여유가 있습니다."
+      }
+    ],
+    "ready": true,
+    "inspectedAt": "2026-09-30T08:38:35+00:00"
+  },
+  "error": "Error: Timeout: installer GRUB menu\n    at until (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:46:9)\n    at async installGuest (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:143:3)\n    at async file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:395:5\n    at async step (file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:80:9)\n    at async file:///D:/a/Open-Mobile-Emulator/Open-Mobile-Emulator/ci/dod/run-dod.mjs:369:3",
+  "finalProcesses": [],
+  "temporaryHome": "D:\\ome-home",
+  "endedAt": "2026-09-30T08:41:21.649Z"
+}

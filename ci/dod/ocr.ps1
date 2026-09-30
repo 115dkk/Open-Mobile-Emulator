@@ -9,6 +9,12 @@ $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Runtime.WindowsRuntime
 [void][Windows.Storage.StorageFile,Windows.Storage,ContentType=WindowsRuntime]
 [void][Windows.Graphics.Imaging.BitmapDecoder,Windows.Graphics.Imaging,ContentType=WindowsRuntime]
+[void][Windows.Graphics.Imaging.BitmapTransform,Windows.Graphics.Imaging,ContentType=WindowsRuntime]
+[void][Windows.Graphics.Imaging.BitmapInterpolationMode,Windows.Graphics.Imaging,ContentType=WindowsRuntime]
+[void][Windows.Graphics.Imaging.BitmapPixelFormat,Windows.Graphics.Imaging,ContentType=WindowsRuntime]
+[void][Windows.Graphics.Imaging.BitmapAlphaMode,Windows.Graphics.Imaging,ContentType=WindowsRuntime]
+[void][Windows.Graphics.Imaging.ExifOrientationMode,Windows.Graphics.Imaging,ContentType=WindowsRuntime]
+[void][Windows.Graphics.Imaging.ColorManagementMode,Windows.Graphics.Imaging,ContentType=WindowsRuntime]
 [void][Windows.Media.Ocr.OcrEngine,Windows.Foundation,ContentType=WindowsRuntime]
 [void][Windows.Globalization.Language,Windows.Globalization,ContentType=WindowsRuntime]
 $asTask = [System.WindowsRuntimeSystemExtensions].GetMethods() | Where-Object {
@@ -26,11 +32,26 @@ $file = Wait-WinRt ([Windows.Storage.StorageFile]::GetFileFromPathAsync($Image))
 $stream = Wait-WinRt ($file.OpenAsync([Windows.Storage.FileAccessMode]::Read)) ([Windows.Storage.Streams.IRandomAccessStream])
 try {
     $decoder = Wait-WinRt ([Windows.Graphics.Imaging.BitmapDecoder]::CreateAsync($stream)) ([Windows.Graphics.Imaging.BitmapDecoder])
-    $bitmap = Wait-WinRt ($decoder.GetSoftwareBitmapAsync()) ([Windows.Graphics.Imaging.SoftwareBitmap])
+    # The guest window is 872x608 logical pixels in the product's stage. At 200 % display scaling (the
+    # development PC) that is 1744x1216 physical pixels and the ISO GRUB menu reads cleanly; at 100 %
+    # (the CI runner, CI run 25) the same menu is half the size and the OCR returned only its footer.
+    # Recognize an integer-upscaled copy (Fant interpolation) so a capture is at least about 1600 px
+    # wide, within the engine's maximum. The saved screenshot stays the unscaled screen copy.
+    $width = [int]$decoder.PixelWidth; $height = [int]$decoder.PixelHeight
+    $maximum = [int][Windows.Media.Ocr.OcrEngine]::MaxImageDimension
+    $wanted = [int][Math]::Ceiling(1600 / [Math]::Max($width, 1))
+    $fits = [int][Math]::Min([Math]::Floor($maximum / [Math]::Max($width, 1)), [Math]::Floor($maximum / [Math]::Max($height, 1)))
+    $scale = [Math]::Max(1, [Math]::Min($wanted, $fits))
+    $transform = [Windows.Graphics.Imaging.BitmapTransform]::new()
+    $transform.ScaledWidth = [uint32]($width * $scale); $transform.ScaledHeight = [uint32]($height * $scale)
+    $transform.InterpolationMode = [Windows.Graphics.Imaging.BitmapInterpolationMode]::Fant
+    $bitmap = Wait-WinRt ($decoder.GetSoftwareBitmapAsync(
+        [Windows.Graphics.Imaging.BitmapPixelFormat]::Bgra8, [Windows.Graphics.Imaging.BitmapAlphaMode]::Premultiplied, $transform,
+        [Windows.Graphics.Imaging.ExifOrientationMode]::IgnoreExifOrientation, [Windows.Graphics.Imaging.ColorManagementMode]::DoNotColorManage)) ([Windows.Graphics.Imaging.SoftwareBitmap])
     try {
         $engine = [Windows.Media.Ocr.OcrEngine]::TryCreateFromLanguage([Windows.Globalization.Language]::new('en-US'))
         if ($null -eq $engine) { throw 'Built-in English OCR is unavailable; cannot assert installer completion' }
         $result = Wait-WinRt ($engine.RecognizeAsync($bitmap)) ([Windows.Media.Ocr.OcrResult])
-        @{text=$result.Text; language=$engine.RecognizerLanguage.LanguageTag} | ConvertTo-Json -Compress
+        @{text=$result.Text; language=$engine.RecognizerLanguage.LanguageTag; width=$width; height=$height; scale=$scale} | ConvertTo-Json -Compress
     } finally { $bitmap.Dispose() }
 } finally { $stream.Dispose() }

@@ -441,7 +441,9 @@ try {
   result.outcome = result.game.visualReviewRequired ? 'needs-review' : 'passed';
 } catch (error) {
   result.error = error.stack; log('failure', { error: error.stack });
-  if (page && !page.isClosed() && !exited) await capture('failure').catch(e => log('capture-failed', { error: e.message }));
+  // A failure capture focuses the main window and refuses when another window holds the foreground
+  // (CI run 25: the guest window). The desktop copy needs no focus and still shows what was on screen.
+  if (page && !page.isClosed() && !exited) await capture('failure').catch(async e => { log('capture-failed', { error: e.message }); await desktopCapture('failure'); });
 } finally {
   await step('cleanup', async () => {
     if (app && !exited) { try { await stopGuest(); await quitApp(); } catch (error) { log('graceful-cleanup-failed', { error: error.stack }); } }
