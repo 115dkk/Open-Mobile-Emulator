@@ -193,6 +193,8 @@ function wizardAt(step: AppSnapshot['wizard']['step'], patch: WizardPatch = {}):
   return { ...wizardBase, ...patch, wizard: { ...wizardBase.wizard, ...patch.wizard, step } };
 }
 
+const stageLogPath = 'C:\\Users\\사용자\\AppData\\Local\\OpenMobileEmulator\\logs\\guest-20260926-1958.log';
+
 const installedImages: AppSnapshot['images'] = { profiles: sampleProfiles, guests: [sampleGuest], activeGuest: sampleGuest.name };
 
 export interface GalleryVariant {
@@ -233,6 +235,17 @@ export const wizardGallery: readonly GalleryVariant[] = [
     snapshot: wizardAt('guestInstall', {
       images: installedImages,
       guest: { ...sampleSnapshot.guest, state: 'running', hosting: 'embedded', imageId: 'sample-android-13' },
+      wizard: { installGuide: sampleInstallGuide, diskSizeGib: 64 },
+    }),
+  },
+  {
+    id: 'install-failed', label: 'S1.5 설치: 설치기 시작 실패',
+    snapshot: wizardAt('guestInstall', {
+      images: installedImages,
+      guest: {
+        ...sampleSnapshot.guest, state: 'failed', hosting: 'embedded', imageId: 'sample-android-13',
+        lastExit: { kind: 'startFailed', at: '2026-09-30T08:39:31', logPath: stageLogPath },
+      },
       wizard: { installGuide: sampleInstallGuide, diskSizeGib: 64 },
     }),
   },
@@ -337,8 +350,6 @@ const stageProbe: AppSnapshot['guest']['capabilities'] = {
     { id: 'nativeBridge', state: 'available' }, { id: 'root', state: 'unknown' },
   ],
 };
-
-const stageLogPath = 'C:\\Users\\사용자\\AppData\\Local\\OpenMobileEmulator\\logs\\guest-20260926-1958.log';
 
 /** The rail shell with presets and an input profile, the operating system stopped after a normal exit. */
 export const stageSnapshot: AppSnapshot = {

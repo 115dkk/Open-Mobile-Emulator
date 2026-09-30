@@ -23,7 +23,7 @@ function show(snapshot: AppSnapshot) {
 describe('first-run wizard: 나중에 하기', () => {
   it.each([
     'host-ready', 'whpx-consent', 'reboot-pending', 'download-idle', 'download-transferring',
-    'install-disk', 'install-guide', 'first-boot', 'first-boot-failed', 'app-install',
+    'install-disk', 'install-guide', 'install-failed', 'first-boot', 'first-boot-failed', 'app-install',
   ])('%s closes the wizard and keeps the step', async (id) => {
     const actions = show(variant(id));
     await userEvent.click(screen.getByRole('button', { name: '나중에 하기' }));
@@ -165,6 +165,16 @@ describe('first-run wizard: S1.5 install', () => {
     expect(guide).toContain('1ISO 메뉴에서 Installation을 선택합니다.');
     expect(guide).toContain('6설치가 끝나면 가상 머신을 끄고 ISO 없이 다시 시작합니다.');
     expect(screen.getByRole('button', { name: '설치 완료' })).toBeDisabled();
+  });
+
+  it('names a failed installer start, keeps 설치 완료 disabled and offers a reinstall', async () => {
+    const actions = show(variant('install-failed'));
+    const notice = screen.getByRole('alert');
+    expect(within(notice).getByText('운영체제 설치 프로그램을 시작하지 못했습니다.')).toBeInTheDocument();
+    expect(within(notice).getByText('디스크를 지우고 처음부터 다시 설치할 수 있습니다.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '설치 완료' })).toBeDisabled();
+    await userEvent.click(within(notice).getByRole('button', { name: '다시 설치' }));
+    expect(actions.guestReinstall).toHaveBeenCalledWith('android-13');
   });
 });
 

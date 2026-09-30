@@ -290,6 +290,22 @@ function SeparateWindowNotice({ guest, actions }: { readonly guest: GuestView; r
   );
 }
 
+function InstallFailureNotice({ snapshot, actions }: StepProps) {
+  const { guest, images } = snapshot;
+  const name = images.activeGuest;
+  if (guest.state !== 'failed' || name === null) return null;
+  const startFailed = guest.lastExit?.kind === 'startFailed';
+  const logPath = guest.lastExit?.logPath ?? null;
+  return (
+    <div className="ome-stage-notice" role="alert">
+      <p>{startFailed ? '운영체제 설치 프로그램을 시작하지 못했습니다.' : '운영체제 설치 프로그램이 끝나기 전에 종료되었습니다.'}</p>
+      {logPath !== null && <p className="ome-caption ome-mono">{logPath}</p>}
+      <p className="ome-caption">디스크를 지우고 처음부터 다시 설치할 수 있습니다.</p>
+      <Button icon="refresh" onClick={() => actions.guestReinstall(name)}>다시 설치</Button>
+    </div>
+  );
+}
+
 function GuestInstallStep({ snapshot, actions }: StepProps) {
   useGuestKeyboard(snapshot.guest.state === 'running' && !snapshot.input.editing, actions.inputHostKey);
   const { wizard, images, guest } = snapshot;
@@ -342,6 +358,7 @@ function GuestInstallStep({ snapshot, actions }: StepProps) {
     >
       <StageFrame onRect={actions.stageRectChanged}>
         <SeparateWindowNotice guest={guest} actions={actions} />
+        <InstallFailureNotice snapshot={snapshot} actions={actions} />
       </StageFrame>
       <aside className="ome-wizard-side">
         <h1 className="ome-page-title">운영체제 설치</h1>

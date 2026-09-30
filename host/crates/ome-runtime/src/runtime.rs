@@ -2833,7 +2833,11 @@ impl AppRuntime {
                 .is_some_and(|(store, name)| {
                     matches!(store.verify(name), ome_artifacts::Verification::Verified)
                 }),
-            guest_installed: !self.guests.is_empty(),
+            // A guest record exists as soon as its disk is made; the installer it started may still
+            // have failed to start or died before the copy finished (CI run 21). Until the person
+            // reinstalls, the step cannot complete on an unformatted disk.
+            guest_installed: !self.guests.is_empty()
+                && !(self.installing_guest && matches!(self.guest_state, GuestState::Failed)),
             guest_booted: self.boot_completed,
             app_install_resolved: true,
         }
@@ -5646,6 +5650,60 @@ package:dev.ome.two versionCode:8",
         assert_eq!(runtime.active_guest.as_deref(), Some(id));
         assert!(guest_dir.join("guest.json").is_file());
         assert_eq!(supervisor.starts.lock().expect("starts lock").len(), 2);
+    }
+
+    #[test]
+    fn installer_failure_blocks_install_completion_until_the_installer_ends_normally() {
+        let (directory, mut runtime, _supervisor, _runner) = lifecycle_runtime(
+            std::iter::empty(),
+            RecordingDesktop::default(),
+            RecordingWindow::embedded(),
+        );
+        assert!(!runtime.guests.is_empty());
+        runtime.wizard.step = Step::GuestInstall;
+        runtime.installing_guest = true;
+        let log = directory.path().join("installer.stderr.log");
+        runtime.ingest_guest_event(guest_event(
+            ome_supervisor::GuestState::Starting,
+            None,
+            None,
+        ));
+        runtime.ingest_guest_event(guest_event(
+            ome_supervisor::GuestState::Failed,
+            None,
+            Some(&log),
+        ));
+        let snapshot = runtime.snapshot();
+        assert_eq!(snapshot.wizard.step, WizardStep::GuestInstall);
+        assert!(!snapshot.wizard.can_continue);
+        assert_eq!(
+            snapshot.guest.last_exit.expect("start failure").kind,
+            ExitKind::StartFailed
+        );
+        let issue = runtime
+            .apply(Command::WizardContinue)
+            .expect_err("an unformatted disk cannot complete the step");
+        assert_eq!(issue.code, "wizard_cannot_continue");
+        assert!(runtime.installing_guest);
+
+        // The reinstalled installer runs and exits on its own once the person finishes.
+        runtime.ingest_guest_event(guest_event(
+            ome_supervisor::GuestState::Starting,
+            None,
+            None,
+        ));
+        runtime.ingest_guest_event(guest_event(
+            ome_supervisor::GuestState::Running,
+            Some(9),
+            None,
+        ));
+        runtime.ingest_guest_event(guest_event(ome_supervisor::GuestState::Stopped, None, None));
+        assert!(runtime.snapshot().wizard.can_continue);
+        let snapshot = runtime
+            .apply(Command::WizardContinue)
+            .expect("continue after the installer ended");
+        assert_eq!(snapshot.wizard.step, WizardStep::FirstBoot);
+        assert!(!runtime.installing_guest);
     }
 
     #[test]

@@ -132,6 +132,19 @@ async function installerPid(pid) {
   const current = (await snapshot()).guest.pid;
   if (current !== pid) throw new StopRun(`Guest restarted during installer: expected QEMU ${pid}, snapshot guest.pid ${current}; refusing to follow a new process`);
 }
+// The Bliss GRUB theme prints "Enter: Boot Selected  E: Edit Selected  C: Grub Terminal" under every
+// menu, on the ISO and on the installed disk alike. At 100 % display scaling the entries are too
+// small for OCR (CI runs 25 and 26) while that footer still reads, so the footer is the menu signal;
+// the entry the keys select is verified by the screen that follows. Every frame of the wait is kept.
+const GRUB_MENU = /installation|edit\s*selected|boot\s*selected|grub\s*te/i;
+async function waitGrubMenu(pid, prefix) {
+  let attempt = 0;
+  await until(async () => {
+    const name = `${prefix}-${String(attempt++).padStart(2, '0')}`;
+    await capture(name, pid);
+    return GRUB_MENU.test(recognize(name));
+  }, 60000, `${prefix} GRUB menu`, 100);
+}
 async function installGuest(pid) {
   // Move the webview focus off the create/completion button with a real noninteractive UI click.
   // While the stage is active the product forwards every key to the guest and prevents the default.
@@ -140,10 +153,7 @@ async function installGuest(pid) {
   // No keys before the menu is recognized: keys during the firmware phase reach the firmware now and
   // left one variable store booting slowly (docs/evidence/M2/embedded-display-freeze.md). The ISO GRUB
   // menu waits about 30 s, so recognition first, then one Home to reset its countdown.
-  await until(async () => {
-    await capture('installer-00-grub-menu', pid);
-    return /installation/i.test(recognize('installer-00-grub-menu'));
-  }, 60000, 'installer GRUB menu', 100);
+  await waitGrubMenu(pid, 'installer-00-grub-menu');
   await snapshot();
   await keys(pid, '01a-grub-home', 'HOME');
   for (let arrow = 1; arrow <= 4; arrow++) await keys(pid, `01a-grub-down-${arrow}`, 'DOWN');
@@ -404,6 +414,8 @@ try {
     result.measurements.softwareRendering = softwareRendering;
     if (softwareRendering) {
       const pid = await qemuWindow();
+      // Keys before the menu would reach the firmware (docs/evidence/M2/embedded-display-freeze.md).
+      await waitGrubMenu(pid, 'first-boot-grub-menu');
       await keys(pid, '29-disk-vm-options', 'HOME,DOWN,DOWN,DOWN,DOWN,ENTER', null, 500);
       await keys(pid, '30-disk-boot', 'HOME,DOWN,ENTER', null, 3000);
     } else log('first-boot-default', { note: 'Normal virgl path: leave installed GRUB default unchanged; no keys sent.' });
