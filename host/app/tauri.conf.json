@@ -44,7 +44,7 @@
       "allowDowngrades": false,
       "webviewInstallMode": { "type": "skip" },
       "nsis": {
-        "installMode": "perMachine",
+        "installMode": "currentUser",
         "languages": ["Korean", "English"],
         "displayLanguageSelector": false,
         "installerIcon": "icons/icon.ico",

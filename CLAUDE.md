@@ -244,7 +244,7 @@ PRODUCT/
 
 ### M3. 출시
 
-1. 설치기: Tauri 번들러의 NSIS 설치기, 현재 사용자 범위(`%LOCALAPPDATA%\Open Mobile Emulator`, UAC 없음. 사용자 결정 2026-10-01, ADR-0011). MSIX는 서명 없이는 설치되지 않아 뺐다. 설치 경로에 QEMU 바이너리, OVMF, 승격 도우미(`ome-setup.exe`), 제품만 포함하고 게스트 이미지는 포함하지 않는다(R2). QEMU와 도우미는 릴리스 빌드 때만 쓰는 설정 덧판 `ci/release/tauri.release.conf.json`으로 동봉한다. 사용자가 `%LOCALAPPDATA%` 아래를 찾아가기 어려우므로 설정의 `정보` 절에 `프로그램 폴더 열기` 단추(`open_install_folder`)를 둔다.
+1. 설치기: Tauri 번들러의 NSIS 설치기, 현재 사용자 범위(`%LOCALAPPDATA%\Open Mobile Emulator`, UAC 없음. 사용자 결정 2026-10-01, ADR-0011). MSIX는 서명 없이는 설치되지 않아 뺐다. 설치 경로에 QEMU 바이너리, OVMF, 승격 도우미(`ome-setup.exe`), 제품만 포함하고 게스트 이미지는 포함하지 않는다(R2). QEMU와 도우미는 릴리스 빌드 때만 쓰는 설정 덧판 `ci/release/tauri.release.conf.json`으로 동봉한다. 사용자가 `%LOCALAPPDATA%` 아래를 찾아가기 어려우므로 설정의 `정보` 절에 `프로그램 폴더 열기` 단추(`open_install_folder`)를 두고, `저장 위치` 절에 스크린샷 폴더 열기와 공유 폴더(PC 파일을 adb로 가상 머신의 `/sdcard/OME/`에 복사하는 `shared_push`, 한 방향)를 둔다(사용자 요구 2026-10-01 오후, ADR-0011 7번). 설치 범위 선택(`both`)은 Tauri 틀에서 UAC 없는 기본값과 양립하지 않아 v0.1.0에 넣지 않는다(ADR-0011 8번).
 2. 코드 서명: 하지 않는다(사용자 결정 2026-09-30, 8절 3번). 릴리스는 서명 없이 나가고, SmartScreen 경고를 지나는 방법과 SHA-256·빌드 출처 증명(ADR-0007)으로 파일을 확인하는 절차를 릴리스 노트와 `docs/help/`에 적는다. 인증서 비용을 대는 후원이 생기면 그때 서명 단계를 더한다.
 3. R4 소스 묶음, `THIRD_PARTY.md`, `NOTICE`가 릴리스에 포함되는지 CI로 검사한다.
 4. `docs/KNOWN_LIMITATIONS.md` 확정. 최소 항목:
