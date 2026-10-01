@@ -4,6 +4,7 @@
 화면 설명은 다른 설치 마법사들의 관례대로 "여유 공간이 충분해 설치할 수 있습니다"는 식으로 둔다. 그래서 화면
 수정이 하나 생긴다(S1.5의 단추 이름과 설명 문장). M2 기능 명세 1번과 9번(개정 2026-10-01)의 구현 방법을 정하는
 ADR이며, 게스트 디스크의 배치와 부팅 방식을 바꾼다. 구현 전에는 지금의 대화형 설치 화면(개발용)이 그대로 남는다.
+검증 스파이크는 2026-10-01에 통과했다("검증 결과" 절).
 
 ## 배경
 
@@ -83,21 +84,25 @@ Cosmopolitan 빌드의 `unpins/e2fsprogs`). 하지만 어느 것도 이 제품�
 라이선스 검토를 부른다. Windows가 포맷하는 VHDX는 FAT32와 NTFS와 exFAT까지만 되고 관리자 권한이 필요하다.
 QEMU의 `vvfat`는 쓰기 모드가 베타라 데이터 디스크로 못 쓴다.
 
-## 결정 (제안)
+## 결정
 
 1. 설치는 **도우미 부팅**으로 한다. 사용자가 `설치하기`로 승인하면 제품이 qcow2를 만들고, 검증된 ISO의
    `kernel`과 `initrd.img`를 호스트로 꺼낸 뒤, `initrd.img` 뒤에 제품이 만든 cpio(`/scripts/99-ome-install`)를 이어
    붙여 QEMU를 **화면 없이** 한 번 띄운다(`-display none`, ISO는 읽기 전용 CD-ROM, 쓰기 가능한 장치는 새 qcow2 하나,
-   `-no-reboot`). 커널 인자에는 `INSTALL`, `AUTO_INSTALL`, `DEBUG`를 주지 않는다. 스크립트는 install.img에서 도구를
-   꺼내 디스크를 GPT로 나누고(ESP 없이 ext4 하나로 충분한지는 2번에 따른다) `system.img`(system.sfs 안의 쓰기 가능한
-   이미지, 6절 번역기 계약이 system 쓰기를 요구한다)와 `kernel`과 `initrd.img`를 복사하고 `data/`를 만들고, 진행
-   상황을 QEMU의 시리얼(`-serial file:`)이나 가상 디스크의 표식 파일로 알린 뒤 `poweroff -f`한다. 제품은 QEMU
-   종료 코드와 표식으로 성공을 판정하고 진행 화면만 보인다.
+   `-action reboot=shutdown`). 커널 인자에는 `INSTALL`, `AUTO_INSTALL`, `DEBUG`를 주지 않고 `OME_INSTALL=1
+   OME_DISK=/dev/vda OME_SRC=ome`를 준다(initrd의 `/init`은 커널 인자의 `KEY=VALUE`를 환경 변수로 받는다). 스크립트는
+   install.img에서 도구를 꺼내 디스크를 GPT로 나누고(ESP 없이 ext4 파티션 하나. 스파이크로 확인) `system.img`(ISO의
+   `system.efs` 안에 든 쓰기 가능한 ext4 이미지. 조사 때는 sfs로 알았는데 16.9.7 ISO는 EROFS이고 안에 같은 모양의
+   `system.img`가 있다. 6절 번역기 계약이 system 쓰기를 요구한다)와 `kernel`과 `initrd.img`를 복사하고 `data/`를
+   만들고, 진행 상황을 QEMU의 시리얼(`-serial file:`)로 `OME-INSTALL step <단계> <백분율>`, `done`, `fail <이유>` 줄로
+   알린 뒤 `poweroff -f`한다. 제품은 QEMU가 스스로 끝나는 것과 시리얼의 `done` 줄로 성공을 판정하고 진행 화면만
+   보인다. 디스크 표식 파일은 쓰지 않는다.
 2. 설치된 게스트는 **GRUB 없이 직접 커널 부팅**한다. 제품이 이미 QEMU 명령줄을 쥐고 있으므로 매 시작에
-   `-kernel <홈의 kernel> -initrd <홈의 initrd.img> -append "root=/dev/ram0 SRC=/blissos <표시 인자> quiet"`를 준다.
+   `-kernel <홈의 kernel> -initrd <홈의 initrd.img> -append "root=/dev/ram0 SRC=/ome <프로필의 boot_args>"`를 준다.
    그러면 ESP도 GRUB도 efibootmgr도 필요 없고, 표시 설정(M2 5번의 `video=`, 주사율)은 GRUB 환경 대신 `-append`로
-   바로 간다. GRUB 화면의 굳음(`embedded-display-freeze.md`)이 생길 자리도 없어진다. OVMF를 계속 쓸지(QEMU는
-   OVMF 아래서도 fw_cfg로 커널을 직접 부팅한다) SeaBIOS로 갈지는 스파이크에서 정한다.
+   바로 간다. GRUB 화면의 굳음(`embedded-display-freeze.md`)이 생길 자리도 없어진다. 펌웨어는 OVMF 그대로다.
+   QEMU는 OVMF 아래서도 fw_cfg로 커널을 직접 부팅하며, 스파이크에서 WHPX와 함께 확인했으므로 SeaBIOS로 바꿀
+   이유가 없다.
 3. 지금의 대화형 설치 화면과 완료 실행 드라이버의 설치기 자동화(OCR과 키, GRUB 선택 막대 판독)는 이 ADR을 채택해
    구현한 뒤 걷어낸다. 드라이버의 S1.5는 진행 화면과 QEMU 종료를 기다리는 단계로 줄어든다.
 4. 이미지 프로필(ADR-0004)에는 그 프로필의 설치 방식과 커널 인자를 적는 자리를 둔다. 안드로이드 15 이상의
@@ -108,9 +113,10 @@ QEMU의 `vvfat`는 쓰기 모드가 베타라 데이터 디스크로 못 쓴다.
 - 사용자가 보는 것은 진행 화면 하나다. 설치 중 화면 조작으로 실패를 만들 길이 없다.
 - 제품에 새 원어 의존성이 없다. 포맷과 복사는 ISO가 든 리눅스 도구가 한다(R2, R3 준수. 도구는 사용자 PC에서
   받은 ISO 안에 있다).
-- 게스트 디스크 배치가 설치기의 것(ESP + ext4 + shim/GRUB)에서 ext4 하나(`/blissos/{kernel,initrd.img,system.img,data/}`)로
-  바뀐다. 기존에 설치기로 만든 게스트(개발용)와 호환되지 않으므로 게스트 기록에 배치 버전을 적고, 옛 배치는
-  다시 설치를 안내한다.
+- 게스트 디스크 배치가 설치기의 것(ESP + ext4 + shim/GRUB)에서 ext4 하나(`/ome/{kernel,initrd.img,system.img,data/}`)로
+  바뀐다. 새 게스트는 기록(`guest.json`)에 `boot: direct`와 설치 상태를 적고 홈에 `kernel`과 `initrd.img`를 둔다.
+  기존에 설치기로 만든 게스트는 기록에 부팅 방식이 없으므로 지금처럼 펌웨어가 디스크의 GRUB을 부팅하게 두어
+  그대로 쓸 수 있다(사용자가 트릭컬을 2시간 40분 돌린 게스트가 그런 게스트다). 다시 설치하면 새 배치가 된다.
 - 첫 부팅 인자를 GRUB 항목이 아니라 제품이 정하므로 `guest/kernel-cmdline.md`의 실험 결과가 그대로 `-append`에
   들어간다.
 
@@ -125,10 +131,22 @@ QEMU의 `vvfat`는 쓰기 모드가 베타라 데이터 디스크로 못 쓴다.
 4. 통과하면 `ome-guest-config`에 도우미 부팅과 직접 부팅의 명령줄을, `ome-runtime`에 설치 단계의 상태 기계(만들기,
    도우미 부팅, 표식 대기, 실패 시 다시 설치)를, 마법사 S1.5에 진행 화면을 만든다. 드라이버는 그 뒤 고친다.
 
+## 검증 결과 (2026-10-01, 개발 PC)
+
+근거는 `docs/evidence/M2/unattended-install-spike.md`다. 1~3번을 모두 통과했고 4번(구현)으로 넘어간다.
+
+| 항목 | 결과 |
+|---|---|
+| 1. ISO 대조 | initrd의 `/init`은 조사한 소스와 같다. 시스템 이미지는 `system.sfs`가 아니라 `system.efs`이고 안에 `system.img`(4.7 GB)가 있다. `mke2fs`, `mkfs.ext4`, `rsync`는 ISO의 안드로이드 시스템에 있고 `sgdisk`, `pv`는 install.img에 있다 |
+| 2. 도우미 부팅 | OVMF + WHPX에서 `-kernel` 직접 부팅이 되고, 스크립트가 파티션, 포맷, 복사를 마치고 `done`을 낸 뒤 전원을 꺼 QEMU가 종료 코드 0으로 끝났다. **32초**(대화형 설치기 자동화는 249~266초) |
+| 2. 직접 부팅 | 첫 부팅 35.4초, 두 번째 22.8초에 `sys.boot_completed`. 네이티브 브리지 있음, `/data`는 vda1, 재부팅 뒤 파일 보존, `adb root` 됨, `adb reboot -p`로 1초 안에 종료 |
+| 3. GRUB 비교 | 같은 조건에서 29회차의 GRUB 디스크는 26.0초. 직접 부팅이 3초쯤 빠르고 GRUB 메뉴와 ESP가 없다. SeaBIOS는 재지 않았다(OVMF로 충분) |
+
 ## 열린 문제
 
-- ISO의 실제 initrd가 열람한 소스와 같은지(1번)가 먼저다. 회차에서 본 "Do you want to install EFI GRUB2?" 문구는
-  상류의 옛 질문이라 ISO가 `arcadia-x86` 끝 커밋과 다를 수 있다.
-- system.img를 쓰기 가능하게 복사하는 대신 system.sfs를 그대로 두고 오버레이로 쓰는 길이 안드로이드 13 Bliss에
-  있는지는 보지 않았다. 번역기 교체 계약(6절)이 system 쓰기를 요구하므로 우선은 복사한다.
+- system.img를 쓰기 가능하게 복사하는 대신 system.efs를 그대로 두고 오버레이로 쓰는 길이 안드로이드 13 Bliss에
+  있는지는 보지 않았다. 번역기 교체 계약(6절)이 system 쓰기를 요구하므로 우선은 복사한다. 복사하면 qcow2가 4.7 GB로
+  시작한다.
+- 도우미 부팅은 QMP `system_powerdown`에 응답하지 않는다(initrd에는 acpid가 없다). 취소는 감독자의 강제 종료로
+  끝나며 디스크는 어차피 지운다.
 - 설치 실패의 사용자 안내(디스크 여유, ISO 손상, 도우미 시간 초과)와 다시 설치의 상태 기계는 구현 때 정한다.

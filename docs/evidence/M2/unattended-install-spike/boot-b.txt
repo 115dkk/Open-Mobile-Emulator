@@ -1,0 +1,76 @@
+08:54:05.076 qemu -machine q35 -accel whpx,kernel-irqchip=off -cpu Skylake-Client-v4 -rtc base=utc -parallel none -action reboot=shutdown -drive "if=pflash,format=raw,readonly=on,file=C:\Open Mobile Emulator\host\target\debug\qemu\share\qemu\edk2-x86_64-code.fd" -drive "if=pflash,format=raw,file=C:\Users\32170336\AppData\Local\Temp\claude\C--Open-Mobile-Emulator\27d99c8c-b9c9-593b-9f42-b33a98337195\scratchpad\spike-adr10\efivars.fd" -m 8192 -smp 4 -drive "file=C:\Users\32170336\AppData\Local\Temp\claude\C--Open-Mobile-Emulator\27d99c8c-b9c9-593b-9f42-b33a98337195\scratchpad\spike-adr10\disk.qcow2,if=virtio,format=qcow2" -kernel "C:\Users\32170336\AppData\Local\Temp\claude\C--Open-Mobile-Emulator\27d99c8c-b9c9-593b-9f42-b33a98337195\scratchpad\spike-adr10\iso\kernel" -initrd "C:\Users\32170336\AppData\Local\Temp\claude\C--Open-Mobile-Emulator\27d99c8c-b9c9-593b-9f42-b33a98337195\scratchpad\spike-adr10\iso\initrd.img" -append "root=/dev/ram0 SRC=/ome quiet console=ttyS0 console=tty0" -device virtio-vga-gl,edid=off -display sdl,show-cursor=on,gl=on -device virtio-net-pci,netdev=n0 -netdev user,id=n0,hostfwd=tcp:127.0.0.1:5556-:5555 -usb -device usb-tablet -device usb-kbd -qmp tcp:127.0.0.1:4446,server=on,wait=off -serial "file:C:\Users\32170336\AppData\Local\Temp\claude\C--Open-Mobile-Emulator\27d99c8c-b9c9-593b-9f42-b33a98337195\scratchpad\spike-adr10\boot-serial-b.log"
+08:54:05.105 pid=8200
+08:54:27.848 boot_completed=True elapsed=22.8s
+08:54:27.951 adb> getprop ro.build.display.id
+TQ3A.230901.001.C1
+08:54:28.065 adb> getprop ro.dalvik.vm.native.bridge
+libndk_translation.so
+08:54:28.168 adb> getprop ro.boot.hardware
+bliss_x86_64
+08:54:28.278 adb> cat /proc/cmdline
+cat: /proc/cmdline: Permission denied
+08:54:28.375 adb> ls /sys/firmware/efi 2>&1 | head -3
+config_table
+efivars
+fw_platform_size
+08:54:28.482 adb> mount | grep -E " / | /system | /data | /mnt" | head -12
+/dev/loop0 on / type ext4 (ro,seclabel,nodev,noatime)
+/dev/block/vda1 on /data type ext4 (rw,seclabel,noatime)
+tmpfs on /mnt type tmpfs (rw,seclabel,nosuid,nodev,noexec,relatime,mode=755,gid=1000)
+tmpfs on /mnt/installer type tmpfs (rw,seclabel,nosuid,nodev,noexec,relatime,mode=755,gid=1000)
+tmpfs on /mnt/androidwritable type tmpfs (rw,seclabel,nosuid,nodev,noexec,relatime,mode=755,gid=1000)
+/data/media on /mnt/runtime/default/emulated type esdfs (rw,nosuid,nodev,noexec,noatime,lower=1023:1023:664:775,upper=0:1015:771:771,derive=multi,noconfine,derive_gid,default_normal,unshared_obb)
+/data/media on /mnt/runtime/read/emulated type esdfs (rw,nosuid,nodev,noexec,noatime,lower=1023:1023:664:775,upper=0:9997:750:750,derive=multi,noconfine,derive_gid,default_normal,unshared_obb)
+/data/media on /mnt/runtime/write/emulated type esdfs (rw,nosuid,nodev,noexec,noatime,lower=1023:1023:664:775,upper=0:9997:770:770,derive=multi,noconfine,derive_gid,default_normal,unshared_obb)
+/data/media on /mnt/runtime/full/emulated type esdfs (rw,nosuid,nodev,noexec,noatime,lower=1023:1023:664:775,upper=0:9997:770:770,derive=multi,noconfine,derive_gid,default_normal,unshared_obb)
+/dev/fuse on /mnt/user/0/emulated type fuse (rw,lazytime,nosuid,nodev,noexec,noatime,user_id=0,group_id=0,allow_other)
+/dev/fuse on /mnt/installer/0/emulated type fuse (rw,lazytime,nosuid,nodev,noexec,noatime,user_id=0,group_id=0,allow_other)
+/dev/fuse on /mnt/androidwritable/0/emulated type fuse (rw,lazytime,nosuid,nodev,noexec,noatime,user_id=0,group_id=0,allow_other)
+08:54:28.580 adb> df -h /data /system 2>&1 | head -5
+Filesystem      Size Used Avail Use% Mounted on
+/dev/block/vda1  31G 4.6G   25G  16% /data/user/0
+/dev/loop0      4.3G 3.9G  342M  93% /apex/com.android.wifi
+08:54:28.679 adb> ls -la /mnt/ 2>&1 | head
+total 4
+drwxr-xr-x 15 root   system            320 2026-10-01 08:54 .
+drwxr-xr-x 26 root   root             4096 2024-10-12 10:58 ..
+drwxr-x---  3 root   media_rw           60 2026-10-01 08:54 androidwritable
+drwx--x--x  2 root   root               40 2026-10-01 08:54 appfuse
+drwxr-xr-x  2 root   system             40 2026-10-01 08:54 asec
+drwxrwx--x  2 system system             40 2026-10-01 08:54 expand
+drwxr-x---  3 root   media_rw           60 2026-10-01 08:54 installer
+drwxr-x---  2 root   external_storage   40 2026-10-01 08:54 media_rw
+drwxr-xr-x  2 root   system             40 2026-10-01 08:54 obb
+08:54:28.775 adb> cat /proc/mounts | grep -E "loop|vda" | head -12
+/dev/loop0 / ext4 ro,seclabel,nodev,noatime 0 0
+/dev/block/vda1 /data ext4 rw,seclabel,noatime 0 0
+/dev/loop0 /apex/com.android.adbd ext4 rw,seclabel,noatime 0 0
+/dev/loop0 /apex/com.android.adservices ext4 rw,seclabel,noatime 0 0
+/dev/loop0 /apex/com.android.appsearch ext4 rw,seclabel,noatime 0 0
+/dev/loop0 /apex/com.android.art ext4 rw,seclabel,noatime 0 0
+/dev/loop0 /apex/com.android.btservices ext4 rw,seclabel,noatime 0 0
+/dev/loop0 /apex/com.android.cellbroadcast ext4 rw,seclabel,noatime 0 0
+/dev/loop0 /apex/com.android.conscrypt ext4 rw,seclabel,noatime 0 0
+/dev/loop0 /apex/com.android.extservices ext4 rw,seclabel,noatime 0 0
+/dev/loop0 /apex/com.android.i18n ext4 rw,seclabel,noatime 0 0
+/dev/loop0 /apex/com.android.ipsec ext4 rw,seclabel,noatime 0 0
+08:54:28.920 adb> wm size
+Physical size: 1280x800
+08:54:29.016 adb> ls /sdcard/ome-spike.txt 2>&1
+/sdcard/ome-spike.txt
+08:54:29.126 adb> id
+uid=2000(shell) gid=2000(shell) groups=2000(shell),1004(input),1007(log),1011(adb),1015(sdcard_rw),1028(sdcard_r),1078(ext_data_rw),1079(ext_obb_rw),3001(net_bt_admin),3002(net_bt),3003(inet),3006(net_bw_stats),3009(readproc),3011(uhid),3012(readtracefs) context=u:r:shell:s0
+08:54:29.215 adb reboot -p: Done
+08:54:30.033 exit=0 shutdown=0.9s
+08:54:30.106 ---- serial (last 25)
+08:54:30.120 [2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01H[    0.379698] SELinux: CONFIG_SECURITY_SELINUX_CHECKREQPROT_VALUE is non-zero.  This is deprecated and will be rejected in a future kernel release.
+08:54:30.135 [    0.380094] SELinux: https://github.com/SELinuxProject/selinux-kernel/wiki/DEPRECATE-checkreqprot
+08:54:30.138 ---- stderr
+08:54:30.145 C:\Open Mobile Emulator\host\target\debug\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+08:54:30.150 C:\Open Mobile Emulator\host\target\debug\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+08:54:30.155 C:\Open Mobile Emulator\host\target\debug\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+08:54:30.161 C:\Open Mobile Emulator\host\target\debug\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+08:54:30.166 C:\Open Mobile Emulator\host\target\debug\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+08:54:30.170 C:\Open Mobile Emulator\host\target\debug\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+08:54:30.174 C:\Open Mobile Emulator\host\target\debug\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+08:54:30.178 C:\Open Mobile Emulator\host\target\debug\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
