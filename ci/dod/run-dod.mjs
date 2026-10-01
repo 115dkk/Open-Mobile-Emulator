@@ -102,7 +102,7 @@ async function stopGuest() {
   const s = await snapshot(); rememberProcesses();
   if (['stopped', 'failed'].includes(s.guest.state)) return;
   if (await page.getByRole('button', { name: '나중에 하기', exact: true }).count()) await click('나중에 하기');
-  await rail('무대');
+  await rail('화면');
   const stop = page.getByRole('button', { name: '끄기', exact: true });
   if (await stop.count()) await stop.click(); else await click('취소');
   await until(async () => ['stopped', 'failed'].includes((await snapshot()).guest.state), 60000, 'guest stopped');
@@ -305,7 +305,7 @@ try {
   });
   await step('game-launch', async () => {
     const start = Date.now();
-    await page.getByRole('row').filter({ hasText: result.game.package }).getByRole('button', { name: '실행', exact: true }).click(); await rail('무대');
+    await page.getByRole('row').filter({ hasText: result.game.package }).getByRole('button', { name: '실행', exact: true }).click(); await rail('화면');
     // No account creation or unapproved game interaction. Fifteen minutes of product captures
     // document whether a consent/resource-download dialog blocks reaching the title screen. The
     // OS's notification permission prompt is answered (answerPermissionPrompt); dev PC round 25 sat
