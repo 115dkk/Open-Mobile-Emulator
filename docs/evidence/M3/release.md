@@ -115,4 +115,16 @@ https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36819100622 이다(2
 
 ## 5. 러너에서의 설치기 완주 (완료 기준 2, `m3-release-dod.yml`)
 
-(릴리스 뒤에 적는다.)
+`gh workflow run m3-release-dod.yml -f tag=v0.1.0`. 워크플로는 릴리스의 설치기와 `.sha256`을 받아 해시를 대조하고
+`gh attestation verify --signer-workflow .../release.yml`을 통과시킨 뒤, m2-dod.yml과 같은 방식으로 표준 사용자 `omeuser`를
+만들어 그 계정으로 설치기를 `/S`로 돌리고(`run-as-user.ps1 -Installer`) 설치된 `%LOCALAPPDATA%\Open Mobile Emulator\ome.exe`에
+완료 실행 드라이버를 댄다.
+
+| 시도 | 실행 | 결과 |
+|---|---|---|
+| 1 | https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36820731098 (05:38~05:42 UTC) | 설치기 검증 통과, 표준 사용자 설치 종료 코드 0, 설치된 제품으로 첫 화면·호스트 점검·WHPX 통과. S1.4에서 SourceForge 다운로드가 두 번 모두 한 바이트도 받지 못한 채 실패(`artifact_download_failed`, 드라이버의 두 번째 시도까지 47초). 제품 밖의 일이며 m2-dod.yml 23회에서도 같은 미러 실패가 있었다 |
+| 2 | https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36821141980 (05:43~05:47 UTC) | 같은 자리에서 같은 실패. 그 시각 개발 PC에서도 `downloads.sourceforge.net`이 HTTP 522(Cloudflare, 원본 서버 응답 없음)를 돌려줬다(`sourceforge-522.txt`). 배포처 장애이며 제품이나 설치기의 결함이 아니다 |
+
+두 시도 모두 설치기의 해시와 출처 증명 확인, 표준 사용자의 무음 설치(종료 코드 0), 설치된 제품의 기동과 호스트 점검과 WHPX 단계까지는
+통과했다. 러너 쪽 완주의 나머지(이미지 내려받기부터 게임까지)는 SourceForge가 돌아오면 같은 워크플로를 다시 돌려 아래에 적는다.
+같은 설치 배치와 같은 QEMU 런타임으로 개발 PC에서 한 35회차(2절)가 그 구간을 이미 지나갔다.

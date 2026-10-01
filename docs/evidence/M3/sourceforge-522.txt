@@ -1,0 +1,7 @@
+SourceForge probe from the dev PC, 2026-10-01T05:49:55Z, while the runner attempts 36820731098 and 36821141980 failed at S1.4
+curl -sSIL https://downloads.sourceforge.net/project/blissos-x86/Official/BlissOS16/Gapps/Generic/Bliss-v16.9.7-x86_64-OFFICIAL-gapps-20241011.iso
+HTTP/1.1 200 Connection Established
+HTTP/1.1 522 <none>
+Date: Thu, 01 Oct 2026 05:50:15 GMT
+Server: cloudflare
+CF-RAY: a4392fda9bf1ed61-ICN

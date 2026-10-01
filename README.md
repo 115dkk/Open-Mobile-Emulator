@@ -7,9 +7,10 @@ guest, and a thin Windows front end.
 
 **Status:** pre-release. M0 (translation check), M1 (Windows execution path) and
 M2 (product shell: the first-run wizard installs the guest unattended and reaches
-the game) are done; M3 (release) is in progress and the first pre-release is
-v0.1.0. Releases are built only on GitHub Actions and every file carries a build
-provenance attestation (`docs/adr/0007-release-build-provenance.md`).
+the game) are done, and M3 (release) published the first pre-release, v0.1.0, on
+2026-10-01. Releases are built only on GitHub Actions and every file carries a
+build provenance attestation (`docs/adr/0007-release-build-provenance.md`,
+evidence in `docs/evidence/M3/release.md`).
 
 ## Install (users)
 
