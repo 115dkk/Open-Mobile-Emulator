@@ -185,4 +185,11 @@ only when a release fixes them.
   any audio output device cannot open DirectSound either, and QEMU treats that
   as fatal too (run 21); the product then starts the guest without an audio
   backend.
+- The shared folder is a one-way copy: Settings > 저장 위치 > 공유 폴더 > 가상 머신으로 보내기 pushes the
+  folder's files with adb into `/sdcard/OME/` on the guest. There is no live
+  mount (the Windows QEMU build has neither 9p nor virtiofs, and QEMU's built-in
+  SMB needs Samba on the host) and nothing comes back from the guest. Whether
+  gallery apps see pushed media right away depends on the media scan request
+  succeeding (unverified on Bliss 16.9.7); the Files app shows the folder
+  regardless.
 - Multi-instance, macros, and scripted automation are not part of v1 (D9).

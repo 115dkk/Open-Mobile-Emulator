@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-shared-push"
+description = "Enables the shared_push command without any pre-configured scope."
+commands.allow = ["shared_push"]
+
+[[permission]]
+identifier = "deny-shared-push"
+description = "Denies the shared_push command without any pre-configured scope."
+commands.deny = ["shared_push"]

@@ -204,6 +204,12 @@ export interface SettingsView {
   readonly autoUpdateCheck: boolean;
   readonly homeDir: string;
   readonly diskUsageBytes: number | null;
+  /** Folder that receives the stage's screenshots; empty when the home is unavailable. */
+  readonly screenshotsDir: string;
+  /** Folder whose files `sharedPush` copies into the guest; empty when the home is unavailable. */
+  readonly sharedDir: string;
+  /** Progress of the shared-folder transfer while one runs. */
+  readonly sharedPush: InstallProgress | null;
   readonly adbAccess: AdbAccess;
   readonly bindingOverlayDefault: boolean;
 }
@@ -317,6 +323,8 @@ export interface ControllerBridge {
   openScreenshotsFolder(): Promise<AppSnapshot>;
   openHomeFolder(): Promise<AppSnapshot>;
   openInstallFolder(): Promise<AppSnapshot>;
+  openSharedFolder(): Promise<AppSnapshot>;
+  sharedPush(): Promise<AppSnapshot>;
   copyToClipboard(item: ClipboardItem): Promise<AppSnapshot>;
   openRegistrationPage(): Promise<AppSnapshot>;
   googleAccountAddOpen(): Promise<AppSnapshot>;

@@ -310,6 +310,12 @@
     "kind": "openInstallFolder"
   },
   {
+    "kind": "openSharedFolder"
+  },
+  {
+    "kind": "sharedPush"
+  },
+  {
     "kind": "copyToClipboard",
     "item": "deviceId"
   },

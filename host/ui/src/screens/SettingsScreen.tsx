@@ -455,7 +455,9 @@ function AdvancedSection({ snapshot, actions, save }: SectionProps) {
 // ---- 저장 위치 ----
 
 function StorageSection({ snapshot, actions }: SectionProps) {
-  const { settings } = snapshot;
+  const { settings, apps } = snapshot;
+  const push = settings.sharedPush;
+  const pushRatio = push === null ? null : push.ratio;
   return (
     <Section title="저장 위치">
       <SettingRow
@@ -467,6 +469,31 @@ function StorageSection({ snapshot, actions }: SectionProps) {
           <span className="ome-muted">사용 중 <span className="ome-readout">{formatBytes(settings.diskUsageBytes)}</span></span>
         )}
         {settings.homeDir !== '' && <Button icon="folder-open" onClick={actions.openHomeFolder}>폴더 열기</Button>}
+      </SettingRow>
+      {/* Where the stage's screenshot button saves (the apps screen has the same button). */}
+      <SettingRow
+        label="스크린샷"
+        help="무대의 스크린샷 단추로 찍은 그림이 저장되는 폴더입니다."
+        below={settings.screenshotsDir === '' ? undefined : <span className="ome-mono ome-settings-value">{settings.screenshotsDir}</span>}
+      >
+        <Button icon="folder-open" onClick={actions.openScreenshotsFolder}>스크린샷 폴더 열기</Button>
+      </SettingRow>
+      {/* One-way copy into the guest over adb (ADR-0011 7): the Windows QEMU has no shared-folder device. */}
+      <SettingRow
+        label="공유 폴더"
+        help={push === null
+          ? '이 폴더에 넣은 파일을 가상 머신 내부 저장소의 OME 폴더로 복사합니다. 운영체제가 실행 중일 때 보낼 수 있습니다.'
+          : `보내는 중: ${push.label} (${push.doneItems}/${push.totalItems})`}
+        below={settings.sharedDir === '' ? undefined : <span className="ome-mono ome-settings-value">{settings.sharedDir}</span>}
+      >
+        {push !== null && (
+          <>
+            <span className="ome-settings-progress"><ProgressBar value={pushRatio} label="공유 폴더 전송 진행률" /></span>
+            {pushRatio !== null && <span className="ome-readout">{formatPercent(pushRatio)}</span>}
+          </>
+        )}
+        <Button icon="folder-open" onClick={actions.openSharedFolder}>공유 폴더 열기</Button>
+        <Button variant="primary" icon="file-up" disabled={!apps.available || push !== null} onClick={actions.sharedPush}>가상 머신으로 보내기</Button>
       </SettingRow>
     </Section>
   );

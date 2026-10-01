@@ -39,6 +39,24 @@ node ../node_modules/@tauri-apps/cli/tauri.js build --ci --config ../../ci/relea
 로그의 `done`을 성공의 근거로 삼고 감독자 상태를 요구하지 않는다. 같은 유실은 일반 게스트가 스스로 꺼질 때 "예기치 않게
 끝났습니다" 알림을 잘못 내는 원인이기도 하다.
 
+### 35회차: 로컬 설치기(ome4 런타임 동봉, 위 두 수정 반영)로 설치한 제품, 개발 PC, 새 홈 (13:46~14:04, 통과)
+
+설치기 54.3 MB(`host/qemu-dist`에 `qemu-v11.1.1-ome4`의 런타임을 풀어 동봉. 설치된 `qemu-system-x86_64.exe`의
+SHA-256이 릴리스 zip 안 `SHA256SUMS`의 값 `62df3d14…6f890`과 같음). `run-dod-installed.ps1 -Round 35 -SeedFrom dod-home-33`.
+드라이버의 결과는 `needs-review`(전 단계 통과, 게임 화면은 사람이 본다)이고 실패 단계는 없다(`round35-dod-result.json`).
+
+| 단계 | 시간 | 비고 |
+|---|---|---|
+| S1.1 호스트 점검, S1.2 WHPX, S1.4 이미지 | 1.6초, 1.5초, 3.1초 | ISO는 복사해 둔 것이라 검증만 |
+| S1.5 설치 | 31.1초 | `설치하기` 뒤 입력 없음. 설치된 제품의 `qemu\bin`과 `share\qemu` 펌웨어로 도우미 부팅(`round35-qemu-install-cmd.txt`). 시리얼 로그 `done`(`round35-install-serial-tail.txt`), 기록 `install.state: installed`, `boot: direct`(`round35-guest.json`) |
+| S1.6 첫 부팅 | 47.4초 | 직접 커널 부팅(`round35-qemu-boot-cmd.txt`) |
+| S1.7 앱 설치 | 20.8초 | |
+| 게임 실행 | 15.6분 | 1분에 권한 대화상자(Allow 탭), 3분부터 게임 화면. 15분 동안 게임 화면이 유지됨 |
+
+마지막 화면(`13-game-final-stage`)은 제품 창 안의 게임 제목 화면(Ver 1.6.44)에 게임의 "서버와 통신이 되지 않습니다.
+네트워크를 확인해주세요" 대화상자가 떠 있는 상태였다. 33회차(같은 PC, 개발 빌드)는 데이터 다운로드 안내까지 갔으므로,
+ome4 런타임의 게스트 네트워크가 원인인지 그 시각의 호스트 회선이나 게임 서버 사정인지 아래에서 따로 가렸다.
+
 ## 3. 러너 QEMU 빌드와 출처 증명 (ADR-0007, R4)
 
 `qemu-release.yml`을 접미사 `ome4`로 수동 실행했다(https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36813804342,

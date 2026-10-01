@@ -347,6 +347,26 @@ pub fn app_package_invalid() -> AppIssue {
     }
 }
 
+/// Returns an issue when the shared folder contains no transferable files.
+pub fn shared_folder_empty() -> AppIssue {
+    AppIssue {
+        code: "shared_folder_empty".to_owned(),
+        message: "공유 폴더에 보낼 파일이 없습니다.".to_owned(),
+        next_action: Some("설정의 공유 폴더에 파일을 넣은 뒤 다시 누르십시오.".to_owned()),
+    }
+}
+
+/// Returns an issue when one shared-folder file cannot be sent to the operating system.
+pub fn shared_push_failed() -> AppIssue {
+    AppIssue {
+        code: "shared_push_failed".to_owned(),
+        message: "파일을 가상 머신으로 보내지 못했습니다.".to_owned(),
+        next_action: Some(
+            "운영체제가 실행 중인지 확인한 뒤 다시 시도하십시오. 자세한 내용은 로그 폴더에 있습니다.".to_owned(),
+        ),
+    }
+}
+
 /// Returns an issue when adb rejects package installation.
 pub fn app_install_failed() -> AppIssue {
     AppIssue {

@@ -284,6 +284,8 @@ enum WorkerEvent {
     ArtifactFinished(Result<(), AppIssue>),
     InstallProgress(InstallProgress),
     InstallFinished(Result<Vec<AppItem>, AppIssue>),
+    SharedProgress(InstallProgress),
+    SharedFinished(Result<u64, AppIssue>),
     BootPolled { generation: u64, completed: bool },
     UpdateChecked(Result<UpdateRelease, AppIssue>),
     UpdateProgress(TransferProgress),
@@ -370,6 +372,7 @@ pub struct AppRuntime {
     apps: Vec<AppItem>,
     install_progress: Option<InstallProgress>,
     install_cancel: Option<Arc<AtomicBool>>,
+    shared_push: Option<InstallProgress>,
     artifact_progress: Option<TransferProgress>,
     artifact_cancel: Option<Arc<AtomicBool>>,
     worker_tx: mpsc::Sender<WorkerEvent>,
@@ -614,6 +617,7 @@ impl AppRuntime {
             apps,
             install_progress: None,
             install_cancel: None,
+            shared_push: None,
             artifact_progress: None,
             artifact_cancel: None,
             worker_tx,
@@ -735,6 +739,16 @@ impl AppRuntime {
                 show_fps: self.settings.show_fps,
                 auto_update_check: self.settings.auto_update_check,
                 home_dir: self.home.as_path().to_string_lossy().into_owned(),
+                screenshots_dir: self
+                    .home
+                    .subdir("screenshots")
+                    .map(|path| path.to_string_lossy().into_owned())
+                    .unwrap_or_default(),
+                shared_dir: self
+                    .shared_directory()
+                    .map(|path| path.to_string_lossy().into_owned())
+                    .unwrap_or_default(),
+                shared_push: self.shared_push.clone(),
                 disk_usage_bytes: self
                     .guests
                     .iter()
@@ -811,6 +825,8 @@ impl AppRuntime {
             Command::OpenHelp { topic } => self.open_help(topic),
             Command::OpenHomeFolder => self.open_fixed_directory(None),
             Command::OpenInstallFolder => self.open_install_folder(),
+            Command::OpenSharedFolder => self.open_fixed_directory(Some("shared")),
+            Command::SharedPush => self.start_shared_push(),
             Command::OpenLogsFolder => self.open_fixed_directory(Some("logs")),
             Command::OpenScreenshotsFolder => self.open_fixed_directory(Some("screenshots")),
             Command::CopyToClipboard { item } => self.copy_to_clipboard(item),
@@ -1597,6 +1613,20 @@ impl AppRuntime {
                         }
                     }
                 }
+                WorkerEvent::SharedProgress(progress) => self.shared_push = Some(progress),
+                WorkerEvent::SharedFinished(result) => {
+                    self.shared_push = None;
+                    match result {
+                        Ok(count) => self.push_notice(Notice {
+                            at: local_rfc3339(),
+                            level: NoticeLevel::Info,
+                            message: format!(
+                                "공유 폴더의 파일 {count}개를 가상 머신의 OME 폴더로 보냈습니다."
+                            ),
+                        }),
+                        Err(issue) => self.issue = Some(issue),
+                    }
+                }
                 WorkerEvent::BootPolled {
                     generation,
                     completed,
@@ -1999,8 +2029,57 @@ impl AppRuntime {
             .map_err(|_| issues::desktop_unavailable())
     }
 
+    fn start_shared_push(&mut self) -> Result<(), AppIssue> {
+        if self.install_progress.is_some() || self.shared_push.is_some() {
+            return Err(issues::operation_in_progress());
+        }
+        self.require_booted()?;
+        let adb = self
+            .deps
+            .adb
+            .as_ref()
+            .cloned()
+            .ok_or_else(issues::operating_system_connection_unavailable)?;
+        let directory = self.shared_directory()?;
+        fs::create_dir_all(&directory).map_err(|_| issues::home_unavailable())?;
+        let files = shared_files(&directory).map_err(|_| issues::home_unavailable())?;
+        let Some(first) = files.first() else {
+            return Err(issues::shared_folder_empty());
+        };
+        let total = u64::try_from(files.len()).unwrap_or(u64::MAX);
+        let first_label = shared_file_label(&first.local);
+        self.shared_push = Some(install_progress(
+            &first_label,
+            TransferStage::Waiting,
+            0,
+            total,
+        ));
+        let sender = self.worker_tx.clone();
+        let spawn = thread::Builder::new()
+            .name("ome-shared-push".to_owned())
+            .spawn(move || {
+                let result = push_shared_files(&adb, &files, total, &sender);
+                let _ = sender.send(WorkerEvent::SharedFinished(result));
+            });
+        if spawn.is_err() {
+            self.shared_push = None;
+            return Err(issues::worker_unavailable());
+        }
+        Ok(())
+    }
+
+    fn shared_directory(&self) -> Result<PathBuf, AppIssue> {
+        let home = self.home.as_path();
+        if home.as_os_str().is_empty() {
+            Err(issues::home_unavailable())
+        } else {
+            Ok(home.join("shared"))
+        }
+    }
+
     fn open_fixed_directory(&self, kind: Option<&str>) -> Result<(), AppIssue> {
         let path = match kind {
+            Some("shared") => self.shared_directory()?,
             Some(kind) => self
                 .home
                 .subdir(kind)
@@ -3374,6 +3453,114 @@ pub fn validate_app_paths(paths: Vec<PathBuf>) -> Result<Vec<PathBuf>, AppIssue>
         valid.push(path);
     }
     Ok(valid)
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct SharedFile {
+    local: PathBuf,
+    relative: String,
+}
+
+fn shared_files(root: &Path) -> std::io::Result<Vec<SharedFile>> {
+    fn visit(root: &Path, directory: &Path, files: &mut Vec<SharedFile>) -> std::io::Result<()> {
+        for entry in fs::read_dir(directory)? {
+            let entry = entry?;
+            let file_type = entry.file_type()?;
+            if file_type.is_dir() {
+                visit(root, &entry.path(), files)?;
+                continue;
+            }
+            if !file_type.is_file() || shared_file_is_ignored(&entry.file_name()) {
+                continue;
+            }
+            let local = entry.path();
+            let relative = local
+                .strip_prefix(root)
+                .expect("a visited shared file remains below its root")
+                .components()
+                .map(|component| component.as_os_str().to_string_lossy())
+                .collect::<Vec<_>>()
+                .join("/");
+            files.push(SharedFile { local, relative });
+        }
+        Ok(())
+    }
+
+    let mut files = Vec::new();
+    visit(root, root, &mut files)?;
+    files.sort_by(|left, right| left.relative.cmp(&right.relative));
+    Ok(files)
+}
+
+fn shared_file_is_ignored(name: &std::ffi::OsStr) -> bool {
+    let name = name.to_string_lossy();
+    name.starts_with('.')
+        || name.eq_ignore_ascii_case("desktop.ini")
+        || name.eq_ignore_ascii_case("Thumbs.db")
+}
+
+fn shared_file_label(path: &Path) -> String {
+    path.file_name()
+        .and_then(|name| name.to_str())
+        .unwrap_or("공유 파일")
+        .to_owned()
+}
+
+fn adb_shell_succeeded(adb: &AdbSession, args: &[&str]) -> bool {
+    let args = args
+        .iter()
+        .map(|argument| (*argument).to_owned())
+        .collect::<Vec<_>>();
+    adb.shell(&args).is_ok_and(|output| output.exit_code == 0)
+}
+
+fn push_shared_files(
+    adb: &AdbSession,
+    files: &[SharedFile],
+    total: u64,
+    sender: &mpsc::Sender<WorkerEvent>,
+) -> Result<u64, AppIssue> {
+    if !adb_shell_succeeded(adb, &["mkdir", "-p", "/sdcard/OME"]) {
+        eprintln!("[shared] could not create /sdcard/OME");
+        return Err(issues::shared_push_failed());
+    }
+    let mut done = 0_u64;
+    for file in files {
+        let label = shared_file_label(&file.local);
+        if let Some((parent, _)) = file.relative.rsplit_once('/') {
+            let remote_parent = format!("/sdcard/OME/{parent}");
+            if !adb_shell_succeeded(adb, &["mkdir", "-p", &remote_parent]) {
+                eprintln!("[shared] could not create the guest folder for {label}");
+                return Err(issues::shared_push_failed());
+            }
+        }
+        let remote = format!("/sdcard/OME/{}", file.relative);
+        if let Err(error) = adb.push(&file.local, &remote) {
+            eprintln!("[shared] push failed for {label}: {error}");
+            return Err(issues::shared_push_failed());
+        }
+        done = done.saturating_add(1);
+        let _ = sender.send(WorkerEvent::SharedProgress(install_progress(
+            &label,
+            TransferStage::Transferring,
+            done,
+            total,
+        )));
+    }
+    let _ = adb_shell_succeeded(
+        adb,
+        &[
+            "content",
+            "call",
+            "--uri",
+            "content://media",
+            "--method",
+            "scan_volume",
+            "--arg",
+            "external_primary",
+        ],
+    );
+    Ok(done)
 }
 
 fn transfer_progress(
@@ -5710,6 +5897,7 @@ mod tests {
             Command::OpenHomeFolder,
             Command::OpenLogsFolder,
             Command::OpenScreenshotsFolder,
+            Command::OpenSharedFolder,
         ] {
             runtime.apply(command).expect("open fixed directory");
         }
@@ -5719,8 +5907,109 @@ mod tests {
                 directory.path().join("home"),
                 directory.path().join("home/logs"),
                 directory.path().join("home/screenshots"),
+                directory.path().join("home/shared"),
             ]
         );
+    }
+
+    #[test]
+    fn shared_push_records_recursive_adb_calls_and_reports_completion() {
+        let outputs = [
+            output(""),
+            output("1 file pushed"),
+            output(""),
+            output("1 file pushed"),
+            output("Result: Bundle[]"),
+        ];
+        let (directory, mut runtime, _supervisor, runner) = lifecycle_runtime(
+            outputs,
+            RecordingDesktop::default(),
+            RecordingWindow::embedded(),
+        );
+        let shared = directory.path().join("home/shared");
+        fs::create_dir_all(shared.join("nested")).expect("nested shared directory");
+        fs::write(shared.join("first.txt"), b"first").expect("first shared file");
+        fs::write(shared.join("nested/second.txt"), b"second").expect("second shared file");
+        fs::write(shared.join(".hidden"), b"hidden").expect("hidden shared file");
+        fs::write(shared.join("desktop.ini"), b"desktop").expect("desktop metadata");
+        fs::write(shared.join("nested/Thumbs.db"), b"thumbs").expect("thumbnail metadata");
+        runtime.guest_state = GuestState::Running;
+        runtime.boot_completed = true;
+
+        let snapshot = runtime
+            .apply(Command::SharedPush)
+            .expect("start shared push");
+        assert_eq!(
+            snapshot.settings.shared_push.expect("initial progress"),
+            install_progress("first.txt", TransferStage::Waiting, 0, 2)
+        );
+        for _ in 0..1000 {
+            runtime.poll_workers();
+            if runtime.shared_push.is_none() {
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(1));
+        }
+
+        let snapshot = runtime.snapshot();
+        assert!(snapshot.settings.shared_push.is_none());
+        assert!(snapshot.notices.iter().any(|notice| {
+            notice.level == NoticeLevel::Info && notice.message.contains("2개")
+        }));
+        let calls = runner.calls();
+        assert_eq!(calls.len(), 5);
+        assert_eq!(calls[0].args[2..], ["shell", "mkdir", "-p", "/sdcard/OME"]);
+        assert_eq!(calls[1].args[2], "push");
+        assert_eq!(calls[1].args[4], "/sdcard/OME/first.txt");
+        assert_eq!(
+            calls[2].args[2..],
+            ["shell", "mkdir", "-p", "/sdcard/OME/nested"]
+        );
+        assert_eq!(calls[3].args[2], "push");
+        assert_eq!(calls[3].args[4], "/sdcard/OME/nested/second.txt");
+        assert_eq!(
+            calls[4].args[2..],
+            [
+                "shell",
+                "content",
+                "call",
+                "--uri",
+                "content://media",
+                "--method",
+                "scan_volume",
+                "--arg",
+                "external_primary",
+            ]
+        );
+    }
+
+    #[test]
+    fn shared_push_rejects_an_empty_shared_folder() {
+        let (directory, mut runtime, _supervisor, runner) =
+            lifecycle_runtime([], RecordingDesktop::default(), RecordingWindow::embedded());
+        fs::create_dir_all(directory.path().join("home/shared")).expect("shared directory");
+        runtime.guest_state = GuestState::Running;
+        runtime.boot_completed = true;
+
+        let issue = runtime
+            .apply(Command::SharedPush)
+            .expect_err("empty shared folder");
+
+        assert_eq!(issue.code, "shared_folder_empty");
+        assert!(runner.calls().is_empty());
+    }
+
+    #[test]
+    fn shared_push_requires_a_running_operating_system() {
+        let (_directory, mut runtime, _supervisor, runner) =
+            lifecycle_runtime([], RecordingDesktop::default(), RecordingWindow::embedded());
+
+        let issue = runtime
+            .apply(Command::SharedPush)
+            .expect_err("stopped operating system");
+
+        assert_eq!(issue.code, "operating_system_not_running");
+        assert!(runner.calls().is_empty());
     }
 
     #[test]

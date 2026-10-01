@@ -169,6 +169,7 @@ const snapshot = object<AppSnapshot>({
   settings: object<SettingsView>({
     ...settingsInput, memoryMibMin: number, memoryMibMax: number, vcpusMax: number,
     homeDir: string, diskUsageBytes: nullable(number),
+    screenshotsDir: string, sharedDir: string, sharedPush: nullable(install),
   }),
   update: object<UpdateView>({ currentVersion: string, state: update }),
   notices: array(object<Notice>({ at: string, level: enumeration('info', 'warning', 'error'), message: string })),
@@ -202,6 +203,7 @@ const commandShapes: Record<string, Record<string, Check>> = {
   stageFitSet: { fit: enumeration('fitWindow', 'oneToOne') },
   settingsSave: { settings: object<SettingsInput>(settingsInput) }, updateCheck: {}, updateInstall: {},
   diagnosticsExport: {}, openLogsFolder: {}, openScreenshotsFolder: {}, openHomeFolder: {}, openInstallFolder: {},
+  openSharedFolder: {}, sharedPush: {},
   copyToClipboard: { item: enumeration('deviceId', 'adbAddress') }, openRegistrationPage: {}, googleAccountAddOpen: {}, guestWindowToFront: {},
 };
 

@@ -58,6 +58,8 @@
     "allow-open-screenshots-folder",
     "allow-open-home-folder",
     "allow-open-install-folder",
+    "allow-open-shared-folder",
+    "allow-shared-push",
     "allow-copy-to-clipboard",
     "allow-open-registration-page",
     "allow-google-account-add-open",

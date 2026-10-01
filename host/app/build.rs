@@ -56,6 +56,8 @@ fn main() {
         "open_screenshots_folder",
         "open_home_folder",
         "open_install_folder",
+        "open_shared_folder",
+        "shared_push",
         "copy_to_clipboard",
         "open_registration_page",
         "google_account_add_open",

@@ -710,6 +710,12 @@ pub struct SettingsView {
     pub auto_update_check: bool,
     /// OME home directory.
     pub home_dir: String,
+    /// Folder that receives the stage's screenshots; empty when the home is unavailable.
+    pub screenshots_dir: String,
+    /// Folder whose files `shared_push` copies into the guest; empty when the home is unavailable.
+    pub shared_dir: String,
+    /// Progress of the shared-folder transfer while one runs.
+    pub shared_push: Option<InstallProgress>,
     /// Disk usage when known.
     pub disk_usage_bytes: Option<u64>,
     /// adb network exposure policy.
@@ -1087,6 +1093,10 @@ pub enum Command {
     OpenHomeFolder,
     /// Open the directory that holds the product executable.
     OpenInstallFolder,
+    /// Open the fixed shared folder.
+    OpenSharedFolder,
+    /// Copy files from the fixed shared folder into the operating system.
+    SharedPush,
     /// Copy a snapshot-owned value to the clipboard.
     CopyToClipboard {
         /// Value selected by the webview.
@@ -1154,6 +1164,8 @@ impl Command {
             Self::OpenScreenshotsFolder => "open_screenshots_folder",
             Self::OpenHomeFolder => "open_home_folder",
             Self::OpenInstallFolder => "open_install_folder",
+            Self::OpenSharedFolder => "open_shared_folder",
+            Self::SharedPush => "shared_push",
             Self::CopyToClipboard { .. } => "copy_to_clipboard",
             Self::OpenRegistrationPage => "open_registration_page",
             Self::GoogleAccountAddOpen => "google_account_add_open",
@@ -1216,6 +1228,8 @@ pub const TAURI_COMMANDS: &[&str] = &[
     "open_screenshots_folder",
     "open_home_folder",
     "open_install_folder",
+    "open_shared_folder",
+    "shared_push",
     "copy_to_clipboard",
     "open_registration_page",
     "google_account_add_open",

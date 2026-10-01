@@ -362,6 +362,36 @@ describe('settings screen (S6): 저장 위치, 업데이트, 진단, 정보', ()
     expect(actions.openHomeFolder).toHaveBeenCalledOnce();
   });
 
+  it('opens the screenshots and shared folders and keeps the push for a running guest', async () => {
+    const actions = show(variant('settings-stopped'));
+    const storage = section('저장 위치');
+    await userEvent.click(within(storage).getByRole('button', { name: '스크린샷 폴더 열기' }));
+    expect(actions.openScreenshotsFolder).toHaveBeenCalledOnce();
+    await userEvent.click(within(storage).getByRole('button', { name: '공유 폴더 열기' }));
+    expect(actions.openSharedFolder).toHaveBeenCalledOnce();
+    expect(within(storage).getByRole('button', { name: '가상 머신으로 보내기' })).toBeDisabled();
+  });
+
+  it('pushes the shared folder while the guest runs', async () => {
+    const actions = show(variant('settings-running'));
+    await userEvent.click(within(section('저장 위치')).getByRole('button', { name: '가상 머신으로 보내기' }));
+    expect(actions.sharedPush).toHaveBeenCalledOnce();
+  });
+
+  it('shows the shared-folder transfer and blocks a second push', () => {
+    const base = variant('settings-running');
+    show({
+      ...base,
+      settings: {
+        ...base.settings,
+        sharedPush: { label: 'photo.jpg', stage: 'transferring', doneItems: 1, totalItems: 4, ratio: 0.25, doneBytes: 1, totalBytes: 4 },
+      },
+    });
+    const storage = section('저장 위치');
+    expect(within(storage).getByText('보내는 중: photo.jpg (1/4)')).toBeInTheDocument();
+    expect(within(storage).getByRole('button', { name: '가상 머신으로 보내기' })).toBeDisabled();
+  });
+
   it('opens the program folder from the about section', async () => {
     const actions = show(variant('settings-stopped'));
     await userEvent.click(within(section('정보')).getByRole('button', { name: '프로그램 폴더 열기' }));

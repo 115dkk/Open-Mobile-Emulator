@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "id": "bliss-16-9-7-android-13",
+  "imageId": "bliss-16.9.7-android-13",
+  "androidVersion": "13",
+  "apiLevel": 33,
+  "diskBytes": 34359738368,
+  "createdAt": "2026-10-01T13:46:49+09:00",
+  "lastStartedAt": "2026-10-01T13:47:16+09:00",
+  "capabilities": {
+    "probedAt": "2026-10-01T13:48:03+09:00",
+    "items": [
+      {
+        "id": "bootMarker",
+        "state": "available"
+      },
+      {
+        "id": "appList",
+        "state": "available"
+      },
+      {
+        "id": "displaySize",
+        "state": "available"
+      },
+      {
+        "id": "mediaVolume",
+        "state": "available"
+      },
+      {
+        "id": "deviceId",
+        "state": "unavailable"
+      },
+      {
+        "id": "screenshot",
+        "state": "available"
+      },
+      {
+        "id": "foregroundApp",
+        "state": "available"
+      },
+      {
+        "id": "multitouch",
+        "state": "unavailable"
+      },
+      {
+        "id": "nativeBridge",
+        "state": "available"
+      },
+      {
+        "id": "root",
+        "state": "unavailable"
+      }
+    ],
+    "nativeBridge": "libndk_translation.so",
+    "mediaVolume": 5,
+    "googleAccounts": 0,
+    "foregroundPackage": "com.google.android.setupwizard",
+    "display": {
+      "width": 1280,
+      "height": 800,
+      "densityDpi": 160
+    },
+    "packages": []
+  },
+  "deviceId": null,
+  "registrationOpenedAt": null,
+  "rootEnabled": false,
+  "boot": {
+    "method": "direct",
+    "src": "ome"
+  },
+  "install": {
+    "state": "installed",
+    "finishedAt": "2026-10-01T13:47:15+09:00",
+    "failure": null
+  }
+}

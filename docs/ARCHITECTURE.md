@@ -659,6 +659,9 @@ CloseAction = StopGuest | MinimizeToTray      // 기본값 StopGuest (사용자 
   `제3자 고지`, 업데이트의 릴리스 노트 링크가 쓴다.
 - `open_home_folder`: 저장 위치의 `폴더 열기`(`open_logs_folder`, `open_screenshots_folder`와 같은 꼴).
 - `open_install_folder`: 제품 실행 파일이 있는 설치 폴더를 연다.
+- `open_shared_folder`: PC의 고정 공유 폴더를 만든 뒤 연다.
+- `shared_push`: 공유 폴더의 파일을 adb로 가상 머신의 `/sdcard/OME/`에 보낸다. 윈도우 QEMU에는
+  9p와 virtiofs가 없으므로 실시간 마운트가 아닌 PC에서 가상 머신으로의 한 방향 복사다.
 - `copy_to_clipboard { item }`: `item`은 열거형 `deviceId | adbAddress`. 웹뷰는 자유 문자열을 보내지
   않고 Rust가 스냅숏의 값을 복사한다. 설정 고급 절과 Google 계정 절의 `복사`.
 - `display_presets()`의 `needs_reboot`는 현재 방향과 카드의 방향이 다를 때만 참이다(지금은 셋 다 참).

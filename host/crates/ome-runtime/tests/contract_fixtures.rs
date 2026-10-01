@@ -314,6 +314,18 @@ fn representative_snapshot() -> AppSnapshot {
             show_fps: true,
             auto_update_check: true,
             home_dir: "C:\\Users\\Example\\AppData\\Local\\OpenMobileEmulator".to_owned(),
+            screenshots_dir: "C:\\Users\\Example\\AppData\\Local\\OpenMobileEmulator\\screenshots"
+                .to_owned(),
+            shared_dir: "C:\\Users\\Example\\AppData\\Local\\OpenMobileEmulator\\shared".to_owned(),
+            shared_push: Some(InstallProgress {
+                label: "photo.png".to_owned(),
+                stage: TransferStage::Transferring,
+                done_items: 1,
+                total_items: 2,
+                ratio: Some(0.5),
+                done_bytes: 1,
+                total_bytes: Some(2),
+            }),
             disk_usage_bytes: Some(1024),
             adb_access: AdbAccess::Localhost,
             binding_overlay_default: true,
@@ -458,6 +470,8 @@ fn every_command() -> Vec<Command> {
         Command::OpenScreenshotsFolder,
         Command::OpenHomeFolder,
         Command::OpenInstallFolder,
+        Command::OpenSharedFolder,
+        Command::SharedPush,
         Command::CopyToClipboard {
             item: ClipboardItem::DeviceId,
         },
