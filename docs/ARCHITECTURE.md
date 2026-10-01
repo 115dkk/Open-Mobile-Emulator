@@ -57,7 +57,8 @@ host/
   crates/
     ome-platform-win/     Win32 (unsafe는 src/ffi/ 안에만, 크레이트 수준 deny)
     ome-guest-image/      GuestImageProfile, GuestFamily 어댑터, CapabilityProbe (3.15절)
-    ome-guest-config/     GuestConfig, QemuInvocation
+    ome-guest-config/     GuestConfig, QemuInvocation, BootMode
+    ome-guest-install/    ISO 파일 추출, 도우미 initrd, 설치 진행 파서 (3.18절)
     ome-qmp/              QmpChannel
     ome-supervisor/       Supervisor 상태 기계와 프로세스 어댑터
     ome-artifacts/        Manifest, AllowedHosts, ArtifactStore
@@ -95,8 +96,12 @@ manifests/images/         게스트 이미지 프로필 JSON (3.15절). 산출�
 ### 3.1 ome-guest-config
 
 - 인터페이스: 검증되지 않은 값(`RawGuestConfig`)을 `GuestConfig`로 검증한다. 실패는 필드
-  이름과 사용자 문장을 가진 `ConfigIssue`다. `QemuInvocation::for_boot`와 `for_install`이
-  `GuestConfig`, 게스트 경로, QEMU 설치 위치를 받아 실행 파일 경로와 인자 목록을 돌려준다.
+  이름과 사용자 문장을 가진 `ConfigIssue`다. `QemuInvocation::for_boot`가 `GuestConfig`, 게스트
+  경로(`GuestPaths`), QEMU 설치 위치를 받아 실행 파일 경로와 인자 목록을 돌려준다. 게스트 경로의
+  `boot: BootMode`가 세 가지 부팅을 가른다(2026-10-01, ADR-0010). `Disk`는 펌웨어가 디스크를 부팅하는
+  옛 게스트(설치기로 깐 GRUB), `Direct`는 설치된 게스트의 직접 커널 부팅(`-kernel`, `-initrd`,
+  `-append`, CD-ROM 없음), `Install`은 화면 없는 도우미 부팅(`-display none`, `-serial file:`, 읽기
+  전용 CD-ROM, 메모리 2 GiB와 vCPU 2, 네트워크·USB·오디오 없음)이다.
 - 뒤에 숨는 것: QEMU 플래그 전부. `-accel whpx,kernel-irqchip=off`, `-cpu Skylake-Client-v4`,
   `virtio-vga-gl,edid=off`, `-display sdl,show-cursor=on,gl=on`, `-action reboot=shutdown`,
   `-qmp tcp:127.0.0.1:<port>,server=on,wait=off`, `hostfwd=tcp:127.0.0.1:<adb>-:5555`,
@@ -376,6 +381,24 @@ Pie(API 28)는 ADR-0008로 2026-09-28에 뺐다), 그 뒤로 새 안드로이드
   어두운 배경 칩 위에 놓는다(DESIGN.md 9절).
 - 테스트 표면: 모드 표와 사각형·배치 규칙은 순수 단위 테스트로 검사한다. 실제 창의 좌표, 보임,
   클릭 통과, 중지 때 숨김은 무시된 실제 게스트 테스트에서 잰다.
+
+### 3.18 ome-guest-install (2026-10-01, ADR-0010)
+
+무인 설치의 호스트 쪽 부품이다. QEMU 인자도 런타임도 화면도 모른다.
+
+- `iso9660::IsoImage::{open, file_size, extract}`: 설치 ISO에서 파일 하나를 꺼낸다(ECMA-119와 Rock
+  Ridge `NM` 이름, 없으면 `;1`을 뗀 ISO 이름을 대소문자 없이 비교. 다중 익스텐트는 거부).
+- `cpio::newc_archive`: SVR4 newc 묶음을 쓴다. 커널은 gzip initrd 뒤에 이어진 비압축 cpio를 그대로 푼다.
+- `helper`: `scripts/99-ome-install`(도우미 스크립트, 크레이트에 박아 넣음)을 `scripts/` 디렉터리와 함께
+  원본 `initrd.img` 뒤에 붙여 `initrd-install.img`를 만들고(`write_install_initrd`), 도우미 부팅의
+  명령줄(`install_cmdline`: `root=/dev/ram0 console=ttyS0 OME_INSTALL=1 OME_DISK=/dev/vda OME_SRC=ome`)과
+  설치된 게스트의 명령줄(`boot_cmdline`: `root=/dev/ram0 SRC=/ome` 뒤에 프로필의 `boot_args`)을 조립한다.
+- `progress::parse_serial_log`: 도우미가 시리얼로 내보낸 `OME-INSTALL step <단계> <백분율>`, `done`,
+  `fail <이유>` 줄을 `InstallReport`(단계, 백분율, 실패 이유, 도구와 원본 크기 같은 사실)로 읽는다.
+  런타임이 매 틱 `install-serial.log` 전체를 다시 읽어 넘긴다.
+- 테스트 표면: 테스트 코드가 메모리에서 만든 최소 ISO 9660 이미지(저장소에 이미지 파일은 두지 않는다,
+  R1), 손으로 계산한 newc 바이트, 스파이크의 실제 시리얼 로그. `OME_TEST_ISO`가 있으면 실제 Bliss ISO의
+  `/kernel`과 `/initrd.img` 크기를 대조하는 무시된 시험이 돈다.
 
 ## 4. 데이터 흐름 두 가지
 
