@@ -15,13 +15,21 @@ pub const HELPER_PATH: &str = "scripts/99-ome-install";
 /// Default folder on the new partition that holds kernel, initrd.img, system.img and data/.
 pub const DEFAULT_SRC: &str = "ome";
 
-/// Writes the bytes of `initrd` followed by a newc archive holding the directory "scripts"
-/// (mode 0o040755) and the file "scripts/99-ome-install" (mode 0o100644) to `destination`.
-/// CRLF sequences in the embedded script are normalised to LF before writing.
+/// Writes the bytes of `initrd`, zero padding to a four-byte boundary, then a newc archive holding
+/// the directory "scripts" (mode 0o040755) and the file "scripts/99-ome-install" (mode 0o100644)
+/// to `destination`. CRLF sequences in the embedded script are normalised to LF before writing.
+///
+/// The kernel recognises an uncompressed cpio member only at a four-byte offset (`init/initramfs.c`
+/// checks `*buf == '0'` together with the offset's low two bits) and skips zero bytes between
+/// members, so the padding is what makes the appended archive visible. The Bliss 16.9.7
+/// `initrd.img` is 8,492,807 bytes: without the padding the helper stayed invisible and the
+/// hidden boot fell through to a live Android (dev PC round 32, 2026-10-01).
 pub fn write_install_initrd(initrd: &Path, destination: &Path) -> io::Result<()> {
     let mut source = File::open(initrd)?;
     let mut output = File::create(destination)?;
-    io::copy(&mut source, &mut output)?;
+    let copied = io::copy(&mut source, &mut output)?;
+    let padding = usize::try_from(copied.next_multiple_of(4) - copied).expect("padding below 4");
+    output.write_all(&[0_u8; 4][..padding])?;
 
     let helper = HELPER_SCRIPT.replace("\r\n", "\n");
     let archive = cpio::newc_archive(&[
@@ -86,7 +94,15 @@ mod tests {
         let output = fs::read(&destination).expect("read install initrd");
 
         assert!(output.starts_with(original));
-        let archive = &output[original.len()..];
+        // 18 original bytes: two zero bytes bring the archive to a four-byte offset.
+        let padding = original.len().next_multiple_of(4) - original.len();
+        assert_eq!(padding, 2);
+        assert!(
+            output[original.len()..original.len() + padding]
+                .iter()
+                .all(|byte| *byte == 0)
+        );
+        let archive = &output[original.len() + padding..];
         assert!(archive.starts_with(b"070701"));
         assert!(
             archive
