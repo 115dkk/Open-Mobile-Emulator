@@ -55,7 +55,7 @@ ext4`로 포맷하고, `kernel`, `initrd.img`, `/sfs/system.img`를 `/hd/ome/`�
 | 08:50:01 | 전원 꺼짐, QEMU 종료 코드 0 |
 
 **설치 32초.** qcow2는 4,752,408,576 B가 됐다. 같은 ISO를 대화형 설치기로 OCR과 키로 넘기던 완료 실행
-(`dod-local.md` 28~31회차)의 S1.5는 249~266초였다. 시리얼 로그 전체는 `install-serial.log`, OME 줄만 보면 `install-a.txt`.
+(`dod-local.md` 28~31회차)의 S1.5는 249~266초였다. 시리얼 로그 전체는 `install-serial.txt`(저장소가 `*.log`를 무시하므로 이름만 바꿈), OME 줄만 보면 `install-a.txt`.
 
 ## 3. 설치된 디스크의 직접 커널 부팅
 
@@ -94,7 +94,7 @@ SeaBIOS는 재지 않았다. OVMF 아래 직접 부팅이 되고 제품이 이�
 |---|---|
 | `unattended-install-spike/99-ome-install` | 도우미 스크립트(제품에는 `host/crates/ome-guest-install/scripts/`로 들어간다) |
 | `unattended-install-spike/spike.ps1` | 스파이크 런처(install, boot, grub 단계) |
-| `unattended-install-spike/install-serial.log` | 도우미 부팅의 시리얼 로그 전체 |
+| `unattended-install-spike/install-serial.txt` | 도우미 부팅의 시리얼 로그 전체 |
 | `unattended-install-spike/install-a.txt` | 도우미 부팅의 명령줄과 OME 줄 요약 |
 | `unattended-install-spike/boot-a.txt`, `boot-b.txt` | 직접 부팅 a, b의 명령줄, 시간, adb 확인 |
 | `unattended-install-spike/grub-29.txt` | GRUB 경로 비교 부팅 |

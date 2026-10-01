@@ -104,7 +104,7 @@ mod tests {
 
     const REAL_SERIAL_LOG: &str = include_str!(concat!(
         env!("CARGO_MANIFEST_DIR"),
-        "/../../../docs/evidence/M2/unattended-install-spike/install-serial.log"
+        "/../../../docs/evidence/M2/unattended-install-spike/install-serial.txt"
     ));
 
     #[test]
