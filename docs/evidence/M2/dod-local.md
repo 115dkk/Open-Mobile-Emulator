@@ -32,6 +32,8 @@ CLAUDE.md 9절의 개발 PC(RTX 2080 SUPER, virgl, dsound, 200 % 배율)이고, 
 | 29 | 07:35 | 922789f | 살아 있음 | 전 단계 통과, 결과 `passed`. 설치 266초, 첫 부팅 88초, 앱 설치 16초, 게임 화면은 28회차와 같은 순서, 끄기 4.3초 | 막힌 곳 없음 | 마법사 상태 저장 고침(W1)이 든 exe의 첫 완주. 끝난 홈의 `state.json`에 `wizard.step=done`과 지난 단계 다섯 개가 남았다 |
 | 30 | 08:04 | ff84067 | 못 봄 | S1.5의 `설치하기`를 누른 뒤 GRUB 메뉴 대기 60초 초과 | 캡처의 OCR 내용이 Claude 데스크톱 앱의 세션 목록이었다. 그 창이 무대를 덮어 드라이버가 메뉴를 못 봤고 그 사이 GRUB이 기본 항목으로 부팅했다. 제품 결함 아님 | GRUB 메뉴 대기가 실패하면 전경 창의 제목을 원인으로 적는다. 31회차는 3분 뒤에 시작해 창을 내릴 시간을 둔다 |
 | 31 | 08:12 | 2684584 | 살아 있음 | 전 단계 통과, 결과 `passed`. 설치 258초, 첫 부팅 84초, 앱 설치 18초, 1분째 권한 대화상자에 Allow, 2분째 게임 화면, 3~15분째 데이터 다운로드 안내(5.1 GB), 끄기 6.0초 | 막힌 곳 없음 | 승인 단추를 `설치하기`로 바꾸고 안내를 "여유 공간 70.2 GB. 32 GB 디스크로 설치할 수 있습니다."로 고친 exe(ff84067)의 첫 완주. 그 화면의 텍스트는 `dod-local/round31-s1-5-install-approval.txt`. Claude 데스크톱 앱 창은 회차 전에 최소화했고 가림 기록은 없다 |
+| 32 | 10:24 | 2322837 | 살아 있음 | S1.5에서 `설치하기` 뒤 제품의 숨은 도우미 부팅이 시작됐지만 시리얼 로그에 `OME-INSTALL` 줄이 나오지 않아 50초 뒤 회차를 끊었다 | 커널이 "rootfs image is not initramfs (invalid magic at start of compressed archive)"를 찍었다. 비압축 cpio 묶음은 4바이트 경계에서 시작해야 커널이 알아보는데(`init/initramfs.c`) Bliss `initrd.img`가 8,492,807바이트라 바로 뒤에 붙인 도우미가 보이지 않았고, 스파이크는 gzip으로 붙여서 걸리지 않았다. 제품 결함 | `write_install_initrd`가 0 바이트 패딩으로 경계를 맞추게 고쳤다(6a6e6bb). 스파이크 런처로 같은 구성이 33.4초에 `done`까지 가는 것을 확인한 뒤 33회차 |
+| 33 | 10:28 | 6a6e6bb | 살아 있음 | 전 단계 통과, 결과 `passed`. **설치 31초**(`설치하기` 뒤 사용자 입력 없이 도우미 부팅이 파티션, 포맷, 복사를 마치고 꺼졌고 마법사가 스스로 첫 부팅으로 넘어감), **첫 부팅 48초**(직접 커널 부팅), 앱 설치 14초, 1분째 권한 대화상자에 Allow, 2분째 게임 화면, 3~15분째 데이터 다운로드 안내, 끄기 6.1초 | 막힌 곳 없음 | 무인 설치(ADR-0010)로 처음 완주한 회차. 게스트 기록에 `boot: direct`, `install: installed`가 남았고 디스크는 6.2 GB. 증거는 `dod-local/round33-*`(결과, 도우미 부팅과 직접 부팅의 QEMU 명령줄, 시리얼의 OME 줄, 게스트 기록). 이 회차부터 드라이버는 설치기에 손대지 않는다(아래 절) |
 
 무대 캡처는 화면 복사라서 무대 위에 다른 창이 오면 드라이버는 그 창을 읽는다. 키도 제품 창이 전경일 때만 들어간다.
 그래서 회차가 도는 동안, 특히 시작 뒤 설치기가 끝나는 6분쯤까지는 제품 창 위에 다른 창을 두면 안 된다. 27회차의
@@ -125,3 +127,33 @@ usb-kbd)로 40 ms 누른 키를 60번씩 보내고 게스트의 `getevent -ltq` 
 호스트가 보낸 간격은 40~120 ms였다. 게스트가 본 유지 시간은 커널의 반복 지연(250 ms)에 한 번도 닿지 않았고 반복 이벤트도
 없었다. 그러므로 14회차의 cfdisk 종료는 키 반복이 아니며, 원인은 아직 모른다. 이 측정은 `cargo test -p ome-runtime --test
 key_hold_real -- --ignored --nocapture`로 다시 돌릴 수 있다(105초).
+
+## 32회차와 33회차: 무인 설치(ADR-0010)로 완주
+
+32회차부터 제품이 ADR-0010의 길로 설치한다. `설치하기`를 누르면 런타임이 검증된 ISO에서 `kernel`과 `initrd.img`를
+게스트 폴더로 꺼내고, `initrd.img` 뒤에 도우미 스크립트(`scripts/99-ome-install`)를 담은 cpio를 이어 붙여 화면 없는
+QEMU를 띄운다(`round33-qemu-install-cmd.txt`: `-m 2048 -smp 2`, 읽기 전용 CD-ROM, `-kernel`, `-initrd`, `-append
+"root=/dev/ram0 console=ttyS0 OME_INSTALL=1 OME_DISK=/dev/vda OME_SRC=ome"`, `-display none`, `-serial file:`). 도우미가
+시리얼로 내보낸 `OME-INSTALL step <단계> <백분율>` 줄(`round33-install-serial-ome.txt`)을 런타임이 매 틱 읽어 S1.5
+진행 화면에 보이고, `done` 뒤 QEMU가 스스로 꺼지면 기록에 `boot: direct`와 설치 완료를 적고 마법사를 첫 부팅으로
+넘긴다. 첫 부팅은 GRUB 없이 `-kernel <홈의 kernel> -initrd <홈의 initrd.img> -append "root=/dev/ram0 SRC=/ome quiet
+HWC=drm_minigbm GRALLOC=minigbm_arcvm"`로 직접 부팅한다(`round33-qemu-boot-cmd.txt`).
+
+드라이버는 이 회차부터 설치기에 손대지 않는다. S1.5는 `설치하기`를 누른 뒤 스냅숏의 `wizard.install`(단계, 백분율)을
+기록하며 마법사 단계가 `firstBoot`가 되기를 기다릴 뿐이고(상한 20분), S1.6은 키를 보내지 않는다. OCR과 키로 GRUB
+메뉴와 cfdisk와 설치기 대화상자를 넘기던 코드, `native.ps1`의 설치기 창 감시와 키 전송과 GRUB 선택 막대 판독은
+걷어냈다(763b35a). OCR은 게임 화면 판정과 권한 대화상자의 Allow 탭에만 남는다.
+
+| 단계 | 28~31회차(대화형 설치기 자동화) | 33회차(무인 설치) |
+|---|---|---|
+| S1.5 설치 | 249~266초 | 31초 |
+| S1.6 첫 부팅 | 84~99초 | 48초 |
+| 사용자 입력 | 승인 뒤 드라이버가 수십 번의 키를 대신 침 | 승인 하나 |
+
+32회차는 도우미가 보이지 않아 실패했다. 커널은 압축하지 않은 cpio 묶음을 4바이트 경계에서만 알아보는데
+(`init/initramfs.c`) `initrd.img`가 8,492,807바이트라 바로 뒤에 붙인 묶음이 경계에 어긋났고, 커널이 "rootfs image is not
+initramfs (invalid magic at start of compressed archive)"를 찍은 뒤 initrd가 라이브 안드로이드로 흘러갔다. 스파이크는
+gzip으로 붙여서 걸리지 않았다. `write_install_initrd`가 0 바이트 패딩으로 경계를 맞추게 고치고(6a6e6bb) 스파이크
+런처로 33.4초 `done`을 확인한 뒤 33회차를 돌렸다.
+
+이로써 M2 완료 기준의 "설치 단계는 사용자 입력 없이 진행 화면만으로 끝난다"(2026-10-01 추가)에 실기 증거가 생겼다.
