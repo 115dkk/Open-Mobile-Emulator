@@ -30,7 +30,12 @@ wsl -d OME-Build -- bash -lc 'OME_REPO_ROOT="/mnt/c/Open Mobile Emulator" "/mnt/
 ```
 
 The tree lives inside the distro at `~/bliss` (ext4, fast); the repository stays on the Windows
-drive and is only read. The ISO, its `.sha256`, `build.prop`, the manifest snapshot and the build
+drive and is only read. Long stages (sync, build) must be started from a `wsl.exe` process that
+stays alive on the Windows side: WSL stops a distro a few seconds after its last `wsl.exe` session
+ends, even with systemd on and a transient service still running (seen 2026-10-01: a `systemd-run`
+sync died 15 s after the launching session closed). A hidden `Start-Process wsl.exe -d OME-Build -u
+ome -- bash /home/ome/run-sync.sh` keeps the session, and the stage script appends to
+`~/bliss/ome-logs/` with an exit marker line to poll for. The ISO, its `.sha256`, `build.prop`, the manifest snapshot and the build
 log land in `~/bliss/dist/<date>-<manifest commit>/`.
 
 ## In a container or on a Linux VM
