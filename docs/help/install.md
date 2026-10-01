@@ -1,0 +1,74 @@
+# 설치와 확인
+
+Open Mobile Emulator는 GitHub Releases에서 설치기 하나로 받습니다. 설치기에는 제품과 가상 머신
+프로그램(QEMU)과 펌웨어가 들어 있고, 운영체제 이미지는 들어 있지 않습니다. 이미지는 첫 실행
+마법사가 공식 배포처에서 내려받아 검증합니다.
+
+## 받기
+
+1. https://github.com/115dkk/Open-Mobile-Emulator/releases 에서 쓰려는 버전을 엽니다.
+2. `Open-Mobile-Emulator-<버전>-x64-setup.exe`를 받습니다. 같은 자리에 있는
+   `Open-Mobile-Emulator-<버전>-x64-setup.exe.sha256`은 설치기의 SHA-256입니다.
+
+## 설치
+
+설치기는 관리자 권한을 요구하지 않습니다. 현재 사용자 계정에만 설치하며, 설치 위치는
+`%LOCALAPPDATA%\Open Mobile Emulator`입니다. 시작 메뉴와 바탕 화면에 바로 가기를 만듭니다.
+
+이 설치기에는 코드 서명이 없습니다. 인증서 비용을 댈 후원이 생기기 전까지는 서명하지 않기로
+했습니다. 그래서 내려받은 설치기를 처음 열면 Windows SmartScreen이 "Windows의 PC 보호" 창을 띄웁니다.
+이 창에서 `추가 정보`를 누르면 `실행` 단추가 나타나고, 그것을 누르면 설치가 시작됩니다. 서명 대신 아래
+두 가지로 파일을 확인할 수 있습니다.
+
+## 받은 파일 확인
+
+### SHA-256 대조
+
+PowerShell에서 다음을 실행해 나온 값이 `.sha256` 파일의 값과 같아야 합니다.
+
+```powershell
+Get-FileHash .\Open-Mobile-Emulator-0.1.0-x64-setup.exe -Algorithm SHA256
+```
+
+명령 프롬프트라면 다음과 같이 합니다.
+
+```
+certutil -hashfile Open-Mobile-Emulator-0.1.0-x64-setup.exe SHA256
+```
+
+### 빌드 출처 증명 확인
+
+릴리스에 올라간 모든 파일은 GitHub Actions의 윈도우 러너가 태그 커밋에서 빌드했고, 파일마다 빌드 출처
+증명이 붙어 있습니다. 개발자의 PC에서 만든 파일은 릴리스에 올리지 않습니다. GitHub CLI(`gh`)가 있으면
+누구나 그 파일이 이 저장소의 어느 커밋과 워크플로에서 나왔는지 확인할 수 있습니다.
+
+```
+gh attestation verify Open-Mobile-Emulator-0.1.0-x64-setup.exe --repo 115dkk/Open-Mobile-Emulator
+```
+
+설치기 안의 QEMU는 별도의 워크플로가 빌드한 것이며, 같은 릴리스에 올라간 `qemu-ome-*-win64.zip`과 소스
+묶음 `qemu-source-offer-*.tar.gz`도 같은 명령으로 확인할 수 있습니다. 릴리스를 만든 워크플로는 올린 파일을
+다시 받아 같은 검사를 거쳤고, 그 결과는 워크플로 실행 기록에 남아 있습니다.
+
+## 설치한 뒤
+
+- 첫 실행 마법사가 PC 점검, Windows 하이퍼바이저 플랫폼 켜기(동의 뒤 한 번 승격), 운영체제 이미지
+  내려받기, 설치(승인 뒤 무인 진행), 첫 부팅, 앱 설치를 차례로 안내합니다.
+- 제품 데이터(운영체제 디스크, 로그, 스크린샷, 설정)는 `%LOCALAPPDATA%\OpenMobileEmulator`에 있습니다.
+  설정의 `저장 위치` 절에서 `폴더 열기`로 열 수 있습니다.
+- 프로그램 파일이 있는 설치 폴더는 설정의 `정보` 절에서 `프로그램 폴더 열기`로 엽니다.
+- 제거는 Windows 설정의 `앱`에서 `Open Mobile Emulator`를 고르면 됩니다. 제거는 설치 폴더만 지우고
+  데이터 폴더는 남깁니다. 데이터까지 지우려면 위 데이터 폴더를 직접 지우십시오.
+
+## 요구 사항
+
+- Windows 11. 개발과 검증은 Windows 11 22621과 Windows Server 2025 러너에서 했고, Windows 10은
+  시험하지 않았습니다. WebView2 런타임이 있어야 하는데 Windows 11에는 들어 있습니다.
+- 하드웨어 가상화(Intel VT-x 또는 AMD-V)가 펌웨어에서 켜져 있는 x86-64 프로세서. 마법사가 켜는
+  Windows 하이퍼바이저 플랫폼 위에서 돕니다. 자체 커널 드라이버는 없습니다.
+- 메모리 16 GB 이상을 권합니다. 가상 머신 기본값이 8 GiB이고, 제품은 물리 메모리에서 4 GiB를 뺀 값까지만
+  허용합니다.
+- 저장 공간 40 GB 이상. 설치 폴더 약 450 MB, 운영체제 이미지 2.4 GB, 가상 디스크 32 GiB(처음에는 실제 사용량이
+  수 GB이고 게임 데이터만큼 늘어납니다).
+- OpenGL 2.0 이상을 지원하는 그래픽 드라이버. 없으면 제품이 소프트웨어 렌더링으로 바꾸고 알리는데, 그때 게임은
+  초당 12~13프레임으로 느립니다. 검증한 조합은 `docs/KNOWN_LIMITATIONS.md`에 있습니다.

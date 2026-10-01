@@ -5,8 +5,20 @@ provenance is clear: a custom QEMU accelerated by the Windows Hypervisor
 Platform, an x86_64 Bliss OS guest, the ARM native bridge that ships inside that
 guest, and a thin Windows front end.
 
-**Status:** pre-alpha. M0 (translation check) and M1 (Windows execution path) are
-in progress. Nothing here is usable by end users yet.
+**Status:** pre-release. M0 (translation check), M1 (Windows execution path) and
+M2 (product shell: the first-run wizard installs the guest unattended and reaches
+the game) are done; M3 (release) is in progress and the first pre-release is
+v0.1.0. Releases are built only on GitHub Actions and every file carries a build
+provenance attestation (`docs/adr/0007-release-build-provenance.md`).
+
+## Install (users)
+
+Download `Open-Mobile-Emulator-<version>-x64-setup.exe` from
+[Releases](https://github.com/115dkk/Open-Mobile-Emulator/releases). The installer
+is unsigned (SmartScreen shows a warning once) and installs for the current user
+without administrator rights. How to pass the warning, check the file's SHA-256 and
+verify its provenance with `gh attestation verify` is in `docs/help/install.md`
+(Korean).
 
 ## Layout
 
@@ -19,7 +31,8 @@ in progress. Nothing here is usable by end users yet.
 | `guest/` | Boot-argument notes and the guest overlay (Apache-2.0, see NOTICE) |
 | `translator/` | Contract that makes the ARM translator a replaceable part |
 | `compat/` | Per-game compatibility entries |
-| `ci/` | Forbidden-pattern list, allowlist, and the checks that enforce them |
+| `ci/` | Forbidden-pattern list, allowlist, the checks that enforce them, the completion-run driver (`ci/dod/`) and the release helpers (`ci/release/`) |
+| `.github/workflows/` | `ci.yml` (checks and tests), `qemu-release.yml` (QEMU built and attested on a runner), `release.yml` (installer built, checked, attested and published from a tag), `m2-dod.yml` and `m3-release-dod.yml` (wizard-to-game completion runs on a clean runner) |
 | `docs/` | Network endpoints, known limitations, evidence per milestone |
 | `tests/` | Self-built fixtures and script tests |
 

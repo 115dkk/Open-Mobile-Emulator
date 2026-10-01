@@ -14,6 +14,8 @@
 
 개정 2026-10-01: 운영체제 설치는 사용자의 승인을 받아 제품이 무인으로 수행한다(사용자 결정). 원래 요구의 "설치기 조작은 사용자가 한다"는 사용자가 설치를 **승인**한다는 뜻이었는데, M2 명세가 사용자가 설치기 화면을 직접 조작한다는 뜻으로 오독해 지금의 S1.5는 설치기 화면과 안내를 그대로 보여 사용자에게 GRUB와 파티션 작업을 시킨다. 설치기 화면을 그대로 보여 주면 불안한 사용자가 화면을 조작해 실패를 만든다. 변경된 항목은 M1 3번의 주석, M2 기능 명세 1번과 9번, M2 완료 기준이고, `docs/M2-SCREENS.md` S1.5의 규칙을 고쳤다. 완료 실행 드라이버(`ci/dod/run-dod.mjs`)가 OCR과 키로 설치기를 넘기는 것은 시험 장치이지 제품의 길이 아니다.
 
+개정 2026-10-01 (M3 시작): 설치기는 현재 사용자 범위의 NSIS이고 설치 폴더를 여는 단추를 두며, 첫 릴리스 v0.1.0은 사전 릴리스로 올리고, M3 완료 기준을 신설했다(모두 사용자 결정, `docs/adr/0011-installer-and-release-pipeline.md`). 변경된 항목은 M3 1번, M3 완료 기준, 4절의 `installer/`와 워크플로 줄, 8절 10번과 11번이다.
+
 ---
 
 ## 0. 한 문단 요약
@@ -146,11 +148,12 @@ PRODUCT/
     build/                  Android-Generic 기반 자체 빌드 (2차)
   translator/               6절 계약, 설치 스크립트, 스모크 테스트
   host/                     M2 제품 껍데기: Rust 워크스페이스(crates/), Tauri 껍데기(app/), 웹뷰(ui/). 구조는 docs/ARCHITECTURE.md
-  installer/                설치기 (M3)
+  ci/release/               릴리스 보조: QEMU 릴리스 받기와 검증, 자산 정리, Tauri 설정 덧판 (M3, ADR-0011)
   ci/
     allowlist.txt  forbidden-patterns.txt  Check-*.ps1  Invoke-AllChecks.ps1  Install-Hooks.ps1
   .githooks/pre-commit      R1, R5 검사 (ci/Install-Hooks.ps1로 활성화)
-  .github/workflows/ci.yml  GitHub Actions
+  .github/workflows/        ci.yml(검사와 테스트), qemu-release.yml(러너 QEMU 빌드와 출처 증명), release.yml(태그에서 설치기 빌드와 릴리스),
+                            m2-dod.yml과 m3-release-dod.yml(깨끗한 러너에서 마법사부터 게임까지 완주)
   docs/
     KNOWN_LIMITATIONS.md  NETWORK.md  evidence/M0  evidence/M1 ...
   tests/
@@ -241,7 +244,7 @@ PRODUCT/
 
 ### M3. 출시
 
-1. 설치기(Inno Setup 또는 MSIX, 스택 결정에 따름). 설치 경로에 QEMU 바이너리, OVMF, 런처, 프런트엔드만 포함하고 게스트 이미지는 포함하지 않는다(R2).
+1. 설치기: Tauri 번들러의 NSIS 설치기, 현재 사용자 범위(`%LOCALAPPDATA%\Open Mobile Emulator`, UAC 없음. 사용자 결정 2026-10-01, ADR-0011). MSIX는 서명 없이는 설치되지 않아 뺐다. 설치 경로에 QEMU 바이너리, OVMF, 승격 도우미(`ome-setup.exe`), 제품만 포함하고 게스트 이미지는 포함하지 않는다(R2). QEMU와 도우미는 릴리스 빌드 때만 쓰는 설정 덧판 `ci/release/tauri.release.conf.json`으로 동봉한다. 사용자가 `%LOCALAPPDATA%` 아래를 찾아가기 어려우므로 설정의 `정보` 절에 `프로그램 폴더 열기` 단추(`open_install_folder`)를 둔다.
 2. 코드 서명: 하지 않는다(사용자 결정 2026-09-30, 8절 3번). 릴리스는 서명 없이 나가고, SmartScreen 경고를 지나는 방법과 SHA-256·빌드 출처 증명(ADR-0007)으로 파일을 확인하는 절차를 릴리스 노트와 `docs/help/`에 적는다. 인증서 비용을 대는 후원이 생기면 그때 서명 단계를 더한다.
 3. R4 소스 묶음, `THIRD_PARTY.md`, `NOTICE`가 릴리스에 포함되는지 CI로 검사한다.
 4. `docs/KNOWN_LIMITATIONS.md` 확정. 최소 항목:
@@ -255,6 +258,14 @@ PRODUCT/
    - 확인된 GPU/드라이버 조합 목록과 미확인 조합.
 5. 릴리스 노트에 트릭컬 프리셋과 검증한 게임 목록, 호스트 최소 사양(측정치 기반)을 적는다.
 6. 빌드 출처 증명(ADR-0007): 릴리스에 올리는 실행 파일(설치기, 제품 exe, 커스텀 QEMU와 동봉 DLL, OVMF)과 R4 소스 묶음은 태그 커밋에서 GitHub Actions 윈도우 러너로만 빌드하고, `actions/attest@v4`로 파일마다 빌드 출처 증명을 붙인다. 개발 PC에서 만든 파일은 릴리스에 올리지 않는다. 확인 명령 `gh attestation verify <파일> --repo 115dkk/Open-Mobile-Emulator`를 릴리스 노트와 `docs/help/`에 적는다. 이 잡이 실패하면 릴리스를 만들 수 없다.
+7. 릴리스 구조(ADR-0011): QEMU는 `qemu-release.yml`(잡 `qemu-source-offer`)이 러너에서 빌드해 출처 증명을 붙인 `qemu-<태그>-<접미사>` 사전 릴리스로 따로 내고, 제품 릴리스 `release.yml`은 `manifests/qemu-release.json`이 가리키는 그 릴리스의 런타임 zip과 소스 묶음을 받아 SHA-256과 출처 증명을 확인한 뒤 설치기에 넣고 같은 릴리스에 다시 올린다. 설치기 자산은 `Open-Mobile-Emulator-<버전>-x64-setup.exe` 하나와 그 `.sha256`이다. 첫 릴리스 v0.1.0은 사전 릴리스로 올린다(사용자 결정 2026-10-01). 사전 릴리스는 제품의 자동 업데이트가 보지 않는다.
+
+완료 기준(사용자 승인 2026-10-01)
+- 태그 커밋에서 릴리스 워크플로가 설치기, QEMU 묶음, 소스 묶음, SHA256SUMS를 만들고 전부 출처 증명을 붙여 올린다.
+- 그 설치기로 깨끗한 계정에 설치해 마법사만으로 게임 실행까지 간다. 완료 실행 드라이버를 설치된 제품에 대고 돌리며, 개발 PC의 새 홈과 GitHub 러너(`m3-release-dod.yml`) 둘 다에서 한다.
+- `docs/KNOWN_LIMITATIONS.md` 확정, 릴리스 노트(`docs/release-notes/v<버전>.md`), `docs/help/install.md`의 SmartScreen과 검증 절차가 있다.
+- 릴리스에 소스 묶음, `THIRD_PARTY.md`, `NOTICE`가 들었는지 CI가 검사한다(`ci/Check-ReleaseAssets.ps1`).
+- 증거는 `docs/evidence/M3/`에 있다.
 
 ### 출시 후 트랙 (순서는 사용자가 정한다)
 
@@ -303,6 +314,8 @@ PRODUCT/
 7. ~~M2 화면의 여섯 가지 질문(`docs/M2-SCREENS.md` 10절)~~ 정함 2026-09-27: 아이콘 레일, fps 기본 숨김, 창 닫으면 게스트 끄기(트레이는 설정), 구글 안내는 첫 실행에서 제외, F12, 이미지 카드는 최신이 앞이고 알파가 아닌 최신이 기본.
 8. D8을 다시 열지(다른 상용 에뮬레이터처럼 인증 기기 지문을 쓸지). 현재는 변경 불가 그대로이며 사용자가 열기 전에는 손대지 않는다.
 9. 구글 변환기의 사용 범위(ADR-0006 열린 문제). 안드로이드 SDK 라이선스 계약 3.1은 앱 개발 목적에만 사용권을 준다. (가) 구글 변환기를 기본으로 두고 사실을 동의 화면과 문서에 적는다, (나) Digitalis가 P2를 통과하면 기본을 바꾸고 구글 변환기는 동의 뒤 고르는 선택지로 둔다, (다) 구글 이미지 조립 흐름을 만들지 않는다 가운데 고른다. 정하기 전에는 R3의 사용자 PC 조립 흐름을 구현하지 않는다. 어느 쪽을 골라도 32비트 ARM 앱은 비공개 번역기에 기대므로(ADR-0008), 이 선택은 arm64의 기본 번역기를 정하는 문제다.
+10. ~~설치기 설치 범위~~ 정함 2026-10-01: 현재 사용자 범위(UAC 없음). 대신 설정에 `프로그램 폴더 열기` 단추를 둔다. ADR-0011.
+11. ~~첫 릴리스의 표시~~ 정함 2026-10-01: v0.1.0은 사전 릴리스로 올린다. 정식 릴리스로 바꾸는 시점은 사용자가 정한다.
 
 ---
 

@@ -1,5 +1,27 @@
-# Known limitations (draft, finalised at M3)
+# Known limitations
 
+Final for release 0.1.0 (2026-10-01). Items are added as they are found and removed
+only when a release fixes them.
+
+- The release is not code-signed (CLAUDE.md section 8 item 3: no certificate until a
+  sponsor pays for one). Windows SmartScreen warns once when the downloaded
+  installer is opened; `docs/help/install.md` explains how to pass it and how to
+  check the file instead, by SHA-256 and by the build provenance attestation that
+  every release file carries (`gh attestation verify`, ADR-0007).
+- The installer installs for the current user only, under
+  `%LOCALAPPDATA%\Open Mobile Emulator`, without administrator rights (ADR-0011).
+  There is no all-users option. Uninstalling removes the program folder and leaves
+  the data folder `%LOCALAPPDATA%\OpenMobileEmulator` (guest disks, logs,
+  settings) in place.
+- 0.1.0 is a pre-release. The product's update check reads GitHub's `latest`
+  release, which never points at a pre-release, so no update is offered between
+  pre-releases; the first regular release will be.
+- Windows 10 is untested. Development and the completion runs used Windows 11
+  22621 and the Windows Server 2025 hosted runner.
+- A guest installed by the interactive Bliss installer (before ADR-0010, that is
+  before the product's unattended install of 2026-10-01) keeps booting through the
+  firmware and GRUB. Reinstalling the guest from Settings switches it to the
+  direct kernel boot the unattended install sets up.
 - The ARM translator is a proprietary Google binary (`libndk_translation`) that
   ships inside the Bliss OS image. This project did not write it and cannot fix
   it. Replacing it with an open-source translator is a post-release task (P2).
