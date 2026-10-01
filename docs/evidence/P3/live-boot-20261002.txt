@@ -1,0 +1,53 @@
+Live boot of the self-built Bliss 18.4 (Android 15) ISO with the product's bundled QEMU, 2026-10-02 (dev PC, RTX 2080 SUPER).
+Run 4: virtio-vga-gl + sdl,gl=on, direct kernel boot, cmdline root=/dev/ram0 androidboot.live=true ROOT=LABEL=BlissOS_20261002 console=ttyS0 quiet androidboot.insecure_adb=1 androidboot.enable_console=1
+
+== root console on ttyS0 (androidboot.enable_console=1)
+getprop sys.boot_completed            1
+getprop init.svc.adbd                 running
+getprop ro.adb.secure                 1
+getprop ro.secure                     1
+getprop sys.usb.config                adb
+getprop ro.hardware.hwcomposer        drm_minigbm
+getprop ro.hardware.gralloc           minigbm_arcvm
+getprop ro.hardware.egl               mesa
+getprop ro.hardware.vulkan            virtio
+getprop ro.product.cpu.abilist        x86_64,x86
+getprop ro.boot.enable_console        1
+id                                    uid=0(root) gid=2000(shell) ... context=u:r:shell:s0
+dmesg | grep -iE 'virtio.gpu|virgl|drm'
+[    2.265468] ACPI: bus type drm_connector registered
+[    2.304321] [drm] pci: virtio-vga detected at 0000:00:01.0
+[    2.305074] [drm] features: +virgl -edid -resource_blob -host_visible
+[    2.305075] [drm] features: +context_init
+[    2.306132] [drm] number of scanouts: 1
+[    2.306139] [drm] number of cap sets: 2
+[    2.338053] [drm] cap set 0: id 1, max-version 1, max-size 308
+[    2.338251] [drm] cap set 1: id 2, max-version 2, max-size 1408
+[    2.338742] [drm] Initialized virtio_gpu 0.1.0 0 for 0000:00:01.0 on minor 0
+
+== adb after appending the host adbkey.pub to /data/misc/adb/adb_keys through the console
+adb devices                           127.0.0.1:5556  device
+getprop ro.build.fingerprint          Android-x86/bliss_x86_64/x86_64:15/AP4A.250205.002/eng.nobody:userdebug/release-keys
+getprop ro.bliss.cpuname              Intel Core Processor (Skylake, IBRS, no TSX)
+getprop ro.boot.insecure_adb          1
+dumpsys SurfaceFlinger | grep -iE 'GLES|RenderEngine'
+ ------------RE GLES------------
+GLES: Mesa, virgl (NVIDIA GeForce RTX 2080 SUPER/PCIe/SSE2), OpenGL ES 3.2 Mesa 24.3.3
+RenderEngine supports protected context: 0
+RenderEngine is in protected context: 0
+grep -o -E 'sse4_2|popcnt|avx2' /proc/cpuinfo | sort -u    avx2 popcnt sse4_2
+ping -c 2 -W 2 8.8.8.8                2 packets transmitted, 2 received, 0% packet loss, time 1002ms; rtt min/avg/max/mdev = 39.052/39.337/39.622/0.285 ms
+ip -4 addr                            inet 10.0.2.15/24 brd 10.0.2.255 scope global eth0
+cat /proc/asound/cards                0 [Intel ]: HDA-Intel - HDA Intel at 0x80840000 irq 36
+ls /dev/input                         event0 event1 event2 event3 event4 event5 event6 js0 mice mouse0 mouse1
+free -m                               Mem: total 7937
+df -h /data                           tmpfs 3.8G 412M 3.4G 11% /data/user/0
+wm size / wm density                  Physical size: 1280x800 / Physical density: 160
+dumpsys display                       real 1280 x 800, 25 supported modes from 640x480 to 4096x2160 (edid=off), renderFrameRate 59.958603
+adb root                              ADB Root access is disabled by system setting - enable in Settings -> System -> Developer options
+logcat -d *:E (graphics)              HWUI: Device claims wide gamut support, cannot find matching config, error = EGL_SUCCESS
+                                      HWComposer: getDisplayDecorationSupport failed for display 0: Unsupported (8)
+                                      GpuMem: Failed to attach bpf program to gpu_mem/gpu_mem_total tracepoint
+screencap -p                          images/live-virgl-lockscreen-adb.png (lock screen, 1280x800)
+
+== run 3 (virtio-vga 2D, sdl): QMP screendump format=png -> images/live-2d-lockscreen-qmp.png (lock screen "Unlock for all features and data")

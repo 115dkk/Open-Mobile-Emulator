@@ -15,7 +15,9 @@ python3-ply가 차례로 드러나 모두 준비 스크립트와 `pins.env`에 �
 java(r8)가 OOM 킬러를 불러 ninja가 죽었고, `.wslconfig`로 VM을 48 GB(스왑 16 GB)로 올리고 `OME_JOBS=12`로 네 번째를 돌렸다. 네 번째는 60 %에서 `alsactl.c` 컴파일에 멈췄다. Bliss 매니페스트가 가리키는
 android-generic의 alsa-utils(`pie-x86` HEAD)가 2026-06-27에 상류 1.2.16을 합쳐 `snd_lib_log_set_handler`를 부르는데 alsa-lib(`v-x86`)는
 1.2.13 그대로라 그 함수가 없다. 상류 Bliss 트리 자체의 어긋남이고, `manifest/ome.xml`에서 alsa-utils를 그 합치기 직전 커밋
-3278244c(1.2.13)로 고정해 다섯 번째를 돌렸다(이 스냅샷이 Bliss 매니페스트와 다른 유일한 자리이며 XML 주석으로 적어 두었다). 개발 전용 변환기 추출 도구(3절 5번)는 보류 때 멈췄고 저장소에 남긴
+3278244c(1.2.13)로 고정해 다섯 번째를 돌렸다(이 스냅샷이 Bliss 매니페스트와 다른 유일한 자리이며 XML 주석으로 적어 두었다). 다섯 번째가 05:14에 끝나 첫 ISO
+`Bliss-v18.4-x86_64-UNOFFICIAL-vanilla-20261002.iso`(2.95 GB)가 나왔고, 블롭 검사와 제품 QEMU(WHPX, virgl)로의 라이브 부팅까지
+확인했다(`docs/evidence/P3/build-20261002.md`). 4절 3번의 나머지(도우미 설치, 직접 부팅, 데이터 보존)와 4~6번이 남았다. 개발 전용 변환기 추출 도구(3절 5번)는 보류 때 멈췄고 저장소에 남긴
 파일은 없으며 4절 4번에서 다시 만든다. 릴리스 빌드의 자리와 출처 증명(ADR-0007 정정)은 아직 열려 있다. 근거는 같은 날 ASTRA
 워커 셋이 만든 조사 사실표 `docs/evidence/P3/research-{bliss-build,google-images,build-host}.md`이고, 이 문서는 그 사실에서
 나온 계획과 사용자가 정할 것을 적는다. 결정이 나면 ADR-0012로 옮긴다.
