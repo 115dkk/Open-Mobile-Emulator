@@ -52,3 +52,6 @@ Trust"(CACM 27권 8호)에서 소스가 깨끗해도 컴파일러가 오염되�
   ADR-0009 6번)를 더해 같은 방식으로 올린 `qemu-v11.1.1-ome2`와, 2026-09-30에 패치 0005(`-display
   sdl,owner-window=`, QMP `x-ome-display-window`, ADR-0009 7번)를 더한 `qemu-v11.1.1-ome3`도 같은
   처지다. 개발 PC 산출물이고 증명이 없으며, `m2-dod.yml`이 받는 zip과 SHA-256만 이것으로 바뀐다.
+- 2026-10-01에 `qemu-release.yml`이 같은 커밋과 패치 집합으로 러너에서 빌드하고 증명을 붙인 `qemu-v11.1.1-ome4`를
+  올렸다(`docs/evidence/M3/release.md` 3절). `manifests/qemu-release.json`과 `m2-dod.yml`이 이 릴리스를 가리키며, 제품
+  릴리스는 이것만 동봉한다. ome1~ome3는 기록으로만 남는다.

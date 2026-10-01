@@ -1,0 +1,7 @@
+"event":"install-progress","stage":"waiting","percent":0,"failure":null,"logPath":null}
+"event":"install-progress","stage":"partition","percent":5,"failure":null,"logPath":"C:\\Users\\USER\\AppData\\Local\\Temp\\claude\\C--Open-Mobile-Emulator\\27d
+"event":"install-progress","stage":"copy","percent":18,"failure":null,"logPath":"C:\\Users\\USER\\AppData\\Local\\Temp\\claude\\C--Open-Mobile-Emulator\\27d99c8
+"event":"install-progress","stage":"copy","percent":24,"failure":null,"logPath":"C:\\Users\\USER\\AppData\\Local\\Temp\\claude\\C--Open-Mobile-Emulator\\27d99c8
+"event":"install-progress","stage":"copy","percent":42,"failure":null,"logPath":"C:\\Users\\USER\\AppData\\Local\\Temp\\claude\\C--Open-Mobile-Emulator\\27d99c8
+"event":"install-progress","stage":"copy","percent":82,"failure":null,"logPath":"C:\\Users\\USER\\AppData\\Local\\Temp\\claude\\C--Open-Mobile-Emulator\\27d99c8
+"event":"install-progress","stage":"failed","percent":100,"failure":"설치 도우미가 끝나기 전에 멈췄습니다.","logPath":"C:\\Users\\USER\\AppData\

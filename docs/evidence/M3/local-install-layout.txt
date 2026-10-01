@@ -1,0 +1,27 @@
+Local trial installer, current-user install, 2026-10-01 13:26 (dev PC). Command: Start-Process <setup> -ArgumentList '/S' -Wait
+
+51.8 MB, 2026-10-01 PM 1:25:33
+installer exit 0
+
+Name          Length
+----          ------
+manifests
+qemu
+ome-setup.exe 226304
+ome.exe       17955328
+uninstall.exe 77990
+
+qemu files: 158
+qemu\bin\qemu-system-x86_64.exe: True
+qemu\share\qemu\edk2-x86_64-code.fd: True
+\manifests\artifacts.json
+\manifests\images\bliss-16.9.7-android-13.json
+== uninstall key (HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall)
+DisplayName     : Open Mobile Emulator
+DisplayVersion  : 0.1.0
+InstallLocation : "C:\Users\USER\AppData\Local\Open Mobile Emulator"
+Publisher       : dkk115   (before bundle.publisher was set to "Open Mobile Emulator contributors")
+== desktop shortcut
+C:\Users\USER\AppData\Local\Open Mobile Emulator\ome.exe
+== start menu
+C:\Users\USER\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Open Mobile Emulator.lnk

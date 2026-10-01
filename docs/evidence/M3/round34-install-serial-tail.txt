@@ -1,0 +1,16 @@
+OME-INSTALL step tools 1
+OME-INSTALL tools sgdisk=/bin/sgdisk pv=/bin/pv mke2fs=/system/bin/mke2fs mkfs.ext3=/system/bin/mkfs.ext3 mkfs.ext4=/system/bin/mkfs.ext4 rsync=/system/system_ext/bin/rsync
+OME-INSTALL source kernel=16278528 initrd=8492807 system=4718592000
+OME-INSTALL step partition 5
+OME-INSTALL step format 10
+OME-INSTALL step copy 15
+OME-INSTALL step copy 18
+OME-INSTALL step copy 24
+OME-INSTALL step copy 42
+OME-INSTALL step copy 64
+OME-INSTALL step copy 82
+OME-INSTALL step copy 88
+OME-INSTALL step copy 90
+OME-INSTALL step finish 92
+OME-INSTALL df Filesystem           1K-blocks      Used Available Use% Mounted on
+OME-INSTALL done

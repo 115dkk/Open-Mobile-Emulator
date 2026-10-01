@@ -114,6 +114,14 @@ impl Lifecycle {
             (Self::Stopping { .. }, LifecycleEvent::ProcessExited(_)) => {
                 (Self::Stopped, vec![Action::EmitState(GuestState::Stopped)])
             }
+            // A clean exit while running is the guest ending itself (Android `poweroff`, the
+            // install helper's `poweroff -f`) or a QMP `quit`, not a crash. The SHUTDOWN event
+            // that normally precedes it can be lost when QEMU closes the QMP socket right after
+            // sending it; completion run 34 (2026-10-01) saw the install helper's clean exit
+            // classified as a failure that way.
+            (Self::Running, LifecycleEvent::ProcessExited(0)) => {
+                (Self::Stopped, vec![Action::EmitState(GuestState::Stopped)])
+            }
             (Self::Starting, LifecycleEvent::ProcessExited(code))
             | (Self::Running, LifecycleEvent::ProcessExited(code)) => {
                 let _ = code;
@@ -1108,6 +1116,17 @@ mod tests {
         let (state, actions) = Lifecycle::Running.on(LifecycleEvent::ProcessExited(17));
         assert_eq!(state, Lifecycle::Failed);
         assert!(!actions.contains(&Action::Spawn));
+    }
+
+    #[test]
+    fn clean_exit_while_running_is_a_stop_not_a_failure() {
+        let (state, actions) = Lifecycle::Running.on(LifecycleEvent::ProcessExited(0));
+        assert_eq!(state, Lifecycle::Stopped);
+        assert_eq!(actions, [Action::EmitState(GuestState::Stopped)]);
+
+        let (state, actions) = Lifecycle::Starting.on(LifecycleEvent::ProcessExited(0));
+        assert_eq!(state, Lifecycle::Failed);
+        assert!(actions.contains(&Action::KeepLogsAsFailure));
     }
 
     #[test]

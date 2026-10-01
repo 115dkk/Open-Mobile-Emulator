@@ -118,10 +118,10 @@ jobs:
         run: |
           $destination = Join-Path $env:RUNNER_TEMP 'ome-qemu-release'
           New-Item -ItemType Directory -Path $destination -Force | Out-Null
-          gh release download qemu-v11.1.1-ome3 --pattern '*.zip' --dir $destination
+          gh release download qemu-v11.1.1-ome4 --pattern '*.zip' --dir $destination
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           $archive = Join-Path $destination 'qemu-ome-v11.1.1-c3d48b7d1e89-win64.zip'
-          $expected = '14c72d6f1b65c11c366692e92cb4beec59cc0a7bc7cc1fd7b826e801695cec0d'
+          $expected = 'ba2a53f3680fc8d96874d86e1ae5b14c08576d29f4ab49864e3103571215db42'
           if ((Get-FileHash $archive -Algorithm SHA256).Hash.ToLowerInvariant() -cne $expected) {
             throw 'QEMU archive digest mismatch'
           }

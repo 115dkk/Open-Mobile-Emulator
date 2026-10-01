@@ -38,6 +38,7 @@
       "../../manifests/artifacts.json": "manifests/artifacts.json",
       "../../manifests/images/*.json": "manifests/images/"
     },
+    "publisher": "Open Mobile Emulator contributors",
     "shortDescription": "arm64 모바일 게임을 윈도우에서 돌리는 에뮬레이터입니다.",
     "category": "Utility",
     "windows": {

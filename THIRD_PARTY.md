@@ -20,12 +20,12 @@ Components that a release **ships** (binaries inside the installer):
 | mingw-w64-ucrt-x86_64-libgcc | 16.2.0-4 | spdx:GPL-3.0-or-later WITH GCC-exception-3.1 AND GFDL-1.3-or-later | https://gcc.gnu.org | Copied UCRT64 DLL; upstream URL from pacman -Qi |
 | mingw-w64-ucrt-x86_64-libiconv | 1.19-1 | spdx:LGPL-2.1-or-later  documentation:spdx:GPL-3.0-or-later | https://www.gnu.org/software/libiconv/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
 | mingw-w64-ucrt-x86_64-libjpeg-turbo | 3.2.0-1 | custom:BSD-like | https://libjpeg-turbo.virtualgl.org/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
-| mingw-w64-ucrt-x86_64-libpng | 1.6.58-1 | custom | http://www.libpng.org/pub/png/libpng.html | Copied UCRT64 DLL; upstream URL from pacman -Qi |
+| mingw-w64-ucrt-x86_64-libpng | 1.6.59-1 | custom | http://www.libpng.org/pub/png/libpng.html | Copied UCRT64 DLL; upstream URL from pacman -Qi |
 | mingw-w64-ucrt-x86_64-libslirp | 4.9.3-1 | spdx:BSD-3-Clause | https://gitlab.freedesktop.org/slirp/libslirp | Copied UCRT64 DLL; upstream URL from pacman -Qi |
 | mingw-w64-ucrt-x86_64-libstdc++ | 16.2.0-4 | spdx:GPL-3.0-or-later WITH GCC-exception-3.1 AND GFDL-1.3-or-later | https://gcc.gnu.org | Copied UCRT64 DLL; upstream URL from pacman -Qi |
-| mingw-w64-ucrt-x86_64-libwinpthread | 14.0.0.r420.g61d40c4c0-1 | spdx:MIT AND BSD-3-Clause-Clear | https://www.mingw-w64.org/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
+| mingw-w64-ucrt-x86_64-libwinpthread | 14.0.0.r426.g4564ee4b5-1 | spdx:MIT AND BSD-3-Clause-Clear | https://www.mingw-w64.org/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
 | mingw-w64-ucrt-x86_64-ncurses | 6.6-4 | spdx:MIT | https://www.gnu.org/software/ncurses/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
-| mingw-w64-ucrt-x86_64-pcre2 | 10.48-3 | spdx:BSD-3-Clause | https://pcre.org/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
+| mingw-w64-ucrt-x86_64-pcre2 | 10.49-1 | spdx:BSD-3-Clause | https://pcre.org/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
 | mingw-w64-ucrt-x86_64-pixman | 0.46.4-3 | spdx:MIT | https://gitlab.freedesktop.org/pixman/pixman | Copied UCRT64 DLL; upstream URL from pacman -Qi |
 | mingw-w64-ucrt-x86_64-virglrenderer | 1.3.0-1 | spdx:MIT | https://docs.mesa3d.org/drivers/virgl/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
 | mingw-w64-ucrt-x86_64-zlib | 1.3.2-2 | spdx:Zlib | https://www.zlib.net/ | Copied UCRT64 DLL; upstream URL from pacman -Qi |
