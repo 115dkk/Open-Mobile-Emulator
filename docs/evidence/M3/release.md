@@ -125,6 +125,19 @@ https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36819100622 이다(2
 | 1 | https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36820731098 (05:38~05:42 UTC) | 설치기 검증 통과, 표준 사용자 설치 종료 코드 0, 설치된 제품으로 첫 화면·호스트 점검·WHPX 통과. S1.4에서 SourceForge 다운로드가 두 번 모두 한 바이트도 받지 못한 채 실패(`artifact_download_failed`, 드라이버의 두 번째 시도까지 47초). 제품 밖의 일이며 m2-dod.yml 23회에서도 같은 미러 실패가 있었다 |
 | 2 | https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36821141980 (05:43~05:47 UTC) | 같은 자리에서 같은 실패. 그 시각 개발 PC에서도 `downloads.sourceforge.net`이 HTTP 522(Cloudflare, 원본 서버 응답 없음)를 돌려줬다(`sourceforge-522.txt`). 배포처 장애이며 제품이나 설치기의 결함이 아니다 |
 
-두 시도 모두 설치기의 해시와 출처 증명 확인, 표준 사용자의 무음 설치(종료 코드 0), 설치된 제품의 기동과 호스트 점검과 WHPX 단계까지는
-통과했다. 러너 쪽 완주의 나머지(이미지 내려받기부터 게임까지)는 SourceForge가 돌아오면 같은 워크플로를 다시 돌려 아래에 적는다.
-같은 설치 배치와 같은 QEMU 런타임으로 개발 PC에서 한 35회차(2절)가 그 구간을 이미 지나갔다.
+| 3 | https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36826094020 (06:41~07:03 UTC, 22분) | **통과.** SourceForge가 06:41 UTC에 돌아온 것(206)을 감시가 확인하고 띄웠다. 드라이버 결과 `needs-review`(전 단계 통과, 실패 없음, `runner-dod-result.json`) |
+
+세 번째 시도의 사실: 설치기 `.sha256` 대조와 `gh attestation verify --signer-workflow .../release.yml` 통과(9초). 표준 사용자
+`omeuser`의 무음 설치 종료 코드 0, 설치 위치 `C:\Users\omeuser\AppData\Local\Open Mobile Emulator`, 도우미와 QEMU 있음, 현재
+사용자의 제거 항목 `DisplayVersion 0.1.0`. 설치된 제품으로 돌린 마법사의 단계별 시간은 다음과 같다.
+
+| 단계 | 시간 | 비고 |
+|---|---|---|
+| S1.1 호스트 점검, S1.2 WHPX | 1.8초, 1.8초 | 러너는 OpenGL이 없어 제품이 소프트웨어 렌더링으로 바꿈 |
+| S1.4 이미지 내려받기 | 33.6초 | 2.4 GB, SHA-256 검증 포함 |
+| S1.5 설치 | 62.7초 | `설치하기` 뒤 입력 없음(개발 PC 31초의 두 배. 4 vCPU 러너) |
+| S1.6 첫 부팅 | 96.2초 | 직접 커널 부팅, 소프트웨어 렌더링 |
+| S1.7 앱 설치 | 27.5초 | |
+| 게임 실행 | 16.0분 | 1분에 권한 대화상자, 2분부터 게임 화면. 마지막 화면(`game-15`)은 게임 제목 화면 위의 게임 서버 점검 안내("현재 서버 점검 중입니다, 예상 완료 10/1/2026 4:00 PM")였다. 점검 안내는 게임 서버가 보낸 것이므로 설치된 제품의 게스트 네트워크는 러너에서 바깥까지 닿는다. 데이터 다운로드 안내는 점검 때문에 나오지 않았다 |
+
+이로써 완료 기준 2의 러너 쪽도 증거가 생겼다. 설치기 한 번과 마법사의 승인 외에 사람의 입력은 없었다.
