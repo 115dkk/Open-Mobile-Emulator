@@ -1,0 +1,111 @@
+From 4a0c9d7e1b2f3a4c5d6e7f8091a2b3c4d5e6f708 Mon Sep 17 00:00:00 2001
+From: Open Mobile Emulator contributors <noreply@example.invalid>
+Date: Thu, 1 Oct 2026 00:00:00 +0000
+Subject: [PATCH] ui/sdl2: treat the owned window as a viewport of the guest
+
+The stock SDL2 display forwards every window resize to the guest as the
+preferred display mode (qemu_console_set_ui_info), and it scales mouse
+coordinates by the surface size on the assumption that the window and the
+guest surface are the same size.  For the owned window of patch 0005 the
+host sizes the window to its stage and the guest resolution is a setting
+of its own (the product applies it with wm size and the kernel video=
+argument), so that coupling made the guest fall back to the stage size
+whenever the window was placed again, and once the sizes differ the guest
+pointer drifts away from the host cursor.
+
+With an owner window set, keep the window a plain viewport: do not report
+its size as UI info, and map window coordinates through the renderer's
+own placement of the surface (letterboxed and centred for GL as in
+surface_gl_setup_viewport, stretched for the 2D renderer) before scaling
+them to the surface.  Without an owner window QEMU behaves as before.
+
+The ui/sdl2.c header carries the MIT license text.
+
+Signed-off-by: Open Mobile Emulator contributors <noreply@example.invalid>
+---
+ ui/sdl2.c | 55 +++++++++++---
+ 1 file changed, 54 insertions(+), 1 deletions(-)
+
+diff --git a/ui/sdl2.c b/ui/sdl2.c
+index 3c46fc2..9a5283f 100644
+--- a/ui/sdl2.c
++++ b/ui/sdl2.c
+@@ -484,6 +484,52 @@ static void sdl_mouse_mode_change(Notifier *notify, void *data)
+     }
+ }
+ 
++/*
++ * Open Mobile Emulator: an owned window (patch 0005) is a viewport that the
++ * host sizes independently of the guest resolution.  The GL renderer draws
++ * the guest surface letterboxed and centred (surface_gl_setup_viewport in
++ * console-gl.c) and the 2D renderer stretches it over the whole window, so a
++ * window coordinate has to go through that same mapping before it is scaled
++ * to the surface; otherwise the guest pointer drifts away from the host
++ * cursor.  Without an owner window the window and the surface stay the same
++ * size and this is the identity.
++ */
++static void sdl2_owner_window_map_point(struct sdl2_console *scon,
++                                        int *x, int *y)
++{
++    int ww, wh, gw, gh, vx = 0, vy = 0, vw, vh;
++
++    if (!sdl2_has_owner_window(scon) || !scon->real_window ||
++        !scon->surface) {
++        return;
++    }
++    SDL_GetWindowSize(scon->real_window, &ww, &wh);
++    gw = surface_width(scon->surface);
++    gh = surface_height(scon->surface);
++    if (ww <= 0 || wh <= 0 || gw <= 0 || gh <= 0) {
++        return;
++    }
++    vw = ww;
++    vh = wh;
++    if (scon->opengl) {
++        if ((int64_t)ww * gh < (int64_t)wh * gw) {
++            /* narrower than the guest: stripes above and below */
++            vh = (int)((int64_t)ww * gh / gw);
++            vy = (wh - vh) / 2;
++        } else {
++            vw = (int)((int64_t)wh * gw / gh);
++            vx = (ww - vw) / 2;
++        }
++        if (vw <= 0 || vh <= 0) {
++            return;
++        }
++    }
++    *x = (int)((int64_t)(*x - vx) * gw / vw);
++    *y = (int)((int64_t)(*y - vy) * gh / vh);
++    *x = MIN(MAX(*x, 0), gw - 1);
++    *y = MIN(MAX(*y, 0), gh - 1);
++}
++
+ static void sdl_send_mouse_event(struct sdl2_console *scon, int dx, int dy,
+                                  int x, int y, int state)
+ {
+@@ -502,6 +548,7 @@ static void sdl_send_mouse_event(struct sdl2_console *scon, int dx, int dy,
+     }
+ 
+     if (qemu_input_is_absolute(scon->dcl.con)) {
++        sdl2_owner_window_map_point(scon, &x, &y);
+         qemu_input_queue_abs(scon->dcl.con, INPUT_AXIS_X,
+                              x, 0, surface_width(scon->surface));
+         qemu_input_queue_abs(scon->dcl.con, INPUT_AXIS_Y,
+@@ -773,7 +820,13 @@ static void handle_windowevent(SDL_Event *ev)
+ 
+     switch (ev->window.event) {
+     case SDL_WINDOWEVENT_RESIZED:
+-        {
++        /*
++         * Open Mobile Emulator: an owner-window display is a viewport that
++         * the host sizes to its stage; the guest resolution is a setting of
++         * its own, so the window size is not reported to the guest as the
++         * preferred mode.  Without an owner window QEMU behaves as before.
++         */
++        if (!sdl2_has_owner_window(scon)) {
+             QemuUIInfo info = {
+                 .width = ev->window.data1,
+                 .height = ev->window.data2,
+-- 
+2.47.0
+

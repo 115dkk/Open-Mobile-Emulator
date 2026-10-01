@@ -3,7 +3,7 @@
 // Input screen (M2-SCREENS.md 4, mockup S4): the profile list on the left and the applied profile's
 // bindings on the right. The list selection is Rust's `input.activeId`. Every edit goes to Rust as a
 // whole profile or a single binding and Rust validates it; bundled presets only offer 복제 because
-// Rust refuses to save them. The overlay editor lives on the stage (`무대에서 편집`).
+// Rust refuses to save them. The overlay editor lives on the stage (`화면에서 편집`).
 import { useEffect, useEffectEvent, useState } from 'react';
 import type { CSSProperties, MouseEvent } from 'react';
 import type { ScreenActions, ScreenProps } from '../actions';
@@ -335,7 +335,7 @@ function ProfileDetail({ profile, snapshot, actions, navigate }: ScreenProps & {
             <Button variant="ghost" onClick={() => { setDialog('target'); }}>대상 앱 지정</Button>
             <Button variant="danger" onClick={() => { setDialog('delete'); }}>삭제</Button>
           </>)}
-          {editOnStage !== undefined && <Button variant="primary" icon="pencil" onClick={editOnStage}>무대에서 편집</Button>}
+          {editOnStage !== undefined && <Button variant="primary" icon="pencil" onClick={editOnStage}>화면에서 편집</Button>}
         </div>
       </div>
       {editable && <p className="ome-muted">화면 위의 자리를 클릭하고 설정할 키를 누르십시오.</p>}

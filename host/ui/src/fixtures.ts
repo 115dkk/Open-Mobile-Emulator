@@ -324,7 +324,7 @@ export const mainSnapshot: AppSnapshot = {
 };
 
 export const mainGallery: readonly GalleryVariant[] = [
-  { id: 'main-stopped', label: 'S2 무대: 꺼짐', snapshot: mainSnapshot },
+  { id: 'main-stopped', label: 'S2 화면: 꺼짐', snapshot: mainSnapshot },
 ];
 
 // ---- Stage (S2) and apps (S3) variants: screen worker B. Other workers append their own blocks. ----
@@ -381,18 +381,18 @@ function failedAt(kind: 'startFailed' | 'bootTimeout' | 'crash'): AppSnapshot {
 export const runningSnapshot: AppSnapshot = stageAt(runningGuest, { apps: runningApps });
 
 export const stageGallery: readonly GalleryVariant[] = [
-  { id: 'stage-stopped', label: 'S2 무대: 꺼짐, 정상 종료', snapshot: stageSnapshot },
+  { id: 'stage-stopped', label: 'S2 화면: 꺼짐, 정상 종료', snapshot: stageSnapshot },
   {
-    id: 'stage-stopped-abnormal', label: 'S2 무대: 꺼짐, 비정상 종료',
+    id: 'stage-stopped-abnormal', label: 'S2 화면: 꺼짐, 비정상 종료',
     snapshot: stageAt({ lastExit: { kind: 'crash', at: '2026-09-26T19:58:00', logPath: stageLogPath } }),
   },
   {
-    id: 'stage-starting', label: 'S2 무대: 시작 중',
+    id: 'stage-starting', label: 'S2 화면: 시작 중',
     snapshot: stageAt({ state: 'starting', hosting: 'embedded', lastExit: null }),
   },
-  { id: 'stage-running', label: 'S2 무대: 실행 중', snapshot: runningSnapshot },
+  { id: 'stage-running', label: 'S2 화면: 실행 중', snapshot: runningSnapshot },
   {
-    id: 'stage-running-auto', label: 'S2 무대: 실행 중, 자동 적용과 일시 중지, fps',
+    id: 'stage-running-auto', label: 'S2 화면: 실행 중, 자동 적용과 일시 중지, fps',
     snapshot: stageAt(runningGuest, {
       apps: runningApps,
       input: { ...stageSnapshot.input, foregroundPackage: 'com.example.sample.a', suspended: true },
@@ -400,26 +400,26 @@ export const stageGallery: readonly GalleryVariant[] = [
     }),
   },
   {
-    id: 'stage-running-editing', label: 'S2 무대: 실행 중, 매핑 편집',
+    id: 'stage-running-editing', label: 'S2 화면: 실행 중, 매핑 편집',
     snapshot: stageAt(runningGuest, { apps: runningApps, input: { ...stageSnapshot.input, editing: true } }),
   },
   {
-    id: 'stage-running-separate', label: 'S2 무대: 실행 중, 별도 창',
+    id: 'stage-running-separate', label: 'S2 화면: 실행 중, 별도 창',
     snapshot: stageAt({ ...runningGuest, hosting: 'separateWindow' }, { apps: runningApps }),
   },
   {
-    id: 'stage-restarting', label: 'S2 무대: 다시 시작 중',
+    id: 'stage-restarting', label: 'S2 화면: 다시 시작 중',
     snapshot: stageAt({ ...runningGuest, state: 'restarting', bootCompleted: false, adbConnected: false, fps: null }),
   },
   {
-    id: 'stage-stopping', label: 'S2 무대: 끄는 중',
+    id: 'stage-stopping', label: 'S2 화면: 끄는 중',
     snapshot: stageAt({ ...runningGuest, state: 'stopping', adbConnected: false, fps: null }),
   },
-  { id: 'stage-failed-start', label: 'S2 무대: 실패, 가상 머신 시작', snapshot: failedAt('startFailed') },
-  { id: 'stage-failed-boot', label: 'S2 무대: 실패, 운영체제 부팅', snapshot: failedAt('bootTimeout') },
-  { id: 'stage-failed-crash', label: 'S2 무대: 실패, 크래시', snapshot: failedAt('crash') },
+  { id: 'stage-failed-start', label: 'S2 화면: 실패, 가상 머신 시작', snapshot: failedAt('startFailed') },
+  { id: 'stage-failed-boot', label: 'S2 화면: 실패, 운영체제 부팅', snapshot: failedAt('bootTimeout') },
+  { id: 'stage-failed-crash', label: 'S2 화면: 실패, 크래시', snapshot: failedAt('crash') },
   {
-    id: 'stage-issue', label: 'S2 무대: 오류 알림',
+    id: 'stage-issue', label: 'S2 화면: 오류 알림',
     snapshot: {
       ...runningSnapshot,
       issue: { code: 'screenshot_failed', message: '스크린샷을 저장하지 못했습니다.', nextAction: '저장 위치의 여유 공간을 확인하십시오.' },
@@ -718,3 +718,13 @@ export const overlayGallery: readonly OverlayGalleryVariant[] = [
     snapshot: { ...overlayEditing, input: { ...overlayEditing.input, activeId: 'bundled-sample-a' } },
   },
 ];
+
+// ---- Title bar (P4-B): the product-drawn window top over the shell, restored and maximized. ----
+// The maximized state belongs to the window, not the snapshot, so the gallery fixes it per variant.
+
+export const titleBarGallery: readonly GalleryVariant[] = [
+  { id: 'titlebar-default', label: '제목 표시줄: 기본', snapshot: mainSnapshot },
+  { id: 'titlebar-maximized', label: '제목 표시줄: 최대화', snapshot: mainSnapshot },
+];
+
+export const titleBarMaximizedIds: ReadonlySet<string> = new Set(['titlebar-maximized']);

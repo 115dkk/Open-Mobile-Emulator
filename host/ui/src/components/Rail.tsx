@@ -9,7 +9,7 @@ import { StatusDot } from './StatusDot';
 export type RailItem = 'stage' | 'apps' | 'input' | 'display' | 'settings';
 
 const ITEMS: readonly { readonly id: RailItem; readonly label: string; readonly icon: IconName }[] = [
-  { id: 'stage', label: '무대', icon: 'stage' },
+  { id: 'stage', label: '화면', icon: 'stage' },
   { id: 'apps', label: '앱', icon: 'apps' },
   { id: 'input', label: '입력', icon: 'input' },
   { id: 'display', label: '표시', icon: 'display' },

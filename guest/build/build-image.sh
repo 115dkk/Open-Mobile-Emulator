@@ -20,7 +20,8 @@ set -euo pipefail
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 OME_REPO_ROOT=${OME_REPO_ROOT:-$(cd "$HERE/../.." && pwd)}
 OME_BUILD_ROOT=${OME_BUILD_ROOT:-$HOME/bliss}
-OME_JOBS=${OME_JOBS:-$(nproc)}
+# GitHub answers HTTP 429 to a 16-way sync; 6 jobs with retries stayed under its limit on 2026-10-01.
+OME_JOBS=${OME_JOBS:-6}
 # shellcheck source=pins.env
 source "$HERE/pins.env"
 
@@ -64,7 +65,20 @@ do_init() {
 do_sync() {
     say "sync (-j$OME_JOBS)"
     cd "$OME_BUILD_ROOT"
-    repo sync -c --force-sync --no-tags --no-clone-bundle -j"$OME_JOBS" --optimized-fetch --prune 2>&1 | tee "$LOG_DIR/sync-$(date +%Y%m%d-%H%M%S).log"
+    local log="$LOG_DIR/sync-$(date +%Y%m%d-%H%M%S).log"
+    # repo sync has returned 0 after "Unable to fully sync the tree" (HTTP 429), so completeness is
+    # checked afterwards instead of trusting the exit code.
+    repo sync -c --force-sync --no-tags --no-clone-bundle -j"$OME_JOBS" --retry-fetches=3 --optimized-fetch --prune 2>&1 | tee "$log" || true
+    local missing=0 total=0
+    while IFS= read -r path; do
+        total=$((total + 1))
+        [ -e "$path/.git" ] || { missing=$((missing + 1)); echo "missing: $path"; }
+    done < <(repo list -p)
+    say "projects: $total, missing: $missing, errors in log: $(grep -c '^error:' "$log" || true)"
+    if [ "$missing" -ne 0 ] || grep -q 'Unable to fully sync' "$log"; then
+        echo "sync incomplete; run the sync stage again" >&2
+        return 1
+    fi
     say "source tree: $(du -sh --exclude=out "$OME_BUILD_ROOT" 2>/dev/null | cut -f1)"
 }
 
@@ -114,12 +128,16 @@ do_build() {
     export PATH="$HOME/.cargo/bin:$PATH"
     export LC_ALL=C.UTF-8
     local log="$LOG_DIR/build-$(date +%Y%m%d-%H%M%S).log"
-    {
+    # envsetup.sh and lunch read unset variables, so the strict modes are relaxed in this subshell
+    # only; make's exit status is the subshell's.
+    (
+        set +u +e
         # shellcheck disable=SC1091
         source build/envsetup.sh
-        lunch "$BLISS_LUNCH"
+        lunch "$BLISS_LUNCH" || { echo "lunch $BLISS_LUNCH failed" >&2; exit 2; }
         make -j"$OME_JOBS" iso_img
-    } 2>&1 | tee "$log"
+        exit $?
+    ) 2>&1 | tee "$log"
     say "build log: $log"
 }
 

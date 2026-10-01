@@ -117,7 +117,7 @@ describe('input screen (S4): the applied profile', () => {
     show(variant('input-stopped'), vi.fn());
     expect(screen.getByText('화면 스냅샷')).toBeInTheDocument();
     expect(screen.queryByText('현재 화면')).toBeNull();
-    expect(screen.queryByRole('button', { name: '무대에서 편집' })).toBeNull();
+    expect(screen.queryByRole('button', { name: '화면에서 편집' })).toBeNull();
     expect(screen.getByRole('table')).toBeInTheDocument();
   });
 
@@ -203,7 +203,7 @@ describe('input screen (S4): the applied profile', () => {
   it('opens the stage editor: editing on, then the stage', async () => {
     const navigate = vi.fn();
     const actions = show(variant('input-running'), navigate);
-    await userEvent.click(screen.getByRole('button', { name: '무대에서 편집' }));
+    await userEvent.click(screen.getByRole('button', { name: '화면에서 편집' }));
     expect(actions.inputEditorToggle).toHaveBeenCalledOnce();
     expect(navigate).toHaveBeenCalledWith('stage');
   });
@@ -212,7 +212,7 @@ describe('input screen (S4): the applied profile', () => {
     const navigate = vi.fn();
     const snapshot = variant('input-running');
     const actions = show({ ...snapshot, input: { ...snapshot.input, editing: true } }, navigate);
-    await userEvent.click(screen.getByRole('button', { name: '무대에서 편집' }));
+    await userEvent.click(screen.getByRole('button', { name: '화면에서 편집' }));
     expect(actions.inputEditorToggle).not.toHaveBeenCalled();
     expect(navigate).toHaveBeenCalledWith('stage');
   });
@@ -220,7 +220,7 @@ describe('input screen (S4): the applied profile', () => {
   it('offers only 복제 on a bundled preset', async () => {
     const actions = show(variant('input-bundled'), vi.fn());
     expect(screen.getByRole('heading', { level: 2, name: '샘플 앱 A 기본 입력' })).toBeInTheDocument();
-    for (const name of ['이름 바꾸기', '대상 앱 지정', '삭제', '무대에서 편집', '새 표지 자리']) {
+    for (const name of ['이름 바꾸기', '대상 앱 지정', '삭제', '화면에서 편집', '새 표지 자리']) {
       expect(screen.queryByRole('button', { name })).toBeNull();
     }
     expect(screen.queryByText('화면 위의 자리를 클릭하고 설정할 키를 누르십시오.')).toBeNull();
@@ -231,13 +231,13 @@ describe('input screen (S4): the applied profile', () => {
 });
 
 describe('input screen (S4) inside the shell', () => {
-  it('moves the rail to the stage from 무대에서 편집', async () => {
+  it('moves the rail to the stage from 화면에서 편집', async () => {
     const actions = mockActions();
     render(<Shell snapshot={railRunningSnapshot} actions={actions} />);
     const rail = screen.getByRole('navigation', { name: '주 메뉴' });
     await userEvent.click(within(rail).getByRole('button', { name: '입력' }));
-    await userEvent.click(screen.getByRole('button', { name: '무대에서 편집' }));
+    await userEvent.click(screen.getByRole('button', { name: '화면에서 편집' }));
     expect(actions.inputEditorToggle).toHaveBeenCalledOnce();
-    expect(within(rail).getByRole('button', { name: '무대' })).toHaveAttribute('aria-current', 'page');
+    expect(within(rail).getByRole('button', { name: '화면' })).toHaveAttribute('aria-current', 'page');
   });
 });

@@ -29,7 +29,7 @@ describe('display screen (S5): resolution', () => {
     show(variant('display-basic'));
     expect(screen.getByRole('heading', { level: 1, name: '표시' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2, name: '해상도' })).toBeInTheDocument();
-    expect(screen.getByText('1920x1080 · 240 DPI · 가로')).toBeInTheDocument();
+    expect(screen.getByText('현재')).toHaveTextContent('현재 1920x1080 · 240 DPI · 가로');
 
     const hd = screen.getByRole('group', { name: '1280x720' });
     expect(hd).toHaveTextContent('160 DPI · 가로');
@@ -48,23 +48,89 @@ describe('display screen (S5): resolution', () => {
     expect(actions.displayPresetApply).toHaveBeenCalledWith('portrait-720');
   });
 
-  it('applies a custom size and density once all three are filled', async () => {
+  it('starts the custom fields from what the guest shows now and keeps 적용 off until something changes', () => {
+    show(variant('display-basic'));
+    const custom = screen.getByRole('group', { name: '사용자 지정' });
+    expect(within(custom).getByRole('spinbutton', { name: '폭' })).toHaveValue(1920);
+    expect(within(custom).getByRole('spinbutton', { name: '높이' })).toHaveValue(1080);
+    expect(within(custom).getByRole('spinbutton', { name: 'DPI' })).toHaveValue(240);
+    expect(within(custom).getByText('1920x1080 · 240 DPI · 가로')).toBeInTheDocument();
+    expect(within(custom).queryByText('640~7680')).toBeNull();
+    expect(within(custom).getByRole('button', { name: '적용' })).toBeDisabled();
+  });
+
+  it('falls back to 1920x1080 at 240 DPI when nothing is known', () => {
+    const basic = variant('display-basic');
+    show({ ...basic, guest: { ...basic.guest, resolution: null }, display: { ...basic.display, activeId: null, custom: null } });
+    const custom = screen.getByRole('group', { name: '사용자 지정' });
+    expect(within(custom).getByText('1920x1080 · 240 DPI · 가로')).toBeInTheDocument();
+  });
+
+  it('proposes a density for a new size and applies the custom values', async () => {
     const actions = show(variant('display-basic'));
     const custom = screen.getByRole('group', { name: '사용자 지정' });
-    const apply = within(custom).getByRole('button', { name: '적용' });
-    expect(apply).toBeDisabled();
-    expect(within(custom).getAllByText('640~7680')).toHaveLength(2);
-    expect(within(custom).getByText('120~640')).toBeInTheDocument();
-    await userEvent.type(within(custom).getByRole('spinbutton', { name: '폭' }), '2560');
-    await userEvent.type(within(custom).getByRole('spinbutton', { name: '높이' }), '1440');
-    await userEvent.type(within(custom).getByRole('spinbutton', { name: 'DPI' }), '320');
-    await userEvent.click(apply);
+    const width = within(custom).getByRole('spinbutton', { name: '폭' });
+    await userEvent.clear(width);
+    await userEvent.type(width, '2560');
+    expect(within(custom).getByRole('spinbutton', { name: 'DPI' })).toHaveValue(320);
+    const height = within(custom).getByRole('spinbutton', { name: '높이' });
+    await userEvent.clear(height);
+    await userEvent.type(height, '1440');
+    expect(within(custom).getByText('2560x1440 · 320 DPI · 가로')).toBeInTheDocument();
+    await userEvent.click(within(custom).getByRole('button', { name: '적용' }));
     expect(actions.displayCustomApply).toHaveBeenCalledWith({ width: 2560, height: 1440 }, 320);
+  });
+
+  it('keeps the density the user typed and clamps proposals to 120~640', async () => {
+    show(variant('display-basic'));
+    const custom = screen.getByRole('group', { name: '사용자 지정' });
+    const width = within(custom).getByRole('spinbutton', { name: '폭' });
+    const dpi = within(custom).getByRole('spinbutton', { name: 'DPI' });
+    await userEvent.clear(width);
+    await userEvent.type(width, '7680');
+    expect(dpi).toHaveValue(640);
+    await userEvent.clear(dpi);
+    await userEvent.type(dpi, '400');
+    await userEvent.clear(width);
+    await userEvent.type(width, '1280');
+    expect(dpi).toHaveValue(400);
+  });
+
+  it('turns the preview into a red notice for values Rust would refuse', async () => {
+    show(variant('display-basic'));
+    const custom = screen.getByRole('group', { name: '사용자 지정' });
+    const width = within(custom).getByRole('spinbutton', { name: '폭' });
+    await userEvent.clear(width);
+    await userEvent.type(width, '2561');
+    const notice = within(custom).getByText('폭은 640~7680 사이의 8의 배수여야 합니다.');
+    expect(notice).toHaveClass('ome-display-custom-problem');
+    expect(width).toHaveAttribute('aria-invalid', 'true');
+    expect(within(custom).getByRole('button', { name: '적용' })).toBeDisabled();
+    await userEvent.clear(width);
+    await userEvent.type(width, '2560');
+    const dpi = within(custom).getByRole('spinbutton', { name: 'DPI' });
+    await userEvent.clear(dpi);
+    await userEvent.type(dpi, '700');
+    expect(within(custom).getByText('DPI는 120~640 사이의 정수여야 합니다.')).toBeInTheDocument();
+    const height = within(custom).getByRole('spinbutton', { name: '높이' });
+    await userEvent.clear(height);
+    expect(within(custom).getByText('높이는 640~7680 사이의 8의 배수여야 합니다.')).toBeInTheDocument();
+  });
+
+  it('applies with Enter from a field, and only valid changed values', async () => {
+    const actions = show(variant('display-basic'));
+    const custom = screen.getByRole('group', { name: '사용자 지정' });
+    const height = within(custom).getByRole('spinbutton', { name: '높이' });
+    await userEvent.type(height, '{Enter}');
+    expect(actions.displayCustomApply).not.toHaveBeenCalled();
+    await userEvent.clear(height);
+    await userEvent.type(height, '1200{Enter}');
+    expect(actions.displayCustomApply).toHaveBeenCalledWith({ width: 1920, height: 1200 }, 267);
   });
 
   it('marks an applied custom size and starts its fields from it', () => {
     show(variant('display-custom'));
-    expect(screen.getByText('2560x1440 · 320 DPI · 가로')).toBeInTheDocument();
+    expect(screen.getByText('현재')).toHaveTextContent('현재 2560x1440 · 320 DPI · 가로');
     const custom = screen.getByRole('group', { name: '사용자 지정' });
     expect(within(custom).getByText('적용됨')).toBeInTheDocument();
     expect(within(custom).getByRole('spinbutton', { name: '폭' })).toHaveValue(2560);

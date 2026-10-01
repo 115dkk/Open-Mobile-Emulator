@@ -473,7 +473,7 @@ function StorageSection({ snapshot, actions }: SectionProps) {
       {/* Where the stage's screenshot button saves (the apps screen has the same button). */}
       <SettingRow
         label="스크린샷"
-        help="무대의 스크린샷 단추로 찍은 그림이 저장되는 폴더입니다."
+        help="화면의 스크린샷 단추로 찍은 그림이 저장되는 폴더입니다."
         below={settings.screenshotsDir === '' ? undefined : <span className="ome-mono ome-settings-value">{settings.screenshotsDir}</span>}
       >
         <Button icon="folder-open" onClick={actions.openScreenshotsFolder}>스크린샷 폴더 열기</Button>

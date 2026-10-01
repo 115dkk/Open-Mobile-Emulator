@@ -14,9 +14,9 @@ use ome_adb::AdbSession;
 use ome_artifacts::{ArtifactStore, Manifest, StoreError, StoreProgress};
 use ome_guest_config::{BootMode, GuestConfig, GuestPaths, QemuInstall, RawGuestConfig};
 use ome_guest_image::{
-    CapabilityProbe, Distribution, FamilyAdapter, GuestImageProfile, ImageStatus as ProfileStatus,
-    ProbeItem, ProbeOutcome, ProbeState, ShellRunner, Translator, adapter_for, recommended_index,
-    sort_newest_first,
+    CapabilityProbe, DisplayInfo, Distribution, FamilyAdapter, GuestImageProfile,
+    ImageStatus as ProfileStatus, ProbeItem, ProbeOutcome, ProbeState, ShellRunner, Translator,
+    adapter_for, recommended_index, sort_newest_first,
 };
 use ome_guest_install::helper::{DEFAULT_SRC, boot_cmdline, install_cmdline, write_install_initrd};
 use ome_guest_install::iso9660::IsoImage;
@@ -43,8 +43,8 @@ use crate::adapters::AdbShellRunner;
 use crate::app_install::group_install_units;
 use crate::desktop::Desktop;
 use crate::guest_store::{
-    GuestRecord, GuestStore, GuestStoreError, StoredBoot, StoredBootMethod, StoredInstall,
-    StoredInstallState, StoredProbeItem, StoredProbeState,
+    GuestRecord, GuestStore, GuestStoreError, StoredBoot, StoredBootMethod, StoredDisplay,
+    StoredInstall, StoredInstallState, StoredProbeItem, StoredProbeState,
 };
 use crate::home::OmeHome;
 use crate::issues;
@@ -125,8 +125,9 @@ where
 /// Guest-window seam used by deterministic runtime tests.
 ///
 /// QEMU creates the SDL window already owned by the host (`owner-window`, QEMU patch 0005). The
-/// host changes only its Z-order; position, size and visibility come back as a
-/// [`DisplayWindowGeometry`] that the runtime sends through the supervisor over QMP.
+/// host changes its position immediately when the owner moves and otherwise changes only its
+/// Z-order; size and visibility come back as a [`DisplayWindowGeometry`] that the runtime sends
+/// through the supervisor over QMP.
 pub trait WindowPlacement: Send {
     /// Finds the guest's owned popup and checks that the native host owns it.
     fn attach(&mut self, target: HostingTarget) -> Result<(), HostingIssue>;
@@ -136,6 +137,8 @@ pub trait WindowPlacement: Send {
         &mut self,
         rect: ome_window_host::Rect,
     ) -> Result<Option<DisplayWindowGeometry>, HostingIssue>;
+    /// Moves the live visible popup to follow its owner's current client origin.
+    fn follow_owner(&mut self) -> Result<bool, HostingIssue>;
     /// Registers the optional native overlay used as the popup's Z-order predecessor.
     fn set_overlay_window(&mut self, overlay: Option<ome_platform_win::WindowHandle>);
     /// Returns the expected geometry to resend when the popup's rectangle differs from it.
@@ -173,6 +176,9 @@ impl WindowPlacement for GuestWindowHost {
         rect: ome_window_host::Rect,
     ) -> Result<Option<DisplayWindowGeometry>, HostingIssue> {
         GuestWindowHost::place(self, rect)
+    }
+    fn follow_owner(&mut self) -> Result<bool, HostingIssue> {
+        GuestWindowHost::follow_owner(self)
     }
     fn set_overlay_window(&mut self, overlay: Option<ome_platform_win::WindowHandle>) {
         GuestWindowHost::set_overlay_window(self, overlay);
@@ -391,6 +397,7 @@ pub struct AppRuntime {
     last_stage_rect: Option<StageRect>,
     stage_visible: bool,
     resolution: Option<Size>,
+    resolution_density_dpi: Option<u32>,
     last_exit: Option<LastExit>,
     started_at: Option<String>,
     capabilities: CapabilityReport,
@@ -527,10 +534,11 @@ impl AppRuntime {
         let root_enabled = active_record.and_then(|guest| guest.root_enabled);
         let google_accounts = active_record.and_then(|guest| guest.capabilities.google_accounts);
         let media_volume = active_record.and_then(|guest| guest.capabilities.media_volume);
-        let resolution = active_record.and_then(|guest| {
-            guest.capabilities.display.map(|display| Size {
+        let display_info = active_record.and_then(|guest| {
+            guest.capabilities.display.map(|display| DisplayInfo {
                 width: display.width,
                 height: display.height,
+                density_dpi: display.density_dpi,
             })
         });
         let add_account_supported = active_record.is_some_and(|guest| {
@@ -635,7 +643,8 @@ impl AppRuntime {
             host_window: None,
             last_stage_rect: None,
             stage_visible: true,
-            resolution,
+            resolution: None,
+            resolution_density_dpi: None,
             last_exit: None,
             started_at: None,
             capabilities,
@@ -654,6 +663,7 @@ impl AppRuntime {
             update_state,
             issue: None,
         };
+        runtime.display_state_from(display_info);
         runtime.refresh_host();
         Ok(runtime)
     }
@@ -2431,9 +2441,23 @@ impl AppRuntime {
         self.try_place_guest_window();
     }
 
-    /// Re-places the guest after the native host moves, resizes, or changes scale.
+    /// Moves an attached guest immediately with its owner, or performs normal placement before
+    /// embedding has completed.
     pub fn host_window_moved(&mut self) {
-        self.try_place_guest_window();
+        let embedded = self.hosting == HostingMode::Embedded
+            && self.stage_visible
+            && self.guest_state == GuestState::Running
+            && self.hosted_pid == self.pid;
+        if embedded {
+            let result = self.deps.window_host.follow_owner();
+            #[cfg(debug_assertions)]
+            eprintln!("[stage] follow owner result={result:?}");
+            if result.is_err() {
+                eprintln!("guest window could not follow its owner");
+            }
+        } else {
+            self.try_place_guest_window();
+        }
     }
 
     /// Registers the optional native overlay used to keep it above the guest popup.
@@ -2861,10 +2885,7 @@ impl AppRuntime {
         self.google_accounts = outcome.google_accounts;
         self.media_volume = outcome.media_volume;
         self.root_enabled = outcome.root_enabled;
-        self.resolution = outcome.display.map(|display| Size {
-            width: display.width,
-            height: display.height,
-        });
+        self.display_state_from(outcome.display);
         self.add_account_supported = add_account_supported;
         self.apps = package_items(
             outcome
@@ -2965,14 +2986,16 @@ impl AppRuntime {
         self.root_enabled = guest.root_enabled;
         self.google_accounts = guest.capabilities.google_accounts;
         self.media_volume = guest.capabilities.media_volume;
-        self.resolution = guest.capabilities.display.map(|display| Size {
+        let display = guest.capabilities.display.map(|display| DisplayInfo {
             width: display.width,
             height: display.height,
+            density_dpi: display.density_dpi,
         });
         self.add_account_supported = adapter_for(guest.api_level)
             .add_google_account_command()
             .is_some();
         self.apps = stored_apps(guest);
+        self.display_state_from(display);
     }
 
     fn load_install_projection(&mut self, position: usize) {
@@ -3001,7 +3024,7 @@ impl AppRuntime {
         self.root_enabled = None;
         self.google_accounts = None;
         self.media_volume = None;
-        self.resolution = None;
+        self.display_state_from(None);
         self.add_account_supported = false;
         self.apps.clear();
         self.install_report = InstallReport::default();
@@ -3128,9 +3151,12 @@ impl AppRuntime {
                 .and_then(|()| adb.set_display_density(preset.density_dpi))
                 .map_err(|_| issues::operating_system_connection_unavailable())?;
         }
-        self.active_display = Some(preset.id);
-        self.custom_display = None;
-        Ok(())
+        let display = self.query_display_info().unwrap_or(DisplayInfo {
+            width: preset.size.width,
+            height: preset.size.height,
+            density_dpi: preset.density_dpi,
+        });
+        self.persist_display_info(display)
     }
 
     fn apply_custom_display(&mut self, size: Size, density_dpi: u32) -> Result<(), AppIssue> {
@@ -3140,9 +3166,73 @@ impl AppRuntime {
                 .and_then(|()| adb.set_display_density(density_dpi))
                 .map_err(|_| issues::operating_system_connection_unavailable())?;
         }
-        self.active_display = None;
-        self.custom_display = Some(CustomDisplay { size, density_dpi });
+        let display = self.query_display_info().unwrap_or(DisplayInfo {
+            width: size.width,
+            height: size.height,
+            density_dpi,
+        });
+        self.persist_display_info(display)
+    }
+
+    fn query_display_info(&self) -> Option<DisplayInfo> {
+        let adb = self.deps.adb.as_ref()?;
+        let (size_command, density_command) = self.with_family_adapter(|adapter| {
+            (
+                adapter.display_size_query_command(),
+                adapter.display_density_query_command(),
+            )
+        });
+        let runner = AdbShellRunner(adb);
+        let size = runner.shell(&size_command?).ok()?;
+        let density = runner.shell(&density_command?).ok()?;
+        if size.exit_code != 0 || density.exit_code != 0 {
+            return None;
+        }
+        self.with_family_adapter(|adapter| adapter.parse_display(&size.stdout, &density.stdout))
+    }
+
+    fn persist_display_info(&mut self, display: DisplayInfo) -> Result<(), AppIssue> {
+        self.display_state_from(Some(display));
+        if let Some(position) = self.selected_guest_index() {
+            self.guests[position].capabilities.display = Some(StoredDisplay {
+                width: display.width,
+                height: display.height,
+                density_dpi: display.density_dpi,
+            });
+            self.guest_store
+                .save(&self.guests[position])
+                .map_err(guest_store_issue)?;
+        }
         Ok(())
+    }
+
+    fn display_state_from(&mut self, info: Option<DisplayInfo>) {
+        let Some(info) = info else {
+            self.resolution = None;
+            self.resolution_density_dpi = None;
+            self.active_display = Some("hd-720".to_owned());
+            self.custom_display = None;
+            return;
+        };
+        self.resolution = Some(Size {
+            width: info.width,
+            height: info.height,
+        });
+        self.resolution_density_dpi = Some(info.density_dpi);
+        let size = self.resolution.expect("display size was just stored");
+        let density_dpi = self
+            .resolution_density_dpi
+            .expect("display density was just stored");
+        if let Some(preset) = display_presets_for(orientation_for_size(size))
+            .into_iter()
+            .find(|preset| preset.size == size && preset.density_dpi == density_dpi)
+        {
+            self.active_display = Some(preset.id);
+            self.custom_display = None;
+        } else {
+            self.active_display = None;
+            self.custom_display = Some(CustomDisplay { size, density_dpi });
+        }
     }
 
     fn refresh_host(&mut self) {
@@ -3955,7 +4045,7 @@ pub fn load_input_directory(
     load_profiles(directory)
 }
 
-/// Returns the three fixed display presets assuming the default landscape orientation.
+/// Returns the fixed display presets assuming the default landscape orientation.
 pub fn display_presets() -> Vec<DisplayPreset> {
     display_presets_for(Orientation::Landscape)
 }
@@ -3983,12 +4073,42 @@ fn display_presets_for(current_orientation: Orientation) -> Vec<DisplayPreset> {
             needs_reboot: current_orientation != Orientation::Landscape,
         },
         DisplayPreset {
+            id: "qhd".to_owned(),
+            size: Size {
+                width: 2560,
+                height: 1440,
+            },
+            density_dpi: 320,
+            orientation: Orientation::Landscape,
+            needs_reboot: current_orientation != Orientation::Landscape,
+        },
+        DisplayPreset {
+            id: "uhd".to_owned(),
+            size: Size {
+                width: 3840,
+                height: 2160,
+            },
+            density_dpi: 480,
+            orientation: Orientation::Landscape,
+            needs_reboot: current_orientation != Orientation::Landscape,
+        },
+        DisplayPreset {
             id: "portrait-720".to_owned(),
             size: Size {
                 width: 720,
                 height: 1280,
             },
             density_dpi: 160,
+            orientation: Orientation::Portrait,
+            needs_reboot: current_orientation != Orientation::Portrait,
+        },
+        DisplayPreset {
+            id: "portrait-1080".to_owned(),
+            size: Size {
+                width: 1080,
+                height: 1920,
+            },
+            density_dpi: 420,
             orientation: Orientation::Portrait,
             needs_reboot: current_orientation != Orientation::Portrait,
         },
@@ -4324,6 +4444,7 @@ mod tests {
         attached: Arc<Mutex<bool>>,
         targets: Arc<Mutex<Vec<HostingTarget>>>,
         placements: Arc<Mutex<Vec<ome_window_host::Rect>>>,
+        follow_count: Arc<Mutex<u32>>,
         hide_count: Arc<Mutex<u32>>,
         show_count: Arc<Mutex<u32>>,
         detach_count: Arc<Mutex<u32>>,
@@ -4338,6 +4459,7 @@ mod tests {
                 attached: Arc::new(Mutex::new(false)),
                 targets: Arc::new(Mutex::new(Vec::new())),
                 placements: Arc::new(Mutex::new(Vec::new())),
+                follow_count: Arc::new(Mutex::new(0)),
                 hide_count: Arc::new(Mutex::new(0)),
                 show_count: Arc::new(Mutex::new(0)),
                 detach_count: Arc::new(Mutex::new(0)),
@@ -4393,6 +4515,11 @@ mod tests {
             }
             *self.live_rect.lock().expect("live rect lock") = Some(rect);
             Ok(Some(Self::geometry(rect, true)))
+        }
+
+        fn follow_owner(&mut self) -> Result<bool, HostingIssue> {
+            *self.follow_count.lock().expect("follow count lock") += 1;
+            Ok(*self.attached.lock().expect("attached lock"))
         }
 
         fn set_overlay_window(&mut self, _overlay: Option<ome_platform_win::WindowHandle>) {}
@@ -4515,11 +4642,15 @@ mod tests {
             Some(ShellCommand::new(["probe-density"]))
         }
         fn parse_display(&self, size: &str, density: &str) -> Option<DisplayInfo> {
-            (size.trim() == "1280x720" && density.trim() == "160").then_some(DisplayInfo {
-                width: 1280,
-                height: 720,
-                density_dpi: 160,
-            })
+            if size.trim() == "1280x720" && density.trim() == "160" {
+                Some(DisplayInfo {
+                    width: 1280,
+                    height: 720,
+                    density_dpi: 160,
+                })
+            } else {
+                adapter_for(33).parse_display(size, density)
+            }
         }
         fn device_id_attempts(&self) -> Vec<Attempt> {
             vec![Attempt {
@@ -5059,6 +5190,188 @@ mod tests {
         assert_eq!(runtime.unknown_key_observations, 1);
     }
 
+    fn snapshot_after_reopening_display(display: StoredDisplay) -> AppSnapshot {
+        let (directory, mut runtime, _supervisor, _runner) = lifecycle_runtime(
+            std::iter::empty(),
+            RecordingDesktop::default(),
+            RecordingWindow::embedded(),
+        );
+        runtime.guests[0].capabilities.display = Some(display);
+        runtime
+            .guest_store
+            .save(&runtime.guests[0])
+            .expect("save display state");
+        drop(runtime);
+        let home = OmeHome::from_path(directory.path().join("home")).expect("home");
+        open_test_runtime(home, FeatureState::Enabled).snapshot()
+    }
+
+    #[test]
+    fn stored_display_restores_matching_preset_or_custom_state() {
+        for (display, active_id, custom) in [
+            (
+                StoredDisplay {
+                    width: 1920,
+                    height: 1080,
+                    density_dpi: 240,
+                },
+                Some("full-hd"),
+                None,
+            ),
+            (
+                StoredDisplay {
+                    width: 2560,
+                    height: 1440,
+                    density_dpi: 320,
+                },
+                Some("qhd"),
+                None,
+            ),
+            (
+                StoredDisplay {
+                    width: 1600,
+                    height: 900,
+                    density_dpi: 200,
+                },
+                None,
+                Some(CustomDisplay {
+                    size: Size {
+                        width: 1600,
+                        height: 900,
+                    },
+                    density_dpi: 200,
+                }),
+            ),
+        ] {
+            let snapshot = snapshot_after_reopening_display(display);
+            assert_eq!(snapshot.display.active_id.as_deref(), active_id);
+            assert_eq!(snapshot.display.custom, custom);
+            assert_eq!(
+                snapshot.guest.resolution,
+                Some(Size {
+                    width: display.width,
+                    height: display.height,
+                })
+            );
+        }
+    }
+
+    #[test]
+    fn display_preset_reads_back_override_and_persists_guest_record() {
+        let outputs = [
+            output(""),
+            output(""),
+            output(
+                "Physical size: 1280x720
+Override size: 1920x1080
+",
+            ),
+            output(
+                "Physical density: 160
+Override density: 240
+",
+            ),
+        ];
+        let (directory, mut runtime, _supervisor, runner) = lifecycle_runtime(
+            outputs,
+            RecordingDesktop::default(),
+            RecordingWindow::embedded(),
+        );
+
+        let snapshot = runtime
+            .apply(Command::DisplayPresetApply {
+                id: "full-hd".to_owned(),
+            })
+            .expect("apply display preset");
+
+        assert_eq!(
+            snapshot.guest.resolution,
+            Some(Size {
+                width: 1920,
+                height: 1080,
+            })
+        );
+        assert_eq!(snapshot.display.active_id.as_deref(), Some("full-hd"));
+        assert_eq!(
+            runtime.guests[0].capabilities.display,
+            Some(StoredDisplay {
+                width: 1920,
+                height: 1080,
+                density_dpi: 240,
+            })
+        );
+        let metadata: serde_json::Value = serde_json::from_slice(
+            &fs::read(directory.path().join("home/vm/default/guest.json")).expect("guest metadata"),
+        )
+        .expect("guest metadata JSON");
+        assert_eq!(metadata["capabilities"]["display"]["width"], 1920);
+        assert_eq!(metadata["capabilities"]["display"]["height"], 1080);
+        assert_eq!(metadata["capabilities"]["display"]["densityDpi"], 240);
+        let calls = runner.calls();
+        assert!(calls.iter().any(|call| {
+            call.args == ["-s", "127.0.0.1:5555", "shell", "probe-size"].map(OsString::from)
+        }));
+        assert!(calls.iter().any(|call| {
+            call.args == ["-s", "127.0.0.1:5555", "shell", "probe-density"].map(OsString::from)
+        }));
+    }
+
+    #[test]
+    fn display_preset_uses_requested_values_when_readback_fails() {
+        let outputs = [output(""), output("")];
+        let (_directory, mut runtime, _supervisor, _runner) = lifecycle_runtime(
+            outputs,
+            RecordingDesktop::default(),
+            RecordingWindow::embedded(),
+        );
+
+        let snapshot = runtime
+            .apply(Command::DisplayPresetApply {
+                id: "qhd".to_owned(),
+            })
+            .expect("readback failure does not undo application");
+
+        assert_eq!(snapshot.display.active_id.as_deref(), Some("qhd"));
+        assert_eq!(
+            snapshot.guest.resolution,
+            Some(Size {
+                width: 2560,
+                height: 1440,
+            })
+        );
+        assert_eq!(runtime.resolution_density_dpi, Some(320));
+        assert_eq!(
+            runtime.guests[0]
+                .capabilities
+                .display
+                .map(|value| value.density_dpi),
+            Some(320)
+        );
+    }
+
+    #[test]
+    fn fixed_display_presets_are_ordered_and_within_validation_bounds() {
+        let presets = display_presets();
+        assert_eq!(
+            presets
+                .iter()
+                .map(|preset| preset.id.as_str())
+                .collect::<Vec<_>>(),
+            [
+                "hd-720",
+                "full-hd",
+                "qhd",
+                "uhd",
+                "portrait-720",
+                "portrait-1080",
+            ]
+        );
+        for preset in presets {
+            validate_display(preset.size, preset.density_dpi)
+                .unwrap_or_else(|_| panic!("invalid fixed preset {}", preset.id));
+        }
+    }
+
     #[test]
     fn display_state_commands_validate_and_update_snapshot() {
         let (_directory, mut runtime) = runtime(FeatureState::Enabled);
@@ -5132,9 +5445,22 @@ mod tests {
     fn display_reboot_requirement_depends_on_current_orientation() {
         let (_directory, mut runtime) = runtime(FeatureState::Enabled);
         let initial = runtime.snapshot();
-        assert!(!initial.display.presets[0].needs_reboot);
-        assert!(!initial.display.presets[1].needs_reboot);
-        assert!(initial.display.presets[2].needs_reboot);
+        assert!(
+            initial
+                .display
+                .presets
+                .iter()
+                .filter(|preset| preset.orientation == Orientation::Landscape)
+                .all(|preset| !preset.needs_reboot)
+        );
+        assert!(
+            initial
+                .display
+                .presets
+                .iter()
+                .filter(|preset| preset.orientation == Orientation::Portrait)
+                .all(|preset| preset.needs_reboot)
+        );
         let portrait = runtime
             .apply(Command::DisplayCustomApply {
                 size: Size {
@@ -5144,9 +5470,22 @@ mod tests {
                 density_dpi: 160,
             })
             .expect("portrait display");
-        assert!(portrait.display.presets[0].needs_reboot);
-        assert!(portrait.display.presets[1].needs_reboot);
-        assert!(!portrait.display.presets[2].needs_reboot);
+        assert!(
+            portrait
+                .display
+                .presets
+                .iter()
+                .filter(|preset| preset.orientation == Orientation::Landscape)
+                .all(|preset| preset.needs_reboot)
+        );
+        assert!(
+            portrait
+                .display
+                .presets
+                .iter()
+                .filter(|preset| preset.orientation == Orientation::Portrait)
+                .all(|preset| !preset.needs_reboot)
+        );
     }
 
     #[test]
@@ -5521,6 +5860,95 @@ mod tests {
                 .lock()
                 .expect("display windows")
                 .is_empty()
+        );
+    }
+
+    #[test]
+    fn moved_embedded_owner_uses_immediate_follow_without_qmp_geometry() {
+        let embedded = RecordingWindow::embedded();
+        let follows = Arc::clone(&embedded.follow_count);
+        let placements = Arc::clone(&embedded.placements);
+        let (_directory, mut runtime, supervisor, _runner) =
+            lifecycle_runtime(std::iter::empty(), RecordingDesktop::default(), embedded);
+        runtime.set_host_window(77);
+        runtime
+            .apply(Command::StageRectChanged {
+                rect: StageRect {
+                    x: 1.0,
+                    y: 2.0,
+                    width: 300.0,
+                    height: 200.0,
+                    scale_factor: 1.5,
+                },
+            })
+            .expect("store rect");
+        runtime.ingest_guest_event(guest_event(
+            ome_supervisor::GuestState::Running,
+            Some(22),
+            None,
+        ));
+        assert_eq!(runtime.hosting, HostingMode::Embedded);
+        assert_eq!(placements.lock().expect("placements lock").len(), 1);
+        assert_eq!(
+            supervisor
+                .display_windows
+                .lock()
+                .expect("display windows")
+                .len(),
+            1
+        );
+
+        runtime.host_window_moved();
+
+        assert_eq!(*follows.lock().expect("follow count lock"), 1);
+        assert_eq!(placements.lock().expect("placements lock").len(), 1);
+        assert_eq!(
+            supervisor
+                .display_windows
+                .lock()
+                .expect("display windows")
+                .len(),
+            1,
+            "the immediate move does not enqueue another QMP geometry"
+        );
+    }
+
+    #[test]
+    fn moved_owner_before_attachment_uses_normal_placement_path() {
+        let embedded = RecordingWindow::embedded();
+        let follows = Arc::clone(&embedded.follow_count);
+        let targets = Arc::clone(&embedded.targets);
+        let placements = Arc::clone(&embedded.placements);
+        let (_directory, mut runtime, supervisor, _runner) =
+            lifecycle_runtime(std::iter::empty(), RecordingDesktop::default(), embedded);
+        runtime.set_host_window(77);
+        runtime
+            .apply(Command::StageRectChanged {
+                rect: StageRect {
+                    x: 5.0,
+                    y: 7.0,
+                    width: 320.0,
+                    height: 240.0,
+                    scale_factor: 1.0,
+                },
+            })
+            .expect("store rect");
+        runtime.guest_state = GuestState::Running;
+        runtime.pid = Some(23);
+
+        runtime.host_window_moved();
+
+        assert_eq!(*follows.lock().expect("follow count lock"), 0);
+        assert_eq!(targets.lock().expect("targets lock").len(), 1);
+        assert_eq!(placements.lock().expect("placements lock").len(), 1);
+        assert_eq!(runtime.hosting, HostingMode::Embedded);
+        assert_eq!(
+            supervisor
+                .display_windows
+                .lock()
+                .expect("display windows")
+                .len(),
+            1
         );
     }
 

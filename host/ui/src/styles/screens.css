@@ -530,8 +530,9 @@
   flex: none;
   align-items: center;
   gap: var(--space-1);
-  height: var(--toolbar-height);
-  padding: 0 var(--space-2);
+  /* The extra space-1 on top keeps the 40px resolution select clear of the title bar's line. */
+  height: calc(var(--toolbar-height) + var(--space-1));
+  padding: var(--space-1) var(--space-2) 0;
   border-bottom: 1px solid var(--line);
   background-color: var(--surface);
 }
@@ -1363,14 +1364,35 @@
   color: var(--accent);
 }
 
+/* The custom card takes two tracks so 폭, 높이 and DPI fit on one line inside its border. */
+.ome-display-card-custom {
+  grid-column: span 2;
+}
+
 .ome-display-custom {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-3);
 }
 
-.ome-display-custom > .ome-field:last-child {
-  grid-column: 1 / -1;
+/* A number input's intrinsic width must not push the box past the card's edge. */
+.ome-display-custom > .ome-field {
+  min-width: 0;
+}
+
+.ome-display-custom .ome-field-input {
+  width: 0;
+}
+
+.ome-display-custom-preview {
+  font: var(--type-readout);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.ome-display-custom-problem {
+  font: var(--type-body);
+  color: var(--danger);
 }
 
 .ome-display-refresh-custom {

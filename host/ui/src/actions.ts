@@ -17,6 +17,6 @@ export type ScreenActions = {
 export interface ScreenProps {
   readonly snapshot: AppSnapshot;
   readonly actions: ScreenActions;
-  /** Moves the rail to another screen. Only the stage is a destination (S4 `무대에서 편집`). */
+  /** Moves the rail to another screen. Only the stage is a destination (S4 `화면에서 편집`). */
   readonly navigate?: ((screen: 'stage') => void) | undefined;
 }

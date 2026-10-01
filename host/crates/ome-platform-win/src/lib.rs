@@ -457,6 +457,22 @@ impl WindowHandle {
         }
     }
 
+    /// Moves the window in screen physical pixels without changing its size or Z-order.
+    ///
+    /// ADR-0009 7번 records that moving the owned SDL GL popup from outside QEMU is safe; style,
+    /// owner, and size changes remain forbidden because they can freeze presentation.
+    pub fn move_to(self, x: i32, y: i32) -> Result<(), PlatformError> {
+        #[cfg(windows)]
+        {
+            ffi::window::move_to(self.0, x, y).map_err(PlatformError::Io)
+        }
+        #[cfg(not(windows))]
+        {
+            let _ = (x, y);
+            Err(PlatformError::Unsupported)
+        }
+    }
+
     /// Places this top-level window directly behind `insert_after`, or at the top when omitted.
     ///
     /// Coordinates and dimensions are physical screen pixels. The Z-order change is intentional;

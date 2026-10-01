@@ -17,12 +17,15 @@ import { overlayGallery } from './fixtures';
 import type { OverlayGalleryVariant } from './fixtures';
 import { OverlayWindow } from './overlay/OverlayWindow';
 import './styles/overlay.css';
+// The product-drawn title bar, restored and maximized (P4-B).
+import { titleBarGallery, titleBarMaximizedIds } from './fixtures';
 
 const GROUPS: readonly { readonly label: string; readonly variants: readonly GalleryVariant[] }[] = [
   { label: '첫 실행 마법사', variants: wizardGallery },
   { label: '막힘 화면', variants: blockedGallery },
   { label: '주 화면', variants: mainGallery },
-  { label: '무대 (S2)', variants: stageGallery },
+  { label: '제목 표시줄', variants: titleBarGallery },
+  { label: '화면 (S2)', variants: stageGallery },
   { label: '앱 (S3)', variants: appsGallery },
   { label: '입력 (S4)', variants: inputGallery },
   { label: '표시 (S5)', variants: displayGallery },
@@ -115,7 +118,7 @@ export function Gallery() {
 
   return (
     <>
-      {overlay === undefined ? <App key={selected} bridge={bridge} /> : <OverlayPreview key={selected} variant={overlay} />}
+      {overlay === undefined ? <App key={selected} bridge={bridge} titleBarMaximized={titleBarMaximizedIds.has(selected) ? true : undefined} /> : <OverlayPreview key={selected} variant={overlay} />}
       {pickerHidden() ? null : (
       <div className="ome-qa-picker" role="region" aria-label="갤러리 상태">
         <label className="ome-qa-field">

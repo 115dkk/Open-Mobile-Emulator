@@ -1,11 +1,17 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "main",
-  "description": "The webview may call only this app's typed commands and listen to its snapshot and progress events. No core:default, no plugin permissions, no remote content (docs/adr/0003-webview-capability.md).",
+  "description": "The webview may call only this app's typed commands, listen to its snapshot and progress events, and drive its own frameless window (drag, minimize, maximize, close). No core:default, no plugin permissions, no remote content (docs/adr/0003-webview-capability.md).",
   "windows": ["main", "overlay"],
   "permissions": [
     "core:event:allow-listen",
     "core:event:allow-unlisten",
+    "core:window:allow-start-dragging",
+    "core:window:allow-internal-toggle-maximize",
+    "core:window:allow-minimize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-close",
+    "core:window:allow-is-maximized",
     "allow-app-snapshot",
     "allow-host-check-refresh",
     "allow-wizard-continue",

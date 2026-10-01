@@ -131,7 +131,7 @@ function StageToolbar({ snapshot, actions }: ScreenProps) {
   const screenshot = running && capability(guest, 'screenshot') !== 'unavailable';
   const volume = running && capability(guest, 'mediaVolume') === 'available' ? guest.mediaVolume : null;
   return (
-    <div className="ome-stage-toolbar" role="group" aria-label="무대 도구">
+    <div className="ome-stage-toolbar" role="group" aria-label="화면 도구">
       {screenshot && <IconButton icon="camera" label="스크린샷" onClick={actions.screenshotSave} />}
       {volume !== null && <VolumeControl volume={volume} onSet={actions.guestVolumeSet} />}
       {(screenshot || volume !== null) && <span className="ome-stage-toolbar-divider" aria-hidden="true" />}
@@ -273,7 +273,7 @@ export function StageScreen({ snapshot, actions }: ScreenProps) {
   useGuestKeyboard(snapshot.guest.state === 'running' && !snapshot.input.editing, actions.inputHostKey);
   return (
     <div className="ome-stage">
-      <h1 className="ome-visually-hidden">무대</h1>
+      <h1 className="ome-visually-hidden">화면</h1>
       <StageToolbar snapshot={snapshot} actions={actions} />
       {snapshot.issue !== null && (
         <div className="ome-stage-issue"><IssueNotice issue={snapshot.issue} /></div>

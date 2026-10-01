@@ -12,7 +12,9 @@ export type IconName =
   | 'chevron-down' | 'chevron-right' | 'file-up' | 'download' | 'external-link' | 'folder-open'
   | 'camera' | 'volume' | 'power' | 'play' | 'pause' | 'search' | 'plus' | 'minus' | 'x'
   | 'copy' | 'mouse' | 'pencil' | 'trash' | 'eye' | 'eye-off' | 'undo' | 'save'
-  | 'app-window' | 'hard-drive' | 'smartphone';
+  | 'app-window' | 'hard-drive' | 'smartphone'
+  // Title bar caption glyphs, drawn for this product (not Lucide): one square, two offset squares.
+  | 'window-maximize' | 'window-restore';
 
 function shapes(name: IconName): ReactElement {
   switch (name) {
@@ -150,6 +152,10 @@ function shapes(name: IconName): ReactElement {
       </>);
     case 'smartphone':
       return (<><rect width="14" height="20" x="5" y="2" rx="2" ry="2" /><path d="M12 18h.01" /></>);
+    case 'window-maximize':
+      return <rect x="5" y="5" width="14" height="14" rx="1.5" />;
+    case 'window-restore':
+      return (<><rect x="5" y="8" width="11" height="11" rx="1.5" /><path d="M8 5h9.5A1.5 1.5 0 0 1 19 6.5V16" /></>);
   }
 }
 

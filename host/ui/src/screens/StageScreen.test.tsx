@@ -21,7 +21,7 @@ function show(snapshot: AppSnapshot) {
 }
 
 function toolbar() {
-  return screen.getByRole('group', { name: '무대 도구' });
+  return screen.getByRole('group', { name: '화면 도구' });
 }
 
 function statusBar() {
@@ -43,7 +43,7 @@ function expectPresetAndMarkerToggleOnly() {
 describe('stage: stopped', () => {
   it('offers one start button and the last normal exit', async () => {
     const actions = show(variant('stage-stopped'));
-    expect(screen.getByRole('heading', { level: 1, name: '무대' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: '화면' })).toBeInTheDocument();
     expect(screen.getByText('마지막 실행 2026-09-26 19:58, 정상 종료')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: '로그 보기' })).toBeNull();
     await userEvent.click(screen.getByRole('button', { name: '시작' }));

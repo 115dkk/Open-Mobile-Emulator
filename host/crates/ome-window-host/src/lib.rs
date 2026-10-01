@@ -193,9 +193,11 @@ impl GuestWindow {
 /// never resizes it to the guest resolution. Any host-side change to the style, owner or size of
 /// that GL window freezes its presentation until the guest's next scanout
 /// (`docs/evidence/M2/embedded-display-freeze.md`), so this type never restyles, re-owns, resizes,
-/// shows or hides it. It changes only the Z-order and returns position, size and visibility as a
-/// [`DisplayWindowGeometry`] that the caller sends over QMP `x-ome-display-window`; QEMU applies
-/// it through SDL. QEMU owns the window's lifetime.
+/// shows or hides it. It may move the popup without changing its size when the owner moves; this is
+/// safe according to ADR-0009 7번. It changes Z-order separately and returns position, size and
+/// visibility as a [`DisplayWindowGeometry`] that the caller sends over QMP
+/// `x-ome-display-window`; QEMU applies that full geometry through SDL. QEMU owns the window's
+/// lifetime.
 ///
 /// The geometry is in physical pixels, and QEMU runs per-monitor DPI aware. The calling process
 /// must be per-monitor DPI aware too (the Tauri shell is, through `tao`), or a scaled monitor
@@ -272,6 +274,28 @@ impl GuestWindowHost {
         let screen = screen_rect(guest.owner, rect)?;
         self.apply_z_order(guest)?;
         display_geometry(screen, true).map(Some)
+    }
+
+    /// Immediately follows the owner's current client origin without resizing or reordering.
+    ///
+    /// ADR-0009 7번 establishes that an external position-only move is safe for the SDL GL popup.
+    /// Returns `false` when no live, visible guest with remembered stage geometry is attached.
+    pub fn follow_owner(&mut self) -> Result<bool, HostingIssue> {
+        if !self.visible {
+            return Ok(false);
+        }
+        let Some(rect) = self.last_rect else {
+            return Ok(false);
+        };
+        let Some(guest) = self.live_guest() else {
+            return Ok(false);
+        };
+        let screen = screen_rect(guest.owner, rect)?;
+        guest
+            .handle
+            .move_to(screen.x, screen.y)
+            .map_err(|_| HostingIssue::Platform)?;
+        Ok(true)
     }
 
     /// Registers the native overlay window used as the popup's Z-order predecessor.
@@ -687,6 +711,7 @@ mod tests {
         );
         assert_eq!(host.hide().expect("unattached hide"), None);
         assert_eq!(host.show().expect("unattached show"), None);
+        assert!(!host.follow_owner().expect("unattached follow"));
         host.detach().expect("unattached detach");
         host.to_front().expect("unattached raise");
         assert_eq!(host.resync().expect("unattached resync"), None);

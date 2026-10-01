@@ -36,5 +36,7 @@ export { StatusDot } from './StatusDot';
 export type { StatusDotProps } from './StatusDot';
 export { StepList } from './StepList';
 export type { StepItem, StepListProps } from './StepList';
+export { TitleBar } from './TitleBar';
+export type { TitleBarProps } from './TitleBar';
 export { Toggle } from './Toggle';
 export type { ToggleProps } from './Toggle';

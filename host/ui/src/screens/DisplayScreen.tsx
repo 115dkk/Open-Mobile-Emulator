@@ -54,34 +54,125 @@ function Applied() {
   );
 }
 
-function CustomCard({ display, onApply }: {
+/** The bounds Rust checks (`validate_display`): sides 640~7680 in steps of 8, density 120~640. */
+const SIDE_MIN = 640;
+const SIDE_MAX = 7680;
+const DPI_MIN = 120;
+const DPI_MAX = 640;
+const FALLBACK_SIZE: Size = { width: 1920, height: 1080 };
+const FALLBACK_DPI = 240;
+
+interface CustomValues { readonly width: string; readonly height: string; readonly dpi: string }
+interface Baseline { readonly size: Size; readonly densityDpi: number }
+
+/**
+ * What the guest shows now: the applied custom size, else the guest's resolution with the active
+ * preset's density, else the active preset, else 1920x1080 at 240 DPI.
+ */
+function baselineOf(display: DisplayView, resolution: Size | null): Baseline {
+  if (display.activeId === null && display.custom !== null) return display.custom;
+  const preset = display.presets.find((item) => item.id === display.activeId);
+  return {
+    size: resolution ?? preset?.size ?? FALLBACK_SIZE,
+    densityDpi: preset?.densityDpi ?? FALLBACK_DPI,
+  };
+}
+
+function valuesOf(baseline: Baseline): CustomValues {
+  return { width: String(baseline.size.width), height: String(baseline.size.height), dpi: String(baseline.densityDpi) };
+}
+
+function validSide(value: number): boolean {
+  return Number.isInteger(value) && value >= SIDE_MIN && value <= SIDE_MAX && value % 8 === 0;
+}
+
+function validDpi(value: number): boolean {
+  return Number.isInteger(value) && value >= DPI_MIN && value <= DPI_MAX;
+}
+
+/** Number('') is 0, which every check rejects, so an empty box reads as out of range. */
+function numberOf(text: string): number {
+  return text.trim() === '' ? Number.NaN : Number(text);
+}
+
+/** Density scaled with the side the user changed, kept within 120~640. Null while the side is out of range. */
+function suggestedDpi(baseline: Baseline, side: 'width' | 'height', text: string): number | null {
+  const value = numberOf(text);
+  if (!Number.isFinite(value) || value < SIDE_MIN || value > SIDE_MAX) return null;
+  const scaled = Math.round(baseline.densityDpi * value / baseline.size[side]);
+  return Math.min(DPI_MAX, Math.max(DPI_MIN, scaled));
+}
+
+function CustomCard({ display, resolution, onApply }: {
   readonly display: DisplayView;
+  readonly resolution: Size | null;
   readonly onApply: (size: Size, densityDpi: number) => Promise<void>;
 }) {
+  const baseline = baselineOf(display, resolution);
+  // Null until the user types: the boxes then follow whatever the guest shows now.
+  const [draft, setDraft] = useState<CustomValues | null>(null);
+  // Once the user types a density, a new size no longer proposes one.
+  const [dpiTouched, setDpiTouched] = useState(false);
+  const values = draft ?? valuesOf(baseline);
+  const width = numberOf(values.width);
+  const height = numberOf(values.height);
+  const dpi = numberOf(values.dpi);
+  const widthOk = validSide(width);
+  const heightOk = validSide(height);
+  const dpiOk = validDpi(dpi);
+  const valid = widthOk && heightOk && dpiOk;
+  const same = width === baseline.size.width && height === baseline.size.height && dpi === baseline.densityDpi;
   const active = display.activeId === null && display.custom !== null;
-  const [width, setWidth] = useState(() => (display.custom === null ? '' : String(display.custom.size.width)));
-  const [height, setHeight] = useState(() => (display.custom === null ? '' : String(display.custom.size.height)));
-  const [dpi, setDpi] = useState(() => (display.custom === null ? '' : String(display.custom.densityDpi)));
-  const empty = width.trim() === '' || height.trim() === '' || dpi.trim() === '';
-  const matches = display.custom !== null && Number(width) === display.custom.size.width
-    && Number(height) === display.custom.size.height && Number(dpi) === display.custom.densityDpi;
-  const apply = () => onApply({ width: Number(width), height: Number(height) }, Number(dpi));
+  const canApply = valid && !same;
+
+  const setSide = (side: 'width' | 'height', text: string) => {
+    const proposal = dpiTouched ? null : suggestedDpi(baseline, side, text);
+    setDraft({ ...values, [side]: text, dpi: proposal === null ? values.dpi : String(proposal) });
+  };
+  const setDensity = (text: string) => {
+    setDpiTouched(true);
+    setDraft({ ...values, dpi: text });
+  };
+  const apply = () => (canApply ? onApply({ width, height }, dpi) : Promise.resolve());
+  const enter = () => { void apply(); };
+
+  const problem = !widthOk ? '폭은 640~7680 사이의 8의 배수여야 합니다.'
+    : !heightOk ? '높이는 640~7680 사이의 8의 배수여야 합니다.'
+      : !dpiOk ? 'DPI는 120~640 사이의 정수여야 합니다.'
+        : null;
+
   return (
-    <div className={active ? 'ome-display-card ome-display-card-active' : 'ome-display-card'} role="group" aria-label="사용자 지정">
+    <div
+      className={active ? 'ome-display-card ome-display-card-custom ome-display-card-active' : 'ome-display-card ome-display-card-custom'}
+      role="group"
+      aria-label="사용자 지정"
+    >
       <span className="ome-display-card-size" aria-hidden="true">사용자 지정</span>
       <div className="ome-display-custom">
-        <Field label="폭" type="number" value={width} onChange={setWidth} min={640} max={7680} step={8} suffix="px" hint="640~7680" />
-        <Field label="높이" type="number" value={height} onChange={setHeight} min={640} max={7680} step={8} suffix="px" hint="640~7680" />
-        <Field label="DPI" type="number" value={dpi} onChange={setDpi} min={120} max={640} hint="120~640" />
+        <Field label="폭" type="number" value={values.width} onChange={(text) => { setSide('width', text); }}
+          min={SIDE_MIN} max={SIDE_MAX} step={8} suffix="px" invalid={!widthOk} onEnter={enter} />
+        <Field label="높이" type="number" value={values.height} onChange={(text) => { setSide('height', text); }}
+          min={SIDE_MIN} max={SIDE_MAX} step={8} suffix="px" invalid={!heightOk} onEnter={enter} />
+        <Field label="DPI" type="number" value={values.dpi} onChange={setDensity}
+          min={DPI_MIN} max={DPI_MAX} invalid={!dpiOk} onEnter={enter} />
       </div>
+      <p
+        className={problem === null ? 'ome-display-custom-preview' : 'ome-display-custom-preview ome-display-custom-problem'}
+        aria-live="polite"
+      >
+        {problem ?? `${String(width)}x${String(height)} · ${String(dpi)} DPI · ${ORIENTATION_LABEL[orientationOf({ width, height })]}`}
+      </p>
       <div className="ome-display-card-action">
-        {active && matches ? <Applied /> : <Button disabled={empty} onClick={apply}>적용</Button>}
+        {active && same ? <Applied /> : <Button disabled={!canApply} onClick={apply}>적용</Button>}
       </div>
     </div>
   );
 }
 
-function Resolution({ display, actions }: Pick<ScreenProps, 'actions'> & { readonly display: DisplayView }) {
+function Resolution({ display, resolution, actions }: Pick<ScreenProps, 'actions'> & {
+  readonly display: DisplayView;
+  readonly resolution: Size | null;
+}) {
   const current = currentLine(display);
   return (
     <section className="ome-display-section" aria-labelledby="ome-display-resolution">
@@ -115,7 +206,7 @@ function Resolution({ display, actions }: Pick<ScreenProps, 'actions'> & { reado
             </div>
           );
         })}
-        <CustomCard display={display} onApply={actions.displayCustomApply} />
+        <CustomCard display={display} resolution={resolution} onApply={actions.displayCustomApply} />
       </div>
     </section>
   );
@@ -211,7 +302,7 @@ export function DisplayScreen({ snapshot, actions }: ScreenProps) {
       <ScreenHeader title="표시" />
       <div className="ome-display">
         {snapshot.issue !== null && <IssueNotice issue={snapshot.issue} />}
-        <Resolution display={display} actions={actions} />
+        <Resolution display={display} resolution={snapshot.guest.resolution} actions={actions} />
         {display.refreshSupported && <RefreshRate display={display} actions={actions} />}
         {display.vsyncSupported && (
           <RowSection

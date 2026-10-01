@@ -24,10 +24,11 @@ use windows::Win32::UI::WindowsAndMessaging::{
     GetGUIThreadInfo, GetWindow, GetWindowLongPtrW, GetWindowRect, GetWindowTextW,
     GetWindowThreadProcessId, HC_ACTION, HHOOK, HWND_TOP, IsWindow, IsWindowVisible,
     SMTO_ABORTIFHUNG, SW_HIDE, SW_SHOW, SW_SHOWNA, SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOMOVE,
-    SWP_NOSIZE, SWP_NOZORDER, SWP_SHOWWINDOW, SendMessageTimeoutW, SetForegroundWindow,
-    SetWindowLongPtrW, SetWindowPos, SetWindowsHookExW, ShowWindow, UnhookWindowsHookEx,
-    WH_CALLWNDPROC, WM_APP, WS_CAPTION, WS_CHILD, WS_EX_APPWINDOW, WS_EX_NOACTIVATE,
-    WS_EX_TOOLWINDOW, WS_MAXIMIZEBOX, WS_MINIMIZEBOX, WS_POPUP, WS_SYSMENU, WS_THICKFRAME,
+    SWP_NOOWNERZORDER, SWP_NOSIZE, SWP_NOZORDER, SWP_SHOWWINDOW, SendMessageTimeoutW,
+    SetForegroundWindow, SetWindowLongPtrW, SetWindowPos, SetWindowsHookExW, ShowWindow,
+    UnhookWindowsHookEx, WH_CALLWNDPROC, WM_APP, WS_CAPTION, WS_CHILD, WS_EX_APPWINDOW,
+    WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW, WS_MAXIMIZEBOX, WS_MINIMIZEBOX, WS_POPUP, WS_SYSMENU,
+    WS_THICKFRAME,
 };
 use windows::core::BOOL;
 
@@ -360,6 +361,19 @@ pub(crate) fn set_bounds(raw: isize, x: i32, y: i32, width: i32, height: i32) ->
         width,
         height,
         SWP_NOZORDER | SWP_NOACTIVATE,
+    )
+}
+
+pub(crate) fn move_to(raw: isize, x: i32, y: i32) -> io::Result<()> {
+    let window = hwnd(raw)?;
+    set_window_pos(
+        window,
+        None,
+        x,
+        y,
+        0,
+        0,
+        SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOOWNERZORDER,
     )
 }
 

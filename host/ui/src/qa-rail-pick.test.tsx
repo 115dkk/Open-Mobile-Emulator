@@ -23,6 +23,6 @@ describe('gallery: rail screens', () => {
   it('stays on the stage for a stage variant', async () => {
     open('stage-running');
     const main = await screen.findByRole('main');
-    expect(await within(main).findByRole('heading', { level: 1, name: '무대' })).toBeInTheDocument();
+    expect(await within(main).findByRole('heading', { level: 1, name: '화면' })).toBeInTheDocument();
   });
 });

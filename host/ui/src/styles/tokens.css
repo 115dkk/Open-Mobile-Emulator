@@ -27,6 +27,7 @@
   --success: #3fb27f;
   --warning: #e0a458;
   --danger: #f0716a;
+  --on-danger: #ffffff;
   --shadow-surface: 0 1px 2px rgb(0 0 0 / .24), 0 6px 20px rgb(0 0 0 / .18);
   --image-outline: oklch(1 0 0 / .1);
 
@@ -54,6 +55,7 @@
   --radius-stage: 8px;
   --radius-card: 12px;
 
+  --titlebar-height: 40px;
   --rail-width: 64px;
   --toolbar-height: 44px;
   --statusbar-height: 28px;

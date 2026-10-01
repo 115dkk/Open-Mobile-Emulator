@@ -88,6 +88,10 @@ textarea {
 }
 
 .ome-app-loading {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
   align-items: center;
   justify-content: center;
   gap: var(--space-4);
@@ -836,6 +840,81 @@ textarea {
   align-items: center;
   gap: var(--space-2);
   margin-left: auto;
+}
+
+/* Title bar: the product draws the window frame's top (decorations off). Same surface as the rail. */
+
+.ome-titlebar {
+  display: grid;
+  flex: none;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  height: var(--titlebar-height);
+  border-bottom: 1px solid var(--line);
+  background-color: var(--surface);
+  color: var(--text);
+  user-select: none;
+}
+
+.ome-titlebar-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: 0 var(--space-3);
+}
+
+.ome-titlebar-icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+
+.ome-titlebar-name {
+  overflow: hidden;
+  font: var(--type-caption);
+  font-weight: 500;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ome-titlebar-controls {
+  display: flex;
+}
+
+/* 46 x 40 caption buttons, square and flush like the system ones; the bar's bottom line stays visible. */
+.ome-titlebar-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: calc(var(--titlebar-height) - 1px);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background-color: transparent;
+  color: var(--text);
+  cursor: default;
+  transition: background-color var(--motion-fast) var(--ease-standard);
+}
+
+.ome-titlebar-button:hover {
+  background-color: var(--surface-raised);
+}
+
+.ome-titlebar-button:active {
+  background-color: var(--line);
+}
+
+.ome-titlebar-button:focus-visible {
+  outline-offset: -2px;
+}
+
+.ome-titlebar-close:hover,
+.ome-titlebar-close:active {
+  background-color: color-mix(in srgb, var(--danger) 82%, var(--stage-frame));
+  color: var(--on-danger);
 }
 
 /* Rail: 64px, icon above label */

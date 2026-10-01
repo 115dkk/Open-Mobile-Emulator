@@ -16,6 +16,17 @@ const names = entries.map((entry) => {
 });
 const allowed = names.map((name) => `allow-${name.replaceAll('_', '-')}`);
 const eventPermissions = ['core:event:allow-listen', 'core:event:allow-unlisten'];
+// The main window has no native frame; its title bar (ui/src/components/TitleBar.tsx) drags, minimizes,
+// maximizes and closes it, and reads the maximized state for the button icon. Nothing else from core:window.
+const windowPermissions = [
+  'core:window:allow-start-dragging',
+  'core:window:allow-internal-toggle-maximize',
+  'core:window:allow-minimize',
+  'core:window:allow-toggle-maximize',
+  'core:window:allow-close',
+  'core:window:allow-is-maximized',
+];
+const corePermissions = [...eventPermissions, ...windowPermissions];
 const literalNames = (block) => [...block.matchAll(/"([a-z_]+)"/gu)].map((match) => match[1]);
 
 function sameNames(actual, expected) {
@@ -35,10 +46,10 @@ test('every app grant has a registered command', () => {
   sameNames(capability.permissions.filter((permission) => permission.startsWith('allow-')), allowed);
 });
 
-test('only the two event listener permissions extend app commands', () => {
+test('only the event listener and title bar window permissions extend app commands', () => {
   assert.deepEqual(readdirSync(new URL('../app/capabilities/', import.meta.url)).filter((name) => name.endsWith('.json')), ['main.json']);
-  sameNames(capability.permissions.filter((permission) => permission.startsWith('core:')), eventPermissions);
-  sameNames(capability.permissions, [...allowed, ...eventPermissions]);
+  sameNames(capability.permissions.filter((permission) => permission.startsWith('core:')), corePermissions);
+  sameNames(capability.permissions, [...allowed, ...corePermissions]);
 });
 
 test('handler command names equal the runtime contract', () => {

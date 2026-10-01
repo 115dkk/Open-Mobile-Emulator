@@ -332,12 +332,42 @@
         "needsReboot": false
       },
       {
+        "id": "qhd",
+        "size": {
+          "width": 2560,
+          "height": 1440
+        },
+        "densityDpi": 320,
+        "orientation": "landscape",
+        "needsReboot": false
+      },
+      {
+        "id": "uhd",
+        "size": {
+          "width": 3840,
+          "height": 2160
+        },
+        "densityDpi": 480,
+        "orientation": "landscape",
+        "needsReboot": false
+      },
+      {
         "id": "portrait-720",
         "size": {
           "width": 720,
           "height": 1280
         },
         "densityDpi": 160,
+        "orientation": "portrait",
+        "needsReboot": true
+      },
+      {
+        "id": "portrait-1080",
+        "size": {
+          "width": 1080,
+          "height": 1920
+        },
+        "densityDpi": 420,
         "orientation": "portrait",
         "needsReboot": true
       }

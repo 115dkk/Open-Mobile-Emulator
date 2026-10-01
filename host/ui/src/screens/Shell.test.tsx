@@ -12,11 +12,11 @@ describe('shell: rail and body', () => {
     render(<Shell snapshot={mainSnapshot} actions={mockActions()} />);
     const rail = screen.getByRole('navigation', { name: '주 메뉴' });
     const items = within(rail).getAllByRole('button');
-    expect(items.map((item) => item.textContent)).toEqual(['무대', '앱', '입력', '표시', '설정']);
-    expect(within(rail).getByRole('button', { name: '무대' })).toHaveAttribute('aria-current', 'page');
+    expect(items.map((item) => item.textContent)).toEqual(['화면', '앱', '입력', '표시', '설정']);
+    expect(within(rail).getByRole('button', { name: '화면' })).toHaveAttribute('aria-current', 'page');
     expect(within(rail).getByText('시작 가능')).toBeInTheDocument();
     expect(within(rail).getByText('0.1.0')).toBeInTheDocument();
-    expect(within(screen.getByRole('main')).getByRole('heading', { level: 1, name: '무대' })).toBeInTheDocument();
+    expect(within(screen.getByRole('main')).getByRole('heading', { level: 1, name: '화면' })).toBeInTheDocument();
   });
 
   it('switches the body when a rail item is chosen', async () => {
@@ -27,7 +27,7 @@ describe('shell: rail and body', () => {
       expect(within(rail).getByRole('button', { name })).toHaveAttribute('aria-current', 'page');
       expect(within(screen.getByRole('main')).getByRole('heading', { level: 1, name })).toBeInTheDocument();
     }
-    expect(within(rail).getByRole('button', { name: '무대' })).not.toHaveAttribute('aria-current');
+    expect(within(rail).getByRole('button', { name: '화면' })).not.toHaveAttribute('aria-current');
   });
 
   it('names the running state next to the rail dot', () => {
