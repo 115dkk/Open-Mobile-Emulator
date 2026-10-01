@@ -62,6 +62,24 @@ pub enum QemuOverride {
     EdidOff,
 }
 
+/// Boot files the product reads out of the installer ISO (absolute paths inside the image).
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct BootFiles {
+    /// Kernel image, for example `/kernel`.
+    pub kernel: String,
+    /// Initial ramdisk, for example `/initrd.img`.
+    pub initrd: String,
+}
+
+/// How the product installs this image.
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum InstallMethod {
+    /// Hidden helper boot of the ISO's kernel and initrd with the OME install script (ADR-0010).
+    HelperBoot,
+}
+
 /// One dated verification record and its repository evidence.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -92,10 +110,10 @@ pub struct GuestImageProfile {
     pub translator: Translator,
     /// Additional kernel arguments selected at boot.
     pub boot_args: Vec<String>,
-    /// Text used to identify the intended GRUB entry.
-    pub grub_entry_hint: String,
-    /// Ordered installer guidance shown by the wizard.
-    pub install_guide: Vec<String>,
+    /// Boot files read from the installer ISO.
+    pub boot_files: BootFiles,
+    /// Installation method for this image.
+    pub install: InstallMethod,
     /// Restricted QEMU behavior requested by this profile.
     pub qemu_overrides: Vec<QemuOverride>,
     /// Product support state.
@@ -159,7 +177,6 @@ impl GuestImageProfile {
             ("display_name", self.display_name.as_str()),
             ("android_version", self.android_version.as_str()),
             ("artifact", self.artifact.as_str()),
-            ("grub_entry_hint", self.grub_entry_hint.as_str()),
         ] {
             if value.trim().is_empty() {
                 return Err(ProfileError::Blank { field });
@@ -167,11 +184,8 @@ impl GuestImageProfile {
         }
         if self.boot_args.is_empty()
             || self.boot_args.iter().any(|value| value.trim().is_empty())
-            || self.install_guide.len() != 6
-            || self
-                .install_guide
-                .iter()
-                .any(|value| value.trim().is_empty())
+            || !valid_boot_file_path(&self.boot_files.kernel)
+            || !valid_boot_file_path(&self.boot_files.initrd)
         {
             return Err(ProfileError::InvalidInstructions);
         }
@@ -193,6 +207,10 @@ impl GuestImageProfile {
         }
         Ok(())
     }
+}
+
+fn valid_boot_file_path(path: &str) -> bool {
+    path.starts_with('/') && !path.trim().is_empty()
 }
 
 /// Sorts profiles by Android version descending, then release date and ID descending.
@@ -351,8 +369,11 @@ mod tests {
             artifact: "artifact".to_owned(),
             translator: Translator::NdkTranslation,
             boot_args: vec!["quiet".to_owned()],
-            grub_entry_hint: "Virgl".to_owned(),
-            install_guide: (1..=6).map(|step| format!("Step {step}")).collect(),
+            boot_files: BootFiles {
+                kernel: "/kernel".to_owned(),
+                initrd: "/initrd.img".to_owned(),
+            },
+            install: InstallMethod::HelperBoot,
             qemu_overrides: vec![QemuOverride::VirtioVgaGl],
             status,
             released_at: released_at.map(str::to_owned),
@@ -418,6 +439,18 @@ mod tests {
             })
         ));
         value.android_version = "13".to_owned();
+        value.boot_files.kernel = "kernel".to_owned();
+        assert!(matches!(
+            value.validate(),
+            Err(ProfileError::InvalidInstructions)
+        ));
+        value.boot_files.kernel = "/kernel".to_owned();
+        value.boot_files.initrd = "  ".to_owned();
+        assert!(matches!(
+            value.validate(),
+            Err(ProfileError::InvalidInstructions)
+        ));
+        value.boot_files.initrd = "/initrd.img".to_owned();
         value.released_at = Some("2024-02-30".to_owned());
         assert!(matches!(
             value.validate(),

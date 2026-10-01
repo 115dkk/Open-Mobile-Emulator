@@ -10,6 +10,9 @@ repository.workspace = true
 publish.workspace = true
 description = "Host-side parts of the unattended operating-system install"
 
+[features]
+test-support = []
+
 [dependencies]
 serde.workspace = true
 thiserror.workspace = true

@@ -37,6 +37,9 @@
     "sizeGib": 32
   },
   {
+    "kind": "guestInstallCancel"
+  },
+  {
     "kind": "guestSelect",
     "id": "default"
   },

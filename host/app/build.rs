@@ -19,6 +19,7 @@ fn main() {
         "guest_select",
         "guest_delete",
         "guest_reinstall",
+        "guest_install_cancel",
         "guest_start",
         "guest_stop",
         "guest_restart",

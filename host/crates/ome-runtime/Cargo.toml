@@ -12,6 +12,7 @@ description = "Snapshot projection, settings persistence and command dispatch; t
 
 [dependencies]
 ome-guest-config = { path = "../ome-guest-config" }
+ome-guest-install = { path = "../ome-guest-install" }
 ome-supervisor = { path = "../ome-supervisor" }
 ome-artifacts = { path = "../ome-artifacts" }
 ome-host-check = { path = "../ome-host-check" }
@@ -31,6 +32,7 @@ sha2.workspace = true
 tempfile = "3.23.0"
 
 [dev-dependencies]
+ome-guest-install = { path = "../ome-guest-install", features = ["test-support"] }
 ome-overlay = { path = "../ome-overlay" }
 zip = { version = "8.6.0", default-features = false, features = ["deflate"] }
 

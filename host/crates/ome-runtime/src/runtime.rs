@@ -12,12 +12,15 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use jiff::{Unit, Zoned};
 use ome_adb::AdbSession;
 use ome_artifacts::{ArtifactStore, Manifest, StoreError, StoreProgress};
-use ome_guest_config::{GuestConfig, GuestPaths, QemuInstall, RawGuestConfig};
+use ome_guest_config::{BootMode, GuestConfig, GuestPaths, QemuInstall, RawGuestConfig};
 use ome_guest_image::{
     CapabilityProbe, Distribution, FamilyAdapter, GuestImageProfile, ImageStatus as ProfileStatus,
     ProbeItem, ProbeOutcome, ProbeState, ShellRunner, Translator, adapter_for, recommended_index,
     sort_newest_first,
 };
+use ome_guest_install::helper::{DEFAULT_SRC, boot_cmdline, install_cmdline, write_install_initrd};
+use ome_guest_install::iso9660::IsoImage;
+use ome_guest_install::progress::{InstallReport, InstallStage, parse_serial_log};
 use ome_host_check::{
     FeatureState, HardwareLimits, HostProbe, HostReadiness, Verdict, hardware_limits,
 };
@@ -40,33 +43,32 @@ use crate::adapters::AdbShellRunner;
 use crate::app_install::group_install_units;
 use crate::desktop::Desktop;
 use crate::guest_store::{
-    GuestRecord, GuestStore, GuestStoreError, StoredProbeItem, StoredProbeState,
+    GuestRecord, GuestStore, GuestStoreError, StoredBoot, StoredBootMethod, StoredInstall,
+    StoredInstallState, StoredProbeItem, StoredProbeState,
 };
 use crate::home::OmeHome;
 use crate::issues;
 use crate::operations::{ElevationError, WorkerDeps};
 use crate::settings::{Settings, SettingsError, SettingsStore};
+
+const INSTALL_DEADLINE: Duration = Duration::from_secs(20 * 60);
+const INSTALL_DEADLINE_FAILURE: &str = "설치가 20분 안에 끝나지 않았습니다.";
+const INSTALL_STOPPED_FAILURE: &str = "설치 도우미가 끝나기 전에 멈췄습니다.";
 use crate::{
     AppIssue, AppItem, AppPhase, AppSnapshot, AppsView, Blocker, BlockerKind, CONTRACT_VERSION,
     Capability, CapabilityId, CapabilityReport, ClipboardItem, Command, CustomDisplay,
-    DisplayPreset, DisplayView, ExitKind, GuestImageSummary, GuestState, GuestSummary, GuestView,
-    HelpTopic, HostCheckId, HostReport, HostRow, HostStatus, HostingMode, ImageDistribution,
-    ImageStatus, ImageTranslator, ImagesView, InputView, InstallProgress, LastExit, Notice,
-    NoticeLevel, Orientation, Rect, SettingsView, Size, StageFit, StageRect, TransferProgress,
-    TransferStage, UpdateAsset, UpdateState, UpdateView, VsyncMode, WizardStep, WizardView,
+    DisplayPreset, DisplayView, ExitKind, GuestImageSummary, GuestInstallView, GuestState,
+    GuestSummary, GuestView, HelpTopic, HostCheckId, HostReport, HostRow, HostStatus, HostingMode,
+    ImageDistribution, ImageStatus, ImageTranslator, ImagesView, InputView, InstallProgress,
+    LastExit, Notice, NoticeLevel, Orientation, Rect, SettingsView, Size, StageFit, StageRect,
+    TransferProgress, TransferStage, UpdateAsset, UpdateState, UpdateView, VsyncMode, WizardStep,
+    WizardView,
 };
 
 /// Process lifecycle seam owned by the runtime.
 pub trait GuestProcess: Send {
     /// Starts one validated virtual-machine process.
     fn start(
-        &mut self,
-        config: GuestConfig,
-        paths: GuestPaths,
-        install: QemuInstall,
-    ) -> Result<(), String>;
-    /// Starts one installer-mode virtual-machine process.
-    fn start_install(
         &mut self,
         config: GuestConfig,
         paths: GuestPaths,
@@ -91,15 +93,6 @@ where
     Q: QmpFactory,
 {
     fn start(
-        &mut self,
-        config: GuestConfig,
-        paths: GuestPaths,
-        install: QemuInstall,
-    ) -> Result<(), String> {
-        Supervisor::start(self, config, paths, install).map_err(|error| error.to_string())
-    }
-
-    fn start_install(
         &mut self,
         config: GuestConfig,
         paths: GuestPaths,
@@ -382,6 +375,10 @@ pub struct AppRuntime {
     update_download: Option<DownloadedUpdate>,
     update_exit_requested: bool,
     installing_guest: bool,
+    install_log: Option<PathBuf>,
+    install_report: InstallReport,
+    install_cancelled: bool,
+    install_failure: Option<String>,
     hosting: HostingMode,
     hosted_pid: Option<u32>,
     host_window: Option<u64>,
@@ -447,6 +444,14 @@ impl AppRuntime {
         let guest_store =
             GuestStore::new(home.subdir("vm").map_err(|_| issues::home_unavailable())?);
         let guests = guest_store.load_all().map_err(guest_store_issue)?;
+        for guest in &guests {
+            if guest.install.as_ref().is_some_and(|install| {
+                install.state == StoredInstallState::Failed
+                    && install.failure.as_deref() == Some("설치가 끝나기 전에 앱이 종료되었습니다.")
+            }) {
+                guest_store.save(guest).map_err(guest_store_issue)?;
+            }
+        }
         let saved_active = guest_store.load_active().map_err(guest_store_issue)?;
         let (wizard, phase) = match guest_store.load_wizard() {
             Ok(Some(wizard)) => {
@@ -543,6 +548,18 @@ impl AppRuntime {
             .unwrap_or(FeatureState::Unknown);
         let update_state = UpdateState::Idle;
         let apps = active_record.map_or_else(Vec::new, stored_apps);
+        let install_log = active_record.and_then(|guest| {
+            let path = guest_store
+                .guest_dir(&guest.id)
+                .ok()?
+                .join("install-serial.log");
+            path.is_file().then_some(path)
+        });
+        let install_report = active_record
+            .and_then(|guest| guest.install.as_ref())
+            .filter(|install| install.state == StoredInstallState::Failed)
+            .map(|install| failed_install_report(install_log.as_deref(), install.failure.clone()))
+            .unwrap_or_default();
         let (worker_tx, worker_rx) = mpsc::channel();
         let mut runtime = Self {
             home,
@@ -602,6 +619,10 @@ impl AppRuntime {
             update_download: None,
             update_exit_requested: false,
             installing_guest: false,
+            install_log,
+            install_report,
+            install_cancelled: false,
+            install_failure: None,
             hosting: HostingMode::None,
             hosted_pid: None,
             host_window: None,
@@ -764,6 +785,7 @@ impl AppRuntime {
                 Ok(())
             }
             Command::GuestCreate { image_id, size_gib } => self.create_guest(image_id, size_gib),
+            Command::GuestInstallCancel => self.cancel_guest_install(),
             Command::GuestReinstall { name } => self.reinstall_guest(name),
             Command::GuestSelect { id } => self.select_guest(id),
             Command::GuestDelete { id } => self.delete_guest(id),
@@ -1209,6 +1231,20 @@ impl AppRuntime {
             }
             let firmware_vars = directory.join("efivars.fd");
             fs::copy(template, &firmware_vars).map_err(|_| issues::firmware_unavailable())?;
+            let kernel = directory.join("kernel");
+            let initrd = directory.join("initrd.img");
+            let install_initrd = directory.join("initrd-install.img");
+            let serial_log = directory.join("install-serial.log");
+            let prepare_result = (|| {
+                let mut iso = IsoImage::open(&verified.path)?;
+                iso.extract(&profile.boot_files.kernel, &kernel)?;
+                iso.extract(&profile.boot_files.initrd, &initrd)?;
+                write_install_initrd(&initrd, &install_initrd)?;
+                Ok::<(), Box<dyn std::error::Error>>(())
+            })();
+            if prepare_result.is_err() {
+                return Err(issues::install_prepare_failed());
+            }
             let record = GuestRecord {
                 id: id.clone(),
                 image_id: profile.id.clone(),
@@ -1221,6 +1257,12 @@ impl AppRuntime {
                 device_id: None,
                 registration_opened_at: None,
                 root_enabled: None,
+                boot: None,
+                install: Some(StoredInstall {
+                    state: StoredInstallState::Running,
+                    finished_at: None,
+                    failure: None,
+                }),
             };
             self.guest_store.save(&record).map_err(guest_store_issue)?;
             let config = self.build_guest_config(&record, &profile)?;
@@ -1228,13 +1270,19 @@ impl AppRuntime {
                 disk,
                 firmware_code,
                 firmware_vars,
-                iso: Some(verified.path),
+                boot: BootMode::Install {
+                    kernel,
+                    initrd: install_initrd,
+                    cmdline: install_cmdline("/dev/vda", DEFAULT_SRC),
+                    iso: verified.path,
+                    serial_log: serial_log.clone(),
+                },
             };
             self.deps
                 .supervisor
                 .as_deref_mut()
                 .ok_or_else(issues::process_unavailable)?
-                .start_install(config, paths, QemuInstall { system_exe })
+                .start(config, paths, QemuInstall { system_exe })
                 .map_err(|_| issues::process_start_failed())?;
             self.guests.push(record);
             self.guests.sort_by(|left, right| left.id.cmp(&right.id));
@@ -1247,6 +1295,10 @@ impl AppRuntime {
                 self.load_guest_projection(position);
             }
             self.installing_guest = true;
+            self.install_log = Some(serial_log);
+            self.install_report = InstallReport::default();
+            self.install_cancelled = false;
+            self.install_failure = None;
             self.boot_started = Some(Instant::now());
             self.boot_completed = false;
             self.adb_connected = false;
@@ -1256,6 +1308,19 @@ impl AppRuntime {
             let _ = fs::remove_dir_all(&directory);
         }
         result
+    }
+
+    fn cancel_guest_install(&mut self) -> Result<(), AppIssue> {
+        if !self.installing_guest {
+            return Err(issues::operating_system_not_running());
+        }
+        self.install_cancelled = true;
+        self.deps
+            .supervisor
+            .as_deref()
+            .ok_or_else(issues::process_unavailable)?
+            .request_stop();
+        Ok(())
     }
 
     fn reinstall_guest(&mut self, name: String) -> Result<(), AppIssue> {
@@ -1274,6 +1339,10 @@ impl AppRuntime {
         self.guest_store.delete(&name).map_err(guest_store_issue)?;
         self.guests.retain(|guest| guest.id != name);
         self.active_guest = None;
+        self.install_report = InstallReport::default();
+        self.install_log = None;
+        self.install_failure = None;
+        self.install_cancelled = false;
         self.create_guest_internal(record.image_id, size_gib, Some(name))
     }
 
@@ -1311,6 +1380,14 @@ impl AppRuntime {
                 qemu_logs.push(path);
             } else {
                 host_logs.push(path);
+            }
+        }
+        if let Some(id) = self.active_guest.as_deref()
+            && let Ok(directory) = self.guest_store.guest_dir(id)
+        {
+            let install_log = directory.join("install-serial.log");
+            if install_log.is_file() {
+                qemu_logs.push(install_log);
             }
         }
         host_logs.sort();
@@ -1586,6 +1663,7 @@ impl AppRuntime {
         self.active_guest = Some(id.clone());
         self.selected_image = Some(self.guests[position].image_id.clone());
         self.load_guest_projection(position);
+        self.load_install_projection(position);
         self.guest_store
             .save_active(Some(&id))
             .map_err(guest_store_issue)
@@ -1604,6 +1682,10 @@ impl AppRuntime {
             .ok_or_else(issues::guest_not_found)?;
         self.guest_store.delete(&id).map_err(guest_store_issue)?;
         self.guests.remove(position);
+        self.install_report = InstallReport::default();
+        self.install_log = None;
+        self.install_failure = None;
+        self.install_cancelled = false;
         if self.active_guest.as_deref() == Some(id.as_str()) {
             self.active_guest = self.guests.first().map(|guest| guest.id.clone());
             self.guest_store
@@ -1612,6 +1694,7 @@ impl AppRuntime {
             if let Some(position) = self.selected_guest_index() {
                 self.selected_image = Some(self.guests[position].image_id.clone());
                 self.load_guest_projection(position);
+                self.load_install_projection(position);
             } else {
                 self.clear_guest_projection();
             }
@@ -1629,7 +1712,7 @@ impl AppRuntime {
             .ok_or_else(issues::image_not_found)?
             .clone();
         let config = self.build_guest_config(&selected, &profile)?;
-        let (paths, install) = self.guest_launch_paths(&selected)?;
+        let (paths, install) = self.guest_launch_paths(&selected, &profile)?;
         self.ensure_adb_session();
         let supervisor = self
             .deps
@@ -1697,8 +1780,8 @@ impl AppRuntime {
             crate::AdbAccess::Localhost => "localhost",
             crate::AdbAccess::Network => "network",
         };
-        // Disk boots obtain the profile's kernel arguments from the installed GRUB entry.
-        // QEMU rejects `-append` unless `-kernel` performs a direct kernel boot.
+        // Direct boots carry the profile's kernel arguments on `-append`; disk boots of old
+        // guests still obtain them from their installed GRUB entry.
         let display_size = self.custom_display.map(|display| display.size).or_else(|| {
             self.active_display.as_deref().and_then(|id| {
                 display_presets_for(self.current_orientation())
@@ -1770,6 +1853,7 @@ impl AppRuntime {
     fn guest_launch_paths(
         &self,
         guest: &GuestRecord,
+        profile: &GuestImageProfile,
     ) -> Result<(GuestPaths, QemuInstall), AppIssue> {
         let found = self
             .deps
@@ -1794,12 +1878,41 @@ impl AppRuntime {
                 .ok_or_else(issues::firmware_unavailable)?;
             fs::copy(template, &firmware_vars).map_err(|_| issues::firmware_unavailable())?;
         }
+        let boot = match guest.boot.as_ref() {
+            Some(StoredBoot {
+                method: StoredBootMethod::Direct,
+                src,
+            }) => {
+                let kernel = directory.join("kernel");
+                let initrd = directory.join("initrd.img");
+                if kernel.is_file() && initrd.is_file() {
+                    let mut extra = profile.boot_args.clone();
+                    let profile_virgl = profile
+                        .qemu_overrides
+                        .iter()
+                        .any(|value| matches!(value, ome_guest_image::QemuOverride::VirtioVgaGl));
+                    let effective_virgl =
+                        self.settings.gpu_mode == crate::GpuMode::Virgl && profile_virgl;
+                    if !effective_virgl {
+                        extra.extend(["nomodeset".to_owned(), "HWACCEL=0".to_owned()]);
+                    }
+                    BootMode::Direct {
+                        kernel,
+                        initrd,
+                        cmdline: boot_cmdline(src, &extra),
+                    }
+                } else {
+                    BootMode::Disk
+                }
+            }
+            None => BootMode::Disk,
+        };
         Ok((
             GuestPaths {
                 disk: directory.join("disk.qcow2"),
                 firmware_code,
                 firmware_vars,
-                iso: None,
+                boot,
             },
             QemuInstall {
                 system_exe: PathBuf::from(found.program),
@@ -2268,6 +2381,15 @@ impl AppRuntime {
 
     /// Projects one supervisor event and performs deferred restart admission.
     pub fn ingest_guest_event(&mut self, event: GuestEvent) {
+        if self.installing_guest
+            && matches!(
+                event.state,
+                ome_supervisor::GuestState::Stopped | ome_supervisor::GuestState::Failed
+            )
+        {
+            self.finish_guest_install(event.state);
+            return;
+        }
         let previous = self.guest_state;
         self.guest_state = convert_guest_state(event.state);
         self.sync_display_keep_awake();
@@ -2401,6 +2523,120 @@ impl AppRuntime {
         }
     }
 
+    fn refresh_install_report(&mut self) {
+        if let Some(path) = self.install_log.as_deref()
+            && let Ok(text) = fs::read_to_string(path)
+        {
+            self.install_report = parse_serial_log(&text);
+        }
+    }
+
+    fn finish_guest_install(&mut self, state: ome_supervisor::GuestState) {
+        self.refresh_install_report();
+        self.guest_state = convert_guest_state(state);
+        self.sync_display_keep_awake();
+        self.key_synth.reset();
+        self.interpreted_keys.clear();
+        self.suspend_hotkey_down = false;
+        self.boot_completed = false;
+        self.adb_connected = false;
+        self.boot_generation = self.boot_generation.wrapping_add(1);
+        self.boot_poll_pending = false;
+        self.last_account_poll = None;
+        self.hosting = HostingMode::None;
+        self.pid = None;
+        self.started_at = None;
+        self.hosted_pid = None;
+        self.restart_pending = false;
+        self.stage_visible = true;
+        let _ = self.deps.window_host.detach();
+        let id = self.active_guest.clone();
+        let directory = id
+            .as_deref()
+            .and_then(|id| self.guest_store.guest_dir(id).ok());
+
+        if self.install_cancelled {
+            if let Some(id) = id.as_deref() {
+                let _ = self.guest_store.delete(id);
+                self.guests.retain(|guest| guest.id != id);
+            }
+            self.active_guest = None;
+            let _ = self.guest_store.save_active(None);
+            self.clear_guest_projection();
+            self.install_report = InstallReport::default();
+            self.install_log = None;
+            self.install_failure = None;
+            self.install_cancelled = false;
+            self.installing_guest = false;
+            self.guest_state = GuestState::Stopped;
+            self.boot_started = None;
+            return;
+        }
+
+        let succeeded = state == ome_supervisor::GuestState::Stopped
+            && self.install_report.stage == InstallStage::Done
+            && self.install_failure.is_none();
+        if succeeded {
+            if let Some(position) = self.selected_guest_index() {
+                self.guests[position].install = Some(StoredInstall {
+                    state: StoredInstallState::Installed,
+                    finished_at: Some(local_rfc3339()),
+                    failure: None,
+                });
+                self.guests[position].boot = Some(StoredBoot {
+                    method: StoredBootMethod::Direct,
+                    src: DEFAULT_SRC.to_owned(),
+                });
+                if let Err(error) = self.guest_store.save(&self.guests[position]) {
+                    self.issue = Some(guest_store_issue(error));
+                }
+            }
+            if let Some(directory) = directory {
+                let _ = fs::remove_file(directory.join("initrd-install.img"));
+            }
+            self.installing_guest = false;
+            self.install_log = None;
+            self.install_failure = None;
+            self.install_cancelled = false;
+            self.guest_state = GuestState::Stopped;
+            self.boot_started = None;
+            if self.wizard.step == Step::GuestInstall {
+                self.wizard = advance(self.wizard.clone(), Outcome::Continue);
+                self.persist_wizard();
+            }
+            if self.wizard.step == Step::FirstBoot
+                && let Err(issue) = self.start_guest()
+            {
+                self.issue = Some(issue);
+            }
+            return;
+        }
+
+        let failure = self
+            .install_report
+            .failure
+            .clone()
+            .or_else(|| self.install_failure.clone())
+            .unwrap_or_else(|| INSTALL_STOPPED_FAILURE.to_owned());
+        self.install_report.stage = InstallStage::Failed;
+        self.install_report.failure = Some(failure.clone());
+        if let Some(position) = self.selected_guest_index() {
+            self.guests[position].install = Some(StoredInstall {
+                state: StoredInstallState::Failed,
+                finished_at: None,
+                failure: Some(failure),
+            });
+            if let Err(error) = self.guest_store.save(&self.guests[position]) {
+                self.issue = Some(guest_store_issue(error));
+            }
+        }
+        self.installing_guest = false;
+        self.install_cancelled = false;
+        self.install_failure = None;
+        self.guest_state = GuestState::Failed;
+        self.boot_started = None;
+    }
+
     /// Holds the display keep-awake guard exactly while the guest is `Running`.
     fn sync_display_keep_awake(&mut self) {
         if self.guest_state != GuestState::Running {
@@ -2418,6 +2654,20 @@ impl AppRuntime {
     /// Advances one non-blocking adb boot/account poll.
     pub fn tick(&mut self) {
         self.drain_worker_events();
+        if self.installing_guest {
+            self.refresh_install_report();
+            if self
+                .boot_started
+                .is_some_and(|started| started.elapsed() >= INSTALL_DEADLINE)
+                && self.install_failure.is_none()
+            {
+                self.install_failure = Some(INSTALL_DEADLINE_FAILURE.to_owned());
+                if let Some(supervisor) = self.deps.supervisor.as_deref() {
+                    supervisor.request_stop();
+                }
+            }
+            return;
+        }
         if self.guest_state != GuestState::Running {
             return;
         }
@@ -2432,13 +2682,9 @@ impl AppRuntime {
             let boot_timeout = Duration::from_secs(180);
             #[cfg(test)]
             let boot_timeout = self.boot_timeout_override.unwrap_or(boot_timeout);
-            // The installer session boots the ISO without adb and runs as long as the person
-            // takes; the deadline is for a boot that should have reached Android
-            // (dev PC rounds 17 and 18, 2026-10-01: the stop landed 180 s into the install).
-            if !self.installing_guest
-                && self
-                    .boot_started
-                    .is_some_and(|started| started.elapsed() >= boot_timeout)
+            if self
+                .boot_started
+                .is_some_and(|started| started.elapsed() >= boot_timeout)
             {
                 self.boot_timeout_pending = true;
                 if let Some(supervisor) = self.deps.supervisor.as_deref() {
@@ -2631,6 +2877,24 @@ impl AppRuntime {
         self.apps = stored_apps(guest);
     }
 
+    fn load_install_projection(&mut self, position: usize) {
+        let guest = &self.guests[position];
+        self.install_log = self
+            .guest_store
+            .guest_dir(&guest.id)
+            .ok()
+            .map(|directory| directory.join("install-serial.log"))
+            .filter(|path| path.is_file());
+        self.install_report = guest
+            .install
+            .as_ref()
+            .filter(|install| install.state == StoredInstallState::Failed)
+            .map(|install| {
+                failed_install_report(self.install_log.as_deref(), install.failure.clone())
+            })
+            .unwrap_or_default();
+    }
+
     fn clear_guest_projection(&mut self) {
         self.capabilities = CapabilityReport::default();
         self.device_id = None;
@@ -2642,6 +2906,8 @@ impl AppRuntime {
         self.resolution = None;
         self.add_account_supported = false;
         self.apps.clear();
+        self.install_report = InstallReport::default();
+        self.install_log = None;
     }
 
     fn select_image(&mut self, id: String) -> Result<(), AppIssue> {
@@ -2824,13 +3090,6 @@ impl AppRuntime {
         {
             return Err(issues::wizard_cannot_continue());
         }
-        if self.wizard.step == Step::GuestInstall && self.installing_guest {
-            self.stop_guest()?;
-            self.installing_guest = false;
-            self.wizard = advance(self.wizard.clone(), outcome);
-            self.persist_wizard();
-            return Ok(());
-        }
         let before = self.wizard.step;
         self.wizard = advance(self.wizard.clone(), outcome);
         if self.wizard.step == before {
@@ -2877,11 +3136,12 @@ impl AppRuntime {
                 .is_some_and(|(store, name)| {
                     matches!(store.verify(name), ome_artifacts::Verification::Verified)
                 }),
-            // A guest record exists as soon as its disk is made; the installer it started may still
-            // have failed to start or died before the copy finished (CI run 21). Until the person
-            // reinstalls, the step cannot complete on an unformatted disk.
-            guest_installed: !self.guests.is_empty()
-                && !(self.installing_guest && matches!(self.guest_state, GuestState::Failed)),
+            guest_installed: self.selected_guest().is_some_and(|guest| {
+                guest
+                    .install
+                    .as_ref()
+                    .is_none_or(|install| install.state == StoredInstallState::Installed)
+            }),
             guest_booted: self.boot_completed,
             app_install_resolved: true,
         }
@@ -2899,13 +3159,41 @@ impl AppRuntime {
             can_skip: can_skip(self.wizard.step),
             download: self.artifact_progress.clone(),
             image_id: self.selected_image.clone(),
-            install_guide: self
-                .selected_profile()
-                .map(|profile| profile.install_guide.clone())
-                .unwrap_or_default(),
+            install: self.install_view(),
             disk_size_gib: 32,
             disk_free_bytes: self.deps.probe.free_disk_bytes().ok(),
         }
+    }
+
+    fn install_view(&self) -> Option<GuestInstallView> {
+        let failed = self.selected_guest().is_some_and(|guest| {
+            guest
+                .install
+                .as_ref()
+                .is_some_and(|install| install.state == StoredInstallState::Failed)
+        });
+        if !self.installing_guest && !failed {
+            return None;
+        }
+        let log_path = self
+            .active_guest
+            .as_deref()
+            .and_then(|id| self.guest_store.guest_dir(id).ok())
+            .map(|directory| directory.join("install-serial.log"))
+            .filter(|path| path.is_file())
+            .map(|path| path.to_string_lossy().into_owned());
+        let stored_failure = self.selected_guest().and_then(|guest| {
+            guest
+                .install
+                .as_ref()
+                .and_then(|install| install.failure.clone())
+        });
+        Some(GuestInstallView {
+            stage: self.install_report.stage,
+            percent: self.install_report.percent,
+            failure: self.install_report.failure.clone().or(stored_failure),
+            log_path,
+        })
     }
 
     fn current_blocker(&self) -> Option<Blocker> {
@@ -2985,6 +3273,18 @@ impl AppRuntime {
             active_guest: self.active_guest.clone(),
         }
     }
+}
+
+fn failed_install_report(path: Option<&Path>, stored_failure: Option<String>) -> InstallReport {
+    let mut report = path
+        .and_then(|path| fs::read_to_string(path).ok())
+        .map(|text| parse_serial_log(&text))
+        .unwrap_or_default();
+    report.stage = InstallStage::Failed;
+    if report.failure.is_none() {
+        report.failure = stored_failure;
+    }
+    report
 }
 
 fn safe_guest_id(image_id: &str) -> Option<String> {
@@ -3785,15 +4085,6 @@ mod tests {
             Ok(())
         }
 
-        fn start_install(
-            &mut self,
-            config: GuestConfig,
-            paths: GuestPaths,
-            install: QemuInstall,
-        ) -> Result<(), String> {
-            self.start(config, paths, install)
-        }
-
         fn request_stop(&self) {
             *self.stop_requests.lock().expect("stop request lock") += 1;
         }
@@ -4152,8 +4443,11 @@ mod tests {
             artifact: "test-artifact".to_owned(),
             translator: Translator::NdkTranslation,
             boot_args: vec!["quiet".to_owned()],
-            grub_entry_hint: "Virgl".to_owned(),
-            install_guide: vec![String::new(); 6],
+            boot_files: ome_guest_image::BootFiles {
+                kernel: "/kernel".to_owned(),
+                initrd: "/initrd.img".to_owned(),
+            },
+            install: ome_guest_image::InstallMethod::HelperBoot,
             qemu_overrides: Vec::new(),
             status: ProfileStatus::Verified,
             released_at: Some("2024-10-11".to_owned()),
@@ -4215,8 +4509,9 @@ mod tests {
             r#"{
               "id":"test-13","display_name":"안드로이드 13","android_version":"13",
               "api_level":33,"distribution":"bliss","artifact":"test-artifact",
-              "translator":"ndk_translation","boot_args":["quiet"],"grub_entry_hint":"Virgl",
-              "install_guide":["1","2","3","4","5","6"],
+              "translator":"ndk_translation","boot_args":["quiet"],
+              "boot_files":{"kernel":"/kernel","initrd":"/initrd.img"},
+              "install":"helper_boot",
               "qemu_overrides":["virtio_vga_gl"],"status":"verified",
               "released_at":"2024-10-11","verifications":[]
             }"#,
@@ -4256,7 +4551,7 @@ mod tests {
         assert_eq!(snapshot.images.profiles[0].size_bytes, Some(1234));
         assert!(snapshot.images.profiles[0].recommended);
         assert_eq!(snapshot.wizard.image_id.as_deref(), Some("test-13"));
-        assert_eq!(snapshot.wizard.install_guide.len(), 6);
+        assert!(snapshot.wizard.install.is_none());
     }
 
     #[test]
@@ -5581,9 +5876,12 @@ package:dev.ome.two versionCode:8",
             distribution: Distribution::Bliss,
             artifact: "test-artifact".to_owned(),
             translator: Translator::NdkTranslation,
-            boot_args: vec![],
-            grub_entry_hint: "installer".to_owned(),
-            install_guide: vec![],
+            boot_args: vec!["quiet".to_owned()],
+            boot_files: ome_guest_image::BootFiles {
+                kernel: "/kernel".to_owned(),
+                initrd: "/initrd.img".to_owned(),
+            },
+            install: ome_guest_image::InstallMethod::HelperBoot,
             qemu_overrides: vec![],
             status: ProfileStatus::Verified,
             released_at: Some("2024-10-11".to_owned()),
@@ -5682,7 +5980,13 @@ package:dev.ome.two versionCode:8",
 
     #[test]
     fn guest_create_and_reinstall_write_layout_and_start_installer_iso() {
-        let body = b"verified installer image".to_vec();
+        let iso_fixture = tempfile::NamedTempFile::new().expect("ISO fixture");
+        ome_guest_install::test_support::write_test_iso(
+            iso_fixture.path(),
+            b"test kernel",
+            b"test initrd",
+        );
+        let body = fs::read(iso_fixture.path()).expect("read ISO fixture");
         let hash = format!("{:x}", Sha256::digest(&body));
         let (directory, mut runtime, supervisor, _runner) = lifecycle_runtime(
             std::iter::empty(),
@@ -5751,12 +6055,34 @@ package:dev.ome.two versionCode:8",
                 .expect("guest document");
         assert_eq!(document["id"], id);
         assert_eq!(document["diskBytes"], 32_u64 << 30);
+        assert_eq!(document["install"]["state"], "running");
+        assert!(document.get("boot").is_none());
+        assert_eq!(
+            fs::read(guest_dir.join("kernel")).expect("kernel"),
+            b"test kernel"
+        );
+        assert_eq!(
+            fs::read(guest_dir.join("initrd.img")).expect("initrd"),
+            b"test initrd"
+        );
+        assert!(guest_dir.join("initrd-install.img").is_file());
         {
             let starts = supervisor.starts.lock().expect("starts lock");
             assert_eq!(starts.len(), 1);
+            let BootMode::Install {
+                iso,
+                serial_log,
+                cmdline,
+                ..
+            } = &starts[0].1.boot
+            else {
+                panic!("guest creation must start the helper installer");
+            };
+            assert_eq!(iso, &directory.path().join("home/artifacts/test.iso"));
+            assert_eq!(serial_log, &guest_dir.join("install-serial.log"));
             assert_eq!(
-                starts[0].1.iso.as_deref(),
-                Some(directory.path().join("home/artifacts/test.iso").as_path())
+                cmdline,
+                "root=/dev/ram0 console=ttyS0 OME_INSTALL=1 OME_DISK=/dev/vda OME_SRC=ome"
             );
         }
         assert_eq!(runner.calls.lock().expect("runner calls")[0].0, image);
@@ -5774,57 +6100,137 @@ package:dev.ome.two versionCode:8",
     }
 
     #[test]
-    fn installer_failure_blocks_install_completion_until_the_installer_ends_normally() {
+    fn installer_failure_stays_on_install_step_with_report() {
         let (directory, mut runtime, _supervisor, _runner) = lifecycle_runtime(
             std::iter::empty(),
             RecordingDesktop::default(),
             RecordingWindow::embedded(),
         );
-        assert!(!runtime.guests.is_empty());
         runtime.wizard.step = Step::GuestInstall;
         runtime.installing_guest = true;
-        let log = directory.path().join("installer.stderr.log");
-        runtime.ingest_guest_event(guest_event(
-            ome_supervisor::GuestState::Starting,
-            None,
-            None,
-        ));
-        runtime.ingest_guest_event(guest_event(
-            ome_supervisor::GuestState::Failed,
-            None,
-            Some(&log),
-        ));
+        let serial_log = directory.path().join("home/vm/default/install-serial.log");
+        fs::write(
+            &serial_log,
+            "OME-INSTALL step format 20\nOME-INSTALL fail mke2fs\n",
+        )
+        .expect("serial log");
+        runtime.install_log = Some(serial_log.clone());
+        runtime.ingest_guest_event(guest_event(ome_supervisor::GuestState::Failed, None, None));
         let snapshot = runtime.snapshot();
         assert_eq!(snapshot.wizard.step, WizardStep::GuestInstall);
         assert!(!snapshot.wizard.can_continue);
+        assert_eq!(snapshot.guest.state, GuestState::Failed);
+        let install = snapshot.wizard.install.expect("failed install view");
+        assert_eq!(install.stage, InstallStage::Failed);
+        assert_eq!(install.percent, 20);
+        assert_eq!(install.failure.as_deref(), Some("mke2fs"));
         assert_eq!(
-            snapshot.guest.last_exit.expect("start failure").kind,
-            ExitKind::StartFailed
+            install.log_path.as_deref().map(Path::new),
+            Some(serial_log.as_path())
         );
-        let issue = runtime
-            .apply(Command::WizardContinue)
-            .expect_err("an unformatted disk cannot complete the step");
-        assert_eq!(issue.code, "wizard_cannot_continue");
-        assert!(runtime.installing_guest);
-
-        // The reinstalled installer runs and exits on its own once the person finishes.
-        runtime.ingest_guest_event(guest_event(
-            ome_supervisor::GuestState::Starting,
-            None,
-            None,
-        ));
-        runtime.ingest_guest_event(guest_event(
-            ome_supervisor::GuestState::Running,
-            Some(9),
-            None,
-        ));
-        runtime.ingest_guest_event(guest_event(ome_supervisor::GuestState::Stopped, None, None));
-        assert!(runtime.snapshot().wizard.can_continue);
-        let snapshot = runtime
-            .apply(Command::WizardContinue)
-            .expect("continue after the installer ended");
-        assert_eq!(snapshot.wizard.step, WizardStep::FirstBoot);
         assert!(!runtime.installing_guest);
+    }
+
+    #[test]
+    fn completed_install_persists_direct_boot_advances_and_starts_once() {
+        let (directory, mut runtime, supervisor, _runner) = lifecycle_runtime(
+            std::iter::empty(),
+            RecordingDesktop::default(),
+            RecordingWindow::embedded(),
+        );
+        runtime.image_profiles[0].boot_args = vec![
+            "quiet".to_owned(),
+            "HWC=drm_minigbm".to_owned(),
+            "GRALLOC=minigbm_arcvm".to_owned(),
+        ];
+        runtime.image_profiles[0].qemu_overrides = vec![
+            ome_guest_image::QemuOverride::VirtioVgaGl,
+            ome_guest_image::QemuOverride::SdlGl,
+        ];
+        runtime.wizard.step = Step::GuestInstall;
+        runtime.installing_guest = true;
+        runtime.guests[0].install = Some(StoredInstall {
+            state: StoredInstallState::Running,
+            finished_at: None,
+            failure: None,
+        });
+        let guest_dir = directory.path().join("home/vm/default");
+        fs::write(guest_dir.join("kernel"), b"kernel").expect("kernel");
+        fs::write(guest_dir.join("initrd.img"), b"initrd").expect("initrd");
+        fs::write(guest_dir.join("initrd-install.img"), b"helper").expect("helper initrd");
+        let serial_log = guest_dir.join("install-serial.log");
+        fs::write(
+            &serial_log,
+            "OME-INSTALL step finish 95\nOME-INSTALL done\n",
+        )
+        .expect("serial log");
+        runtime.install_log = Some(serial_log);
+
+        runtime.ingest_guest_event(guest_event(ome_supervisor::GuestState::Stopped, None, None));
+
+        assert_eq!(runtime.wizard.step, Step::FirstBoot);
+        assert!(!guest_dir.join("initrd-install.img").exists());
+        let record = runtime.selected_guest().expect("installed record");
+        assert_eq!(
+            record.boot,
+            Some(StoredBoot {
+                method: StoredBootMethod::Direct,
+                src: DEFAULT_SRC.to_owned(),
+            })
+        );
+        assert_eq!(
+            record.install.as_ref().map(|install| install.state),
+            Some(StoredInstallState::Installed)
+        );
+        let starts = supervisor.starts.lock().expect("starts lock");
+        assert_eq!(starts.len(), 1);
+        let BootMode::Direct { cmdline, .. } = &starts[0].1.boot else {
+            panic!("first boot must use direct kernel boot");
+        };
+        assert_eq!(
+            cmdline,
+            "root=/dev/ram0 SRC=/ome quiet HWC=drm_minigbm GRALLOC=minigbm_arcvm"
+        );
+    }
+
+    #[test]
+    fn install_cancel_discards_guest_and_keeps_install_step() {
+        let (directory, mut runtime, supervisor, _runner) = lifecycle_runtime(
+            std::iter::empty(),
+            RecordingDesktop::default(),
+            RecordingWindow::embedded(),
+        );
+        runtime.wizard.step = Step::GuestInstall;
+        runtime.installing_guest = true;
+        runtime.guests[0].install = Some(StoredInstall {
+            state: StoredInstallState::Running,
+            finished_at: None,
+            failure: None,
+        });
+        runtime
+            .apply(Command::GuestInstallCancel)
+            .expect("cancel request");
+        assert_eq!(*supervisor.stop_requests.lock().expect("stop lock"), 1);
+        runtime.ingest_guest_event(guest_event(ome_supervisor::GuestState::Stopped, None, None));
+
+        assert_eq!(runtime.wizard.step, Step::GuestInstall);
+        assert!(!directory.path().join("home/vm/default").exists());
+        assert!(runtime.guests.is_empty());
+        assert!(runtime.active_guest.is_none());
+        assert!(runtime.snapshot().wizard.install.is_none());
+    }
+
+    #[test]
+    fn legacy_guest_start_uses_disk_boot() {
+        let (_directory, mut runtime, supervisor, _runner) = lifecycle_runtime(
+            std::iter::empty(),
+            RecordingDesktop::default(),
+            RecordingWindow::embedded(),
+        );
+        assert!(runtime.guests[0].boot.is_none());
+        runtime.apply(Command::GuestStart).expect("legacy start");
+        let starts = supervisor.starts.lock().expect("starts lock");
+        assert_eq!(starts[0].1.boot, BootMode::Disk);
     }
 
     #[test]
@@ -5836,6 +6242,11 @@ package:dev.ome.two versionCode:8",
         let logs = directory.path().join("home/logs");
         fs::write(logs.join("host.log"), b"host").expect("host log");
         fs::write(logs.join("default.stdout.log"), b"qemu").expect("qemu log");
+        fs::write(
+            directory.path().join("home/vm/default/install-serial.log"),
+            b"OME-INSTALL fail test",
+        )
+        .expect("install log");
         runtime
             .apply(Command::DiagnosticsExport)
             .expect("diagnostics export");
@@ -5850,6 +6261,7 @@ package:dev.ome.two versionCode:8",
             zip::ZipArchive::new(std::fs::File::open(archive).expect("bundle")).expect("ZIP");
         assert!(zip.by_name("logs/host.log").is_ok());
         assert!(zip.by_name("qemu/default.stdout.log").is_ok());
+        assert!(zip.by_name("qemu/install-serial.log").is_ok());
         assert!(zip.by_name("environment.txt").is_ok());
         assert_eq!(observed.paths(), [diagnostics]);
     }

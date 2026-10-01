@@ -7,3 +7,6 @@ pub mod cpio;
 pub mod helper;
 pub mod iso9660;
 pub mod progress;
+#[cfg(feature = "test-support")]
+#[doc(hidden)]
+pub mod test_support;

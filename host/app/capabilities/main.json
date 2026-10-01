@@ -21,6 +21,7 @@
     "allow-guest-select",
     "allow-guest-delete",
     "allow-guest-reinstall",
+    "allow-guest-install-cancel",
     "allow-guest-start",
     "allow-guest-stop",
     "allow-guest-restart",

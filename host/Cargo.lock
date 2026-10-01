@@ -2471,6 +2471,7 @@ dependencies = [
  "ome-diagnostics",
  "ome-guest-config",
  "ome-guest-image",
+ "ome-guest-install",
  "ome-host-check",
  "ome-input",
  "ome-overlay",

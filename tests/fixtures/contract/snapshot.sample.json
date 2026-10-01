@@ -1,5 +1,5 @@
 {
-  "contractVersion": 7,
+  "contractVersion": 8,
   "productVersion": "0.1.0",
   "phase": "main",
   "blocker": {
@@ -28,9 +28,12 @@
       "label": "guest.iso"
     },
     "imageId": "bliss-16.9.7-android-13",
-    "installGuide": [
-      "Installation을 선택합니다."
-    ],
+    "install": {
+      "stage": "copy",
+      "percent": 59,
+      "failure": null,
+      "logPath": "C:\\Users\\Example\\install-serial.log"
+    },
     "diskSizeGib": 32,
     "diskFreeBytes": 53687091200
   },

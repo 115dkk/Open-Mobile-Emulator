@@ -201,7 +201,12 @@ fn representative_snapshot() -> AppSnapshot {
                 label: "guest.iso".to_owned(),
             }),
             image_id: Some("bliss-16.9.7-android-13".to_owned()),
-            install_guide: vec!["Installation을 선택합니다.".to_owned()],
+            install: Some(GuestInstallView {
+                stage: ome_guest_install::progress::InstallStage::Copy,
+                percent: 59,
+                failure: None,
+                log_path: Some(r"C:\Users\Example\install-serial.log".to_owned()),
+            }),
             disk_size_gib: 32,
             disk_free_bytes: Some(50 * 1024 * 1024 * 1024),
         },
@@ -359,6 +364,7 @@ fn every_command() -> Vec<Command> {
             image_id: "bliss-16.9.7-android-13".to_owned(),
             size_gib: 32,
         },
+        Command::GuestInstallCancel,
         Command::GuestSelect {
             id: "default".to_owned(),
         },

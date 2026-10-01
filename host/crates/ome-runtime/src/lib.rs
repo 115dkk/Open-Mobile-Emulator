@@ -19,7 +19,10 @@ pub mod settings;
 pub use adapters::AdbPowerOff;
 pub use contract::*;
 pub use desktop::{Desktop, UnavailableDesktop};
-pub use guest_store::{GuestRecord, GuestStore, GuestStoreError};
+pub use guest_store::{
+    GuestRecord, GuestStore, GuestStoreError, StoredBoot, StoredBootMethod, StoredInstall,
+    StoredInstallState,
+};
 pub use home::{HomeError, OmeHome};
 pub use ome_host_check::TableProbe;
 #[cfg(windows)]

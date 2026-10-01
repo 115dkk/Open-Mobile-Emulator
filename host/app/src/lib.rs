@@ -225,6 +225,7 @@ pub fn run() {
             commands::guest_select,
             commands::guest_delete,
             commands::guest_reinstall,
+            commands::guest_install_cancel,
             commands::guest_start,
             commands::guest_stop,
             commands::guest_restart,

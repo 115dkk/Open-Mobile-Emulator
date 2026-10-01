@@ -14,7 +14,7 @@ pub use ome_input::{
 };
 
 /// Current Rust-to-webview contract version.
-pub const CONTRACT_VERSION: u32 = 7;
+pub const CONTRACT_VERSION: u32 = 8;
 
 /// The one read-only projection the webview renders.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -154,12 +154,26 @@ pub struct WizardView {
     pub download: Option<TransferProgress>,
     /// Image selected in the download step.
     pub image_id: Option<String>,
-    /// Installer guidance from the selected profile.
-    pub install_guide: Vec<String>,
+    /// Unattended install progress while it runs or after it failed; absent before and after.
+    pub install: Option<GuestInstallView>,
     /// Selected virtual disk size.
     pub disk_size_gib: u32,
     /// Free bytes available to the installer.
     pub disk_free_bytes: Option<u64>,
+}
+
+/// Progress of the hidden operating-system install (ADR-0010).
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GuestInstallView {
+    /// Stage reported by the helper.
+    pub stage: ome_guest_install::progress::InstallStage,
+    /// Percent from zero through one hundred.
+    pub percent: u8,
+    /// Reason when the install failed.
+    pub failure: Option<String>,
+    /// Serial log of the helper boot, for the failure screen and diagnostics.
+    pub log_path: Option<String>,
 }
 
 /// Ordered first-run wizard steps.
@@ -174,7 +188,7 @@ pub enum WizardStep {
     RebootPending,
     /// Verified image download.
     ArtifactDownload,
-    /// Interactive operating-system installation.
+    /// Unattended operating-system installation.
     GuestInstall,
     /// First boot and capability probe.
     FirstBoot,
@@ -926,6 +940,8 @@ pub enum Command {
         /// Virtual disk size in GiB.
         size_gib: u32,
     },
+    /// Stop the running operating-system install and discard the disk.
+    GuestInstallCancel,
     /// Select an installed virtual machine.
     GuestSelect {
         /// Virtual-machine identifier.
@@ -1097,6 +1113,7 @@ impl Command {
             Self::ArtifactDownloadCancel => "artifact_download_cancel",
             Self::GuestImageSelect { .. } => "guest_image_select",
             Self::GuestCreate { .. } => "guest_create",
+            Self::GuestInstallCancel => "guest_install_cancel",
             Self::GuestSelect { .. } => "guest_select",
             Self::GuestDelete { .. } => "guest_delete",
             Self::GuestReinstall { .. } => "guest_reinstall",
@@ -1156,6 +1173,7 @@ pub const TAURI_COMMANDS: &[&str] = &[
     "artifact_download_cancel",
     "guest_image_select",
     "guest_create",
+    "guest_install_cancel",
     "guest_select",
     "guest_delete",
     "guest_reinstall",

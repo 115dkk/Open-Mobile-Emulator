@@ -419,6 +419,17 @@ pub fn invalid_disk_size() -> AppIssue {
     }
 }
 
+/// Returns an issue when installer boot files cannot be prepared from the verified image.
+pub fn install_prepare_failed() -> AppIssue {
+    AppIssue {
+        code: "install_prepare_failed".to_owned(),
+        message:
+            "설치 파일을 준비하지 못했습니다. 이미지 파일을 다시 내려받은 뒤 다시 시도해 주십시오."
+                .to_owned(),
+        next_action: None,
+    }
+}
+
 /// Returns an issue when qemu-img cannot create the virtual disk.
 pub fn guest_create_failed() -> AppIssue {
     AppIssue {

@@ -14,6 +14,8 @@ use std::sync::{Arc, Mutex, mpsc};
 use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
+#[cfg(test)]
+use ome_guest_config::BootMode;
 use ome_guest_config::{GuestConfig, GuestPaths, QemuInstall, QemuInvocation};
 pub use ome_qmp::DisplayWindowGeometry;
 use ome_qmp::{QmpChannel, QmpError, QmpEvent};
@@ -1380,7 +1382,7 @@ mod tests {
             disk: "disk.qcow2".into(),
             firmware_code: "code.fd".into(),
             firmware_vars: "vars.fd".into(),
-            iso: None,
+            boot: BootMode::Disk,
         };
         let install = QemuInstall {
             system_exe: "qemu.exe".into(),
@@ -1573,7 +1575,7 @@ mod tests {
             disk: "disk.qcow2".into(),
             firmware_code: "code.fd".into(),
             firmware_vars: "vars.fd".into(),
-            iso: None,
+            boot: BootMode::Disk,
         };
         let install = QemuInstall {
             system_exe: "qemu.exe".into(),

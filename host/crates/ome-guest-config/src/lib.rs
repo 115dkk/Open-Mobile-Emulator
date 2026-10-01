@@ -15,6 +15,10 @@ const DEFAULT_MEMORY_MIB: u32 = 8192;
 const DEFAULT_VCPUS: u16 = 4;
 const DEFAULT_QMP_PORT: u16 = 4444;
 const DEFAULT_ADB_PORT: u16 = 5555;
+/// The helper only copies and formats files, so it needs little memory.
+pub const INSTALL_MEMORY_MIB: u32 = 2048;
+/// The helper only copies and formats files, so it needs few virtual CPUs.
+pub const INSTALL_VCPUS: u16 = 2;
 
 /// Unchecked values loaded from persistent settings or an IPC request.
 ///
@@ -329,6 +333,27 @@ impl GuestConfig {
     }
 }
 
+/// How QEMU brings the guest up.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum BootMode {
+    /// The firmware boots the disk itself (a guest installed by hand with GRUB on an ESP).
+    Disk,
+    /// Direct kernel boot of an installed guest (ADR-0010): `-kernel`, `-initrd`, `-append`.
+    Direct {
+        kernel: PathBuf,
+        initrd: PathBuf,
+        cmdline: String,
+    },
+    /// Hidden helper boot that installs the guest from the ISO into the disk (ADR-0010).
+    Install {
+        kernel: PathBuf,
+        initrd: PathBuf,
+        cmdline: String,
+        iso: PathBuf,
+        serial_log: PathBuf,
+    },
+}
+
 /// Files belonging to one guest and its firmware.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct GuestPaths {
@@ -338,8 +363,8 @@ pub struct GuestPaths {
     pub firmware_code: PathBuf,
     /// Writable per-guest OVMF variable image.
     pub firmware_vars: PathBuf,
-    /// Optional installer ISO; required by [`QemuInvocation::for_install`].
-    pub iso: Option<PathBuf>,
+    /// Selected boot procedure.
+    pub boot: BootMode,
 }
 
 /// Location of a QEMU installation used to start a guest.
@@ -347,14 +372,6 @@ pub struct GuestPaths {
 pub struct QemuInstall {
     /// Path to `qemu-system-x86_64.exe`.
     pub system_exe: PathBuf,
-}
-
-/// An error encountered while creating a QEMU invocation.
-#[derive(Clone, Debug, Error, Eq, PartialEq)]
-pub enum InvocationError {
-    /// Installation mode was requested without an ISO path.
-    #[error("installer ISO path is required for an install invocation")]
-    MissingIso,
 }
 
 /// A QEMU process launch represented as an executable and discrete arguments.
@@ -367,24 +384,34 @@ pub struct QemuInvocation {
 }
 
 impl QemuInvocation {
-    /// Builds a persistent-disk invocation, using installer mode when an ISO is supplied.
+    /// Builds the invocation selected by [`GuestPaths::boot`].
     pub fn for_boot(config: &GuestConfig, paths: &GuestPaths, install: &QemuInstall) -> Self {
-        if paths.iso.is_some() {
-            Self::for_install(config, paths, install).expect("ISO presence was checked above")
-        } else {
-            Self::build(config, paths, install, None)
+        let (args, environment) = match &paths.boot {
+            BootMode::Disk => Self::build_guest(config, paths, None),
+            BootMode::Direct {
+                kernel,
+                initrd,
+                cmdline,
+            } => Self::build_guest(config, paths, Some((kernel, initrd, cmdline))),
+            BootMode::Install {
+                kernel,
+                initrd,
+                cmdline,
+                iso,
+                serial_log,
+            } => Self::build_installer(config, paths, kernel, initrd, cmdline, iso, serial_log),
+        };
+        let printable = std::iter::once(install.system_exe.as_os_str())
+            .chain(args.iter().map(OsString::as_os_str))
+            .map(quote_windows_argument)
+            .collect::<Vec<_>>()
+            .join(" ");
+        Self {
+            program: install.system_exe.clone(),
+            args,
+            printable,
+            environment,
         }
-    }
-
-    /// Builds an installer invocation, returning [`InvocationError::MissingIso`]
-    /// if the guest paths contain no installer image.
-    pub fn for_install(
-        config: &GuestConfig,
-        paths: &GuestPaths,
-        install: &QemuInstall,
-    ) -> Result<Self, InvocationError> {
-        let iso = paths.iso.as_deref().ok_or(InvocationError::MissingIso)?;
-        Ok(Self::build(config, paths, install, Some(iso)))
     }
 
     /// Returns the QEMU executable path.
@@ -420,12 +447,12 @@ impl QemuInvocation {
             .join(" ")
     }
 
-    fn build(
+    fn common_prefix(
         config: &GuestConfig,
         paths: &GuestPaths,
-        install: &QemuInstall,
-        iso: Option<&Path>,
-    ) -> Self {
+        memory_mib: u32,
+        vcpus: u16,
+    ) -> Vec<OsString> {
         let mut args = Vec::new();
         pair(&mut args, "-name", format!("OME {}", config.name()));
         pair(&mut args, "-machine", "q35");
@@ -442,8 +469,8 @@ impl QemuInvocation {
         // Do not substitute `max` under WHPX: it is QEMU's TCG definition and
         // Bliss stalled with it (docs/evidence/M0/guest-install.md).
         pair(&mut args, "-cpu", config.cpu_model());
-        pair(&mut args, "-m", config.memory_mib().to_string());
-        pair(&mut args, "-smp", config.vcpus().to_string());
+        pair(&mut args, "-m", memory_mib.to_string());
+        pair(&mut args, "-smp", vcpus.to_string());
         pair(
             &mut args,
             "-drive",
@@ -462,17 +489,54 @@ impl QemuInvocation {
             "-drive",
             surrounded_path("file=", &paths.disk, ",if=virtio,format=qcow2"),
         );
-        if let Some(iso) = iso {
-            pair(
-                &mut args,
-                "-drive",
-                surrounded_path("file=", iso, ",media=cdrom,if=none,id=cd0"),
-            );
-            pair(
-                &mut args,
-                "-device",
-                "ide-cd,drive=cd0,bootindex=0,bus=ide.0",
-            );
+        args
+    }
+
+    fn build_installer(
+        config: &GuestConfig,
+        paths: &GuestPaths,
+        kernel: &Path,
+        initrd: &Path,
+        cmdline: &str,
+        iso: &Path,
+        serial_log: &Path,
+    ) -> (Vec<OsString>, Vec<(String, String)>) {
+        let mut args = Self::common_prefix(config, paths, INSTALL_MEMORY_MIB, INSTALL_VCPUS);
+        pair(
+            &mut args,
+            "-drive",
+            surrounded_path("file=", iso, ",media=cdrom,if=none,id=cd0,readonly=on"),
+        );
+        pair(&mut args, "-device", "ide-cd,drive=cd0,bus=ide.0");
+        pair(&mut args, "-kernel", kernel.as_os_str());
+        pair(&mut args, "-initrd", initrd.as_os_str());
+        pair(&mut args, "-append", cmdline);
+        // The person never sees this VM. The helper reports progress over its serial port, so the
+        // installer needs no display, GPU, network, USB, audio, or caller-provided extra arguments.
+        pair(&mut args, "-display", "none");
+        pair(&mut args, "-monitor", "none");
+        pair(
+            &mut args,
+            "-qmp",
+            format!("tcp:127.0.0.1:{},server=on,wait=off", config.qmp_port()),
+        );
+        pair(&mut args, "-action", "reboot=shutdown");
+        pair(&mut args, "-rtc", "base=utc");
+        pair(&mut args, "-serial", prefixed_path("file:", serial_log));
+        pair(&mut args, "-parallel", "none");
+        (args, Vec::new())
+    }
+
+    fn build_guest(
+        config: &GuestConfig,
+        paths: &GuestPaths,
+        direct: Option<(&Path, &Path, &str)>,
+    ) -> (Vec<OsString>, Vec<(String, String)>) {
+        let mut args = Self::common_prefix(config, paths, config.memory_mib(), config.vcpus());
+        if let Some((kernel, initrd, cmdline)) = direct {
+            pair(&mut args, "-kernel", kernel.as_os_str());
+            pair(&mut args, "-initrd", initrd.as_os_str());
+            pair(&mut args, "-append", cmdline);
         }
         pair(
             &mut args,
@@ -564,18 +628,7 @@ impl QemuInvocation {
         pair(&mut args, "-serial", "none");
         pair(&mut args, "-parallel", "none");
         args.extend(config.extra_args().iter().cloned());
-
-        let printable = std::iter::once(install.system_exe.as_os_str())
-            .chain(args.iter().map(OsString::as_os_str))
-            .map(quote_windows_argument)
-            .collect::<Vec<_>>()
-            .join(" ");
-        Self {
-            program: install.system_exe.clone(),
-            args,
-            printable,
-            environment,
-        }
+        (args, environment)
     }
 }
 
@@ -758,7 +811,11 @@ mod tests {
         disk: PathBuf,
         firmware_code: PathBuf,
         firmware_vars: PathBuf,
+        kernel: Option<PathBuf>,
+        initrd: Option<PathBuf>,
+        cmdline: Option<String>,
         iso: Option<PathBuf>,
+        serial_log: Option<PathBuf>,
         gpu: String,
         accel: String,
         cpu_model: String,
@@ -898,25 +955,35 @@ mod tests {
     }
 
     #[test]
-    fn install_requires_an_iso() {
+    fn install_invocation_is_headless_and_has_no_sdl_environment() {
         let config = GuestConfig::validate(RawGuestConfig::default()).expect("valid config");
         let paths = GuestPaths {
             disk: "C:\\vm\\disk.qcow2".into(),
             firmware_code: "C:\\fw\\code.fd".into(),
             firmware_vars: "C:\\vm\\efivars.fd".into(),
-            iso: None,
+            boot: BootMode::Install {
+                kernel: "C:\\vm\\kernel".into(),
+                initrd: "C:\\vm\\initrd-install.img".into(),
+                cmdline: "root=/dev/ram0 console=ttyS0".to_owned(),
+                iso: "C:\\images\\guest.iso".into(),
+                serial_log: "C:\\vm\\install-serial.log".into(),
+            },
         };
         let install = QemuInstall {
             system_exe: "qemu-system-x86_64.exe".into(),
         };
-        assert_eq!(
-            QemuInvocation::for_install(&config, &paths, &install),
-            Err(InvocationError::MissingIso)
+        let invocation = QemuInvocation::for_boot(&config, &paths, &install);
+        assert!(invocation.environment().is_empty());
+        assert!(
+            invocation
+                .args()
+                .windows(2)
+                .any(|pair| { pair == [OsString::from("-display"), OsString::from("none")] })
         );
     }
 
     #[test]
-    fn sdl_boot_and_install_invocations_set_per_monitor_v2_awareness() {
+    fn sdl_boot_invocations_set_per_monitor_v2_awareness() {
         let config = GuestConfig::validate(RawGuestConfig::default()).expect("valid config");
         let install = QemuInstall {
             system_exe: "qemu-system-x86_64.exe".into(),
@@ -930,7 +997,7 @@ mod tests {
             disk: "C:\\vm\\disk.qcow2".into(),
             firmware_code: "C:\\fw\\code.fd".into(),
             firmware_vars: "C:\\vm\\efivars.fd".into(),
-            iso: None,
+            boot: BootMode::Disk,
         };
         let boot = QemuInvocation::for_boot(&config, &boot_paths, &install);
         assert_eq!(boot.environment(), expected.as_slice());
@@ -938,18 +1005,10 @@ mod tests {
             boot.printable_environment(),
             "SDL_WINDOWS_DPI_AWARENESS=permonitorv2"
         );
-
-        let install_paths = GuestPaths {
-            iso: Some("C:\\images\\guest.iso".into()),
-            ..boot_paths
-        };
-        let installer = QemuInvocation::for_install(&config, &install_paths, &install)
-            .expect("install paths include ISO");
-        assert_eq!(installer.environment(), expected.as_slice());
     }
 
     #[test]
-    fn hosted_sdl_boot_and_install_invocations_disable_click_activation() {
+    fn hosted_sdl_boot_invocation_disables_click_activation() {
         let config = GuestConfig::validate(RawGuestConfig {
             hosted_window: Some(true),
             ..RawGuestConfig::default()
@@ -962,20 +1021,10 @@ mod tests {
             disk: r"C:\vm\disk.qcow2".into(),
             firmware_code: r"C:\fw\code.fd".into(),
             firmware_vars: r"C:\vm\efivars.fd".into(),
-            iso: None,
+            boot: BootMode::Disk,
         };
         let boot = QemuInvocation::for_boot(&config, &boot_paths, &install);
         assert!(boot.args().contains(&OsString::from(
-            "sdl,show-cursor=on,gl=on,activate-on-click=off"
-        )));
-
-        let install_paths = GuestPaths {
-            iso: Some(r"C:\images\guest.iso".into()),
-            ..boot_paths
-        };
-        let installer = QemuInvocation::for_install(&config, &install_paths, &install)
-            .expect("install paths include ISO");
-        assert!(installer.args().contains(&OsString::from(
             "sdl,show-cursor=on,gl=on,activate-on-click=off"
         )));
     }
@@ -995,28 +1044,19 @@ mod tests {
             disk: r"C:\vm\disk.qcow2".into(),
             firmware_code: r"C:\fw\code.fd".into(),
             firmware_vars: r"C:\vm\efivars.fd".into(),
-            iso: None,
+            boot: BootMode::Disk,
         };
-        let install_paths = GuestPaths {
-            iso: Some(r"C:\images\guest.iso".into()),
-            ..boot_paths.clone()
-        };
-        for invocation in [
-            QemuInvocation::for_boot(&config, &boot_paths, &install),
-            QemuInvocation::for_install(&config, &install_paths, &install)
-                .expect("install paths include ISO"),
-        ] {
-            let args = invocation
-                .args()
-                .iter()
-                .map(|value| value.to_string_lossy().into_owned())
-                .collect::<Vec<_>>();
-            assert!(args.contains(&"sdl,show-cursor=on,gl=on,owner-window=74565".to_owned()));
-            assert!(
-                args.iter()
-                    .all(|value| !value.contains("activate-on-click"))
-            );
-        }
+        let invocation = QemuInvocation::for_boot(&config, &boot_paths, &install);
+        let args = invocation
+            .args()
+            .iter()
+            .map(|value| value.to_string_lossy().into_owned())
+            .collect::<Vec<_>>();
+        assert!(args.contains(&"sdl,show-cursor=on,gl=on,owner-window=74565".to_owned()));
+        assert!(
+            args.iter()
+                .all(|value| !value.contains("activate-on-click"))
+        );
     }
 
     #[test]
@@ -1026,7 +1066,7 @@ mod tests {
             disk: "disk.qcow2".into(),
             firmware_code: "code.fd".into(),
             firmware_vars: "vars.fd".into(),
-            iso: None,
+            boot: BootMode::Disk,
         };
         let install = QemuInstall {
             system_exe: "qemu-system-x86_64.exe".into(),
@@ -1055,7 +1095,7 @@ mod tests {
             disk: "disk.qcow2".into(),
             firmware_code: "code.fd".into(),
             firmware_vars: "vars.fd".into(),
-            iso: None,
+            boot: BootMode::Disk,
         };
         let install = QemuInstall {
             system_exe: "qemu-system-x86_64.exe".into(),
@@ -1077,8 +1117,12 @@ mod tests {
                 include_str!("../../../../tests/fixtures/qemu-args/tcg-std-no-audio.json"),
             ),
             (
-                "install-cdrom.json",
-                include_str!("../../../../tests/fixtures/qemu-args/install-cdrom.json"),
+                "install-helper.json",
+                include_str!("../../../../tests/fixtures/qemu-args/install-helper.json"),
+            ),
+            (
+                "direct-boot.json",
+                include_str!("../../../../tests/fixtures/qemu-args/direct-boot.json"),
             ),
             (
                 "gtk-display.json",
@@ -1111,27 +1155,43 @@ mod tests {
                 extra_args: Some(input.extra_args.unwrap_or_default()),
             })
             .expect("fixture config validates");
+            let boot = match input.mode.as_str() {
+                "boot" => BootMode::Disk,
+                "direct" => BootMode::Direct {
+                    kernel: input.kernel.expect("direct fixture kernel"),
+                    initrd: input.initrd.expect("direct fixture initrd"),
+                    cmdline: input.cmdline.expect("direct fixture cmdline"),
+                },
+                "install" => BootMode::Install {
+                    kernel: input.kernel.expect("install fixture kernel"),
+                    initrd: input.initrd.expect("install fixture initrd"),
+                    cmdline: input.cmdline.expect("install fixture cmdline"),
+                    iso: input.iso.expect("install fixture ISO"),
+                    serial_log: input.serial_log.expect("install fixture serial log"),
+                },
+                other => panic!("unknown fixture mode {other}"),
+            };
             let paths = GuestPaths {
                 disk: input.disk,
                 firmware_code: input.firmware_code,
                 firmware_vars: input.firmware_vars,
-                iso: input.iso,
+                boot,
             };
             let install = QemuInstall {
                 system_exe: "C:\\qemu\\qemu-system-x86_64.exe".into(),
             };
-            let invocation = if input.mode == "install" {
-                QemuInvocation::for_install(&config, &paths, &install)
-                    .expect("install fixture has ISO")
-            } else {
-                QemuInvocation::for_boot(&config, &paths, &install)
-            };
+            let invocation = QemuInvocation::for_boot(&config, &paths, &install);
             let actual: Vec<String> = invocation
                 .args()
                 .iter()
                 .map(|item| item.to_string_lossy().into_owned())
                 .collect();
             assert_eq!(actual, fixture.args, "fixture {name}");
+            if *name == "direct-boot.json" {
+                assert!(invocation.printable().contains(
+                    "-append \"root=/dev/ram0 SRC=/ome quiet HWC=drm_minigbm GRALLOC=minigbm_arcvm\""
+                ));
+            }
         }
     }
 
@@ -1148,7 +1208,7 @@ mod tests {
             disk: "disk.qcow2".into(),
             firmware_code: "code.fd".into(),
             firmware_vars: "vars.fd".into(),
-            iso: None,
+            boot: BootMode::Disk,
         };
         let install = QemuInstall {
             system_exe: "qemu-system-x86_64.exe".into(),

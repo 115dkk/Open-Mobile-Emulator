@@ -61,15 +61,6 @@ impl GuestProcess for RecordingSupervisor {
         GuestProcess::start(&mut self.inner, config, paths, install)
     }
 
-    fn start_install(
-        &mut self,
-        config: GuestConfig,
-        paths: GuestPaths,
-        install: QemuInstall,
-    ) -> Result<(), String> {
-        GuestProcess::start_install(&mut self.inner, config, paths, install)
-    }
-
     fn request_stop(&self) {
         GuestProcess::request_stop(&self.inner);
     }

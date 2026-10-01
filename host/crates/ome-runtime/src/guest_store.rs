@@ -47,6 +47,10 @@ pub struct GuestRecord {
     pub registration_opened_at: Option<String>,
     /// Whether applications may request root, or unknown before probing.
     pub root_enabled: Option<bool>,
+    /// How the installed guest boots; absent for guests the interactive installer made.
+    pub boot: Option<StoredBoot>,
+    /// Outcome of the unattended install; absent for guests made before ADR-0010.
+    pub install: Option<StoredInstall>,
 }
 
 impl GuestRecord {
@@ -83,6 +87,48 @@ impl GuestRecord {
         self.device_id = outcome.device_id.as_ref().map(StoredDeviceId::from);
         self.root_enabled = outcome.root_enabled;
     }
+}
+
+/// Direct-boot metadata for an installed guest.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoredBoot {
+    /// Direct kernel boot is the only stored method.
+    pub method: StoredBootMethod,
+    /// Directory name passed to the guest initrd as `SRC`.
+    pub src: String,
+}
+
+/// Supported persisted boot method.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum StoredBootMethod {
+    /// Start the extracted kernel and initrd without GRUB.
+    Direct,
+}
+
+/// Persisted unattended-install outcome.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoredInstall {
+    /// Latest install state.
+    pub state: StoredInstallState,
+    /// Completion time in RFC 3339, only for a successful install.
+    pub finished_at: Option<String>,
+    /// User-visible failure reason, only for a failed install.
+    pub failure: Option<String>,
+}
+
+/// Persisted unattended-install state.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum StoredInstallState {
+    /// The hidden helper VM is running.
+    Running,
+    /// The helper completed and direct boot is ready.
+    Installed,
+    /// The helper failed, stopped early, or was interrupted.
+    Failed,
 }
 
 /// Persisted capability probe report and parsed values.
@@ -218,6 +264,12 @@ struct GuestDocument {
     device_id: Option<StoredDeviceId>,
     registration_opened_at: Option<String>,
     root_enabled: Option<bool>,
+    /// Absent in guest documents written before ADR-0010.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    boot: Option<StoredBoot>,
+    /// Absent in guest documents written before ADR-0010.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    install: Option<StoredInstall>,
 }
 
 impl From<&GuestRecord> for GuestDocument {
@@ -235,6 +287,8 @@ impl From<&GuestRecord> for GuestDocument {
             device_id: record.device_id.clone(),
             registration_opened_at: record.registration_opened_at.clone(),
             root_enabled: record.root_enabled,
+            boot: record.boot.clone(),
+            install: record.install.clone(),
         }
     }
 }
@@ -253,6 +307,8 @@ impl From<GuestDocument> for GuestRecord {
             device_id: document.device_id,
             registration_opened_at: document.registration_opened_at,
             root_enabled: document.root_enabled,
+            boot: document.boot,
+            install: document.install,
         }
     }
 }
@@ -312,6 +368,8 @@ impl GuestStore {
                     device_id: None,
                     registration_opened_at: None,
                     root_enabled: None,
+                    boot: None,
+                    install: None,
                 });
             }
         }
@@ -408,7 +466,19 @@ fn load_document(path: &Path) -> Result<GuestRecord, GuestStoreError> {
         return Err(GuestStoreError::UnsupportedVersion);
     }
     validate_id(&document.id)?;
-    Ok(document.into())
+    let mut record: GuestRecord = document.into();
+    if record
+        .install
+        .as_ref()
+        .is_some_and(|install| install.state == StoredInstallState::Running)
+    {
+        record.install = Some(StoredInstall {
+            state: StoredInstallState::Failed,
+            finished_at: None,
+            failure: Some("설치가 끝나기 전에 앱이 종료되었습니다.".to_owned()),
+        });
+    }
+    Ok(record)
 }
 
 pub(crate) fn validate_id(id: &str) -> Result<(), GuestStoreError> {
@@ -469,6 +539,56 @@ mod tests {
         assert_eq!(document["id"], "default");
         assert!(document.get("guest").is_none());
         assert_eq!(store.load_all().expect("reload"), [record]);
+    }
+
+    #[test]
+    fn legacy_document_without_boot_or_install_keys_loads() {
+        let directory = tempfile::tempdir().expect("temp directory");
+        let root = directory.path().join("vm");
+        let guest = root.join("default");
+        fs::create_dir_all(&guest).expect("guest directory");
+        fs::write(guest.join("disk.qcow2"), [0_u8; 1]).expect("disk");
+        fs::write(
+            guest.join("guest.json"),
+            r#"{
+              "version":1,"id":"default","imageId":"bliss-16.9.7-android-13",
+              "androidVersion":"13","apiLevel":33,"diskBytes":1,"createdAt":null,
+              "lastStartedAt":null,"capabilities":{"probedAt":null,"items":[],
+              "nativeBridge":null,"mediaVolume":null,"googleAccounts":null,
+              "foregroundPackage":null,"display":null,"packages":[]},"deviceId":null,
+              "registrationOpenedAt":null,"rootEnabled":null
+            }"#,
+        )
+        .expect("legacy metadata");
+        let record = GuestStore::new(root).load_all().expect("load").remove(0);
+        assert_eq!(record.boot, None);
+        assert_eq!(record.install, None);
+    }
+
+    #[test]
+    fn running_install_loads_as_failed() {
+        let directory = tempfile::tempdir().expect("temp directory");
+        let root = directory.path().join("vm");
+        let guest = root.join("default");
+        fs::create_dir_all(&guest).expect("guest directory");
+        fs::write(guest.join("disk.qcow2"), [0_u8; 1]).expect("disk");
+        let store = GuestStore::new(&root);
+        let mut record = store.load_all().expect("adopt").remove(0);
+        record.install = Some(StoredInstall {
+            state: StoredInstallState::Running,
+            finished_at: None,
+            failure: None,
+        });
+        store.save(&record).expect("save running install");
+        let loaded = store.load_all().expect("reload").remove(0);
+        assert_eq!(
+            loaded.install,
+            Some(StoredInstall {
+                state: StoredInstallState::Failed,
+                finished_at: None,
+                failure: Some("설치가 끝나기 전에 앱이 종료되었습니다.".to_owned()),
+            })
+        );
     }
 
     #[test]

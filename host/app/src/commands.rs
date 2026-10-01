@@ -351,6 +351,13 @@ pub(crate) async fn guest_reinstall(
     apply(app, &state, Command::GuestReinstall { name }).await
 }
 #[tauri::command]
+pub(crate) async fn guest_install_cancel(
+    app: AppHandle,
+    state: State<'_, ShellState>,
+) -> Result<AppSnapshot, AppIssue> {
+    apply(app, &state, Command::GuestInstallCancel).await
+}
+#[tauri::command]
 pub(crate) async fn guest_root_set(
     app: AppHandle,
     state: State<'_, ShellState>,
