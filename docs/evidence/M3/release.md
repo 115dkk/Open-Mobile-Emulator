@@ -157,3 +157,32 @@ https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36819100622 이다(2
 
 개발 PC에서는 같은 패치를 MSYS2 빌드 트리에서 증분 빌드해 개발 번들과 설치된 v0.1.0의 `qemu-system-x86_64.exe`를 바꿔 사용자가
 먼저 확인했다(증명 없는 개발 산출물. 릴리스에는 쓰지 않는다).
+
+## 7. 제품 릴리스 v0.1.1 (2026-10-02 새벽, 사전 릴리스)
+
+사용자 결정 2026-10-02 새벽: 0.1.0을 쓰면서 나온 문제의 수정(6절의 패치 0006, 창 즉시 따라오기, 해상도 상태 복원, 제품이 그리는
+제목 표시줄, GRUB 게스트 이관. `docs/release-notes/v0.1.1.md`)을 사용자가 써 보기 전에 사전 릴리스로 한 단계 올린다. 버전을
+0.1.1로 올린 c4a494d에 태그 `v0.1.1`을 밀었고, 직전 커밋 9695d88의 CI와 로컬 `ci/Invoke-AllChecks.ps1`(Pester 48개)이 통과한
+뒤였다. `release.yml` 실행은 https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36886487101 이다(2026-10-01
+15:43~16:03 UTC).
+
+| 잡 | 시간 | 내용 |
+|---|---|---|
+| verify | 7분 39초 | 4절과 같은 게이트(정책 검사, Pester, UI 테스트, fmt, clippy, cargo test) |
+| qemu-source-offer | 55초 | `Get-QemuBundle.ps1`: 6절의 ome5 zip과 소스 묶음을 받아 SHA-256 대조와 `gh attestation verify --signer-workflow .../qemu-release.yml` 통과 |
+| product | 11분 41초 | 버전 일치 확인(tauri.conf.json, Cargo.toml, package.json, 태그, 릴리스 노트), 설치기 빌드, `Stage-ReleaseAssets.ps1`, `Check-ReleaseAssets.ps1`, `actions/attest@v4`, `gh release create --prerelease`, 올린 자산을 다시 받아 `gh attestation verify` |
+
+릴리스 https://github.com/115dkk/Open-Mobile-Emulator/releases/tag/v0.1.1 (사전 릴리스)의 자산은 다음과 같다.
+
+| 자산 | 크기 | SHA-256 |
+|---|---|---|
+| `Open-Mobile-Emulator-0.1.1-x64-setup.exe` | 54,287,175 B | `9f245425…a725a8` |
+| `Open-Mobile-Emulator-0.1.1-x64-setup.exe.sha256` | 107 B | |
+| `qemu-ome-v11.1.1-c3d48b7d1e89-win64.zip` | 62,777,151 B | `3ff59ee8…4cbdf3` (6절의 ome5 파일. 4절의 ome4와 이름은 같고 내용이 다르다) |
+| `qemu-source-offer-v11.1.1-c3d48b7d1e89.tar.gz` | 249,539,916 B | `3838fd75…936109` |
+| `THIRD_PARTY.md`, `NOTICE`, `LICENSE`, `SHA256SUMS` | | 4절과 같은 내용 |
+
+개발 PC에서 사용자 절차대로 다시 확인했다(`release-v0.1.1-verify-local.txt`). 설치기의 SHA-256이 `.sha256`과 같고 `SHA256SUMS`의
+일곱 항목이 전부 맞으며, 두 QEMU 파일의 SHA-256이 `manifests/qemu-release.json`의 ome5 고정값과 같다. 여덟 자산 모두
+`gh attestation verify --signer-workflow .../release.yml`을 통과하고, 증명은 `refs/tags/v0.1.1`(c4a494d)과 실행 36886487101을
+가리킨다. 개발 PC에서 만든 파일은 릴리스에 없다(ADR-0007).

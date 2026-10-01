@@ -1,0 +1,52 @@
+User-style verification of release v0.1.1 on the dev PC, 2026-10-01T16:06:44Z
+== sha256sum vs .sha256
+file   9f2454258ff0d00c14250e5787467b828b60c8de4e5d4459bc23fc71eaa725a8
+sha256 9f2454258ff0d00c14250e5787467b828b60c8de4e5d4459bc23fc71eaa725a8  Open-Mobile-Emulator-0.1.1-x64-setup.exe
+MATCH
+== SHA256SUMS
+edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6  LICENSE
+26c2e6fb835d520184bc721dad6fd44a500299553698b90082615c8f42c55028  NOTICE
+9f2454258ff0d00c14250e5787467b828b60c8de4e5d4459bc23fc71eaa725a8  Open-Mobile-Emulator-0.1.1-x64-setup.exe
+3143bdb017cb7da0442b7e2d6135888bd02645931b76d4e2e49c7052309e8d19  Open-Mobile-Emulator-0.1.1-x64-setup.exe.sha256
+3ff59ee8d3a00a52b046b8665c1bf7a1ab0a8056f9b87e78c7a01beb704cbdf3  qemu-ome-v11.1.1-c3d48b7d1e89-win64.zip
+3838fd75edfa16a6b70e18c6aa92992bf1a7e7c49a16dcf7a49286bb86936109  qemu-source-offer-v11.1.1-c3d48b7d1e89.tar.gz
+594070cf5c54c645695cd29c4b928175ae6056aa485a896650fcfe18f2c91a9a  THIRD_PARTY.md
+== sha256sum -c SHA256SUMS
+LICENSE: OK
+NOTICE: OK
+Open-Mobile-Emulator-0.1.1-x64-setup.exe: OK
+Open-Mobile-Emulator-0.1.1-x64-setup.exe.sha256: OK
+qemu-ome-v11.1.1-c3d48b7d1e89-win64.zip: OK
+qemu-source-offer-v11.1.1-c3d48b7d1e89.tar.gz: OK
+THIRD_PARTY.md: OK
+== manifests/qemu-release.json (the QEMU files must be the pinned ome5 ones)
+_comment: The QEMU release that the product release bundles (ADR-0011). qemu-release.yml built it on a GitHub-hosted Windows runner and attested every file; release.yml downloads these two files, compares the SHA-256 and verifies the attestation against signer_workflow before bundling the runtime and re-uploading the source offer (R4).
+repository: 115dkk/Open-Mobile-Emulator
+tag: qemu-v11.1.1-ome5
+built_by_run: https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36864791103
+built_at_commit: ea71f079b75a7ae79dd64493946545ce145f9157
+qemu_tag: v11.1.1
+qemu_commit: c3d48b7d1e89604920e5b81b91140c2ad39a1943
+patches: 6 entries
+runtime_zip: qemu-ome-v11.1.1-c3d48b7d1e89-win64.zip
+runtime_zip_sha256: 3ff59ee8d3a00a52b046b8665c1bf7a1ab0a8056f9b87e78c7a01beb704cbdf3
+source_offer: qemu-source-offer-v11.1.1-c3d48b7d1e89.tar.gz
+source_offer_sha256: 3838fd75edfa16a6b70e18c6aa92992bf1a7e7c49a16dcf7a49286bb86936109
+signer_workflow: 115dkk/Open-Mobile-Emulator/.github/workflows/qemu-release.yml
+== gh attestation verify (installer)
+subjects: 8 incl. LICENSE, NOTICE, Open-Mobile-Emulator-0.1.1-x64-setup.exe, Open-Mobile-Emulator-0.1.1-x64-setup.exe.sha256, SHA256SUMS, THIRD_PARTY.md, qemu-ome-v11.1.1-c3d48b7d1e89-win64.zip, qemu-source-offer-v11.1.1-c3d48b7d1e89.tar.gz
+predicateType: https://slsa.dev/provenance/v1
+source: https://github.com/115dkk/Open-Mobile-Emulator refs/tags/v0.1.1 c4a494d4f77a0f46b7bb68bc38ccbebdeecab355
+buildSignerURI: https://github.com/115dkk/Open-Mobile-Emulator/.github/workflows/release.yml@refs/tags/v0.1.1
+runInvocationURI: https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36886487101/attempts/1
+exit=0
+== gh attestation verify --signer-workflow .../release.yml (every asset)
+ok   LICENSE
+ok   NOTICE
+ok   Open-Mobile-Emulator-0.1.1-x64-setup.exe
+ok   Open-Mobile-Emulator-0.1.1-x64-setup.exe.sha256
+ok   qemu-ome-v11.1.1-c3d48b7d1e89-win64.zip
+ok   qemu-source-offer-v11.1.1-c3d48b7d1e89.tar.gz
+ok   SHA256SUMS
+ok   THIRD_PARTY.md
+failed=0

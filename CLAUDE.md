@@ -262,7 +262,7 @@ PRODUCT/
 6. 빌드 출처 증명(ADR-0007): 릴리스에 올리는 실행 파일(설치기, 제품 exe, 커스텀 QEMU와 동봉 DLL, OVMF)과 R4 소스 묶음은 태그 커밋에서 GitHub Actions 윈도우 러너로만 빌드하고, `actions/attest@v4`로 파일마다 빌드 출처 증명을 붙인다. 개발 PC에서 만든 파일은 릴리스에 올리지 않는다. 확인 명령 `gh attestation verify <파일> --repo 115dkk/Open-Mobile-Emulator`를 릴리스 노트와 `docs/help/`에 적는다. 이 잡이 실패하면 릴리스를 만들 수 없다.
 7. 릴리스 구조(ADR-0011): QEMU는 `qemu-release.yml`(잡 `qemu-source-offer`)이 러너에서 빌드해 출처 증명을 붙인 `qemu-<태그>-<접미사>` 사전 릴리스로 따로 내고, 제품 릴리스 `release.yml`은 `manifests/qemu-release.json`이 가리키는 그 릴리스의 런타임 zip과 소스 묶음을 받아 SHA-256과 출처 증명을 확인한 뒤 설치기에 넣고 같은 릴리스에 다시 올린다. 설치기 자산은 `Open-Mobile-Emulator-<버전>-x64-setup.exe` 하나와 그 `.sha256`이다. 첫 릴리스 v0.1.0은 사전 릴리스로 올린다(사용자 결정 2026-10-01). 사전 릴리스는 제품의 자동 업데이트가 보지 않는다.
 
-상태(2026-10-01): M3 완료. 1~7번을 구현했고 첫 사전 릴리스 v0.1.0이 태그 e79c270에서 러너로 빌드되어 올라갔다(`docs/evidence/M3/release.md`). 완료 기준 1, 3, 4는 그 릴리스로, 2는 개발 PC의 새 홈(35회차)과 GitHub 러너(`m3-release-dod.yml` 실행 36826094020, 앞선 두 시도는 SourceForge의 HTTP 522 장애로 이미지 내려받기에서 멈췄다)로 증거가 있다.
+상태(2026-10-01): M3 완료. 1~7번을 구현했고 첫 사전 릴리스 v0.1.0이 태그 e79c270에서 러너로 빌드되어 올라갔다(`docs/evidence/M3/release.md`). 완료 기준 1, 3, 4는 그 릴리스로, 2는 개발 PC의 새 홈(35회차)과 GitHub 러너(`m3-release-dod.yml` 실행 36826094020, 앞선 두 시도는 SourceForge의 HTTP 522 장애로 이미지 내려받기에서 멈췄다)로 증거가 있다. 두 번째 사전 릴리스 v0.1.1(태그 c4a494d, 2026-10-02)은 0.1.0을 쓰면서 나온 창과 표시 문제를 고친 것이며 같은 절차로 올렸다(`docs/release-notes/v0.1.1.md`, `docs/evidence/M3/release.md` 7절).
 
 완료 기준(사용자 승인 2026-10-01)
 - 태그 커밋에서 릴리스 워크플로가 설치기, QEMU 묶음, 소스 묶음, SHA256SUMS를 만들고 전부 출처 증명을 붙여 올린다.
