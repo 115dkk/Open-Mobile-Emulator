@@ -66,6 +66,8 @@ jobs:
           gh release view '${{ steps.pins.outputs.release }}' --json tagName 2>$null | Out-Null
           if ($LASTEXITCODE -eq 0) { throw 'Release ${{ steps.pins.outputs.release }} already exists; pick another suffix' }
           'The release name is free'
+          # The failed lookup is the wanted outcome; the step's own exit code must not repeat it.
+          exit 0
 
       - name: Set up MSYS2 UCRT64
         uses: msys2/setup-msys2@v2
