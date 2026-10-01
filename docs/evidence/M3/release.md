@@ -186,3 +186,12 @@ https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36819100622 이다(2
 일곱 항목이 전부 맞으며, 두 QEMU 파일의 SHA-256이 `manifests/qemu-release.json`의 ome5 고정값과 같다. 여덟 자산 모두
 `gh attestation verify --signer-workflow .../release.yml`을 통과하고, 증명은 `refs/tags/v0.1.1`(c4a494d)과 실행 36886487101을
 가리킨다. 개발 PC에서 만든 파일은 릴리스에 없다(ADR-0007).
+
+러너에서의 설치기 완주(`m3-release-dod.yml -f tag=v0.1.1`, 5절과 같은 방식)는 두 번 돌렸다.
+
+| 시도 | 실행 | 결과 |
+|---|---|---|
+| 1 | https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36889630779 (16:07~16:16 UTC) | 설치기 검증과 표준 사용자 설치 통과, 마법사의 내려받기 49초, 설치 60초, 첫 부팅 92초, 게임 설치 25초 통과. `game-launch`에서 드라이버가 레일의 `무대` 항목을 찾다가 12초 뒤 멈췄다. 제품의 레일 항목 이름을 `화면`으로 바꾼 것(ea71f07)을 드라이버 `ci/dod/run-dod.mjs`에 반영하지 않은 시험 장치의 결함이며 제품의 단계는 전부 통과했다. 0befc3a로 고쳤다 |
+| 2 | https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36891206352 (16:20~16:43 UTC) | 통과. 내려받기 53.9초, 설치 63.8초, 첫 부팅 100.0초, 게임 설치 26.5초, 게임 실행 964초(화면 분류: 빈 화면 → 권한 요청 → `game-ui` 열네 장 연속), 정지·종료·정리 통과. 드라이버 결과 `needs-review`(게임 스크린샷은 사람이 본다)이고 실패한 단계는 없다 |
+
+0.1.1 설치기는 러너의 깨끗한 표준 사용자 계정에서도 마법사만으로 게임 실행까지 간다(M3 완료 기준 2).
