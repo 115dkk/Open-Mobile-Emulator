@@ -1,0 +1,120 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+#
+# OME unattended install helper (ADR-0010 spike).
+#
+# Sourced by the Bliss initrd /init after it has mounted the ISO at /mnt, mounted the
+# ISO's system image at /android and linked /system to it. Runs only when the kernel
+# command line carries OME_INSTALL=1, and always ends in poweroff, so the helper boot
+# never reaches Android. Progress goes to the serial port as "OME-INSTALL ..." lines.
+#
+# Kernel command line variables (the kernel exports unknown KEY=VALUE pairs to init):
+#   OME_INSTALL=1      run this helper
+#   OME_DISK=/dev/vda  target disk (default /dev/vda)
+#   OME_SRC=ome        folder on the new partition that holds kernel, initrd.img,
+#                      system.img and data/ (default ome); the installed guest boots with
+#                      -append "root=/dev/ram0 SRC=/<OME_SRC> ..."
+#
+
+[ "$OME_INSTALL" = "1" ] || return 0
+
+ome_disk=${OME_DISK:-/dev/vda}
+ome_dir=${OME_SRC:-ome}
+ome_part=${ome_disk}1
+ome_tty=/dev/ttyS0
+
+exec >$ome_tty 2>&1
+
+ome_say()
+{
+	echo "OME-INSTALL $*"
+}
+
+ome_off()
+{
+	sync
+	poweroff -f
+	sleep 5
+	echo o > /proc/sysrq-trigger
+	sleep 30
+}
+
+ome_fail()
+{
+	ome_say "fail $*"
+	ome_off
+	exit 1
+}
+
+cd / || ome_fail cd
+ome_say "start disk=$ome_disk dir=$ome_dir kernel=$(uname -r)"
+ome_say "efi=$(cat /sys/firmware/efi/fw_platform_size 2>/dev/null)"
+
+# 1. tools: sgdisk, pv and their libraries live in install.img (the initrd removed the
+#    busybox fdisk and mke2fs on purpose; mke2fs comes from the Android system image).
+ome_say "step tools 1"
+[ -f /src/install.img ] || ome_fail "no install.img"
+zcat /src/install.img | ( cd /; cpio -iud > /dev/null 2>&1 ) || ome_fail tools
+ome_mkfs=/system/bin/mke2fs
+[ -x $ome_mkfs ] || ome_mkfs=$(command -v mkfs.ext4)
+ome_say "tools sgdisk=$(command -v sgdisk) pv=$(command -v pv) mke2fs=$ome_mkfs mkfs.ext3=$(command -v mkfs.ext3) mkfs.ext4=$(command -v mkfs.ext4) rsync=$(command -v rsync)"
+[ -n "$ome_mkfs" ] || ome_fail "no mke2fs"
+command -v sgdisk > /dev/null || ome_fail "no sgdisk"
+
+# 2. source files: the ISO's system.efs is mounted at /sfs and holds a writable system.img
+#    (the interactive installer copies the same three files).
+[ -b $ome_disk ] || ome_fail "no $ome_disk"
+ome_sys=/sfs/system.img
+if [ ! -f $ome_sys ]; then
+	ome_say "sfs=$(ls /sfs 2>/dev/null | tr '\n' ' ')"
+	ome_fail "no /sfs/system.img"
+fi
+ome_size=$(stat -c %s $ome_sys)
+ome_say "source kernel=$(stat -c %s /mnt/kernel) initrd=$(stat -c %s /mnt/initrd.img) system=$ome_size"
+
+# 3. partition: GPT with one Linux partition. No ESP: the installed guest boots the kernel
+#    directly from the host (-kernel/-initrd), so no boot loader is written.
+ome_say "step partition 5"
+sgdisk --zap-all $ome_disk > /dev/null 2>&1 || ome_fail zap
+sgdisk --new=1:0:0 --typecode=1:8300 --change-name=1:OME $ome_disk > /dev/null 2>&1 || ome_fail sgdisk
+partprobe $ome_disk > /dev/null 2>&1
+n=0
+until [ -b $ome_part ]; do
+	mdev -s
+	n=$((n+1))
+	[ $n -gt 30 ] && ome_fail "no $ome_part"
+	sleep 1
+done
+
+# 4. filesystem
+ome_say "step format 10"
+$ome_mkfs -q -t ext4 -L OME $ome_part > /dev/null 2>&1 || ome_fail mke2fs
+mkdir -p /hd
+mount -t ext4 -o noatime $ome_part /hd || ome_fail mount
+mkdir -p /hd/$ome_dir/data || ome_fail mkdir
+
+# 5. copy kernel, initrd.img and system.img (pv reports whole percentages on stderr)
+ome_say "step copy 15"
+cp /mnt/kernel /hd/$ome_dir/kernel || ome_fail copy-kernel
+cp /mnt/initrd.img /hd/$ome_dir/initrd.img || ome_fail copy-initrd
+( pv -n -i 2 $ome_sys > /hd/$ome_dir/system.img ) 2>&1 | while read pct; do
+	case "$pct" in
+		[0-9]*) ome_say "step copy $((15 + pct * 75 / 100))" ;;
+		*) ome_say "pv $pct" ;;
+	esac
+done
+ome_copied=$(stat -c %s /hd/$ome_dir/system.img)
+[ "$ome_copied" = "$ome_size" ] || ome_fail "copy-system $ome_copied of $ome_size"
+
+# 6. finish
+ome_say "step finish 92"
+chown 0:0 /hd/$ome_dir /hd/$ome_dir/* || ome_fail chown
+chmod 644 /hd/$ome_dir/kernel /hd/$ome_dir/initrd.img /hd/$ome_dir/system.img || ome_fail chmod
+echo "installed=$(date -u +%Y-%m-%dT%H:%M:%SZ) src=$ome_dir" > /hd/$ome_dir/ome-install.txt
+sync
+umount /hd || ome_fail umount
+sync
+ome_say "df $(df -k $ome_part 2>/dev/null | tail -1)"
+ome_say "done"
+ome_off
+exit 0

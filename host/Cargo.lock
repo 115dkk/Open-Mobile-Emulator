@@ -2411,6 +2411,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "ome-guest-install"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "thiserror 2.0.21",
+]
+
+[[package]]
 name = "ome-host-check"
 version = "0.1.0"
 dependencies = [

@@ -8,3 +8,4 @@
 *.png binary
 *.jpg binary
 *.ico binary
+host/crates/ome-guest-install/scripts/99-ome-install text eol=lf

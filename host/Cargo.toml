@@ -11,6 +11,7 @@ members = [
     "crates/ome-platform-win",
     "crates/ome-guest-image",
     "crates/ome-guest-config",
+    "crates/ome-guest-install",
     "crates/ome-qmp",
     "crates/ome-supervisor",
     "crates/ome-artifacts",
