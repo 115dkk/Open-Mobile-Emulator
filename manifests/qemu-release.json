@@ -1,9 +1,9 @@
 {
   "_comment": "The QEMU release that the product release bundles (ADR-0011). qemu-release.yml built it on a GitHub-hosted Windows runner and attested every file; release.yml downloads these two files, compares the SHA-256 and verifies the attestation against signer_workflow before bundling the runtime and re-uploading the source offer (R4).",
   "repository": "115dkk/Open-Mobile-Emulator",
-  "tag": "qemu-v11.1.1-ome4",
-  "built_by_run": "https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36813804342",
-  "built_at_commit": "73aa3a5e71008d4dbbc12c58b679634c517b9027",
+  "tag": "qemu-v11.1.1-ome5",
+  "built_by_run": "https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36864791103",
+  "built_at_commit": "ea71f079b75a7ae79dd64493946545ce145f9157",
   "qemu_tag": "v11.1.1",
   "qemu_commit": "c3d48b7d1e89604920e5b81b91140c2ad39a1943",
   "patches": [
@@ -11,11 +11,12 @@
     "0002-virtio-gpu-refresh-rate-property.patch",
     "0003-ui-sdl2-swap-interval-option.patch",
     "0004-ui-sdl2-activate-on-click-option.patch",
-    "0005-ui-sdl2-owner-window-and-qmp-geometry.patch"
+    "0005-ui-sdl2-owner-window-and-qmp-geometry.patch",
+    "0006-ui-sdl2-owner-window-keeps-guest-resolution.patch"
   ],
   "runtime_zip": "qemu-ome-v11.1.1-c3d48b7d1e89-win64.zip",
-  "runtime_zip_sha256": "ba2a53f3680fc8d96874d86e1ae5b14c08576d29f4ab49864e3103571215db42",
+  "runtime_zip_sha256": "3ff59ee8d3a00a52b046b8665c1bf7a1ab0a8056f9b87e78c7a01beb704cbdf3",
   "source_offer": "qemu-source-offer-v11.1.1-c3d48b7d1e89.tar.gz",
-  "source_offer_sha256": "8b73799575171ecd4c8d861198ca7c7eb40f61845d3c622527426ea0ed3ac380",
+  "source_offer_sha256": "3838fd75edfa16a6b70e18c6aa92992bf1a7e7c49a16dcf7a49286bb86936109",
   "signer_workflow": "115dkk/Open-Mobile-Emulator/.github/workflows/qemu-release.yml"
 }

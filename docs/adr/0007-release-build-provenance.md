@@ -55,3 +55,6 @@ Trust"(CACM 27권 8호)에서 소스가 깨끗해도 컴파일러가 오염되�
 - 2026-10-01에 `qemu-release.yml`이 같은 커밋과 패치 집합으로 러너에서 빌드하고 증명을 붙인 `qemu-v11.1.1-ome4`를
   올렸다(`docs/evidence/M3/release.md` 3절). `manifests/qemu-release.json`과 `m2-dod.yml`이 이 릴리스를 가리키며, 제품
   릴리스는 이것만 동봉한다. ome1~ome3는 기록으로만 남는다.
+- 2026-10-01 저녁에 패치 0006(소유된 창은 게스트의 뷰포트: 창 크기를 해상도로 알리지 않고 마우스를 레터박스에 맞춰 매핑)을 더해
+  `qemu-v11.1.1-ome5`를 같은 방식으로 러너에서 빌드했다(실행 36864791103, 커밋 ea71f07). `manifests/qemu-release.json`과
+  `m2-dod.yml`이 그 릴리스를 가리킨다.

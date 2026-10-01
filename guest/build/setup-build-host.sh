@@ -53,7 +53,7 @@ if ! id "$BUILD_USER" >/dev/null 2>&1; then
 fi
 echo "$BUILD_USER ALL=(ALL) NOPASSWD:ALL" > "/etc/sudoers.d/90-$BUILD_USER"
 chmod 440 "/etc/sudoers.d/90-$BUILD_USER"
-git lfs install --system >/dev/null
+git lfs install --system --skip-repo >/dev/null
 
 echo "==> rust toolchain for $BUILD_USER (the README asks for rustup, not distro Rust)"
 sudo -u "$BUILD_USER" -H bash -c 'if [ ! -x "$HOME/.cargo/bin/rustc" ]; then curl -fsSL https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain stable >/dev/null; fi; "$HOME/.cargo/bin/rustc" --version'

@@ -141,3 +141,19 @@ https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36819100622 이다(2
 | 게임 실행 | 16.0분 | 1분에 권한 대화상자, 2분부터 게임 화면. 마지막 화면(`game-15`)은 게임 제목 화면 위의 게임 서버 점검 안내("현재 서버 점검 중입니다, 예상 완료 10/1/2026 4:00 PM")였다. 점검 안내는 게임 서버가 보낸 것이므로 설치된 제품의 게스트 네트워크는 러너에서 바깥까지 닿는다. 데이터 다운로드 안내는 점검 때문에 나오지 않았다 |
 
 이로써 완료 기준 2의 러너 쪽도 증거가 생겼다. 설치기 한 번과 마법사의 승인 외에 사람의 입력은 없었다.
+
+## 6. QEMU 릴리스 ome5 (2026-10-01 저녁, 패치 0006)
+
+사용자 보고 둘(프리셋 해상도가 되돌아감, 게스트 포인터가 커서 위에 뜸)의 원인이 QEMU SDL 프런트엔드의 "창 크기 = 표면 크기"
+전제였고, 패치 0006(`qemu-build/patches/README.md`)으로 고쳤다. `qemu-release.yml`을 접미사 `ome5`로 다시 실행했다
+(https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36864791103, 커밋 ea71f07, 처음 띄운 36863189706은 패치가
+밀어 올려지기 전 커밋이어서 취소). `manifests/qemu-release.json`과 `m2-dod.yml`을 이 릴리스로 옮겼다.
+
+| 항목 | 값 |
+|---|---|
+| 릴리스 | 사전 릴리스 `qemu-v11.1.1-ome5`, 태그는 워크플로 커밋 ea71f07 |
+| 산출물 | `qemu-ome-v11.1.1-c3d48b7d1e89-win64.zip` 62,777,151 B(SHA-256 `3ff59ee8…4cbdf3`), `qemu-source-offer-v11.1.1-c3d48b7d1e89.tar.gz` 249,539,916 B(`3838fd75…936109`), `THIRD_PARTY.generated.md`, `ome-patches.txt`(0001~0006), `pacman-lock.txt`, `SHA256SUMS` |
+| 로컬 검증 | `ci/release/Get-QemuBundle.ps1`: 두 파일 모두 SHA-256 일치, `gh attestation verify --signer-workflow .../qemu-release.yml` 통과, SHA256SUMS와 매니페스트 일치 |
+
+개발 PC에서는 같은 패치를 MSYS2 빌드 트리에서 증분 빌드해 개발 번들과 설치된 v0.1.0의 `qemu-system-x86_64.exe`를 바꿔 사용자가
+먼저 확인했다(증명 없는 개발 산출물. 릴리스에는 쓰지 않는다).
