@@ -478,7 +478,6 @@ impl AppRuntime {
             }
             Ok(None) => (WizardState::default(), AppPhase::Wizard),
             Err(error) => {
-                #[cfg(debug_assertions)]
                 eprintln!("[wizard] failed to load state: {error}");
                 (WizardState::default(), AppPhase::Wizard)
             }
@@ -987,7 +986,6 @@ impl AppRuntime {
                         }
                     };
                     if let Err(error) = adb.install(&package) {
-                        #[cfg(debug_assertions)]
                         eprintln!("[apps] install failed: {error}");
                         failure = Some(issues::app_install_failed());
                         break;
@@ -3465,7 +3463,6 @@ impl AppRuntime {
 
     fn persist_wizard(&mut self) {
         if let Err(error) = self.guest_store.save_wizard(&self.wizard) {
-            #[cfg(debug_assertions)]
             eprintln!("[wizard] failed to save state: {error}");
         }
     }

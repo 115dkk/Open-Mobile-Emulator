@@ -228,6 +228,8 @@ pub(crate) fn install(app: &tauri::App) -> tauri::Result<()> {
     Ok(())
 }
 
+/// Used by the debug-only overlay check (`overlay_check.rs`).
+#[cfg(debug_assertions)]
 pub(crate) fn snapshot(app: &tauri::AppHandle, snapshot: &AppSnapshot, guest_rect: Option<Rect>) {
     snapshot_with_stage_visibility(app, snapshot, guest_rect, true);
 }
@@ -246,6 +248,8 @@ pub(crate) fn remember_stage_rect(app: &tauri::AppHandle, rect: StageRect) {
     app.state::<OverlayWindow>().remember_stage_rect(rect);
 }
 
+/// Used by the debug-only overlay check (`overlay_check.rs`).
+#[cfg(debug_assertions)]
 pub(crate) fn window(app: &tauri::AppHandle) -> Option<WebviewWindow> {
     app.state::<OverlayWindow>()
         .state
