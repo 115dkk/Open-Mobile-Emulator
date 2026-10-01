@@ -16,6 +16,16 @@ only when a release fixes them.
 - 0.1.0 is a pre-release. The product's update check reads GitHub's `latest`
   release, which never points at a pre-release, so no update is offered between
   pre-releases; the first regular release will be.
+- Security software that controls outbound connections per program (seen with
+  AhnLab V3 365 Clinic on the development host, 2026-10-01,
+  `docs/evidence/M3/guest-network-by-binary-path.txt`) can silently block the
+  guest's internet: `qemu-system-x86_64.exe` in the install folder is a program
+  that software has never seen. The guest still boots, adb works and ICMP goes
+  through, but DNS and outbound TCP from the guest fail, so a game reports that
+  it cannot reach its server. Allow `%LOCALAPPDATA%\Open Mobile Emulator\qemu\bin\qemu-system-x86_64.exe`
+  in that software; the product cannot do it for you (R9). The same copy of
+  QEMU at an already allowed path worked, so this is not a defect of the
+  bundled runtime.
 - Windows 10 is untested. Development and the completion runs used Windows 11
   22621 and the Windows Server 2025 hosted runner.
 - A guest installed by the interactive Bliss installer (before ADR-0010, that is

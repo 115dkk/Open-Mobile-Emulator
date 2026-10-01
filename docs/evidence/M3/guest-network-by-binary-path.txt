@@ -1,0 +1,88 @@
+Guest network tests on the dev PC, 2026-10-01 14:10-14:30 KST. Same guest disk (round 35 home), same QEMU command line (headless, -netdev user hostfwd 5555), only the QEMU binaries and their path differ.
+
+== A. installed product runtime (ome4, %LOCALAPPDATA%\Open Mobile Emulator\qemu\bin)
+qemu pid 25035
+boot completed after ~15 s
+== dns props
+
+10.0.2.0/24 dev eth0 proto kernel scope link src 10.0.2.15 
+    inet 10.0.2.15/24 brd 10.0.2.255 scope global eth0
+    inet6 fec0::b682:d2a0:9fae:e71e/64 scope site temporary dynamic 
+    inet6 fec0::c96b:aae7:d8b3:d910/64 scope site dynamic mngtmpaddr stable-privacy 
+    inet6 fe80::849d:f49e:f56b:62b3/64 scope link stable-privacy 
+== ping 8.8.8.8
+PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
+64 bytes from 8.8.8.8: icmp_seq=1 ttl=255 time=40.0 ms
+64 bytes from 8.8.8.8: icmp_seq=2 ttl=255 time=39.2 ms
+64 bytes from 8.8.8.8: icmp_seq=3 ttl=255 time=39.0 ms
+
+--- 8.8.8.8 ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2002ms
+rtt min/avg/max/mdev = 39.082/39.448/40.031/0.416 ms
+== ping 10.0.2.2 (host)
+PING 10.0.2.2 (10.0.2.2) 56(84) bytes of data.
+64 bytes from 10.0.2.2: icmp_seq=1 ttl=255 time=0.167 ms
+64 bytes from 10.0.2.2: icmp_seq=2 ttl=255 time=0.230 ms
+
+--- 10.0.2.2 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1020ms
+rtt min/avg/max/mdev = 0.167/0.198/0.230/0.034 ms
+== dns resolve + tcp 443
+ping: unknown host www.google.com
+nc: Timeout
+tcp443-fail
+nc: Timeout
+trickcal-tcp443-fail
+done
+
+== B. development bundle at its usual path (host\target\debug\qemu\bin)
+dev bundle qemu pid 25209
+boot completed after ~15 s
+== dns servers (dumpsys)
+  NetworkAgentInfo{network{100}  handle{432902426637}  ni{Ethernet CONNECTED extra: 52:54:00:12:34:56} Score(-2147483648 ; KeepConnected : 0 ; Policies : EVER_VALIDATED_NOT_AVOIDED_WHEN_BAD&IS_UNMETERED&IS_VALIDATED)  created everValidated lastValidated  lp{{InterfaceName: eth0 LinkAddresses: [ fe80::849d:f49e:f56b:62b3/64,10.0.2.15/24,fec0::c96b:aae7:d8b3:d910/64,fec0::513c:af8d:1eb0:23da/64 ] DnsAddresses: [ /10.0.2.3 ] Domains: null MTU: 0 ServerAddress: /10.0.2.2 TcpBufferSizes: 524288,1048576,3145728,524288,1048576,2097152 Routes: [ fe80::/64 -> :: eth0 mtu 0,::/0 -> fe80::2 eth0 mtu 0,fec0::/64 -> :: eth0 mtu 0,10.0.2.0/24 -> 0.0.0.0 eth0 mtu 0,0.0.0.0/0 -> 10.0.2.2 eth0 mtu 0 ]}}  nc{[ Transports: ETHERNET Capabilities: NOT_METERED&INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN&VALIDATED&NOT_ROAMING&FOREGROUND&NOT_CONGESTED&NOT_SUSPENDED&NOT_VCN_MANAGED LinkUpBandwidth>=100000Kbps LinkDnBandwidth>=100000Kbps Specifier: <EthernetNetworkSpecifier (eth0)> UnderlyingNetworks: Null]}  factorySerialNumber=1}
+== tcp 53 to slirp dns 10.0.2.3
+dns-tcp-ok
+== resolve
+PING www.google.com (142.251.154.119) 56(84) bytes of data.
+64 bytes from 142.251.154.119: icmp_seq=1 ttl=255 time=45.2 ms
+64 bytes from 142.251.154.119: icmp_seq=2 ttl=255 time=39.5 ms
+
+--- www.google.com ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1000ms
+rtt min/avg/max/mdev = 39.576/42.436/45.296/2.860 ms
+tcp443-ok
+done
+
+== C. mixed binaries at new scratch paths (mixA = ome4 exe + dev DLLs, mixB = dev exe + ome4 DLLs)
+=== mixA
+boot completed after ~15 s
+-- tcp 53 to 10.0.2.3
+dns-tcp-ok
+-- tcp 443 by ip
+nc: Timeout
+tcp443-ip-fail
+-- resolve
+ping: unknown host www.google.com
+=== mixB
+boot completed after ~20 s
+-- tcp 53 to 10.0.2.3
+dns-tcp-ok
+-- tcp 443 by ip
+nc: Timeout
+tcp443-ip-fail
+-- resolve
+ping: unknown host www.google.com
+done
+
+== D. exact copy of the development bundle at a new scratch path
+=== mixC: exact copy of the dev bundle at a new path
+boot completed after ~15 s
+-- tcp 443 by ip
+nc: Timeout
+tcp443-ip-fail
+-- resolve
+ping: unknown host www.google.com
+done
+
+== host firewall facts
+Windows Defender Firewall profiles: all disabled. SecurityCenter2 FirewallProduct: AhnLab V3 365 Clinic (productState 397312). No Windows firewall rule names qemu.
