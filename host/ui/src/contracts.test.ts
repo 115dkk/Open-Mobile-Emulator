@@ -119,7 +119,7 @@ const guestSummary = object<GuestSummary>({
   lastStartedAt: nullable(string), capabilities: capabilityReport,
 });
 const snapshot = object<AppSnapshot>({
-  contractVersion: (value, path) => { if (value !== 7) fail(path, 'contract version 7'); },
+  contractVersion: (value, path) => { if (value !== 8) fail(path, 'contract version 8'); },
   productVersion: string, phase: enumeration('wizard', 'main'),
   blocker: nullable(object({ kind: enumeration('virtualizationOff', 'qemuMissing', 'hypervisorPlatformOff') })),
   host: object<HostReport>({
@@ -132,7 +132,11 @@ const snapshot = object<AppSnapshot>({
   wizard: object<WizardView>({
     step: enumeration('hostCheck', 'whpxConsent', 'rebootPending', 'artifactDownload', 'guestInstall', 'firstBoot', 'appInstall', 'done'),
     canContinue: boolean, canSkip: boolean, download: nullable(transfer), imageId: nullable(string),
-    installGuide: array(string), diskSizeGib: number, diskFreeBytes: nullable(number),
+    install: nullable(object<NonNullable<WizardView['install']>>({
+      stage: enumeration('waiting', 'tools', 'partition', 'format', 'copy', 'finish', 'done', 'failed'),
+      percent: number, failure: nullable(string), logPath: nullable(string),
+    })),
+    diskSizeGib: number, diskFreeBytes: nullable(number),
   }),
   images: object<ImagesView>({ profiles: array(imageSummary), guests: array(guestSummary), activeGuest: nullable(string) }),
   guest: object<GuestView>({
@@ -185,7 +189,7 @@ const commandShapes: Record<string, Record<string, Check>> = {
   openHelp: { topic: enumeration('virtualizationBios', 'hypervisorPlatform', 'googleAccount', 'adbSecurity', 'qemuSource', 'thirdPartyNotices', 'releaseNotes') },
   appQuit: {}, whpxEnable: {}, artifactDownloadStart: {}, artifactDownloadCancel: {}, guestImageSelect: { id: string },
   guestCreate: { imageId: string, sizeGib: number }, guestSelect: { id: string },
-  guestDelete: { id: string }, guestReinstall: { name: string }, guestStart: {}, guestStop: {},
+  guestDelete: { id: string }, guestReinstall: { name: string }, guestInstallCancel: {}, guestStart: {}, guestStop: {},
   guestRestart: {}, guestRootSet: { enabled: boolean }, guestVolumeSet: { index: number },
   stageRectChanged: { rect }, stageHidden: {}, screenshotSave: {},
   appInstallPick: {}, appInstallCancel: {}, appUninstall: { package: string }, appLaunch: { package: string },

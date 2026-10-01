@@ -23,7 +23,7 @@ function show(snapshot: AppSnapshot) {
 describe('first-run wizard: 나중에 하기', () => {
   it.each([
     'host-ready', 'whpx-consent', 'reboot-pending', 'download-idle', 'download-transferring',
-    'install-disk', 'install-guide', 'install-failed', 'first-boot', 'first-boot-failed', 'app-install',
+    'install-disk', 'install-failed', 'install-installed', 'first-boot', 'first-boot-failed', 'app-install',
   ])('%s closes the wizard and keeps the step', async (id) => {
     const actions = show(variant(id));
     await userEvent.click(screen.getByRole('button', { name: '나중에 하기' }));
@@ -160,22 +160,39 @@ describe('first-run wizard: S1.5 install', () => {
     expect(actions.guestCreate).toHaveBeenCalledWith('sample-android-13', 128);
   });
 
-  it('shows the image profile install guide next to the stage', () => {
-    show(variant('install-guide'));
-    const guide = screen.getAllByRole('listitem').map((item) => item.textContent);
-    expect(guide).toContain('1ISO 메뉴에서 Installation을 선택합니다.');
-    expect(guide).toContain('6설치가 끝나면 가상 머신을 끄고 ISO 없이 다시 시작합니다.');
-    expect(screen.getByRole('button', { name: '설치 완료' })).toBeDisabled();
+  it('shows the hidden install as progress alone and cancels it', async () => {
+    const actions = show(variant('install-progress'));
+    expect(screen.getByText('운영체제를 설치하고 있습니다. 몇 분 걸리며, 끝나면 바로 첫 부팅으로 넘어갑니다.')).toBeInTheDocument();
+    expect(screen.getByRole('progressbar', { name: '설치 진행률' })).toHaveAttribute('aria-valuenow', '58');
+    const steps = screen.getByRole('list', { name: '설치 진행' });
+    expect(within(steps).getByText('시스템 복사').closest('li')).toHaveAttribute('aria-current', 'step');
+    expect(within(steps).getByText('포맷').closest('li')).toHaveClass('ome-step-done');
+    expect(within(steps).getByText('마무리').closest('li')).toHaveClass('ome-step-pending');
+    // Nothing to operate and no way to leave it running unseen.
+    expect(screen.queryByRole('button', { name: '설치 완료' })).toBeNull();
+    expect(screen.queryByRole('button', { name: '나중에 하기' })).toBeNull();
+    await userEvent.click(screen.getByRole('button', { name: '취소' }));
+    expect(actions.guestInstallCancel).toHaveBeenCalledOnce();
   });
 
-  it('names a failed installer start, keeps 설치 완료 disabled and offers a reinstall', async () => {
+  it('names a failed install with its reason and log and offers a reinstall', async () => {
     const actions = show(variant('install-failed'));
     const notice = screen.getByRole('alert');
-    expect(within(notice).getByText('운영체제 설치 프로그램을 시작하지 못했습니다.')).toBeInTheDocument();
+    expect(within(notice).getByText('운영체제를 설치하지 못했습니다.')).toBeInTheDocument();
+    expect(within(notice).getByText('mke2fs')).toBeInTheDocument();
+    expect(within(notice).getByText(/install-serial\.log$/)).toBeInTheDocument();
     expect(within(notice).getByText('디스크를 지우고 처음부터 다시 설치할 수 있습니다.')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '설치 완료' })).toBeDisabled();
-    await userEvent.click(within(notice).getByRole('button', { name: '다시 설치' }));
+    await userEvent.click(screen.getByRole('button', { name: '진단 묶음 내보내기' }));
+    expect(actions.diagnosticsExport).toHaveBeenCalledOnce();
+    await userEvent.click(screen.getByRole('button', { name: '다시 설치' }));
     expect(actions.guestReinstall).toHaveBeenCalledWith('android-13');
+  });
+
+  it('only confirms an operating system that is already installed', async () => {
+    const actions = show(variant('install-installed'));
+    expect(screen.getByText('운영체제가 설치되어 있습니다.')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: '다음' }));
+    expect(actions.wizardContinue).toHaveBeenCalledOnce();
   });
 });
 

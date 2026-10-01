@@ -290,9 +290,11 @@ Pie(API 28)는 ADR-0008로 2026-09-28에 뺐다), 그 뒤로 새 안드로이드
 - 이미지 프로필의 필드: `id`, `display_name`(사용자 말로, 예: "안드로이드 13"), `android_version`,
   `api_level`, `distribution`(`bliss`, `android_x86`, `self_built`), `artifact`(`manifests/artifacts.json`의
   산출물 이름), `translator`(`houdini`, `ndk_translation`, `digitalis`, `none`; `translator/`
-  계약의 `android_api`와 대조), `boot_args`, `grub_entry_hint`, `install_guide`(설치기 안내 문장
-  목록), `qemu_overrides`(허용 목록 안의 열거형 값만: GPU 장치, 디스플레이 옵션, EDID), `status`
-  (`verified`, `candidate`, `deprecated`)와 검증 기록.
+  계약의 `android_api`와 대조), `boot_args`(직접 커널 부팅의 `-append`에 `root=/dev/ram0 SRC=/ome`
+  뒤에 붙는 인자), `boot_files`(ISO 안의 `kernel`과 `initrd` 경로. 제품이 설치 때 꺼낸다),
+  `install`(`helper_boot`. ADR-0010), `qemu_overrides`(허용 목록 안의 열거형 값만: GPU 장치,
+  디스플레이 옵션, EDID), `status`(`verified`, `candidate`, `deprecated`)와 검증 기록.
+  `grub_entry_hint`와 `install_guide`는 대화형 설치기 시절의 필드라 2026-10-01에 뺐다.
 - 세대 어댑터가 소유하는 방언: 앱 목록(`pm list packages -3 --show-versioncode`의 유무),
   앱 라벨 읽기, 미디어 볼륨(`cmd media_session volume`, 없으면 `service call audio` 대체),
   기기 ID(GSF `content query`, 권한이 막히면 안내 문장으로 대체), 전경 앱(`dumpsys activity
@@ -479,8 +481,10 @@ QEMU가 설정 파일 경로를 못 만들어 시작 직후 죽던 것과, 껍�
 - `WizardStep`은 일곱 단계다. `hostCheck`, `whpxConsent`, `rebootPending`, `artifactDownload`,
   `guestInstall`, `firstBoot`, `appInstall`, `done`. `googleRegistration`은 없다(사용자 결정
   2026-09-27: 구글 등록은 첫 실행에서 요구하지 않고 설정의 운영체제 절에서 필요할 때만 보인다).
-- `WizardView`에서 `gsf_id`가 빠지고 `image_id: Option<String>`(S1.4에서 고른 이미지)과
-  `install_guide: Vec<String>`(고른 이미지 프로필의 설치 안내 문장, S1.5)이 들어온다.
+- `WizardView`에서 `gsf_id`가 빠지고 `image_id: Option<String>`(S1.4에서 고른 이미지)이 들어온다.
+  `install_guide`는 2026-10-01에 `install: Option<GuestInstallView>`(무인 설치의 단계 `stage`,
+  `percent`, 실패 `failure`, 도우미 시리얼 로그 `log_path`. 설치 중과 실패 뒤에만 있다)로 바뀌었고
+  명령 `guest_install_cancel`이 생겼다(계약 8판, ADR-0010).
 - 명령 `wizard_restart`는 없어진다(설정의 `처음부터 다시 설정` 삭제). `guest_disk_create`는
   `guest_create { image_id, size_gib }`로 바뀐다.
 

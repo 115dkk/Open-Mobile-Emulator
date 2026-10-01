@@ -48,6 +48,7 @@ export const controllerBridge: ControllerBridge = {
   guestSelect: (id) => native('guest_select', { id }),
   guestDelete: (id) => native('guest_delete', { id }),
   guestReinstall: (name) => native('guest_reinstall', { name }),
+  guestInstallCancel: () => native('guest_install_cancel'),
   guestStart: () => native('guest_start'),
   guestStop: () => native('guest_stop'),
   guestRestart: () => native('guest_restart'),

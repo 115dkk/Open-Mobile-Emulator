@@ -63,8 +63,8 @@ async function snapshot() {
   const s = await withTimeout(page.evaluate(() => window.__TAURI_INTERNALS__.invoke('app_snapshot')), 20000, 'app_snapshot invoke');
   log('snapshot', { snapshot: s }); return s;
 }
-async function capture(name, qemuPid, options = {}) {
-  const shot = native(['-AppPid', String(app.pid), ...(qemuPid ? ['-QemuPid', String(qemuPid)] : []), '-Shot', path.join(output, 'shots', `${name}.png`), ...(options.highlight ? ['-Highlight'] : [])]);
+async function capture(name, qemuPid) {
+  const shot = native(['-AppPid', String(app.pid), ...(qemuPid ? ['-QemuPid', String(qemuPid)] : []), '-Shot', path.join(output, 'shots', `${name}.png`)]);
   log('capture', { name, ...shot });
   fs.writeFileSync(path.join(output, `${name}.txt`), scrub(await page.locator('body').innerText()), 'utf8');
   return shot;
@@ -86,398 +86,17 @@ async function step(name, fn) {
 async function freePort() {
   await new Promise((resolve, reject) => { const s = net.createServer(); s.once('error', reject); s.listen(port, '127.0.0.1', () => s.close(resolve)); });
 }
-// `excludePid` is the installer's QEMU: after 설치 완료 the product sends system_powerdown, the
-// installer's userspace ignores it, and the supervisor kills the process at its 30 s deadline
-// (ome-supervisor STOP_DEADLINE) before starting the installed disk. Until then the snapshot still
-// names the old process, and the first boot's window is the one with a new PID.
-async function qemuWindow(excludePid = null, timeout = 30000) {
+async function qemuWindow(timeout = 30000) {
   return until(async () => {
     const s = await snapshot(); rememberProcesses();
-    if (!s.guest.pid || !ownedQemu.has(s.guest.pid) || s.guest.pid === excludePid) return false;
+    if (!s.guest.pid || !ownedQemu.has(s.guest.pid)) return false;
     native(['-AppPid', String(app.pid), '-QemuPid', String(s.guest.pid)]); return s.guest.pid;
   }, timeout, 'owned SDL_app');
 }
-let installerQemuPid = null;
-// Installer and GRUB keys go the way a person's do: into the product window, whose webview forwards
-// each press and release to QEMU over QMP (`input-send-event`). Before the guest reports its boot
-// marker the ome-input gate passes every key through raw, profile bindings included, so this path is
-// open for the whole installer and for the installed GRUB. The press and the release are separate
-// QMP commands a few milliseconds apart, so the guest firmware never sees a key held long enough to
-// repeat. The host-side SDL path (SendInput into the QEMU window) held each key about 180 ms and the
-// runner's scheduling jitter stretched one DOWN past the firmware's 500 ms typematic threshold
-// (CI run 27: one press moved the selection six rows). OME_DOD_SDL_KEYS=1 restores that path.
-const BROWSER_KEYS = { HOME: 'Home', END: 'End', UP: 'ArrowUp', DOWN: 'ArrowDown', LEFT: 'ArrowLeft', RIGHT: 'ArrowRight', ENTER: 'Enter', TAB: 'Tab', ESC: 'Escape', BACKSPACE: 'Backspace', SPACE: 'Space' };
-const TEXT_CODES = { ' ': 'Space', '.': 'Period', '-': 'Minus', '/': 'Slash', '_': 'Shift+Minus', '+': 'Shift+Equal', '=': 'Equal', ',': 'Comma' };
-function textChord(character) {
-  if (/^[a-z]$/.test(character)) return `Key${character.toUpperCase()}`;
-  if (/^[A-Z]$/.test(character)) return `Shift+Key${character}`;
-  if (/^[0-9]$/.test(character)) return `Digit${character}`;
-  return TEXT_CODES[character] ?? null;
-}
-// keyboard.press() fires keydown and keyup within a millisecond; the product handles each
-// forwarded event on its own blocking task, so the release could overtake the press (a press with
-// no release, then the next press of that key suppressed as a repeat: CI runs 30 and 35 lost about
-// one key in three). A person's press lasts tens of milliseconds, so the driver's does too.
-async function pressSlow(chord) {
-  const parts = chord.split('+');
-  for (const part of parts) { await page.keyboard.down(part); await delay(40); }
-  await delay(40);
-  for (const part of [...parts].reverse()) { await page.keyboard.up(part); await delay(40); }
-}
-async function sdlKeys(pid, label, keySequence, text, waitMs) {
-  log('installer-input', { label, path: 'sdl', ...native(['-AppPid', String(app.pid), '-QemuPid', String(pid), ...(keySequence ? ['-Keys', keySequence] : []), ...(text ? ['-Text', text] : [])]) });
-  await delay(waitMs); await capture(`installer-${label}`, pid);
-}
-async function keys(pid, label, keySequence, text, waitMs = 800) {
-  if (process.env.OME_DOD_SDL_KEYS === '1') return sdlKeys(pid, label, keySequence, text, waitMs);
-  // The gate admits keys only while the main window is the foreground window.
-  const focus = native(['-AppPid', String(app.pid), '-Foreground']);
-  if (!focus.settled) log('foreground-unsettled', { label, ...focus });
-  // CI run 30 lost the first key of two sequences ('5' of 512M, 'y' of yes) right after the focus
-  // helper acted; the window activation is still settling in the product. A short pause first.
-  await delay(300);
-  const sent = [];
-  for (const key of keySequence ? keySequence.split(',') : []) {
-    // A named key from BROWSER_KEYS, or one character typed as a chord (capitals with Shift).
-    const browser = BROWSER_KEYS[key] ?? (key.length === 1 ? textChord(key) : null);
-    if (!browser) throw new StopRun(`Unknown key ${key}`);
-    await pressSlow(browser); sent.push(browser); await delay(150);
-  }
-  for (const character of text ?? '') {
-    // keyboard.type() marks a capital with the shift modifier flag only; the product forwards
-    // event.code, so Shift must be its own press for cfdisk's capital W to arrive as W.
-    const chord = textChord(character);
-    if (!chord) throw new StopRun(`Unmapped character ${JSON.stringify(character)}`);
-    await pressSlow(chord); sent.push(chord); await delay(120);
-  }
-  log('installer-input', { label, path: 'product', settled: focus.settled, foreground: focus.foreground, others: focus.others, sent });
-  await delay(waitMs); await capture(`installer-${label}`, pid);
-}
 function recognizeImage(name, file) {
   const r = spawnSync('powershell.exe', ['-NoProfile', '-File', path.join(directory, 'ocr.ps1'), '-Image', file], { encoding: 'buffer', timeout: 30000 });
-  if (r.status !== 0) throw new StopRun(`Installer OCR unavailable: ${r.stderr?.toString('utf8')}`);
-  const value = JSON.parse(r.stdout.toString('utf8')); const { lines, ...rest } = value; log('installer-ocr', { name, ...rest }); return value;
-}
-const recognize = name => recognizeImage(name, path.join(output, 'shots', name + '.png')).text;
-const installerText = text => text.toLowerCase().replace(/\s+/g, ' ').trim();
-function installerScreen(text) {
-  // OCR sometimes splits a word ("fi lesystem", "Bl issOS") across text boxes.
-  const words = text.replace(/\s/g, '');
-  const has = phrase => words.includes(phrase.replace(/\s/g, ''));
-  // "Congratulations! BlissOS-16.9.7 is installed successfully." reads as "congratu muons ! bi issos"
-  // on the dev PC (round 22); either half of the sentence is enough.
-  if (has('installed successful') || /congratu/.test(words)) return 'done';
-  if (has('choose partition')) {
-    if (has('efi system partition')) return 'esp-chooser';
-    if (has('install blissos') || has('select a partition to install')) return 'system-chooser';
-    return 'unknown'; // A chooser must never fall through to a LEFT/RIGHT action.
-  }
-  // OCR read this title as "Choose r i lesysten" (round 9); the body line "Please select a filesystem to
-  // format" and the option list are the reliable parts. The ESP chooser offers only "Do not re-format" and
-  // fat32 (read as "fdt3Z"); the system chooser is the one with ext4.
-  if (has('choose filesystem') || (/lesyste[mn]/.test(words) && (has('please select') || has('choose')))) {
-    if (has('ext4')) return 'filesystem-for-system';
-    // The ESP list is always "Do not re-format" then fat32 (round 19 showed it on a fresh partition
-    // too); whether the ESP was formatted already is tracked from the screens that formatted it.
-    if (/fat3|fdt3/.test(words) || has('do not re')) return 'filesystem-for-esp';
-    return 'unknown';
-  }
-  // Second ESP pass: "Are you sure you want to pick vda1 as ESP?" with No highlighted (round 17).
-  if (has('pick') && has('as esp')) return 'confirm-pick-esp';
-  // "Cannot mount /dev/vda1. Do you want to format it?" (round 19, after "Do not re-format" on a
-  // partition that had no filesystem yet).
-  if (has('cannot mount') || (has('mount') && has('want to format'))) return 'mount-failed-format';
-  if (has('warning') || (/\b\d+\s*(?:s\b|sec|second)/.test(text) && /\b[0o]k\b/.test(text) && !/\byes\b|\bno\b|reboot/i.test(text))) return 'warning-countdown';
-  if (has('error') || has('this is not an efi system partition')) return 'error';
-  if (has('ota')) return 'ota-confirm';
-  // Read as "Chouse EEI BUUt ... GrubZ EFI Bootloader" on the dev PC (round 20).
-  if (/grub[2z]/.test(words) || has('choose efi boot') || has('since you are using uefi') || has('boot options for')) return 'efi-boot-chooser';
-  // Console OCR reads Confirm as "Cont Irm", Question as "Uuestion" and Would as "Uould" (CI run 39).
-  // "Cont Irm" on the runner, "Cont Irn" on the dev PC (round 16).
-  if (/con[ft][il1]r[mn]/.test(words) && has('format')) return 'confirm-format';
-  // The title reads "Uuestion" on the runner and "wuesuon" on the dev PC (round 15), so the body
-  // sentence identifies the question as well.
-  if ((/[qwu]ues[tu]i?on/.test(words) && (has('label') || has('customize') || has('drive name')))
-    || has('customize the formatted') || has('press enter to skip')) return 'label-question';
-  // "Expect to write 2307771 KB..." reads as "urite" on the dev PC (round 21).
-  if (has('installing') || /expectto[uw]rite|\d{5,}kb/.test(words)) return 'installing';
-  return 'unknown';
-}
-async function installerPid(pid) {
-  const current = (await snapshot()).guest.pid;
-  if (current !== pid) throw new StopRun(`Guest restarted during installer: expected QEMU ${pid}, snapshot guest.pid ${current}; refusing to follow a new process`);
-}
-// The Bliss GRUB theme prints "Enter: Boot Selected  E: Edit Selected  C: Grub Terminal" under every
-// menu, on the ISO and on the installed disk alike. At 100 % display scaling the entries are too
-// small for OCR (CI runs 25 and 26) while that footer still reads, so the footer is the menu signal;
-// the entry the keys select is verified by the screen that follows. Every frame of the wait is kept.
-const GRUB_MENU = /installation|edit\s*selected|boot\s*selected|grub\s*te/i;
-async function waitGrubMenu(pid, prefix) {
-  let attempt = 0;
-  try {
-    await until(async () => {
-      const name = `${prefix}-${String(attempt++).padStart(2, '0')}`;
-      await capture(name, pid);
-      return GRUB_MENU.test(recognize(name));
-    }, 60000, `${prefix} GRUB menu`, 100);
-  } catch (error) {
-    // The stage capture is a screen copy, so a window over the stage is what the OCR reads (dev PC
-    // round 30: the person's chat window covered the stage and the ISO GRUB timed out into the
-    // default entry). Name that window so the failure is attributed to the desktop, not the product.
-    let desktop = null;
-    try { desktop = native(['-AppPid', String(app.pid), '-Desktop']); } catch {}
-    const foreground = desktop?.foregroundWindow;
-    const family = desktop?.processes?.map(p => p.pid) ?? [];
-    if (foreground && !family.includes(foreground.pid) && !ownedQemu.has(foreground.pid)) {
-      log('stage-occluded', { prefix, foreground });
-      throw new StopRun(`${error.message}; the foreground window belongs to another program (${foreground.class} "${foreground.title}", pid ${foreground.pid}), so the stage was covered while the menu was awaited`);
-    }
-    throw error;
-  }
-}
-// Waits until the guest screen reads `pattern`, keeping every frame as `${label}-NN`; returns the text.
-// Console OCR at this scale turns 2 into Z, v into u and W into U, so callers write tolerant patterns.
-// OCR splits words at will ("Part it ion", "Fi lesystem"), so screen patterns are matched against
-// the text with every space removed and lower-cased, and are written that way.
-const squash = text => text.toLowerCase().replace(/\s+/g, '');
-async function waitScreen(pid, label, pattern, timeoutMs = 60000) {
-  let attempt = 0, last = '';
-  await until(async () => {
-    const name = `${label}-${String(attempt++).padStart(2, '0')}`;
-    await capture(name, pid); last = squash(recognize(name));
-    return pattern.test(last);
-  }, timeoutMs, `${label} ${pattern}`, 100);
-  return last;
-}
-// Sends keys and requires `pattern` on the screen within `settleMs`; sends the same keys again up to
-// `attempts` times. Callers pick sequences that are safe to repeat on the screen they expect to leave.
-// `retryWhen` names the screen the keys are meant to leave: the keys are sent again only while that
-// screen is still showing, never into whatever else appeared (CI run 35 pressed Enter into the
-// dialog after the one it meant, twice).
-async function keysUntil(pid, label, keySequence, text, pattern, { settleMs = 10000, attempts = 3, waitMs = 800, retryWhen = null } = {}) {
-  let last = '';
-  const stillThere = seen => (typeof retryWhen === 'function' ? retryWhen(seen) : retryWhen.test(seen));
-  for (let attempt = 1; attempt <= attempts; attempt++) {
-    const name = attempt === 1 ? label : `${label}-retry${attempt}`;
-    if (attempt > 1 && retryWhen) {
-      const frame = `installer-${name}-before`;
-      await capture(frame, pid); last = squash(recognize(frame));
-      if (pattern.test(last)) return last;
-      if (!stillThere(last)) {
-        log('installer-retry-held', { label, attempt, seen: last.slice(0, 200) });
-        try { return await waitScreen(pid, `installer-${name}-wait`, pattern, settleMs); }
-        catch (error) { if (error instanceof StopRun) throw error; continue; }
-      }
-    }
-    await keys(pid, name, keySequence, text, waitMs);
-    try { return await waitScreen(pid, `installer-${name}-check`, pattern, settleMs); }
-    catch (error) {
-      if (error instanceof StopRun) throw error;
-      log('installer-expect-miss', { label, attempt, pattern: String(pattern) });
-    }
-  }
-  throw new StopRun(`Installer screen after ${label} never showed ${pattern}; last ${last.slice(0, 200)}`);
-}
-// Matched against squash()ed text. The console OCR reads 2 as z, 1 as i or l, v as u, w as u.
-const CFDISK = {
-  // The dev PC's OCR interleaves the prompt with the table columns ("Partition size Start 2048 End
-  // ... : 512M"), so the typed value is also accepted right after its colon.
-  size512M: /(size:?|:)5[1il][2z]m/,
-  row512M: /5[1il][2z]m/,
-  efiSystem: /efisyste/,
-  linuxFilesystem: /linuxfi?lesyste/,
-  typeList: /linux(root|swap|home|server)|efisyste|biosboot/,
-  table: /freespace|\[(quit|write|urite|type|delete)\]/,
-  sizePrompt: /partitionsize/,
-  labelType: /labeltype/,
-  confirmTool: /cfdiskprogram|cgdisk/,
-  // The list's blue entries are dropped by the OCR at times (dev PC round 11 read the header row and
-  // stopped), so the hint that only this dialog carries also identifies it.
-  partitionList: /choosepartition.*(modify|hint:?ifyouchoseesp|chooseespagain)/,
-  installerInfo: /don.?tkno[wu]whatthisis|documentationformore/,
-  writeQuestion: /areyousure|type.?yes/,
-  writeResult: /altered|synci|didnotwrite/,
-  written: /altered|synci/,
-  installerBack: /choosepartition|pleaseselect|restart(ing)?theinstal/,
-};
-// Moves the GRUB selection to `targetRow` one key at a time, reading the selection bar from each
-// frame (native.ps1 -Highlight). A lost or repeated key is corrected by the next frame instead of
-// trusted (CI runs 27 and 32 each booted the wrong entry after blind Down presses).
-async function grubSelect(pid, prefix, targetRow, expectedRows) {
-  let frame = 0, oddFrames = 0;
-  for (let attempt = 0; attempt < 14; attempt++) {
-    const shot = await capture(`${prefix}-${String(frame++).padStart(2, '0')}`, pid, { highlight: true });
-    const highlight = shot.highlight;
-    if (!highlight || highlight.row < 0) { await delay(500); continue; }
-    if (highlight.entries.length !== expectedRows) {
-      // A window over the guest hides rows (CI run 36: an adb console window); read again before
-      // giving up, and never send a key on a partial reading.
-      log('grub-rows-unexpected', { prefix, oddFrames, highlight });
-      if (++oddFrames >= 4) throw new StopRun(`GRUB menu shows ${highlight.entries.length} rows, expected ${expectedRows}: ${JSON.stringify(highlight)}`);
-      await delay(700); continue;
-    }
-    oddFrames = 0;
-    if (highlight.row === targetRow) { log('grub-selected', { prefix, row: highlight.row, entries: highlight.entries }); return highlight; }
-    const key = highlight.row < targetRow ? 'DOWN' : 'UP';
-    await keys(pid, `${prefix}-${String(frame++).padStart(2, '0')}-${key.toLowerCase()}`, key, null, 600);
-  }
-  throw new StopRun(`GRUB selection did not reach row ${targetRow} within 14 frames`);
-}
-// Presses Enter on the verified selection and confirms it took: the menu is gone (an entry boots)
-// or a submenu with `submenuRows` entries shows. A lost Enter is pressed again; a moved selection stops.
-async function grubEnter(pid, label, selectedRow, submenuRows = null) {
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    const suffix = attempt > 1 ? `-retry${attempt}` : '';
-    await keys(pid, `${label}${suffix}`, 'ENTER', null, 1500);
-    const highlight = (await capture(`installer-${label}-after${suffix}`, pid, { highlight: true })).highlight;
-    const menuGone = !highlight || highlight.row < 0 || highlight.entries.length === 0;
-    if (submenuRows === null ? menuGone : highlight?.entries.length === submenuRows) { log('grub-entered', { label, attempt }); return; }
-    if (!menuGone && highlight.row !== selectedRow) throw new StopRun(`GRUB selection is on row ${highlight.row}, not ${selectedRow}, before Enter took effect`);
-    log('grub-enter-retry', { label, attempt, highlight });
-  }
-  throw new StopRun(`GRUB Enter on ${label} did not take effect after three presses`);
-}
-async function installGuest(pid) {
-  // Move the webview focus off the create/completion button with a real noninteractive UI click.
-  // While the stage is active the product forwards every key to the guest and prevents the default.
-  await page.getByRole('heading', { name: '운영체제 설치', exact: true }).click();
-  // docs/evidence/M0/guest-install.md 69-94. Never send these to an existing disk.
-  // No keys before the menu is recognized: keys during the firmware phase reach the firmware now and
-  // left one variable store booting slowly (docs/evidence/M2/embedded-display-freeze.md). The ISO GRUB
-  // menu waits about 30 s, so recognition first, then one Home to reset its countdown.
-  await waitGrubMenu(pid, 'installer-00-grub-menu');
-  await snapshot();
-  await keys(pid, '01a-grub-home', 'HOME');
-  // ISO menu: Live, Live w/ FFMPEG, Live PC-Mode, Live PC-Mode w/ FFMPEG, Installation, VM Options,
-  // Debugging, Advanced options (docs/evidence/M0/guest-install.md).
-  await grubSelect(pid, 'installer-01a-grub-select', 4, 8);
-  await grubEnter(pid, '01-grub-installation', 4);
-  // The installer's first dialog took 30 s in runs 29 and 30 and longer in run 31: poll for it.
-  // The installer first shows a message box ("UEFI System detected! Please select a partition as
-  // an EFI System Partition ... OK"), then the Choose Partition list with Create/Modify partitions.
-  // Only the list takes the c hotkey (CI run 35 sent it into the message box). The box takes Enter
-  // when it has not gone on its own after fifteen seconds.
-  {
-    let frame = 0, infoSince = null;
-    await until(async () => {
-      const name = `installer-01-partition-dialog-${String(frame++).padStart(2, '0')}`;
-      await capture(name, pid); const text = squash(recognize(name));
-      if (CFDISK.partitionList.test(text)) return true;
-      if (CFDISK.installerInfo.test(text)) {
-        infoSince ??= Date.now();
-        if (Date.now() - infoSince >= 15000) { await keys(pid, `01b-dismiss-info-${frame}`, 'ENTER', null, 500); infoSince = null; }
-      }
-      return false;
-    }, 180000, 'installer Choose Partition list', 100);
-  }
-  // docs/evidence/M0/guest-install.md 69-94, each step verified on screen before the next.
-  // `c` highlights Create/Modify partitions, Enter opens the cfdisk-or-cgdisk question.
-  const tableOnly = seen => CFDISK.table.test(seen) && !CFDISK.sizePrompt.test(seen) && !CFDISK.typeList.test(seen) && !CFDISK.writeQuestion.test(seen);
-  await keysUntil(pid, '02-create-modify', 'c,ENTER', null, CFDISK.confirmTool, { retryWhen: seen => CFDISK.partitionList.test(seen) && !CFDISK.confirmTool.test(seen), settleMs: 15000 });
-  await keysUntil(pid, '03-continue-cfdisk', 'ENTER', null, CFDISK.labelType, { retryWhen: CFDISK.confirmTool });
-  await keysUntil(pid, '04-gpt', 'ENTER', null, CFDISK.table, { retryWhen: CFDISK.labelType });
-  await keysUntil(pid, '05-new-esp', 'n', null, CFDISK.sizePrompt, { retryWhen: tableOnly });
-  // The size field is prefilled with the free size; clear it, then type. A lost character shows on
-  // the prompt line, and the retry clears and types again.
-  await keysUntil(pid, '06-esp-size', `${Array(8).fill('BACKSPACE').join(',')},5,1,2,M`, null, CFDISK.size512M, { settleMs: 6000, retryWhen: CFDISK.sizePrompt });
-  await keysUntil(pid, '07-create-esp', 'ENTER', null, CFDISK.row512M, { retryWhen: CFDISK.sizePrompt });
-  // The type list opens on Linux filesystem; Home goes to its first entry. CI run 38 read the list
-  // as EFI System, MBR partition scheme, Intel Fast Flash, ... (run 30 had landed on MBR partition
-  // scheme with Home, Enter), so the list text decides how many Down presses EFI System needs.
-  for (let attempt = 1; ; attempt++) {
-    const list = await keysUntil(pid, `08-type-list${attempt > 1 ? `-retry${attempt}` : ''}`, 't', null, CFDISK.typeList, { retryWhen: tableOnly });
-    const efiAt = list.indexOf('efisyste'), mbrAt = list.indexOf('mbrpartitionscheme');
-    const efiFirst = efiAt >= 0 && (mbrAt < 0 || efiAt < mbrAt);
-    const sequence = (efiFirst === (attempt % 2 === 1)) ? 'HOME,ENTER' : 'HOME,DOWN,ENTER';
-    log('installer-type-order', { attempt, efiAt, mbrAt, sequence });
-    const table = await keysUntil(pid, `09-efi-type${attempt > 1 ? `-retry${attempt}` : ''}`, sequence, null, CFDISK.table, { retryWhen: CFDISK.typeList });
-    if (CFDISK.efiSystem.test(table)) break;
-    if (attempt >= 3) throw new StopRun(`Partition 1 type is not EFI System after three tries: ${table.slice(0, 300)}`);
-    log('installer-type-retry', { attempt, table: table.slice(0, 300) });
-  }
-  // Down onto the free-space row (Down again stays there), New, default size = the rest.
-  await keysUntil(pid, '10-new-system', 'DOWN,n', null, CFDISK.sizePrompt, { retryWhen: tableOnly });
-  const tableBeforeWrite = await keysUntil(pid, '11-system-size', 'ENTER', null, CFDISK.linuxFilesystem, { retryWhen: CFDISK.sizePrompt });
-  if (!CFDISK.efiSystem.test(tableBeforeWrite)) throw new StopRun(`Table lost EFI System before write: ${tableBeforeWrite.slice(0, 300)}`);
-  // Write needs a capital W and the literal word yes; the confirmation shows what was typed, and a
-  // refused write reads "Did not write partition table to disk".
-  let written = '';
-  for (let attempt = 1; attempt <= 3 && !CFDISK.written.test(written); attempt++) {
-    await keysUntil(pid, `12-write${attempt > 1 ? `-retry${attempt}` : ''}`, 'W', null, CFDISK.writeQuestion, { retryWhen: tableOnly });
-    await keys(pid, `13-write-yes${attempt > 1 ? `-retry${attempt}` : ''}`, 'y,e,s,ENTER', null, 1500);
-    written = await waitScreen(pid, `installer-13-write-result${attempt > 1 ? `-retry${attempt}` : ''}`, CFDISK.writeResult, 15000);
-    if (!CFDISK.written.test(written)) log('installer-write-refused', { attempt, seen: written.slice(0, 200) });
-  }
-  if (!CFDISK.written.test(written)) throw new StopRun('cfdisk did not write the partition table after three tries');
-  // Quit returns to the installer, which restarts itself and lists the new partitions.
-  await keysUntil(pid, '14-quit-cfdisk', 'q', null, CFDISK.installerBack, { settleMs: 30000, waitMs: 4000, retryWhen: tableOnly });
-  const deadline = Date.now() + 12 * 60000;
-  let espFormatted = false, formatTarget, previousScreen, acted = false, unknownSince, actedAt, attempts = 0;
-  let check = 0, actionNumber = 30, errors = 0, done = false;
-  const lastTexts = [];
-  while (Date.now() < deadline) {
-    await delay(1500);
-    await installerPid(pid);
-    const label = `installer-screen-${String(check++).padStart(3, '0')}`;
-    try { await capture(label, pid); }
-    catch (error) { await installerPid(pid); throw error; }
-    const text = installerText(recognize(label));
-    const screen = installerScreen(text);
-    lastTexts.push(text); if (lastTexts.length > 4) lastTexts.shift();
-    if (screen !== previousScreen) { acted = false; attempts = 0; }
-    // A key the product's gate dropped (the main window lost the foreground for a moment) leaves the
-    // screen unchanged; one more attempt after 20 s, never a third, keeps a slow screen from doubling up.
-    else if (acted && attempts < 2 && Date.now() - actedAt >= 20000 && !['installing', 'warning-countdown', 'done', 'unknown'].includes(screen)) {
-      log('installer-retry', { screen, attempts }); acted = false;
-    }
-    previousScreen = screen;
-    if (screen === 'unknown') unknownSince ??= Date.now(); else unknownSince = undefined;
-    let action = 'wait', sequence;
-    if (screen === 'done') action = 'finish';
-    else if (!acted) {
-      switch (screen) {
-        case 'esp-chooser':
-          formatTarget = 'esp'; sequence = 'HOME,ENTER';
-          action = espFormatted ? 'select-vda1-without-reformat' : 'select-vda1'; break;
-        case 'filesystem-for-esp':
-          formatTarget = 'esp'; sequence = espFormatted ? 'HOME,ENTER' : 'HOME,DOWN,ENTER';
-          action = espFormatted ? 'do-not-reformat' : 'select-fat32'; break;
-        case 'mount-failed-format':
-          espFormatted = true; sequence = 'y'; action = 'format-unmountable'; break;
-        // dialog's yes/no boxes take y and n directly; a doubled Enter (round 17) cannot land on
-        // the highlighted No that way.
-        case 'confirm-pick-esp': sequence = 'y'; action = 'confirm-pick-esp'; break;
-        case 'system-chooser':
-          formatTarget = 'system'; sequence = 'HOME,DOWN,ENTER'; action = 'select-vda2'; break;
-        case 'filesystem-for-system':
-          formatTarget = 'system'; sequence = 'DOWN,ENTER'; action = 'select-ext4'; break;
-        case 'label-question': sequence = 'ENTER'; action = 'keep-label'; break;
-        case 'confirm-format':
-          if (!formatTarget) throw new StopRun(`Format confirmation without a classified target: ${text}`);
-          sequence = 'y'; action = `confirm-format-${formatTarget}`; break;
-        case 'ota-confirm': sequence = 'n'; action = 'decline-ota'; break;
-        case 'efi-boot-chooser': sequence = 'HOME,ENTER'; action = 'select-grub2'; break;
-        case 'error':
-          errors++; action = errors > 3 ? 'stop-after-errors' : 'acknowledge-error';
-          if (errors <= 3) sequence = 'ENTER'; break;
-      }
-    }
-    log('installer-screen', { screen, action });
-    if (errors > 3) throw new StopRun(`More than three installer errors: ${JSON.stringify(lastTexts)}`);
-    if (unknownSince !== undefined && Date.now() - unknownSince >= 20000) throw new StopRun(`Unknown installer screen for 20 seconds: ${text}`);
-    if (screen === 'done') { done = true; break; }
-    if (sequence) {
-      if (Date.now() >= deadline) break;
-      await installerPid(pid);
-      try { await keys(pid, `${actionNumber++}-${screen}-${action}`, sequence); }
-      catch (error) { await installerPid(pid); throw error; }
-      await installerPid(pid);
-      if (screen === 'confirm-format' && formatTarget === 'esp') espFormatted = true;
-      acted = true; actedAt = Date.now(); attempts++;
-    }
-  }
-  if (!done) throw new StopRun(`Installer exceeded 12 minutes: ${JSON.stringify(lastTexts)}`);
-  await capture('installer-28-copy-finished', pid);
+  if (r.status !== 0) throw new StopRun(`OCR unavailable: ${r.stderr?.toString('utf8')}`);
+  const value = JSON.parse(r.stdout.toString('utf8')); const { lines, ...rest } = value; log('ocr', { name, ...rest }); return value;
 }
 async function stopGuest() {
   const s = await snapshot(); rememberProcesses();
@@ -646,52 +265,28 @@ try {
   });
   await step('S1.5-installer', async () => {
     const start = Date.now();
-    // Start the native watcher before the UI click; PowerShell/CIM startup otherwise misses
-    // the ISO GRUB countdown and enters Live Android rather than Installation.
-    const watcher = spawn('pwsh', ['-NoProfile', '-File', path.join(directory, 'native.ps1'), '-AppPid', String(app.pid), '-WaitInstaller', '-HomePath', home], { stdio: ['ignore', 'pipe', 'pipe'] });
-    let watcherOut = '', watcherErr = '';
-    watcher.stdout.setEncoding('utf8'); watcher.stderr.setEncoding('utf8');
-    watcher.stdout.on('data', s => { watcherOut += s; }); watcher.stderr.on('data', s => { watcherErr += s; });
-    const watched = new Promise(resolve => watcher.once('exit', code => resolve(code)));
-    await delay(1800); await click('설치하기'); let pid;
-    try {
-      if (await withTimeout(watched, 90000, 'installer watcher exit') !== 0) throw Error(`Installer watcher failed: ${watcherErr}`);
-      const observed = JSON.parse(watcherOut); log('installer-watcher', observed); pid = observed.pid;
-      rememberProcesses(); if (!ownedQemu.has(pid)) throw Error('Installer process identity not confirmed');
-    }
-    catch (error) {
-      const stderr = fs.existsSync(path.join(home, 'logs')) ? fs.readdirSync(path.join(home, 'logs')).filter(n => /qemu.*stderr/.test(n)).map(n => fs.readFileSync(path.join(home, 'logs', n), 'utf8')).join('\n') : '';
-      if (Date.now() - start <= 45000 && /(?:GL|EGL|OpenGL|virgl).*(?:error|fail)|(?:error|fail).*(?:GL|EGL|virgl)/i.test(stderr)) {
-        gap('Installer GL startup failed; settings software rendering retry requested.');
-        await click('나중에 하기'); await rail('설정'); await page.getByRole('switch', { name: '소프트웨어 렌더링', exact: true }).check();
-        result.softwareRenderingRetry = true; await capture('software-rendering-settings');
-        const resume = page.getByRole('button', { name: /설정 이어서|설치 계속|마법사/ });
-        if (await resume.count() !== 1) throw Error('No visible wizard resume entry after enabling software rendering');
-        await resume.click(); await click('다시 시작'); pid = await qemuWindow();
-      } else throw error;
-    }
-    await installGuest(pid); result.measurements.installMs = Date.now() - start; installerQemuPid = pid;
-    await capture('06-install-complete'); await click('설치 완료');
+    await delay(1800); await click('설치하기');
+    // The install runs hidden (ADR-0010): the product boots the ISO's kernel with its helper, no
+    // window, and moves the wizard to the first boot by itself. The driver only reads the
+    // snapshot's progress; there is nothing to operate.
+    let progress = null;
+    await until(async () => {
+      const s = await snapshot(); rememberProcesses();
+      const install = s.wizard.install;
+      if (install && (install.stage !== progress?.stage || install.percent !== progress?.percent)) { progress = install; log('install-progress', install); }
+      if (install?.stage === 'failed') throw new StopRun(`Unattended install failed: ${install.failure ?? 'no reason'} (${install.logPath ?? 'no log'})`);
+      return s.wizard.step === 'firstBoot' && s;
+    }, 20 * 60000, 'unattended install', 2000);
+    result.measurements.installMs = Date.now() - start; result.install = progress;
+    await capture('06-install-complete');
   });
   await step('S1.6-first-boot', async () => {
     const start = Date.now();
-    // The product itself picks software rendering on a host without OpenGL 2.0 (GDI Generic); the
-    // installed GRUB default then hangs in early userspace under std VGA, so the first boot needs the
-    // ISO authors' "No HW Acceleration" entry (docs/evidence/M0/guest-install.md, attempt 4 and 5).
     const softwareRendering = result.softwareRenderingRetry || (await snapshot()).settings.gpuMode === 'software';
     result.measurements.softwareRendering = softwareRendering;
-    if (softwareRendering) {
-      const pid = await qemuWindow(installerQemuPid, 120000);
-      // Keys before the menu would reach the firmware (docs/evidence/M2/embedded-display-freeze.md).
-      await waitGrubMenu(pid, 'first-boot-grub-menu');
-      // Installed menu: four Bliss entries, VM Options, Debugging, Advanced options, BlissOS at
-      // hd0,gpt1; VM Options holds Virgl, No HW Acceleration and their debug variants.
-      await keys(pid, '29a-grub-home', 'HOME');
-      await grubSelect(pid, 'first-boot-grub-select', 4, 8);
-      await grubEnter(pid, '29-disk-vm-options', 4, 4);
-      await grubSelect(pid, 'first-boot-vm-select', 1, 4);
-      await grubEnter(pid, '30-disk-boot', 1);
-    } else log('first-boot-default', { note: 'Normal virgl path: leave installed GRUB default unchanged; no keys sent.' });
+    // Direct kernel boot (ADR-0010): the product passes the boot arguments itself, software
+    // rendering included (nomodeset HWACCEL=0). The driver sends no keys and reads no menu.
+    log('first-boot-mode', { softwareRendering });
     const s = await until(async () => { const s = await snapshot(); return s.guest.bootCompleted && s.guest.capabilities.items.some(i => i.state !== 'unknown') && s; }, 10 * 60000, 'first boot and probe', 3000);
     result.measurements.firstBootMs = Date.now() - start; result.probeItems = s.guest.capabilities.items;
     await capture('07-first-boot-probe'); log('applied-defaults', { text: await page.locator('body').innerText() }); await click('다음');

@@ -8,7 +8,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import type { ScreenActions, ScreenProps } from '../actions';
 import type {
-  AppIssue, AppSnapshot, GuestImageSummary, GuestView, TransferProgress, TransferStage, WizardStep,
+  AppIssue, AppSnapshot, GuestImageSummary, GuestView, InstallStage, TransferProgress, TransferStage, WizardStep,
 } from '../contracts';
 import {
   Button, Icon, IssueNotice, ProgressBar, Segmented, StageFrame, StatusDot, StepList,
@@ -177,6 +177,29 @@ function transferSteps(stage: TransferStage): StepItem[] {
   ];
 }
 
+/** Noun phrases for the install helper's stages (ADR-0010); the symbol beside them says done or in progress. */
+const INSTALL_STAGE_LABEL: Readonly<Record<InstallStage, string>> = {
+  waiting: '준비',
+  tools: '도구 준비',
+  partition: '파티션 만들기',
+  format: '포맷',
+  copy: '시스템 복사',
+  finish: '마무리',
+  done: '완료',
+  failed: '실패',
+};
+
+const INSTALL_STEP_ORDER: readonly InstallStage[] = ['tools', 'partition', 'format', 'copy', 'finish'];
+
+function installSteps(stage: InstallStage): StepItem[] {
+  const current = stage === 'done' ? INSTALL_STEP_ORDER.length : INSTALL_STEP_ORDER.indexOf(stage);
+  return INSTALL_STEP_ORDER.map((id, index) => ({
+    id,
+    label: INSTALL_STAGE_LABEL[id],
+    state: index < current ? 'done' : index === current ? 'active' : 'pending',
+  }));
+}
+
 function sourceName(image: GuestImageSummary): string | null {
   return image.distribution === 'selfBuilt' ? null : 'SourceForge 공식 프로젝트';
 }
@@ -293,25 +316,8 @@ function SeparateWindowNotice({ guest, actions }: { readonly guest: GuestView; r
   );
 }
 
-function InstallFailureNotice({ snapshot, actions }: StepProps) {
-  const { guest, images } = snapshot;
-  const name = images.activeGuest;
-  if (guest.state !== 'failed' || name === null) return null;
-  const startFailed = guest.lastExit?.kind === 'startFailed';
-  const logPath = guest.lastExit?.logPath ?? null;
-  return (
-    <div className="ome-stage-notice" role="alert">
-      <p>{startFailed ? '운영체제 설치 프로그램을 시작하지 못했습니다.' : '운영체제 설치 프로그램이 끝나기 전에 종료되었습니다.'}</p>
-      {logPath !== null && <p className="ome-caption ome-mono">{logPath}</p>}
-      <p className="ome-caption">디스크를 지우고 처음부터 다시 설치할 수 있습니다.</p>
-      <Button icon="refresh" onClick={() => actions.guestReinstall(name)}>다시 설치</Button>
-    </div>
-  );
-}
-
 function GuestInstallStep({ snapshot, actions }: StepProps) {
-  useGuestKeyboard(snapshot.guest.state === 'running' && !snapshot.input.editing, actions.inputHostKey);
-  const { wizard, images, guest } = snapshot;
+  const { wizard, images } = snapshot;
   const [size, setSize] = useState<DiskSize | null>(() => toDiskSize(wizard.diskSizeGib));
   const imageId = wizard.imageId;
 
@@ -363,30 +369,64 @@ function GuestInstallStep({ snapshot, actions }: StepProps) {
     );
   }
 
+  // The install runs hidden (ADR-0010): no stage, nothing to operate, only its progress. It ends in
+  // the first boot by itself, so the only button is 취소; 나중에 하기 would leave it running unseen.
+  const install = wizard.install;
+  const name = images.activeGuest;
+  if (install !== null && install.stage === 'failed') {
+    return (
+      <WizardLayout
+        issue={snapshot.issue}
+        onDefer={actions.wizardDefer}
+        footer={<>
+          <Button size="large" icon="download" onClick={actions.diagnosticsExport}>진단 묶음 내보내기</Button>
+          <Button size="large" variant="primary" icon="refresh" onClick={() => actions.guestReinstall(name)}>다시 설치</Button>
+        </>}
+      >
+        <h1 className="ome-page-title">운영체제 설치</h1>
+        <div className="ome-install-failure" role="alert">
+          <p className="ome-verdict">운영체제를 설치하지 못했습니다.</p>
+          {install.failure !== null && (
+            <p className="ome-caption">원인 <span className="ome-mono">{install.failure}</span></p>
+          )}
+          {install.logPath !== null && <p className="ome-caption ome-mono">{install.logPath}</p>}
+          <p className="ome-caption">디스크를 지우고 처음부터 다시 설치할 수 있습니다.</p>
+        </div>
+      </WizardLayout>
+    );
+  }
+  if (install !== null) {
+    return (
+      <WizardLayout
+        issue={snapshot.issue}
+        footer={<Button size="large" onClick={actions.guestInstallCancel}>취소</Button>}
+      >
+        <h1 className="ome-page-title">운영체제 설치</h1>
+        <p className="ome-lead">운영체제를 설치하고 있습니다. 몇 분 걸리며, 끝나면 바로 첫 부팅으로 넘어갑니다.</p>
+        <div className="ome-transfer">
+          <div className="ome-transfer-head">
+            <span>{INSTALL_STAGE_LABEL[install.stage]}</span>
+            <span className="ome-readout ome-transfer-percent">{formatPercent(install.percent / 100)}</span>
+          </div>
+          <ProgressBar value={install.percent / 100} label="설치 진행률" />
+        </div>
+        <div className="ome-labelled">
+          <span className="ome-group-label" aria-hidden="true">진행</span>
+          <StepList label="설치 진행" items={installSteps(install.stage)} />
+        </div>
+      </WizardLayout>
+    );
+  }
+  // A guest exists and nothing is installing: a home whose operating system was installed before
+  // this step became unattended. The step only confirms it.
   return (
     <WizardLayout
-      wide
       issue={snapshot.issue}
       onDefer={actions.wizardDefer}
-      footer={<Button size="large" variant="primary" disabled={!wizard.canContinue} onClick={actions.wizardContinue}>설치 완료</Button>}
+      footer={<Button size="large" variant="primary" disabled={!wizard.canContinue} onClick={actions.wizardContinue}>다음</Button>}
     >
-      <StageFrame onRect={actions.stageRectChanged}>
-        <SeparateWindowNotice guest={guest} actions={actions} />
-        <InstallFailureNotice snapshot={snapshot} actions={actions} />
-      </StageFrame>
-      <aside className="ome-wizard-side">
-        <h1 className="ome-page-title">운영체제 설치</h1>
-        {wizard.installGuide.length > 0 && (
-          <ol className="ome-guide">
-            {wizard.installGuide.map((line, index) => (
-              <li key={`${String(index)}-${line}`} className="ome-guide-item">
-                <span className="ome-guide-number">{index + 1}</span>
-                <span>{line}</span>
-              </li>
-            ))}
-          </ol>
-        )}
-      </aside>
+      <h1 className="ome-page-title">운영체제 설치</h1>
+      <p className="ome-verdict">운영체제가 설치되어 있습니다.</p>
     </WizardLayout>
   );
 }

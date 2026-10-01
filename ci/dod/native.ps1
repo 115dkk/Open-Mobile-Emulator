@@ -4,9 +4,9 @@ param(
  [int]$AppPid, [int]$QemuPid, [string]$Shot,
  [int]$Width=0, [int]$Height=0, [int]$X=80, [int]$Y=60,
  [switch]$Quit, [switch]$Inventory, [string]$HomePath,
- [string]$Keys, [string]$Text, [string]$FilePath, [switch]$GameSelection, [string]$Tap,
- [int]$KillOwnedPid, [string]$ExpectedCreation, [switch]$WaitInstaller, [switch]$Desktop, [switch]$Close,
- [switch]$Foreground, [switch]$Highlight
+ [string]$FilePath, [switch]$GameSelection, [string]$Tap,
+ [int]$KillOwnedPid, [string]$ExpectedCreation, [switch]$Desktop, [switch]$Close,
+ [switch]$Foreground
 )
 $ErrorActionPreference='Stop'
 [Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)
@@ -133,78 +133,10 @@ if ($Desktop) {
  @{action='desktop';screen="$($bounds.Width)x$($bounds.Height)";foreground=$fg.ToInt64();foregroundWindow=$foregroundWindow;windows=$windows;processes=$processes;shot=$Shot} | ConvertTo-Json -Depth 6 -Compress
  exit
 }
-# GRUB gfxmenu geometry from the capture: the selection bar is a wide run of blue pixels, the entry
-# rows are the blue lotus or chevron icons (white on the selected row) in the column left of the
-# text. Every rule is a fraction of the window, so the runner's 872x608 and the development PC's
-# 1744x1216 read the same (CI run 32 lost one Down and booted the wrong entry; docs/evidence/M2/dod-ci.md).
-# Plain PowerShell over GetPixel (about 30k samples, a second or two): Add-Type with explicit
-# references lost the default assembly set on the runner (CI run 33).
-function Test-GrubBlue($c) { return ($c.B -ge 120) -and ($c.B -gt ($c.R + 50)) -and ($c.B -gt ($c.G + 20)) }
-function Add-GrubEntry($entries, $cluster, $h) {
- $span = $cluster[-1] - $cluster[0]; $center = ($cluster[0] + $cluster[-1]) / 2
- if ($span -ge 6 -and $span -le 0.1 * $h -and $center -lt 0.9 * $h) { $entries.Add([double]$center) }
-}
-function Get-GrubHighlight($b) {
- $w = $b.Width; $h = $b.Height
- $x0 = [int](0.25 * $w); $x1 = [int](0.75 * $w)
- $barRows = New-Object System.Collections.Generic.List[int]
- for ($y = 0; $y -lt $h; $y += 3) {
-  $n = 0; $m = 0
-  for ($x = $x0; $x -lt $x1; $x += 4) { $m++; if (Test-GrubBlue $b.GetPixel($x, $y)) { $n++ } }
-  if ($m -gt 0 -and ($n * 2) -gt $m) { $barRows.Add($y) }
- }
- $clusters = @(); $cur = $null
- foreach ($y in $barRows) {
-  if ($null -ne $cur -and ($y - $cur[-1]) -le 6) { $cur += $y } else { if ($null -ne $cur) { $clusters += ,$cur }; $cur = @($y) }
- }
- if ($null -ne $cur) { $clusters += ,$cur }
- $big = $null; foreach ($c in $clusters) { if ($null -eq $big -or $c.Count -gt $big.Count) { $big = $c } }
- $bar = -1; $barHeight = 0
- if ($null -ne $big) { $bar = ($big[0] + $big[-1]) / 2; $barHeight = $big[-1] - $big[0] }
- $b0 = [int](0.19 * $w); $b1 = [int](0.24 * $w)
- $entries = New-Object System.Collections.Generic.List[double]; $cur = $null
- for ($y = 0; $y -lt $h; $y++) {
-  $n = 0
-  for ($x = $b0; $x -lt $b1; $x += 3) {
-   $c = $b.GetPixel($x, $y)
-   if ((Test-GrubBlue $c) -or ($c.R -gt 200 -and $c.G -gt 200 -and $c.B -gt 200)) { $n++; if ($n -ge 2) { break } }
-  }
-  if ($n -ge 2) {
-   if ($null -ne $cur -and ($y - $cur[-1]) -le 3) { $cur += $y } else { if ($null -ne $cur) { Add-GrubEntry $entries $cur $h }; $cur = @($y) }
-  }
- }
- if ($null -ne $cur) { Add-GrubEntry $entries $cur $h }
- $row = -1
- if ($bar -ge 0 -and $entries.Count -gt 0) {
-  $best = [double]::MaxValue
-  for ($i = 0; $i -lt $entries.Count; $i++) { $d = [Math]::Abs($entries[$i] - $bar); if ($d -lt $best) { $best = $d; $row = $i } }
-  if ($best -gt 0.03 * $h) { $row = -1 }
- }
- return @{ bar = $bar; barHeight = $barHeight; entries = @($entries | ForEach-Object { [int]$_ }); row = $row }
-}
 $p=Get-Process -Id $AppPid
 $h=$p.MainWindowHandle
 if($h -eq 0){throw 'No main window'}
 $main=$h
-if ($WaitInstaller) {
- $deadline = [DateTime]::UtcNow.AddSeconds(30)
- do {
-  $candidates = @([W]::All()) + @([W]::Children($h))
-  $targets = @($candidates | Where-Object { [W]::Pid($_) -ne $AppPid -and [W]::Class($_) -eq 'SDL_app' -and [W]::IsWindowVisible($_) } | Select-Object -Unique)
-  $targets = @($targets | Where-Object {
-   $candidate = Get-CimInstance Win32_Process -Filter "ProcessId = $([W]::Pid($_))"
-   $candidate.ParentProcessId -eq $AppPid -and $candidate.CommandLine.Replace('\','/').Contains($HomePath.Replace('\','/') + '/')
-  })
-  if ($targets.Count -eq 1) { break }
-  Start-Sleep -Milliseconds 40
- } while ([DateTime]::UtcNow -lt $deadline)
- if ($targets.Count -ne 1) { throw 'Owned visible installer window did not appear' }
- $h = $targets[0]
- # Report the window only. Keys are sent after the caller has recognized the GRUB menu; the product
- # forwards keys to the guest now, and keys during the firmware phase are not harmless.
- @{pid=[W]::Pid($h);hwnd=$h.ToInt64();action='installer-window'} | ConvertTo-Json -Compress
- exit
-}
 if ($QemuPid) {
  $candidates = @([W]::All()) + @([W]::Children($h))
  $targets = @($candidates | Where-Object { [W]::Pid($_) -eq $QemuPid -and [W]::Class($_) -eq 'SDL_app' -and [W]::IsWindowVisible($_) } | Select-Object -Unique)
@@ -254,17 +186,6 @@ if ($Tap) {
  $x=[int][Math]::Round($r.L + $fx * ($r.Rt - $r.L)); $y=[int][Math]::Round($r.T + $fy * ($r.B - $r.T))
  [W]::ClickAt($x,$y)
  @{action='tap';hwnd=$h.ToInt64();pid=[W]::Pid($h);x=$x;y=$y;rect=$r;fraction=@{x=$fx;y=$fy}} | ConvertTo-Json -Depth 3 -Compress
- exit
-}
-if ($Keys -or $Text) {
- [W]::Focus($main)
- $map=@{HOME=0x24;END=0x23;UP=0x26;DOWN=0x28;LEFT=0x25;RIGHT=0x27;ENTER=0x0d;TAB=9;ESC=0x1b;BACKSPACE=8;SPACE=0x20}
- if($Keys){foreach($key in $Keys.Split(',')){
-  if(!$map.ContainsKey($key)){throw "Unknown key $key"}
-  [W]::Focus($main); [W]::Tap($map[$key])
- }}
- if($Text){[W]::Focus($main);[W]::Type($Text)}
- @{action='keys';hwnd=$h.ToInt64();pid=[W]::Pid($h);keys=$Keys;text=$Text} | ConvertTo-Json -Compress
  exit
 }
 if($Foreground){
@@ -336,12 +257,10 @@ $r=[W+R]::new();[void][W]::GetWindowRect($h,[ref]$r)
 $crop=[W+R]::new();$dwm=if($QemuPid){[void][W]::GetWindowRect($h,[ref]$crop);0}else{[W]::DwmGetWindowAttribute($h,9,[ref]$crop,16)}
 if($dwm -ne 0){throw "DWM frame query failed $dwm"}
 $children=@([W]::Children($h) | ForEach-Object {$cr=[W+R]::new();[void][W]::GetWindowRect($_,[ref]$cr);@{hwnd=$_.ToInt64();pid=[W]::Pid($_);class=[W]::Class($_);visible=[W]::IsWindowVisible($_);rect=$cr}})
-$grubHighlight=$null
 if($Shot){
  $b=[Drawing.Bitmap]::new(($crop.Rt-$crop.L),($crop.B-$crop.T));$g=[Drawing.Graphics]::FromImage($b)
  try{
   $g.CopyFromScreen($crop.L,$crop.T,0,0,$b.Size);$b.Save($Shot,[Drawing.Imaging.ImageFormat]::Png)
-  if($Highlight){$grubHighlight=Get-GrubHighlight $b}
  }finally{$g.Dispose();$b.Dispose()}
 }
-@{hwnd=$h.ToInt64();rect=$r;crop=$crop;focus=$focus;foreground=[W]::GetForegroundWindow().ToInt64();children=$children;shot=$Shot;highlight=$grubHighlight} | ConvertTo-Json -Depth 6 -Compress
+@{hwnd=$h.ToInt64();rect=$r;crop=$crop;focus=$focus;foreground=[W]::GetForegroundWindow().ToInt64();children=$children;shot=$Shot} | ConvertTo-Json -Depth 6 -Compress

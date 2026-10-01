@@ -7,11 +7,11 @@ import type {
 import type { OverlaySeed } from './overlay/model';
 
 export const sampleSnapshot: AppSnapshot = {
-  contractVersion: 7, productVersion: '0.1.0', phase: 'wizard', blocker: null,
+  contractVersion: 8, productVersion: '0.1.0', phase: 'wizard', blocker: null,
   host: { rows: [], ready: false, inspectedAt: null },
   wizard: {
     step: 'hostCheck', canContinue: false, canSkip: false, download: null,
-    imageId: null, installGuide: [], diskSizeGib: 32, diskFreeBytes: null,
+    imageId: null, install: null, diskSizeGib: 32, diskFreeBytes: null,
   },
   images: { profiles: [], guests: [], activeGuest: null },
   guest: {
@@ -65,6 +65,7 @@ export function fixtureBridge(
     guestSelect: apply,
     guestDelete: apply,
     guestReinstall: apply,
+    guestInstallCancel: apply,
     guestStart: apply,
     guestStop: apply,
     guestRestart: apply,
@@ -143,14 +144,8 @@ export const sampleProfiles: readonly GuestImageSummary[] = [
   },
 ];
 
-export const sampleInstallGuide: readonly string[] = [
-  'ISO 메뉴에서 Installation을 선택합니다.',
-  '빈 디스크에 GPT 파티션 표와 512MB EFI 시스템 파티션을 만듭니다.',
-  '남은 공간에 Linux filesystem 파티션을 만들고 변경 사항을 기록합니다.',
-  'EFI 파티션은 FAT32로, 운영체제 파티션은 ext4로 포맷합니다.',
-  'OTA 업데이트는 No를 고르고 Grub2 EFI Bootloader를 설치합니다.',
-  '설치가 끝나면 가상 머신을 끄고 ISO 없이 다시 시작합니다.',
-];
+/** Serial log of the hidden install helper, kept in the guest directory (ADR-0010). */
+const installLogPath = 'C:\\Users\\사용자\\AppData\\Local\\OpenMobileEmulator\\vm\\android-13\\install-serial.log';
 
 export const sampleApps: readonly AppItem[] = [
   { package: 'com.example.sample.a', label: '샘플 앱 A', versionName: '1.4.2', versionCode: 142, installedAt: '2026-09-24T10:00:00' },
@@ -231,23 +226,24 @@ export const wizardGallery: readonly GalleryVariant[] = [
     snapshot: wizardAt('guestInstall', { wizard: { diskSizeGib: 64, diskFreeBytes: 412 * GIB } }),
   },
   {
-    id: 'install-guide', label: 'S1.5 설치: 설치 안내',
+    id: 'install-progress', label: 'S1.5 설치: 설치 중',
     snapshot: wizardAt('guestInstall', {
       images: installedImages,
-      guest: { ...sampleSnapshot.guest, state: 'running', hosting: 'embedded', imageId: 'sample-android-13' },
-      wizard: { installGuide: sampleInstallGuide, diskSizeGib: 64 },
+      guest: { ...sampleSnapshot.guest, state: 'running', imageId: 'sample-android-13' },
+      wizard: { diskSizeGib: 64, install: { stage: 'copy', percent: 58, failure: null, logPath: installLogPath } },
     }),
   },
   {
-    id: 'install-failed', label: 'S1.5 설치: 설치기 시작 실패',
+    id: 'install-failed', label: 'S1.5 설치: 설치 실패',
     snapshot: wizardAt('guestInstall', {
       images: installedImages,
-      guest: {
-        ...sampleSnapshot.guest, state: 'failed', hosting: 'embedded', imageId: 'sample-android-13',
-        lastExit: { kind: 'startFailed', at: '2026-09-30T08:39:31', logPath: stageLogPath },
-      },
-      wizard: { installGuide: sampleInstallGuide, diskSizeGib: 64 },
+      guest: { ...sampleSnapshot.guest, state: 'failed', imageId: 'sample-android-13' },
+      wizard: { diskSizeGib: 64, install: { stage: 'failed', percent: 10, failure: 'mke2fs', logPath: installLogPath } },
     }),
+  },
+  {
+    id: 'install-installed', label: 'S1.5 설치: 이미 설치됨',
+    snapshot: wizardAt('guestInstall', { images: installedImages, wizard: { diskSizeGib: 64, canContinue: true } }),
   },
   {
     id: 'first-boot', label: 'S1.6 첫 부팅: 부팅 중',

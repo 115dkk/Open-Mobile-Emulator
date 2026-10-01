@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Open Mobile Emulator contributors
 // Read-only presentation contracts mirroring ome-runtime contract.rs field for field.
 
-export const CONTRACT_VERSION = 7;
+export const CONTRACT_VERSION = 8;
 
 export type AppPhase = 'wizard' | 'main';
 export type BlockerKind = 'virtualizationOff' | 'qemuMissing' | 'hypervisorPlatformOff';
@@ -26,13 +26,23 @@ export interface TransferProgress {
   readonly bytesPerSecond: number | null;
   readonly label: string;
 }
+/** Stages the hidden install helper reports over the serial port, in order (ADR-0010). */
+export type InstallStage = 'waiting' | 'tools' | 'partition' | 'format' | 'copy' | 'finish' | 'done' | 'failed';
+/** Progress of the unattended operating-system install while it runs or after it failed. */
+export interface GuestInstallView {
+  readonly stage: InstallStage;
+  /** Zero through one hundred. */
+  readonly percent: number;
+  readonly failure: string | null;
+  readonly logPath: string | null;
+}
 export interface WizardView {
   readonly step: WizardStep;
   readonly canContinue: boolean;
   readonly canSkip: boolean;
   readonly download: TransferProgress | null;
   readonly imageId: string | null;
-  readonly installGuide: readonly string[];
+  readonly install: GuestInstallView | null;
   readonly diskSizeGib: number;
   readonly diskFreeBytes: number | null;
 }
@@ -270,6 +280,7 @@ export interface ControllerBridge {
   guestSelect(id: string): Promise<AppSnapshot>;
   guestDelete(id: string): Promise<AppSnapshot>;
   guestReinstall(name: string): Promise<AppSnapshot>;
+  guestInstallCancel(): Promise<AppSnapshot>;
   guestStart(): Promise<AppSnapshot>;
   guestStop(): Promise<AppSnapshot>;
   guestRestart(): Promise<AppSnapshot>;

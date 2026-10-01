@@ -104,6 +104,7 @@ export function useController(bridge: ControllerBridge): ControllerState {
     guestSelect: (id) => execute(() => bridge.guestSelect(id)),
     guestDelete: (id) => execute(() => bridge.guestDelete(id)),
     guestReinstall: (name) => execute(() => bridge.guestReinstall(name)),
+    guestInstallCancel: () => execute(() => bridge.guestInstallCancel()),
     guestStart: () => execute(() => bridge.guestStart()),
     guestStop: () => execute(() => bridge.guestStop()),
     guestRestart: () => execute(() => bridge.guestRestart()),
@@ -149,7 +150,7 @@ export function useController(bridge: ControllerBridge): ControllerState {
     openScreenshotsFolder: () => execute(() => bridge.openScreenshotsFolder()),
     openHomeFolder: () => execute(() => bridge.openHomeFolder()),
     copyToClipboard: (item) => execute(() => bridge.copyToClipboard(item)),
-    openRegistrationPage: () => execute(() => bridge.openRegistrationPage()),
+    openRegistrationPage: () => execute(() => bridge.openRegistrationPage()),
     googleAccountAddOpen: () => execute(() => bridge.googleAccountAddOpen()),
     guestWindowToFront: () => execute(() => bridge.guestWindowToFront()),
   }), [bridge, execute]);
