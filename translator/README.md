@@ -61,7 +61,9 @@ Follows the AOSP native-bridge layout:
 ## Where the bundled Google translator comes from
 
 Bliss OS 16.9.x ships `libndk_translation` extracted from a Google emulator
-image. Self-built images (P3) ship without it (`BLISS_BUILD_VARIANT=foss`): the
+image. Self-built images (P3) ship without it (`BLISS_BUILD_VARIANT=vanilla` with every
+native-bridge and GApps flag off; Bliss's `foss` value only picks the microG bundle,
+see `docs/P3-PLAN.md`): the
 installer downloads a Google APIs x86_64 system image from `dl.google.com` on the
 user's PC, extracts a bundle in this contract's layout there, and installs it
 into the guest (R3, ADR-0006). No release, server, or mirror of this project
@@ -77,9 +79,9 @@ CLAUDE.md section 8 item 9. Digitalis (P2) is the translator without that
 restriction, for 64-bit ARM only: it has no ARM32 backend, so 32-bit ARM apps
 stay on a proprietary translator whichever way item 9 is decided (ADR-0008).
 
-The development host already holds such an image under the Android SDK
-(`system-images/android-36/google_apis/x86_64`), which is useful for inspecting
-the layout; nothing from it is committed.
+The index entries for API 35 to 37 x86_64 images, with their SHA-1 and layout
+notes, are in `docs/evidence/P3/research-google-images.md`; nothing from such an
+image is committed.
 
 ## Digitalis bundles per API level (ADR-0008)
 

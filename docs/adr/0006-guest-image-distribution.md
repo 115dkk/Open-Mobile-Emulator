@@ -108,3 +108,13 @@ development and debug only"라고 적는다. 게임 실행은 이 범위에 들�
 성능 비교 대상에 그치지 않는다. Digitalis는 AOSP Berberis를 수정한 Apache-2.0 저장소이고, README는
 바이너리 묶음이 구글 비공개 파일 없이 만들어진다고 적는다(2026-09-28 확인). 후보 변환기(구글,
 인텔, Digitalis) 가운데 구글 SDK 계약의 사용 범위 문제가 없는 것은 Digitalis뿐이다.
+
+## 정정 (2026-10-01, P3 조사)
+
+이 ADR이 적은 `BLISS_BUILD_VARIANT=foss`는 블롭 없는 변형을 고르는 값이 아니다. Bliss의 `foss`는 microG와 F-Droid
+묶음(`vendor/foss`)을 고르는 값이고, 네이티브 브리지는 `USE_LIBNDK_TRANSLATION_NB`와 `USE_CROS_HOUDINI_NB`, 구글 앱은
+`USE_EMU_GAPPS`와 `USE_OPENGAPPS`로 따로 들어가며 그 조건에 변형을 가리는 분기가 없다. 그래서 OME의 '블롭 없는 변형'은
+`BLISS_BUILD_VARIANT=vanilla`에 그 플래그를 모두 끈 빌드이고, 결정 1의 `foss`는 그 뜻으로 읽는다. 또 Digitalis는 AOSP 16
+QPR2 전용이고 BlissOS에는 안드로이드 16 트리가 없어, 1차 자체 이미지(안드로이드 15)에서 결정 3의 (나)는 Digitalis의
+플랫폼 층 이식(P2) 뒤에야 가능하다. 근거는 `docs/evidence/P3/research-bliss-build.md`와 `research-google-images.md`,
+계획은 `docs/P3-PLAN.md`다.
