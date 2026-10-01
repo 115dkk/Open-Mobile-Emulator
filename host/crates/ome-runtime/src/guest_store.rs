@@ -49,6 +49,8 @@ pub struct GuestRecord {
     pub root_enabled: Option<bool>,
     /// How the installed guest boots; absent for guests the interactive installer made.
     pub boot: Option<StoredBoot>,
+    /// Whether the one-time migration from the interactive install layout was attempted.
+    pub direct_boot_migration_attempted: bool,
     /// Outcome of the unattended install; absent for guests made before ADR-0010.
     pub install: Option<StoredInstall>,
 }
@@ -97,6 +99,12 @@ pub struct StoredBoot {
     pub method: StoredBootMethod,
     /// Directory name passed to the guest initrd as `SRC`.
     pub src: String,
+    /// Whether the product migrated an interactive installer guest to direct boot.
+    #[serde(default)]
+    pub migrated_from_disk: bool,
+    /// Whether the migrated guest has completed one direct boot.
+    #[serde(default)]
+    pub direct_boot_verified: bool,
 }
 
 /// Supported persisted boot method.
@@ -267,9 +275,16 @@ struct GuestDocument {
     /// Absent in guest documents written before ADR-0010.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     boot: Option<StoredBoot>,
+    /// Absent in guest documents written before legacy guests could be migrated.
+    #[serde(default, skip_serializing_if = "is_false")]
+    direct_boot_migration_attempted: bool,
     /// Absent in guest documents written before ADR-0010.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     install: Option<StoredInstall>,
+}
+
+fn is_false(value: &bool) -> bool {
+    !value
 }
 
 impl From<&GuestRecord> for GuestDocument {
@@ -288,6 +303,7 @@ impl From<&GuestRecord> for GuestDocument {
             registration_opened_at: record.registration_opened_at.clone(),
             root_enabled: record.root_enabled,
             boot: record.boot.clone(),
+            direct_boot_migration_attempted: record.direct_boot_migration_attempted,
             install: record.install.clone(),
         }
     }
@@ -308,6 +324,7 @@ impl From<GuestDocument> for GuestRecord {
             registration_opened_at: document.registration_opened_at,
             root_enabled: document.root_enabled,
             boot: document.boot,
+            direct_boot_migration_attempted: document.direct_boot_migration_attempted,
             install: document.install,
         }
     }
@@ -369,6 +386,7 @@ impl GuestStore {
                     registration_opened_at: None,
                     root_enabled: None,
                     boot: None,
+                    direct_boot_migration_attempted: false,
                     install: None,
                 });
             }
@@ -563,6 +581,35 @@ mod tests {
         let record = GuestStore::new(root).load_all().expect("load").remove(0);
         assert_eq!(record.boot, None);
         assert_eq!(record.install, None);
+    }
+
+    #[test]
+    fn direct_boot_document_without_migration_flags_loads_with_false_defaults() {
+        let directory = tempfile::tempdir().expect("temp directory");
+        let root = directory.path().join("vm");
+        let guest = root.join("default");
+        fs::create_dir_all(&guest).expect("guest directory");
+        fs::write(guest.join("disk.qcow2"), [0_u8; 1]).expect("disk");
+        fs::write(
+            guest.join("guest.json"),
+            r#"{
+              "version":1,"id":"default","imageId":"bliss-16.9.7-android-13",
+              "androidVersion":"13","apiLevel":33,"diskBytes":1,"createdAt":null,
+              "lastStartedAt":null,"capabilities":{"probedAt":null,"items":[],
+              "nativeBridge":null,"mediaVolume":null,"googleAccounts":null,
+              "foregroundPackage":null,"display":null,"packages":[]},"deviceId":null,
+              "registrationOpenedAt":null,"rootEnabled":null,
+              "boot":{"method":"direct","src":"ome"}
+            }"#,
+        )
+        .expect("direct boot metadata");
+
+        let record = GuestStore::new(root).load_all().expect("load").remove(0);
+
+        let boot = record.boot.expect("direct boot");
+        assert!(!boot.migrated_from_disk);
+        assert!(!boot.direct_boot_verified);
+        assert!(!record.direct_boot_migration_attempted);
     }
 
     #[test]

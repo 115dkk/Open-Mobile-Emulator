@@ -15,8 +15,8 @@ use ome_artifacts::{ArtifactStore, Manifest, StoreError, StoreProgress};
 use ome_guest_config::{BootMode, GuestConfig, GuestPaths, QemuInstall, RawGuestConfig};
 use ome_guest_image::{
     CapabilityProbe, DisplayInfo, Distribution, FamilyAdapter, GuestImageProfile,
-    ImageStatus as ProfileStatus, ProbeItem, ProbeOutcome, ProbeState, ShellRunner, Translator,
-    adapter_for, recommended_index, sort_newest_first,
+    ImageStatus as ProfileStatus, InstallMethod, ProbeItem, ProbeOutcome, ProbeState, ShellRunner,
+    Translator, adapter_for, recommended_index, sort_newest_first,
 };
 use ome_guest_install::helper::{DEFAULT_SRC, boot_cmdline, install_cmdline, write_install_initrd};
 use ome_guest_install::iso9660::IsoImage;
@@ -410,6 +410,7 @@ pub struct AppRuntime {
     media_volume: Option<u32>,
     restart_pending: bool,
     boot_timeout_pending: bool,
+    migrated_direct_boot_guest: Option<String>,
     #[cfg(test)]
     boot_timeout_override: Option<Duration>,
     notices: Vec<Notice>,
@@ -657,6 +658,7 @@ impl AppRuntime {
             media_volume,
             restart_pending: false,
             boot_timeout_pending: false,
+            migrated_direct_boot_guest: None,
             #[cfg(test)]
             boot_timeout_override: None,
             notices: startup_notices,
@@ -1266,9 +1268,7 @@ impl AppRuntime {
             let install_initrd = directory.join("initrd-install.img");
             let serial_log = directory.join("install-serial.log");
             let prepare_result = (|| {
-                let mut iso = IsoImage::open(&verified.path)?;
-                iso.extract(&profile.boot_files.kernel, &kernel)?;
-                iso.extract(&profile.boot_files.initrd, &initrd)?;
+                extract_boot_files(&verified.path, &profile, &directory)?;
                 write_install_initrd(&initrd, &install_initrd)?;
                 Ok::<(), Box<dyn std::error::Error>>(())
             })();
@@ -1288,6 +1288,7 @@ impl AppRuntime {
                 registration_opened_at: None,
                 root_enabled: None,
                 boot: None,
+                direct_boot_migration_attempted: false,
                 install: Some(StoredInstall {
                     state: StoredInstallState::Running,
                     finished_at: None,
@@ -1646,6 +1647,7 @@ impl AppRuntime {
                         if completed && self.guest_state == GuestState::Running {
                             self.adb_connected = true;
                             self.boot_completed = true;
+                            self.mark_migrated_direct_boot_verified();
                             self.run_capability_probe();
                             self.last_account_poll = Some(Instant::now());
                         }
@@ -1747,25 +1749,59 @@ impl AppRuntime {
     }
 
     fn start_guest(&mut self) -> Result<(), AppIssue> {
+        let selected_id = self
+            .selected_guest()
+            .ok_or_else(issues::guest_not_found)?
+            .id
+            .clone();
+        let image_id = self
+            .selected_guest()
+            .ok_or_else(issues::guest_not_found)?
+            .image_id
+            .clone();
+        let profile = self
+            .profile_by_id(&image_id)
+            .ok_or_else(issues::image_not_found)?
+            .clone();
+        self.migrate_legacy_guest(&selected_id, &profile);
         let selected = self
             .selected_guest()
             .ok_or_else(issues::guest_not_found)?
             .clone();
-        let profile = self
-            .profile_by_id(&selected.image_id)
-            .ok_or_else(issues::image_not_found)?
-            .clone();
-        let config = self.build_guest_config(&selected, &profile)?;
-        let (paths, install) = self.guest_launch_paths(&selected, &profile)?;
+        let pending_migrated_boot = selected
+            .boot
+            .as_ref()
+            .is_some_and(|boot| boot.migrated_from_disk && !boot.direct_boot_verified);
+        self.migrated_direct_boot_guest = pending_migrated_boot.then(|| selected.id.clone());
+        let config = match self.build_guest_config(&selected, &profile) {
+            Ok(config) => config,
+            Err(issue) => return Err(self.migrated_start_issue(pending_migrated_boot, issue)),
+        };
+        let (paths, install) = match self.guest_launch_paths(&selected, &profile) {
+            Ok(launch) => launch,
+            Err(issue) => return Err(self.migrated_start_issue(pending_migrated_boot, issue)),
+        };
+        let direct_boot_ready = matches!(&paths.boot, BootMode::Direct { .. });
+        if pending_migrated_boot && !direct_boot_ready {
+            return Err(self.migrated_start_issue(true, issues::process_start_failed()));
+        }
         self.ensure_adb_session();
-        let supervisor = self
+        if self.deps.supervisor.is_none() {
+            return Err(
+                self.migrated_start_issue(pending_migrated_boot, issues::process_unavailable())
+            );
+        }
+        let start_result = self
             .deps
             .supervisor
             .as_deref_mut()
-            .ok_or_else(issues::process_unavailable)?;
-        supervisor
-            .start(config, paths, install)
-            .map_err(|_| issues::process_start_failed())?;
+            .expect("guest supervisor checked above")
+            .start(config, paths, install);
+        if start_result.is_err() {
+            return Err(
+                self.migrated_start_issue(pending_migrated_boot, issues::process_start_failed())
+            );
+        }
         if let Some(position) = self.selected_guest_index()
             && self.guest_store.save(&self.guests[position]).is_err()
         {
@@ -1782,6 +1818,113 @@ impl AppRuntime {
         self.adb_connected = false;
         self.restart_pending = false;
         Ok(())
+    }
+
+    fn migrated_start_issue(&mut self, migrated: bool, original: AppIssue) -> AppIssue {
+        if migrated {
+            match self.revert_migrated_direct_boot() {
+                Ok(true) => issues::direct_boot_reverted(),
+                Ok(false) => original,
+                Err(issue) => issue,
+            }
+        } else {
+            original
+        }
+    }
+
+    fn migrate_legacy_guest(&mut self, guest_id: &str, profile: &GuestImageProfile) {
+        let Some(position) = self.guests.iter().position(|guest| guest.id == guest_id) else {
+            return;
+        };
+        let Some(src) = profile.legacy_install_src.as_ref() else {
+            return;
+        };
+        if self.guests[position].boot.is_some()
+            || self.guests[position].direct_boot_migration_attempted
+            || profile.install != InstallMethod::HelperBoot
+        {
+            return;
+        }
+        let Some(verified) = self
+            .deps
+            .artifacts
+            .as_ref()
+            .and_then(|store| store.verified(&profile.artifact))
+        else {
+            return;
+        };
+        let Ok(directory) = self.guest_store.guest_dir(guest_id) else {
+            return;
+        };
+        let extraction = extract_boot_files(&verified.path, profile, &directory);
+        if let Err(error) = extraction {
+            eprintln!("[guest] legacy direct-boot migration skipped for {guest_id}: {error}");
+            return;
+        }
+
+        let mut migrated = self.guests[position].clone();
+        migrated.direct_boot_migration_attempted = true;
+        migrated.boot = Some(StoredBoot {
+            method: StoredBootMethod::Direct,
+            src: src.clone(),
+            migrated_from_disk: true,
+            direct_boot_verified: false,
+        });
+        if let Err(error) = self.guest_store.save(&migrated) {
+            eprintln!(
+                "[guest] legacy direct-boot migration metadata was not saved for {guest_id}: {error}"
+            );
+            return;
+        }
+        self.guests[position] = migrated;
+        eprintln!("[guest] migrated {guest_id} from GRUB disk boot to direct kernel boot");
+    }
+
+    fn revert_migrated_direct_boot(&mut self) -> Result<bool, AppIssue> {
+        let Some(guest_id) = self.migrated_direct_boot_guest.take() else {
+            return Ok(false);
+        };
+        let Some(position) = self.guests.iter().position(|guest| guest.id == guest_id) else {
+            return Ok(false);
+        };
+        let should_revert = self.guests[position]
+            .boot
+            .as_ref()
+            .is_some_and(|boot| boot.migrated_from_disk && !boot.direct_boot_verified);
+        if !should_revert {
+            return Ok(false);
+        }
+        let previous = self.guests[position].boot.take();
+        if let Err(error) = self.guest_store.save(&self.guests[position]) {
+            self.guests[position].boot = previous;
+            return Err(guest_store_issue(error));
+        }
+        eprintln!("[guest] reverted {guest_id} to GRUB disk boot after direct boot failed");
+        Ok(true)
+    }
+
+    fn mark_migrated_direct_boot_verified(&mut self) {
+        let Some(guest_id) = self.migrated_direct_boot_guest.take() else {
+            return;
+        };
+        let Some(position) = self.guests.iter().position(|guest| guest.id == guest_id) else {
+            return;
+        };
+        let Some(boot) = self.guests[position].boot.as_mut() else {
+            return;
+        };
+        if !boot.migrated_from_disk || boot.direct_boot_verified {
+            return;
+        }
+        boot.direct_boot_verified = true;
+        if self.guest_store.save(&self.guests[position]).is_err() {
+            self.push_notice(Notice {
+                at: local_rfc3339(),
+                level: NoticeLevel::Warning,
+                message: "직접 부팅 확인 결과를 저장하지 못했습니다. 저장 공간과 앱의 파일 접근 권한을 확인하십시오."
+                    .to_owned(),
+            });
+        }
     }
 
     fn stop_guest(&mut self) -> Result<(), AppIssue> {
@@ -1926,6 +2069,7 @@ impl AppRuntime {
             Some(StoredBoot {
                 method: StoredBootMethod::Direct,
                 src,
+                ..
             }) => {
                 let kernel = directory.join("kernel");
                 let initrd = directory.join("initrd.img");
@@ -2531,6 +2675,7 @@ impl AppRuntime {
                 _ => None,
             }
         };
+        let mut suppress_automatic_restart = false;
         if let Some(kind) = exit_kind {
             self.last_exit = Some(LastExit {
                 kind,
@@ -2540,6 +2685,19 @@ impl AppRuntime {
                     .as_ref()
                     .map(|logs| logs.stderr.to_string_lossy().into_owned()),
             });
+            if matches!(kind, ExitKind::BootTimeout | ExitKind::StartFailed) {
+                match self.revert_migrated_direct_boot() {
+                    Ok(true) => {
+                        suppress_automatic_restart = true;
+                        self.issue = Some(issues::direct_boot_reverted());
+                    }
+                    Ok(false) => {}
+                    Err(issue) => {
+                        suppress_automatic_restart = true;
+                        self.issue = Some(issue);
+                    }
+                }
+            }
         }
         match event.state {
             ome_supervisor::GuestState::Starting => {
@@ -2611,10 +2769,11 @@ impl AppRuntime {
                 let _ = self.deps.window_host.detach();
                 if self.restart_pending {
                     self.restart_pending = false;
-                    if let Err(issue) = self.start_guest() {
+                    if !suppress_automatic_restart && let Err(issue) = self.start_guest() {
                         self.issue = Some(issue);
                     }
-                } else if self.wizard.step == Step::FirstBoot
+                } else if !suppress_automatic_restart
+                    && self.wizard.step == Step::FirstBoot
                     && let Err(issue) = self.start_guest()
                 {
                     self.issue = Some(issue);
@@ -2708,6 +2867,8 @@ impl AppRuntime {
                 self.guests[position].boot = Some(StoredBoot {
                     method: StoredBootMethod::Direct,
                     src: DEFAULT_SRC.to_owned(),
+                    migrated_from_disk: false,
+                    direct_boot_verified: false,
                 });
                 if let Err(error) = self.guest_store.save(&self.guests[position]) {
                     self.issue = Some(guest_store_issue(error));
@@ -4179,6 +4340,17 @@ fn image_summary(
     }
 }
 
+fn extract_boot_files(
+    iso_path: &Path,
+    profile: &GuestImageProfile,
+    destination: &Path,
+) -> Result<(), ome_guest_install::iso9660::IsoError> {
+    let mut iso = IsoImage::open(iso_path)?;
+    iso.extract(&profile.boot_files.kernel, &destination.join("kernel"))?;
+    iso.extract(&profile.boot_files.initrd, &destination.join("initrd.img"))?;
+    Ok(())
+}
+
 fn blocker_from_host(report: &HostReport) -> Option<Blocker> {
     let blocked = |id| {
         report
@@ -4430,6 +4602,39 @@ mod tests {
 
         fn state(&self) -> ome_supervisor::GuestState {
             *self.state.lock().expect("guest state lock")
+        }
+
+        fn subscribe(&self) -> mpsc::Receiver<GuestEvent> {
+            let (_sender, receiver) = mpsc::channel();
+            receiver
+        }
+    }
+
+    #[derive(Debug)]
+    struct FailingGuestProcess;
+
+    impl GuestProcess for FailingGuestProcess {
+        fn start(
+            &mut self,
+            _config: GuestConfig,
+            _paths: GuestPaths,
+            _install: QemuInstall,
+        ) -> Result<(), String> {
+            Err("start failed".to_owned())
+        }
+
+        fn request_stop(&self) {}
+
+        fn send_input(&self, _events: Vec<serde_json::Value>) -> Result<(), InputError> {
+            Ok(())
+        }
+
+        fn set_display_window(&self, _geometry: DisplayWindowGeometry) -> Result<(), InputError> {
+            Ok(())
+        }
+
+        fn state(&self) -> ome_supervisor::GuestState {
+            ome_supervisor::GuestState::Stopped
         }
 
         fn subscribe(&self) -> mpsc::Receiver<GuestEvent> {
@@ -4786,6 +4991,7 @@ mod tests {
                 initrd: "/initrd.img".to_owned(),
             },
             install: ome_guest_image::InstallMethod::HelperBoot,
+            legacy_install_src: None,
             qemu_overrides: Vec::new(),
             status: ProfileStatus::Verified,
             released_at: Some("2024-10-11".to_owned()),
@@ -4793,6 +4999,45 @@ mod tests {
         });
         runtime.selected_image = Some("bliss-16.9.7-android-13".to_owned());
         (directory, runtime, supervisor_handle, runner_handle)
+    }
+
+    fn configure_legacy_migration_artifact(
+        directory: &tempfile::TempDir,
+        runtime: &mut AppRuntime,
+        present: bool,
+    ) {
+        let fixture = directory.path().join("legacy-installer.iso");
+        ome_guest_install::test_support::write_test_iso(
+            &fixture,
+            b"legacy kernel",
+            b"legacy initrd",
+        );
+        let body = fs::read(&fixture).expect("read migration ISO fixture");
+        let hash = format!("{:x}", Sha256::digest(&body));
+        let artifact_dir = directory.path().join("home/artifacts");
+        if present {
+            fs::write(artifact_dir.join("test.iso"), &body).expect("write verified migration ISO");
+        }
+        let manifest = Manifest::parse(&format!(
+            r#"{{"schema_version":1,"allowed_hosts":["example.com"],"artifacts":[{{
+            "name":"test-artifact","version":"1","filename":"test.iso",
+            "url":"https://example.com/test.iso","size_bytes":{},"sha256":"{}",
+            "license":"test","provenance_note":"test","fetched_by":"installer"}}]}}"#,
+            body.len(),
+            hash
+        ))
+        .expect("migration artifact manifest");
+        runtime.deps.artifacts = Some(ArtifactStore::new(
+            manifest,
+            artifact_dir,
+            Box::new(FixedHttp {
+                body: Vec::new(),
+                final_url: "https://example.com/test.iso".to_owned(),
+                status: 200,
+            }),
+        ));
+        runtime.image_profiles[0].legacy_install_src = Some("android-2024-10-11".to_owned());
+        runtime.image_profiles[0].qemu_overrides = vec![ome_guest_image::QemuOverride::VirtioVgaGl];
     }
 
     fn guest_event(
@@ -6654,6 +6899,7 @@ package:dev.ome.two versionCode:8",
                 initrd: "/initrd.img".to_owned(),
             },
             install: ome_guest_image::InstallMethod::HelperBoot,
+            legacy_install_src: None,
             qemu_overrides: vec![],
             status: ProfileStatus::Verified,
             released_at: Some("2024-10-11".to_owned()),
@@ -6948,6 +7194,8 @@ package:dev.ome.two versionCode:8",
             Some(StoredBoot {
                 method: StoredBootMethod::Direct,
                 src: DEFAULT_SRC.to_owned(),
+                migrated_from_disk: false,
+                direct_boot_verified: false,
             })
         );
         assert_eq!(
@@ -7035,16 +7283,251 @@ package:dev.ome.two versionCode:8",
     }
 
     #[test]
-    fn legacy_guest_start_uses_disk_boot() {
-        let (_directory, mut runtime, supervisor, _runner) = lifecycle_runtime(
+    fn legacy_guest_with_verified_iso_migrates_to_direct_boot_and_persists() {
+        let (directory, mut runtime, supervisor, _runner) = lifecycle_runtime(
             std::iter::empty(),
             RecordingDesktop::default(),
             RecordingWindow::embedded(),
         );
-        assert!(runtime.guests[0].boot.is_none());
-        runtime.apply(Command::GuestStart).expect("legacy start");
+        configure_legacy_migration_artifact(&directory, &mut runtime, true);
+        let guest_dir = directory.path().join("home/vm/default");
+        fs::write(guest_dir.join("kernel"), b"stale kernel").expect("stale kernel");
+        fs::write(guest_dir.join("initrd.img"), b"stale initrd").expect("stale initrd");
+
+        runtime.apply(Command::GuestStart).expect("migrated start");
+
+        let starts = supervisor.starts.lock().expect("starts lock");
+        let BootMode::Direct {
+            kernel,
+            initrd,
+            cmdline,
+        } = &starts[0].1.boot
+        else {
+            panic!("migrated guest must use direct boot");
+        };
+        assert_eq!(kernel, &guest_dir.join("kernel"));
+        assert_eq!(initrd, &guest_dir.join("initrd.img"));
+        assert_eq!(cmdline, "root=/dev/ram0 SRC=/android-2024-10-11 quiet");
+        drop(starts);
+        assert_eq!(
+            fs::read(guest_dir.join("kernel")).expect("kernel"),
+            b"legacy kernel"
+        );
+        assert_eq!(
+            fs::read(guest_dir.join("initrd.img")).expect("initrd"),
+            b"legacy initrd"
+        );
+        let boot = runtime.guests[0].boot.as_ref().expect("stored boot");
+        assert!(boot.migrated_from_disk);
+        assert!(!boot.direct_boot_verified);
+        assert!(runtime.guests[0].direct_boot_migration_attempted);
+        let stored = runtime
+            .guest_store
+            .load_all()
+            .expect("reload migrated guest");
+        assert_eq!(stored[0], runtime.guests[0]);
+    }
+
+    #[test]
+    fn legacy_guest_without_verified_iso_keeps_disk_boot() {
+        let (directory, mut runtime, supervisor, _runner) = lifecycle_runtime(
+            std::iter::empty(),
+            RecordingDesktop::default(),
+            RecordingWindow::embedded(),
+        );
+        configure_legacy_migration_artifact(&directory, &mut runtime, false);
+
+        runtime
+            .apply(Command::GuestStart)
+            .expect("legacy disk start");
+
         let starts = supervisor.starts.lock().expect("starts lock");
         assert_eq!(starts[0].1.boot, BootMode::Disk);
+        assert!(runtime.guests[0].boot.is_none());
+        assert!(!runtime.guests[0].direct_boot_migration_attempted);
+    }
+
+    #[test]
+    fn migrated_guest_synchronous_start_failure_reverts_and_reports_issue() {
+        let (directory, mut runtime, _supervisor, _runner) = lifecycle_runtime(
+            std::iter::empty(),
+            RecordingDesktop::default(),
+            RecordingWindow::embedded(),
+        );
+        configure_legacy_migration_artifact(&directory, &mut runtime, true);
+        runtime.deps.supervisor = Some(Box::new(FailingGuestProcess));
+
+        let issue = runtime
+            .apply(Command::GuestStart)
+            .expect_err("migrated start must fail");
+
+        assert_eq!(issue.code, "direct_boot_reverted");
+        assert!(runtime.guests[0].boot.is_none());
+        assert!(runtime.guests[0].direct_boot_migration_attempted);
+        let stored = runtime
+            .guest_store
+            .load_all()
+            .expect("reload synchronously reverted guest");
+        assert!(stored[0].boot.is_none());
+        assert!(stored[0].direct_boot_migration_attempted);
+    }
+
+    #[test]
+    fn migrated_guest_boot_timeout_reverts_once_and_reports_issue() {
+        let (directory, mut runtime, supervisor, _runner) = lifecycle_runtime(
+            std::iter::empty(),
+            RecordingDesktop::default(),
+            RecordingWindow::embedded(),
+        );
+        configure_legacy_migration_artifact(&directory, &mut runtime, true);
+        runtime.wizard.step = Step::FirstBoot;
+        runtime.apply(Command::GuestStart).expect("migrated start");
+        runtime.ingest_guest_event(guest_event(
+            ome_supervisor::GuestState::Starting,
+            None,
+            None,
+        ));
+        runtime.ingest_guest_event(guest_event(
+            ome_supervisor::GuestState::Running,
+            Some(42),
+            None,
+        ));
+        runtime.boot_timeout_override = Some(Duration::ZERO);
+        runtime.tick();
+        runtime.ingest_guest_event(guest_event(
+            ome_supervisor::GuestState::Stopping,
+            Some(42),
+            None,
+        ));
+        runtime.ingest_guest_event(guest_event(ome_supervisor::GuestState::Stopped, None, None));
+
+        assert!(runtime.guests[0].boot.is_none());
+        assert!(runtime.guests[0].direct_boot_migration_attempted);
+        assert_eq!(
+            supervisor.starts.lock().expect("starts lock").len(),
+            1,
+            "rollback must wait for the user's next start request"
+        );
+        assert_eq!(
+            runtime
+                .snapshot()
+                .issue
+                .as_ref()
+                .map(|issue| issue.code.as_str()),
+            Some("direct_boot_reverted")
+        );
+        let stored = runtime
+            .guest_store
+            .load_all()
+            .expect("reload reverted guest");
+        assert!(stored[0].boot.is_none());
+        assert!(stored[0].direct_boot_migration_attempted);
+
+        runtime.apply(Command::GuestStart).expect("fallback start");
+        let starts = supervisor.starts.lock().expect("starts lock");
+        assert_eq!(starts.len(), 2);
+        assert_eq!(starts[1].1.boot, BootMode::Disk);
+    }
+
+    #[test]
+    fn completed_migrated_direct_boot_is_verified_and_never_reverted() {
+        let (directory, mut runtime, _supervisor, _runner) = lifecycle_runtime(
+            std::iter::empty(),
+            RecordingDesktop::default(),
+            RecordingWindow::embedded(),
+        );
+        configure_legacy_migration_artifact(&directory, &mut runtime, true);
+        runtime.apply(Command::GuestStart).expect("migrated start");
+        runtime.ingest_guest_event(guest_event(
+            ome_supervisor::GuestState::Starting,
+            None,
+            None,
+        ));
+        runtime.ingest_guest_event(guest_event(
+            ome_supervisor::GuestState::Running,
+            Some(43),
+            None,
+        ));
+        runtime
+            .worker_tx
+            .send(WorkerEvent::BootPolled {
+                generation: runtime.boot_generation,
+                completed: true,
+            })
+            .expect("boot completion event");
+        runtime.poll_workers();
+        assert!(
+            runtime.guests[0]
+                .boot
+                .as_ref()
+                .expect("migrated boot")
+                .direct_boot_verified
+        );
+
+        runtime.ingest_guest_event(guest_event(ome_supervisor::GuestState::Failed, None, None));
+        runtime.guest_state = GuestState::Stopped;
+        runtime
+            .apply(Command::GuestStart)
+            .expect("verified direct start");
+        runtime.ingest_guest_event(guest_event(
+            ome_supervisor::GuestState::Starting,
+            None,
+            None,
+        ));
+        runtime.ingest_guest_event(guest_event(
+            ome_supervisor::GuestState::Running,
+            Some(44),
+            None,
+        ));
+        runtime.boot_timeout_override = Some(Duration::ZERO);
+        runtime.tick();
+        runtime.ingest_guest_event(guest_event(
+            ome_supervisor::GuestState::Stopping,
+            Some(44),
+            None,
+        ));
+        runtime.ingest_guest_event(guest_event(ome_supervisor::GuestState::Stopped, None, None));
+
+        let boot = runtime.guests[0].boot.as_ref().expect("direct boot kept");
+        assert!(boot.migrated_from_disk);
+        assert!(boot.direct_boot_verified);
+        let stored = runtime
+            .guest_store
+            .load_all()
+            .expect("reload verified guest");
+        assert!(
+            stored[0]
+                .boot
+                .as_ref()
+                .expect("persisted direct boot")
+                .direct_boot_verified
+        );
+        assert_ne!(
+            runtime
+                .snapshot()
+                .issue
+                .as_ref()
+                .map(|issue| issue.code.as_str()),
+            Some("direct_boot_reverted")
+        );
+    }
+
+    #[test]
+    fn guest_without_legacy_install_src_keeps_disk_boot_even_with_verified_iso() {
+        let (directory, mut runtime, supervisor, _runner) = lifecycle_runtime(
+            std::iter::empty(),
+            RecordingDesktop::default(),
+            RecordingWindow::embedded(),
+        );
+        configure_legacy_migration_artifact(&directory, &mut runtime, true);
+        runtime.image_profiles[0].legacy_install_src = None;
+
+        runtime.apply(Command::GuestStart).expect("legacy start");
+
+        let starts = supervisor.starts.lock().expect("starts lock");
+        assert_eq!(starts[0].1.boot, BootMode::Disk);
+        assert!(runtime.guests[0].boot.is_none());
+        assert!(!runtime.guests[0].direct_boot_migration_attempted);
     }
 
     #[test]

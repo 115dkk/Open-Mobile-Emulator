@@ -114,6 +114,9 @@ pub struct GuestImageProfile {
     pub boot_files: BootFiles,
     /// Installation method for this image.
     pub install: InstallMethod,
+    /// Directory the ISO's interactive installer used, passed as `SRC` when migrating that guest.
+    #[serde(default)]
+    pub legacy_install_src: Option<String>,
     /// Restricted QEMU behavior requested by this profile.
     pub qemu_overrides: Vec<QemuOverride>,
     /// Product support state.
@@ -186,6 +189,10 @@ impl GuestImageProfile {
             || self.boot_args.iter().any(|value| value.trim().is_empty())
             || !valid_boot_file_path(&self.boot_files.kernel)
             || !valid_boot_file_path(&self.boot_files.initrd)
+            || self
+                .legacy_install_src
+                .as_deref()
+                .is_some_and(|src| !valid_install_src(src))
         {
             return Err(ProfileError::InvalidInstructions);
         }
@@ -211,6 +218,13 @@ impl GuestImageProfile {
 
 fn valid_boot_file_path(path: &str) -> bool {
     path.starts_with('/') && !path.trim().is_empty()
+}
+
+fn valid_install_src(src: &str) -> bool {
+    !matches!(src, "" | "." | "..")
+        && src
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_' | b'.'))
 }
 
 /// Sorts profiles by Android version descending, then release date and ID descending.
@@ -374,6 +388,7 @@ mod tests {
                 initrd: "/initrd.img".to_owned(),
             },
             install: InstallMethod::HelperBoot,
+            legacy_install_src: None,
             qemu_overrides: vec![QemuOverride::VirtioVgaGl],
             status,
             released_at: released_at.map(str::to_owned),
@@ -451,6 +466,12 @@ mod tests {
             Err(ProfileError::InvalidInstructions)
         ));
         value.boot_files.initrd = "/initrd.img".to_owned();
+        value.legacy_install_src = Some("../android".to_owned());
+        assert!(matches!(
+            value.validate(),
+            Err(ProfileError::InvalidInstructions)
+        ));
+        value.legacy_install_src = Some("android-2024-10-11".to_owned());
         value.released_at = Some("2024-02-30".to_owned());
         assert!(matches!(
             value.validate(),

@@ -226,6 +226,16 @@ pub fn process_start_failed() -> AppIssue {
     }
 }
 
+/// Returns an issue after a migrated guest fails its first direct boot and returns to GRUB.
+pub fn direct_boot_reverted() -> AppIssue {
+    AppIssue {
+        code: "direct_boot_reverted".to_owned(),
+        message: "운영체제를 GRUB 없이 바로 시작하려 했지만 부팅하지 못해 이전 방식으로 돌아갑니다. 다시 시작해 주십시오."
+            .to_owned(),
+        next_action: Some("운영체제를 다시 시작하십시오.".to_owned()),
+    }
+}
+
 /// Returns an issue when validated runtime configuration could not be built.
 pub fn invalid_guest_configuration() -> AppIssue {
     AppIssue {
