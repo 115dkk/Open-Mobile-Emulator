@@ -11,7 +11,7 @@ built in, committed or shipped; the native bridge and Google apps stay out (`OME
 | `pins.env` | Every input the build consumes: manifest URL, branch and commit, lunch target, variant, the installer-environment release, the build-host rootfs and its SHA-256 |
 | `manifest/ome.xml` | `repo manifest -r` snapshot written by `build-image.sh snapshot`: every project at the commit that was built. Later builds start from it |
 | `aaropa.sha256` | Checksums of the installer-environment files (`install.sfs` and friends) recorded on the first `build-image.sh aaropa` |
-| `setup-build-host.sh` | Prepares an Ubuntu 22.04 host as root: packages from the Bliss README, repo launcher, build user `ome`, rustup |
+| `setup-build-host.sh` | Prepares an Ubuntu 22.04 host as root: packages from the Bliss README (meson from PyPI instead, pinned in `pins.env`, because the distro's 0.61.2 is below Mesa's 1.1.0), repo launcher, build user `ome`, rustup |
 | `build-image.sh` | `init`, `sync`, `snapshot`, `aaropa`, `build`, `collect` or `all` |
 | `Dockerfile` | The same host as a container (`ubuntu:22.04` + `setup-build-host.sh`) |
 | `New-BuildDistro.ps1` | Windows PC: downloads and verifies the rootfs, imports the WSL 2 distro `OME-Build`, runs the setup |

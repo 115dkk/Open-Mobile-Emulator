@@ -29,12 +29,21 @@ apt-get install -y --no-install-recommends \
     git-core gnupg flex bison gperf build-essential zip zlib1g-dev gcc-multilib g++-multilib \
     libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z-dev ccache libgl1-mesa-dev \
     libxml2-utils xsltproc unzip squashfs-tools python3-mako libssl-dev ninja-build lunzip syslinux \
-    syslinux-utils gettext genisoimage bc xorriso xmlstarlet meson glslang-tools git-lfs libncurses5 \
+    syslinux-utils gettext genisoimage bc xorriso xmlstarlet glslang-tools git-lfs libncurses5 \
     libncurses5:i386 libelf-dev aapt zstd rdfind nasm kmod \
     python3 python-is-python3 python3-pip rsync p7zip-full aria2 file cpio erofs-utils e2fsprogs \
     dosfstools mtools openssh-client less procps
 apt-get clean
 rm -rf /var/lib/apt/lists/*
+
+# The Bliss README lists the distro meson, but Ubuntu 22.04 ships 0.61.2 and external/mesa in
+# the tree (24.3.3) requires >= 1.1.0; glodroid/aospext runs whatever meson is on PATH, so the
+# first build stopped at 48 % in Mesa's configure step (2026-10-02). PyPI's release, pinned in
+# pins.env, lands in /usr/local/bin ahead of /usr/bin.
+echo "==> meson $MESON_PIP_VERSION from PyPI"
+apt-get remove -y meson >/dev/null 2>&1 || true
+pip3 install --no-cache-dir "meson==$MESON_PIP_VERSION" >/dev/null
+echo "meson $(meson --version) at $(command -v meson)"
 
 echo "==> locale"
 sed -i 's/^# *en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen

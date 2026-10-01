@@ -7,7 +7,9 @@
 페도라 44 설치(C: 바로 뒤의 ESP 2 GiB, /boot 2 GiB, btrfs 196.5 GiB. 2026-08에 깔다 만 것)를 지우고 C:를 늘린 뒤
 작업 잔해(옛 세션 임시 홈, BlueStacks 5, 커널 덤프, LLM 실험, Codex 빌드 출력)를 치워 C: 여유를 400 GB로 만들었다.
 빌드 호스트는 선택지 (가)다. Ubuntu 22.04 rootfs를 `C:\WSL\OME-Build`에 WSL2 배포판으로 들여와 쓰며, 만드는
-절차와 빌드 스크립트는 `guest/build/`에 있다. 개발 전용 변환기 추출 도구(3절 5번)는 보류 때 멈췄고 저장소에 남긴
+절차와 빌드 스크립트는 `guest/build/`에 있다. 첫 빌드(2026-10-01 밤)는 48 %에서 Mesa의 설정 단계에 멈췄다. Ubuntu 22.04의
+meson 0.61.2가 트리의 Mesa 24.3.3이 요구하는 1.1.0에 못 미쳐서이고, `setup-build-host.sh`가 PyPI의 meson(`pins.env`의
+`MESON_PIP_VERSION`)을 대신 깔도록 고친 뒤 2026-10-02 새벽에 이어서 돌렸다. 개발 전용 변환기 추출 도구(3절 5번)는 보류 때 멈췄고 저장소에 남긴
 파일은 없으며 4절 4번에서 다시 만든다. 릴리스 빌드의 자리와 출처 증명(ADR-0007 정정)은 아직 열려 있다. 근거는 같은 날 ASTRA
 워커 셋이 만든 조사 사실표 `docs/evidence/P3/research-{bliss-build,google-images,build-host}.md`이고, 이 문서는 그 사실에서
 나온 계획과 사용자가 정할 것을 적는다. 결정이 나면 ADR-0012로 옮긴다.
