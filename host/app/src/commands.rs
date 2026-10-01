@@ -178,6 +178,7 @@ command_no_args!(diagnostics_export, Command::DiagnosticsExport);
 command_no_args!(open_logs_folder, Command::OpenLogsFolder);
 command_no_args!(open_screenshots_folder, Command::OpenScreenshotsFolder);
 command_no_args!(open_home_folder, Command::OpenHomeFolder);
+command_no_args!(open_install_folder, Command::OpenInstallFolder);
 command_no_args!(open_registration_page, Command::OpenRegistrationPage);
 command_no_args!(google_account_add_open, Command::GoogleAccountAddOpen);
 command_no_args!(guest_window_to_front, Command::GuestWindowToFront);

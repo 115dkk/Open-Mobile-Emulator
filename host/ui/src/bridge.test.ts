@@ -79,6 +79,7 @@ describe('native bridge', () => {
       [() => controllerBridge.openLogsFolder(), 'open_logs_folder', undefined],
       [() => controllerBridge.openScreenshotsFolder(), 'open_screenshots_folder', undefined],
       [() => controllerBridge.openHomeFolder(), 'open_home_folder', undefined],
+      [() => controllerBridge.openInstallFolder(), 'open_install_folder', undefined],
       [() => controllerBridge.copyToClipboard('deviceId'), 'copy_to_clipboard', { item: 'deviceId' }],
       [() => controllerBridge.openRegistrationPage(), 'open_registration_page', undefined],
       [() => controllerBridge.googleAccountAddOpen(), 'google_account_add_open', undefined],

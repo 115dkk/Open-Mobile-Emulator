@@ -149,6 +149,7 @@ export function useController(bridge: ControllerBridge): ControllerState {
     openLogsFolder: () => execute(() => bridge.openLogsFolder()),
     openScreenshotsFolder: () => execute(() => bridge.openScreenshotsFolder()),
     openHomeFolder: () => execute(() => bridge.openHomeFolder()),
+    openInstallFolder: () => execute(() => bridge.openInstallFolder()),
     copyToClipboard: (item) => execute(() => bridge.copyToClipboard(item)),
     openRegistrationPage: () => execute(() => bridge.openRegistrationPage()),
     googleAccountAddOpen: () => execute(() => bridge.googleAccountAddOpen()),

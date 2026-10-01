@@ -307,6 +307,9 @@
     "kind": "openHomeFolder"
   },
   {
+    "kind": "openInstallFolder"
+  },
+  {
     "kind": "copyToClipboard",
     "item": "deviceId"
   },

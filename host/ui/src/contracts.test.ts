@@ -119,7 +119,7 @@ const guestSummary = object<GuestSummary>({
   lastStartedAt: nullable(string), capabilities: capabilityReport,
 });
 const snapshot = object<AppSnapshot>({
-  contractVersion: (value, path) => { if (value !== 8) fail(path, 'contract version 8'); },
+  contractVersion: (value, path) => { if (value !== 9) fail(path, 'contract version 9'); },
   productVersion: string, phase: enumeration('wizard', 'main'),
   blocker: nullable(object({ kind: enumeration('virtualizationOff', 'qemuMissing', 'hypervisorPlatformOff') })),
   host: object<HostReport>({
@@ -201,7 +201,7 @@ const commandShapes: Record<string, Record<string, Check>> = {
   displayRefreshSet: { hz: nullable(number) }, displayVsyncSet: { mode: enumeration('off', 'on', 'adaptive') },
   stageFitSet: { fit: enumeration('fitWindow', 'oneToOne') },
   settingsSave: { settings: object<SettingsInput>(settingsInput) }, updateCheck: {}, updateInstall: {},
-  diagnosticsExport: {}, openLogsFolder: {}, openScreenshotsFolder: {}, openHomeFolder: {},
+  diagnosticsExport: {}, openLogsFolder: {}, openScreenshotsFolder: {}, openHomeFolder: {}, openInstallFolder: {},
   copyToClipboard: { item: enumeration('deviceId', 'adbAddress') }, openRegistrationPage: {}, googleAccountAddOpen: {}, guestWindowToFront: {},
 };
 

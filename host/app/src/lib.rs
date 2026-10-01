@@ -77,6 +77,9 @@ fn initialize_runtime(manifest_root: &std::path::Path) -> Result<AppRuntime, App
             adb,
             supervisor,
             desktop,
+            install_dir: std::env::current_exe()
+                .ok()
+                .and_then(|path| path.parent().map(std::path::Path::to_path_buf)),
             window_host: Box::new(ome_window_host::GuestWindowHost::default()),
             family_adapter: None,
             images_dir: Some(manifest_root.join("images")),
@@ -261,6 +264,7 @@ pub fn run() {
             commands::open_logs_folder,
             commands::open_screenshots_folder,
             commands::open_home_folder,
+            commands::open_install_folder,
             commands::copy_to_clipboard,
             commands::open_registration_page,
             commands::google_account_add_open,

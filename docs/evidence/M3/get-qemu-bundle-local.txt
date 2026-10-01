@@ -1,0 +1,6 @@
+verified SHA-256 qemu-ome-v11.1.1-c3d48b7d1e89-win64.zip
+verified provenance qemu-ome-v11.1.1-c3d48b7d1e89-win64.zip
+verified SHA-256 qemu-source-offer-v11.1.1-c3d48b7d1e89.tar.gz
+verified provenance qemu-source-offer-v11.1.1-c3d48b7d1e89.tar.gz
+the release's SHA256SUMS agrees with the manifest
+unpacked 162 files to C:\Open Mobile Emulator\host\qemu-dist

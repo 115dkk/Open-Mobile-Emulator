@@ -249,6 +249,8 @@ pub struct RuntimeDeps {
     pub supervisor: Option<Box<dyn GuestProcess>>,
     /// Trusted native desktop operations.
     pub desktop: Box<dyn Desktop>,
+    /// Directory that holds the product executable; `None` when the shell could not resolve it.
+    pub install_dir: Option<PathBuf>,
     /// Native window host.
     pub window_host: Box<dyn WindowPlacement>,
     /// Optional generation adapter override used by deterministic tests.
@@ -268,6 +270,7 @@ impl std::fmt::Debug for RuntimeDeps {
             .field("artifacts", &self.artifacts.is_some())
             .field("adb", &self.adb.is_some())
             .field("supervisor", &self.supervisor.is_some())
+            .field("install_dir", &self.install_dir)
             .field("images_dir", &self.images_dir)
             .field("artifacts_manifest", &self.artifacts_manifest)
             .field("product_version", &self.product_version)
@@ -807,6 +810,7 @@ impl AppRuntime {
             Command::DiagnosticsExport => self.export_diagnostics(),
             Command::OpenHelp { topic } => self.open_help(topic),
             Command::OpenHomeFolder => self.open_fixed_directory(None),
+            Command::OpenInstallFolder => self.open_install_folder(),
             Command::OpenLogsFolder => self.open_fixed_directory(Some("logs")),
             Command::OpenScreenshotsFolder => self.open_fixed_directory(Some("screenshots")),
             Command::CopyToClipboard { item } => self.copy_to_clipboard(item),
@@ -2010,6 +2014,18 @@ impl AppRuntime {
             .map_err(|_| issues::desktop_unavailable())
     }
 
+    fn open_install_folder(&self) -> Result<(), AppIssue> {
+        let directory = self
+            .deps
+            .install_dir
+            .as_deref()
+            .ok_or_else(issues::desktop_unavailable)?;
+        self.deps
+            .desktop
+            .open_path(directory)
+            .map_err(|_| issues::desktop_unavailable())
+    }
+
     fn copy_to_clipboard(&self, item: ClipboardItem) -> Result<(), AppIssue> {
         let adb_address = self.adb_address();
         let value = match item {
@@ -2573,9 +2589,12 @@ impl AppRuntime {
             return;
         }
 
-        let succeeded = state == ome_supervisor::GuestState::Stopped
-            && self.install_report.stage == InstallStage::Done
-            && self.install_failure.is_none();
+        // The helper's `done` line is the verdict: it is written after the copy is complete and
+        // right before `poweroff -f`. How the supervisor classified the exit is not part of it;
+        // completion run 34 (2026-10-01) lost the QMP shutdown event in the socket close and saw
+        // a finished install reported as "stopped before finishing".
+        let succeeded =
+            self.install_report.stage == InstallStage::Done && self.install_failure.is_none();
         if succeeded {
             if let Some(position) = self.selected_guest_index() {
                 self.guests[position].install = Some(StoredInstall {
@@ -4425,6 +4444,7 @@ mod tests {
                 adb: Some(session),
                 supervisor: Some(Box::new(supervisor)),
                 desktop: Box::new(desktop),
+                install_dir: None,
                 window_host: Box::new(window),
                 family_adapter: Some(Box::new(FakeFamilyAdapter)),
                 images_dir: None,
@@ -4482,6 +4502,7 @@ mod tests {
                 adb: None,
                 supervisor: None,
                 desktop: Box::new(crate::UnavailableDesktop),
+                install_dir: None,
                 window_host: Box::new(GuestWindowHost::default()),
                 family_adapter: None,
                 images_dir: None,
@@ -4539,6 +4560,7 @@ mod tests {
                 adb: None,
                 supervisor: None,
                 desktop: Box::new(crate::UnavailableDesktop),
+                install_dir: None,
                 window_host: Box::new(GuestWindowHost::default()),
                 family_adapter: None,
                 images_dir: Some(images),
@@ -4638,6 +4660,7 @@ mod tests {
                 adb: None,
                 supervisor: None,
                 desktop: Box::new(crate::UnavailableDesktop),
+                install_dir: None,
                 window_host: Box::new(GuestWindowHost::default()),
                 family_adapter: None,
                 images_dir: None,
@@ -5701,6 +5724,38 @@ mod tests {
     }
 
     #[test]
+    fn open_install_folder_opens_the_resolved_directory_once() {
+        let desktop = RecordingDesktop::default();
+        let observed = desktop.clone();
+        let (directory, mut runtime, _supervisor, _runner) =
+            lifecycle_runtime(std::iter::empty(), desktop, RecordingWindow::embedded());
+        let install_dir = directory.path().join("installed-product");
+        runtime.deps.install_dir = Some(install_dir.clone());
+
+        runtime
+            .apply(Command::OpenInstallFolder)
+            .expect("open install directory");
+
+        assert_eq!(observed.paths(), std::slice::from_ref(&install_dir));
+        assert!(!install_dir.exists());
+    }
+
+    #[test]
+    fn open_install_folder_without_a_resolved_directory_returns_an_issue() {
+        let desktop = RecordingDesktop::default();
+        let observed = desktop.clone();
+        let (_directory, mut runtime, _supervisor, _runner) =
+            lifecycle_runtime(std::iter::empty(), desktop, RecordingWindow::embedded());
+
+        let issue = runtime
+            .apply(Command::OpenInstallFolder)
+            .expect_err("missing install directory");
+
+        assert_eq!(issue.code, "desktop_open_failed");
+        assert!(observed.paths().is_empty());
+    }
+
+    #[test]
     fn registration_copies_hex_opens_url_and_persists_time() {
         let desktop = RecordingDesktop::default();
         let observed = desktop.clone();
@@ -6191,6 +6246,48 @@ package:dev.ome.two versionCode:8",
             cmdline,
             "root=/dev/ram0 SRC=/ome quiet HWC=drm_minigbm GRALLOC=minigbm_arcvm"
         );
+    }
+
+    #[test]
+    fn completed_install_counts_even_when_the_exit_was_classified_as_a_failure() {
+        // Completion run 34 (2026-10-01): the helper wrote `done` and powered off, QEMU's
+        // shutdown event was lost in the socket close, and the supervisor reported `Failed`.
+        let (directory, mut runtime, supervisor, _runner) = lifecycle_runtime(
+            std::iter::empty(),
+            RecordingDesktop::default(),
+            RecordingWindow::embedded(),
+        );
+        runtime.wizard.step = Step::GuestInstall;
+        runtime.installing_guest = true;
+        runtime.guests[0].install = Some(StoredInstall {
+            state: StoredInstallState::Running,
+            finished_at: None,
+            failure: None,
+        });
+        let guest_dir = directory.path().join("home/vm/default");
+        fs::write(guest_dir.join("kernel"), b"kernel").expect("kernel");
+        fs::write(guest_dir.join("initrd.img"), b"initrd").expect("initrd");
+        let serial_log = guest_dir.join("install-serial.log");
+        fs::write(
+            &serial_log,
+            "OME-INSTALL step finish 95\nOME-INSTALL done\n",
+        )
+        .expect("serial log");
+        runtime.install_log = Some(serial_log);
+
+        runtime.ingest_guest_event(guest_event(ome_supervisor::GuestState::Failed, None, None));
+
+        assert_eq!(runtime.wizard.step, Step::FirstBoot);
+        let record = runtime.selected_guest().expect("installed record");
+        assert_eq!(
+            record.install.as_ref().map(|install| install.state),
+            Some(StoredInstallState::Installed)
+        );
+        assert_eq!(
+            record.boot.as_ref().map(|boot| boot.method),
+            Some(StoredBootMethod::Direct)
+        );
+        assert_eq!(supervisor.starts.lock().expect("starts lock").len(), 1);
     }
 
     #[test]

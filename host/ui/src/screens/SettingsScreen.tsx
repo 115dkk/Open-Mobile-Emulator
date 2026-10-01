@@ -595,6 +595,10 @@ function AboutSection({ snapshot, actions }: SectionProps) {
       <SettingRow label="Open Mobile Emulator" help={`버전 ${snapshot.productVersion} · GPL-2.0-or-later`}>
         <Button variant="ghost" icon="external-link" onClick={() => actions.openHelp('thirdPartyNotices')}>제3자 고지</Button>
       </SettingRow>
+      {/* The installer puts the program under %LOCALAPPDATA%, which users rarely find by hand (ADR-0011). */}
+      <SettingRow label="프로그램 폴더" help="제품과 가상 머신 프로그램이 설치된 폴더입니다.">
+        <Button icon="folder-open" onClick={actions.openInstallFolder}>프로그램 폴더 열기</Button>
+      </SettingRow>
       <SettingRow label="가상 머신 소스 코드" help="이 앱에 포함된 가상 머신 프로그램의 소스 코드를 받을 수 있습니다.">
         <Button variant="ghost" icon="external-link" onClick={() => actions.openHelp('qemuSource')}>소스 코드 받기</Button>
       </SettingRow>

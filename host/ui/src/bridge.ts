@@ -84,6 +84,7 @@ export const controllerBridge: ControllerBridge = {
   openLogsFolder: () => native('open_logs_folder'),
   openScreenshotsFolder: () => native('open_screenshots_folder'),
   openHomeFolder: () => native('open_home_folder'),
+  openInstallFolder: () => native('open_install_folder'),
   copyToClipboard: (item) => native('copy_to_clipboard', { item }),
   openRegistrationPage: () => native('open_registration_page'),
   googleAccountAddOpen: () => native('google_account_add_open'),

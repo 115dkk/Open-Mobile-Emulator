@@ -101,6 +101,7 @@ export function fixtureBridge(
     openLogsFolder: apply,
     openScreenshotsFolder: apply,
     openHomeFolder: apply,
+    openInstallFolder: apply,
     copyToClipboard: apply,
     openRegistrationPage: apply,
     googleAccountAddOpen: apply,

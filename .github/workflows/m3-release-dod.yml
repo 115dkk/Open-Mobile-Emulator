@@ -147,7 +147,7 @@ jobs:
             Remove-Item Env:OME_FIXTURES_DEPLOY_KEY -ErrorAction SilentlyContinue
             Remove-Item Env:GIT_SSH_COMMAND -ErrorAction SilentlyContinue
           }
-      - name: Run fresh-home wizard as a standard user
+      - name: Install the release as a standard user and run the fresh-home wizard
         # The product is made for a signed-in standard user, and WebView2 150+ opens no remote-debugging
         # endpoint for an elevated host (docs/evidence/M2/dod-ci.md, runs 16 to 19). The job itself is an
         # administrator with UAC off, so this step creates a standard local user, opens what the driver
@@ -221,7 +221,7 @@ jobs:
           # 'needs-review' means every step passed and only the game screenshots await a human eye
           # (the driver never certifies a running game by itself); it is not a failure of the run.
           if ($result.outcome -eq 'needs-review' -and !$failedSteps.Count) {
-            Write-Output '::notice title=M2 wizard completion::All driver steps passed; game screenshots need visual review'
+            Write-Output '::notice title=M3 release completion::All driver steps passed on the installed product; game screenshots need visual review'
           } elseif ($code -ne 0 -or $result.outcome -ne 'passed' -or $failedSteps.Count) {
             throw 'Wizard completion failed; see dod-result.json and screenshots'
           }

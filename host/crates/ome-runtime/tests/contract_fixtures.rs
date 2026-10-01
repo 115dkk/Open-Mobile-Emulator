@@ -457,6 +457,7 @@ fn every_command() -> Vec<Command> {
         Command::OpenLogsFolder,
         Command::OpenScreenshotsFolder,
         Command::OpenHomeFolder,
+        Command::OpenInstallFolder,
         Command::CopyToClipboard {
             item: ClipboardItem::DeviceId,
         },

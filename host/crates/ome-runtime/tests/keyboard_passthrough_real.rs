@@ -284,6 +284,7 @@ fn run_check() {
             images_dir: Some(repository.join("manifests/images")),
             artifacts_manifest: Some(repository.join("manifests/artifacts.json")),
             product_version: env!("CARGO_PKG_VERSION").to_owned(),
+            install_dir: None,
         },
     )
     .expect("open product runtime");

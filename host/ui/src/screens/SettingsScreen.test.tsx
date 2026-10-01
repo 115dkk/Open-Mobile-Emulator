@@ -362,6 +362,12 @@ describe('settings screen (S6): 저장 위치, 업데이트, 진단, 정보', ()
     expect(actions.openHomeFolder).toHaveBeenCalledOnce();
   });
 
+  it('opens the program folder from the about section', async () => {
+    const actions = show(variant('settings-stopped'));
+    await userEvent.click(within(section('정보')).getByRole('button', { name: '프로그램 폴더 열기' }));
+    expect(actions.openInstallFolder).toHaveBeenCalledOnce();
+  });
+
   it('checks for updates and switches the automatic check', async () => {
     const actions = show(variant('settings-stopped'));
     const update = section('업데이트');

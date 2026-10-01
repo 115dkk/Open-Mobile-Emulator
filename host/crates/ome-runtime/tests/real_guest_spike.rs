@@ -223,6 +223,7 @@ fn measures_real_guest_through_product_runtime() {
             images_dir: Some(manifest_root.join("images")),
             artifacts_manifest: Some(manifest_root.join("artifacts.json")),
             product_version: env!("CARGO_PKG_VERSION").to_owned(),
+            install_dir: None,
         },
     )
     .expect("open product runtime");

@@ -1,0 +1,17 @@
+gh attestation verify --format json, dev PC, 2026-10-01T04:35:54Z, gh version 2.96.0 (2026-07-02)
+== qemu-ome-v11.1.1-c3d48b7d1e89-win64.zip
+subject: ome-patches.txt sha256:dc4ed2044755037f5a1cf06a49af59c047a83603ae91cfbab63926ce1363879b, pacman-lock.txt sha256:6a002b15db5a1dfd48d10985f1ffc8e13774add610bcc228214cfc400e1c2fb5, qemu-ome-v11.1.1-c3d48b7d1e89-win64.zip sha256:ba2a53f3680fc8d96874d86e1ae5b14c08576d29f4ab49864e3103571215db42, qemu-source-offer-v11.1.1-c3d48b7d1e89.tar.gz sha256:8b73799575171ecd4c8d861198ca7c7eb40f61845d3c622527426ea0ed3ac380, SHA256SUMS sha256:c828eaa3f1e59084141eb40dddd7e0fe677c88a18e6d0845d1e26ac637adadda, THIRD_PARTY.generated.md sha256:594070cf5c54c645695cd29c4b928175ae6056aa485a896650fcfe18f2c91a9a
+predicateType: https://slsa.dev/provenance/v1
+sourceRepositoryURI: https://github.com/115dkk/Open-Mobile-Emulator ref: refs/heads/main digest: 73aa3a5e71008d4dbbc12c58b679634c517b9027
+buildSignerURI: https://github.com/115dkk/Open-Mobile-Emulator/.github/workflows/qemu-release.yml@refs/heads/main
+runInvocationURI: https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36813804342/attempts/1
+verified at: 2026-10-01T13:31:22+09:00
+exit=0
+== qemu-source-offer-v11.1.1-c3d48b7d1e89.tar.gz
+subject: ome-patches.txt sha256:dc4ed2044755037f5a1cf06a49af59c047a83603ae91cfbab63926ce1363879b, pacman-lock.txt sha256:6a002b15db5a1dfd48d10985f1ffc8e13774add610bcc228214cfc400e1c2fb5, qemu-ome-v11.1.1-c3d48b7d1e89-win64.zip sha256:ba2a53f3680fc8d96874d86e1ae5b14c08576d29f4ab49864e3103571215db42, qemu-source-offer-v11.1.1-c3d48b7d1e89.tar.gz sha256:8b73799575171ecd4c8d861198ca7c7eb40f61845d3c622527426ea0ed3ac380, SHA256SUMS sha256:c828eaa3f1e59084141eb40dddd7e0fe677c88a18e6d0845d1e26ac637adadda, THIRD_PARTY.generated.md sha256:594070cf5c54c645695cd29c4b928175ae6056aa485a896650fcfe18f2c91a9a
+predicateType: https://slsa.dev/provenance/v1
+sourceRepositoryURI: https://github.com/115dkk/Open-Mobile-Emulator ref: refs/heads/main digest: 73aa3a5e71008d4dbbc12c58b679634c517b9027
+buildSignerURI: https://github.com/115dkk/Open-Mobile-Emulator/.github/workflows/qemu-release.yml@refs/heads/main
+runInvocationURI: https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36813804342/attempts/1
+verified at: 2026-10-01T13:31:22+09:00
+exit=0

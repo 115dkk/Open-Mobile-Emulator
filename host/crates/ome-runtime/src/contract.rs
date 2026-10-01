@@ -14,7 +14,7 @@ pub use ome_input::{
 };
 
 /// Current Rust-to-webview contract version.
-pub const CONTRACT_VERSION: u32 = 8;
+pub const CONTRACT_VERSION: u32 = 9;
 
 /// The one read-only projection the webview renders.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -1085,6 +1085,8 @@ pub enum Command {
     OpenScreenshotsFolder,
     /// Open the fixed product home folder.
     OpenHomeFolder,
+    /// Open the directory that holds the product executable.
+    OpenInstallFolder,
     /// Copy a snapshot-owned value to the clipboard.
     CopyToClipboard {
         /// Value selected by the webview.
@@ -1151,6 +1153,7 @@ impl Command {
             Self::OpenLogsFolder => "open_logs_folder",
             Self::OpenScreenshotsFolder => "open_screenshots_folder",
             Self::OpenHomeFolder => "open_home_folder",
+            Self::OpenInstallFolder => "open_install_folder",
             Self::CopyToClipboard { .. } => "copy_to_clipboard",
             Self::OpenRegistrationPage => "open_registration_page",
             Self::GoogleAccountAddOpen => "google_account_add_open",
@@ -1212,6 +1215,7 @@ pub const TAURI_COMMANDS: &[&str] = &[
     "open_logs_folder",
     "open_screenshots_folder",
     "open_home_folder",
+    "open_install_folder",
     "copy_to_clipboard",
     "open_registration_page",
     "google_account_add_open",

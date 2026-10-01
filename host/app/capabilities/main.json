@@ -57,6 +57,7 @@
     "allow-open-logs-folder",
     "allow-open-screenshots-folder",
     "allow-open-home-folder",
+    "allow-open-install-folder",
     "allow-copy-to-clipboard",
     "allow-open-registration-page",
     "allow-google-account-add-open",

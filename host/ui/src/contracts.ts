@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Open Mobile Emulator contributors
 // Read-only presentation contracts mirroring ome-runtime contract.rs field for field.
 
-export const CONTRACT_VERSION = 8;
+export const CONTRACT_VERSION = 9;
 
 export type AppPhase = 'wizard' | 'main';
 export type BlockerKind = 'virtualizationOff' | 'qemuMissing' | 'hypervisorPlatformOff';
@@ -316,6 +316,7 @@ export interface ControllerBridge {
   openLogsFolder(): Promise<AppSnapshot>;
   openScreenshotsFolder(): Promise<AppSnapshot>;
   openHomeFolder(): Promise<AppSnapshot>;
+  openInstallFolder(): Promise<AppSnapshot>;
   copyToClipboard(item: ClipboardItem): Promise<AppSnapshot>;
   openRegistrationPage(): Promise<AppSnapshot>;
   googleAccountAddOpen(): Promise<AppSnapshot>;
