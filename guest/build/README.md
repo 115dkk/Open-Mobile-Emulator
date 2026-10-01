@@ -22,6 +22,12 @@ built in, committed or shipped; the native bridge and Google apps stay out (`OME
 `out/` about 150 GB), 24 GB RAM, four to six hours on 16 threads. The sync downloads on the order
 of 100 GB.
 
+The README's 24 GB is not enough for the parallel build on 16 threads: in a 31 GB WSL VM with
+8 GB swap, `java` (r8) invoked the OOM killer at 23 % and ninja was killed (2026-10-02). On the
+development PC the VM gets 48 GB and 16 GB swap through `%USERPROFILE%\.wslconfig`
+(`[wsl2] memory=48GB`, `swap=16GB`, applied by `wsl --shutdown`) and the build runs with
+`OME_JOBS=12`.
+
 ## On the development PC (WSL 2)
 
 ```powershell

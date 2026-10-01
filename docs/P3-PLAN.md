@@ -11,7 +11,8 @@
 meson 0.61.2가 트리의 Mesa 24.3.3이 요구하는 1.1.0에 못 미쳐서이고, `setup-build-host.sh`가 PyPI의 meson(`pins.env`의
 `MESON_PIP_VERSION`)을 대신 깔도록 고친 뒤 2026-10-02 새벽에 이어서 돌렸다. 같은 설정 단계에서 README가 빠뜨린 pkg-config, README에는
 있으나 준비 스크립트가 빠뜨렸던 Rust 안드로이드 타깃과 cargo 프로그램(cargo-ndk, bindgen-cli 0.69.1, cbindgen), Intel GRL 커널의
-python3-ply가 차례로 드러나 모두 준비 스크립트와 `pins.env`에 넣었고, 손으로 돌린 Mesa 설정 단계가 통과한 뒤 세 번째로 이어서 돌렸다. 개발 전용 변환기 추출 도구(3절 5번)는 보류 때 멈췄고 저장소에 남긴
+python3-ply가 차례로 드러나 모두 준비 스크립트와 `pins.env`에 넣었고, 손으로 돌린 Mesa 설정 단계가 통과한 뒤 세 번째로 이어서 돌렸다. 세 번째는 23 %에서 WSL VM(31 GB, 스왑 8 GB)의 메모리가 바닥나
+java(r8)가 OOM 킬러를 불러 ninja가 죽었고, `.wslconfig`로 VM을 48 GB(스왑 16 GB)로 올리고 `OME_JOBS=12`로 네 번째를 돌렸다. 개발 전용 변환기 추출 도구(3절 5번)는 보류 때 멈췄고 저장소에 남긴
 파일은 없으며 4절 4번에서 다시 만든다. 릴리스 빌드의 자리와 출처 증명(ADR-0007 정정)은 아직 열려 있다. 근거는 같은 날 ASTRA
 워커 셋이 만든 조사 사실표 `docs/evidence/P3/research-{bliss-build,google-images,build-host}.md`이고, 이 문서는 그 사실에서
 나온 계획과 사용자가 정할 것을 적는다. 결정이 나면 ADR-0012로 옮긴다.
