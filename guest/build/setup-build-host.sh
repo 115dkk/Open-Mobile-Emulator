@@ -6,7 +6,10 @@
 # image. Run as root. Idempotent: packages are installed once, the build user is created once.
 #
 # Package list: BlissOS voyager-x86 manifest README (read 2026-10-01), plus what repo, the
-# Android build system and our own scripts need (python-is-python3, rsync, p7zip, aria2).
+# Android build system and our own scripts need (python-is-python3, rsync, p7zip, aria2), plus
+# pkg-config, which the README omits and glodroid/aospext's meson cross file names as
+# /usr/bin/pkg-config, and python3-ply, which Mesa's Intel GRL kernels need (Mesa's configure
+# step failed without each of them, 2026-10-02).
 set -euo pipefail
 
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
@@ -32,7 +35,7 @@ apt-get install -y --no-install-recommends \
     syslinux-utils gettext genisoimage bc xorriso xmlstarlet glslang-tools git-lfs libncurses5 \
     libncurses5:i386 libelf-dev aapt zstd rdfind nasm kmod \
     python3 python-is-python3 python3-pip rsync p7zip-full aria2 file cpio erofs-utils e2fsprogs \
-    dosfstools mtools openssh-client less procps
+    dosfstools mtools openssh-client less procps pkg-config python3-ply
 apt-get clean
 rm -rf /var/lib/apt/lists/*
 
@@ -66,6 +69,21 @@ git lfs install --system --skip-repo >/dev/null
 
 echo "==> rust toolchain for $BUILD_USER (the README asks for rustup, not distro Rust)"
 sudo -u "$BUILD_USER" -H bash -c 'if [ ! -x "$HOME/.cargo/bin/rustc" ]; then curl -fsSL https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain stable >/dev/null; fi; "$HOME/.cargo/bin/rustc" --version'
+
+# The README's follow-up to rustup: the Android targets and three cargo programs. Mesa's
+# configure step needs the x86_64-linux-android and i686-linux-android targets (NVK is in the
+# vulkan driver list, so Mesa adds Rust) and bindgen/cbindgen; the first build host lacked all of
+# them (2026-10-02). Versions are pinned in pins.env; bindgen-cli 0.69.1 is the README's own pin.
+echo "==> rust targets and cargo programs for $BUILD_USER"
+sudo -u "$BUILD_USER" -H env CARGO_NDK_VERSION="$CARGO_NDK_VERSION" BINDGEN_CLI_VERSION="$BINDGEN_CLI_VERSION" CBINDGEN_VERSION="$CBINDGEN_VERSION" bash -c '
+    export PATH="$HOME/.cargo/bin:$PATH"
+    rustup target add x86_64-linux-android i686-linux-android >/dev/null
+    for spec in "cargo-ndk $CARGO_NDK_VERSION" "bindgen-cli $BINDGEN_CLI_VERSION" "cbindgen $CBINDGEN_VERSION"; do
+        set -- $spec
+        cargo install --locked --version "$2" "$1" >/dev/null 2>&1 || cargo install --version "$2" "$1" >/dev/null
+    done
+    rustup target list --installed | paste -sd " " -
+    cargo ndk --version; bindgen --version; cbindgen --version'
 
 if grep -qi microsoft /proc/version 2>/dev/null; then
     echo "==> wsl.conf (systemd on, default user $BUILD_USER)"

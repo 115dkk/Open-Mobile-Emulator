@@ -9,7 +9,9 @@
 빌드 호스트는 선택지 (가)다. Ubuntu 22.04 rootfs를 `C:\WSL\OME-Build`에 WSL2 배포판으로 들여와 쓰며, 만드는
 절차와 빌드 스크립트는 `guest/build/`에 있다. 첫 빌드(2026-10-01 밤)는 48 %에서 Mesa의 설정 단계에 멈췄다. Ubuntu 22.04의
 meson 0.61.2가 트리의 Mesa 24.3.3이 요구하는 1.1.0에 못 미쳐서이고, `setup-build-host.sh`가 PyPI의 meson(`pins.env`의
-`MESON_PIP_VERSION`)을 대신 깔도록 고친 뒤 2026-10-02 새벽에 이어서 돌렸다. 개발 전용 변환기 추출 도구(3절 5번)는 보류 때 멈췄고 저장소에 남긴
+`MESON_PIP_VERSION`)을 대신 깔도록 고친 뒤 2026-10-02 새벽에 이어서 돌렸다. 같은 설정 단계에서 README가 빠뜨린 pkg-config, README에는
+있으나 준비 스크립트가 빠뜨렸던 Rust 안드로이드 타깃과 cargo 프로그램(cargo-ndk, bindgen-cli 0.69.1, cbindgen), Intel GRL 커널의
+python3-ply가 차례로 드러나 모두 준비 스크립트와 `pins.env`에 넣었고, 손으로 돌린 Mesa 설정 단계가 통과한 뒤 세 번째로 이어서 돌렸다. 개발 전용 변환기 추출 도구(3절 5번)는 보류 때 멈췄고 저장소에 남긴
 파일은 없으며 4절 4번에서 다시 만든다. 릴리스 빌드의 자리와 출처 증명(ADR-0007 정정)은 아직 열려 있다. 근거는 같은 날 ASTRA
 워커 셋이 만든 조사 사실표 `docs/evidence/P3/research-{bliss-build,google-images,build-host}.md`이고, 이 문서는 그 사실에서
 나온 계획과 사용자가 정할 것을 적는다. 결정이 나면 ADR-0012로 옮긴다.
