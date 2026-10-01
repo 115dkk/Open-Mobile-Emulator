@@ -87,7 +87,31 @@ QEMU는 막는 것으로 판단한다. 게임의 서버 통신 오류는 그 때
 
 ## 4. 제품 릴리스 v0.1.0 (완료 기준 1, 4)
 
-(태그 뒤에 적는다.)
+태그 `v0.1.0`은 처음 67efcb8에 밀었다가 `release.yml`의 verify 잡이 ci.yml과 같은 이유로 실패해(`ome-guest-install`의 테스트가
+저장소가 무시하는 `.log` 픽스처를 `include_str!`로 읽어 러너에서 컴파일되지 않음. 2026-09-30부터 CI가 빨갰던 두 원인 가운데
+하나이고, 다른 하나는 철회된 `yoke-derive`였다) 픽스처를 `.txt`로 바꾼 e79c270으로 옮겨 다시 밀었다. 그 실행이
+https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36819100622 이다(2026-10-01 05:18~05:37 UTC).
+
+| 잡 | 시간 | 내용 |
+|---|---|---|
+| verify | 8분 9초 | `ci/Invoke-AllChecks.ps1`(정책 검사, Pester 48개)과 `node tools/quality.mjs`(UI 테스트 249개, fmt, clippy, cargo test) |
+| qemu-source-offer | 48초 | `Get-QemuBundle.ps1`: ome4의 zip과 소스 묶음을 받아 SHA-256 대조, `gh attestation verify --signer-workflow qemu-release.yml` 통과, 산출물로 넘김 |
+| product | 11분 3초 | ome-setup 빌드, `tauri build --config ci/release/tauri.release.conf.json`, `Stage-ReleaseAssets.ps1`, `Check-ReleaseAssets.ps1`(findings=0), `actions/attest@v4`, `gh release create --prerelease`, 올린 자산을 다시 받아 `gh attestation verify`(`release-v0.1.0-verify-runner.txt`, 실패 0) |
+
+릴리스 https://github.com/115dkk/Open-Mobile-Emulator/releases/tag/v0.1.0 (사전 릴리스)의 자산은 다음과 같고 `SHA256SUMS`에 전부 적혀 있다.
+
+| 자산 | 크기 | SHA-256 |
+|---|---|---|
+| `Open-Mobile-Emulator-0.1.0-x64-setup.exe` | 54,269,596 B | `df8624de…f43117` |
+| `Open-Mobile-Emulator-0.1.0-x64-setup.exe.sha256` | 107 B | |
+| `qemu-ome-v11.1.1-c3d48b7d1e89-win64.zip` | 62,776,149 B | `ba2a53f3…15db42` (3절과 같은 파일) |
+| `qemu-source-offer-v11.1.1-c3d48b7d1e89.tar.gz` | 249,537,255 B | `8b737995…3ac380` (R4 소스 묶음) |
+| `THIRD_PARTY.md`, `NOTICE`, `LICENSE`, `SHA256SUMS` | | M3 3번의 CI 검사(`Check-ReleaseAssets.ps1`)가 올리기 전에 확인 |
+
+개발 PC에서 사용자 절차대로 다시 확인했다(`release-v0.1.0-verify-local.txt`). 내려받은 설치기의 SHA-256이 `.sha256`과 같고,
+`gh attestation verify ... --signer-workflow .../release.yml`이 여덟 자산을 주제로 하는 증명을 돌려주며, 그 증명은 저장소
+`115dkk/Open-Mobile-Emulator`의 `refs/tags/v0.1.0`(e79c270)과 워크플로 `release.yml`, 실행 36819100622를 가리킨다. 개발 PC에서
+만든 파일은 릴리스에 없다(ADR-0007).
 
 ## 5. 러너에서의 설치기 완주 (완료 기준 2, `m3-release-dod.yml`)
 
