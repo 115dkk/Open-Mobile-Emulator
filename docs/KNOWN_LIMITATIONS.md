@@ -1,6 +1,6 @@
 # Known limitations
 
-Final for release 0.1.0 (2026-10-01). Items are added as they are found and removed
+Final for release 0.1.1 (2026-10-02). Items are added as they are found and removed
 only when a release fixes them.
 
 - The release is not code-signed (CLAUDE.md section 8 item 3: no certificate until a
@@ -13,7 +13,7 @@ only when a release fixes them.
   There is no all-users option. Uninstalling removes the program folder and leaves
   the data folder `%LOCALAPPDATA%\OpenMobileEmulator` (guest disks, logs,
   settings) in place.
-- 0.1.0 is a pre-release. The product's update check reads GitHub's `latest`
+- 0.1.0 and 0.1.1 are pre-releases. The product's update check reads GitHub's `latest`
   release, which never points at a pre-release, so no update is offered between
   pre-releases; the first regular release will be.
 - Security software that controls outbound connections per program (seen with
@@ -29,9 +29,12 @@ only when a release fixes them.
 - Windows 10 is untested. Development and the completion runs used Windows 11
   22621 and the Windows Server 2025 hosted runner.
 - A guest installed by the interactive Bliss installer (before ADR-0010, that is
-  before the product's unattended install of 2026-10-01) keeps booting through the
-  firmware and GRUB. Reinstalling the guest from Settings switches it to the
-  direct kernel boot the unattended install sets up.
+  before the product's unattended install of 2026-10-01) used to boot through the
+  firmware and GRUB at every start. Since 0.1.1 the product moves such a guest to
+  the direct kernel boot once, on its next start, taking the kernel and initrd from
+  the verified ISO; if that first direct boot fails, the product goes back to the
+  GRUB boot and says so in a notice. Reinstalling the guest from Settings also
+  switches it.
 - The ARM translator is a proprietary Google binary (`libndk_translation`) that
   ships inside the Bliss OS image. This project did not write it and cannot fix
   it. Replacing it with an open-source translator is a post-release task (P2).
@@ -183,8 +186,15 @@ only when a release fixes them.
   the window already owned and borderless (`-display sdl,owner-window=`, patch
   0005) and sets its position, size and visibility through the QMP command
   `x-ome-display-window`; the window never follows the guest resolution on its
-  own. A QEMU without these patches, such as a distribution build, is not
-  usable for hosting: the guest window would activate on click and freeze.
+  own. Since 0.1.1 (patch 0006) the window's size is also never reported to the
+  guest as its display size, so the resolution comes from the display settings
+  alone, and mouse coordinates are mapped through the letterboxed placement of
+  the guest image inside the window. A QEMU without these patches, such as a
+  distribution build, is not usable for hosting: the guest window would activate
+  on click and freeze.
+- The product draws its own title bar (0.1.1). Windows 11's snap layout menu,
+  which opens when the pointer rests on a standard maximize button, does not
+  open on the product's maximize button.
 - A host whose default OpenGL context is Microsoft's software fallback (`GDI Generic`,
   OpenGL 1.1: no display driver, a basic VM display adapter, some remote sessions)
   cannot run virgl; QEMU exits with `No provider of glCreateShader found`
