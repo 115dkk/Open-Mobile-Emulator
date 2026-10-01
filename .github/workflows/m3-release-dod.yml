@@ -1,0 +1,254 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+#
+# M3 completion run (CLAUDE.md M3 item 2): takes the installer of a published release, verifies its
+# SHA-256 and build provenance, installs it as a standard local user on a clean hosted runner and
+# drives the installed product through the first-run wizard to the game with ci/dod/run-dod.mjs.
+# It is m2-dod.yml without the product build and the QEMU fetch: the installer carries both.
+name: M3 release completion
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag whose installer to test, for example v0.1.0'
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  wizard:
+    runs-on: windows-2025
+    timeout-minutes: 180
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up pinned Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: host/.node-version
+          cache: npm
+          cache-dependency-path: host/package-lock.json
+      # restore/save instead of the combined action: the combined action saves only when the job
+      # succeeds, and every completion run so far has failed, so each run rebuilt for seven minutes.
+      - name: Install the driver's node modules
+        # The driver drives the product window through playwright-core from host/node_modules.
+        working-directory: host
+        run: |
+          npm ci
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Runner facts
+        # Read-only. The completion run needs an interactive desktop, a WebView2 runtime for the
+        # product window, and the built-in Windows OCR (ci/dod/ocr.ps1) for the installer screens.
+        run: |
+          $ErrorActionPreference = 'Continue'
+          "== os =="; (Get-CimInstance Win32_OperatingSystem).Caption; [Environment]::OSVersion.VersionString
+          "== cpu =="; Get-CimInstance Win32_Processor | Select-Object Name, NumberOfCores, NumberOfLogicalProcessors | Format-List
+          "== memory =="; "{0:N1} GiB" -f ((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB)
+          "== drives =="; Get-PSDrive -PSProvider FileSystem | Select-Object Name, @{n='FreeGiB';e={[math]::Round($_.Free/1GB,1)}}, @{n='UsedGiB';e={[math]::Round($_.Used/1GB,1)}} | Format-Table
+          "== session =="; "UserInteractive: $([Environment]::UserInteractive)"; "Session: $((Get-Process -Id $PID).SessionId)"; "User: $env:USERNAME"
+          "== screen =="; Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Screen]::AllScreens | ForEach-Object { "$($_.DeviceName) $($_.Bounds.Width)x$($_.Bounds.Height) primary=$($_.Primary)" }
+          "== video =="; Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion, VideoModeDescription, Status | Format-List
+          "== hypervisor =="; (Get-CimInstance Win32_ComputerSystem).HypervisorPresent; foreach ($name in 'HypervisorPlatform') { try { $f = Get-WindowsOptionalFeature -Online -FeatureName $name -ErrorAction Stop; "$name : $($f.State)" } catch { "$name : $($_.Exception.Message)" } }
+          "== webview2 =="; foreach ($key in 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}', 'HKLM:\SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}', 'HKCU:\SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}') { if (Test-Path $key) { "$key pv=$((Get-ItemProperty $key).pv)" } else { "$key absent" } }
+          Get-ChildItem 'C:\Program Files (x86)\Microsoft\EdgeWebView\Application' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
+          "== ocr capability =="; Get-WindowsCapability -Online -Name 'Language.OCR*' -ErrorAction SilentlyContinue | Select-Object Name, State | Format-Table
+          "== ocr engines (Windows PowerShell) =="; powershell.exe -NoProfile -Command "[void][Windows.Media.Ocr.OcrEngine,Windows.Foundation,ContentType=WindowsRuntime]; [Windows.Media.Ocr.OcrEngine]::AvailableRecognizerLanguages | ForEach-Object { \$_.LanguageTag }; 'count=' + [Windows.Media.Ocr.OcrEngine]::AvailableRecognizerLanguages.Count"
+          "== tools =="; (Get-Command pwsh, powershell.exe, gh, git, ssh, node -ErrorAction SilentlyContinue | Select-Object Name, Version, Source | Format-Table | Out-String)
+      - name: Ensure Windows OCR, WebView2 runtime and a 1920x1080 desktop
+        # Runner preparation only, never product behaviour. Windows Server images may lack the OCR
+        # language component and the Evergreen WebView2 runtime that Windows 11 carries.
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $ocrCount = [int](powershell.exe -NoProfile -Command "[void][Windows.Media.Ocr.OcrEngine,Windows.Foundation,ContentType=WindowsRuntime]; [Windows.Media.Ocr.OcrEngine]::AvailableRecognizerLanguages.Count")
+          if ($ocrCount -eq 0) {
+            "No OCR recognizer; adding Language.OCR~~~en-US"
+            $capability = Get-WindowsCapability -Online -Name 'Language.OCR~~~en-US*' | Select-Object -First 1
+            if ($capability) { Add-WindowsCapability -Online -Name $capability.Name | Format-List } else { 'No Language.OCR~~~en-US capability offered' }
+            powershell.exe -NoProfile -Command "[void][Windows.Media.Ocr.OcrEngine,Windows.Foundation,ContentType=WindowsRuntime]; 'engines after: ' + [Windows.Media.Ocr.OcrEngine]::AvailableRecognizerLanguages.Count"
+          } else { "OCR recognizers present: $ocrCount" }
+          $webview = 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}'
+          if (!(Test-Path $webview) -and !(Test-Path 'C:\Program Files (x86)\Microsoft\EdgeWebView\Application')) {
+            "No WebView2 runtime; installing the Evergreen runtime"
+            $bootstrapper = Join-Path $env:RUNNER_TEMP 'MicrosoftEdgeWebview2Setup.exe'
+            Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/p/?LinkId=2124703' -OutFile $bootstrapper
+            $p = Start-Process -FilePath $bootstrapper -ArgumentList '/silent', '/install' -Wait -PassThru
+            "bootstrapper exit code: $($p.ExitCode)"
+            if (Test-Path $webview) { "pv=$((Get-ItemProperty $webview).pv)" } else { 'WebView2 registry key still absent' }
+          } else { 'WebView2 runtime present' }
+          Add-Type -AssemblyName System.Windows.Forms
+          $before = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+          if ($before.Width -lt 1600 -or $before.Height -lt 900) {
+            Add-Type @'
+          using System; using System.Runtime.InteropServices;
+          public static class Display {
+            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)] public struct DEVMODE {
+              [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)] public string dmDeviceName; public short dmSpecVersion, dmDriverVersion, dmSize, dmDriverExtra; public int dmFields;
+              public int dmPositionX, dmPositionY, dmDisplayOrientation, dmDisplayFixedOutput; public short dmColor, dmDuplex, dmYResolution, dmTTOption, dmCollate;
+              [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)] public string dmFormName; public short dmLogPixels; public int dmBitsPerPel, dmPelsWidth, dmPelsHeight, dmDisplayFlags, dmDisplayFrequency, dmICMMethod, dmICMIntent, dmMediaType, dmDitherType, dmReserved1, dmReserved2, dmPanningWidth, dmPanningHeight; }
+            [DllImport("user32.dll")] public static extern bool EnumDisplaySettings(string deviceName, int modeNum, ref DEVMODE devMode);
+            [DllImport("user32.dll")] public static extern int ChangeDisplaySettings(ref DEVMODE devMode, int flags);
+            public static int Set(int width, int height) {
+              var mode = new DEVMODE(); mode.dmSize = (short)Marshal.SizeOf(typeof(DEVMODE));
+              if (!EnumDisplaySettings(null, -1, ref mode)) return -100;
+              mode.dmPelsWidth = width; mode.dmPelsHeight = height; mode.dmFields = 0x80000 | 0x100000;
+              return ChangeDisplaySettings(ref mode, 0);
+            }
+          }
+          '@
+            "ChangeDisplaySettings 1920x1080 -> $([Display]::Set(1920, 1080)) (0 = DISP_CHANGE_SUCCESSFUL)"
+            Start-Sleep -Seconds 2
+          }
+          $after = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+          "screen before $($before.Width)x$($before.Height), after $($after.Width)x$($after.Height)"
+      - name: Download and verify the release installer
+        # The same checks docs/help/install.md asks a user to make: the .sha256 next to the installer
+        # and the build provenance attestation of release.yml (ADR-0007).
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          if ($env:TAG -notmatch '^v\d+\.\d+\.\d+$') { throw "Not a release tag: $env:TAG" }
+          $destination = Join-Path $env:RUNNER_TEMP 'ome-installer'
+          New-Item -ItemType Directory -Path $destination -Force | Out-Null
+          gh release download $env:TAG --pattern 'Open-Mobile-Emulator-*-x64-setup.exe*' --dir $destination
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $installer = @(Get-ChildItem $destination -Filter '*-setup.exe')
+          if ($installer.Count -ne 1) { throw "Expected one installer, found $($installer.Count)" }
+          $expected = ((Get-Content "$($installer[0].FullName).sha256" -Raw) -split '\s+' | Where-Object { $_ -match '^[0-9a-fA-F]{64}$' } | Select-Object -First 1)
+          $actual = (Get-FileHash $installer[0].FullName -Algorithm SHA256).Hash
+          if (-not $expected -or $actual -ne $expected.ToUpperInvariant()) { throw "Installer digest mismatch: .sha256 says $expected, file is $actual" }
+          "SHA-256 verified: $actual"
+          gh attestation verify $installer[0].FullName --repo $env:GITHUB_REPOSITORY --signer-workflow "$env:GITHUB_REPOSITORY/.github/workflows/release.yml"
+          if ($LASTEXITCODE) { throw 'Build provenance verification failed' }
+          "OME_INSTALLER=$($installer[0].FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Fetch private game fixture with read-only key
+        env:
+          OME_FIXTURES_DEPLOY_KEY: ${{ secrets.OME_FIXTURES_DEPLOY_KEY }}
+        run: |
+          $key = Join-Path $env:RUNNER_TEMP 'ome-fixtures-key'
+          try {
+            if ([string]::IsNullOrWhiteSpace($env:OME_FIXTURES_DEPLOY_KEY)) { throw 'Missing fixture deploy key' }
+            [IO.File]::WriteAllText($key, '', [Text.UTF8Encoding]::new($false))
+            $acl = [Security.AccessControl.FileSecurity]::new()
+            $acl.SetAccessRuleProtection($true, $false)
+            $identity = [Security.Principal.WindowsIdentity]::GetCurrent().User
+            $acl.SetOwner($identity)
+            $acl.AddAccessRule([Security.AccessControl.FileSystemAccessRule]::new($identity, 'FullControl', 'Allow'))
+            Set-Acl -LiteralPath $key -AclObject $acl
+            [IO.File]::WriteAllText($key, $env:OME_FIXTURES_DEPLOY_KEY.TrimEnd() + "`n", [Text.UTF8Encoding]::new($false))
+            $env:GIT_SSH_COMMAND = 'ssh -i "' + $key.Replace('\','/') + '" -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new'
+            git clone --depth 1 git@github.com:115dkk/ome-game-fixtures.git (Join-Path $env:RUNNER_TEMP 'fixtures')
+            if ($LASTEXITCODE) { throw 'Private fixture clone failed' }
+          } finally {
+            if (Test-Path -LiteralPath $key) { Remove-Item -LiteralPath $key -Force }
+            Remove-Item Env:OME_FIXTURES_DEPLOY_KEY -ErrorAction SilentlyContinue
+            Remove-Item Env:GIT_SSH_COMMAND -ErrorAction SilentlyContinue
+          }
+      - name: Run fresh-home wizard as a standard user
+        # The product is made for a signed-in standard user, and WebView2 150+ opens no remote-debugging
+        # endpoint for an elevated host (docs/evidence/M2/dod-ci.md, runs 16 to 19). The job itself is an
+        # administrator with UAC off, so this step creates a standard local user, opens what the driver
+        # reads and writes to it, and starts the driver with that user's credentials on this desktop.
+        # The runner context is not allowed in job-level env; GitHub rejected the whole file.
+        env:
+          OME_DOD_OUTPUT: ${{ runner.temp }}\ome-dod-evidence
+        run: |
+          $repo = $PWD.Path
+          $omeHome = if (Test-Path 'D:\') { 'D:\ome-home' } else { Join-Path $env:RUNNER_TEMP 'ome-home' }
+          $fixtures = Join-Path $env:RUNNER_TEMP 'fixtures'
+          $node = (Get-Command node).Source
+          $userRoot = if (Test-Path 'D:\') { 'D:\ome-user' } else { Join-Path $env:RUNNER_TEMP 'ome-user' }
+          New-Item -ItemType Directory -Path $omeHome, $env:OME_DOD_OUTPUT, $userRoot -Force | Out-Null
+          # A local standard user with a random password that lives only in this step.
+          $user = 'omeuser'
+          $alphabet = [char[]]'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'
+          $bytes = [byte[]]::new(24); [Security.Cryptography.RandomNumberGenerator]::Fill($bytes)
+          $password = (-join ($bytes | ForEach-Object { $alphabet[$_ % $alphabet.Length] })) + '!aZ9'
+          $secure = ConvertTo-SecureString $password -AsPlainText -Force
+          net user $user /delete 2>$null | Out-Null
+          net user $user $password /add /y /expires:never /passwordchg:no | Out-Null
+          if ($LASTEXITCODE) { throw "net user /add failed with $LASTEXITCODE" }
+          net localgroup Users $user /add 2>$null | Out-Null
+          "created standard user $user; Administrators member: $([bool](net localgroup Administrators | Select-String -SimpleMatch $user))"
+          # Read: the checkout (driver, product, QEMU bundle, node modules), node, the private fixture. Modify: home and evidence.
+          foreach ($path in @($repo, $fixtures, (Split-Path -Parent $node), (Split-Path -Parent $env:OME_INSTALLER))) {
+            icacls $path /grant "${user}:(OI)(CI)RX" /Q | Out-Null
+            if ($LASTEXITCODE) { throw "icacls read grant failed on $path" }
+          }
+          foreach ($path in @($omeHome, $env:OME_DOD_OUTPUT, $userRoot)) {
+            icacls $path /grant "${user}:(OI)(CI)M" /Q | Out-Null
+            if ($LASTEXITCODE) { throw "icacls modify grant failed on $path" }
+          }
+          "access granted"
+          # CreateProcessWithLogonW (Start-Process -Credential) needs the Secondary Logon service.
+          $seclogon = Get-Service seclogon
+          if ($seclogon.StartType -eq 'Disabled') { Set-Service seclogon -StartupType Manual }
+          if ((Get-Service seclogon).Status -ne 'Running') { Start-Service seclogon }
+          $stdout = Join-Path $env:RUNNER_TEMP 'driver-stdout.txt'
+          $stderr = Join-Path $env:RUNNER_TEMP 'driver-stderr.txt'
+          $arguments = @('-NoProfile', '-File', (Join-Path $repo 'ci\dod\run-as-user.ps1'),
+            '-Repo', $repo, '-Node', $node, '-OmeHome', $omeHome,
+            '-Installer', $env:OME_INSTALLER,
+            '-GameDir', (Join-Path $fixtures 'com.epidgames.trickcalrevive'),
+            '-Output', $env:OME_DOD_OUTPUT, '-UserRoot', $userRoot)
+          $credential = [pscredential]::new($user, $secure)
+          # Not -Wait: it waits for every descendant, and the adb server the product starts outlives the
+          # driver and holds the redirected output handle (run 24 sat two hours after the driver ended).
+          $process = Start-Process -FilePath (Get-Command pwsh).Source -ArgumentList $arguments -WorkingDirectory (Join-Path $repo 'host') -Credential $credential -LoadUserProfile -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru
+          if (!$process.WaitForExit(115 * 60 * 1000)) {
+            "driver still running after 115 minutes; stopping it"
+            Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+            $process.WaitForExit(30000) | Out-Null
+          }
+          $process.Refresh(); $code = $process.ExitCode
+          # Whatever the driver's user left behind (adb server, a product or QEMU the cleanup could not
+          # own) goes now, so the output files are released and the evidence step can read them.
+          $names = @('adb.exe', 'ome.exe', 'qemu-system-x86_64.exe', 'msedgewebview2.exe', 'node.exe', 'powershell.exe', 'pwsh.exe', 'conhost.exe')
+          foreach ($leftover in Get-CimInstance Win32_Process | Where-Object { $names -contains $_.Name }) {
+            $owner = Invoke-CimMethod -InputObject $leftover -MethodName GetOwner -ErrorAction SilentlyContinue
+            if ($owner.User -eq $user) { "leftover of ${user}: $($leftover.Name) pid $($leftover.ProcessId)"; Stop-Process -Id $leftover.ProcessId -Force -ErrorAction SilentlyContinue }
+          }
+          "== driver stdout =="; Get-Content $stdout
+          "== driver stderr =="; Get-Content $stderr
+          $resultPath = Join-Path $env:OME_DOD_OUTPUT 'dod-result.json'
+          if (!(Test-Path $resultPath)) { throw "Driver exit code $code and no dod-result.json; see the driver output above" }
+          $result = Get-Content $resultPath -Raw | ConvertFrom-Json
+          $failedSteps = @($result.steps | Where-Object outcome -eq 'failed')
+          "driver exit code $code, outcome $($result.outcome), failed steps: $($failedSteps.name -join ', ')"
+          # 'needs-review' means every step passed and only the game screenshots await a human eye
+          # (the driver never certifies a running game by itself); it is not a failure of the run.
+          if ($result.outcome -eq 'needs-review' -and !$failedSteps.Count) {
+            Write-Output '::notice title=M2 wizard completion::All driver steps passed; game screenshots need visual review'
+          } elseif ($code -ne 0 -or $result.outcome -ne 'passed' -or $failedSteps.Count) {
+            throw 'Wizard completion failed; see dod-result.json and screenshots'
+          }
+      - name: Check and stage evidence only
+        id: evidence
+        if: always()
+        env:
+          OME_DOD_OUTPUT: ${{ runner.temp }}\ome-dod-evidence
+        run: |
+          if (!(Test-Path $env:OME_DOD_OUTPUT)) { throw 'No evidence folder was produced' }
+          # A cancelled or stopped wizard step leaves the standard user's processes holding the output
+          # files; release them before reading (run 24).
+          $names = @('adb.exe', 'ome.exe', 'qemu-system-x86_64.exe', 'msedgewebview2.exe', 'node.exe', 'powershell.exe', 'pwsh.exe')
+          foreach ($leftover in Get-CimInstance Win32_Process | Where-Object { $names -contains $_.Name }) {
+            $owner = Invoke-CimMethod -InputObject $leftover -MethodName GetOwner -ErrorAction SilentlyContinue
+            if ($owner.User -eq 'omeuser') { "leftover: $($leftover.Name) pid $($leftover.ProcessId)"; Stop-Process -Id $leftover.ProcessId -Force -ErrorAction SilentlyContinue }
+          }
+          $publish = Join-Path $env:RUNNER_TEMP 'ome-dod-publish'
+          pwsh -NoProfile -File ci/dod/publish-evidence.ps1 -Source $env:OME_DOD_OUTPUT -Destination $publish
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          "path=$publish" >> $env:GITHUB_OUTPUT
+      - name: Upload completion evidence
+        if: always() && steps.evidence.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: m3-release-evidence
+          path: ${{ steps.evidence.outputs.path }}
+          if-no-files-found: error
+          retention-days: 7
+          include-hidden-files: false

@@ -1,0 +1,240 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+#
+# Product release (CLAUDE.md M3, ADR-0007). A pushed tag v<x.y.z> whose version matches the
+# repository's version builds the installer on a GitHub-hosted Windows runner, takes the attested
+# QEMU runtime and corresponding source from the QEMU release that manifests/qemu-release.json
+# names, checks the asset set (R4 source offer, THIRD_PARTY.md, NOTICE), attests every file and
+# publishes a GitHub pre-release. The job that brings in the corresponding source is named
+# qemu-source-offer (R4): when it fails there is no release.
+#
+# A manual run builds and checks everything but publishes nothing, so the pipeline can be tried
+# without a tag. Nothing here is product behaviour.
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    # The gates of ci.yml, run again on the tag commit so a release never ships from a commit that
+    # never passed them.
+    runs-on: windows-2025
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up pinned Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: host/.node-version
+          cache: npm
+          cache-dependency-path: host/package-lock.json
+      - name: Install Pester
+        run: Install-Module Pester -Force -SkipPublisherCheck -MinimumVersion 5.5.0 -Scope CurrentUser
+      - name: Run policy checks and tests
+        run: pwsh -NoProfile -File ci/Invoke-AllChecks.ps1
+      - name: Check host and webview
+        working-directory: host
+        run: |
+          rustup show active-toolchain
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          npm ci
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          node tools/quality.mjs
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+
+  qemu-source-offer:
+    # Fetches the runtime zip and the corresponding-source archive of the pinned QEMU release,
+    # compares their SHA-256 with manifests/qemu-release.json and verifies the build provenance
+    # attestation of each against this repository's qemu-release.yml. The product job bundles the
+    # runtime and publishes both files next to the installer.
+    runs-on: windows-2025
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Download and verify the pinned QEMU release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: pwsh -NoProfile -File ci/release/Get-QemuBundle.ps1 -Destination (Join-Path $env:RUNNER_TEMP 'qemu-release')
+      - name: Keep the verified files for the product job
+        uses: actions/upload-artifact@v4
+        with:
+          name: qemu-release
+          path: ${{ runner.temp }}/qemu-release
+          if-no-files-found: error
+          retention-days: 7
+
+  product:
+    needs: [verify, qemu-source-offer]
+    runs-on: windows-2025
+    timeout-minutes: 120
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Resolve the version and decide whether to publish
+        id: version
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          $configured = (Get-Content host/app/tauri.conf.json -Raw | ConvertFrom-Json).version
+          $workspace = (Select-String -Path host/Cargo.toml -Pattern '^version = "(.+)"$').Matches[0].Groups[1].Value
+          $package = (Get-Content host/package.json -Raw | ConvertFrom-Json).version
+          if ($configured -ne $workspace -or $configured -ne $package) {
+            throw "Versions disagree: tauri.conf.json $configured, host/Cargo.toml $workspace, host/package.json $package"
+          }
+          $publish = $false
+          if ($env:REF_TYPE -eq 'tag') {
+            if ($env:REF_NAME -ne "v$configured") { throw "Tag $env:REF_NAME does not match the configured version $configured" }
+            if (-not (Test-Path "docs/release-notes/v$configured.md")) { throw "docs/release-notes/v$configured.md is missing" }
+            $publish = $true
+          }
+          "version=$configured" >> $env:GITHUB_OUTPUT
+          "publish=$($publish.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
+          "version $configured, publish $publish"
+
+      - name: Set up pinned Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: host/.node-version
+          cache: npm
+          cache-dependency-path: host/package-lock.json
+
+      - name: Restore Rust build output
+        id: rust-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: host/target
+          key: release-windows-2025-${{ hashFiles('host/Cargo.lock', 'host/rust-toolchain.toml') }}
+          restore-keys: |
+            release-windows-2025-
+
+      - name: Take the verified QEMU files
+        uses: actions/download-artifact@v4
+        with:
+          name: qemu-release
+          path: ${{ runner.temp }}/qemu-release
+
+      - name: Unpack the QEMU runtime for bundling
+        # ci/release/tauri.release.conf.json bundles host/qemu-dist as qemu/ next to the product
+        # executable, where the host probe looks for the product bundle.
+        run: |
+          $zip = @(Get-ChildItem (Join-Path $env:RUNNER_TEMP 'qemu-release') -Filter 'qemu-ome-*-win64.zip')
+          if ($zip.Count -ne 1) { throw "Expected one runtime zip, found $($zip.Count)" }
+          Expand-Archive -LiteralPath $zip[0].FullName -DestinationPath host/qemu-dist
+          foreach ($required in 'bin\qemu-system-x86_64.exe', 'bin\qemu-img.exe', 'share\qemu\edk2-x86_64-code.fd', 'share\qemu\edk2-i386-vars.fd') {
+            if (-not (Test-Path (Join-Path 'host/qemu-dist' $required))) { throw "The runtime zip lacks $required" }
+          }
+          "unpacked $(@(Get-ChildItem host/qemu-dist -Recurse -File).Count) files"
+
+      - name: Build the product and the installer
+        working-directory: host
+        run: |
+          rustup show active-toolchain
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          npm ci
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          cargo build -p ome-setup --release
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          Set-Location app
+          node ../node_modules/@tauri-apps/cli/tauri.js build --ci --config ../../ci/release/tauri.release.conf.json
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+
+      - name: Save Rust build output
+        if: always() && steps.rust-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: host/target
+          key: ${{ steps.rust-cache.outputs.cache-primary-key }}
+
+      - name: Stage and check the release files
+        id: stage
+        run: |
+          $installer = @(Get-ChildItem host/target/release/bundle/nsis -Filter '*-setup.exe')
+          if ($installer.Count -ne 1) { throw "Expected one installer under host/target/release/bundle/nsis, found $($installer.Count)" }
+          $stage = Join-Path $env:RUNNER_TEMP 'release-stage'
+          pwsh -NoProfile -File ci/release/Stage-ReleaseAssets.ps1 -Version '${{ steps.version.outputs.version }}' -Installer $installer[0].FullName -QemuFiles (Join-Path $env:RUNNER_TEMP 'qemu-release') -Destination $stage
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          pwsh -NoProfile -File ci/Check-ReleaseAssets.ps1 -Path $stage -Version '${{ steps.version.outputs.version }}'
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          "stage=$stage" >> $env:GITHUB_OUTPUT
+
+      - name: Keep the staged files as a workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-v${{ steps.version.outputs.version }}
+          path: ${{ steps.stage.outputs.stage }}
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Attest build provenance
+        if: steps.version.outputs.publish == 'true'
+        uses: actions/attest@v4
+        with:
+          subject-path: ${{ steps.stage.outputs.stage }}/*
+
+      - name: Publish the pre-release
+        if: steps.version.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $files = Get-ChildItem '${{ steps.stage.outputs.stage }}' -File | ForEach-Object { $_.FullName }
+          gh release create 'v${{ steps.version.outputs.version }}' $files --prerelease --verify-tag `
+            --title 'Open Mobile Emulator ${{ steps.version.outputs.version }}' `
+            --notes-file 'docs/release-notes/v${{ steps.version.outputs.version }}.md'
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+
+      - name: Verify the published assets the way a user would
+        if: steps.version.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $check = Join-Path $env:RUNNER_TEMP 'release-check'
+          New-Item -ItemType Directory -Path $check | Out-Null
+          gh release download 'v${{ steps.version.outputs.version }}' --dir $check
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $report = Join-Path $env:RUNNER_TEMP 'release-verify.txt'
+          "release v${{ steps.version.outputs.version }} at $(Get-Date -Format o)" | Out-File $report
+          $failed = $false
+          foreach ($file in Get-ChildItem $check -File | Sort-Object Name) {
+            "== $($file.Name)" | Out-File $report -Append
+            gh attestation verify $file.FullName --repo $env:GITHUB_REPOSITORY --signer-workflow "$env:GITHUB_REPOSITORY/.github/workflows/release.yml" 2>&1 | Out-File $report -Append
+            if ($LASTEXITCODE) { $failed = $true; "FAILED $($file.Name)" | Out-File $report -Append }
+          }
+          Get-Content $report
+          if ($failed) { throw 'A published asset failed provenance verification' }
+          "::notice title=Release::v${{ steps.version.outputs.version }} published; every asset verified with gh attestation verify"
+
+      - name: Keep the verification report
+        if: always() && steps.version.outputs.publish == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-v${{ steps.version.outputs.version }}-verification
+          path: ${{ runner.temp }}/release-verify.txt
+          if-no-files-found: ignore
+          retention-days: 90

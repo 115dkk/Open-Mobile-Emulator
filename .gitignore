@@ -69,3 +69,4 @@ ds-bundle/
 .design-sync/learnings/
 .design-sync/node_modules
 host/types/
+/host/qemu-dist/

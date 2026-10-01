@@ -1,0 +1,165 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+#
+# Builds the product's custom QEMU on a GitHub-hosted Windows runner from the pins and patches in
+# qemu-build/, makes the R4 corresponding-source bundle in the same job (the job is named
+# qemu-source-offer as R4 requires), attests every file it publishes (ADR-0007) and publishes them
+# as the pre-release qemu-<QEMU_TAG>-<suffix>. The product release (release.yml) consumes the QEMU
+# release that manifests/qemu-release.json names and verifies these attestations before bundling.
+#
+# Manual only: a build takes the better part of an hour of Windows runner time and is needed only
+# when qemu-build/ changes. Nothing here is product behaviour; the runner's MSYS2 fetches come from
+# the development package repositories, not from docs/NETWORK.md.
+name: QEMU release
+
+on:
+  workflow_dispatch:
+    inputs:
+      suffix:
+        description: 'Suffix after the QEMU tag; the release is named qemu-<QEMU_TAG>-<suffix> (for example ome4)'
+        required: true
+        type: string
+      publish:
+        description: 'Attest the files and create the GitHub pre-release. Off: build and keep the files as a workflow artifact only'
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  qemu-source-offer:
+    runs-on: windows-2025
+    timeout-minutes: 300
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Read the QEMU pins
+        id: pins
+        env:
+          SUFFIX: ${{ inputs.suffix }}
+        run: |
+          $tag = (Select-String -Path qemu-build/pins.env -Pattern '^QEMU_TAG=(.+)$').Matches[0].Groups[1].Value.Trim()
+          $commit = (Select-String -Path qemu-build/pins.env -Pattern '^QEMU_COMMIT=(.+)$').Matches[0].Groups[1].Value.Trim()
+          if ($tag -notmatch '^v\d+\.\d+\.\d+$') { throw "Unexpected QEMU_TAG: $tag" }
+          if ($env:SUFFIX -notmatch '^[a-z0-9][a-z0-9.-]{0,30}$') { throw 'The suffix must be lower-case letters, digits, dots or dashes' }
+          "tag=$tag" >> $env:GITHUB_OUTPUT
+          "commit=$commit" >> $env:GITHUB_OUTPUT
+          "release=qemu-$tag-$env:SUFFIX" >> $env:GITHUB_OUTPUT
+          "QEMU tag $tag, commit $commit, release qemu-$tag-$env:SUFFIX"
+
+      - name: Refuse to overwrite an existing release
+        if: inputs.publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view '${{ steps.pins.outputs.release }}' --json tagName 2>$null | Out-Null
+          if ($LASTEXITCODE -eq 0) { throw 'Release ${{ steps.pins.outputs.release }} already exists; pick another suffix' }
+          'The release name is free'
+
+      - name: Set up MSYS2 UCRT64
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          path-type: minimal
+
+      - name: Build QEMU, package the runtime and make the source offer
+        # build-qemu.sh installs the packages pins.env lists, clones the pinned tag with its firmware
+        # submodules, applies qemu-build/patches, builds, copies the runtime with its UCRT64 DLLs to
+        # dist/qemu, regenerates the third-party table and archives the corresponding source.
+        shell: msys2 {0}
+        env:
+          OME_QEMU_BUILD_WORK: ${{ runner.temp }}\qemu-work
+          OME_REPOSITORY_ROOT: ${{ github.workspace }}
+        run: |
+          set -euo pipefail
+          cd qemu-build
+          ./build-qemu.sh all
+
+      - name: Collect the release files
+        id: files
+        run: |
+          $work = Join-Path $env:RUNNER_TEMP 'qemu-work'
+          $dist = Join-Path $work 'dist'
+          $out = Join-Path $work 'out'
+          $commit = (Get-Content (Join-Path $out 'qemu-commit.txt') -Raw).Trim()
+          if ($commit -ne '${{ steps.pins.outputs.commit }}') { throw "Built commit $commit is not the pinned ${{ steps.pins.outputs.commit }}" }
+          $short = $commit.Substring(0, 12)
+          $stage = Join-Path $env:RUNNER_TEMP 'qemu-stage'
+          New-Item -ItemType Directory -Path $stage | Out-Null
+          $zipName = "qemu-ome-${{ steps.pins.outputs.tag }}-$short-win64.zip"
+          Compress-Archive -Path (Join-Path $dist 'qemu\*') -DestinationPath (Join-Path $stage $zipName) -CompressionLevel Optimal
+          $offer = @(Get-ChildItem $dist -Filter 'qemu-source-offer-*.tar.gz')
+          if ($offer.Count -ne 1) { throw "Expected one source offer archive, found $($offer.Count)" }
+          Copy-Item $offer[0].FullName $stage
+          Copy-Item (Join-Path $out 'THIRD_PARTY.generated.md') (Join-Path $stage 'THIRD_PARTY.generated.md')
+          Copy-Item (Join-Path $dist 'qemu\bin\ome-patches.txt') (Join-Path $stage 'ome-patches.txt')
+          Copy-Item (Join-Path $out 'pacman-lock.txt') (Join-Path $stage 'pacman-lock.txt')
+          $sums = foreach ($file in Get-ChildItem $stage -File | Sort-Object Name) {
+            '{0}  {1}' -f (Get-FileHash $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant(), $file.Name
+          }
+          [IO.File]::WriteAllText((Join-Path $stage 'SHA256SUMS'), (($sums -join "`n") + "`n"), [Text.UTF8Encoding]::new($false))
+          $patches = (Get-Content (Join-Path $stage 'ome-patches.txt') | Where-Object { $_ }) -join ', '
+          $run = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
+          $fence = '`' * 3
+          $tick = '`'
+          $notes = @(
+            "Open Mobile Emulator custom QEMU ${{ steps.pins.outputs.tag }} (upstream commit $commit) with the OME patches $patches.",
+            '',
+            "Built on a GitHub-hosted Windows runner by the workflow run $run at commit $env:GITHUB_SHA from ${tick}qemu-build/${tick} (ADR-0007). Every file below carries a build provenance attestation; verify one with",
+            '',
+            $fence,
+            "gh attestation verify <file> --repo $env:GITHUB_REPOSITORY --signer-workflow $env:GITHUB_REPOSITORY/.github/workflows/qemu-release.yml",
+            $fence,
+            '',
+            "- ${tick}$zipName${tick}: the runtime the product bundles (${tick}bin/${tick} with the executables and their UCRT64 DLLs, ${tick}share/qemu/${tick} with firmware and keymaps, ${tick}licenses/${tick}, ${tick}SHA256SUMS${tick}).",
+            "- ${tick}$($offer[0].Name)${tick}: the corresponding source of those executables (patched QEMU tree, pinned subprojects, firmware submodules, build scripts and package lock), offered under GPL-2.0 (CLAUDE.md R4).",
+            "- ${tick}THIRD_PARTY.generated.md${tick}: the third-party table regenerated from the packages that provided the bundled DLLs.",
+            "- ${tick}pacman-lock.txt${tick}: the MSYS2 package set at build time.",
+            "- ${tick}SHA256SUMS${tick}: SHA-256 of every file above.",
+            '',
+            'SHA-256'
+          ) + @($sums | ForEach-Object { "- $_" })
+          [IO.File]::WriteAllText((Join-Path $env:RUNNER_TEMP 'qemu-release-notes.md'), (($notes -join "`n") + "`n"), [Text.UTF8Encoding]::new($false))
+          Get-ChildItem $stage | Select-Object Name, Length | Format-Table -AutoSize
+          Get-Content (Join-Path $stage 'SHA256SUMS')
+          "stage=$stage" >> $env:GITHUB_OUTPUT
+          "zip=$zipName" >> $env:GITHUB_OUTPUT
+          "offer=$($offer[0].Name)" >> $env:GITHUB_OUTPUT
+
+      - name: Upload the files as a workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.pins.outputs.release }}
+          path: ${{ steps.files.outputs.stage }}
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Attest build provenance
+        if: inputs.publish
+        uses: actions/attest@v4
+        with:
+          subject-path: ${{ steps.files.outputs.stage }}/*
+
+      - name: Publish the pre-release
+        if: inputs.publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $files = Get-ChildItem '${{ steps.files.outputs.stage }}' -File | ForEach-Object { $_.FullName }
+          gh release create '${{ steps.pins.outputs.release }}' $files --prerelease --target $env:GITHUB_SHA `
+            --title 'QEMU ${{ steps.pins.outputs.tag }} ${{ inputs.suffix }} (CI build with provenance)' `
+            --notes-file (Join-Path $env:RUNNER_TEMP 'qemu-release-notes.md')
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          "::notice title=QEMU release::${{ steps.pins.outputs.release }} published with ${{ steps.files.outputs.zip }} and ${{ steps.files.outputs.offer }}"
