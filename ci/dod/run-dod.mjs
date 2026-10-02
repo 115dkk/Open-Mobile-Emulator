@@ -18,6 +18,11 @@ const home = required('OME_HOME');
 const output = required('OME_DOD_OUTPUT');
 const gameDirectory = required('OME_DOD_GAME_APK_DIR');
 const port = Number(process.env.OME_DOD_CDP_PORT ?? 9333);
+// OME_DOD_IMAGE=<profile id> picks that image card in S1.4 instead of the product's recommendation
+// (P3: the Android 15 profile). OME_DOD_SKIP_GAME=1 ends the wizard after the first boot and probe
+// and records the game steps as skipped: a profile without a translator cannot run the game.
+const wantedImage = process.env.OME_DOD_IMAGE || null;
+const skipGame = process.env.OME_DOD_SKIP_GAME === '1';
 const scrub = text => text.replaceAll(gameDirectory.replaceAll('\\', '\\\\'), '<private-fixtures>').replaceAll(gameDirectory, '<private-fixtures>').replaceAll(gameDirectory.replaceAll('\\', '/'), '<private-fixtures>').replace(/C:([\\/]+)Users\1[^\\/\r\n" ]+/gi, 'C:$1Users$1USER');
 fs.mkdirSync(path.join(output, 'shots'), { recursive: true });
 const plannedSteps = ['preflight', 'launch', 'S1.1-host-check', 'S1.2-WHPX', 'S1.4-download', 'S1.5-installer', 'S1.6-first-boot', 'S1.7-game-install', 'game-launch', 'stop', 'quit'];
@@ -235,6 +240,14 @@ try {
   await step('S1.4-download', async () => {
     const start = Date.now(); let nextProgress = 0;
     let s = await snapshot();
+    if (wantedImage && s.wizard.imageId !== wantedImage) {
+      const card = s.images?.profiles?.find(p => p.id === wantedImage);
+      if (!card) throw new StopRun(`OME_DOD_IMAGE ${wantedImage} is not an image profile of this build`);
+      log('image-select', { from: s.wizard.imageId, to: wantedImage, displayName: card.displayName });
+      await page.getByRole('radiogroup', { name: '운영체제 이미지' }).getByRole('radio', { name: new RegExp('^' + card.displayName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) }).click();
+      s = await until(async () => { const n = await snapshot(); return n.wizard.imageId === wantedImage && n; }, 10000, 'image card selected');
+      await capture('03b-image-selected');
+    }
     const profile = s.images?.profiles?.find(p => p.id === s.wizard.imageId);
     if (!s.wizard.download && s.wizard.canContinue && profile?.status === 'verified') {
       // A seeded home (artifacts/*.iso with its .verified marker) is verified at first sight: download is null and the wizard shows 다음 only.
@@ -291,7 +304,12 @@ try {
     result.measurements.firstBootMs = Date.now() - start; result.probeItems = s.guest.capabilities.items;
     await capture('07-first-boot-probe'); log('applied-defaults', { text: await page.locator('body').innerText() }); await click('다음');
   });
-  await step('S1.7-game-install', async () => {
+  if (skipGame) {
+    log('game-skipped', { reason: 'OME_DOD_SKIP_GAME=1' });
+    for (const name of ['S1.7-game-install', 'game-launch']) result.steps.push({ name, start: null, end: null, durationMs: null, outcome: 'skipped', reason: 'OME_DOD_SKIP_GAME=1: the selected image profile has no translator' });
+    await capture('08-app-install'); await click('완료'); await capture('09-wizard-done');
+  }
+  else await step('S1.7-game-install', async () => {
     await capture('08-app-install');
     gap('S1.7 has no launch/capture actions; complete wizard before installing from 앱 as directed for round 2.');
     await click('완료'); await rail('앱');
@@ -303,7 +321,7 @@ try {
     result.measurements.gameInstallMs = Date.now() - start; await capture('09-game-installed');
     await rail('앱');
   });
-  await step('game-launch', async () => {
+  if (!skipGame) await step('game-launch', async () => {
     const start = Date.now();
     await page.getByRole('row').filter({ hasText: result.game.package }).getByRole('button', { name: '실행', exact: true }).click(); await rail('화면');
     // No account creation or unapproved game interaction. Fifteen minutes of product captures
@@ -333,7 +351,7 @@ try {
   await step('stop', async () => { const start = Date.now(); await stopGuest(); result.measurements.stopMs = Date.now() - start; await capture('14-stopped'); });
   await step('quit', quitApp);
   // A game capture nobody read (neither the OCR above nor a person) cannot certify a running game.
-  result.outcome = result.game.visualReviewRequired ? 'needs-review' : 'passed';
+  result.outcome = skipGame ? 'passed' : (result.game.visualReviewRequired ? 'needs-review' : 'passed');
 } catch (error) {
   result.error = error.stack; log('failure', { error: error.stack });
   // A failure capture focuses the main window and refuses when another window holds the foreground

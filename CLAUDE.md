@@ -16,6 +16,8 @@
 
 개정 2026-10-01 (P3 시작): 사용자가 출시 후 트랙 순서를 P3 → P1 → P2로 정했다(8절 6번). P3 조사(`docs/evidence/P3/research-*.md`, `docs/P3-PLAN.md`)로 사실 셋을 정정했다. BlissOS의 `arcadia-x86`은 안드로이드 16이 아니라 12L이고 안드로이드 16·17 트리는 없으므로 1차 자체 이미지는 Bliss 18(`voyager-x86`, 안드로이드 15)이다. `BLISS_BUILD_VARIANT=foss`는 블롭을 빼는 값이 아니라 microG 묶음을 고르는 값이고 네이티브 브리지와 구글 앱은 별도 플래그다. 설치기는 `bootable/aaropa`로 바뀌었지만 initrd의 `/scripts/*` 훅은 남아 ADR-0010이 그대로 통한다. 변경된 항목은 1.3절, D2, R3, P3, 8절 6번이다.
 
+개정 2026-10-02 (P3 결정): 자체 게스트 이미지는 개발 PC의 WSL2에서 빌드해 사전 릴리스로 올리고(ADR-0007의 예외), 안드로이드 15 게스트의 adb는 설치 때 도우미가 넣은 호스트 adb 공개키로 승인한다(모두 사용자 결정, `docs/adr/0012-self-built-image-release.md`). 변경된 항목은 R3, 4절의 `guest/build/` 줄, P3다.
+
 개정 2026-10-01 (M3 시작): 설치기는 현재 사용자 범위의 NSIS이고 설치 폴더를 여는 단추를 두며, 첫 릴리스 v0.1.0은 사전 릴리스로 올리고, M3 완료 기준을 신설했다(모두 사용자 결정, `docs/adr/0011-installer-and-release-pipeline.md`). 변경된 항목은 M3 1번, M3 완료 기준, 4절의 `installer/`와 워크플로 줄, 8절 10번과 11번이다.
 
 ---
@@ -86,7 +88,7 @@ Claude Code는 이 절의 사실을 다시 조사하지 않아도 된다. 다만
 - 미러를 두어야 할 상황이 오면 작업을 멈추고 사용자에게 묻는다.
 
 ### R3. 자체 게스트 이미지는 블롭 없이 배포하고, 구글 블롭은 사용자 PC가 설치 시점에 넣는다 (ADR-0006)
-- OME가 배포하는 자체 게스트 이미지는 블롭이 전혀 없는 변형뿐이다. 이 문서에서 'foss 변형'은 `BLISS_BUILD_VARIANT=vanilla`에 `USE_LIBNDK_TRANSLATION_NB`, `USE_CROS_HOUDINI_NB`, `USE_EMU_GAPPS`, `USE_OPENGAPPS`를 모두 끈 빌드를 가리킨다(정정 2026-10-01: Bliss의 `foss` 값은 microG 묶음을 고르는 것이지 브리지를 빼는 것이 아니다. `docs/P3-PLAN.md` 1절). 이 변형은 항상 빌드 가능해야 하고, CI에서 이 변형의 빌드 성공을 게이트로 둔다.
+- OME가 배포하는 자체 게스트 이미지는 블롭이 전혀 없는 변형뿐이다. 이 문서에서 'foss 변형'은 `BLISS_BUILD_VARIANT=vanilla`에 `USE_LIBNDK_TRANSLATION_NB`, `USE_CROS_HOUDINI_NB`, `USE_EMU_GAPPS`, `USE_OPENGAPPS`를 모두 끈 빌드를 가리킨다(정정 2026-10-01: Bliss의 `foss` 값은 microG 묶음을 고르는 것이지 브리지를 빼는 것이 아니다. `docs/P3-PLAN.md` 1절). 이 변형은 항상 빌드 가능해야 하고, CI에서 이 변형의 빌드 성공을 게이트로 둔다(정정 2026-10-02: 안드로이드 트리 빌드는 GitHub 호스트 러너에서 돌지 않으므로 그 게이트는 개발 PC 빌드 기록 `docs/evidence/P3/build-*.md`로 대신하고, 이미지는 개발 PC 빌드를 사전 릴리스로 올린다. ADR-0012).
 - 구글 에뮬레이터 이미지에서 꺼낸 파일이 든 이미지는 릴리스, 제품 서버, 미러 어디에도 올리지 않는다. 안드로이드 SDK 라이선스 계약 3.4가 SDK 구성요소의 복사, 수정, 재배포를 금지하고, 1.1은 SDK에 "Android system files"가 포함된다고 적는다. `NOTICE`를 적는다고 이 금지가 풀리지 않는다.
 - 블롭이 필요한 이미지 프로필은 설치 시점에 사용자 PC의 설치기가 `dl.google.com`에서 구글 에뮬레이터 시스템 이미지를 받아(매니페스트 `fetched_by: installer`, SHA-256 대조) 사용자 PC에서 변환기 묶음과 GApps를 꺼내고, 6절 계약으로 foss 게스트에 넣는다. 꺼낸 파일은 OME 홈 아래에만 있다. 이 흐름을 켤지와 기본값 여부는 8절 9번에서 사용자가 정하며, 켜면 설치기는 받기 전에 해당 이미지의 라이선스 전문을 보여 주고 동의를 받는다.
 - 빌드 머신에서 Android-Generic의 `vendor_google_emu-x86` 흐름으로 블롭을 넣은 이미지는 개발과 증거 수집에만 쓴다. 그 출력물은 어떤 저장소에도 커밋되지 않고 배포되지 않는다.
@@ -147,7 +149,7 @@ PRODUCT/
   guest/
     kernel-cmdline.md       Bliss 부팅 인자 실험 기록
     overlay/                게스트에 넣을 자체 스크립트 (블롭 없음)
-    build/                  Android-Generic 기반 자체 빌드 (2차)
+    build/                  Bliss 18 트리의 자체 빌드(WSL2 `OME-Build`)와 릴리스 자산 스크립트 (P3, ADR-0012)
   translator/               6절 계약, 설치 스크립트, 스모크 테스트
   host/                     M2 제품 껍데기: Rust 워크스페이스(crates/), Tauri 껍데기(app/), 웹뷰(ui/). 구조는 docs/ARCHITECTURE.md
   ci/release/               릴리스 보조: QEMU 릴리스 받기와 검증, 자산 정리, Tauri 설정 덧판 (M3, ADR-0011)
@@ -275,7 +277,7 @@ PRODUCT/
 
 - P1. gfxstream: 윈도우 호스트에서 `virtio-gpu-rutabaga`를 빌드할 수 있는지 조사 스파이크. 리눅스 전제 문서를 윈도우로 옮기는 데 필요한 변경을 목록화하고, 불가하면 대안(ANGLE 위 virgl, Venus)을 평가한다. 결과 문서만 산출하고 코드는 승인 후.
 - P2. Digitalis 교체: `translator/` 계약(6절)에 맞춰 Digitalis 바이너리 번들을 설치하는 스크립트를 만들고, libndk와 A/B로 트릭컬 시나리오와 측정표를 비교한다. 성능이나 안정성이 미달이면 결과를 기록하고 기본값은 libndk로 유지한다. ADR-0006 뒤로 Digitalis(Apache-2.0, AOSP Berberis 수정판)는 후보 변환기 가운데 구글 SDK 계약의 사용 범위 문제(3.1)가 없는 유일한 것이기도 하다. Digitalis는 AOSP 16(API 36)에 맞춰 빌드되고 다른 API 레벨의 이미지에 섞어 넣는 것을 지원하지 않으므로, 통째로 포크하지 않고 버전에 묶인 플랫폼 층(게스트 bionic, `native_bridge_support` 프록시)만 OME가 소스에서 API 레벨별로 빌드한다(ADR-0008, 빌드 위치는 확인 필요). 순서는 API 33(지금 게스트, 이 묶음이 생기면 P3를 기다리지 않고 A/B를 시작한다), API 34~37, API 30~32다. Digitalis에는 ARM64 백엔드만 있다.
-- P3. 게스트 갱신: Bliss 18(`voyager-x86`, 안드로이드 15) 기반 foss 이미지를 빌드하고, 블롭은 사용자 PC가 설치 시점에 넣는다(R3, ADR-0006). 2026-10-01 시작. 같은 날 저녁 빌드 호스트가 없어 한때 보류했다가, 개발 PC의 쓰지 않던 페도라 파티션(200 GiB)을 지우고 C:를 늘려 여유 400 GB를 확보한 뒤 **이 PC의 WSL2(`OME-Build`, Ubuntu 22.04, C:\WSL)**를 빌드 호스트로 삼아 다시 열었다(사용자 결정). 빌드 스크립트는 `guest/build/`, 계획과 남은 결정은 `docs/P3-PLAN.md`에 있다. 개발 PC 빌드는 개발과 증거용이고, 릴리스 빌드의 자리와 출처 증명은 ADR-0012에서 정한다. 0절의 목표(새 안드로이드를 가장 빨리 따라가기)의 중심이다. 구글은 새 안드로이드마다 베타 단계부터 x86_64 에뮬레이터 이미지를 내므로(2026-09-28 색인에 `android-37.2-beta3`, `android-canary-20260909` 항목), 이 흐름이 갖춰지면 갱신 속도는 구글의 이미지 출시 속도를 따른다. 게스트를 올리게 만드는 것은 앱의 minSdk다. targetSdk는 설치를 막지 않는다. 트릭컬 10644는 targetSdk 36, minSdk 26으로 API 33 게스트에서 돈다(`docs/evidence/M0/findings-20260926.md`). gfxstream 게스트 드라이버도 자체 이미지에 묶인다(`docs/DECISION-gpu-roadmap.md`).
+- P3. 게스트 갱신: Bliss 18(`voyager-x86`, 안드로이드 15) 기반 foss 이미지를 빌드하고, 블롭은 사용자 PC가 설치 시점에 넣는다(R3, ADR-0006). 2026-10-01 시작. 같은 날 저녁 빌드 호스트가 없어 한때 보류했다가, 개발 PC의 쓰지 않던 페도라 파티션(200 GiB)을 지우고 C:를 늘려 여유 400 GB를 확보한 뒤 **이 PC의 WSL2(`OME-Build`, Ubuntu 22.04, C:\WSL)**를 빌드 호스트로 삼아 다시 열었다(사용자 결정). 빌드 스크립트는 `guest/build/`, 계획과 남은 결정은 `docs/P3-PLAN.md`에 있다. 첫 ISO(안드로이드 15, 블롭 없음)는 2026-10-02 새벽에 나왔고 제품 QEMU로 라이브 부팅까지 확인했다(`docs/evidence/P3/build-20261002.md`). 같은 날 사용자가 정했다. 이미지는 개발 PC에서 빌드해 사전 릴리스 `guest-android-15-<날짜>`로 올리고(ADR-0007의 예외. GitHub 자산 한도 때문에 1 GiB 조각으로 나누며 제품이 이어 붙인다), 프로필 `ome-android-15`는 `candidate`로 들어가며, 그 게스트의 adb(`ro.adb.secure=1`)는 설치 때 도우미가 호스트 adb 공개키를 시스템 이미지의 `/adb_keys`에 넣어 승인한다(ADR-0012). 0절의 목표(새 안드로이드를 가장 빨리 따라가기)의 중심이다. 구글은 새 안드로이드마다 베타 단계부터 x86_64 에뮬레이터 이미지를 내므로(2026-09-28 색인에 `android-37.2-beta3`, `android-canary-20260909` 항목), 이 흐름이 갖춰지면 갱신 속도는 구글의 이미지 출시 속도를 따른다. 게스트를 올리게 만드는 것은 앱의 minSdk다. targetSdk는 설치를 막지 않는다. 트릭컬 10644는 targetSdk 36, minSdk 26으로 API 33 게스트에서 돈다(`docs/evidence/M0/findings-20260926.md`). gfxstream 게스트 드라이버도 자체 이미지에 묶인다(`docs/DECISION-gpu-roadmap.md`).
 - P4. 다른 게임: 사용자가 지정한 게임마다 APK ABI 확인 → 시나리오 → 프리셋 → 호환성 표 갱신. 탐지 차단 게임은 미지원 표기(R7).
 - P5. D9 재검토: 멀티 인스턴스와 매크로는 게임 약관 검토 뒤 사용자 결정.
 

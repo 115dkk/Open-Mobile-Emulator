@@ -42,8 +42,42 @@ only when a release fixes them.
   Android SDK License Agreement, which grants use "solely to develop
   applications for compatible implementations of Android" (section 3.1).
   Running games is outside that scope (`docs/adr/0006-guest-image-distribution.md`).
-  Self-built guest images, once they exist, are released without Google files
-  (R3).
+  Self-built guest images are released without Google files (R3); the first
+  one is the Android 15 profile below.
+- The Android 15 profile (`ome-android-15`, image release
+  `guest-android-15-20261002`) is a candidate, shown as 검증 전. It is this
+  project's own blob-free build of the BlissOS 18 tree (ADR-0012,
+  `docs/evidence/P3/build-20261002.md`): it carries no ARM translator and no
+  Google apps, so an ARM-only game does not run on it at all until the
+  translator flow of CLAUDE.md section 8 item 9 or the open translator (P2)
+  exists. It is for booting, probing and development today.
+- That image is built on the development PC's WSL2, not on a GitHub runner, so
+  its release files carry no build provenance attestation; `gh attestation
+  verify` fails on them by design. The release carries the pinned build inputs
+  (`pins.env`, `ome.xml`), `build.prop`, the build logs, the forbidden-pattern
+  scan, `NOTICE-guest.md` and the kernel source tarball instead (ADR-0012
+  items 1 and 6). Product executables and QEMU keep their attestations. The
+  image is signed with AOSP test keys.
+- GitHub limits one release asset to 2 GiB, so the 2.95 GB image is published
+  as three 1 GiB parts (`.iso.part0` to `.part2`). The product downloads and
+  joins them and checks each part and the whole file by SHA-256. A manual
+  download has to concatenate the parts in order (`copy /b`) before the
+  `.iso.sha256` line matches.
+- adb on the Android 15 guest requires key authorization (`ro.adb.secure=1`).
+  At install the product writes the host adb client's public key
+  (`%USERPROFILE%\.android\adbkey.pub`, created by `adb start-server`) into
+  the guest's system image as `/adb_keys`, so the first boot is authorized
+  without a dialog. If that key file is deleted or the data folder is moved to
+  another user, the guest shows `unauthorized` and has to be reinstalled from
+  Settings. `adb root` is refused on this image by Bliss's root setting
+  ("ADB Root access is disabled by system setting"), so the product's root
+  toggle is absent for it until that setting is wired (docs/P3-PLAN.md).
+- The Android 15 image contains GPL components (the kernel, busybox,
+  e2fsprogs, alsa-utils and others). The release attaches the kernel source
+  tarball; for everything else the source offer is the `ome.xml` snapshot,
+  which pins every project to a commit in a public repository, listed with its
+  license marker in `NOTICE-guest.md`. A full source archive of the tree (about
+  100 GB) is not published for the pre-release.
 - 32-bit ARM apps (`armeabi-v7a`, `armeabi`) run only through a proprietary
   translator. The open translator the project aims to make the default for
   64-bit ARM apps (Digitalis, P2) has an ARM64 backend only, and no open
