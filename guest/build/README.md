@@ -44,6 +44,30 @@ ome -- bash /home/ome/run-sync.sh` keeps the session, and the stage script appen
 `~/bliss/ome-logs/` with an exit marker line to poll for. The ISO, its `.sha256`, `build.prop`, the manifest snapshot and the build
 log land in `~/bliss/dist/<date>-<manifest commit>/`.
 
+## Release assets (ADR-0012)
+
+`make-notice-guest.sh <tree> <dist> <out>` mounts the ISO, its `system.efs` and the `system.img`
+inside it read-only, writes the file list and the R1 forbidden-name scan (`forbidden-scan.txt`,
+exit code 3 when something matches), copies the image's own `NOTICE.xml.gz`, and generates
+`NOTICE-guest.md` from the manifest snapshot and the license marker at each project root
+(`notice_guest.py`).
+
+`make-kernel-source.sh <tree> <out>` checks that `kernel/x86/common` sits at the commit the
+manifest pins, archives that commit (`git archive`, gzip) and copies the `.config` the build used.
+
+`make-release-assets.sh <tree> <dist> <out>` runs both, splits the ISO into 1 GiB parts
+(`<name>.iso.part0`, `.part1`, ...; GitHub caps one release asset at 2 GiB), collects the build
+inputs and logs, and writes `SHA256SUMS` and `release-assets.json` (the values to copy into
+`manifests/artifacts.json`). Example:
+
+```sh
+guest/build/make-release-assets.sh ~/bliss ~/bliss/dist/20261002-db973c9 ~/bliss/dist/20261002-db973c9/release
+```
+
+The upload itself is `gh release create --prerelease` from the development PC with every file in
+`<out>`; ADR-0012 fixes the release name (`guest-android-15-<date>`) and what the release has to
+carry in place of a build provenance attestation.
+
 ## In a container or on a Linux VM
 
 ```sh
