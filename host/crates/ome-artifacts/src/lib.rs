@@ -4,7 +4,7 @@
 #![forbid(unsafe_code)]
 
 use std::fs::{self, File, OpenOptions};
-use std::io::{self, Read, Write};
+use std::io::{self, Read, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
@@ -13,7 +13,7 @@ use thiserror::Error;
 
 /// A validated external-artifact manifest.
 ///
-/// Parsing rejects missing hashes, unsafe filenames, duplicate artifact names, and empty host
+/// Parsing rejects missing hashes, non-leaf filenames, duplicate artifact names, and empty host
 /// entries. Unknown JSON fields are retained only by the caller and have no effect here.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Manifest {
@@ -60,15 +60,60 @@ impl Manifest {
             if hash.len() != 64 || !hash.bytes().all(|byte| byte.is_ascii_hexdigit()) {
                 return Err(ManifestError::InvalidSha256(artifact.name.clone()));
             }
-            if artifact.filename.is_empty()
-                || artifact.filename.contains('/')
-                || artifact.filename.contains('\\')
-                || Path::new(&artifact.filename)
-                    .file_name()
-                    .and_then(|name| name.to_str())
-                    != Some(artifact.filename.as_str())
-            {
-                return Err(ManifestError::UnsafeFilename(artifact.filename.clone()));
+            if !is_safe_leaf_filename(&artifact.filename) {
+                return Err(ManifestError::InvalidFilename(artifact.filename.clone()));
+            }
+            let mut part_names = std::collections::BTreeSet::new();
+            let mut part_size = 0_u64;
+            for part in &artifact.parts {
+                let part_hash = part.sha256.trim();
+                if part_hash.len() != 64 || !part_hash.bytes().all(|byte| byte.is_ascii_hexdigit())
+                {
+                    return Err(ManifestError::InvalidParts {
+                        name: artifact.name.clone(),
+                        reason: format!("part SHA-256 is malformed: {}", part.filename),
+                    });
+                }
+                if part.size_bytes == 0 {
+                    return Err(ManifestError::InvalidParts {
+                        name: artifact.name.clone(),
+                        reason: format!("part size is zero: {}", part.filename),
+                    });
+                }
+                if !is_safe_leaf_filename(&part.filename) {
+                    return Err(ManifestError::InvalidParts {
+                        name: artifact.name.clone(),
+                        reason: format!("part filename is not a safe leaf name: {}", part.filename),
+                    });
+                }
+                if part.filename == artifact.filename || !part_names.insert(part.filename.as_str())
+                {
+                    return Err(ManifestError::InvalidParts {
+                        name: artifact.name.clone(),
+                        reason: format!("part filename is duplicated: {}", part.filename),
+                    });
+                }
+                if !manifest.allowed_hosts.permits(&part.url) {
+                    return Err(ManifestError::InvalidParts {
+                        name: artifact.name.clone(),
+                        reason: format!("part URL is not allowed: {}", part.filename),
+                    });
+                }
+                part_size = part_size.checked_add(part.size_bytes).ok_or_else(|| {
+                    ManifestError::InvalidParts {
+                        name: artifact.name.clone(),
+                        reason: "part sizes overflow".to_owned(),
+                    }
+                })?;
+            }
+            if !artifact.parts.is_empty() && part_size != artifact.size_bytes {
+                return Err(ManifestError::InvalidParts {
+                    name: artifact.name.clone(),
+                    reason: format!(
+                        "part sizes total {part_size}, expected {}",
+                        artifact.size_bytes
+                    ),
+                });
             }
         }
         Ok(manifest)
@@ -81,6 +126,30 @@ impl Manifest {
         let json = fs::read_to_string(path).map_err(ManifestError::Io)?;
         Self::parse(&json)
     }
+}
+
+fn is_safe_leaf_filename(filename: &str) -> bool {
+    !filename.is_empty()
+        && !filename.contains('/')
+        && !filename.contains('\\')
+        && Path::new(filename)
+            .file_name()
+            .and_then(|name| name.to_str())
+            == Some(filename)
+}
+
+/// One piece of an artifact that the publisher split for upload (GitHub Releases caps one asset
+/// at 2 GiB). Pieces concatenate in order into the whole file.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ArtifactPart {
+    /// Safe leaf filename published for this piece.
+    pub filename: String,
+    /// Publisher URL for this piece.
+    pub url: String,
+    /// Expected byte length of this piece.
+    pub size_bytes: u64,
+    /// Expected hexadecimal SHA-256 of this piece.
+    pub sha256: String,
 }
 
 /// One manifest artifact and all provenance fields required by R2.
@@ -98,6 +167,10 @@ pub struct Artifact {
     pub size_bytes: u64,
     /// Expected lowercase or uppercase hexadecimal SHA-256.
     pub sha256: String,
+    /// Pieces to download in order; empty for a single-file artifact. When present, `url` is the
+    /// publisher's page and is never fetched.
+    #[serde(default)]
+    pub parts: Vec<ArtifactPart>,
     /// Publisher license description.
     pub license: String,
     /// Human-authored provenance note.
@@ -193,7 +266,15 @@ pub enum ManifestError {
     InvalidSha256(String),
     /// An artifact filename is not a leaf name.
     #[error("artifact filename contains a directory: {0}")]
-    UnsafeFilename(String),
+    InvalidFilename(String),
+    /// One or more multipart fields violate the artifact invariant.
+    #[error("artifact parts are invalid for {name}: {reason}")]
+    InvalidParts {
+        /// Artifact whose pieces were rejected.
+        name: String,
+        /// Stable description of the rejected invariant.
+        reason: String,
+    },
 }
 
 /// Result metadata from an HTTP transfer.
@@ -495,6 +576,10 @@ impl ArtifactStore {
             }
         }
 
+        if !artifact.parts.is_empty() {
+            return self.ensure_multipart(artifact, progress, &final_path);
+        }
+
         let part_path = self.dir.join(format!("{}.part", artifact.filename));
         let mut resume = match fs::metadata(&part_path) {
             Ok(metadata) if metadata.is_file() && metadata.len() <= artifact.size_bytes => {
@@ -575,6 +660,126 @@ impl ArtifactStore {
                     "{reason}; received {downloaded} bytes"
                 )))
             }
+        }
+    }
+
+    fn ensure_multipart(
+        &self,
+        artifact: &Artifact,
+        progress: &mut dyn FnMut(StoreProgress) -> bool,
+        final_path: &Path,
+    ) -> Result<VerifiedFile, StoreError> {
+        let part_path = self.dir.join(format!("{}.part", artifact.filename));
+        let mut resume = match fs::metadata(&part_path) {
+            Ok(metadata) if metadata.is_file() && metadata.len() <= artifact.size_bytes => {
+                metadata.len()
+            }
+            Ok(_) => {
+                fs::remove_file(&part_path).map_err(StoreError::Io)?;
+                0
+            }
+            Err(error) if error.kind() == io::ErrorKind::NotFound => 0,
+            Err(error) => return Err(StoreError::Io(error)),
+        };
+        if resume == artifact.size_bytes {
+            if !progress(StoreProgress::Verifying) {
+                return Err(StoreError::Cancelled);
+            }
+            match self.verify_path(artifact, &part_path) {
+                Verification::Verified => {
+                    promote_partial(&part_path, final_path)?;
+                    return Ok(verified_file(artifact, final_path.to_path_buf()));
+                }
+                Verification::Missing | Verification::Mismatch(_) => {
+                    fs::remove_file(&part_path).map_err(StoreError::Io)?;
+                    resume = 0;
+                }
+            }
+        }
+
+        let mut start = 0_u64;
+        for part in &artifact.parts {
+            let end = start + part.size_bytes;
+            if resume >= end {
+                if !verify_file_range(&part_path, start, part.size_bytes, &part.sha256)? {
+                    truncate_file(&part_path, start)?;
+                    return Err(StoreError::PartMismatch {
+                        filename: part.filename.clone(),
+                    });
+                }
+                start = end;
+                continue;
+            }
+
+            if !self.manifest.allowed_hosts.permits(&part.url) {
+                return Err(StoreError::UrlNotAllowed);
+            }
+            let offset = resume - start;
+            let mut file = open_partial(&part_path, resume > 0)?;
+            let outcome = self
+                .http
+                .fetch(
+                    &part.url,
+                    (offset > 0).then_some(offset),
+                    &mut file,
+                    &mut |bytes| progress(StoreProgress::Bytes(bytes)),
+                )
+                .map_err(StoreError::Fetch)?;
+            self.verify_fetch_url(&outcome)?;
+            if offset > 0 && outcome.status == 200 {
+                drop(file);
+                truncate_file(&part_path, start)?;
+                file = open_partial(&part_path, true)?;
+                let restarted = self
+                    .http
+                    .fetch(&part.url, None, &mut file, &mut |bytes| {
+                        progress(StoreProgress::Bytes(bytes))
+                    })
+                    .map_err(StoreError::Fetch)?;
+                self.verify_fetch_url(&restarted)?;
+            } else if offset > 0 && outcome.status == 206 {
+                let expected_content = part.size_bytes - offset;
+                if outcome.bytes_written != expected_content {
+                    truncate_file(&part_path, start)?;
+                    return Err(StoreError::VerificationFailed(format!(
+                        "range response size {}, expected {expected_content}",
+                        outcome.bytes_written
+                    )));
+                }
+            }
+            file.sync_all().map_err(StoreError::Io)?;
+            drop(file);
+
+            let actual_size = fs::metadata(&part_path).map_err(StoreError::Io)?.len();
+            if actual_size != end {
+                truncate_file(&part_path, start)?;
+                return Err(StoreError::VerificationFailed(format!(
+                    "part response ended at {actual_size}, expected {end}"
+                )));
+            }
+            if !verify_file_range(&part_path, start, part.size_bytes, &part.sha256)? {
+                truncate_file(&part_path, start)?;
+                return Err(StoreError::PartMismatch {
+                    filename: part.filename.clone(),
+                });
+            }
+            resume = end;
+            start = end;
+        }
+
+        debug_assert_eq!(resume, artifact.size_bytes);
+        if !progress(StoreProgress::Verifying) {
+            return Err(StoreError::Cancelled);
+        }
+        match self.verify_path(artifact, &part_path) {
+            Verification::Verified => {
+                promote_partial(&part_path, final_path)?;
+                Ok(verified_file(artifact, final_path.to_path_buf()))
+            }
+            Verification::Missing => Err(StoreError::VerificationFailed(
+                "partial file disappeared".to_owned(),
+            )),
+            Verification::Mismatch(reason) => Err(StoreError::VerificationFailed(reason)),
         }
     }
 
@@ -681,6 +886,31 @@ fn promote_partial(part_path: &Path, final_path: &Path) -> Result<(), StoreError
     Ok(())
 }
 
+fn verify_file_range(
+    path: &Path,
+    offset: u64,
+    size: u64,
+    expected_sha256: &str,
+) -> Result<bool, StoreError> {
+    let mut file = File::open(path).map_err(StoreError::Io)?;
+    file.seek(SeekFrom::Start(offset)).map_err(StoreError::Io)?;
+    let mut bytes = file.take(size);
+    let mut hasher = Sha256::new();
+    let copied = io::copy(&mut bytes, &mut hasher).map_err(StoreError::Io)?;
+    if copied != size {
+        return Ok(false);
+    }
+    Ok(format!("{:x}", hasher.finalize()).eq_ignore_ascii_case(expected_sha256.trim()))
+}
+
+fn truncate_file(path: &Path, size: u64) -> Result<(), StoreError> {
+    OpenOptions::new()
+        .write(true)
+        .open(path)
+        .and_then(|file| file.set_len(size))
+        .map_err(StoreError::Io)
+}
+
 fn open_partial(path: &Path, append: bool) -> Result<File, StoreError> {
     OpenOptions::new()
         .create(true)
@@ -717,6 +947,12 @@ pub enum StoreError {
     /// Downloaded bytes do not match the manifest; the partial file is retained.
     #[error("artifact verification failed: {0}")]
     VerificationFailed(String),
+    /// A completed piece does not match its declared SHA-256 and was removed from the partial.
+    #[error("artifact part SHA-256 mismatch: {filename}")]
+    PartMismatch {
+        /// Published filename of the rejected piece.
+        filename: String,
+    },
     /// The caller cancelled and any partial file remains available for resume.
     #[error("artifact transfer was cancelled")]
     Cancelled,
@@ -732,6 +968,7 @@ mod tests {
     struct FakeFetch {
         body: Vec<u8>,
         calls: Arc<Mutex<Vec<Option<u64>>>>,
+        urls: Option<Arc<Mutex<Vec<String>>>>,
         ignore_range: bool,
         final_url: Option<String>,
     }
@@ -739,12 +976,15 @@ mod tests {
     impl HttpFetch for FakeFetch {
         fn fetch(
             &self,
-            _url: &str,
+            url: &str,
             range_start: Option<u64>,
             sink: &mut dyn Write,
             progress: &mut dyn FnMut(u64) -> bool,
         ) -> Result<FetchOutcome, FetchError> {
             self.calls.lock().expect("calls lock").push(range_start);
+            if let Some(urls) = &self.urls {
+                urls.lock().expect("URLs lock").push(url.to_owned());
+            }
             let (status, start) = if self.ignore_range && range_start.is_some() {
                 (200, 0)
             } else if let Some(start) = range_start {
@@ -789,7 +1029,7 @@ mod tests {
     }
 
     #[test]
-    fn manifest_accepts_repository_shape_and_rejects_unsafe_fields() {
+    fn manifest_accepts_repository_shape_and_rejects_invalid_fields() {
         let valid = manifest(b"complete");
         assert_eq!(valid.installer().name, "guest-iso");
 
@@ -807,12 +1047,12 @@ mod tests {
             Manifest::parse(&unsupported),
             Err(ManifestError::InvalidSchemaVersion)
         ));
-        let unsafe_name = serde_json::to_string(&valid)
+        let invalid_name = serde_json::to_string(&valid)
             .expect("serialize")
             .replace("guest.iso", "dir/guest.iso");
         assert!(matches!(
-            Manifest::parse(&unsafe_name),
-            Err(ManifestError::UnsafeFilename(_))
+            Manifest::parse(&invalid_name),
+            Err(ManifestError::InvalidFilename(_))
         ));
     }
 
@@ -843,6 +1083,40 @@ mod tests {
     }
 
     #[test]
+    fn omitted_or_empty_parts_use_the_single_file_url() {
+        for explicit_empty in [false, true] {
+            let body = b"complete".to_vec();
+            let value = if explicit_empty {
+                let mut value = manifest(&body);
+                value.artifacts[0].parts = Vec::new();
+                Manifest::parse(&serde_json::to_string(&value).expect("serialize empty parts"))
+                    .expect("parse empty parts")
+            } else {
+                manifest(&body)
+            };
+            let expected_url = value.artifacts[0].url.clone();
+            let directory = tempfile::tempdir().expect("temp directory");
+            let urls = Arc::new(Mutex::new(Vec::new()));
+            let store = ArtifactStore::new(
+                value,
+                directory.path(),
+                Box::new(FakeFetch {
+                    body: body.clone(),
+                    calls: Arc::new(Mutex::new(Vec::new())),
+                    urls: Some(Arc::clone(&urls)),
+                    ignore_range: false,
+                    final_url: None,
+                }),
+            );
+
+            store
+                .ensure("guest-iso", &mut |_| {})
+                .expect("single-file download");
+            assert_eq!(*urls.lock().expect("URLs lock"), vec![expected_url]);
+        }
+    }
+
+    #[test]
     fn verifies_size_before_hash() {
         let directory = tempfile::tempdir().expect("temp directory");
         fs::write(directory.path().join("guest.iso"), b"wrong").expect("write file");
@@ -852,6 +1126,7 @@ mod tests {
             Box::new(FakeFetch {
                 body: Vec::new(),
                 calls: Arc::new(Mutex::new(Vec::new())),
+                urls: None,
                 ignore_range: false,
                 final_url: None,
             }),
@@ -873,6 +1148,7 @@ mod tests {
             Box::new(FakeFetch {
                 body: Vec::new(),
                 calls: Arc::new(Mutex::new(Vec::new())),
+                urls: None,
                 ignore_range: false,
                 final_url: None,
             }),
@@ -925,6 +1201,7 @@ mod tests {
             Box::new(FakeFetch {
                 body: body.clone(),
                 calls: Arc::new(Mutex::new(Vec::new())),
+                urls: None,
                 ignore_range: false,
                 final_url: None,
             }),
@@ -948,6 +1225,7 @@ mod tests {
             Box::new(FakeFetch {
                 body: body.clone(),
                 calls: Arc::clone(&calls),
+                urls: None,
                 ignore_range: false,
                 final_url: None,
             }),
@@ -974,6 +1252,7 @@ mod tests {
             Box::new(FakeFetch {
                 body: body.clone(),
                 calls: Arc::clone(&calls),
+                urls: None,
                 ignore_range: false,
                 final_url: None,
             }),
@@ -998,6 +1277,7 @@ mod tests {
             Box::new(FakeFetch {
                 body: body.clone(),
                 calls: Arc::new(Mutex::new(Vec::new())),
+                urls: None,
                 ignore_range: false,
                 final_url: None,
             }),
@@ -1027,6 +1307,7 @@ mod tests {
             Box::new(FakeFetch {
                 body: body.clone(),
                 calls: Arc::clone(&calls),
+                urls: None,
                 ignore_range: false,
                 final_url: None,
             }),
@@ -1053,6 +1334,7 @@ mod tests {
             Box::new(FakeFetch {
                 body: body.clone(),
                 calls: Arc::clone(&calls),
+                urls: None,
                 ignore_range: true,
                 final_url: None,
             }),
@@ -1079,6 +1361,7 @@ mod tests {
             Box::new(FakeFetch {
                 body: b"bad data".to_vec(),
                 calls: Arc::new(Mutex::new(Vec::new())),
+                urls: None,
                 ignore_range: false,
                 final_url: None,
             }),
@@ -1087,6 +1370,312 @@ mod tests {
         assert!(matches!(result, Err(StoreError::VerificationFailed(_))));
         assert!(!final_path.exists());
         assert!(directory.path().join("guest.iso.part").exists());
+    }
+
+    fn multipart_manifest(parts: &[&[u8]]) -> Manifest {
+        let body = parts.concat();
+        let parts_json = parts
+            .iter()
+            .enumerate()
+            .map(|(index, part)| {
+                format!(
+                    r#"{{"filename":"guest.iso.{index}","url":"https://downloads.sourceforge.net/guest.iso.{index}","size_bytes":{},"sha256":"{:x}"}}"#,
+                    part.len(),
+                    Sha256::digest(part)
+                )
+            })
+            .collect::<Vec<_>>()
+            .join(",");
+        Manifest::parse(&format!(
+            r#"{{
+                "schema_version": 1,
+                "allowed_hosts": ["sourceforge.net"],
+                "artifacts": [{{
+                    "name": "guest-iso",
+                    "version": "1",
+                    "filename": "guest.iso",
+                    "url": "https://sourceforge.net/projects/guest/files",
+                    "size_bytes": {},
+                    "sha256": "{:x}",
+                    "parts": [{parts_json}],
+                    "license": "mixed",
+                    "provenance_note": "publisher",
+                    "fetched_by": "installer"
+                }}]
+            }}"#,
+            body.len(),
+            Sha256::digest(&body)
+        ))
+        .expect("multipart manifest parses")
+    }
+
+    type PartCalls = Arc<Mutex<Vec<(String, Option<u64>)>>>;
+
+    #[derive(Clone, Debug)]
+    struct MultipartIgnoreRangeFetch {
+        parts: Arc<std::collections::BTreeMap<String, Vec<u8>>>,
+        calls: PartCalls,
+    }
+
+    impl HttpFetch for MultipartIgnoreRangeFetch {
+        fn fetch(
+            &self,
+            url: &str,
+            range_start: Option<u64>,
+            sink: &mut dyn Write,
+            progress: &mut dyn FnMut(u64) -> bool,
+        ) -> Result<FetchOutcome, FetchError> {
+            self.calls
+                .lock()
+                .expect("calls lock")
+                .push((url.to_owned(), range_start));
+            let body = self.parts.get(url).expect("part URL is wired");
+            sink.write_all(body).map_err(FetchError::Io)?;
+            let bytes = u64::try_from(body.len()).expect("test length fits u64");
+            if !progress(bytes) {
+                return Err(FetchError::Cancelled);
+            }
+            Ok(FetchOutcome {
+                status: 200,
+                final_url: Some(url.to_owned()),
+                bytes_written: bytes,
+            })
+        }
+    }
+
+    #[derive(Clone, Debug)]
+    struct PartFetch {
+        bodies: Arc<std::collections::BTreeMap<String, Vec<u8>>>,
+        calls: PartCalls,
+        chunk_size: usize,
+    }
+
+    impl HttpFetch for PartFetch {
+        fn fetch(
+            &self,
+            url: &str,
+            range_start: Option<u64>,
+            sink: &mut dyn Write,
+            progress: &mut dyn FnMut(u64) -> bool,
+        ) -> Result<FetchOutcome, FetchError> {
+            self.calls
+                .lock()
+                .expect("calls lock")
+                .push((url.to_owned(), range_start));
+            let body = self.bodies.get(url).expect("part URL is wired");
+            let start = usize::try_from(range_start.unwrap_or(0)).expect("test offset fits usize");
+            let mut written = 0_u64;
+            for chunk in body[start..].chunks(self.chunk_size) {
+                sink.write_all(chunk).map_err(FetchError::Io)?;
+                let count = u64::try_from(chunk.len()).expect("test length fits u64");
+                written += count;
+                if !progress(count) {
+                    return Err(FetchError::Cancelled);
+                }
+            }
+            Ok(FetchOutcome {
+                status: if range_start.is_some() { 206 } else { 200 },
+                final_url: Some(url.to_owned()),
+                bytes_written: written,
+            })
+        }
+    }
+
+    fn part_fetch(parts: &[&[u8]], chunk_size: usize) -> (PartFetch, PartCalls) {
+        let bodies = parts
+            .iter()
+            .enumerate()
+            .map(|(index, body)| {
+                (
+                    format!("https://downloads.sourceforge.net/guest.iso.{index}"),
+                    body.to_vec(),
+                )
+            })
+            .collect();
+        let calls = Arc::new(Mutex::new(Vec::new()));
+        (
+            PartFetch {
+                bodies: Arc::new(bodies),
+                calls: Arc::clone(&calls),
+                chunk_size,
+            },
+            calls,
+        )
+    }
+
+    #[test]
+    fn multipart_progress_reports_whole_file_increments() {
+        let parts: [&[u8]; 3] = [b"first", b"second", b"third"];
+        let directory = tempfile::tempdir().expect("temp directory");
+        let (fetch, _) = part_fetch(&parts, 2);
+        let store = ArtifactStore::new(
+            multipart_manifest(&parts),
+            directory.path(),
+            Box::new(fetch),
+        );
+        let mut total = 0_u64;
+        store
+            .ensure("guest-iso", &mut |bytes| total += bytes)
+            .expect("download multipart artifact");
+        assert_eq!(total, 16);
+    }
+
+    #[test]
+    fn downloads_three_parts_and_promotes_the_whole_artifact() {
+        let parts: [&[u8]; 3] = [b"first", b"second", b"third"];
+        let body = parts.concat();
+        let directory = tempfile::tempdir().expect("temp directory");
+        let (fetch, calls) = part_fetch(&parts, usize::MAX);
+        let store = ArtifactStore::new(
+            multipart_manifest(&parts),
+            directory.path(),
+            Box::new(fetch),
+        );
+
+        let file = store
+            .ensure("guest-iso", &mut |_| {})
+            .expect("download multipart artifact");
+
+        assert_eq!(fs::read(file.path).expect("read complete"), body);
+        assert_eq!(calls.lock().expect("calls lock").len(), 3);
+    }
+
+    #[test]
+    fn resumes_inside_the_second_part_with_a_part_relative_range() {
+        let parts: [&[u8]; 3] = [b"first", b"second", b"third"];
+        let directory = tempfile::tempdir().expect("temp directory");
+        let (first_fetch, _) = part_fetch(&parts, 2);
+        let store = ArtifactStore::new(
+            multipart_manifest(&parts),
+            directory.path(),
+            Box::new(first_fetch),
+        );
+        let mut transferred = 0_u64;
+        let result = store.ensure_cancellable("guest-iso", &mut |event| {
+            if let StoreProgress::Bytes(bytes) = event {
+                transferred += bytes;
+            }
+            transferred < 7
+        });
+        assert!(matches!(
+            result,
+            Err(StoreError::Fetch(FetchError::Cancelled))
+        ));
+        assert_eq!(
+            fs::metadata(directory.path().join("guest.iso.part"))
+                .expect("partial metadata")
+                .len(),
+            7
+        );
+
+        let (resume_fetch, calls) = part_fetch(&parts, usize::MAX);
+        let store = ArtifactStore::new(
+            multipart_manifest(&parts),
+            directory.path(),
+            Box::new(resume_fetch),
+        );
+        store
+            .ensure("guest-iso", &mut |_| {})
+            .expect("resume multipart artifact");
+        let calls = calls.lock().expect("calls lock");
+        assert_eq!(calls[0].1, Some(2));
+        assert!(calls[0].0.ends_with("guest.iso.1"));
+    }
+
+    #[test]
+    fn multipart_range_ignored_restarts_at_the_current_part_boundary() {
+        let parts: [&[u8]; 3] = [b"first", b"second", b"third"];
+        let directory = tempfile::tempdir().expect("temp directory");
+        fs::write(directory.path().join("guest.iso.part"), b"firstse").expect("partial file");
+        let calls = Arc::new(Mutex::new(Vec::new()));
+        let bodies = parts
+            .iter()
+            .enumerate()
+            .map(|(index, body)| {
+                (
+                    format!("https://downloads.sourceforge.net/guest.iso.{index}"),
+                    body.to_vec(),
+                )
+            })
+            .collect();
+        let store = ArtifactStore::new(
+            multipart_manifest(&parts),
+            directory.path(),
+            Box::new(MultipartIgnoreRangeFetch {
+                parts: Arc::new(bodies),
+                calls: Arc::clone(&calls),
+            }),
+        );
+
+        store
+            .ensure("guest-iso", &mut |_| {})
+            .expect("restart current part");
+        assert_eq!(
+            *calls.lock().expect("calls lock"),
+            vec![
+                (
+                    "https://downloads.sourceforge.net/guest.iso.1".to_owned(),
+                    Some(2),
+                ),
+                (
+                    "https://downloads.sourceforge.net/guest.iso.1".to_owned(),
+                    None,
+                ),
+                (
+                    "https://downloads.sourceforge.net/guest.iso.2".to_owned(),
+                    None,
+                ),
+            ]
+        );
+        assert_eq!(
+            fs::read(directory.path().join("guest.iso")).expect("complete artifact"),
+            parts.concat()
+        );
+    }
+
+    #[test]
+    fn part_hash_mismatch_truncates_to_the_part_start() {
+        let declared: [&[u8]; 3] = [b"first", b"second", b"third"];
+        let downloaded: [&[u8]; 3] = [b"first", b"xxxxxx", b"third"];
+        let directory = tempfile::tempdir().expect("temp directory");
+        let (fetch, _) = part_fetch(&downloaded, usize::MAX);
+        let store = ArtifactStore::new(
+            multipart_manifest(&declared),
+            directory.path(),
+            Box::new(fetch),
+        );
+
+        assert!(matches!(
+            store.ensure("guest-iso", &mut |_| {}),
+            Err(StoreError::PartMismatch { filename }) if filename == "guest.iso.1"
+        ));
+        assert_eq!(
+            fs::read(directory.path().join("guest.iso.part")).expect("truncated partial"),
+            b"first"
+        );
+    }
+
+    #[test]
+    fn manifest_rejects_wrong_part_total_and_unapproved_part_host() {
+        let parts: [&[u8]; 3] = [b"first", b"second", b"third"];
+        let valid = multipart_manifest(&parts);
+        let wrong_total = serde_json::to_string(&valid)
+            .expect("serialize")
+            .replace("\"size_bytes\":16", "\"size_bytes\":17");
+        assert!(matches!(
+            Manifest::parse(&wrong_total),
+            Err(ManifestError::InvalidParts { .. })
+        ));
+
+        let unapproved = serde_json::to_string(&valid).expect("serialize").replacen(
+            "downloads.sourceforge.net",
+            "example.invalid",
+            1,
+        );
+        assert!(matches!(
+            Manifest::parse(&unapproved),
+            Err(ManifestError::InvalidParts { .. })
+        ));
     }
 
     #[test]
@@ -1099,6 +1688,7 @@ mod tests {
             Box::new(FakeFetch {
                 body,
                 calls: Arc::new(Mutex::new(Vec::new())),
+                urls: None,
                 ignore_range: false,
                 final_url: Some("https://evil.example/guest.iso".to_owned()),
             }),
@@ -1122,6 +1712,7 @@ mod tests {
             Box::new(FakeFetch {
                 body: b"complete".to_vec(),
                 calls: Arc::clone(&calls),
+                urls: None,
                 ignore_range: false,
                 final_url: None,
             }),

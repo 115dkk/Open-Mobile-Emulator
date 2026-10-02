@@ -216,6 +216,7 @@ fn measures_real_guest_through_product_runtime() {
             probe: Box::new(probe),
             artifacts: None,
             adb,
+            adb_host_key_path: None,
             supervisor: Some(Box::new(supervisor)),
             desktop: Box::new(ClosedDesktop),
             window_host: Box::new(GuestWindowHost::default()),

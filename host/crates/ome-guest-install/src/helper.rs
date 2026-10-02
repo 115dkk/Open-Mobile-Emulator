@@ -14,6 +14,8 @@ pub const HELPER_SCRIPT: &str = include_str!("../scripts/99-ome-install");
 pub const HELPER_PATH: &str = "scripts/99-ome-install";
 /// Default folder on the new partition that holds kernel, initrd.img, system.img and data/.
 pub const DEFAULT_SRC: &str = "ome";
+/// Where an optional host adb public key list lives inside the initrd.
+pub const ADB_KEYS_PATH: &str = "ome/adb_keys";
 
 /// Writes the bytes of `initrd`, zero padding to a four-byte boundary, then a newc archive holding
 /// the directory "scripts" (mode 0o040755) and the file "scripts/99-ome-install" (mode 0o100644)
@@ -24,7 +26,11 @@ pub const DEFAULT_SRC: &str = "ome";
 /// members, so the padding is what makes the appended archive visible. The Bliss 16.9.7
 /// `initrd.img` is 8,492,807 bytes: without the padding the helper stayed invisible and the
 /// hidden boot fell through to a live Android (dev PC round 32, 2026-10-01).
-pub fn write_install_initrd(initrd: &Path, destination: &Path) -> io::Result<()> {
+pub fn write_install_initrd(
+    initrd: &Path,
+    destination: &Path,
+    adb_keys: Option<&str>,
+) -> io::Result<()> {
     let mut source = File::open(initrd)?;
     let mut output = File::create(destination)?;
     let copied = io::copy(&mut source, &mut output)?;
@@ -32,7 +38,15 @@ pub fn write_install_initrd(initrd: &Path, destination: &Path) -> io::Result<()>
     output.write_all(&[0_u8; 4][..padding])?;
 
     let helper = HELPER_SCRIPT.replace("\r\n", "\n");
-    let archive = cpio::newc_archive(&[
+    let keys = adb_keys.map(|keys| {
+        let mut normalized = keys.replace("\r\n", "\n");
+        while normalized.ends_with('\n') {
+            normalized.pop();
+        }
+        normalized.push('\n');
+        normalized
+    });
+    let mut entries = vec![
         Entry::Directory {
             name: "scripts",
             mode: 0o040755,
@@ -42,7 +56,21 @@ pub fn write_install_initrd(initrd: &Path, destination: &Path) -> io::Result<()>
             mode: 0o100644,
             data: helper.as_bytes(),
         },
-    ]);
+    ];
+    if let Some(keys) = keys.as_deref() {
+        entries.extend([
+            Entry::Directory {
+                name: "ome",
+                mode: 0o040755,
+            },
+            Entry::File {
+                name: ADB_KEYS_PATH,
+                mode: 0o100644,
+                data: keys.as_bytes(),
+            },
+        ]);
+    }
+    let archive = cpio::newc_archive(&entries);
     output.write_all(&archive)
 }
 
@@ -71,7 +99,11 @@ mod tests {
     use std::path::PathBuf;
     use std::sync::atomic::{AtomicU64, Ordering};
 
-    use super::{HELPER_PATH, HELPER_SCRIPT, boot_cmdline, install_cmdline, write_install_initrd};
+    use super::{
+        ADB_KEYS_PATH, HELPER_PATH, HELPER_SCRIPT, boot_cmdline, install_cmdline,
+        write_install_initrd,
+    };
+    use crate::cpio::{self, Entry};
 
     static NEXT_TEMP_FILE: AtomicU64 = AtomicU64::new(0);
 
@@ -90,7 +122,7 @@ mod tests {
         let original = b"known initrd bytes";
         fs::write(&source, original).expect("write source initrd");
 
-        write_install_initrd(&source, &destination).expect("write install initrd");
+        write_install_initrd(&source, &destination, None).expect("write install initrd");
         let output = fs::read(&destination).expect("read install initrd");
 
         assert!(output.starts_with(original));
@@ -113,6 +145,48 @@ mod tests {
             archive
                 .windows(HELPER_SCRIPT.len())
                 .any(|window| window == HELPER_SCRIPT.as_bytes())
+        );
+        let expected_archive = cpio::newc_archive(&[
+            Entry::Directory {
+                name: "scripts",
+                mode: 0o040755,
+            },
+            Entry::File {
+                name: HELPER_PATH,
+                mode: 0o100644,
+                data: HELPER_SCRIPT.as_bytes(),
+            },
+        ]);
+        assert_eq!(archive, expected_archive);
+        assert!(!archive.windows(4).any(|window| window == b"ome\0"));
+
+        fs::remove_file(source).expect("remove source initrd");
+        fs::remove_file(destination).expect("remove install initrd");
+    }
+
+    #[test]
+    fn appends_normalized_adb_keys_when_requested() {
+        let source = temp_path("source-initrd-keys");
+        let destination = temp_path("install-initrd-keys");
+        fs::write(&source, b"initrd").expect("write source initrd");
+
+        write_install_initrd(
+            &source,
+            &destination,
+            Some("QUJD user@host\r\nREVG second\r\n\r\n"),
+        )
+        .expect("write keyed install initrd");
+        let output = fs::read(&destination).expect("read install initrd");
+        assert!(output.windows(4).any(|window| window == b"ome\0"));
+        assert!(
+            output
+                .windows(ADB_KEYS_PATH.len())
+                .any(|window| window == ADB_KEYS_PATH.as_bytes())
+        );
+        assert!(
+            output
+                .windows(b"QUJD user@host\nREVG second\n".len())
+                .any(|window| window == b"QUJD user@host\nREVG second\n")
         );
 
         fs::remove_file(source).expect("remove source initrd");

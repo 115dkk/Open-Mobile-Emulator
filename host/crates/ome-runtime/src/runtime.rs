@@ -251,6 +251,8 @@ pub struct RuntimeDeps {
     pub artifacts: Option<ArtifactStore>,
     /// Operating-system adb session when the shell discovered the executable.
     pub adb: Option<AdbSession>,
+    /// Host adb public-key path supplied by the native shell or a deterministic test.
+    pub adb_host_key_path: Option<PathBuf>,
     /// QEMU lifecycle supervisor.
     pub supervisor: Option<Box<dyn GuestProcess>>,
     /// Trusted native desktop operations.
@@ -1237,6 +1239,26 @@ impl AppRuntime {
             .firmware_vars_template
             .map(PathBuf::from)
             .ok_or_else(issues::firmware_unavailable)?;
+        let adb_key = if profile.adb_secure {
+            self.ensure_adb_session();
+            let session = self
+                .deps
+                .adb
+                .as_ref()
+                .ok_or_else(issues::adb_host_key_unavailable)?;
+            let path = self
+                .deps
+                .adb_host_key_path
+                .as_deref()
+                .ok_or_else(issues::adb_host_key_unavailable)?;
+            Some(
+                session
+                    .host_public_key(path)
+                    .map_err(|_| issues::adb_host_key_unavailable())?,
+            )
+        } else {
+            None
+        };
         let id = forced_id.unwrap_or(self.next_guest_id(&image_id)?);
         let directory = self.guest_store.guest_dir(&id).map_err(guest_store_issue)?;
         fs::create_dir(&directory).map_err(|_| issues::guest_storage_unavailable())?;
@@ -1267,7 +1289,7 @@ impl AppRuntime {
             let serial_log = directory.join("install-serial.log");
             let prepare_result = (|| {
                 extract_boot_files(&verified.path, &profile, &directory)?;
-                write_install_initrd(&initrd, &install_initrd)?;
+                write_install_initrd(&initrd, &install_initrd, adb_key.as_deref())?;
                 Ok::<(), Box<dyn std::error::Error>>(())
             })();
             if prepare_result.is_err() {
@@ -4962,6 +4984,7 @@ mod tests {
                 probe: Box::new(probe),
                 artifacts: None,
                 adb: Some(session),
+                adb_host_key_path: None,
                 supervisor: Some(Box::new(supervisor)),
                 desktop: Box::new(desktop),
                 install_dir: None,
@@ -4982,6 +5005,7 @@ mod tests {
             distribution: Distribution::Bliss,
             artifact: "test-artifact".to_owned(),
             translator: Translator::NdkTranslation,
+            adb_secure: false,
             boot_args: vec!["quiet".to_owned()],
             boot_files: ome_guest_image::BootFiles {
                 kernel: "/kernel".to_owned(),
@@ -5060,6 +5084,7 @@ mod tests {
                 probe: Box::new(ready_probe(feature)),
                 artifacts: None,
                 adb: None,
+                adb_host_key_path: None,
                 supervisor: None,
                 desktop: Box::new(crate::UnavailableDesktop),
                 install_dir: None,
@@ -5118,6 +5143,7 @@ mod tests {
                 probe: Box::new(ready_probe(FeatureState::Enabled)),
                 artifacts: None,
                 adb: None,
+                adb_host_key_path: None,
                 supervisor: None,
                 desktop: Box::new(crate::UnavailableDesktop),
                 install_dir: None,
@@ -5218,6 +5244,7 @@ mod tests {
                 probe: Box::new(probe),
                 artifacts: None,
                 adb: None,
+                adb_host_key_path: None,
                 supervisor: None,
                 desktop: Box::new(crate::UnavailableDesktop),
                 install_dir: None,
@@ -6890,6 +6917,7 @@ package:dev.ome.two versionCode:8",
             distribution: Distribution::Bliss,
             artifact: "test-artifact".to_owned(),
             translator: Translator::NdkTranslation,
+            adb_secure: false,
             boot_args: vec!["quiet".to_owned()],
             boot_files: ome_guest_image::BootFiles {
                 kernel: "/kernel".to_owned(),
@@ -6993,8 +7021,15 @@ package:dev.ome.two versionCode:8",
         assert!(artifact_dir.join("test.iso.part").is_file());
     }
 
-    #[test]
-    fn guest_create_and_reinstall_write_layout_and_start_installer_iso() {
+    fn guest_create_runtime(
+        outputs: impl IntoIterator<Item = Result<Output, ome_adb::RecordedError>>,
+    ) -> (
+        tempfile::TempDir,
+        AppRuntime,
+        ScriptedGuest,
+        CreatingDiskRunner,
+        RecordedRunner,
+    ) {
         let iso_fixture = tempfile::NamedTempFile::new().expect("ISO fixture");
         ome_guest_install::test_support::write_test_iso(
             iso_fixture.path(),
@@ -7003,8 +7038,8 @@ package:dev.ome.two versionCode:8",
         );
         let body = fs::read(iso_fixture.path()).expect("read ISO fixture");
         let hash = format!("{:x}", Sha256::digest(&body));
-        let (directory, mut runtime, supervisor, _runner) = lifecycle_runtime(
-            std::iter::empty(),
+        let (directory, mut runtime, supervisor, adb_runner) = lifecycle_runtime(
+            outputs,
             RecordingDesktop::default(),
             RecordingWindow::embedded(),
         );
@@ -7052,6 +7087,13 @@ package:dev.ome.two versionCode:8",
         runtime.guests.clear();
         runtime.active_guest = None;
         runtime.wizard.step = Step::GuestInstall;
+        (directory, runtime, supervisor, runner, adb_runner)
+    }
+
+    #[test]
+    fn guest_create_and_reinstall_write_layout_and_start_installer_iso() {
+        let (directory, mut runtime, supervisor, runner, adb_runner) =
+            guest_create_runtime(std::iter::empty());
         runtime
             .apply(Command::GuestCreate {
                 image_id: "bliss-16.9.7-android-13".to_owned(),
@@ -7100,7 +7142,11 @@ package:dev.ome.two versionCode:8",
                 "root=/dev/ram0 console=ttyS0 OME_INSTALL=1 OME_DISK=/dev/vda OME_SRC=ome"
             );
         }
-        assert_eq!(runner.calls.lock().expect("runner calls")[0].0, image);
+        assert_eq!(
+            runner.calls.lock().expect("runner calls")[0].0,
+            directory.path().join("qemu/qemu-img.exe")
+        );
+        assert!(adb_runner.calls().is_empty());
 
         runtime.guest_state = GuestState::Stopped;
         *supervisor.state.lock().expect("state lock") = ome_supervisor::GuestState::Stopped;
@@ -7112,6 +7158,65 @@ package:dev.ome.two versionCode:8",
         assert_eq!(runtime.active_guest.as_deref(), Some(id));
         assert!(guest_dir.join("guest.json").is_file());
         assert_eq!(supervisor.starts.lock().expect("starts lock").len(), 2);
+    }
+
+    #[test]
+    fn secure_adb_profile_embeds_host_key_before_starting_install() {
+        let (directory, mut runtime, supervisor, _runner, adb_runner) =
+            guest_create_runtime([output("")]);
+        let key_path = directory.path().join("adbkey.pub");
+        let key = "QUJDREVGRw== user@host";
+        fs::write(&key_path, format!("{key}\n")).expect("write host key");
+        runtime.deps.adb_host_key_path = Some(key_path);
+        runtime.image_profiles[0].adb_secure = true;
+
+        runtime
+            .apply(Command::GuestCreate {
+                image_id: "bliss-16.9.7-android-13".to_owned(),
+                size_gib: 32,
+            })
+            .expect("secure guest create");
+
+        let guest_dir = directory.path().join("home/vm/bliss-16-9-7-android-13");
+        let install_initrd =
+            fs::read(guest_dir.join("initrd-install.img")).expect("read install initrd");
+        assert!(
+            install_initrd
+                .windows(ome_guest_install::helper::ADB_KEYS_PATH.len())
+                .any(|window| window == ome_guest_install::helper::ADB_KEYS_PATH.as_bytes())
+        );
+        assert!(
+            install_initrd
+                .windows(key.len())
+                .any(|window| window == key.as_bytes())
+        );
+        assert_eq!(adb_runner.calls()[0].args, ["start-server"]);
+        assert_eq!(supervisor.starts.lock().expect("starts lock").len(), 1);
+    }
+
+    #[test]
+    fn secure_adb_profile_without_host_key_does_not_create_guest_directory() {
+        let (directory, mut runtime, supervisor, _runner, adb_runner) =
+            guest_create_runtime([output("")]);
+        runtime.deps.adb_host_key_path = Some(directory.path().join("missing-adbkey.pub"));
+        runtime.image_profiles[0].adb_secure = true;
+
+        let issue = runtime
+            .apply(Command::GuestCreate {
+                image_id: "bliss-16.9.7-android-13".to_owned(),
+                size_gib: 32,
+            })
+            .expect_err("missing key rejects installation");
+
+        assert_eq!(issue.code, "adb_host_key_unavailable");
+        assert!(
+            !directory
+                .path()
+                .join("home/vm/bliss-16-9-7-android-13")
+                .exists()
+        );
+        assert_eq!(adb_runner.calls()[0].args, ["start-server"]);
+        assert!(supervisor.starts.lock().expect("starts lock").is_empty());
     }
 
     #[test]

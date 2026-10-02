@@ -307,6 +307,31 @@ impl AdbSession {
         })
     }
 
+    /// Starts the adb server so the client key pair exists, then returns the one-line public key read
+    /// from `key_path` (the product passes `%USERPROFILE%\.android\adbkey.pub`), without the trailing newline.
+    pub fn host_public_key(&self, key_path: &Path) -> Result<String, AdbError> {
+        self.expect_success(&[OsString::from("start-server")], COMMAND_TIMEOUT)?;
+        let contents = fs::read_to_string(key_path).map_err(|_| AdbError::HostKeyUnavailable)?;
+        let line = contents
+            .lines()
+            .next()
+            .map(str::trim)
+            .filter(|line| !line.is_empty())
+            .ok_or(AdbError::HostKeyUnavailable)?;
+        let token = line
+            .split_whitespace()
+            .next()
+            .ok_or(AdbError::HostKeyUnavailable)?;
+        if token.is_empty()
+            || !token
+                .bytes()
+                .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'+' | b'/' | b'='))
+        {
+            return Err(AdbError::HostKeyUnavailable);
+        }
+        Ok(line.to_owned())
+    }
+
     /// Connects only when the serial has the `host:port` form used by network adb.
     ///
     /// Exit code zero still fails when adb writes `failed to connect` to stdout.
@@ -601,6 +626,19 @@ impl AdbSession {
     }
 }
 
+/// Returns the default Windows adb public-key path derived from `USERPROFILE`.
+#[must_use]
+pub fn default_host_public_key_path() -> Option<PathBuf> {
+    if cfg!(windows) {
+        std::env::var_os("USERPROFILE")
+            .filter(|profile| !profile.is_empty())
+            .map(PathBuf::from)
+            .map(|profile| profile.join(".android").join("adbkey.pub"))
+    } else {
+        None
+    }
+}
+
 fn command_failed(output: Output) -> AdbError {
     AdbError::CommandFailed {
         exit_code: output.exit_code,
@@ -667,6 +705,9 @@ pub enum AdbError {
     /// A binary command unexpectedly returned no bytes.
     #[error("adb returned empty output")]
     EmptyOutput,
+    /// The host adb public key is missing or malformed.
+    #[error("adb host public key is unavailable")]
+    HostKeyUnavailable,
     /// A package archive could not be safely prepared.
     #[error("app package could not be prepared")]
     Package(#[from] PackageError),
@@ -1154,6 +1195,68 @@ mod tests {
         session.set_display_size(1280, 720).expect("size");
         session.set_display_density(160).expect("density");
         session.uninstall("com.example.app").expect("uninstall");
+    }
+
+    #[test]
+    fn host_public_key_starts_server_without_a_serial_and_parses_one_line() {
+        let directory = tempfile::tempdir().expect("temp directory");
+        let key_path = directory.path().join("adbkey.pub");
+        fs::write(&key_path, "QUJDREVGRw== user@host\r\nignored\n").expect("write key");
+        let runner = RecordedRunner::new([success("")]);
+        let calls = runner.clone();
+        let session = AdbSession::new("adb.exe", "127.0.0.1:5555".to_owned(), Box::new(runner))
+            .expect("session");
+
+        assert_eq!(
+            session.host_public_key(&key_path).expect("host key"),
+            "QUJDREVGRw== user@host"
+        );
+        assert_eq!(calls.calls()[0].args, ["start-server"]);
+    }
+
+    #[test]
+    fn host_public_key_rejects_empty_and_malformed_tokens() {
+        for contents in ["", "not_valid! user@host\n"] {
+            let directory = tempfile::tempdir().expect("temp directory");
+            let key_path = directory.path().join("adbkey.pub");
+            fs::write(&key_path, contents).expect("write key");
+            let session = AdbSession::new(
+                "adb.exe",
+                "serial".to_owned(),
+                Box::new(RecordedRunner::new([success("")])),
+            )
+            .expect("session");
+            assert!(matches!(
+                session.host_public_key(&key_path),
+                Err(AdbError::HostKeyUnavailable)
+            ));
+        }
+    }
+
+    #[test]
+    fn host_public_key_maps_start_server_failure_to_adb_error() {
+        let directory = tempfile::tempdir().expect("temp directory");
+        let key_path = directory.path().join("adbkey.pub");
+        fs::write(
+            &key_path,
+            "QUJD user@host
+",
+        )
+        .expect("write key");
+        let session = AdbSession::new(
+            "adb.exe",
+            "serial".to_owned(),
+            Box::new(RecordedRunner::new([Ok(Output {
+                exit_code: 1,
+                stdout: Vec::new(),
+                stderr: b"server failed".to_vec(),
+            })])),
+        )
+        .expect("session");
+        assert!(matches!(
+            session.host_public_key(&key_path),
+            Err(AdbError::CommandFailed { exit_code: 1, .. })
+        ));
     }
 
     #[test]

@@ -108,6 +108,10 @@ pub struct GuestImageProfile {
     pub artifact: String,
     /// Native bridge included by the image.
     pub translator: Translator,
+    /// Whether the image's adbd requires key authorization (`ro.adb.secure=1`). The installer then
+    /// writes the host adb public key into the system image so the first boot is authorized (ADR-0012).
+    #[serde(default)]
+    pub adb_secure: bool,
     /// Additional kernel arguments selected at boot.
     pub boot_args: Vec<String>,
     /// Boot files read from the installer ISO.
@@ -382,6 +386,7 @@ mod tests {
             distribution: Distribution::Bliss,
             artifact: "artifact".to_owned(),
             translator: Translator::NdkTranslation,
+            adb_secure: false,
             boot_args: vec!["quiet".to_owned()],
             boot_files: BootFiles {
                 kernel: "/kernel".to_owned(),
@@ -427,6 +432,27 @@ mod tests {
             GuestImageProfile::load_all(directory.path()),
             Err(ProfileError::Json { .. })
         ));
+    }
+
+    #[test]
+    fn adb_secure_defaults_false_and_round_trips() {
+        let value = profile("android-15", "15", ImageStatus::Candidate, None);
+        let mut document = serde_json::to_value(&value).expect("serialize");
+        document
+            .as_object_mut()
+            .expect("profile object")
+            .remove("adb_secure");
+        let defaulted: GuestImageProfile =
+            serde_json::from_value(document).expect("deserialize default");
+        assert!(!defaulted.adb_secure);
+
+        let mut secure = value;
+        secure.adb_secure = true;
+        let round_trip: GuestImageProfile = serde_json::from_str(
+            &serde_json::to_string(&secure).expect("serialize secure profile"),
+        )
+        .expect("deserialize secure profile");
+        assert_eq!(round_trip, secure);
     }
 
     #[test]

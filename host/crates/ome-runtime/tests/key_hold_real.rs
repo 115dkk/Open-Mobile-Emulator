@@ -218,6 +218,7 @@ fn run_check() {
             probe: Box::new(probe),
             artifacts: None,
             adb: Some(adb),
+            adb_host_key_path: None,
             supervisor: Some(Box::new(supervisor)),
             desktop: Box::new(ClosedDesktop),
             window_host: Box::new(GuestWindowHost::default()),

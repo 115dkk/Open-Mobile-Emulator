@@ -99,6 +99,98 @@ Describe 'Check-Manifest.ps1' {
         $result.Text | Should -Match 'MANIFEST .* url host is not allowed: example\.invalid'
     }
 
+    It 'accepts an explicit empty parts array' {
+        $path = Write-ManifestVariant {
+            param($manifest)
+            $manifest.artifacts[0] | Add-Member -NotePropertyName parts -NotePropertyValue @()
+        }
+        $result = Invoke-ManifestCheck $path
+
+        $result.ExitCode | Should -Be 0
+        $result.Text | Should -Match 'SUMMARY manifest findings=0'
+    }
+
+    It 'accepts valid multipart artifact fields' {
+        $path = Write-ManifestVariant {
+            param($manifest)
+            $manifest.artifacts[0].size_bytes = 7
+            $manifest.artifacts[0] | Add-Member -NotePropertyName parts -NotePropertyValue @(
+                [pscustomobject]@{
+                    filename = 'guest.part.0'
+                    url = 'https://downloads.sourceforge.net/guest.part.0'
+                    size_bytes = 3
+                    sha256 = 'a' * 64
+                },
+                [pscustomobject]@{
+                    filename = 'guest.part.1'
+                    url = 'https://downloads.sourceforge.net/guest.part.1'
+                    size_bytes = 4
+                    sha256 = 'b' * 64
+                }
+            )
+        }
+        $result = Invoke-ManifestCheck $path
+
+        $result.ExitCode | Should -Be 0
+        $result.Text | Should -Match 'SUMMARY manifest findings=0'
+    }
+
+    It 'rejects multipart size sum mismatch' {
+        $path = Write-ManifestVariant {
+            param($manifest)
+            $manifest.artifacts[0] | Add-Member -NotePropertyName parts -NotePropertyValue @(
+                [pscustomobject]@{
+                    filename = 'guest.part.0'
+                    url = 'https://downloads.sourceforge.net/guest.part.0'
+                    size_bytes = 1
+                    sha256 = 'a' * 64
+                }
+            )
+        }
+        $result = Invoke-ManifestCheck $path
+
+        $result.ExitCode | Should -Be 1
+        $result.Text | Should -Match 'MANIFEST .* part size_bytes sum must equal artifact size_bytes'
+    }
+
+    It 'rejects malformed multipart sha256' {
+        $path = Write-ManifestVariant {
+            param($manifest)
+            $manifest.artifacts[0].size_bytes = 1
+            $manifest.artifacts[0] | Add-Member -NotePropertyName parts -NotePropertyValue @(
+                [pscustomobject]@{
+                    filename = 'guest.part.0'
+                    url = 'https://downloads.sourceforge.net/guest.part.0'
+                    size_bytes = 1
+                    sha256 = 'A' * 64
+                }
+            )
+        }
+        $result = Invoke-ManifestCheck $path
+
+        $result.ExitCode | Should -Be 1
+        $result.Text | Should -Match 'MANIFEST .* part sha256 must be exactly 64 lowercase hexadecimal characters'
+    }
+
+    It 'rejects a multipart URL on an unknown host' {
+        $path = Write-ManifestVariant {
+            param($manifest)
+            $manifest.artifacts[0].size_bytes = 1
+            $manifest.artifacts[0] | Add-Member -NotePropertyName parts -NotePropertyValue @(
+                [pscustomobject]@{
+                    filename = 'guest.part.0'
+                    url = 'https://example.invalid/guest.part.0'
+                    size_bytes = 1
+                    sha256 = 'a' * 64
+                }
+            )
+        }
+        $result = Invoke-ManifestCheck $path
+
+        $result.ExitCode | Should -Be 1
+        $result.Text | Should -Match 'MANIFEST .* part url host is not allowed: example\.invalid'
+    }
+
     It 'rejects an unknown fetched_by value' {
         $path = Write-ManifestVariant { param($manifest) $manifest.artifacts[0].fetched_by = 'server' }
         $result = Invoke-ManifestCheck $path

@@ -274,6 +274,7 @@ fn run_check() {
             probe: Box::new(probe),
             artifacts: None,
             adb: Some(adb),
+            adb_host_key_path: None,
             supervisor: Some(Box::new(RecordingSupervisor {
                 inner: supervisor,
                 sent: Arc::clone(&sent),

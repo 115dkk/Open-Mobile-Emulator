@@ -562,3 +562,12 @@ pub fn update_launch_failed() -> AppIssue {
         next_action: Some("Windows 보안 설정을 확인한 뒤 다시 시도하십시오.".to_owned()),
     }
 }
+
+/// Returns an issue when the host adb public key cannot be prepared for a key-authorized image (ADR-0012).
+pub fn adb_host_key_unavailable() -> AppIssue {
+    AppIssue {
+        code: "adb_host_key_unavailable".to_owned(),
+        message: "adb 키를 준비하지 못해 설치를 시작하지 않았습니다.".to_owned(),
+        next_action: Some("adb가 설치되어 있고 실행되는지 확인한 뒤 다시 시도하십시오.".to_owned()),
+    }
+}

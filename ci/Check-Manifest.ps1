@@ -223,14 +223,128 @@ try {
             }
 
             $sizeProperty = Get-JsonProperty $artifactElement 'size_bytes'
+            $sizeValue = 0L
+            $sizeValid = $false
             if ($sizeProperty.Found) {
-                $sizeValue = 0L
                 if (
                     $sizeProperty.Value.ValueKind -ne [System.Text.Json.JsonValueKind]::Number -or
                     -not $sizeProperty.Value.TryGetInt64([ref]$sizeValue) -or
                     $sizeValue -le 0
                 ) {
                     Add-ManifestProblem $problems $artifactLabel 'size_bytes must be a positive integer'
+                }
+                else {
+                    $sizeValid = $true
+                }
+            }
+
+            $partsProperty = Get-JsonProperty $artifactElement 'parts'
+            if ($partsProperty.Found) {
+                if ($partsProperty.Value.ValueKind -ne [System.Text.Json.JsonValueKind]::Array) {
+                    Add-ManifestProblem $problems $artifactLabel 'parts must be an array'
+                }
+                else {
+                    $seenPartNames = [System.Collections.Generic.HashSet[string]]::new(
+                        [System.StringComparer]::Ordinal
+                    )
+                    $partSizeTotal = [decimal]0
+                    $partIndex = 0
+                    foreach ($partElement in $partsProperty.Value.EnumerateArray()) {
+                        $partLabel = "parts[$partIndex]"
+                        if ($partElement.ValueKind -ne [System.Text.Json.JsonValueKind]::Object) {
+                            Add-ManifestProblem $problems $artifactLabel "$partLabel must be an object"
+                            $partIndex++
+                            continue
+                        }
+
+                        $partValues = @{}
+                        foreach ($partFieldName in @('filename', 'url', 'sha256')) {
+                            $partField = Get-JsonProperty $partElement $partFieldName
+                            if (
+                                -not $partField.Found -or
+                                $partField.Value.ValueKind -ne [System.Text.Json.JsonValueKind]::String -or
+                                [string]::IsNullOrWhiteSpace($partField.Value.GetString())
+                            ) {
+                                Add-ManifestProblem $problems $artifactLabel "$partLabel.$partFieldName must be a non-empty string"
+                                $partValues[$partFieldName] = $null
+                            }
+                            else {
+                                $partValues[$partFieldName] = $partField.Value.GetString()
+                            }
+                        }
+
+                        if ($null -ne $partValues['filename']) {
+                            if (
+                                $partValues['filename'].Contains('/') -or
+                                $partValues['filename'].Contains('\') -or
+                                [System.IO.Path]::GetFileName($partValues['filename']) -cne $partValues['filename']
+                            ) {
+                                Add-ManifestProblem $problems $artifactLabel 'part filename must be a safe leaf name'
+                            }
+                            if (
+                                $null -ne $fieldValues['filename'] -and
+                                $partValues['filename'] -ceq $fieldValues['filename']
+                            ) {
+                                Add-ManifestProblem $problems $artifactLabel 'part filename must differ from artifact filename'
+                            }
+                            if (-not $seenPartNames.Add($partValues['filename'])) {
+                                Add-ManifestProblem $problems $artifactLabel 'part filename must be unique'
+                            }
+                        }
+                        if (
+                            $null -ne $partValues['sha256'] -and
+                            $partValues['sha256'] -cnotmatch '^[0-9a-f]{64}$'
+                        ) {
+                            Add-ManifestProblem $problems $artifactLabel 'part sha256 must be exactly 64 lowercase hexadecimal characters'
+                        }
+                        if ($null -ne $partValues['url']) {
+                            $partUri = $null
+                            if (
+                                -not [System.Uri]::TryCreate($partValues['url'], [System.UriKind]::Absolute, [ref]$partUri) -or
+                                $partUri.Scheme -cne 'https' -or
+                                [string]::IsNullOrWhiteSpace($partUri.Host)
+                            ) {
+                                Add-ManifestProblem $problems $artifactLabel 'part url must be an absolute HTTPS URL'
+                            }
+                            else {
+                                $partHostAllowed = $false
+                                foreach ($allowedHost in $validAllowedHosts) {
+                                    if (
+                                        $partUri.DnsSafeHost -ieq $allowedHost -or
+                                        $partUri.DnsSafeHost.EndsWith(".$allowedHost", [System.StringComparison]::OrdinalIgnoreCase)
+                                    ) {
+                                        $partHostAllowed = $true
+                                        break
+                                    }
+                                }
+                                if (-not $partHostAllowed) {
+                                    Add-ManifestProblem $problems $artifactLabel "part url host is not allowed: $($partUri.DnsSafeHost)"
+                                }
+                            }
+                        }
+
+                        $partSizeProperty = Get-JsonProperty $partElement 'size_bytes'
+                        $partSizeValue = 0L
+                        if (
+                            -not $partSizeProperty.Found -or
+                            $partSizeProperty.Value.ValueKind -ne [System.Text.Json.JsonValueKind]::Number -or
+                            -not $partSizeProperty.Value.TryGetInt64([ref]$partSizeValue) -or
+                            $partSizeValue -le 0
+                        ) {
+                            Add-ManifestProblem $problems $artifactLabel "$partLabel.size_bytes must be a positive integer"
+                        }
+                        else {
+                            $partSizeTotal += $partSizeValue
+                        }
+                        $partIndex++
+                    }
+                    if (
+                        $sizeValid -and
+                        $partsProperty.Value.GetArrayLength() -gt 0 -and
+                        $partSizeTotal -ne $sizeValue
+                    ) {
+                        Add-ManifestProblem $problems $artifactLabel 'part size_bytes sum must equal artifact size_bytes'
+                    }
                 }
             }
             $artifactIndex++

@@ -75,6 +75,7 @@ fn initialize_runtime(manifest_root: &std::path::Path) -> Result<AppRuntime, App
                 Box::new(UreqFetch::new()),
             )),
             adb,
+            adb_host_key_path: ome_adb::default_host_public_key_path(),
             supervisor,
             desktop,
             install_dir: std::env::current_exe()
