@@ -195,3 +195,65 @@ https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36819100622 이다(2
 | 2 | https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/36891206352 (16:20~16:43 UTC) | 통과. 내려받기 53.9초, 설치 63.8초, 첫 부팅 100.0초, 게임 설치 26.5초, 게임 실행 964초(화면 분류: 빈 화면 → 권한 요청 → `game-ui` 열네 장 연속), 정지·종료·정리 통과. 드라이버 결과 `needs-review`(게임 스크린샷은 사람이 본다)이고 실패한 단계는 없다 |
 
 0.1.1 설치기는 러너의 깨끗한 표준 사용자 계정에서도 마법사만으로 게임 실행까지 간다(M3 완료 기준 2).
+
+## 8. 제품 릴리스 v0.1.2 (2026-10-03, 사전 릴리스)
+
+사용자 결정 2026-10-03: 설치된 0.1.0이 '응답 없음'이 된 교착(3acd0d8, `window-deadlock-20261003.md`)과 부팅 중 화면 가림(80caa43)을
+사용자 PC에 넣기 위해 사전 릴리스로 한 단계 올린다. 같은 날 안드로이드 15 이미지에서 BlissOS의 속성 위장을 찾아 그 프로필은
+이 릴리스에서 뺐다(b6498ca, `docs/evidence/P3/dod-a15-20261003.md` 6절). 태그 `v0.1.2`는 b1a93d0에 밀었고, 그 커밋의 CI(실행
+37096685074)가 통과한 뒤였다. `release.yml` 실행은 https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/37097027039 이다
+(2026-10-03 04:35~04:49 UTC).
+
+| 잡 | 시간 | 내용 |
+|---|---|---|
+| verify | 6분 2초 | 4절과 같은 게이트 |
+| qemu-source-offer | 44초 | 6절의 ome5 zip과 소스 묶음의 SHA-256 대조와 출처 증명 확인 |
+| product | 8분 9초 | 버전 일치 확인, 설치기 빌드, 자산 정리와 검사, `actions/attest@v4`, `gh release create --prerelease`, 다시 받아 `gh attestation verify` |
+
+릴리스 https://github.com/115dkk/Open-Mobile-Emulator/releases/tag/v0.1.2 (사전 릴리스)의 자산은 다음과 같다.
+
+| 자산 | 크기 | SHA-256 |
+|---|---|---|
+| `Open-Mobile-Emulator-0.1.2-x64-setup.exe` | 54,302,350 B | `587525d6…a06c16` |
+| `Open-Mobile-Emulator-0.1.2-x64-setup.exe.sha256` | 107 B | |
+| `qemu-ome-v11.1.1-c3d48b7d1e89-win64.zip` | 62,777,151 B | `3ff59ee8…4cbdf3` (7절과 같은 ome5 파일) |
+| `qemu-source-offer-v11.1.1-c3d48b7d1e89.tar.gz` | 249,539,916 B | `3838fd75…936109` |
+| `THIRD_PARTY.md`, `NOTICE`, `LICENSE`, `SHA256SUMS` | | 4절과 같은 내용 |
+
+개발 PC에서 사용자 절차대로 다시 확인했다(`release-v0.1.2-verify-local.txt`). 설치기의 SHA-256이 `.sha256`과 같고, `SHA256SUMS`의
+일곱 항목이 전부 맞는다. 두 QEMU 파일은 `manifests/qemu-release.json`의 고정값과 같다. 여덟 자산 모두
+`gh attestation verify --signer-workflow .../release.yml`을 통과했고, 증명은 `refs/tags/v0.1.2`(b1a93d0)와 실행 37097027039를
+가리킨다.
+
+### 사용자 PC의 설치본 갱신
+
+같은 설치기를 `/S`로 기존 설치(`%LOCALAPPDATA%\Open Mobile Emulator`, 0.1.0) 위에 깔았다. 설치기는 종료 코드 0으로 끝났고,
+`ome.exe`의 제품 버전과 제거 항목의 버전은 모두 0.1.2다. 사용자 데이터(`%LOCALAPPDATA%\OpenMobileEmulator`, 설치된 안드로이드 13
+게스트)는 그대로 남았다. 설치된 제품을 띄워 `화면` 탭에서 `시작`을 누르고, 3초마다 웹뷰의 글과 창의 응답을 기록했다.
+창은 매번 40픽셀씩 움직였다.
+
+| 시점 | 웹뷰 | 창 이동 | 응답 확인(`SendMessageTimeout`, 5초) | `IsHungAppWindow` |
+|---|---|---|---|---|
+| 3초 | `운영체제를 시작하고 있습니다`, `시작한 지 4초` | 4 ms | 10 ms | 거짓 |
+| 9초 | 같은 글, `시작한 지 10초` | 4 ms | 12 ms | 거짓 |
+| 15초 | 같은 글, `시작한 지 16초` | 4 ms | 11 ms | 거짓 |
+| 21초 | 같은 글, `시작한 지 22초` | 6 ms | 15 ms | 거짓 |
+| 27초 | 부팅 완료, 가림 해제(`실행 중`, `앱 관리 연결됨`) | 4 ms | 11 ms | 거짓 |
+
+부팅 뒤에도 창을 세 번 더 옮겼고 응답은 같았다. 게스트는 adb(`127.0.0.1:5555`)로 잠금 화면을 그리고 있었다(`screencap`). 끝으로
+제품의 `끄기`로 게스트를 끄고(3초), 창 닫기로 제품을 끝냈다.
+
+이 확인에서 데스크톱 화면 캡처(`CopyFromScreen`)는 쓸 수 없었다. 제품 창이 앞에 있는데도 그 자리에 바탕 화면 아이콘이 찍혀,
+화면 합성이 캡처에 반영되지 않는 상태였다(모니터가 꺼진 원격 사용 중으로 보인다). 그래서 GRUB 글자가 보이지 않는다는 것은
+이 PC의 화면으로 확인하지 못했다. 그 확인은 완료 실행 a15-9, a15-10의 무대 캡처(`docs/evidence/P3/dod-a15-20261003.md`)와 사용자가
+직접 볼 때로 넘긴다.
+
+### 러너에서의 설치기 완주
+
+`m3-release-dod.yml -f tag=v0.1.2`(5절과 같은 방식)는 한 번에 통과했다. 실행은
+https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/37097999833 이다(04:52~05:17 UTC). 사전 점검부터 정리까지 열두 단계가
+모두 통과했다. 내려받기 95.3초(2.43 GB), 설치 61.0초, 첫 부팅 102.6초, 게임 설치 20.1초가 걸렸고, 게임 실행은 964초 동안
+지켜보았다. 정지는 6.4초다. 드라이버 결과는 `needs-review`(게임 스크린샷은 사람이 본다)이다. 마지막 스크린샷에는 무대에 게임
+첫 화면과 '업데이트 알림' 창(동봉 시험 APK가 구버전이라 뜬다)이 있다. 드라이버가 적은 틈 가운데 트레이 `종료` 메뉴가 열리지 않아
+창 닫기로 끝냈다. 종료 단계는 통과했다. 이 실행에는 부팅 중 무대 캡처가 없어 가림막의 화면 확인은 여기서도
+하지 않았다.
