@@ -10,7 +10,9 @@ import type { ScreenActions, ScreenProps } from '../actions';
 import type {
   AppSnapshot, Capability, CapabilityId, DisplayPreset, DisplayView, ExitKind, GuestView, LastExit, Size,
 } from '../contracts';
-import { Button, Icon, IconButton, IssueNotice, Slider, StageFrame, StatusDot, StepList } from '../components';
+import {
+  BootActivity, Button, Icon, IconButton, IssueNotice, Slider, StageFrame, StatusDot, StepList,
+} from '../components';
 import { formatTimestamp } from '../format';
 import { keyLabel } from '../input-profile';
 import { FAILURE_NEXT_STEP, GUEST_STATE_LABEL, GUEST_STATE_TONE, bootSteps } from '../presentation';
@@ -170,6 +172,7 @@ function StoppedStage({ lastExit, actions }: { readonly lastExit: LastExit | nul
 function BootStage({ guest, onCancel }: { readonly guest: GuestView; readonly onCancel?: (() => Promise<void>) | undefined }) {
   return (
     <div className="ome-stage-boot">
+      <BootActivity startedAt={guest.startedAt} />
       <StepList label="부팅 진행" items={bootSteps(guest, false)} />
       {onCancel !== undefined && <div><Button onClick={onCancel}>취소</Button></div>}
     </div>
@@ -222,9 +225,9 @@ function StageContent({ snapshot, actions }: ScreenProps): ReactElement | null {
           </div>
         );
       }
-      // Embedded: Rust places the operating system's window over this frame. Until it does, the
-      // frame shows how far the boot has come.
-      return guest.hosting === 'none' ? <BootStage guest={guest} /> : null;
+      // Embedded: Rust places the operating system's window over this frame and keeps it hidden
+      // until Android has booted. Until then the frame shows how far the boot has come.
+      return guest.hosting === 'none' || !guest.bootCompleted ? <BootStage guest={guest} /> : null;
     case 'failed':
       return <FailedStage lastExit={guest.lastExit} actions={actions} />;
     case 'stopping':

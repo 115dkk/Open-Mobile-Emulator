@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Copyright (C) 2026 Open Mobile Emulator contributors
 // Shared building blocks for every screen. Styles live in styles/app.css under the `ome-` prefix.
+export { BootActivity } from './BootActivity';
+export type { BootActivityProps } from './BootActivity';
 export { Button } from './Button';
 export type { ButtonProps, ButtonVariant } from './Button';
 export { Chip } from './Chip';

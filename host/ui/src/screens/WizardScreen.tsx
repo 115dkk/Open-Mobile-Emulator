@@ -11,7 +11,7 @@ import type {
   AppIssue, AppSnapshot, GuestImageSummary, GuestView, InstallStage, TransferProgress, TransferStage, WizardStep,
 } from '../contracts';
 import {
-  Button, Icon, IssueNotice, ProgressBar, Segmented, StageFrame, StatusDot, StepList,
+  BootActivity, Button, Icon, IssueNotice, ProgressBar, Segmented, StageFrame, StatusDot, StepList,
 } from '../components';
 import type { StepItem } from '../components';
 import {
@@ -307,7 +307,11 @@ function toDiskSize(gib: number): DiskSize | null {
 }
 
 function SeparateWindowNotice({ guest, actions }: { readonly guest: GuestView; readonly actions: ScreenActions }) {
-  if (guest.hosting !== 'separateWindow') return null;
+  if (guest.hosting !== 'separateWindow') {
+    // The embedded guest window stays hidden until Android has booted (the runtime's placement).
+    const booting = (guest.state === 'starting' || guest.state === 'running') && !guest.bootCompleted;
+    return booting ? <BootActivity startedAt={guest.startedAt} /> : null;
+  }
   return (
     <div className="ome-stage-notice">
       <p>운영체제 화면은 별도 창에 있습니다.</p>

@@ -1667,6 +1667,7 @@ impl AppRuntime {
                         if completed && self.guest_state == GuestState::Running {
                             self.adb_connected = true;
                             self.boot_completed = true;
+                            self.reveal_booted_guest_window();
                             self.mark_migrated_direct_boot_verified();
                             self.run_capability_probe();
                             self.last_account_poll = Some(Instant::now());
@@ -2337,6 +2338,20 @@ impl AppRuntime {
         Ok(())
     }
 
+    /// Shows the embedded popup that placement kept hidden while the guest was booting.
+    fn reveal_booted_guest_window(&mut self) {
+        if self.hosting != HostingMode::Embedded || !self.stage_visible {
+            return;
+        }
+        match self.deps.window_host.show() {
+            Ok(Some(geometry)) => {
+                self.send_display_window(geometry);
+            }
+            Ok(None) => {}
+            Err(_) => eprintln!("booted guest window could not be shown"),
+        }
+    }
+
     fn hide_guest_window(&mut self) -> Result<(), AppIssue> {
         self.stage_visible = false;
         if self.hosting == HostingMode::Embedded
@@ -2419,6 +2434,13 @@ impl AppRuntime {
             .window_host
             .place(StageGeometry::physical(&native))
         {
+            // Until Android reports boot completion the popup stays hidden and the webview stage
+            // shows the boot progress, so firmware, boot loader and kernel console text never
+            // reach the user (user request; reveal_booted_guest_window shows it).
+            Ok(Some(_)) if !self.boot_completed => match self.deps.window_host.hide() {
+                Ok(Some(hidden)) => self.send_display_window(hidden),
+                Ok(None) | Err(_) => false,
+            },
             Ok(Some(geometry)) => self.send_display_window(geometry),
             Ok(None) | Err(_) => false,
         };
@@ -4662,6 +4684,18 @@ mod tests {
         }
     }
 
+    /// Delivers the adb boot poll's completion the way the worker does.
+    fn complete_boot(runtime: &mut AppRuntime) {
+        runtime
+            .worker_tx
+            .send(WorkerEvent::BootPolled {
+                generation: runtime.boot_generation,
+                completed: true,
+            })
+            .expect("boot completion event");
+        runtime.poll_workers();
+    }
+
     #[derive(Clone, Debug)]
     struct RecordingWindow {
         attach_result: Result<(), HostingIssue>,
@@ -6061,16 +6095,29 @@ Override density: 240
         assert_eq!(runtime.snapshot().guest.hosting, HostingMode::Embedded);
         assert_eq!(targets.lock().expect("targets lock").len(), 1);
         assert_eq!(placements.lock().expect("placements lock").len(), 1);
+        let geometry = DisplayWindowGeometry {
+            x: 2,
+            y: 3,
+            width: 450,
+            height: 300,
+            visible: false,
+        };
         assert_eq!(
             *supervisor.display_windows.lock().expect("display windows"),
-            vec![DisplayWindowGeometry {
-                x: 2,
-                y: 3,
-                width: 450,
-                height: 300,
-                visible: true,
-            }],
-            "one visible geometry with the stage's screen rect goes over QMP"
+            vec![geometry],
+            "the booting guest is placed hidden with the stage's screen rect"
+        );
+        complete_boot(&mut runtime);
+        assert_eq!(
+            *supervisor.display_windows.lock().expect("display windows"),
+            vec![
+                geometry,
+                DisplayWindowGeometry {
+                    visible: true,
+                    ..geometry
+                }
+            ],
+            "boot completion shows the same geometry"
         );
         assert_eq!(
             runtime.guest_client_screen_rect(),
@@ -6394,10 +6441,12 @@ Override density: 240
             Some(22),
             None,
         ));
+        complete_boot(&mut runtime);
         assert!(runtime.guest_client_screen_rect().is_some());
 
         runtime.apply(Command::StageHidden).expect("hide stage");
-        assert_eq!(*hides.lock().expect("hide count"), 1);
+        // The first hide is the placement of the booting guest.
+        assert_eq!(*hides.lock().expect("hide count"), 2);
         assert_eq!(runtime.guest_client_screen_rect(), None);
 
         runtime
@@ -6419,8 +6468,8 @@ Override density: 240
             .collect::<Vec<_>>();
         assert_eq!(
             sent,
-            vec![(450, true), (450, false), (600, true)],
-            "embed, hide with the last rect, then show with the next rect"
+            vec![(450, false), (450, true), (450, false), (600, true)],
+            "embed hidden while booting, show at boot, hide with the last rect, then show with the next rect"
         );
     }
 

@@ -257,6 +257,16 @@ export const wizardGallery: readonly GalleryVariant[] = [
     }),
   },
   {
+    id: 'first-boot-hidden', label: 'S1.6 첫 부팅: 창 숨김, 운영체제 부팅 중',
+    snapshot: wizardAt('firstBoot', {
+      images: installedImages,
+      guest: {
+        ...sampleSnapshot.guest, state: 'running', hosting: 'embedded', imageId: 'sample-android-13',
+        startedAt: new Date(Date.now() - 75_000).toISOString(),
+      },
+    }),
+  },
+  {
     id: 'first-boot-failed', label: 'S1.6 첫 부팅: 부팅 실패',
     snapshot: wizardAt('firstBoot', {
       images: installedImages,
@@ -389,6 +399,15 @@ export const stageGallery: readonly GalleryVariant[] = [
   {
     id: 'stage-starting', label: 'S2 화면: 시작 중',
     snapshot: stageAt({ state: 'starting', hosting: 'embedded', lastExit: null }),
+  },
+  {
+    // The guest window stays hidden until Android reports boot completion; the counter runs from
+    // the start time, so this variant starts 42 seconds before the gallery opens.
+    id: 'stage-booting', label: 'S2 화면: 실행 중, 부팅 중(창 숨김)',
+    snapshot: stageAt({
+      state: 'running', hosting: 'embedded', bootCompleted: false, adbConnected: false, lastExit: null,
+      startedAt: new Date(Date.now() - 42_000).toISOString(),
+    }),
   },
   { id: 'stage-running', label: 'S2 화면: 실행 중', snapshot: runningSnapshot },
   {
