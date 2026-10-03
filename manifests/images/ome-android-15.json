@@ -1,0 +1,26 @@
+{
+  "id": "ome-android-15",
+  "display_name": "안드로이드 15",
+  "android_version": "15",
+  "api_level": 35,
+  "distribution": "self_built",
+  "artifact": "ome-android-15-x86_64-iso",
+  "translator": "none",
+  "adb_secure": true,
+  "boot_args": [
+    "quiet"
+  ],
+  "boot_files": {
+    "kernel": "/kernel",
+    "initrd": "/initrd.img"
+  },
+  "install": "helper_boot",
+  "qemu_overrides": [
+    "virtio_vga_gl",
+    "sdl_gl",
+    "edid_off"
+  ],
+  "status": "candidate",
+  "released_at": "2026-10-02",
+  "verifications": []
+}

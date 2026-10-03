@@ -57,15 +57,21 @@ only when a release fixes them.
   the values of a locked retail device, so that SafetyNet-style checks are
   misled. That is a disguise the product must not ship (CLAUDE.md D8, R7), so the
   profile returns with an image built without it
-  (`docs/evidence/P3/dod-a15-20261003.md` section 6). The items below describe
-  that profile as it was before the withdrawal.
+  (`docs/evidence/P3/dod-a15-20261003.md` section 6). The rebuild found more of
+  the same in BlissOS (a `release-keys` fingerprint, framework hooks that give
+  apps Pixel or other phones' device values, claim Pixel features, report Aurora
+  Store installs as Play Store installs, block key attestation for DroidGuard and
+  hide developer status; section 7). `guest/build/patches/` restores upstream AOSP
+  at every one of those places, and the image release `guest-android-15-20261003`
+  is built with them. The profile is back in the repository for the next release.
+  The items below describe the profile.
 - The Android 15 profile (`ome-android-15`, image release
-  `guest-android-15-20261002`) is a candidate, shown as 검증 전. It is this
+  `guest-android-15-20261003`) is a candidate, shown as 검증 전. It is this
   project's own blob-free build of the BlissOS 18 tree (ADR-0012,
-  `docs/evidence/P3/build-20261002.md`): it carries no ARM translator and no
-  Google apps, so an ARM-only game does not run on it at all until the
-  translator flow of CLAUDE.md section 8 item 9 or the open translator (P2)
-  exists. It is for booting, probing and development today.
+  `docs/evidence/P3/build-20261002.md`, `docs/evidence/P3/dod-a15-20261003.md`):
+  it carries no ARM translator and no Google apps, so an ARM-only game does not
+  run on it at all until the translator flow of CLAUDE.md section 8 item 9 or
+  the open translator (P2) exists. It is for booting, probing and development today.
 - That image is built on the development PC's WSL2, not on a GitHub runner, so
   its release files carry no build provenance attestation; `gh attestation
   verify` fails on them by design. The release carries the pinned build inputs

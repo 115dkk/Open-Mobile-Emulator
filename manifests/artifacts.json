@@ -24,37 +24,37 @@
     },
     {
       "name": "ome-android-15-x86_64-iso",
-      "version": "18.4-20261002-db973c9",
-      "filename": "ome-android-15-x86_64-20261002-db973c9.iso",
-      "url": "https://github.com/115dkk/Open-Mobile-Emulator/releases/tag/guest-android-15-20261002",
-      "size_bytes": 2946441216,
-      "sha256": "62dc0836191dccf6c2a64e39bbaea7a37f2e0e1e42aad9b503fc3d8fc651e683",
+      "version": "18.4-20261003-db973c9",
+      "filename": "ome-android-15-x86_64-20261003-db973c9.iso",
+      "url": "https://github.com/115dkk/Open-Mobile-Emulator/releases/tag/guest-android-15-20261003",
+      "size_bytes": 2946426880,
+      "sha256": "08fa89f427c824ade89d7895d8a4624a3e978a7aa2931647ed88efc60ce9c0be",
       "parts": [
         {
-          "filename": "ome-android-15-x86_64-20261002-db973c9.iso.part0",
-          "url": "https://github.com/115dkk/Open-Mobile-Emulator/releases/download/guest-android-15-20261002/ome-android-15-x86_64-20261002-db973c9.iso.part0",
+          "filename": "ome-android-15-x86_64-20261003-db973c9.iso.part0",
+          "url": "https://github.com/115dkk/Open-Mobile-Emulator/releases/download/guest-android-15-20261003/ome-android-15-x86_64-20261003-db973c9.iso.part0",
           "size_bytes": 1073741824,
-          "sha256": "36b015b50a0b6497e00be4a89cadd679dd4bf18e82cd188c35b682cc028eaf53"
+          "sha256": "02f6cefdce0fa769b8a820b8e94e284de73e3ff2c31640fa4ff52ef998babe61"
         },
         {
-          "filename": "ome-android-15-x86_64-20261002-db973c9.iso.part1",
-          "url": "https://github.com/115dkk/Open-Mobile-Emulator/releases/download/guest-android-15-20261002/ome-android-15-x86_64-20261002-db973c9.iso.part1",
+          "filename": "ome-android-15-x86_64-20261003-db973c9.iso.part1",
+          "url": "https://github.com/115dkk/Open-Mobile-Emulator/releases/download/guest-android-15-20261003/ome-android-15-x86_64-20261003-db973c9.iso.part1",
           "size_bytes": 1073741824,
-          "sha256": "58fe0303d2ce16a7f09c5d192a04b3e6bf82938dbd8a6b8c69adfd4f208411d0"
+          "sha256": "2efd2bdeba18e6563d8293ca5099d9a3d67e259d6c9bbbc61b2ac7c838bb5fb3"
         },
         {
-          "filename": "ome-android-15-x86_64-20261002-db973c9.iso.part2",
-          "url": "https://github.com/115dkk/Open-Mobile-Emulator/releases/download/guest-android-15-20261002/ome-android-15-x86_64-20261002-db973c9.iso.part2",
-          "size_bytes": 798957568,
-          "sha256": "a4e95848ec46e1ecfe41a853b7c9fbf20afcb08b795e3240a777e075b7767112"
+          "filename": "ome-android-15-x86_64-20261003-db973c9.iso.part2",
+          "url": "https://github.com/115dkk/Open-Mobile-Emulator/releases/download/guest-android-15-20261003/ome-android-15-x86_64-20261003-db973c9.iso.part2",
+          "size_bytes": 798943232,
+          "sha256": "4520b90e1cc7e777920bcca5e6d5e52394a4607ffd91783303a4fbf2aae49071"
         }
       ],
-      "sha256_source": "https://github.com/115dkk/Open-Mobile-Emulator/releases/download/guest-android-15-20261002/SHA256SUMS",
+      "sha256_source": "https://github.com/115dkk/Open-Mobile-Emulator/releases/download/guest-android-15-20261003/SHA256SUMS",
       "sha256_verified_locally": true,
       "license": "Mixed open-source: AOSP, BlissOS and Android-x86 components under Apache-2.0, BSD, MIT, GPL-2.0 (kernel, busybox, e2fsprogs, alsa-utils), LGPL and others. Per-project markers are in the release asset NOTICE-guest.md, per-file texts in NOTICE-guest.xml.gz, the kernel source in kernel-source-*.tar.gz. No proprietary file is included (R3).",
-      "provenance_note": "This project's own blob-free Android 15 (API 35) x86_64 image, built on the development PC's WSL2 (Ubuntu 22.04) from the BlissOS 18.4 voyager-x86 tree pinned in guest/build/pins.env and guest/build/manifest/ome.xml (manifest commit db973c9), BLISS_BUILD_VARIANT=vanilla with every native-bridge and Google-app flag off (CLAUDE.md R3). Published as the pre-release guest-android-15-20261002 without a build provenance attestation (ADR-0012 item 1); the release carries the build inputs, logs, forbidden-pattern scan and NOTICE-guest.md instead. Split into 1 GiB parts because GitHub caps a release asset at 2 GiB; url is the release page and parts carry the downloads. Evidence: docs/evidence/P3/build-20261002.md.",
+      "provenance_note": "This project's own blob-free Android 15 (API 35) x86_64 image, built on the development PC's WSL2 (Ubuntu 22.04) from the BlissOS 18.4 voyager-x86 tree pinned in guest/build/pins.env and guest/build/manifest/ome.xml (manifest commit db973c9), BLISS_BUILD_VARIANT=vanilla with every native-bridge and Google-app flag off (CLAUDE.md R3). Published as the pre-release guest-android-15-20261003 without a build provenance attestation (ADR-0012 item 1); the release carries the build inputs, logs, forbidden-pattern scan and NOTICE-guest.md instead. Split into 1 GiB parts because GitHub caps a release asset at 2 GiB; url is the release page and parts carry the downloads. Rebuilt on 2026-10-03 with guest/build/patches (BlissOS device disguise removed: init property rewrite, release-keys fingerprint, PixelPropsUtils, AttestationHooks, GamesPropsUtils, Pixel feature and installer answers, developer-status hiding; CLAUDE.md D8, R7, R8) and vendor/extra/product.mk (persist.sys.usb.config=adb). Evidence: docs/evidence/P3/build-20261002.md, docs/evidence/P3/dod-a15-20261003.md.",
       "fetched_by": "installer",
-      "sha256_verified_note": "Computed with sha256sum on the build host on 2026-10-02 for the whole ISO and for each part (guest/build/make-release-assets.sh); the three parts concatenated hash to the whole value, and Get-FileHash on the Windows copy matched SHA256SUMS before upload."
+      "sha256_verified_note": "Computed with sha256sum on the build host on 2026-10-03 for the whole ISO and for each part (guest/build/make-release-assets.sh); Get-FileHash on the Windows side is compared with SHA256SUMS before upload."
     }
   ]
 }

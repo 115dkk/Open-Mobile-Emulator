@@ -48,6 +48,11 @@ SHA-256 `62dc0836…e683`)다. 시스템 이미지에 R1의 금지 패턴에 걸
    정정 2026-10-03(사용자 결정): 프로필은 0.1.2에서 뺐다. BlissOS의 `init`이 부팅 때 빌드 종류와 검증 부팅 상태를 판매 기기의
    값으로 덮어쓰는 `workaround_snet_properties`를 싣고 있어 D8과 R7에 걸린다(`docs/evidence/P3/dod-a15-20261003.md` 6절).
    `guest/build`가 이 함수를 끈 이미지를 빌드해 새 사전 릴리스로 올린 뒤 `candidate`로 되돌린다.
+   정정 2026-10-03 저녁: 위장 코드는 그 함수 하나가 아니었다. 빌드 지문의 `release-keys` 고정(`build/make`), 앱 프레임워크의
+   `PixelPropsUtils`, `AttestationHooks`, `GamesPropsUtils`, `HideDeveloperStatusUtils`, Pixel 기능과 설치 출처를 꾸미는
+   `ApplicationPackageManager`가 더 있었다(같은 증거 7절). `guest/build/patches/`의 네 패치가 호출하는 자리를 상류 AOSP로
+   되돌린 이미지를 사전 릴리스 `guest-android-15-20261003`으로 올리고 프로필을 `candidate`로 되돌렸다. 제품은 0.1.3부터
+   이 프로필을 싣는다.
 4. **adb는 설치 때 넣은 키로 승인한다**(사용자 결정 2026-10-02). 제품은 설치를 시작하기 전에 `adb start-server`로 호스트
    adb 클라이언트의 키 쌍이 있게 하고(`client/auth.cpp`의 `load_userkey`가 없으면 만든다) `%USERPROFILE%\.android\adbkey.pub`을
    읽어(`adb_utils.cpp`의 `adb_get_android_dir_path`는 윈도우에서 `CSIDL_PROFILE` 아래 `.android`를 쓰고 환경 변수로
