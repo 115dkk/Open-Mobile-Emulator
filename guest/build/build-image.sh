@@ -122,10 +122,30 @@ do_aaropa() {
     say "aaropa assets in place: $(du -sh iso | cut -f1)"
 }
 
+# vendor/bliss/config/common.mk inherits vendor/extra/product.mk first so a builder can set
+# properties. The tree's userdebug lunch still yields ro.debuggable=0 and no
+# persist.sys.usb.config, so the image boots with adb off and OME cannot reach it even with the
+# host key in /adb_keys (docs/evidence/P3/dod-a15-20261003.md, ADR-0012 decision 4). The install
+# helper adds the same line to images built before this; it sees this one and leaves it alone.
+write_vendor_extra() {
+    local mk="$OME_BUILD_ROOT/vendor/extra/product.mk"
+    local marker="# Written by Open Mobile Emulator guest/build/build-image.sh"
+    if [ -f "$mk" ] && ! grep -qxF "$marker" "$mk"; then
+        echo "refusing to overwrite $mk: it was not written by build-image.sh" >&2
+        exit 2
+    fi
+    mkdir -p "$(dirname "$mk")"
+    cat > "$mk" <<EOF
+$marker
+PRODUCT_SYSTEM_PROPERTIES += persist.sys.usb.config=adb
+EOF
+}
+
 do_build() {
     refuse_blob_flags
     say "build $BLISS_LUNCH variant=$BLISS_BUILD_VARIANT -j$OME_JOBS"
     cd "$OME_BUILD_ROOT"
+    write_vendor_extra
     export BLISS_BUILD_VARIANT
     export PATH="$HOME/.cargo/bin:$PATH"
     export LC_ALL=C.UTF-8

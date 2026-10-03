@@ -1,0 +1,217 @@
+{
+  "startedAt": "2026-10-03T02:52:13.670Z",
+  "outcome": "passed",
+  "steps": [
+    {
+      "name": "preflight",
+      "start": "2026-10-03T02:52:13.671Z",
+      "outcome": "passed",
+      "end": "2026-10-03T02:52:14.645Z",
+      "durationMs": 973
+    },
+    {
+      "name": "launch",
+      "start": "2026-10-03T02:52:14.653Z",
+      "outcome": "passed",
+      "end": "2026-10-03T02:52:19.647Z",
+      "durationMs": 4993
+    },
+    {
+      "name": "S1.1-host-check",
+      "start": "2026-10-03T02:52:19.648Z",
+      "outcome": "passed",
+      "end": "2026-10-03T02:52:21.310Z",
+      "durationMs": 1661
+    },
+    {
+      "name": "S1.2-WHPX",
+      "start": "2026-10-03T02:52:21.311Z",
+      "outcome": "passed",
+      "end": "2026-10-03T02:52:23.040Z",
+      "durationMs": 1728
+    },
+    {
+      "name": "S1.4-download",
+      "start": "2026-10-03T02:52:23.041Z",
+      "outcome": "passed",
+      "end": "2026-10-03T02:52:28.184Z",
+      "durationMs": 5142
+    },
+    {
+      "name": "S1.5-installer",
+      "start": "2026-10-03T02:52:28.185Z",
+      "outcome": "passed",
+      "end": "2026-10-03T02:53:42.718Z",
+      "durationMs": 74533
+    },
+    {
+      "name": "S1.6-first-boot",
+      "start": "2026-10-03T02:53:42.719Z",
+      "outcome": "passed",
+      "end": "2026-10-03T02:55:45.302Z",
+      "durationMs": 122583
+    },
+    {
+      "name": "S1.7-game-install",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "skipped",
+      "reason": "OME_DOD_SKIP_GAME=1: the selected image profile has no translator"
+    },
+    {
+      "name": "game-launch",
+      "start": null,
+      "end": null,
+      "durationMs": null,
+      "outcome": "skipped",
+      "reason": "OME_DOD_SKIP_GAME=1: the selected image profile has no translator"
+    },
+    {
+      "name": "stop",
+      "start": "2026-10-03T02:55:48.783Z",
+      "outcome": "passed",
+      "end": "2026-10-03T02:55:54.734Z",
+      "durationMs": 5950
+    },
+    {
+      "name": "quit",
+      "start": "2026-10-03T02:55:54.734Z",
+      "outcome": "passed",
+      "end": "2026-10-03T02:55:55.925Z",
+      "durationMs": 1190
+    },
+    {
+      "name": "cleanup",
+      "start": "2026-10-03T02:55:55.927Z",
+      "outcome": "passed",
+      "end": "2026-10-03T02:55:59.790Z",
+      "durationMs": 3863
+    }
+  ],
+  "gaps": [
+    "pulled.json has no version fields; installed version can only be read after successful installation.",
+    "WHPX already enabled: product skips S1.2 instead of showing an already-on screen."
+  ],
+  "measurements": {
+    "downloadSkipped": true,
+    "installMs": 72642,
+    "softwareRendering": false,
+    "firstBootMs": 120726,
+    "stopMs": 4169
+  },
+  "probeItems": [
+    {
+      "id": "bootMarker",
+      "state": "available"
+    },
+    {
+      "id": "appList",
+      "state": "available"
+    },
+    {
+      "id": "displaySize",
+      "state": "available"
+    },
+    {
+      "id": "mediaVolume",
+      "state": "available"
+    },
+    {
+      "id": "deviceId",
+      "state": "unknown"
+    },
+    {
+      "id": "screenshot",
+      "state": "available"
+    },
+    {
+      "id": "foregroundApp",
+      "state": "unknown"
+    },
+    {
+      "id": "multitouch",
+      "state": "unavailable"
+    },
+    {
+      "id": "nativeBridge",
+      "state": "unavailable"
+    },
+    {
+      "id": "root",
+      "state": "unavailable"
+    }
+  ],
+  "softwareRenderingRetry": false,
+  "utf8Check": "다시 확인",
+  "environment": {
+    "freeBytes": 69425315840,
+    "processes": [],
+    "killed": 0
+  },
+  "game": {
+    "package": "com.epidgames.trickcalrevive",
+    "versionName": null,
+    "versionCode": null
+  },
+  "qemu": {
+    "source": "C:\\Open Mobile Emulator\\host\\target\\debug\\qemu",
+    "sha256": "f5cdd998464e23e8de4efc7d2ecfbbf618adacd180ee3c102755506da5e41c48",
+    "version": "QEMU emulator version 11.1.1 (v11.1.1-dirty)\r\nCopyright (c) 2003-2026 Fabrice Bellard and the QEMU Project developers\r\n"
+  },
+  "hostVerdict": {
+    "rows": [
+      {
+        "id": "cpuVirtualization",
+        "status": "ready",
+        "detail": "사용할 수 있습니다."
+      },
+      {
+        "id": "hypervisorPlatform",
+        "status": "ready",
+        "detail": "켜져 있습니다."
+      },
+      {
+        "id": "rebootPending",
+        "status": "ready",
+        "detail": "필요하지 않습니다."
+      },
+      {
+        "id": "whpxAvailable",
+        "status": "ready",
+        "detail": "켜져 있고 실행 준비가 되어 있습니다."
+      },
+      {
+        "id": "qemuPresent",
+        "status": "ready",
+        "detail": "준비되어 있습니다."
+      },
+      {
+        "id": "firmwarePresent",
+        "status": "ready",
+        "detail": "준비되어 있습니다."
+      },
+      {
+        "id": "adbPresent",
+        "status": "ready",
+        "detail": "준비되어 있습니다."
+      },
+      {
+        "id": "diskSpace",
+        "status": "ready",
+        "detail": "설치에 충분한 여유가 있습니다."
+      }
+    ],
+    "ready": true,
+    "inspectedAt": "2026-10-03T11:52:15+09:00"
+  },
+  "install": {
+    "stage": "copy",
+    "percent": 88,
+    "failure": null,
+    "logPath": "C:\\Users\\USER\\AppData\\Local\\Temp\\claude\\C--Open-Mobile-Emulator\\27d99c8c-b9c9-593b-9f42-b33a98337195\\scratchpad\\dod-home-a15-6\\vm\\ome-android-15\\install-serial.log"
+  },
+  "finalProcesses": [],
+  "temporaryHome": "C:\\Users\\USER\\AppData\\Local\\Temp\\claude\\C--Open-Mobile-Emulator\\27d99c8c-b9c9-593b-9f42-b33a98337195\\scratchpad\\dod-home-a15-6",
+  "endedAt": "2026-10-03T02:55:59.792Z"
+}

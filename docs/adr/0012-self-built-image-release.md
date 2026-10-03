@@ -52,6 +52,12 @@ SHA-256 `62dc0836…e683`)다. 시스템 이미지에 R1의 금지 패턴에 걸
    시스템 이미지는 실행 중에 읽기 전용으로 붙으므로 `early-init`의 `restorecon /adb_keys`가 라벨을 고쳐 준다고 기대할 수 없다.
    그래서 도우미는 이미지를 마운트하지 않고 `install.sfs`의 `debugfs`로 링크를 지우고 일반 파일을 쓴 뒤 SELinux 라벨을
    `plat_file_contexts`의 `/adb_keys` 항목과 같은 `u:object_r:system_file:s0`로 직접 넣고, 다시 읽어 종류와 라벨과 내용을 확인한다.
+   정정 2026-10-03: 키만으로는 부족했다. 이 이미지는 lunch가 `userdebug`인데도 `ro.debuggable=0`이고
+   `persist.sys.usb.config`이 없어, 첫 부팅이 `none`을 저장하고 adbd를 띄우지 않는다(a15-5). 그래서 같은 도우미가
+   `/system/build.prop`에 `persist.sys.usb.config=adb`를 덧붙인다(원래 모드와 라벨 유지, 이미 있으면 건너뜀). `init.usb.rc`가 부팅 때
+   이 값을 `sys.usb.config`로 옮기고 `AdbService`가 이 값으로 `adb_enabled`를 정한다. 다음 이미지부터는 `guest/build/build-image.sh`가
+   Bliss의 덮어쓰기 자리 `vendor/extra/product.mk`에 같은 속성을 넣는다. adb 포트는 호스트의 127.0.0.1에만 열리므로 이 변경으로
+   게스트 adb가 다른 PC에 열리지는 않는다(M2 6-2의 다른 PC 연결은 여전히 기본 끔).
    `/data/misc/adb/adb_keys`에 쓰는 길은 고르지 않았다. `init.rc`는 `/data`와 `/data/misc`만 `restorecon`하고 그 아래를 재귀로
    라벨하지 않으므로 initrd가 만든 파일은 `unlabeled`로 남는다. 키를 읽지 못하는 상태(사용자가 `.android`를 지운 경우)는
    게스트를 다시 설치해 푼다. 안드로이드 13 프로필은 `adb_secure`가 거짓이라 아무것도 넣지 않고 지금 흐름 그대로다.

@@ -46,11 +46,37 @@ ome_fail()
 	exit 1
 }
 
+# Replaces one file inside the copied system.img with debugfs from install.sfs, without mounting
+# the image: ome_img_put <path in image> <staged name in /hd/$ome_dir> <octal mode> <label file
+# name in /hd/$ome_dir> <failure tag>. /hd must be bound at /install/mnt. The image is mounted
+# read-only at run time, so init's restorecon cannot label a file written here; the label is
+# written with the file. debugfs exits 0 even when a request fails, so the result is read back.
+ome_img_put()
+{
+	ome_img=/mnt/$ome_dir/system.img
+	ome_name=${1##*/}
+	ome_tool /usr/sbin/debugfs -w -f - $ome_img > /dev/null 2>&1 <<-EOF
+	cd ${1%/*}/
+	rm $ome_name
+	write /mnt/$ome_dir/$2 $ome_name
+	set_inode_field $1 mode 0100$3
+	set_inode_field $1 uid 0
+	set_inode_field $1 gid 0
+	ea_set -f /mnt/$ome_dir/$4 $1 security.selinux
+	EOF
+	ome_tool /usr/sbin/debugfs -R "stat $1" $ome_img 2>/dev/null | grep -q "Type: regular" || ome_fail $5-write
+	ome_tool /bin/sh -c "/usr/sbin/debugfs -R 'ea_get -f /mnt/$ome_dir/.ome-label-check $1 security.selinux' $ome_img > /dev/null 2>&1 && cmp -s /mnt/$ome_dir/.ome-label-check /mnt/$ome_dir/$4" || ome_fail $5-xattr
+	ome_tool /bin/sh -c "/usr/sbin/debugfs -R 'cat $1' $ome_img 2>/dev/null | cmp -s - /mnt/$ome_dir/$2" || ome_fail $5-verify
+	rm -f /hd/$ome_dir/.ome-label-check
+}
+
+# Profiles with adb_secure (the Android 15 image) get the host key and adb switched on.
 # The system image's /adb_keys is a symlink to /product/etc/security/adb_keys, which does not
-# exist, and the image is mounted read-only at run time, so init's restorecon cannot label a
-# file written here. The aaropa branch therefore replaces the symlink with a regular file and
-# writes its SELinux label (the /adb_keys entry of plat_file_contexts) with debugfs from
-# install.sfs, without mounting the image.
+# exist; the helper replaces it with a regular file carrying the /adb_keys label of
+# plat_file_contexts. The image is a user-type build that ships with adb off
+# (persist.sys.usb.config absent, so the first boot stores none); the helper adds
+# persist.sys.usb.config=adb to /system/build.prop, which init.usb.rc copies to sys.usb.config on
+# boot and AdbService reads to initialise adb_enabled. The prop keeps the file's own mode and label.
 ome_adb_keys()
 {
 	[ -s /ome/adb_keys ] || return 0
@@ -59,21 +85,25 @@ ome_adb_keys()
 		mount --bind /hd /install/mnt || ome_fail keys-bind
 		cp /ome/adb_keys /hd/$ome_dir/.adb_keys || ome_fail keys-copy
 		printf 'u:object_r:system_file:s0\000' > /hd/$ome_dir/.adb_keys.label || ome_fail keys-label
-		ome_tool /usr/sbin/debugfs -w -f - /mnt/$ome_dir/system.img > /dev/null 2>&1 <<-EOF
-		rm /adb_keys
-		write /mnt/$ome_dir/.adb_keys adb_keys
-		set_inode_field /adb_keys mode 0100644
-		set_inode_field /adb_keys uid 0
-		set_inode_field /adb_keys gid 0
-		ea_set -f /mnt/$ome_dir/.adb_keys.label /adb_keys security.selinux
-		EOF
-		# debugfs exits 0 even when a request fails, so read the result back.
-		ome_tool /usr/sbin/debugfs -R "stat /adb_keys" /mnt/$ome_dir/system.img 2>/dev/null | grep -q "Type: regular" || ome_fail keys-write
-		ome_tool /usr/sbin/debugfs -R "ea_get /adb_keys security.selinux" /mnt/$ome_dir/system.img 2>/dev/null | grep -q "system_file" || ome_fail keys-xattr
-		ome_tool /bin/sh -c "/usr/sbin/debugfs -R 'cat /adb_keys' /mnt/$ome_dir/system.img 2>/dev/null | cmp -s - /mnt/$ome_dir/.adb_keys" || ome_fail keys-verify
-		rm -f /hd/$ome_dir/.adb_keys /hd/$ome_dir/.adb_keys.label
-		umount /install/mnt || ome_fail keys-unbind
+		ome_img_put /adb_keys .adb_keys 644 .adb_keys.label keys
 		ome_say "keys $(wc -l < /ome/adb_keys)"
+
+		ome_tool /bin/sh -c "/usr/sbin/debugfs -R 'cat /system/build.prop' /mnt/$ome_dir/system.img 2>/dev/null > /mnt/$ome_dir/.build.prop" || ome_fail prop-read
+		ome_tool /bin/grep -q '^ro.build.version.sdk=' /mnt/$ome_dir/.build.prop || ome_fail prop-read
+		if ome_tool /bin/grep -qx 'persist.sys.usb.config=adb' /mnt/$ome_dir/.build.prop; then
+			ome_say "adb already on"
+		else
+			ome_tool /bin/sh -c "/usr/sbin/debugfs -R 'ea_get -f /mnt/$ome_dir/.build.prop.label /system/build.prop security.selinux' /mnt/$ome_dir/system.img > /dev/null 2>&1" || ome_fail prop-label
+			[ -s /hd/$ome_dir/.build.prop.label ] || ome_fail prop-label
+			ome_mode=$(ome_tool /usr/sbin/debugfs -R "stat /system/build.prop" /mnt/$ome_dir/system.img 2>/dev/null | sed -n 's/.*Mode: *0*\([0-7]\{3\}\) .*/\1/p')
+			[ -n "$ome_mode" ] || ome_fail prop-mode
+			ome_tool /bin/sed -i '/^persist\.sys\.usb\.config=/d' /mnt/$ome_dir/.build.prop || ome_fail prop-edit
+			echo 'persist.sys.usb.config=adb' >> /hd/$ome_dir/.build.prop || ome_fail prop-edit
+			ome_img_put /system/build.prop .build.prop $ome_mode .build.prop.label prop
+			ome_say "adb on mode=$ome_mode"
+		fi
+		rm -f /hd/$ome_dir/.adb_keys /hd/$ome_dir/.adb_keys.label /hd/$ome_dir/.build.prop /hd/$ome_dir/.build.prop.label
+		umount /install/mnt || ome_fail keys-unbind
 		return 0
 	fi
 	mkdir -p /omesys || ome_fail keys-mkdir
