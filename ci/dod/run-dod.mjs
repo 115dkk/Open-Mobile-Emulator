@@ -123,11 +123,24 @@ async function quitApp() {
   }
   await until(() => exited, 30000, 'app exit', 200);
 }
+// The product's screenshot is `adb exec-out screencap -p` under its own 120 s command bound
+// (ome-adb COMMAND_TIMEOUT). The capture right after the game launch is the slow one on the
+// software-rendered runner: 4.1 s, 5.5 s and 11.0 s with OCR in the 0.1.0 to 0.1.2 runs, and past
+// the old 15 s wait in run 37123833071. Wait out the product's bound, and on a timeout record the
+// product's notices so a slow capture and a failed one are told apart.
 async function guestScreenshot(name) {
   const shots = path.join(home, 'screenshots');
   const before = new Set(fs.existsSync(shots) ? fs.readdirSync(shots) : []);
   await click('스크린샷');
-  const file = await until(() => fs.existsSync(shots) && fs.readdirSync(shots).find(n => n.endsWith('.png') && !before.has(n)), 15000, 'product screenshot');
+  const started = Date.now();
+  let file;
+  try { file = await until(() => fs.existsSync(shots) && fs.readdirSync(shots).find(n => n.endsWith('.png') && !before.has(n)), 130000, 'product screenshot'); }
+  catch (error) {
+    try { const s = await snapshot(); log('screenshot-timeout', { name, issue: s.issue ?? null, notices: s.notices ?? null, guest: s.guest ?? null }); }
+    catch (inner) { log('screenshot-timeout', { name, snapshotError: inner.message }); }
+    throw error;
+  }
+  log('screenshot', { name, waitMs: Date.now() - started });
   const copy = path.join(output, name + '.png'); fs.copyFileSync(path.join(shots, file), copy); return copy;
 }
 // The guest's own notification permission prompt (Android 13 asks on the game's first start) is the
