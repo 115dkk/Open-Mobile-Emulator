@@ -163,12 +163,26 @@ apply_ome_patches() {
     done < <(find "$HERE/patches" -name '*.patch' | sort)
 }
 
+# The kernel rule (device/generic/common/build/tasks/kernel.mk) runs copy-firmware.sh into
+# system/vendor/firmware, and that script stops at links a previous build left there ("File
+# exists", then "Broken symlinks found"; 2026-10-03). Before a rebuild the firmware tree and the
+# kernel image go together, so the rule runs again from an empty directory instead of an image
+# going out with the firmware missing.
+reset_kernel_firmware() {
+    local product="$OME_BUILD_ROOT/out/target/product/x86_64"
+    if [ -d "$product/system/vendor/firmware" ]; then
+        rm -rf "$product/system/vendor/firmware" "$product/obj/kernel/arch/x86_64/boot/bzImage"
+        say "removed the previous firmware tree and bzImage so the kernel rule copies firmware afresh"
+    fi
+}
+
 do_build() {
     refuse_blob_flags
     say "build $BLISS_LUNCH variant=$BLISS_BUILD_VARIANT -j$OME_JOBS"
     cd "$OME_BUILD_ROOT"
     write_vendor_extra
     apply_ome_patches
+    reset_kernel_firmware
     export BLISS_BUILD_VARIANT
     export PATH="$HOME/.cargo/bin:$PATH"
     export LC_ALL=C.UTF-8
