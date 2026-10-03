@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Copyright (C) 2026 Open Mobile Emulator contributors
+use std::sync::atomic::{AtomicBool, Ordering};
+
 use ome_runtime::{CloseAction, GuestState};
 use tauri::Manager;
 
@@ -47,13 +49,57 @@ fn refresh_overlay(app: &tauri::AppHandle) {
     tauri::async_runtime::spawn_blocking(move || crate::overlay::refresh(&app));
 }
 
+/// Set while a follow task is queued; window events arriving before it runs share that task.
+static MOVE_PENDING: AtomicBool = AtomicBool::new(false);
+
+/// Lets the guest window follow the host window without blocking the window thread.
+///
+/// The window thread must never wait for the runtime lock. A worker holding that lock calls
+/// `SetWindowPos` on the guest popup or the overlay, both owned by this thread, and Windows makes
+/// that call wait until this thread handles the resulting messages; waiting here deadlocked the
+/// installed product on 2026-10-03 (the window stopped responding with the guest still running).
 fn host_window_moved(app: &tauri::AppHandle) {
-    let state = app.state::<ShellState>();
-    if let Ok(mut guard) = state.runtime.lock()
-        && let Ok(runtime) = &mut *guard
-    {
-        runtime.host_window_moved();
+    if MOVE_PENDING.swap(true, Ordering::AcqRel) {
+        return;
     }
+    let app = app.clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        // Cleared before the move is applied, so an event arriving during it queues another pass.
+        MOVE_PENDING.store(false, Ordering::Release);
+        let state = app.state::<ShellState>();
+        if let Ok(mut guard) = state.runtime.lock()
+            && let Ok(runtime) = &mut *guard
+        {
+            runtime.host_window_moved();
+        }
+    });
+}
+
+/// Decides between hiding to the tray and exiting off the window thread (see `host_window_moved`).
+fn close_requested(window: &tauri::WebviewWindow) {
+    let window = window.clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let state = window.state::<ShellState>();
+        let hide = match state.runtime.lock() {
+            Ok(guard) => match &*guard {
+                Ok(runtime) => {
+                    let snapshot = runtime.snapshot();
+                    snapshot.settings.close_action == CloseAction::MinimizeToTray
+                        && snapshot.guest.state != GuestState::Stopped
+                }
+                Err(_) => false,
+            },
+            Err(_) => false,
+        };
+        if hide {
+            if let Err(error) = window.hide() {
+                eprintln!("main window could not be hidden: {error}");
+            }
+            refresh_overlay(window.app_handle());
+        } else {
+            crate::commands::request_app_exit(window.app_handle(), &state);
+        }
+    });
 }
 
 pub(crate) fn install(app: &tauri::App) -> tauri::Result<()> {
@@ -69,29 +115,9 @@ pub(crate) fn install(app: &tauri::App) -> tauri::Result<()> {
     let handle = window.clone();
     window.on_window_event(move |event| match event {
         tauri::WindowEvent::CloseRequested { api, .. } => {
-            let state = handle.state::<ShellState>();
-            let hide = match state.runtime.lock() {
-                Ok(guard) => match &*guard {
-                    Ok(runtime) => {
-                        let snapshot = runtime.snapshot();
-                        snapshot.settings.close_action == CloseAction::MinimizeToTray
-                            && snapshot.guest.state != GuestState::Stopped
-                    }
-                    Err(_) => false,
-                },
-                Err(_) => false,
-            };
-            if !hide {
-                api.prevent_close();
-                crate::commands::request_app_exit(handle.app_handle(), &state);
-            }
-            if hide {
-                api.prevent_close();
-                if let Err(error) = handle.hide() {
-                    eprintln!("main window could not be hidden: {error}");
-                }
-                refresh_overlay(handle.app_handle());
-            }
+            // Both outcomes keep the window: it is hidden, or the app exits after the guest stops.
+            api.prevent_close();
+            close_requested(&handle);
         }
         tauri::WindowEvent::DragDrop(tauri::DragDropEvent::Drop { paths, .. }) => {
             let paths = paths.clone();

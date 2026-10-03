@@ -43,21 +43,29 @@ pub(crate) fn install(app: &tauri::App) -> tauri::Result<()> {
             "guest-power" => {
                 let app = app.clone();
                 let state = app.state::<ShellState>().inner().clone();
-                let running = state.runtime.lock().ok().is_some_and(|guard| {
-                    guard.as_ref().ok().is_some_and(|runtime| {
-                        !matches!(
-                            runtime.snapshot().guest.state,
-                            ome_runtime::GuestState::Stopped | ome_runtime::GuestState::Failed
-                        )
-                    })
-                });
-                let command = if running {
-                    Command::GuestStop
-                } else {
-                    Command::GuestStart
-                };
                 let power = event_power.clone();
                 tauri::async_runtime::spawn(async move {
+                    // Menu events run on the window thread, which must not wait for the runtime
+                    // lock (window.rs, host_window_moved).
+                    let runtime = std::sync::Arc::clone(&state.runtime);
+                    let running = tauri::async_runtime::spawn_blocking(move || {
+                        runtime.lock().ok().is_some_and(|guard| {
+                            guard.as_ref().ok().is_some_and(|runtime| {
+                                !matches!(
+                                    runtime.snapshot().guest.state,
+                                    ome_runtime::GuestState::Stopped
+                                        | ome_runtime::GuestState::Failed
+                                )
+                            })
+                        })
+                    })
+                    .await
+                    .unwrap_or(false);
+                    let command = if running {
+                        Command::GuestStop
+                    } else {
+                        Command::GuestStart
+                    };
                     match commands::apply(app.clone(), &state, command).await {
                         Ok(snapshot) => {
                             let label = if matches!(
@@ -80,8 +88,12 @@ pub(crate) fn install(app: &tauri::App) -> tauri::Result<()> {
                 });
             }
             "quit" => {
-                let state = app.state::<ShellState>();
-                commands::request_app_exit(app, &state);
+                // request_app_exit takes the runtime lock; keep it off the window thread.
+                let app = app.clone();
+                tauri::async_runtime::spawn_blocking(move || {
+                    let state = app.state::<ShellState>();
+                    commands::request_app_exit(&app, &state);
+                });
             }
             _ => {}
         })
