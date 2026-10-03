@@ -42,6 +42,9 @@ SHA-256 `62dc0836…e683`)다. 시스템 이미지에 R1의 금지 패턴에 걸
    `install: helper_boot`, `adb_secure: true`, `status: candidate`로 들어간다. 프로필 필드 `adb_secure`는 그 이미지의 adbd가
    키 승인을 요구한다는 뜻이고, 제품은 이 값이 참인 프로필을 설치할 때 호스트 adb의 공개키를 게스트에 넣는다(4번).
    마법사는 `candidate` 프로필을 '검증 전' 표시와 함께 고르게 둔다. 능력 조사를 통과하면 `verified`로 바꾼다.
+   정정 2026-10-03(사용자 결정): 능력 조사 통과만으로는 바꾸지 않는다. 마법사는 `verified` 가운데 최신을 기본으로 고르므로
+   (`recommended_index`), 변환기가 없는 이 프로필이 `verified`가 되면 새 사용자의 기본 이미지에서 arm64 게임이 돌지 않는다.
+   완료 실행 a15-6과 a15-7이 내려받기부터 능력 조사까지 통과했지만, 8절 9번의 변환기 흐름이 정해져 게임까지 돌 때 바꾼다.
 4. **adb는 설치 때 넣은 키로 승인한다**(사용자 결정 2026-10-02). 제품은 설치를 시작하기 전에 `adb start-server`로 호스트
    adb 클라이언트의 키 쌍이 있게 하고(`client/auth.cpp`의 `load_userkey`가 없으면 만든다) `%USERPROFILE%\.android\adbkey.pub`을
    읽어(`adb_utils.cpp`의 `adb_get_android_dir_path`는 윈도우에서 `CSIDL_PROFILE` 아래 `.android`를 쓰고 환경 변수로
