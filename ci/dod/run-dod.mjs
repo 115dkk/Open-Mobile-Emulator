@@ -124,10 +124,10 @@ async function quitApp() {
   await until(() => exited, 30000, 'app exit', 200);
 }
 // The product's screenshot is `adb exec-out screencap -p` under its own 120 s command bound
-// (ome-adb COMMAND_TIMEOUT). The capture right after the game launch is the slow one on the
-// software-rendered runner: 4.1 s, 5.5 s and 11.0 s with OCR in the 0.1.0 to 0.1.2 runs, and past
-// the old 15 s wait in run 37123833071. Wait out the product's bound, and on a timeout record the
-// product's notices so a slow capture and a failed one are told apart.
+// (ome-adb COMMAND_TIMEOUT). Run 37123833071 gave up at the old 15 s wait on the capture right after
+// the game launch and left no record of whether the product was still waiting or had failed; the
+// rerun found every capture within about a second. Wait out the product's bound, and on a timeout
+// record the product's issue and notices so a slow capture and a failed one are told apart.
 async function guestScreenshot(name) {
   const shots = path.join(home, 'screenshots');
   const before = new Set(fs.existsSync(shots) ? fs.readdirSync(shots) : []);
