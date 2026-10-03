@@ -1,6 +1,6 @@
 # Known limitations
 
-Final for release 0.1.2 (2026-10-03). Items are added as they are found and removed
+Final for release 0.1.3 (2026-10-03). Items are added as they are found and removed
 only when a release fixes them.
 
 - The release is not code-signed (CLAUDE.md section 8 item 3: no certificate until a
@@ -13,7 +13,7 @@ only when a release fixes them.
   There is no all-users option. Uninstalling removes the program folder and leaves
   the data folder `%LOCALAPPDATA%\OpenMobileEmulator` (guest disks, logs,
   settings) in place.
-- 0.1.0, 0.1.1 and 0.1.2 are pre-releases. The product's update check reads GitHub's `latest`
+- 0.1.0 to 0.1.3 are pre-releases. The product's update check reads GitHub's `latest`
   release, which never points at a pre-release, so no update is offered between
   pre-releases; the first regular release will be.
 - Security software that controls outbound connections per program (seen with
@@ -50,21 +50,18 @@ only when a release fixes them.
   Running games is outside that scope (`docs/adr/0006-guest-image-distribution.md`).
   Self-built guest images are released without Google files (R3); the first
   one is the Android 15 profile below.
-- 0.1.2 does not offer the Android 15 profile. Its image (`guest-android-15-20261002`)
-  carries BlissOS's init change `workaround_snet_properties`, which at every boot
-  rewrites `ro.build.type`, `ro.debuggable`, `ro.build.tags`,
-  `ro.boot.verifiedbootstate`, `ro.boot.flash.locked` and similar properties to
-  the values of a locked retail device, so that SafetyNet-style checks are
-  misled. That is a disguise the product must not ship (CLAUDE.md D8, R7), so the
-  profile returns with an image built without it
-  (`docs/evidence/P3/dod-a15-20261003.md` section 6). The rebuild found more of
-  the same in BlissOS (a `release-keys` fingerprint, framework hooks that give
-  apps Pixel or other phones' device values, claim Pixel features, report Aurora
-  Store installs as Play Store installs, block key attestation for DroidGuard and
-  hide developer status; section 7). `guest/build/patches/` restores upstream AOSP
-  at every one of those places, and the image release `guest-android-15-20261003`
-  is built with them. The profile is back in the repository for the next release.
-  The items below describe the profile.
+- 0.1.2 did not offer the Android 15 profile. Its first image
+  (`guest-android-15-20261002`, since deleted) carried device disguise that
+  BlissOS adds to its tree: init rewrote `ro.build.type`, `ro.debuggable`,
+  `ro.build.tags`, the verified-boot state and similar properties to a locked
+  retail device's values at every boot, the fingerprint said `release-keys`,
+  and framework hooks gave apps Pixel or other phones' device values, claimed
+  Pixel features, reported Aurora Store installs as Play Store installs, blocked
+  key attestation for DroidGuard and could hide developer status. The product
+  must not ship that (CLAUDE.md D8, R7, R8). `guest/build/patches/` restores
+  upstream AOSP at every one of those places, and since 0.1.3 the profile
+  installs the image `guest-android-15-20261003` built with them
+  (`docs/evidence/P3/dod-a15-20261003.md` sections 6 and 7).
 - The Android 15 profile (`ome-android-15`, image release
   `guest-android-15-20261003`) is a candidate, shown as 검증 전. It is this
   project's own blob-free build of the BlissOS 18 tree (ADR-0012,
@@ -88,12 +85,11 @@ only when a release fixes them.
   At install the product writes the host adb client's public key
   (`%USERPROFILE%\.android\adbkey.pub`, created by `adb start-server`) into
   the guest's system image as `/adb_keys`, so the first boot is authorized
-  without a dialog. The image itself ships with adb switched off
-  (`ro.debuggable=0`, no `persist.sys.usb.config`); since 0.1.2 the product
-  adds `persist.sys.usb.config=adb` to the installed system image, and the adb
-  port stays bound to 127.0.0.1 on the host. If that key file is deleted or the data folder is moved to
-  another user, the guest shows `unauthorized` and has to be reinstalled from
-  Settings. `adb root` is refused on this image by Bliss's root setting
+  without a dialog. The image turns adb on itself (`persist.sys.usb.config=adb`,
+  `ro.debuggable=1`); the adb port stays bound to 127.0.0.1 on the host. If that
+  key file is deleted or the data folder is moved to another user, the guest
+  shows `unauthorized` and has to be reinstalled from Settings. `adb root` is
+  still refused on this image by Bliss's root setting
   ("ADB Root access is disabled by system setting"), so the product's root
   toggle is absent for it until that setting is wired (docs/P3-PLAN.md).
 - The Android 15 image contains GPL components (the kernel, busybox,
