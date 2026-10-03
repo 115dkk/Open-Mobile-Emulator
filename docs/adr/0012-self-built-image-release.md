@@ -45,10 +45,13 @@ SHA-256 `62dc0836…e683`)다. 시스템 이미지에 R1의 금지 패턴에 걸
 4. **adb는 설치 때 넣은 키로 승인한다**(사용자 결정 2026-10-02). 제품은 설치를 시작하기 전에 `adb start-server`로 호스트
    adb 클라이언트의 키 쌍이 있게 하고(`client/auth.cpp`의 `load_userkey`가 없으면 만든다) `%USERPROFILE%\.android\adbkey.pub`을
    읽어(`adb_utils.cpp`의 `adb_get_android_dir_path`는 윈도우에서 `CSIDL_PROFILE` 아래 `.android`를 쓰고 환경 변수로
-   바꾸는 길이 없다) 도우미 initrd에 `/ome/adb_keys`로 넣는다. 도우미는 `system.img`를 디스크에 복사한 뒤 그 이미지를 쓰기
-   가능하게 마운트해 루트에 `/adb_keys`를 쓴다. 이 자리는 adbd가 `/data/misc/adb/adb_keys`보다 먼저 보는 키 파일이고
-   (`frameworks/native/libs/adbd_auth/adbd_auth.cpp`의 `key_paths`), `init.rc`의 `early-init`이 매 부팅 `restorecon /adb_keys`를
-   하며 `plat_file_contexts`가 `system_file`로 라벨하므로, initrd에서 SELinux 라벨 없이 만든 파일이라도 adbd가 읽는다.
+   바꾸는 길이 없다) 도우미 initrd에 `/ome/adb_keys`로 넣는다. 도우미는 `system.img`를 디스크에 복사한 뒤 그 이미지 루트에
+   `/adb_keys`를 쓴다. 이 자리는 adbd가 `/data/misc/adb/adb_keys`보다 먼저 보는 키 파일이다
+   (`frameworks/native/libs/adbd_auth/adbd_auth.cpp`의 `key_paths`). 정정 2026-10-03: 빌드된 이미지에서 `/adb_keys`는
+   없는 파일 `/product/etc/security/adb_keys`를 가리키는 심볼릭 링크라 그냥 복사하면 실패했고(완료 실행 a15-4의 `keys-copy`),
+   시스템 이미지는 실행 중에 읽기 전용으로 붙으므로 `early-init`의 `restorecon /adb_keys`가 라벨을 고쳐 준다고 기대할 수 없다.
+   그래서 도우미는 이미지를 마운트하지 않고 `install.sfs`의 `debugfs`로 링크를 지우고 일반 파일을 쓴 뒤 SELinux 라벨을
+   `plat_file_contexts`의 `/adb_keys` 항목과 같은 `u:object_r:system_file:s0`로 직접 넣고, 다시 읽어 종류와 라벨과 내용을 확인한다.
    `/data/misc/adb/adb_keys`에 쓰는 길은 고르지 않았다. `init.rc`는 `/data`와 `/data/misc`만 `restorecon`하고 그 아래를 재귀로
    라벨하지 않으므로 initrd가 만든 파일은 `unlabeled`로 남는다. 키를 읽지 못하는 상태(사용자가 `.android`를 지운 경우)는
    게스트를 다시 설치해 푼다. 안드로이드 13 프로필은 `adb_secure`가 거짓이라 아무것도 넣지 않고 지금 흐름 그대로다.

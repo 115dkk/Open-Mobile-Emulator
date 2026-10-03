@@ -46,12 +46,39 @@ ome_fail()
 	exit 1
 }
 
+# The system image's /adb_keys is a symlink to /product/etc/security/adb_keys, which does not
+# exist, and the image is mounted read-only at run time, so init's restorecon cannot label a
+# file written here. The aaropa branch therefore replaces the symlink with a regular file and
+# writes its SELinux label (the /adb_keys entry of plat_file_contexts) with debugfs from
+# install.sfs, without mounting the image.
 ome_adb_keys()
 {
 	[ -s /ome/adb_keys ] || return 0
 	ome_say "step keys 91"
+	if [ "$ome_env" = aaropa ]; then
+		mount --bind /hd /install/mnt || ome_fail keys-bind
+		cp /ome/adb_keys /hd/$ome_dir/.adb_keys || ome_fail keys-copy
+		printf 'u:object_r:system_file:s0\000' > /hd/$ome_dir/.adb_keys.label || ome_fail keys-label
+		ome_tool /usr/sbin/debugfs -w -f - /mnt/$ome_dir/system.img > /dev/null 2>&1 <<-EOF
+		rm /adb_keys
+		write /mnt/$ome_dir/.adb_keys adb_keys
+		set_inode_field /adb_keys mode 0100644
+		set_inode_field /adb_keys uid 0
+		set_inode_field /adb_keys gid 0
+		ea_set -f /mnt/$ome_dir/.adb_keys.label /adb_keys security.selinux
+		EOF
+		# debugfs exits 0 even when a request fails, so read the result back.
+		ome_tool /usr/sbin/debugfs -R "stat /adb_keys" /mnt/$ome_dir/system.img 2>/dev/null | grep -q "Type: regular" || ome_fail keys-write
+		ome_tool /usr/sbin/debugfs -R "ea_get /adb_keys security.selinux" /mnt/$ome_dir/system.img 2>/dev/null | grep -q "system_file" || ome_fail keys-xattr
+		ome_tool /bin/sh -c "/usr/sbin/debugfs -R 'cat /adb_keys' /mnt/$ome_dir/system.img 2>/dev/null | cmp -s - /mnt/$ome_dir/.adb_keys" || ome_fail keys-verify
+		rm -f /hd/$ome_dir/.adb_keys /hd/$ome_dir/.adb_keys.label
+		umount /install/mnt || ome_fail keys-unbind
+		ome_say "keys $(wc -l < /ome/adb_keys)"
+		return 0
+	fi
 	mkdir -p /omesys || ome_fail keys-mkdir
 	mount -t ext4 -o loop,rw /hd/$ome_dir/system.img /omesys || ome_fail keys-mount
+	rm -f /omesys/adb_keys
 	cp /ome/adb_keys /omesys/adb_keys || ome_fail keys-copy
 	chown 0:0 /omesys/adb_keys && chmod 644 /omesys/adb_keys || ome_fail keys-mode
 	sync

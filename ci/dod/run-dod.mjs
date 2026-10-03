@@ -249,9 +249,10 @@ try {
       await capture('03b-image-selected');
     }
     const profile = s.images?.profiles?.find(p => p.id === s.wizard.imageId);
-    if (!s.wizard.download && s.wizard.canContinue && profile?.status === 'verified') {
+    if (!s.wizard.download && s.wizard.canContinue) {
       // A seeded home (artifacts/*.iso with its .verified marker) is verified at first sight: download is null and the wizard shows 다음 only.
-      result.measurements.downloadSkipped = true; log('download-skipped', { reason: 'image already verified in the seeded home', profile: profile.id });
+      // The product's image status (verified or candidate) says nothing about the file; round a15-3 waited for 다운로드 on a candidate profile.
+      result.measurements.downloadSkipped = true; log('download-skipped', { reason: 'image already verified in the seeded home', profile: profile?.id, status: profile?.status });
     } else {
       // A SourceForge mirror dropped the 2.4 GB transfer at 953 MB in CI run 23 (3 MB/s that time,
       // 44 MB/s the two runs before). A person presses 다운로드 again; the driver does so once and
