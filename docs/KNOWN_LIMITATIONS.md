@@ -1,6 +1,6 @@
 # Known limitations
 
-Final for release 0.1.1 (2026-10-02). Items are added as they are found and removed
+Final for release 0.1.2 (2026-10-03). Items are added as they are found and removed
 only when a release fixes them.
 
 - The release is not code-signed (CLAUDE.md section 8 item 3: no certificate until a
@@ -13,7 +13,7 @@ only when a release fixes them.
   There is no all-users option. Uninstalling removes the program folder and leaves
   the data folder `%LOCALAPPDATA%\OpenMobileEmulator` (guest disks, logs,
   settings) in place.
-- 0.1.0 and 0.1.1 are pre-releases. The product's update check reads GitHub's `latest`
+- 0.1.0, 0.1.1 and 0.1.2 are pre-releases. The product's update check reads GitHub's `latest`
   release, which never points at a pre-release, so no update is offered between
   pre-releases; the first regular release will be.
 - Security software that controls outbound connections per program (seen with
@@ -26,6 +26,12 @@ only when a release fixes them.
   in that software; the product cannot do it for you (R9). The same copy of
   QEMU at an already allowed path worked, so this is not a defect of the
   bundled runtime.
+- Since 0.1.2 the product keeps the guest's screen hidden until Android reports
+  that it has booted, and the stage shows a turning ring, a line of text and an
+  elapsed-time counter instead of firmware and console text. Boot completion is
+  read over adb, so a guest whose adb never connects keeps that screen until the
+  boot timeout (3 minutes); the product then stops the virtual machine
+  and starts it again, and repeats this without limit.
 - Windows 10 is untested. Development and the completion runs used Windows 11
   22621 and the Windows Server 2025 hosted runner.
 - A guest installed by the interactive Bliss installer (before ADR-0010, that is
@@ -67,7 +73,10 @@ only when a release fixes them.
   At install the product writes the host adb client's public key
   (`%USERPROFILE%\.android\adbkey.pub`, created by `adb start-server`) into
   the guest's system image as `/adb_keys`, so the first boot is authorized
-  without a dialog. If that key file is deleted or the data folder is moved to
+  without a dialog. The image itself ships with adb switched off
+  (`ro.debuggable=0`, no `persist.sys.usb.config`); since 0.1.2 the product
+  adds `persist.sys.usb.config=adb` to the installed system image, and the adb
+  port stays bound to 127.0.0.1 on the host. If that key file is deleted or the data folder is moved to
   another user, the guest shows `unauthorized` and has to be reinstalled from
   Settings. `adb root` is refused on this image by Bliss's root setting
   ("ADB Root access is disabled by system setting"), so the product's root
