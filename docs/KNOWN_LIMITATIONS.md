@@ -50,6 +50,15 @@ only when a release fixes them.
   Running games is outside that scope (`docs/adr/0006-guest-image-distribution.md`).
   Self-built guest images are released without Google files (R3); the first
   one is the Android 15 profile below.
+- 0.1.2 does not offer the Android 15 profile. Its image (`guest-android-15-20261002`)
+  carries BlissOS's init change `workaround_snet_properties`, which at every boot
+  rewrites `ro.build.type`, `ro.debuggable`, `ro.build.tags`,
+  `ro.boot.verifiedbootstate`, `ro.boot.flash.locked` and similar properties to
+  the values of a locked retail device, so that SafetyNet-style checks are
+  misled. That is a disguise the product must not ship (CLAUDE.md D8, R7), so the
+  profile returns with an image built without it
+  (`docs/evidence/P3/dod-a15-20261003.md` section 6). The items below describe
+  that profile as it was before the withdrawal.
 - The Android 15 profile (`ome-android-15`, image release
   `guest-android-15-20261002`) is a candidate, shown as 검증 전. It is this
   project's own blob-free build of the BlissOS 18 tree (ADR-0012,
