@@ -5457,6 +5457,16 @@ mod tests {
         runtime.guest_state = GuestState::Running;
         runtime.stage_visible = true;
         runtime.boot_completed = true;
+        runtime.input_profiles[0].bindings.push(ome_input::Binding {
+            id: "space-tap".to_owned(),
+            trigger: ome_input::Trigger::Key {
+                code: "Space".to_owned(),
+            },
+            action: ome_input::BindingAction::Tap {
+                at: ome_input::LogicalPoint { x: 0.5, y: 0.5 },
+                hold: false,
+            },
+        });
         runtime.ingest_host_key(
             HostKey {
                 scan: 0x39,
