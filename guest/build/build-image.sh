@@ -141,11 +141,34 @@ PRODUCT_SYSTEM_PROPERTIES += persist.sys.usb.config=adb
 EOF
 }
 
+# guest/build/patches/<project path>/*.patch are applied to the synced tree in name order.
+# A patch that already applies in reverse is left alone, so a rebuild does not apply it twice;
+# one that applies neither way stops the build. 0001 in system/core removes BlissOS's
+# workaround_snet_properties, which rewrites build type, debuggable and verified-boot state to
+# a locked retail device's values at every boot (CLAUDE.md D8, R7;
+# docs/evidence/P3/dod-a15-20261003.md section 6).
+apply_ome_patches() {
+    local patch project
+    while IFS= read -r patch; do
+        project=$(dirname "${patch#"$HERE/patches/"}")
+        if git -C "$OME_BUILD_ROOT/$project" apply --reverse --check "$patch" 2>/dev/null; then
+            say "patch already applied: $project/$(basename "$patch")"
+        elif git -C "$OME_BUILD_ROOT/$project" apply --check "$patch"; then
+            git -C "$OME_BUILD_ROOT/$project" apply "$patch"
+            say "patch applied: $project/$(basename "$patch")"
+        else
+            echo "patch does not apply: $patch" >&2
+            exit 2
+        fi
+    done < <(find "$HERE/patches" -name '*.patch' | sort)
+}
+
 do_build() {
     refuse_blob_flags
     say "build $BLISS_LUNCH variant=$BLISS_BUILD_VARIANT -j$OME_JOBS"
     cd "$OME_BUILD_ROOT"
     write_vendor_extra
+    apply_ome_patches
     export BLISS_BUILD_VARIANT
     export PATH="$HOME/.cargo/bin:$PATH"
     export LC_ALL=C.UTF-8

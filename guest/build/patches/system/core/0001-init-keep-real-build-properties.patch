@@ -1,0 +1,26 @@
+diff --git a/init/property_service.cpp b/init/property_service.cpp
+index 8ce055b..6ce0f75 100644
+--- a/init/property_service.cpp
++++ b/init/property_service.cpp
+@@ -932,7 +932,7 @@ static const char *snet_prop_value[] = {
+     NULL
+ };
+ 
+-static void workaround_snet_properties() {
++[[maybe_unused]] static void workaround_snet_properties() {
+     std::string build_type = android::base::GetProperty("ro.build.type", "");
+ 
+     // Bail out if this is recovery, fastbootd, or anything other than a normal boot.
+@@ -1324,8 +1324,10 @@ void PropertyLoadBootDefaults() {
+ 
+     update_sys_usb_config();
+ 
+-    // Workaround SafetyNet
+-    workaround_snet_properties();
++    // Open Mobile Emulator: BlissOS rewrites build type, debuggable, build tags and
++    // verified-boot state here to the values of a locked retail device, which disguises
++    // the guest to SafetyNet-style checks. The product must not ship a disguise
++    // (CLAUDE.md D8, R7), so the guest keeps its real properties.
+ }
+ 
+ void PropertyLoadDerivedDefaults() {

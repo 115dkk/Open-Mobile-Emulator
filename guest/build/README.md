@@ -44,6 +44,14 @@ ome -- bash /home/ome/run-sync.sh` keeps the session, and the stage script appen
 `~/bliss/ome-logs/` with an exit marker line to poll for. The ISO, its `.sha256`, `build.prop`, the manifest snapshot and the build
 log land in `~/bliss/dist/<date>-<manifest commit>/`.
 
+Before `lunch`, the build stage writes `vendor/extra/product.mk` (BlissOS's property override hook;
+it turns adb on with `persist.sys.usb.config=adb`) and applies `patches/<project path>/*.patch` to
+the synced tree. A patch that already applies in reverse is skipped, and one that applies neither
+way stops the build. `patches/system/core/0001-init-keep-real-build-properties.patch` removes
+BlissOS's `workaround_snet_properties`, which rewrites the build type, `ro.debuggable` and the
+verified-boot state to a locked retail device's values at every boot. The product must not ship
+that disguise (CLAUDE.md D8, R7; `docs/evidence/P3/dod-a15-20261003.md` section 6).
+
 ## Release assets (ADR-0012)
 
 `make-notice-guest.sh <tree> <dist> <out>` mounts the ISO, its `system.efs` and the `system.img`
