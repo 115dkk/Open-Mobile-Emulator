@@ -257,3 +257,43 @@ https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/37097999833 이다(0
 첫 화면과 '업데이트 알림' 창(동봉 시험 APK가 구버전이라 뜬다)이 있다. 드라이버가 적은 틈 가운데 트레이 `종료` 메뉴가 열리지 않아
 창 닫기로 끝냈다. 종료 단계는 통과했다. 이 실행에는 부팅 중 무대 캡처가 없어 가림막의 화면 확인은 여기서도
 하지 않았다.
+
+## 9. 제품 릴리스 v0.1.3 (2026-10-03, 사전 릴리스)
+
+사용자 결정 2026-10-03: 기기 위장 코드를 뺀 안드로이드 15 이미지(`guest-android-15-20261003`, `docs/evidence/P3/dod-a15-20261003.md`
+7절)로 그 프로필을 되돌리고, 게임 화면을 가리던 동봉 프리셋의 매핑(38e1e63)을 비운 채로 한 단계 올린다. 위장 코드가 든 첫 이미지
+릴리스 `guest-android-15-20261002`는 같은 결정으로 지웠다(태그는 main의 커밋을 가리키므로 남겼다). 태그 `v0.1.3`은 3c42583에
+밀었고, 그 커밋의 CI(실행 37122206638)가 통과한 뒤였다. `release.yml` 실행은
+https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/37122667309 이다(2026-10-03 12:22~12:42 UTC).
+
+| 잡 | 시간 | 내용 |
+|---|---|---|
+| verify | 8분 10초 | 4절과 같은 게이트 |
+| qemu-source-offer | 38초 | 6절의 ome5 zip과 소스 묶음의 SHA-256 대조와 출처 증명 확인 |
+| product | 11분 18초 | 버전 일치 확인, 설치기 빌드, 자산 정리와 검사, `actions/attest@v4`, `gh release create --prerelease`, 다시 받아 `gh attestation verify` |
+
+릴리스 https://github.com/115dkk/Open-Mobile-Emulator/releases/tag/v0.1.3 (사전 릴리스)의 자산은 다음과 같다.
+
+| 자산 | 크기 | SHA-256 |
+|---|---|---|
+| `Open-Mobile-Emulator-0.1.3-x64-setup.exe` | 54,299,845 B | `e12b2747…2e7188` |
+| `Open-Mobile-Emulator-0.1.3-x64-setup.exe.sha256` | 107 B | |
+| `qemu-ome-v11.1.1-c3d48b7d1e89-win64.zip` | 62,777,151 B | `3ff59ee8…4cbdf3` (8절과 같은 ome5 파일) |
+| `qemu-source-offer-v11.1.1-c3d48b7d1e89.tar.gz` | 249,539,916 B | `3838fd75…936109` |
+| `THIRD_PARTY.md`, `NOTICE`, `LICENSE`, `SHA256SUMS` | | 4절과 같은 내용 |
+
+개발 PC에서 사용자 절차대로 다시 확인했다(`release-v0.1.3-verify-local.txt`). 설치기의 SHA-256이 `.sha256`과 같고, `SHA256SUMS`의
+일곱 항목이 전부 맞는다. 두 QEMU 파일은 `manifests/qemu-release.json`의 고정값과 같다. 여덟 자산 모두
+`gh attestation verify --signer-workflow .../release.yml`을 통과했고, 증명은 `refs/tags/v0.1.3`(3c42583)과 실행 37122667309를
+가리킨다.
+
+### 사용자 PC의 설치본 갱신
+
+같은 설치기를 `/S`로 기존 설치(0.1.2) 위에 깔았다. 제품이 돌고 있지 않은 것을 먼저 확인했다. 설치기는 종료 코드 0으로 끝났고,
+`ome.exe`의 제품 버전과 제거 항목의 버전은 모두 0.1.3이다. 설치된 `manifests/artifacts.json`과 `manifests/images/ome-android-15.json`은
+태그 커밋의 파일과 바이트 단위로 같다. 사용자 데이터(`%LOCALAPPDATA%\OpenMobileEmulator`)는 그대로 남았다.
+
+설치된 제품을 사용자 홈 그대로 띄워 개발자 도구 포트(CDP)로 웹뷰의 글을 읽었다(게스트는 시작하지 않았다). 레일의 버전은 `0.1.3`이다.
+설정의 `새 운영체제 설치` 대화 상자는 `안드로이드 15 · 검증 전 · API 35 · 2.74 GB`와 `안드로이드 13 · 검증됨 · API 33 · 2.26 GB`
+두 카드를 보였고, 대화 상자는 취소로 닫았다. `입력` 화면의 동봉 프리셋 `기본 입력`은 `표지 0개`다. 끝으로 창 닫기로 제품을 끝냈고
+프로세스는 남지 않았다.
