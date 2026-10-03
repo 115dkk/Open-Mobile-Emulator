@@ -47,10 +47,20 @@ log land in `~/bliss/dist/<date>-<manifest commit>/`.
 Before `lunch`, the build stage writes `vendor/extra/product.mk` (BlissOS's property override hook;
 it turns adb on with `persist.sys.usb.config=adb`) and applies `patches/<project path>/*.patch` to
 the synced tree. A patch that already applies in reverse is skipped, and one that applies neither
-way stops the build. `patches/system/core/0001-init-keep-real-build-properties.patch` removes
-BlissOS's `workaround_snet_properties`, which rewrites the build type, `ro.debuggable` and the
-verified-boot state to a locked retail device's values at every boot. The product must not ship
-that disguise (CLAUDE.md D8, R7; `docs/evidence/P3/dod-a15-20261003.md` section 6).
+way stops the build. The patches take out the device disguise BlissOS carries, which the product
+must not ship (CLAUDE.md D8, R7, R8; `docs/evidence/P3/dod-a15-20261003.md` sections 6 and 7):
+
+| Patch | What it restores |
+|---|---|
+| `system/core/0001-init-keep-real-build-properties.patch` | init no longer runs `workaround_snet_properties`, which rewrote the build type, `ro.debuggable` and the verified-boot state to a locked retail device's values at every boot |
+| `build/make/0001-sysprop-keep-real-build-keys.patch` | upstream's `BUILD_KEYS` choice, so the fingerprint of a test-key build says `test-keys` instead of `release-keys` |
+| `frameworks/base/0001-keep-real-device-identity.patch` | upstream AOSP at every call into `PixelPropsUtils`, `AttestationHooks`, `GamesPropsUtils` and `HideDeveloperStatusUtils`, and upstream `hasSystemFeature`, `getInstallerPackageName` and `RuntimeInit`: apps see the real build and device values, Pixel features are not claimed, key attestation is not blocked |
+| `packages/apps/Settings/0001-drop-hide-developer-status-entry.patch` | drops the Settings entry for hiding developer status, which does nothing once the framework hook is gone |
+
+The BlissOS utility classes stay in the tree; nothing calls them.
+
+An incremental rebuild in the same tree removes `system/vendor/firmware` and the kernel image
+first: the kernel rule's `copy-firmware.sh` stops at links an earlier build left there.
 
 ## Release assets (ADR-0012)
 

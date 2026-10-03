@@ -1,0 +1,425 @@
+diff --git a/core/java/android/app/ApplicationPackageManager.java b/core/java/android/app/ApplicationPackageManager.java
+index 811e05ba4..654279d9a 100644
+--- a/core/java/android/app/ApplicationPackageManager.java
++++ b/core/java/android/app/ApplicationPackageManager.java
+@@ -910,33 +910,6 @@ public class ApplicationPackageManager extends PackageManager {
+ 
+     @Override
+     public boolean hasSystemFeature(String name, int version) {
+-        String packageName = ActivityThread.currentPackageName();
+-        if (packageName != null
+-                && (packageName.equals("com.google.android.googlequicksearchbox")
+-                || packageName.equals("com.google.android.apps.pixel.agent")
+-                || packageName.equals("com.google.android.apps.pixel.creativeassistant")
+-                || packageName.equals("com.google.android.dialer")
+-                || packageName.equals("com.google.android.apps.nexuslauncher"))) {
+-            if (Arrays.asList(featuresPixel).contains(name)) return true;
+-            if (Arrays.asList(featuresPixelOthers).contains(name)) return true;
+-            if (Arrays.asList(featuresTensor).contains(name)) return true;
+-            if (Arrays.asList(featuresNexus).contains(name)) return true;
+-        }
+-        if (packageName != null
+-                && packageName.equals("com.google.android.apps.photos")
+-                && SystemProperties.getBoolean("persist.sys.gphooks.enable", false)) {
+-            if (Arrays.asList(featuresPixel).contains(name)) return false;
+-            if (Arrays.asList(featuresPixelOthers).contains(name)) return true;
+-            if (Arrays.asList(featuresTensor).contains(name)) return false;
+-            if (Arrays.asList(featuresNexus).contains(name)) return true;
+-        }
+-        if (name != null && Arrays.asList(featuresTensor).contains(name)
+-                && !Arrays.asList(pTensorCodenames).contains(SystemProperties.get("ro.bliss.device"))) {
+-            return false;
+-        }
+-        if (Arrays.asList(featuresAndroid).contains(name)) return true;
+-        if (Arrays.asList(featuresPixel).contains(name)) return true;
+-        if (Arrays.asList(featuresPixelOthers).contains(name)) return true;
+         return mHasSystemFeatureCache.query(new HasSystemFeatureQuery(name, version));
+     }
+ 
+@@ -2720,11 +2693,7 @@ public class ApplicationPackageManager extends PackageManager {
+     @Override
+     public String getInstallerPackageName(String packageName) {
+         try {
+-            String installer = mPM.getInstallerPackageName(packageName);
+-            if ("com.aurora.store".equals(installer)) {
+-                return "com.android.vending";
+-            }
+-            return installer;
++            return mPM.getInstallerPackageName(packageName);
+         } catch (RemoteException e) {
+             throw e.rethrowFromSystemServer();
+         }
+diff --git a/core/java/android/app/Instrumentation.java b/core/java/android/app/Instrumentation.java
+index a92d09823..aca46be57 100644
+--- a/core/java/android/app/Instrumentation.java
++++ b/core/java/android/app/Instrumentation.java
+@@ -72,9 +72,6 @@ import java.util.Objects;
+ import java.util.StringJoiner;
+ import java.util.concurrent.TimeoutException;
+ 
+-import com.android.internal.util.bliss.AttestationHooks;
+-import com.android.internal.util.bliss.GamesPropsUtils;
+-import com.android.internal.util.bliss.PixelPropsUtils;
+ 
+ /**
+  * Base class for implementing application instrumentation code.  When running
+@@ -1357,9 +1354,6 @@ public class Instrumentation {
+         Application app = getFactory(context.getPackageName())
+                 .instantiateApplication(cl, className);
+         app.attach(context);
+-        AttestationHooks.setProps(context);
+-        GamesPropsUtils.setProps(context);
+-        PixelPropsUtils.setProps(context);
+         return app;
+     }
+     
+@@ -1377,9 +1371,6 @@ public class Instrumentation {
+             ClassNotFoundException {
+         Application app = (Application)clazz.newInstance();
+         app.attach(context);
+-        AttestationHooks.setProps(context);
+-        GamesPropsUtils.setProps(context);
+-        PixelPropsUtils.setProps(context);
+         return app;
+     }
+ 
+diff --git a/core/java/android/provider/Settings.java b/core/java/android/provider/Settings.java
+index 2790c1191..83d87a535 100644
+--- a/core/java/android/provider/Settings.java
++++ b/core/java/android/provider/Settings.java
+@@ -104,7 +104,6 @@ import android.widget.Editor;
+ import com.android.internal.annotations.GuardedBy;
+ import com.android.internal.util.Preconditions;
+ 
+-import com.android.internal.util.bliss.HideDeveloperStatusUtils;
+ 
+ import java.io.IOException;
+ import java.lang.annotation.ElementType;
+@@ -4407,9 +4406,6 @@ public final class Settings {
+          * or not a valid integer.
+          */
+         public static int getInt(ContentResolver cr, String name, int def) {
+-            if (HideDeveloperStatusUtils.shouldHideDevStatus(cr, cr.getPackageName(), name)) {
+-                return 0 /* Disabled */;
+-            }
+             return getIntForUser(cr, name, def, cr.getUserId());
+         }
+ 
+@@ -4440,9 +4436,6 @@ public final class Settings {
+          */
+         public static int getInt(ContentResolver cr, String name)
+                 throws SettingNotFoundException {
+-            if (HideDeveloperStatusUtils.shouldHideDevStatus(cr, cr.getPackageName(), name)) {
+-                return 0 /* Disabled */;
+-            }
+             return getIntForUser(cr, name, cr.getUserId());
+         }
+ 
+@@ -8491,9 +8484,6 @@ public final class Settings {
+          * or not a valid integer.
+          */
+         public static int getInt(ContentResolver cr, String name, int def) {
+-            if (HideDeveloperStatusUtils.shouldHideDevStatus(cr, cr.getPackageName(), name)) {
+-                return 0 /* Disabled */;
+-            }
+             return getIntForUser(cr, name, def, cr.getUserId());
+         }
+ 
+@@ -8524,9 +8514,6 @@ public final class Settings {
+          */
+         public static int getInt(ContentResolver cr, String name)
+                 throws SettingNotFoundException {
+-            if (HideDeveloperStatusUtils.shouldHideDevStatus(cr, cr.getPackageName(), name)) {
+-                return 0 /* Disabled */;
+-            }
+             return getIntForUser(cr, name, cr.getUserId());
+         }
+ 
+@@ -19980,9 +19967,6 @@ public final class Settings {
+          * or not a valid integer.
+          */
+         public static int getInt(ContentResolver cr, String name, int def) {
+-            if (HideDeveloperStatusUtils.shouldHideDevStatus(cr, cr.getPackageName(), name)) {
+-                return 0 /* Disabled */;
+-            }
+             String v = getString(cr, name);
+             return parseIntSettingWithDefault(v, def);
+         }
+@@ -20007,9 +19991,6 @@ public final class Settings {
+          */
+         public static int getInt(ContentResolver cr, String name)
+                 throws SettingNotFoundException {
+-            if (HideDeveloperStatusUtils.shouldHideDevStatus(cr, cr.getPackageName(), name)) {
+-                return 0 /* Disabled */;
+-            }
+             String v = getString(cr, name);
+             return parseIntSetting(v, name);
+         }
+diff --git a/core/java/com/android/internal/os/RuntimeInit.java b/core/java/com/android/internal/os/RuntimeInit.java
+index 58889a343..fbbedf215 100644
+--- a/core/java/com/android/internal/os/RuntimeInit.java
++++ b/core/java/com/android/internal/os/RuntimeInit.java
+@@ -248,8 +248,6 @@ public class RuntimeInit {
+         RuntimeHooks.setUncaughtExceptionPreHandler(loggingHandler);
+         Thread.setDefaultUncaughtExceptionHandler(new KillApplicationHandler(loggingHandler));
+ 
+-        Build.adjustBuildTypeIfNeeded();
+-
+         /*
+          * Install a time zone supplier that uses the Android persistent time zone system property.
+          */
+diff --git a/keystore/java/android/security/keystore2/AndroidKeyStoreSpi.java b/keystore/java/android/security/keystore2/AndroidKeyStoreSpi.java
+index bca57d1e0..34ce5d828 100644
+--- a/keystore/java/android/security/keystore2/AndroidKeyStoreSpi.java
++++ b/keystore/java/android/security/keystore2/AndroidKeyStoreSpi.java
+@@ -92,7 +92,6 @@ import java.util.NoSuchElementException;
+ 
+ import javax.crypto.SecretKey;
+ 
+-import com.android.internal.util.bliss.PixelPropsUtils;
+ 
+ /**
+  * A java.security.KeyStore interface for the Android KeyStore. An instance of
+@@ -196,10 +195,6 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
+ 
+     @Override
+     public Certificate[] engineGetCertificateChain(String alias) {
+-        if (SystemProperties.getBoolean("persist.sys.pihooks.enable", true)) {
+-            PixelPropsUtils.onEngineGetCertificateChain();
+-        }
+-
+         KeyEntryResponse response = getKeyMetadata(alias);
+ 
+         if (response == null || response.metadata.certificate == null) {
+diff --git a/services/core/java/com/android/server/wm/ActivityTaskManagerService.java b/services/core/java/com/android/server/wm/ActivityTaskManagerService.java
+index b2abc97b1..4153591e0 100644
+--- a/services/core/java/com/android/server/wm/ActivityTaskManagerService.java
++++ b/services/core/java/com/android/server/wm/ActivityTaskManagerService.java
+@@ -260,7 +260,6 @@ import com.android.internal.util.ArrayUtils;
+ import com.android.internal.util.FastPrintWriter;
+ import com.android.internal.util.FrameworkStatsLog;
+ import com.android.internal.util.function.pooled.PooledLambda;
+-import com.android.internal.util.bliss.PixelPropsUtils;
+ import com.android.server.LocalManagerRegistry;
+ import com.android.server.LocalServices;
+ import com.android.server.SystemConfig;
+@@ -1790,9 +1789,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+      */
+     @Override
+     public void preloadRecentsActivity(Intent intent) {
+-        if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
+-            enforceTaskPermission("preloadRecentsActivity()");
+-        }
++        enforceTaskPermission("preloadRecentsActivity()");
+         final long origId = Binder.clearCallingIdentity();
+         try {
+             synchronized (mGlobalLock) {
+@@ -2006,9 +2003,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public void setFocusedRootTask(int taskId) {
+-        if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
+-            enforceTaskPermission("setFocusedRootTask()");
+-        }
++        enforceTaskPermission("setFocusedRootTask()");
+         ProtoLog.d(WM_DEBUG_FOCUS, "setFocusedRootTask: taskId=%d", taskId);
+         final long callingId = Binder.clearCallingIdentity();
+         try {
+@@ -2030,9 +2025,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public void setFocusedTask(int taskId) {
+-        if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
+-            enforceTaskPermission("setFocusedTask()");
+-        }
++        enforceTaskPermission("setFocusedTask()");
+         final long callingId = Binder.clearCallingIdentity();
+         try {
+             synchronized (mGlobalLock) {
+@@ -2045,9 +2038,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public void focusTopTask(int displayId) {
+-        if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
+-            enforceTaskPermission("focusTopTask()");
+-        }
++        enforceTaskPermission("focusTopTask()");
+         final long callingId = Binder.clearCallingIdentity();
+         try {
+             synchronized (mGlobalLock) {
+@@ -2154,9 +2145,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public Rect getTaskBounds(int taskId) {
+-        if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
+-            enforceTaskPermission("getTaskBounds()");
+-        }
++        enforceTaskPermission("getTaskBounds()");
+         final long ident = Binder.clearCallingIdentity();
+         Rect rect = new Rect();
+         try {
+@@ -2442,9 +2431,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public void moveTaskToRootTask(int taskId, int rootTaskId, boolean toTop) {
+-        if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
+-            enforceTaskPermission("moveTaskToRootTask()");
+-        }
++        enforceTaskPermission("moveTaskToRootTask()");
+         synchronized (mGlobalLock) {
+             final long ident = Binder.clearCallingIdentity();
+             try {
+@@ -2480,9 +2467,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+      */
+     @Override
+     public void removeRootTasksInWindowingModes(int[] windowingModes) {
+-        if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
+-            enforceTaskPermission("removeRootTasksInWindowingModes()");
+-        }
++        enforceTaskPermission("removeRootTasksInWindowingModes()");
+ 
+         synchronized (mGlobalLock) {
+             final long ident = Binder.clearCallingIdentity();
+@@ -2496,9 +2481,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public void removeRootTasksWithActivityTypes(int[] activityTypes) {
+-        if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
+-            enforceTaskPermission("removeRootTasksWithActivityTypes()");
+-        }
++        enforceTaskPermission("removeRootTasksWithActivityTypes()");
+ 
+         synchronized (mGlobalLock) {
+             final long ident = Binder.clearCallingIdentity();
+@@ -2529,9 +2512,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public List<RootTaskInfo> getAllRootTaskInfos() {
+-        if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
+-            enforceTaskPermission("getAllRootTaskInfos()");
+-        }
++        enforceTaskPermission("getAllRootTaskInfos()");
+         final long ident = Binder.clearCallingIdentity();
+         try {
+             synchronized (mGlobalLock) {
+@@ -2544,9 +2525,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public RootTaskInfo getRootTaskInfo(int windowingMode, int activityType) {
+-        if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
+-            enforceTaskPermission("getRootTaskInfo()");
+-        }
++        enforceTaskPermission("getRootTaskInfo()");
+         final long ident = Binder.clearCallingIdentity();
+         try {
+             synchronized (mGlobalLock) {
+@@ -2559,9 +2538,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public List<RootTaskInfo> getAllRootTaskInfosOnDisplay(int displayId) {
+-        if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
+-            enforceTaskPermission("getAllRootTaskInfosOnDisplay()");
+-        }
++        enforceTaskPermission("getAllRootTaskInfosOnDisplay()");
+         final long ident = Binder.clearCallingIdentity();
+         try {
+             synchronized (mGlobalLock) {
+@@ -2575,9 +2552,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+     @Override
+     public RootTaskInfo getRootTaskInfoOnDisplay(int windowingMode, int activityType,
+             int displayId) {
+-        if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
+-            enforceTaskPermission("getRootTaskInfoOnDisplay()");
+-        }
++        enforceTaskPermission("getRootTaskInfoOnDisplay()");
+         final long ident = Binder.clearCallingIdentity();
+         try {
+             synchronized (mGlobalLock) {
+@@ -2590,9 +2565,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public void startSystemLockTaskMode(int taskId) {
+-        if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
+-            enforceTaskPermission("startSystemLockTaskMode");
+-        }
++        enforceTaskPermission("startSystemLockTaskMode");
+         // This makes inner call to look as if it was initiated by system.
+         final long ident = Binder.clearCallingIdentity();
+         try {
+@@ -2618,9 +2591,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+      */
+     @Override
+     public void stopSystemLockTaskMode() throws RemoteException {
+-        if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
+-            enforceTaskPermission("stopSystemLockTaskMode");
+-        }
++        enforceTaskPermission("stopSystemLockTaskMode");
+         stopLockTaskModeInternal(null, true /* isSystemCaller */);
+     }
+ 
+@@ -2915,9 +2886,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public void resizeTask(int taskId, Rect bounds, int resizeMode) {
+-        if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
+-            enforceTaskPermission("resizeTask()");
+-        }
++        enforceTaskPermission("resizeTask()");
+         final long ident = Binder.clearCallingIdentity();
+         try {
+             synchronized (mGlobalLock) {
+@@ -3146,9 +3115,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+     /** Unregister a task stack listener so that it stops receiving callbacks. */
+     @Override
+     public void unregisterTaskStackListener(ITaskStackListener listener) {
+-        if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
+-            enforceTaskPermission("unregisterTaskStackListener()");
+-        }
++        enforceTaskPermission("unregisterTaskStackListener()");
+         mTaskChangeNotificationController.unregisterTaskStackListener(listener);
+     }
+ 
+@@ -3970,9 +3937,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public void cancelTaskWindowTransition(int taskId) {
+-        if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
+-            enforceTaskPermission("cancelTaskWindowTransition()");
+-        }
++        enforceTaskPermission("cancelTaskWindowTransition()");
+         final long ident = Binder.clearCallingIdentity();
+         try {
+             synchronized (mGlobalLock) {
+@@ -4284,9 +4249,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+      */
+     @Override
+     public void clearLaunchParamsForPackages(List<String> packageNames) {
+-        if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
+-            enforceTaskPermission("clearLaunchParamsForPackages");
+-        }
++        enforceTaskPermission("clearLaunchParamsForPackages");
+         synchronized (mGlobalLock) {
+             for (int i = 0; i < packageNames.size(); ++i) {
+                 mTaskSupervisor.mLaunchParamsPersister.removeRecordForPackage(packageNames.get(i));
+@@ -4296,9 +4259,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public void onPictureInPictureUiStateChanged(PictureInPictureUiState pipState) {
+-        if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
+-            enforceTaskPermission("onPictureInPictureUiStateChanged");
+-        }
++        enforceTaskPermission("onPictureInPictureUiStateChanged");
+         synchronized (mGlobalLock) {
+             // The PictureInPictureUiState is sent to current pip task if there is any
+             // -or- the top standard task (state like entering PiP does not require a pinned task).
+@@ -6844,9 +6805,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+         @Override
+         public void startConfirmDeviceCredentialIntent(Intent intent, Bundle options) {
+-            if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
+-                enforceTaskPermission("startConfirmDeviceCredentialIntent");
+-            }
++            enforceTaskPermission("startConfirmDeviceCredentialIntent");
+ 
+             synchronized (mGlobalLock) {
+                 final long ident = Binder.clearCallingIdentity();

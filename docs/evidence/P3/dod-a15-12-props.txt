@@ -1,0 +1,15 @@
+device 127.0.0.1:5555 at 2026-10-03T06:44:49Z
+ro.build.type=userdebug
+ro.build.tags=test-keys
+ro.debuggable=1
+ro.adb.secure=1
+persist.sys.usb.config=adb
+sys.usb.config=adb
+ro.boot.verifiedbootstate=
+ro.boot.flash.locked=
+ro.boot.vbmeta.device_state=
+ro.build.version.release=15
+ro.build.version.sdk=35
+ro.build.fingerprint=Android-x86/bliss_x86_64/x86_64:15/AP4A.250205.002/eng.nobody:userdebug/test-keys
+ro.product.model=Generic Android-x86_64
+id: uid=2000(shell) gid=2000(shell) groups=2000(shell),1004(input),1007(log),1011(adb),1015(sdcard_rw),1028(sdcard_r),1078(ext_data_rw),1079(ext_obb_rw),3001(net_bt_admin),3002(net_bt),3003(inet),3006(net_bw_stats),3009(readproc),3011(uhid),3012(readtracefs) context=u:r:shell:s0

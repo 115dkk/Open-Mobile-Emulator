@@ -1,0 +1,19 @@
+diff --git a/core/sysprop.mk b/core/sysprop.mk
+index 4c2ea34..950ce78 100644
+--- a/core/sysprop.mk
++++ b/core/sysprop.mk
+@@ -172,7 +172,13 @@ endif
+ # non-default dev keys (usually private keys from a vendor directory).
+ # Both of these tags will be removed and replaced with "release-keys"
+ # when the target-files is signed in a post-build step.
+-BUILD_KEYS := release-keys
++# Open Mobile Emulator: upstream AOSP's choice is restored. BlissOS wrote release-keys here for
++# every build, so the fingerprint of a test-key build claimed a signed release (CLAUDE.md D8, R7).
++ifeq ($(DEFAULT_SYSTEM_DEV_CERTIFICATE),build/make/target/product/security/testkey)
++BUILD_KEYS := test-keys
++else
++BUILD_KEYS := dev-keys
++endif
+ BUILD_VERSION_TAGS += $(BUILD_KEYS)
+ BUILD_VERSION_TAGS := $(subst $(space),$(comma),$(sort $(BUILD_VERSION_TAGS)))
+ 

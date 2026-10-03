@@ -1,0 +1,19 @@
+diff --git a/res/xml/security_advanced_settings.xml b/res/xml/security_advanced_settings.xml
+index 671cb68..f1556d6 100644
+--- a/res/xml/security_advanced_settings.xml
++++ b/res/xml/security_advanced_settings.xml
+@@ -115,14 +115,6 @@
+         android:fragment="com.android.settings.security.MemtagPage"
+         settings:controller="com.android.settings.security.MemtagPagePreferenceController" />
+ 
+-    <Preference
+-        android:order="91"
+-        android:key="hide_developer_status_settings"
+-        android:title="@string/hide_developer_status_title"
+-        android:summary="@string/hide_developer_status_summary"
+-        android:fragment="com.android.settings.security.HideDeveloperStatusSettings"
+-        settings:controller="com.android.settings.security.HideDeveloperStatusPreferenceController" />
+-
+     <!-- work profile security section -->
+     <PreferenceCategory
+         android:order="310"
