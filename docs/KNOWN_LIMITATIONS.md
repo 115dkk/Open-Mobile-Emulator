@@ -115,6 +115,16 @@ only when a release fixes them.
   `docs/GOOGLE_ACCOUNT.md`. On 2026-09-26 the registration worked on the
   development host: the account was added, Google Play Games signed in, and the
   Play Store opened; purchases remain untested.
+- Registration does not make the guest certified. On 2026-10-05 the registered
+  guest still showed "Play Protect certification: Device is not certified", and
+  the Play Store page of Trickcal Revive said "This app isn't compatible with
+  your device anymore" although the guest offers `arm64-v8a`, GLES 3.2 and
+  touch. Clearing the Play Store's data did not change it. A developer can
+  exclude uncertified devices in the Play Console, so games that do so cannot be
+  installed or updated from the Play Store in this product. Commercial emulators
+  pass this check by presenting the fingerprint of a certified device; this
+  product does not (D8, R7). Such games are installed and updated from APK,
+  XAPK or APKS files through the Apps screen, which keeps the game's data.
 - Enabling the Windows Hypervisor Platform runs Windows on top of Hyper-V. Games
   with kernel anti-cheat on the same PC may refuse to start while it is on. The
   product never changes this setting by itself (R9).

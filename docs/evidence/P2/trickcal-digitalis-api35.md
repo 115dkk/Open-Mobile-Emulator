@@ -149,3 +149,10 @@ jni6 system.img에 넣었다(라벨 `system_file`, 다시 읽어 해시와 라�
 `context ... "RenderThread" Illegal command buffer`. minigbm 계측(`debug.ome.minigbm_trace=1`, 실험 패치)으로는 `nv12_sampler=0 r8_sampler=1 gbm=0`이고
 기본 텍스처 용도의 NV12는 R8 대체로 허용된다(`video-probe-capability.txt`). 영상이 검게 나오는 것은 virgl 경로(게스트 Mesa의 YUV 샘플러 뷰 생성과
 호스트 virglrenderer 1.3.0의 해석 가운데 하나)의 문제이고 Digitalis와 무관하다. 이는 M1의 열린 문제(앱 안 영상이 검다)와 같은 것으로 보인다.
+
+## 게임은 타이틀까지 가고 화면만 검다 (2026-10-06, 직접 확인)
+
+A15 game64(jni6 + GApps)에서 게임을 띄우고 가운데를 한 번 탭한 뒤, A13 화면(`game-gms-on-prompt.png`)의 `스토어 이동` 자리(760,594)를 탭하자 게임(uid 10299)이
+Play 스토어를 열었다(`START u0 {act=android.intent.action.VIEW dat=https://play.google.com/... } from uid 10299`). `게임 종료` 자리(518,594)를 탭하면 프로세스가
+SIGKILL(status 9)로 끝났다. Unity 로그에 `Title:vwm()`. 게임 논리는 타이틀과 업데이트 알림까지 가고 입력도 받는데 화면이 검다(위아래 40 px 흰 띠, 가운데 1280x720 검정).
+같은 시험의 호스트 stderr에 `Unknown format is 163` 23번과 sampler view 오류(`a15-title-tapcheck-qemu-stderr.txt`). 원인 조사는 이어서 한다.

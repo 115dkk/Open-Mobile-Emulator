@@ -1,0 +1,40 @@
+C:\Users\32170336\AppData\Local\Open Mobile Emulator\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+C:\Users\32170336\AppData\Local\Open Mobile Emulator\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+C:\Users\32170336\AppData\Local\Open Mobile Emulator\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+C:\Users\32170336\AppData\Local\Open Mobile Emulator\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+C:\Users\32170336\AppData\Local\Open Mobile Emulator\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+C:\Users\32170336\AppData\Local\Open Mobile Emulator\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+C:\Users\32170336\AppData\Local\Open Mobile Emulator\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+C:\Users\32170336\AppData\Local\Open Mobile Emulator\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+Unknown format is 163
+Unknown format is 163
+Unknown format is 163
+Unknown format is 163
+Unknown format is 163
+Unknown format is 163
+Unknown format is 163
+Unknown format is 163
+vrend_create_sampler_view: Invalid number of layers (-1) or zero levels requested
+context 17 failed to dispatch CREATE_OBJECT: 22
+vrend_decode_ctx_submit_cmd: context error reported 17 "RenderThread" Illegal command buffer 394753
+Unknown format is 163
+Unknown format is 163
+Unknown format is 163
+Unknown format is 163
+Unknown format is 163
+Unknown format is 163
+Unknown format is 163
+Unknown format is 163
+vrend_create_sampler_view: Invalid number of layers (-1) or zero levels requested
+context 17 failed to dispatch CREATE_OBJECT: 22
+vrend_decode_ctx_submit_cmd: context error reported 17 "RenderThread" Illegal command buffer 394753
+Unknown format is 163
+Unknown format is 163
+Unknown format is 163
+Unknown format is 163
+Unknown format is 163
+Unknown format is 163
+Unknown format is 163
+vrend_create_sampler_view: Invalid number of layers (-1) or zero levels requested
+context 17 failed to dispatch CREATE_OBJECT: 22
+vrend_decode_ctx_submit_cmd: context error reported 17 "RenderThread" Illegal command buffer 394753
