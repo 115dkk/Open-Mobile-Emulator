@@ -127,7 +127,7 @@ jni6 system.img에 넣었다(라벨 `system_file`, 다시 읽어 해시와 라�
 
 ## 인트로 검은 화면 진단 (2026-10-06)
 
-- 인트로 영상은 AVC 1600x1024 + AAC(`assets/meta.mp4`가 아닌 게임 자산, 코덱은 logcat 기준). A15에서는 `c2.android.avc.decoder` 생성이 성공했고
+- 인트로 영상은 logcat 기준 AVC 1600x1024 + AAC다(APK 자산 목록의 영상은 `assets/meta.mp4` 하나, 346,513바이트. 이 파일인지는 확인하지 않았다). A15에서는 `c2.android.avc.decoder` 생성이 성공했고
   SurfaceFlinger의 게임 레이어는 초당 약 39~42 프레임을 내지만 내용이 검다. 창이 멈춘 것은 아니다(`video-sf.txt`, `video-latency-*.txt`).
 - A13 기준선에서는 같은 디코더가 곧바로 죽었고(`Codec2 component "c2.android.avc.decoder" died`, `NdkMediaCodec ... -38`) 유니티가 영상을 건너뛰어 탭 한 번에 타이틀로 갔다
   (`video-a13-codec-comparison.txt`).
