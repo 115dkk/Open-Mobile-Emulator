@@ -24,6 +24,7 @@ import type { BootStep, StepState } from '../presentation';
 import { ImageCards } from './ImageCards';
 import { useEscapeKey } from './use-escape-key';
 import { useGuestKeyboard } from './use-guest-keyboard';
+import { useGuestTextInput } from './use-guest-text-input';
 
 /** Bytes in one GiB, the unit of the disk size choices. */
 const GIB = 1024 ** 3;
@@ -456,7 +457,8 @@ function CapabilityList({ guest }: { readonly guest: GuestView }) {
 }
 
 function FirstBootStep({ snapshot, actions }: StepProps) {
-  useGuestKeyboard(snapshot.guest.state === 'running' && !snapshot.input.editing, actions.inputHostKey);
+  useGuestKeyboard(snapshot.guest.state === 'running' && !snapshot.input.editing && snapshot.textInput.state !== 'active', actions.inputHostKey);
+  useGuestTextInput(snapshot.textInput, snapshot.guest.state === 'running', { ...actions, suspendHotkey: snapshot.input.suspendHotkey });
   const { guest, wizard } = snapshot;
   // The failed symbol and the noun phrase name the failure; the detail says what to do (DESIGN.md 9).
   const detail = (step: BootStep): ReactNode => {
