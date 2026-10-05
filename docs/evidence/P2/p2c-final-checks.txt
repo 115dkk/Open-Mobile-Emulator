@@ -1,0 +1,23 @@
+2026-10-06T03:58:54.4663515+09:00
+SUMMARY forbidden findings=0 candidates=1454
+forbidden_exit=0
+SUMMARY spdx findings=0 checked=358 candidates=1454
+spdx_exit=0
+baseline_check_exit=0
+qemu_count=0
+free_C_bytes=34413543424
+ M docs/evidence/P2/p2b-a15-qemu-stderr.txt
+?? docs/evidence/P2/p2c-caps-probe-source.txt
+?? docs/evidence/P2/p2c-context-and-plane-source.txt
+?? docs/evidence/P2/p2c-corner-12s.png
+?? docs/evidence/P2/p2c-corner-1s.png
+?? docs/evidence/P2/p2c-corner-20s.png
+?? docs/evidence/P2/p2c-corner-4s.png
+?? docs/evidence/P2/p2c-corner-logcat.txt
+?? docs/evidence/P2/p2c-corner-ome.txt
+?? docs/evidence/P2/p2c-final-checks.txt
+?? docs/evidence/P2/p2c-host-caps.txt
+?? docs/evidence/P2/p2c-issue586.txt
+?? docs/evidence/P2/p2c-qemu-timed-stderr.txt
+?? docs/evidence/P2/p2c-upstream-heads.txt
+?? docs/evidence/P2/p2c-upstream-issues.txt

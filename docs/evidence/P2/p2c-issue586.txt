@@ -1,0 +1,67 @@
+{
+  "id": 124513,
+  "iid": 586,
+  "project_id": 166,
+  "title": "how to support planar  image sampling without ENABLE_MINIGBM_ALLOCATION?",
+  "description": "Background:\nNo ENABLE_MINIGBM_ALLOCATION flag, because gbm_bo_get_handle_for_plane is not supported on all platforms;\nSome platforms, only API gbm_bo_get_handle is enable, for planar buffer, it only has one fd and 2 or 3 offsets ; \n\nQ: how to support planar YUV/NV12 image sampling?\n\n\n（On a side note, I think the current virgl+mesa has a flaw, that is the stride； Each physical platform is different, and their gbm alignment is completely different, some need to force 64 alignment, some need 32 alignment, and some do not align. It feels like during the sampling process, this part also needs hardcode processing.）",
+  "state": "opened",
+  "created_at": "2024-11-11T06:23:21.179Z",
+  "updated_at": "2025-02-11T03:02:41.221Z",
+  "closed_at": null,
+  "closed_by": null,
+  "labels": [],
+  "milestone": null,
+  "assignees": [],
+  "author": {
+    "id": 52359,
+    "username": "invokermoon",
+    "public_email": "",
+    "name": "ivk",
+    "state": "active",
+    "locked": false,
+    "avatar_url": "https://secure.gravatar.com/avatar/72340b9f2fe907c55483f7d7e91cf9f6edace5982fa921ad2b48f3db26f7287c?s=80&d=identicon",
+    "web_url": "https://gitlab.freedesktop.org/invokermoon"
+  },
+  "type": "ISSUE",
+  "assignee": null,
+  "user_notes_count": 4,
+  "merge_requests_count": 0,
+  "upvotes": 0,
+  "downvotes": 0,
+  "start_date": null,
+  "due_date": null,
+  "confidential": false,
+  "discussion_locked": null,
+  "issue_type": "issue",
+  "web_url": "https://gitlab.freedesktop.org/virgl/virglrenderer/-/work_items/586",
+  "time_stats": {
+    "time_estimate": 0,
+    "total_time_spent": 0,
+    "human_time_estimate": null,
+    "human_total_time_spent": null
+  },
+  "task_completion_status": {
+    "count": 0,
+    "completed_count": 0
+  },
+  "has_tasks": true,
+  "task_status": "0 of 0 checklist items completed",
+  "_links": {
+    "self": "https://gitlab.freedesktop.org/api/v4/projects/166/issues/586",
+    "notes": "https://gitlab.freedesktop.org/api/v4/projects/166/issues/586/notes",
+    "award_emoji": "https://gitlab.freedesktop.org/api/v4/projects/166/issues/586/award_emoji",
+    "project": "https://gitlab.freedesktop.org/api/v4/projects/166",
+    "closed_as_duplicate_of": null
+  },
+  "references": {
+    "short": "#586",
+    "relative": "#586",
+    "full": "virgl/virglrenderer#586"
+  },
+  "severity": "UNKNOWN",
+  "subscribed": false,
+  "moved_to_id": null,
+  "imported": false,
+  "imported_from": "none",
+  "service_desk_reply_to": null
+}

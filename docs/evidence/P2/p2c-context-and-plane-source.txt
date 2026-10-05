@@ -1,0 +1,282 @@
+SOURCE p2b-vrend_renderer.c virglrenderer 1.3.0
+SHA256 be7e5c63fb501cb77bd5b2c13c332f8b93c49fd04d207f17d434932c237f4ea3
+1125: void vrend_report_context_error_internal(const char *fname, struct vrend_context *ctx,
+1126:                                          enum virgl_ctx_errors error, uint32_t value)
+1127: {
+1128:    ctx->in_error = true;
+1129:    ctx->last_error = error;
+1130:    virgl_error("%s: context error reported %d \"%s\" %s %d\n", fname,
+1131:                ctx->ctx_id, ctx->debug_name, vrend_ctx_error_strings[error],
+1132:                value);
+1133: }
+4798: void vrend_clear(struct vrend_context *ctx, unsigned buffers,
+4799:                  const union pipe_color_union *color, double depth,
+4800:                  unsigned stencil) {
+4801:    GLbitfield bits = 0;
+4802:    struct vrend_sub_context *sub_ctx = ctx->sub;
+4803: 
+4804:    if (ctx->in_error)
+4805:       return;
+4806: 
+4807:    if (ctx->ctx_switch_pending)
+4808:       vrend_finish_context_switch(ctx);
+5893: {
+5894:    enum select_program_result program_select_result = PROGRAMM_NO_CHANGE;
+5895:    struct vrend_resource *indirect_res = NULL;
+5896:    struct vrend_resource *indirect_params_res = NULL;
+5897:    struct vrend_sub_context *sub_ctx = ctx->sub;
+5898: 
+5899:    if (ctx->in_error)
+5900:       return ENOTRECOVERABLE;
+5901: 
+2711:    if (view->target == PIPE_BUFFER) {
+2712:       view->target = view->texture->target;
+2713: 
+2714:       view->u.buf.first_element = val0;
+2715:       view->u.buf.last_element = val1;
+2716:    } else {
+2717:       view->u.tex.first_layer = val0 & 0xffff;
+2718:       view->u.tex.last_layer = (val0 >> 16) & 0xffff;
+2719:       view->u.tex.first_level = val1 & 0xff;
+2720:       view->u.tex.last_level = (val1 >> 8) & 0xff;
+2721:    }
+2793:       if (view->u.tex.first_layer > 0 || view->u.tex.first_level > 0)
+2794:          needs_view = true;
+2795: 
+2796:       if (needs_view &&
+2797:           has_bit(view->texture->storage_bits, VREND_STORAGE_GL_IMMUTABLE) &&
+2798:           has_feature(feat_texture_view)) {
+2799:         GLenum internalformat = tex_conv_table[format].internalformat;
+2800:         view->levels = (view->u.tex.last_level - view->u.tex.first_level) + 1;
+2801: 
+2802:         int num_layers = view->u.tex.last_layer - view->u.tex.first_layer + 1;
+2803: 
+2804:         if (view->levels == 0 || num_layers <= 0) {
+2805:             vrend_resource_reference(&view->texture, NULL);
+2806:             FREE(view);
+2807:             virgl_error("%s: Invalid number of layers (%d) or zero levels requested\n",
+2808:                         __func__, num_layers);
+2809:             return EINVAL;
+2882:       } else if (needs_view && view->u.buf.first_element < ARRAY_SIZE(res->aux_plane_egl_image) &&
+2883:             res->aux_plane_egl_image[view->u.buf.first_element]) {
+2884:         void *image = res->aux_plane_egl_image[view->u.buf.first_element];
+2885:         glGenTextures(1, &view->gl_id);
+2886:         glBindTexture(view->target, view->gl_id);
+2887:         glEGLImageTargetTexture2DOES(view->target, (GLeglImageOES) image);
+2888:         glBindTexture(view->target, 0);
+2889:       }
+8829:    if (image_oes && gr->gbm_bo) {
+8830: #if defined(HAVE_EPOXY_EGL_H) && defined(ENABLE_GBM_ALLOCATION)
+8831:       if (!has_bit(gr->storage_bits, VREND_STORAGE_GL_BUFFER) &&
+8832:             !vrend_format_can_texture_view(gr->base.format)) {
+8833:          for (int i = 0; i < gbm_bo_get_plane_count(gr->gbm_bo); i++) {
+8834:             gr->aux_plane_egl_image[i] =
+8835:                   virgl_egl_aux_plane_image_from_gbm_bo(egl, gr->gbm_bo, i);
+8836:          }
+8837:       }
+8838: #endif
+8839:    }
+11599: bool vrend_hw_switch_context(struct vrend_context *ctx, bool now)
+11600: {
+11601:    if (!ctx)
+11602:       return false;
+11603: 
+11604:    if (ctx == vrend_state.current_ctx && ctx->ctx_switch_pending == false)
+11605:       return true;
+11606: 
+11607:    if (ctx->ctx_id != 0 && ctx->in_error) {
+11608:       return false;
+11609:    }
+11610: 
+11611:    ctx->ctx_switch_pending = true;
+11612:    if (now == true) {
+11613:       vrend_finish_context_switch(ctx);
+11614:    }
+11615:    vrend_state.current_ctx = ctx;
+12735: #if defined(HAVE_EPOXY_EGL_H) && defined(ENABLE_GBM_ALLOCATION)
+12736:    if (gbm) {
+12737:       if (has_feature(feat_memory_object) && has_feature(feat_memory_object_fd)) {
+12738:          if ((!strcmp(gbm_device_get_backend_name(gbm->device), "i915") ||
+12739:               !strcmp(gbm_device_get_backend_name(gbm->device), "amdgpu")) &&
+12740:              !vrend_winsys_different_gpu())
+12741:             caps->v2.capability_bits |= VIRGL_CAP_ARB_BUFFER_STORAGE;
+12742:       }
+12743:       caps->v2.capability_bits_v2 |= VIRGL_CAP_V2_SCANOUT_USES_GBM;
+12744:    }
+12745: #endif
+12746: 
+12747:    if (has_feature(feat_blend_equation_advanced))
+12748:       caps->v2.capability_bits_v2 |= VIRGL_CAP_V2_BLEND_EQUATION;
+12749: 
+12750: #ifdef HAVE_EPOXY_EGL_H
+12751:    if (egl)
+12752:       caps->v2.capability_bits_v2 |= VIRGL_CAP_V2_UNTYPED_RESOURCE;
+12753: #endif
+
+SOURCE p2b-vrend_decode.c virglrenderer 1.3.0
+SHA256 fa74df51019af22c73edf8a12643cf5301191104cbe9e48c398d30013864537f
+2049: static int vrend_decode_ctx_submit_cmd(struct virgl_context *ctx,
+2050:                                        const void *buffer,
+2051:                                        size_t size)
+2052: {
+2053:    TRACE_FUNC();
+2054:    struct vrend_decode_ctx *gdctx = (struct vrend_decode_ctx *)ctx;
+2055:    bool bret;
+2056:    int ret;
+2057: 
+2058: #define TRANSFER_HEADER_SIZE 4096
+2059: 
+2060:    bret = vrend_hw_switch_context(gdctx->grctx, true);
+2061:    if (bret == false)
+2062:       return EINVAL;
+2063: 
+2098:       ret = decode_table[cmd](gdctx->grctx, buf, len);
+2099:       if (!vrend_check_no_error(gdctx->grctx) && !ret)
+2100:          ret = EINVAL;
+2101:       if (ret) {
+2102:          virgl_error("context %d failed to dispatch %s: %d\n",
+2103:                gdctx->base.ctx_id, vrend_get_comand_name(cmd), ret);
+2104:          if (ret == EINVAL)
+2105:             vrend_report_buffer_error(gdctx->grctx, *buf);
+2106:          return ret;
+2107:       }
+2108:    }
+2109:    return 0;
+
+SOURCE p2c-main-encode.c Mesa main 70c4c018cbe5b78a1db7e9413bc7e511b366fd95
+SHA256 eb55bfcd21f4da0538b3cd2c84cfe363e390c0ce590b8144463c5dbd8846cf74
+1157:    virgl_encoder_write_dword(ctx->cbuf, fui(state->max_lod));
+1158:    for (i = 0; i <  4; i++)
+1159:       virgl_encoder_write_dword(ctx->cbuf, state->border_color.ui[i]);
+1160:    return 0;
+1161: }
+1162: 
+1163: 
+1164: int virgl_encode_sampler_view(struct virgl_context *ctx,
+1165:                              uint32_t handle,
+1166:                              struct virgl_resource *res,
+1167:                              const struct pipe_sampler_view *state)
+1168: {
+1169:    unsigned elem_size = util_format_get_blocksize(state->format);
+1170:    struct virgl_screen *rs = virgl_screen(ctx->base.screen);
+1171:    uint32_t tmp;
+1172:    uint32_t dword_fmt_target = pipe_to_virgl_format(state->format);
+1173:    virgl_encoder_write_cmd_dword(ctx, VIRGL_CMD0(VIRGL_CCMD_CREATE_OBJECT, VIRGL_OBJECT_SAMPLER_VIEW, VIRGL_OBJ_SAMPLER_VIEW_SIZE));
+1174:    virgl_encoder_write_dword(ctx->cbuf, handle);
+1175:    virgl_encoder_write_res(ctx, res);
+1176:    if (rs->caps.caps.v2.capability_bits & VIRGL_CAP_TEXTURE_VIEW)
+1177:      dword_fmt_target |= (state->target << 24);
+1178:    virgl_encoder_write_dword(ctx->cbuf, dword_fmt_target);
+1179:    if (res->b.target == PIPE_BUFFER) {
+1180:       virgl_encoder_write_dword(ctx->cbuf, state->u.buf.offset / elem_size);
+1181:       virgl_encoder_write_dword(ctx->cbuf, (state->u.buf.offset + state->u.buf.size) / elem_size - 1);
+1182:    } else {
+1183:       if (res->metadata.plane) {
+1184:          assert(state->u.tex.first_layer == 0 && state->u.tex.last_layer == 0);
+1185:          virgl_encoder_write_dword(ctx->cbuf, res->metadata.plane);
+1186:       } else {
+1187:          virgl_encoder_write_dword(ctx->cbuf, state->u.tex.first_layer | state->u.tex.last_layer << 16);
+1188:       }
+1189:       virgl_encoder_write_dword(ctx->cbuf, state->u.tex.first_level | state->u.tex.last_level << 8);
+1190:    }
+
+SOURCE p2c-main-renderer.c virglrenderer main 123e0bc30504c7e745fc008debce30ab0d9a2955
+SHA256 4f5a5bd2a67b9b796948e96bf87c794261b11990d8ce5e5c2716c1154e47ee61
+2711: 
+2712:    if (view->target == PIPE_BUFFER) {
+2713:       view->target = view->texture->target;
+2714: 
+2715:       view->u.buf.first_element = val0;
+2716:       view->u.buf.last_element = val1;
+2717:    } else {
+2718:       view->u.tex.first_layer = val0 & 0xffff;
+2719:       view->u.tex.last_layer = (val0 >> 16) & 0xffff;
+2720:       view->u.tex.first_level = val1 & 0xff;
+2721:       view->u.tex.last_level = (val1 >> 8) & 0xff;
+2722:    }
+2793: 
+2794:       if (view->u.tex.first_layer > 0 || view->u.tex.first_level > 0)
+2795:          needs_view = true;
+2796: 
+2797:       if (needs_view &&
+2798:           has_bit(view->texture->storage_bits, VREND_STORAGE_GL_IMMUTABLE) &&
+2799:           has_feature(feat_texture_view)) {
+2800:         GLenum internalformat = tex_conv_table[format].internalformat;
+2801:         view->levels = (view->u.tex.last_level - view->u.tex.first_level) + 1;
+2802: 
+2803:         int num_layers = view->u.tex.last_layer - view->u.tex.first_layer + 1;
+2804: 
+2805:         if (view->levels == 0 || num_layers <= 0) {
+2806:             vrend_resource_reference(&view->texture, NULL);
+2807:             FREE(view);
+2808:             virgl_error("%s: Invalid number of layers (%d) or zero levels requested\n",
+2809:                         __func__, num_layers);
+2810:             return EINVAL;
+2811:         }
+2879:            glTexParameteri(view->target, GL_TEXTURE_SRGB_DECODE_EXT,
+2880:                             view->srgb_decode);
+2881:         }
+2882:         glBindTexture(view->target, 0);
+2883:       } else if (needs_view && view->u.buf.first_element < ARRAY_SIZE(res->aux_plane_egl_image) &&
+2884:             res->aux_plane_egl_image[view->u.buf.first_element]) {
+2885:         void *image = res->aux_plane_egl_image[view->u.buf.first_element];
+2886:         glGenTextures(1, &view->gl_id);
+2887:         glBindTexture(view->target, view->gl_id);
+2888:         glEGLImageTargetTexture2DOES(view->target, (GLeglImageOES) image);
+2889:         glBindTexture(view->target, 0);
+2890:       }
+2891:    }
+2892: 
+
+SOURCE p2c-main-winsys.c Mesa main
+SHA256 225262525697f2b252fddd56fa05db36ae81ee7d3d8bd8f8d15ae8049d19d246
+489:    struct virgl_drm_winsys *qdws = virgl_drm_winsys(qws);
+490:    struct drm_gem_open open_arg = {};
+491:    struct drm_virtgpu_resource_info info_arg = {};
+492:    struct virgl_hw_res *res = NULL;
+493:    uint32_t handle = whandle->handle;
+494: 
+495:    if (whandle->plane >= VIRGL_MAX_PLANE_COUNT) {
+496:       return NULL;
+497:    }
+498: 
+499:    if (whandle->offset != 0 && whandle->type == WINSYS_HANDLE_TYPE_SHARED) {
+500:       _debug_printf("attempt to import unsupported winsys offset %u\n",
+501:                     whandle->offset);
+502:       return NULL;
+503:    } else if (whandle->type == WINSYS_HANDLE_TYPE_FD) {
+504:       *plane = whandle->plane;
+505:       *stride = whandle->stride;
+506:       *plane_offset = whandle->offset;
+507:       *modifier = whandle->modifier;
+508:    }
+509: 
+510:    mtx_lock(&qdws->bo_handles_mutex);
+
+SOURCE p2c-main-hw.h virglrenderer main
+SHA256 6f60f85fdc4e337fe059eac37176e7ad989bbf8cc0d843251272048d245c079c
+613: #define VIRGL_CAP_V2_BLEND_EQUATION       (1u << 0)
+614: #define VIRGL_CAP_V2_UNTYPED_RESOURCE     (1u << 1)
+615: #define VIRGL_CAP_V2_VIDEO_MEMORY         (1u << 2)
+616: #define VIRGL_CAP_V2_MEMINFO              (1u << 3)
+617: #define VIRGL_CAP_V2_STRING_MARKER        (1u << 4)
+618: #define VIRGL_CAP_V2_DIFFERENT_GPU        (1u << 5)
+619: #define VIRGL_CAP_V2_IMPLICIT_MSAA        (1u << 6)
+620: #define VIRGL_CAP_V2_COPY_TRANSFER_BOTH_DIRECTIONS (1u << 7)
+621: #define VIRGL_CAP_V2_SCANOUT_USES_GBM     (1u << 8)
+622: #define VIRGL_CAP_V2_SSO                  (1u << 9)
+623: #define VIRGL_CAP_V2_TEXTURE_SHADOW_LOD   (1u << 10)
+624: #define VIRGL_CAP_V2_VS_VERTEX_LAYER      (1u << 11)
+625: #define VIRGL_CAP_V2_VS_VIEWPORT_INDEX    (1u << 12)
+626: #define VIRGL_CAP_V2_PIPELINE_STATISTICS_QUERY (1u << 13)
+627: #define VIRGL_CAP_V2_DRAW_PARAMETERS      (1u << 14)
+628: #define VIRGL_CAP_V2_GROUP_VOTE           (1u << 15)
+629: #define VIRGL_CAP_V2_MIRROR_CLAMP_TO_EDGE (1u << 16)
+630: #define VIRGL_CAP_V2_MIRROR_CLAMP         (1u << 17)
+631: #define VIRGL_CAP_V2_RESOURCE_LAYOUT      (1u << 18)
+632: #define VIRGL_CAP_V2_QUERY_FORMAT_MODIFIER (1u << 19)
+
+URL https://gitlab.freedesktop.org/virgl/virglrenderer/-/raw/1.3.0/src/vrend/vrend_renderer.c
+URL https://gitlab.freedesktop.org/virgl/virglrenderer/-/raw/1.3.0/src/vrend/vrend_decode.c
+URL https://gitlab.freedesktop.org/mesa/mesa/-/raw/70c4c018cbe5b78a1db7e9413bc7e511b366fd95/src/gallium/drivers/virgl/virgl_encode.c
+URL https://gitlab.freedesktop.org/virgl/virglrenderer/-/raw/123e0bc30504c7e745fc008debce30ab0d9a2955/src/vrend/vrend_renderer.c

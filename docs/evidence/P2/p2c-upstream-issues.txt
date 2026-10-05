@@ -1,0 +1,307 @@
+URL https://gitlab.freedesktop.org/api/v4/projects/virgl%2Fvirglrenderer/issues/222
+{
+  "id": 41195,
+  "iid": 222,
+  "project_id": 166,
+  "title": "Cannot play yuv data without gbm",
+  "description": "In my environment, the front end plays the YUV format video abnormally. \n\nAfter analysis, it is found that because the backend cannot use GBM, the `aux_plane_egl_image` member in the `vrend_resource` corresponding to YUV is not created.\n\nThe front-end YUV sampler `samplerExternalOES` will be converted into a new fragment shader in mesa. This new fragment shader will use the `aux_plane_egl_image` member of `vrend_resource` as input to calculate rgb.\n\nSo I added a new interface `virgl_renderer_resource_create_panel` to assign eglimage to the `aux_plane_egl_image` member of `vrend_resource`.This interface is called after successfully creating a resource using `virgl_renderer_resource_create`.\n\nIn this way, `aux_plane_egl_image` can be used to implement YUV sampling in `vrend_create_sampler_view`.\n\n\nI want to ask if I can combine the `virgl_renderer_resource_create_panel` function into the library\n\nThe following code is my implementation on 0.8.2\n\n```\ndiff --git a/src/vrend_decode.c b/src/vrend_decode.c\nindex faf2ced..ff533f6 100644\n--- a/src/vrend_decode.c\n+++ b/src/vrend_decode.c\n@@ -2182,7 +2211,7 @@ int vrend_create_sampler_view(struct vrend_context *ctx,\n                             view->srgb_decode);\n         }\n         glBindTexture(view->target, 0);\n-      } else if (needs_view && view->val0 < ARRAY_SIZE(res->aux_plane_egl_image) &&\n+      } else if ((needs_view || res->force_panel) && view->val0 < ARRAY_SIZE(res->aux_plane_egl_image) &&\n             res->aux_plane_egl_image[view->val0]) {\n         void *image = res->aux_plane_egl_image[view->val0];\n         glGenTextures(1, &view->id);\n```\n```\ndiff --git a/src/virglrenderer.c b/src/virglrenderer.c\nindex 8458b21..0f23e19 100644\n--- a/src/virglrenderer.c\n+++ b/src/virglrenderer.c\n@@ -104,6 +104,21 @@ int virgl_renderer_resource_create(struct virgl_renderer_resource_create_args *a\n    return virgl_renderer_resource_create_internal(args, iov, num_iovs, NULL);\n }\n \n+int virgl_renderer_resource_create_panel(uint32_t res_handle, int panel, void *image)\n+{\n+   struct virgl_resource *res = virgl_resource_lookup(res_handle);\n+   struct vrend_resource *gr = NULL;\n+\n+   if (!res || panel >= VIRGL_GBM_MAX_PLANES)\n+      return -1;\n+\n+   gr = (struct vrend_resource *)res->pipe_resource;\n+   gr->aux_plane_egl_image[panel] = image;\n+   gr->force_panel = true;\n+\n+   return 0;\n+}\n+\n```\n```\ndiff --git a/src/virglrenderer.h b/src/virglrenderer.h\nindex e7592a8..8931aae 100644\n--- a/src/virglrenderer.h\n+++ b/src/virglrenderer.h\n@@ -175,6 +175,7 @@ struct virgl_renderer_supported_structures {\n typedef void (*virgl_debug_callback_type)(const char *fmt, va_list ap);\n \n VIRGL_EXPORT int virgl_renderer_resource_create(struct virgl_renderer_resource_create_args *args, struct iovec *iov, uint32_t num_iovs);\n+VIRGL_EXPORT int virgl_renderer_resource_create_panel(uint32_t res_handle, int panel, void *image);\n VIRGL_EXPORT int virgl_renderer_resource_import_eglimage(struct virgl_renderer_resource_create_args *args, void *image);\n VIRGL_EXPORT void virgl_renderer_resource_unref(uint32_t res_handle);\n \ndiff --git a/src/vrend_debug.c b/src/vrend_debug.c\n```\n```\ndiff --git a/src/vrend_renderer.h b/src/vrend_renderer.h\nindex da4ffe9..8ccf89c 100644\n--- a/src/vrend_renderer.h\n+++ b/src/vrend_renderer.h\n@@ -88,6 +88,7 @@ struct vrend_resource {\n    uint64_t mipmap_offsets[VR_MAX_TEXTURE_2D_LEVELS];\n    void *gbm_bo, *egl_image;\n    void *aux_plane_egl_image[VIRGL_GBM_MAX_PLANES];\n+   bool force_panel;\n    \n    uint64_t size;\n    GLbitfield buffer_storage_flags;\n```",
+  "state": "closed",
+  "created_at": "2021-05-28T06:43:02.731Z",
+  "updated_at": "2021-06-10T09:13:36.641Z",
+  "closed_at": "2021-06-10T09:13:36.635Z",
+  "closed_by": {
+    "id": 27755,
+    "username": "JN-Chen",
+    "public_email": "",
+    "name": "JN-Chen",
+    "state": "active",
+    "locked": false,
+    "avatar_url": "https://gitlab.freedesktop.org/uploads/-/system/user/avatar/27755/avatar.png?v=1731374085",
+    "web_url": "https://gitlab.freedesktop.org/JN-Chen"
+  },
+  "labels": [],
+  "milestone": null,
+  "assignees": [],
+  "author": {
+    "id": 27755,
+    "username": "JN-Chen",
+    "public_email": "",
+    "name": "JN-Chen",
+    "state": "active",
+    "locked": false,
+    "avatar_url": "https://gitlab.freedesktop.org/uploads/-/system/user/avatar/27755/avatar.png?v=1731374085",
+    "web_url": "https://gitlab.freedesktop.org/JN-Chen"
+  },
+  "type": "ISSUE",
+  "assignee": null,
+  "user_notes_count": 0,
+  "merge_requests_count": 0,
+  "upvotes": 0,
+  "downvotes": 0,
+  "start_date": null,
+  "due_date": null,
+  "confidential": false,
+  "discussion_locked": null,
+  "issue_type": "issue",
+  "web_url": "https://gitlab.freedesktop.org/virgl/virglrenderer/-/work_items/222",
+  "time_stats": {
+    "time_estimate": 0,
+    "total_time_spent": 0,
+    "human_time_estimate": null,
+    "human_total_time_spent": null
+  },
+  "task_completion_status": {
+    "count": 0,
+    "completed_count": 0
+  },
+  "has_tasks": true,
+  "task_status": "0 of 0 checklist items completed",
+  "_links": {
+    "self": "https://gitlab.freedesktop.org/api/v4/projects/166/issues/222",
+    "notes": "https://gitlab.freedesktop.org/api/v4/projects/166/issues/222/notes",
+    "award_emoji": "https://gitlab.freedesktop.org/api/v4/projects/166/issues/222/award_emoji",
+    "project": "https://gitlab.freedesktop.org/api/v4/projects/166",
+    "closed_as_duplicate_of": null
+  },
+  "references": {
+    "short": "#222",
+    "relative": "#222",
+    "full": "virgl/virglrenderer#222"
+  },
+  "severity": "UNKNOWN",
+  "subscribed": false,
+  "moved_to_id": null,
+  "imported": false,
+  "imported_from": "none",
+  "service_desk_reply_to": null
+}
+URL https://gitlab.freedesktop.org/api/v4/projects/virgl%2Fvirglrenderer/merge_requests/310
+{
+  "id": 14172,
+  "iid": 310,
+  "project_id": 166,
+  "title": "vrend: Support emulating planar image sampling",
+  "description": "Mesa emulates planar format sampling with per-plane samplers. With this\nchange, the guest can pass the plane index when creating a sampler view\nfrom a virgl resource to create a per-plane sampler view. The index can\nbe passed in place of the texture layer, as that will always be 0 for\nplanar images.\n\nSigned-off-by: David Stevens <stevensd@chromium.org>",
+  "state": "merged",
+  "created_at": "2019-10-02T04:51:33.646Z",
+  "updated_at": "2019-10-23T00:07:36.916Z",
+  "merged_by": {
+    "id": 5804,
+    "username": "lepton",
+    "public_email": "",
+    "name": "Lepton Wu",
+    "state": "active",
+    "locked": false,
+    "avatar_url": "https://secure.gravatar.com/avatar/a0e646fae55279220274809feb7a0f9e9587396f5e36556e484d6a5c761a086c?s=80&d=identicon",
+    "web_url": "https://gitlab.freedesktop.org/lepton"
+  },
+  "merge_user": {
+    "id": 5804,
+    "username": "lepton",
+    "public_email": "",
+    "name": "Lepton Wu",
+    "state": "active",
+    "locked": false,
+    "avatar_url": "https://secure.gravatar.com/avatar/a0e646fae55279220274809feb7a0f9e9587396f5e36556e484d6a5c761a086c?s=80&d=identicon",
+    "web_url": "https://gitlab.freedesktop.org/lepton"
+  },
+  "merged_at": "2019-10-23T00:07:36.938Z",
+  "closed_by": null,
+  "closed_at": null,
+  "target_branch": "master",
+  "source_branch": "plane-sample-view",
+  "user_notes_count": 30,
+  "upvotes": 0,
+  "downvotes": 0,
+  "author": {
+    "id": 8515,
+    "username": "dgstevens",
+    "public_email": "",
+    "name": "David Stevens",
+    "state": "active",
+    "locked": false,
+    "avatar_url": "https://secure.gravatar.com/avatar/0b4f5bc5832043f48f30476c14349e946708fa2babad69065638c94d4e73c9f3?s=80&d=identicon",
+    "web_url": "https://gitlab.freedesktop.org/dgstevens"
+  },
+  "assignees": [],
+  "assignee": null,
+  "reviewers": [],
+  "source_project_id": 4184,
+  "target_project_id": 166,
+  "labels": [],
+  "draft": false,
+  "imported": false,
+  "imported_from": "none",
+  "work_in_progress": false,
+  "milestone": null,
+  "merge_when_pipeline_succeeds": false,
+  "merge_status": "can_be_merged",
+  "detailed_merge_status": "not_open",
+  "merge_after": null,
+  "sha": "77d268182379f73849ebd92af41acfce05d51795",
+  "merge_commit_sha": null,
+  "squash_commit_sha": null,
+  "discussion_locked": null,
+  "should_remove_source_branch": null,
+  "force_remove_source_branch": true,
+  "prepared_at": "2019-10-02T04:51:33.646Z",
+  "allow_collaboration": true,
+  "allow_maintainer_to_push": true,
+  "reference": "!310",
+  "references": {
+    "short": "!310",
+    "relative": "!310",
+    "full": "virgl/virglrenderer!310"
+  },
+  "web_url": "https://gitlab.freedesktop.org/virgl/virglrenderer/-/merge_requests/310",
+  "time_stats": {
+    "time_estimate": 0,
+    "total_time_spent": 0,
+    "human_time_estimate": null,
+    "human_total_time_spent": null
+  },
+  "squash": false,
+  "squash_on_merge": false,
+  "task_completion_status": {
+    "count": 0,
+    "completed_count": 0
+  },
+  "has_conflicts": false,
+  "blocking_discussions_resolved": true,
+  "subscribed": false,
+  "changes_count": "6",
+  "latest_build_started_at": "2019-10-22T22:28:48.604Z",
+  "latest_build_finished_at": "2019-10-22T23:43:26.481Z",
+  "first_deployed_to_production_at": null,
+  "pipeline": {
+    "id": 72619,
+    "iid": 19,
+    "project_id": 4184,
+    "sha": "77d268182379f73849ebd92af41acfce05d51795",
+    "ref": "plane-sample-view",
+    "status": "success",
+    "source": "merge_request_event",
+    "created_at": "2019-10-22T22:27:51.857Z",
+    "updated_at": "2019-10-22T23:43:26.498Z",
+    "web_url": "https://gitlab.freedesktop.org/dgstevens/virglrenderer/-/pipelines/72619"
+  },
+  "head_pipeline": {
+    "id": 72619,
+    "iid": 19,
+    "project_id": 4184,
+    "sha": "77d268182379f73849ebd92af41acfce05d51795",
+    "ref": "plane-sample-view",
+    "status": "success",
+    "source": "merge_request_event",
+    "created_at": "2019-10-22T22:27:51.857Z",
+    "updated_at": "2019-10-22T23:43:26.498Z",
+    "web_url": "https://gitlab.freedesktop.org/dgstevens/virglrenderer/-/pipelines/72619",
+    "before_sha": "0000000000000000000000000000000000000000",
+    "tag": false,
+    "yaml_errors": null,
+    "user": {
+      "id": 5804,
+      "username": "lepton",
+      "public_email": "",
+      "name": "Lepton Wu",
+      "state": "active",
+      "locked": false,
+      "avatar_url": "https://secure.gravatar.com/avatar/a0e646fae55279220274809feb7a0f9e9587396f5e36556e484d6a5c761a086c?s=80&d=identicon",
+      "web_url": "https://gitlab.freedesktop.org/lepton"
+    },
+    "started_at": "2019-10-22T22:28:48.604Z",
+    "finished_at": "2019-10-22T23:43:26.481Z",
+    "committed_at": null,
+    "duration": 4476,
+    "queued_duration": 56,
+    "coverage": null,
+    "detailed_status": {
+      "icon": "status_success",
+      "text": "Passed",
+      "label": "passed",
+      "group": "success",
+      "tooltip": "passed",
+      "has_details": true,
+      "details_path": "/dgstevens/virglrenderer/-/pipelines/72619",
+      "illustration": null,
+      "favicon": "/assets/ci_favicons/favicon_status_success-8451333011eee8ce9f2ab25dc487fe24a8758c694827a582f17f42b0a90446a2.png"
+    },
+    "archived": false
+  },
+  "diff_refs": {
+    "base_sha": "cf423460fd5cfda5c0b72e498f69a8045e4bb34e",
+    "head_sha": "77d268182379f73849ebd92af41acfce05d51795",
+    "start_sha": "cf423460fd5cfda5c0b72e498f69a8045e4bb34e"
+  },
+  "merge_error": null,
+  "first_contribution": false,
+  "user": {
+    "can_merge": false
+  }
+}
+URL https://gitlab.freedesktop.org/api/v4/projects/virgl%2Fvirglrenderer/merge_requests/310/commits
+[
+  {
+    "id": "77d268182379f73849ebd92af41acfce05d51795",
+    "short_id": "77d26818",
+    "created_at": "2019-10-22T22:27:48.000+00:00",
+    "parent_ids": [
+      "cf423460fd5cfda5c0b72e498f69a8045e4bb34e"
+    ],
+    "title": "vrend: support emulating planar image sampling",
+    "message": "vrend: support emulating planar image sampling\n\nMesa emulates planar format sampling with per-plane samplers. With this\nchange, the guest can pass the plane index when creating a sampler view\nfrom a virgl resource to create a per-plane sampler view. The index can\nbe passed in place of the texture layer, as that will always be 0 for\nplanar images.\n\nSigned-off-by: David Stevens <stevensd@chromium.org>\nReviewed-by: Lepton Wu <lepton@chromium.org>\n",
+    "author_name": "David Stevens",
+    "author_email": "stevensd@chromium.org",
+    "authored_date": "2019-10-17T10:54:28.000+09:00",
+    "committer_name": "Lepton Wu",
+    "committer_email": "lepton@chromium.org",
+    "committed_date": "2019-10-22T22:27:48.000+00:00",
+    "trailers": {},
+    "extended_trailers": {},
+    "web_url": "https://gitlab.freedesktop.org/virgl/virglrenderer/-/commit/77d268182379f73849ebd92af41acfce05d51795"
+  }
+]
+URL https://gitlab.freedesktop.org/api/v4/projects/mesa%2Fmesa/repository/commits/0466239aae7cb38f8e34ef5a778da45035c30f49
+{
+  "id": "0466239aae7cb38f8e34ef5a778da45035c30f49",
+  "short_id": "0466239a",
+  "created_at": "2019-11-08T17:06:56.000+00:00",
+  "parent_ids": [
+    "084431ce45b3421ef224a16652559713151b122a"
+  ],
+  "title": "virgl: support emulating planar image sampling",
+  "message": "virgl: support emulating planar image sampling\n\nMesa emulates planar format sampling with per-plane samplers. Virgl now\nsupports this by allowing the plane index to be passed when creating a\nsampler view from a planar image. With this change, mesa now passes that\ninformation to virgl.\n\nSigned-off-by: David Stevens <stevensd@chromium.org>\nReviewed-by: Lepton Wu <lepton@chromium.org>\n",
+  "author_name": "David Stevens",
+  "author_email": "stevensd@chromium.org",
+  "authored_date": "2019-10-23T11:06:17.000+09:00",
+  "committer_name": "Gert Wollny",
+  "committer_email": "gert.wollny@collabora.com",
+  "committed_date": "2019-11-08T17:06:56.000+00:00",
+  "trailers": {},
+  "extended_trailers": {},
+  "web_url": "https://gitlab.freedesktop.org/mesa/mesa/-/commit/0466239aae7cb38f8e34ef5a778da45035c30f49",
+  "stats": {
+    "additions": 6,
+    "deletions": 1,
+    "total": 7
+  },
+  "status": null,
+  "project_id": 176,
+  "last_pipeline": null
+}
+URL https://gitlab.freedesktop.org/api/v4/projects/mesa%2Fmesa/repository/commits/0466239aae7cb38f8e34ef5a778da45035c30f49/diff
+[
+  {
+    "diff": "@@ -879,7 +879,12 @@ int virgl_encode_sampler_view(struct virgl_context *ctx,\n       virgl_encoder_write_dword(ctx->cbuf, state->u.buf.offset / elem_size);\n       virgl_encoder_write_dword(ctx->cbuf, (state->u.buf.offset + state->u.buf.size) / elem_size - 1);\n    } else {\n-      virgl_encoder_write_dword(ctx->cbuf, state->u.tex.first_layer | state->u.tex.last_layer << 16);\n+      if (res->metadata.plane) {\n+         debug_assert(state->u.tex.first_layer == 0 && state->u.tex.last_layer == 0);\n+         virgl_encoder_write_dword(ctx->cbuf, res->metadata.plane);\n+      } else {\n+         virgl_encoder_write_dword(ctx->cbuf, state->u.tex.first_layer | state->u.tex.last_layer << 16);\n+      }\n       virgl_encoder_write_dword(ctx->cbuf, state->u.tex.first_level | state->u.tex.last_level << 8);\n    }\n    tmp = VIRGL_OBJ_SAMPLER_VIEW_SWIZZLE_R(state->swizzle_r) |\n",
+    "collapsed": false,
+    "too_large": false,
+    "new_path": "src/gallium/drivers/virgl/virgl_encode.c",
+    "old_path": "src/gallium/drivers/virgl/virgl_encode.c",
+    "a_mode": "100644",
+    "b_mode": "100644",
+    "new_file": false,
+    "renamed_file": false,
+    "deleted_file": false,
+    "generated_file": null
+  }
+]

@@ -1,0 +1,11 @@
+2026-10-06T03:49:20.233771+09:00 C:\Users\32170336\AppData\Local\Open Mobile Emulator\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+2026-10-06T03:49:20.236031+09:00 C:\Users\32170336\AppData\Local\Open Mobile Emulator\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+2026-10-06T03:49:20.238985+09:00 C:\Users\32170336\AppData\Local\Open Mobile Emulator\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+2026-10-06T03:49:20.239356+09:00 C:\Users\32170336\AppData\Local\Open Mobile Emulator\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+2026-10-06T03:49:20.240266+09:00 C:\Users\32170336\AppData\Local\Open Mobile Emulator\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+2026-10-06T03:49:20.240630+09:00 C:\Users\32170336\AppData\Local\Open Mobile Emulator\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+2026-10-06T03:49:20.241603+09:00 C:\Users\32170336\AppData\Local\Open Mobile Emulator\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+2026-10-06T03:49:20.241959+09:00 C:\Users\32170336\AppData\Local\Open Mobile Emulator\qemu\bin\qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+2026-10-06T03:49:42.351432+09:00 vrend_create_sampler_view: Invalid number of layers (-1) or zero levels requested
+2026-10-06T03:49:42.351504+09:00 context 16 failed to dispatch CREATE_OBJECT: 22
+2026-10-06T03:49:42.351516+09:00 vrend_decode_ctx_submit_cmd: context error reported 16 "RenderThread" Illegal command buffer 394753

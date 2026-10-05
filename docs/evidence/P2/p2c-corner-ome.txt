@@ -1,0 +1,16 @@
+HOST_START=2026-10-06T03:49:41.954921+09:00
+10-05 18:49:43.996  3450  3450 I OMEVideo: t=2ms start mode=gl
+10-05 18:49:44.035  3450  3466 I OMEVideo: t=40ms gl renderer=virgl (NVIDIA GeForce RTX 2080 SUPER/PCIe/SSE2) version=OpenGL ES 3.2 Mesa 24.3.3
+10-05 18:49:44.087  3450  3450 I OMEVideo: t=92ms prepared width=1600 height=1024 durationMs=10000
+10-05 18:49:44.089  3450  3466 I OMEVideo: t=94ms first-frame centre=0,0,0 corner=0,255,0
+10-05 18:49:44.263  3450  3450 I OMEVideo: t=268ms info what=3 extra=0
+10-05 18:49:45.112  3450  3466 I OMEVideo: t=1117ms frames=26 total=26 centre=0,0,0 corner=0,0,0 glError=0
+10-05 18:49:46.116  3450  3466 I OMEVideo: t=2122ms frames=30 total=56 centre=0,0,0 corner=0,0,0 glError=0
+10-05 18:49:47.144  3450  3466 I OMEVideo: t=3149ms frames=31 total=87 centre=0,0,0 corner=0,255,0 glError=0
+10-05 18:49:48.134  3450  3466 I OMEVideo: t=4139ms frames=30 total=117 centre=0,0,0 corner=0,255,0 glError=0
+10-05 18:49:49.169  3450  3466 I OMEVideo: t=5174ms frames=31 total=148 centre=0,0,0 corner=0,0,0 glError=0
+10-05 18:49:50.182  3450  3466 I OMEVideo: t=6187ms frames=30 total=178 centre=0,0,0 corner=0,0,0 glError=0
+10-05 18:49:51.183  3450  3466 I OMEVideo: t=7188ms frames=30 total=208 centre=0,0,0 corner=0,0,0 glError=0
+10-05 18:49:52.215  3450  3466 I OMEVideo: t=8220ms frames=31 total=239 centre=0,0,0 corner=0,0,0 glError=0
+10-05 18:49:53.217  3450  3466 I OMEVideo: t=9222ms frames=30 total=269 centre=0,0,0 corner=0,0,0 glError=0
+10-05 18:49:54.199  3450  3450 I OMEVideo: t=10204ms completed frames=297

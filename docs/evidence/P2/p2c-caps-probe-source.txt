@@ -1,0 +1,30 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+#include <stdio.h>
+#include <stdint.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <drm/virtgpu_drm.h>
+#include "virgl_hw.h"
+int main(void) {
+    int fd = open("/dev/dri/renderD128", O_RDWR | O_CLOEXEC);
+    if (fd < 0) { perror("open render node"); return 1; }
+    union virgl_caps caps = {0};
+    struct drm_virtgpu_get_caps arg = { .cap_set_id = 2, .cap_set_ver = 2,
+        .addr = (uintptr_t)&caps, .size = sizeof(caps) };
+    int ret = ioctl(fd, DRM_IOCTL_VIRTGPU_GET_CAPS, &arg);
+    printf("GET_CAPS id=2 version=2 size=%zu ret=%d errno=%d %s\n", sizeof(caps), ret, errno, strerror(errno));
+    if (ret) return 2;
+    printf("max_version=%u host_feature_check_version=%u\n",caps.max_version,caps.v2.host_feature_check_version);
+    printf("capability_bits=0x%08x capability_bits_v2=0x%08x\n",caps.v2.capability_bits,caps.v2.capability_bits_v2);
+    printf("TEXTURE_VIEW=%u UNTYPED_RESOURCE=%u\n",!!(caps.v2.capability_bits & VIRGL_CAP_TEXTURE_VIEW),!!(caps.v2.capability_bits_v2 & VIRGL_CAP_V2_UNTYPED_RESOURCE));
+    unsigned formats[]={VIRGL_FORMAT_YV12,VIRGL_FORMAT_NV12,VIRGL_FORMAT_R8_UNORM,VIRGL_FORMAT_R8G8_UNORM,VIRGL_FORMAT_ASTC_4x4,VIRGL_FORMAT_ETC2_RGB8};
+    for(unsigned i=0;i<sizeof(formats)/sizeof(formats[0]);i++) {
+        unsigned f=formats[i];
+        printf("format=%u sampler=%u render=%u scanout=%u\n",f,!!(caps.v1.sampler.bitmask[f/32]&(1u<<(f%32))),!!(caps.v1.render.bitmask[f/32]&(1u<<(f%32))),!!(caps.v2.scanout.bitmask[f/32]&(1u<<(f%32))));
+    }
+    for(unsigned i=0;i<sizeof(caps)/4;i++) printf("word[%u]=%08x\n",i,((uint32_t*)&caps)[i]);
+    close(fd);return 0;
+}

@@ -165,3 +165,14 @@ SIGKILL(status 9)로 끝났다. Unity 로그에 `Title:vwm()`. 게임 논리는 
   그 값의 하위 16비트를 첫 레이어, 상위 16비트를 마지막 레이어로 읽는다. 세 번째 평면(2)이면 첫 레이어 2, 마지막 0이 되어 `Invalid number of layers (-1)`과 맞는다
   (소스 대조, 명령 버퍼를 직접 잡아 본 것은 아니다, `p2b-yuv-source.txt`).
 - 이 오류가 게임 화면 전체를 검게 만드는지는 아직 확인하지 않았다. 판별기에 매 프레임 초록으로 지우는 구석을 더해, 영상 오류 뒤 그 GL 컨텍스트 전체가 그리기를 멈추는지 본다.
+
+## 컨텍스트가 죽는다: 원인 확정 (2026-10-06, p2c)
+
+- virglrenderer 1.3.0은 명령 해석 오류가 나면 `ctx->in_error = true`를 기록하고, 그 뒤 그 컨텍스트의 clear는 바로 돌아가며 draw는 `ENOTRECOVERABLE`이다
+  (`vrend_renderer.c`, `vrend_decode.c`, `p2c-context-and-plane-source.txt`). 오류 상태를 되돌리는 코드는 없다.
+- 판별기의 초록 구석은 첫 프레임에 `0,255,0`, 호스트가 `Invalid number of layers (-1)`로 컨텍스트 오류를 낸 뒤 `0,0,0`(`p2c-corner-ome.txt`, `p2c-qemu-timed-stderr.txt`).
+  영상 텍스처만이 아니라 그 GL 컨텍스트의 그리기 전체가 멈춘다. 게임도 같은 오류를 내므로 타이틀이 검은 이유와 맞는다.
+- 호스트가 평면별 텍스처를 만드는 길(`aux_plane_egl_image`)은 GBM 할당이 켜진 빌드에서만 채워진다. 윈도우 호스트에는 GBM이 없다. 게스트가 알아낸 호스트 능력:
+  `SCANOUT_USES_GBM=0`, YV12와 NV12 sampler 0, R8 sampler 1(`p2c-host-caps.txt`). 상류 Mesa main과 virglrenderer main도 이 경우를 고치지 않았고,
+  관련 이슈 #222("Cannot play yuv data without gbm")와 #586(열림)이 있다.
+- A13은 디코더가 먼저 죽어 이 오류에 이르지 않으므로 영상만 건너뛰고 타이틀이 그려진다.
