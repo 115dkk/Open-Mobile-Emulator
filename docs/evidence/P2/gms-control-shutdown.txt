@@ -1,0 +1,17 @@
+QEMU_NORMAL_SHUTDOWN=PASS PID=16496
+
+Name                   Length
+----                   ------
+boot-args.txt            1163
+disk.qcow2         6144131072
+efivars.fd             540672
+initrd.img            8492807
+install-args.txt         1110
+install-initrd.img    8504552
+install-serial.txt      38830
+kernel               16278528
+qemu.pid                    7
+
+
+Free : 32020832256
+

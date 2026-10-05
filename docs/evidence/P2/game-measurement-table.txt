@@ -78,3 +78,17 @@ Unity log: Firebase modules failed to initialize: messaging (missing dependency)
 전투/10분 플레이/정상 게임 재실행 시나리오는 미완료, 성능 비교 불가.
 원문 game-jni6-three-minute-logcat.txt, jni6-cross-after-logcat.txt.
 승인한 system.before-jni2.img는 jni6 업데이트 도우미가 삭제했고 /data 사용량 약 15GB에서 10GB로 감소.
+
+GMS 대조 실험 (2026-10-06)
+공식 Bliss 16.9.7 GApps ISO SHA256 17137711fb42236640ac6fe4421fcb3bd15710065fcf75c20807c018f42e3751 재확인.
+독립 A13 디스크, libndk_translation.so, 같은 APK 네 개와 게임 버전 10644.
+GMS 켬: 알림 거부 뒤 검은 인트로를 탭하면 타이틀과 서버의 업데이트 필수 알림까지 진행.
+현재 서버가 10644 업데이트를 요구하여 리소스 다운로드 안내까지는 검증하지 못함. 스토어 이동이나 버전 검사 우회 없음.
+게임만 pm clear 후 com.google.android.gms만 disable-user: 같은 권한 선택과 탭 뒤 흰 화면 재현.
+GSF는 끄지 않음. GMS 사용 불가만으로 같은 증상이 발생.
+GMS 끔 로그: Firebase modules failed to initialize: messaging (missing dependency), Crashlytics TypeInitializationException.
+A15 Digitalis 무GMS 로그와 같은 오류. GMS 켬에서는 이 messaging 의존성 오류 없음.
+따라서 흰 화면은 Digitalis에만 있는 문제가 아니며 GMS 사용 불가에 따른 초기화 실패로 재현됨.
+Digitalis 전투/장시간 호환성이 검증됐다는 뜻은 아님.
+A13 control 디스크 6144131072 bytes, GMS disabled-user 상태로 보존, QEMU 정상 종료.
+다음 진행은 GMS 구성 정책과 최신 APK 확보에 관한 사용자 결정 사항.

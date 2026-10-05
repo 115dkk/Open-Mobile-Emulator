@@ -1,0 +1,15 @@
+libndk_translation.so
+
+package:org.lineageos.updater
+package:com.android.bluetooth
+package:com.android.nfc
+package:org.zeroxlab.util.tscal
+
+Starting: Intent { cmp=com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity }
+Status: ok
+LaunchState: COLD
+Activity: com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity
+TotalTime: 804
+WaitTime: 806
+Complete
+

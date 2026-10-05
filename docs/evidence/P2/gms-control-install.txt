@@ -1,0 +1,31 @@
+Formatting 'C:\Users\32170336\AppData\Local/OpenMobileEmulator/p2/a13/disk.qcow2', fmt=qcow2 cluster_size=65536 extended_l2=off compression_type=zlib size=34359738368 lazy_refcounts=off refcount_bits=16
+A13_install PID=31360
+qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+OME-INSTALL start disk=/dev/vda dir=ome kernel=6.1.112-gloria-xanmod1
+OME-INSTALL efi=64
+OME-INSTALL env legacy
+OME-INSTALL step tools 1
+OME-INSTALL tools sgdisk=/bin/sgdisk pv=/bin/pv mke2fs=/system/bin/mke2fs mkfs.ext3=/system/bin/mkfs.ext3 mkfs.ext4=/system/bin/mkfs.ext4 rsync=/system/system_ext/bin/rsync
+OME-INSTALL source kernel=16278528 initrd=8492807 system=4718592000
+OME-INSTALL step partition 5
+OME-INSTALL step format 10
+OME-INSTALL step copy 15
+OME-INSTALL step copy 21
+OME-INSTALL step copy 27
+OME-INSTALL step copy 34
+OME-INSTALL step copy 41
+OME-INSTALL step copy 48
+OME-INSTALL step copy 54
+OME-INSTALL step copy 62
+OME-INSTALL step copy 84
+OME-INSTALL step copy 90
+OME-INSTALL step finish 92
+OME-INSTALL df Filesystem           1K-blocks      Used Available Use% Mounted on
+OME-INSTALL done

@@ -1,0 +1,7 @@
+NO_WINDOWS_JNI5_COPY
+2965128424	/home/ome/bliss/dist/20261006-db973c9-jni5-digitalis
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sde       1007G  312G  645G  33% /
+C:\             932G  896G   37G  97% /mnt/c
+C_FREE_BEFORE=38702739456 AFTER=38702211072
+A13_ISO=C:\Users\32170336\AppData\Local\OpenMobileEmulator\artifacts\Bliss-v16.9.7-x86_64-OFFICIAL-gapps-20241011.iso SHA256=17137711fb42236640ac6fe4421fcb3bd15710065fcf75c20807c018f42e3751 SIZE=2429550592

@@ -97,3 +97,17 @@ ISO `OME-api35-20261005-jni1-digitalis.iso` SHA-256 `9bb72cc07bba1fa1609faf020a4
 리소스 내려받기 안내가 나오지 않았다. 프로세스는 살아 있다. logcat에 `Firebase modules failed to initialize: messaging (missing dependency)`,
 Crashlytics의 `TypeInitializationException`, `com.google.android.gms` 없음이 있다. 이 이미지에는 구글 앱이 없다. 흰 화면의 원인이 GMS 부재인지
 번역기 결함인지는 아직 가르지 못했다(`game-jni6-*`).
+
+## 대조 실험: 흰 화면은 GMS 부재 때문 (2026-10-06)
+
+공식 Bliss 16.9.7 GApps ISO(SHA-256 `17137711…e3751`, 매니페스트와 일치)를 제품 도우미의 레거시 길로 scratch 디스크에 설치하고 같은 APK로 시험했다.
+
+| 조건 | 화면 | Firebase messaging |
+|---|---|---|
+| A13 공식, libndk, GMS 켬 | 권한 → 인트로 → 타이틀과 서버의 업데이트 필수 알림 | 오류 없음 |
+| 같은 디스크, 게임 데이터만 지우고 `pm disable-user com.google.android.gms` | 권한 뒤 흰 화면 | `missing dependency`, Crashlytics `TypeInitializationException` |
+| A15 자체 이미지, Digitalis jni6, GMS 없음 | 권한 뒤 흰 화면 | 같은 오류 |
+
+GMS를 쓸 수 없으면 트릭컬은 초기화를 마치지 못한다. 흰 화면은 Digitalis의 결함이 아니다. 같은 API 35에서 GMS가 있을 때 그 뒤가 도는지는 아직 확인하지 않았다.
+서버는 10644에 업데이트를 요구한다("새로운 버전이 확인되었습니다. 안정적인 서비스 이용을 위하여 스토어로 이동하여 업데이트 해주세요.", `game-gms-on-prompt.png`).
+다음 게임 시험에는 최신 APK가 필요하다.

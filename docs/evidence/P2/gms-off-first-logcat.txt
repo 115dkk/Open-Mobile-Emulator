@@ -1,0 +1,511 @@
+--------- beginning of main
+10-06 01:00:21.892  2498  2742 I Finsky  : [38] rht.apply(84): SCH: Scheduling 1 system job(s)
+10-06 01:00:21.892  2498  2742 I Finsky  : [38] rht.apply(90): SCH: Scheduling system job Id: 9014, L: 59731, D: 59731, C: false, I: false, N: 0
+--------- beginning of system
+10-06 01:00:21.917  1027  1040 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity} from uid 2000
+10-06 01:00:21.917  1027  1040 D CompatibilityChangeReporter: Compat change id reported: 265464455; UID 10282; state: DISABLED
+10-06 01:00:21.917  1027  1040 D CompatibilityChangeReporter: Compat change id reported: 265452344; UID 10282; state: DISABLED
+10-06 01:00:21.917  1027  1040 D CompatibilityChangeReporter: Compat change id reported: 266124927; UID 10282; state: DISABLED
+10-06 01:00:21.917  1027  1040 D CompatibilityChangeReporter: Compat change id reported: 265451093; UID 10282; state: DISABLED
+10-06 01:00:21.917  1027  1040 D CompatibilityChangeReporter: Compat change id reported: 265456536; UID 10282; state: DISABLED
+10-06 01:00:21.917  1027  1040 D CompatibilityChangeReporter: Compat change id reported: 255940284; UID 10282; state: DISABLED
+10-06 01:00:21.917  1027  1040 D CompatibilityChangeReporter: Compat change id reported: 236283604; UID 10282; state: DISABLED
+10-06 01:00:21.917  1027  1040 D CompatibilityChangeReporter: Compat change id reported: 263959004; UID 10282; state: DISABLED
+10-06 01:00:21.917  1027  1040 D CompatibilityChangeReporter: Compat change id reported: 264304459; UID 10282; state: DISABLED
+10-06 01:00:21.917  1027  1040 D CompatibilityChangeReporter: Compat change id reported: 264301586; UID 10282; state: DISABLED
+10-06 01:00:21.917  1027  1040 D CompatibilityChangeReporter: Compat change id reported: 254631730; UID 10282; state: DISABLED
+10-06 01:00:21.917  1027  1040 D CompatibilityChangeReporter: Compat change id reported: 273509367; UID 10282; state: DISABLED
+10-06 01:00:21.917  1027  1040 D CompatibilityChangeReporter: Compat change id reported: 263259275; UID 10282; state: DISABLED
+10-06 01:00:21.919  1027  1040 D CompatibilityChangeReporter: Compat change id reported: 194480991; UID 10282; state: ENABLED
+10-06 01:00:21.920  1027  1040 D CompatibilityChangeReporter: Compat change id reported: 184838306; UID 10282; state: DISABLED
+10-06 01:00:21.920  1027  1040 D CompatibilityChangeReporter: Compat change id reported: 185004937; UID 10282; state: DISABLED
+10-06 01:00:21.922  1027  1040 D CompatibilityChangeReporter: Compat change id reported: 205907456; UID 10282; state: ENABLED
+10-06 01:00:21.922  1027  1040 D ActivityTrigger: ActivityTrigger activityPauseTrigger 
+10-06 01:00:21.924  1027  1045 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 10282; state: DISABLED
+10-06 01:00:21.924  1027  1045 D CompatibilityChangeReporter: Compat change id reported: 177438394; UID 10282; state: DISABLED
+10-06 01:00:21.924  1027  1045 D CompatibilityChangeReporter: Compat change id reported: 135772972; UID 10282; state: DISABLED
+10-06 01:00:21.925  1027  1045 D CompatibilityChangeReporter: Compat change id reported: 135754954; UID 10282; state: ENABLED
+10-06 01:00:21.925  1519  1635 W Parcel  : Expecting binder but got null!
+10-06 01:00:21.925  1027  1053 D CompatibilityChangeReporter: Compat change id reported: 143937733; UID 10282; state: ENABLED
+10-06 01:00:21.928   838   838 D Zygote  : Forked child process 5264
+10-06 01:00:21.928  1027  1053 I ActivityManager: Start proc 5264:com.epidgames.trickcalrevive/u0a282 for next-top-activity {com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity}
+10-06 01:00:21.938  1519  1635 E OpenGLRenderer: Unable to match the desired swap behavior.
+10-06 01:00:21.961  5264  5264 W .trickcalrevive: Unexpected CPU variant for x86: generic.
+10-06 01:00:21.961  5264  5264 W .trickcalrevive: Known variants: atom, sandybridge, silvermont, kabylake, default
+10-06 01:00:21.985  5264  5264 I ndk_translation: Initialized NDK translation (aarch64), version 0.2.3
+10-06 01:00:22.015  5264  5264 E .trickcalrevive: Not starting debugger since process cannot load the jdwp agent.
+10-06 01:00:22.019  1027  1754 D CompatibilityInfo: mCompatibilityFlags - 4
+10-06 01:00:22.019  1027  1754 D CompatibilityInfo: applicationDensity - 160
+10-06 01:00:22.019  1027  1754 D CompatibilityInfo: applicationScale - 1.0
+10-06 01:00:22.019  5264  5279 E ashmem  : memfd: ro.vndk.version not defined or invalid (), this is mandated since P.
+10-06 01:00:22.019  1027  1754 D CompatibilityInfo: mCompatibilityFlags - 4
+10-06 01:00:22.019  1027  1754 D CompatibilityInfo: applicationDensity - 160
+10-06 01:00:22.019  1027  1754 D CompatibilityInfo: applicationScale - 1.0
+10-06 01:00:22.020  1027  1043 V GameManagerService: Game power mode ON (process state was changed to foreground)
+10-06 01:00:22.021  5264  5264 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10282; state: ENABLED
+10-06 01:00:22.026  1027  1463 D EthernetNetworkFactory: eth0: onNetworkUnneeded for request: NetworkRequest [ REQUEST id=89, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10256 RequestorUid: 10266 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-06 01:00:22.027  1027  2118 D ConnectivityService: requestNetwork for uid/pid:10266/1519 asUid: 10282 activeRequest: null callbackRequest: 90 [NetworkRequest [ REQUEST id=91, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10282 RequestorUid: 10266 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647
+10-06 01:00:22.027  1027  1464 D ConnectivityService: NetReassign [91 : null → 100]
+10-06 01:00:22.027  1786  1786 D PhoneSwitcherNetworkRequstListener: got request NetworkRequest [ REQUEST id=91, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10282 RequestorUid: 10266 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-06 01:00:22.027  1027  1463 D EthernetNetworkFactory: eth0: onNetworkNeeded for request: NetworkRequest [ REQUEST id=91, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10282 RequestorUid: 10266 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-06 01:00:22.027  1027  1463 D EthernetNetworkFactory: IpClient already started
+10-06 01:00:22.027  1027  1413 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=91, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10282 RequestorUid: 10266 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-06 01:00:22.027  1027  1413 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=91, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10282 RequestorUid: 10266 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-06 01:00:22.027  1027  1413 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=91, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10282 RequestorUid: 10266 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-06 01:00:22.027  1027  1052 D CompatibilityInfo: mCompatibilityFlags - 4
+10-06 01:00:22.027  1027  1052 D CompatibilityInfo: applicationDensity - 160
+10-06 01:00:22.027  1027  1052 D CompatibilityInfo: applicationScale - 1.0
+10-06 01:00:22.030  5264  5264 W ziparchive: Unable to open '/data/app/~~hvVvQB_k3zJwRncOh4qrFg==/com.epidgames.trickcalrevive-5dTlmpvy3WwhMdxanJkQpQ==/split_config.arm64_v8a.dm': No such file or directory
+10-06 01:00:22.030  5264  5264 W ziparchive: Unable to open '/data/app/~~hvVvQB_k3zJwRncOh4qrFg==/com.epidgames.trickcalrevive-5dTlmpvy3WwhMdxanJkQpQ==/split_config.arm64_v8a.dm': No such file or directory
+10-06 01:00:22.030  5264  5264 W .trickcalrevive: Entry not found
+10-06 01:00:22.031  5264  5264 W ziparchive: Unable to open '/data/app/~~hvVvQB_k3zJwRncOh4qrFg==/com.epidgames.trickcalrevive-5dTlmpvy3WwhMdxanJkQpQ==/split_gpdeku.config.arm64_v8a.dm': No such file or directory
+10-06 01:00:22.031  5264  5264 W ziparchive: Unable to open '/data/app/~~hvVvQB_k3zJwRncOh4qrFg==/com.epidgames.trickcalrevive-5dTlmpvy3WwhMdxanJkQpQ==/split_gpdeku.config.arm64_v8a.dm': No such file or directory
+10-06 01:00:22.031  5264  5264 W .trickcalrevive: Entry not found
+10-06 01:00:22.032  5264  5264 W .trickcalrevive: JIT profile information will not be recorded: profile file does not exist.
+10-06 01:00:22.033  5264  5264 W .trickcalrevive: JIT profile information will not be recorded: profile file does not exist.
+10-06 01:00:22.035  5264  5264 V GraphicsEnvironment: ANGLE Developer option for 'com.epidgames.trickcalrevive' set to: 'default'
+10-06 01:00:22.035  5264  5264 V GraphicsEnvironment: ANGLE GameManagerService for com.epidgames.trickcalrevive: false
+10-06 01:00:22.035  5264  5264 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+10-06 01:00:22.036  5264  5264 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-06 01:00:22.036  5264  5264 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-06 01:00:22.110  5264  5264 E <Presto_D>: e8Hk2vi4CH not found in assets!
+10-06 01:00:22.113  5264  5264 D CompatibilityChangeReporter: Compat change id reported: 183155436; UID 10282; state: ENABLED
+10-06 01:00:22.115  5264  5264 D FirebaseSessions: Dependency to CRASHLYTICS added.
+10-06 01:00:22.116  5264  5264 I FirebaseApp: Device unlocked: initializing all Firebase APIs for app [DEFAULT]
+10-06 01:00:22.118  5264  5264 I FirebaseCrashlytics: Initializing Firebase Crashlytics 20.0.4 for com.epidgames.trickcalrevive
+10-06 01:00:22.123  5264  5264 D FirebaseSessions: Subscriber CRASHLYTICS registered.
+10-06 01:00:22.127  5264  5287 E DynamiteModule: Invalid GmsCore APK, remote loading disabled.
+10-06 01:00:22.127  5264  5287 I DynamiteModule: Considering local module com.google.android.gms.measurement.dynamite:155 and remote module com.google.android.gms.measurement.dynamite:0
+10-06 01:00:22.127  5264  5287 I DynamiteModule: Selected local version of com.google.android.gms.measurement.dynamite
+10-06 01:00:22.127  5264  5287 E DynamiteModule: Invalid GmsCore APK, remote loading disabled.
+10-06 01:00:22.144  5264  5289 D TrafficStats: tagSocket(62) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:22.145  5264  5291 I FA      : App measurement initialized, version: 133005
+10-06 01:00:22.145  5264  5291 I FA      : To enable debug logging run: adb shell setprop log.tag.FA VERBOSE
+10-06 01:00:22.145  5264  5291 I FA      : To enable faster debug mode event logging run:
+10-06 01:00:22.145  5264  5291 I FA      :   adb shell setprop debug.firebase.analytics.app com.epidgames.trickcalrevive
+10-06 01:00:22.148  5264  5289 D TrafficStats: tagSocket(68) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:22.149  5264  5264 D FirebaseSessions: Initializing Firebase Sessions 3.0.4.
+10-06 01:00:22.150  5264  5290 I FirebaseCrashlytics: Saved version control info
+10-06 01:00:22.150  5264  5264 I FirebaseInitProvider: FirebaseApp initialization successful
+10-06 01:00:22.151  5264  5289 E FirebaseCrashlytics: Settings request failed.
+10-06 01:00:22.151  5264  5289 E FirebaseCrashlytics: java.net.ConnectException: Failed to connect to firebase-settings.crashlytics.com/:::443
+10-06 01:00:22.151  5264  5289 E FirebaseCrashlytics: 	at com.android.okhttp.internal.io.RealConnection.connectSocket(RealConnection.java:147)
+10-06 01:00:22.151  5264  5289 E FirebaseCrashlytics: 	at com.android.okhttp.internal.io.RealConnection.connect(RealConnection.java:116)
+10-06 01:00:22.151  5264  5289 E FirebaseCrashlytics: 	at com.android.okhttp.internal.http.StreamAllocation.findConnection(StreamAllocation.java:186)
+10-06 01:00:22.151  5264  5289 E FirebaseCrashlytics: 	at com.android.okhttp.internal.http.StreamAllocation.findHealthyConnection(StreamAllocation.java:128)
+10-06 01:00:22.151  5264  5289 E FirebaseCrashlytics: 	at com.android.okhttp.internal.http.StreamAllocation.newStream(StreamAllocation.java:97)
+10-06 01:00:22.151  5264  5289 E FirebaseCrashlytics: 	at com.android.okhttp.internal.http.HttpEngine.connect(HttpEngine.java:289)
+10-06 01:00:22.151  5264  5289 E FirebaseCrashlytics: 	at com.android.okhttp.internal.http.HttpEngine.sendRequest(HttpEngine.java:232)
+10-06 01:00:22.151  5264  5289 E FirebaseCrashlytics: 	at com.android.okhttp.internal.huc.HttpURLConnectionImpl.execute(HttpURLConnectionImpl.java:465)
+10-06 01:00:22.151  5264  5289 E FirebaseCrashlytics: 	at com.android.okhttp.internal.huc.HttpURLConnectionImpl.connect(HttpURLConnectionImpl.java:131)
+10-06 01:00:22.151  5264  5289 E FirebaseCrashlytics: 	at com.android.okhttp.internal.huc.DelegatingHttpsURLConnection.connect(DelegatingHttpsURLConnection.java:90)
+10-06 01:00:22.151  5264  5289 E FirebaseCrashlytics: 	at com.android.okhttp.internal.huc.HttpsURLConnectionImpl.connect(HttpsURLConnectionImpl.java:30)
+10-06 01:00:22.151  5264  5289 E FirebaseCrashlytics: 	at com.google.firebase.crashlytics.internal.network.HttpGetRequest.execute(HttpGetRequest.java:80)
+10-06 01:00:22.151  5264  5289 E FirebaseCrashlytics: 	at com.google.firebase.crashlytics.internal.settings.DefaultSettingsSpiCall.invoke(DefaultSettingsSpiCall.java:114)
+10-06 01:00:22.151  5264  5289 E FirebaseCrashlytics: 	at com.google.firebase.crashlytics.internal.settings.SettingsController$1.lambda$then$0$com-google-firebase-crashlytics-internal-settings-SettingsController$1(SettingsController.java:204)
+10-06 01:00:22.151  5264  5289 E FirebaseCrashlytics: 	at com.google.firebase.crashlytics.internal.settings.SettingsController$1$$ExternalSyntheticLambda0.call(D8$$SyntheticClass:0)
+10-06 01:00:22.151  5264  5289 E FirebaseCrashlytics: 	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+10-06 01:00:22.151  5264  5289 E FirebaseCrashlytics: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1137)
+10-06 01:00:22.151  5264  5289 E FirebaseCrashlytics: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:637)
+10-06 01:00:22.151  5264  5289 E FirebaseCrashlytics: 	at com.google.firebase.concurrent.CustomThreadFactory.lambda$newThread$0$com-google-firebase-concurrent-CustomThreadFactory(CustomThreadFactory.java:47)
+10-06 01:00:22.151  5264  5289 E FirebaseCrashlytics: 	at com.google.firebase.concurrent.CustomThreadFactory$$ExternalSyntheticLambda0.run(D8$$SyntheticClass:0)
+10-06 01:00:22.151  5264  5289 E FirebaseCrashlytics: 	at java.lang.Thread.run(Thread.java:1012)
+10-06 01:00:22.153  5264  5313 W FirebaseInstanceId: Failed to resolve IID implementation package, falling back
+10-06 01:00:22.156  5264  5264 W .trickcalrevive: Unsupported class loader
+10-06 01:00:22.157  5264  5290 D FirebaseSessions: Notified CRASHLYTICS of new session 01359f91fcd64d6a842c33702dc4e98a
+10-06 01:00:22.157  5264  5264 W .trickcalrevive: Unsupported class loader
+10-06 01:00:22.157  5264  5264 W .trickcalrevive: Unsupported class loader
+10-06 01:00:22.163  1027  1754 W ActivityManager: Unable to start service Intent { act=com.google.android.gms.games.internal.appshortcuts.service.START pkg=com.google.android.gms } U=0: not found
+10-06 01:00:22.163  1027  1754 W ActivityManager: Unbind failed: could not find connection for android.os.BinderProxy@ed6ede2
+10-06 01:00:22.164  5264  5317 W GmsClient: unable to connect to service: com.google.android.gms.games.internal.appshortcuts.service.START on com.google.android.gms
+10-06 01:00:22.164  5264  5317 W GoogleApiManager: Not showing notification since connectionResult is not user-facing: ConnectionResult{statusCode=API_UNAVAILABLE, resolution=null, message=null, clientMethodKey=null}
+10-06 01:00:22.171  1027  1754 W ActivityManager: Unable to start service Intent { act=com.google.android.gms.ads.identifier.service.START pkg=com.google.android.gms } U=0: not found
+10-06 01:00:22.172  5264  5329 W com.facebook.internal.NativeProtocol: Apps that target Android API 30+ (Android 11+) cannot call Facebook native apps unless the package visibility needs are declared. Please follow https://developers.facebook.com/docs/android/troubleshooting/#faq_267321845055988 to make the declaration.
+10-06 01:00:22.173  5264  5264 I Airbridge: {setSDKDevelopmentPlatform} is called: {unity}
+10-06 01:00:22.173  5264  5264 I Airbridge: {setSDKSignature} is called
+10-06 01:00:22.173  5264  5264 I Airbridge: {setLogLevel} is called: {WARNING}
+10-06 01:00:22.173  5264  5264 I Airbridge: {setSessionTimeout} is called: {300}
+10-06 01:00:22.173  5264  5264 I Airbridge: {setHashUserInformationEnabled} is called: {true}
+10-06 01:00:22.173  5264  5264 I Airbridge: {setCollectLocationEnabled} is called: {false}
+10-06 01:00:22.173  5264  5264 I Airbridge: {setTrackAirbridgeDeeplinkOnlyEnabled} is called: {false}
+10-06 01:00:22.173  5264  5264 I Airbridge: {setAutoStartTrackingEnabled} is called: {true}
+10-06 01:00:22.173  5264  5264 I Airbridge: {setTrackMetaDeferredAppLinkEnabled} is called: {false}
+10-06 01:00:22.173  5264  5264 I Airbridge: {setOnAttributionReceived} is called
+10-06 01:00:22.173  5264  5264 I Airbridge: {setTrackInSessionLifeCycleEventEnabled} is called: {false}
+10-06 01:00:22.173  5264  5264 I Airbridge: {setPauseEventTransmitOnBackgroundEnabled} is called: {false}
+10-06 01:00:22.173  5264  5264 I Airbridge: {setClearEventBufferOnInitializeEnabled} is called: {false}
+10-06 01:00:22.173  5264  5264 I Airbridge: {setSDKEnabled} is called: {true}
+10-06 01:00:22.173  5264  5264 I Airbridge: {setEventBufferCountLimit} is called: {2147483647}
+10-06 01:00:22.173  5264  5264 I Airbridge: `setEventBufferSizeLimit` is called: {1024.0}
+10-06 01:00:22.173  5264  5264 I Airbridge: {setEventTransmitInterval} is called: {0}
+10-06 01:00:22.173  5264  5264 I Airbridge: {setLifecycleIntegration} is called
+10-06 01:00:22.173  5264  5264 I Airbridge: {setSDKAttribute} is called: attributes={{wrapperVersion=4.7.0, wrapperName=airbridge-unity-sdk}}
+10-06 01:00:22.173  5264  5264 I Airbridge: {setSDKAttributes} is called: option={{isHandleAirbridgeDeeplinkOnly=false}}
+10-06 01:00:22.173  5264  5264 I Airbridge: {setInAppPurchaseEnvironment} is called
+10-06 01:00:22.173  5264  5264 I Airbridge: {setOnInAppPurchaseReceived} is called
+10-06 01:00:22.173  5264  5264 I Airbridge: {setCollectTCFDataEnabled} is called: {false}
+10-06 01:00:22.173  5264  5264 I Airbridge: {initializeSDK} is called
+10-06 01:00:22.179  5264  5324 D TrafficStats: tagSocket(81) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:22.180  5264  5327 D TrafficStats: tagSocket(79) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:22.180  5264  5320 D TrafficStats: tagSocket(80) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:22.180  5264  5325 D TrafficStats: tagSocket(72) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:22.184  1027  1754 D ConnectivityService: requestNetwork for uid/pid:10282/5264 activeRequest: null callbackRequest: 92 [NetworkRequest [ REQUEST id=93, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10282 RequestorUid: 10282 RequestorPkg: com.epidgames.trickcalrevive UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647
+10-06 01:00:22.185  1027  1464 D ConnectivityService: NetReassign [93 : null → 100]
+10-06 01:00:22.185  1786  1786 D PhoneSwitcherNetworkRequstListener: got request NetworkRequest [ REQUEST id=93, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10282 RequestorUid: 10282 RequestorPkg: com.epidgames.trickcalrevive UnderlyingNetworks: Null] ]
+10-06 01:00:22.185  1027  1463 D EthernetNetworkFactory: eth0: onNetworkNeeded for request: NetworkRequest [ REQUEST id=93, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10282 RequestorUid: 10282 RequestorPkg: com.epidgames.trickcalrevive UnderlyingNetworks: Null] ]
+10-06 01:00:22.185  1027  1463 D EthernetNetworkFactory: IpClient already started
+10-06 01:00:22.186  1027  1413 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=93, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10282 RequestorUid: 10282 RequestorPkg: com.epidgames.trickcalrevive UnderlyingNetworks: Null] ]
+10-06 01:00:22.186  1027  1413 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=93, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10282 RequestorUid: 10282 RequestorPkg: com.epidgames.trickcalrevive UnderlyingNetworks: Null] ]
+10-06 01:00:22.186  1027  1413 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=93, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10282 RequestorUid: 10282 RequestorPkg: com.epidgames.trickcalrevive UnderlyingNetworks: Null] ]
+10-06 01:00:22.193  5264  5292 D TrafficStats: tagSocket(76) with statsTag=0x8001, statsUid=-1
+10-06 01:00:22.195  5264  5317 W GoogleApiManager: The service for com.google.android.gms.internal.appset.zzd is not available: ConnectionResult{statusCode=SERVICE_DISABLED, resolution=null, message=null, clientMethodKey=null}
+10-06 01:00:22.197  5264  5317 W GoogleApiManager: The service for com.google.android.gms.internal.games_v2.zzp is not available: ConnectionResult{statusCode=SERVICE_DISABLED, resolution=null, message=null, clientMethodKey=null}
+10-06 01:00:22.198  5264  5317 W GoogleApiManager: The service for com.google.android.gms.internal.games_v2.zzp is not available: ConnectionResult{statusCode=SERVICE_DISABLED, resolution=null, message=null, clientMethodKey=null}
+10-06 01:00:22.198  1027  1042 I ServiceWatcher: [GeocoderProxy] chose new implementation null
+10-06 01:00:22.198  1027  1042 I ServiceWatcher: [fused] chose new implementation 1000/com.android.location.fused/.FusedLocationService@0
+10-06 01:00:22.198  1027  1042 I ServiceWatcher: [fused] disconnected from 1000/com.android.location.fused/.FusedLocationService@0
+10-06 01:00:22.199  1027  1042 D CompatibilityInfo: mCompatibilityFlags - 4
+10-06 01:00:22.199  1027  1042 D CompatibilityInfo: applicationDensity - 160
+10-06 01:00:22.199  1027  1042 D CompatibilityInfo: applicationScale - 1.0
+10-06 01:00:22.199  1027  1042 I ServiceWatcher: [network] chose new implementation null
+10-06 01:00:22.199  1027  1042 I ServiceWatcher: [GeofenceProxy] chose new implementation null
+10-06 01:00:22.199  1027  1042 I ServiceWatcher: [HardwareActivityRecognitionProxy] chose new implementation null
+10-06 01:00:22.201  1027  1042 I ServiceWatcher: [fused] connected to {com.android.location.fused/com.android.location.fused.FusedLocationService}
+10-06 01:00:22.309  5264  5264 E <Presto_L>: [WARNING] Child process failed to attach. Protection might be weak.
+10-06 01:00:22.326  5264  5264 I Presto  : SDK_Ver = 2026080501
+10-06 01:00:22.357  5264  5291 W FA      : Service disabled
+10-06 01:00:22.359  1027  1882 D CompatibilityInfo: mCompatibilityFlags - 4
+10-06 01:00:22.359  1027  1882 D CompatibilityInfo: applicationDensity - 160
+10-06 01:00:22.359  1027  1882 D CompatibilityInfo: applicationScale - 1.0
+10-06 01:00:22.387  5264  5291 I FA      : Tag Manager is not found and thus will not be used
+10-06 01:00:22.403   852   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 01:00:22.403   852   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 01:00:22.425  1027  2118 D CompatibilityInfo: mCompatibilityFlags - 4
+10-06 01:00:22.425  1027  2118 D CompatibilityInfo: applicationDensity - 160
+10-06 01:00:22.425  1027  2118 D CompatibilityInfo: applicationScale - 1.0
+10-06 01:00:22.427  5264  5325 W AnalyticsUserIDStore: initStore should have been called before calling setUserID
+10-06 01:00:22.442  5264  5264 I IL2CPP  : JNI_OnLoad
+10-06 01:00:22.443  5264  5264 V Unity   : Context Type: ActivityOrService
+10-06 01:00:22.453  5264  5264 D FirebaseSessions: App foregrounded on com.epidgames.trickcalrevive
+10-06 01:00:22.453  5264  5264 D FirebaseSessions: Session 01359f91fcd64d6a842c33702dc4e98a has not backgrounded yet
+10-06 01:00:22.453  5264  5264 D FirebaseSessions: No process data for com.epidgames.trickcalrevive
+10-06 01:00:22.454  1027  1882 W ActivityManager: Unable to start service Intent { act=com.google.android.play.deku.action.BIND_DEKU_BROKER_SERVICE pkg=com.android.vending } U=0: not found
+10-06 01:00:22.456  1027  1069 E VerityUtils: Failed to measure fs-verity, errno 1: /data/app/~~hvVvQB_k3zJwRncOh4qrFg==/com.epidgames.trickcalrevive-5dTlmpvy3WwhMdxanJkQpQ==/base.apk
+10-06 01:00:22.457  5264  5296 D FirebaseSessions: Session fe9c622e07424ac6ab9ec987afc8516b has not backgrounded yet
+10-06 01:00:22.457  5264  5296 D FirebaseSessions: No process data map
+10-06 01:00:22.457  5264  5296 D FirebaseSessions: No process data for com.epidgames.trickcalrevive
+10-06 01:00:22.458  5264  5264 D CompatibilityChangeReporter: Compat change id reported: 237531167; UID 10282; state: DISABLED
+10-06 01:00:22.461  5264  5357 W Parcel  : Expecting binder but got null!
+10-06 01:00:22.462  1027  1882 W WindowManager: Failed looking up window session=Session{1b7fa9a 5264:u0a10282} callers=com.android.server.wm.WindowManagerService.windowForClientLocked:6084 com.android.server.wm.Session.updateRequestedVisibilities:701 android.view.IWindowSession$Stub.onTransact:1075 
+10-06 01:00:22.463  1027  1882 D CoreBackPreview: Window{7536ec1 u0 com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@dd69da7, mPriority=-1}
+10-06 01:00:22.463  1027  1882 D CoreBackPreview: Window{7536ec1 u0 com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@e943254, mPriority=1}
+10-06 01:00:22.465  1519  1519 D CentralSurfaces: Received new disable state: Old: EnAiHBCRSo.qingr | New: EnAiHbCRSo.qingr (changed: b.)
+10-06 01:00:22.466  5264  5357 I MESA    : Using gralloc0 CrOS API
+10-06 01:00:22.457  5264  5264 I RenderThread: type=1400 audit(0.0:661): avc: denied { read } for name="uevent" dev="sysfs" ino=3872 scontext=u:r:untrusted_app:s0:c26,c257,c512,c768 tcontext=u:object_r:sysfs:s0 tclass=file permissive=1 app=com.epidgames.trickcalrevive
+10-06 01:00:22.467  5264  5264 E SurfaceSyncer: Failed to find sync for id=0
+10-06 01:00:22.468  5264  5290 D FirebaseSessions: Notified CRASHLYTICS of new session 3624db8b9c5842b1a2296aefff3f9ba4
+10-06 01:00:22.497  5264  5357 W EGL-MAIN: failed to get driver name for fd -1
+10-06 01:00:22.497  5264  5357 W EGL-MAIN: MESA-LOADER: failed to retrieve device information
+10-06 01:00:22.497  5264  5357 W EGL-MAIN: failed to get driver name for fd -1
+10-06 01:00:22.505  5264  5357 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_CREATE_GUEST_HANDLE
+10-06 01:00:22.505  5264  5357 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_RESOURCE_SYNC
+10-06 01:00:22.505  5264  5357 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_GUEST_VRAM
+10-06 01:00:22.505  5264  5357 I [minigbm:virgl_get_caps(556)]: Supported CAPSET IDs: 6.
+10-06 01:00:22.505  5264  5357 I [minigbm:virgl_add_combination(372)]: Skipping unsupported combination format:842094158
+10-06 01:00:22.505  5264  5357 I [minigbm:virgl_add_combination(372)]: Skipping unsupported combination format:808530000
+10-06 01:00:22.511  5264  5357 E OpenGLRenderer: Device claims wide gamut support, cannot find matching config, error = EGL_SUCCESS
+10-06 01:00:22.511  5264  5357 W OpenGLRenderer: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+10-06 01:00:22.515   857  1996 D SurfaceFlinger: Native-Android-x86: display 1280 800 density 213.000000
+10-06 01:00:22.515   857  1996 D SurfaceFlinger: Native-Android-x86: auto set density
+10-06 01:00:22.516  5264  5357 E OpenGLRenderer: Unable to match the desired swap behavior.
+10-06 01:00:22.530  5264  5264 V FA      : AppMeasurementService is starting up.
+10-06 01:00:22.531  5264  5291 D CompatibilityChangeReporter: Compat change id reported: 160794467; UID 10282; state: ENABLED
+10-06 01:00:22.532  1027  1042 W system_server: Failed to determine oat file name for dex location /data/app/~~hvVvQB_k3zJwRncOh4qrFg==/com.epidgames.trickcalrevive-5dTlmpvy3WwhMdxanJkQpQ==/base.apk: Dalvik cache directory does not exist
+10-06 01:00:22.532  1027  1042 W ziparchive: Unable to open '/data/app/~~hvVvQB_k3zJwRncOh4qrFg==/com.epidgames.trickcalrevive-5dTlmpvy3WwhMdxanJkQpQ==/base.dm': No such file or directory
+10-06 01:00:22.532  1027  1042 I ActivityTaskManager: Displayed com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity: +613ms
+10-06 01:00:22.557  1027  1040 W ActivityManager: Unable to start service Intent { act=com.google.android.gms.ads.identifier.service.START pkg=com.google.android.gms } U=0: not found
+10-06 01:00:22.563  5264  5264 E SurfaceSyncer: Failed to find sync for id=0
+10-06 01:00:22.583  1027  1040 W ActivityManager: Unable to start service Intent { act=com.google.android.gms.ads.identifier.service.START pkg=com.google.android.gms } U=0: not found
+10-06 01:00:22.584  1027  1040 D CompatibilityChangeReporter: Compat change id reported: 214016041; UID 10282; state: ENABLED
+10-06 01:00:22.625  5264  5305 D TrafficStats: tagSocket(105) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:22.630  5264  5305 D TrafficStats: tagSocket(105) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:22.631  5264  5305 W Airbridge: Client is failed to receive response: method={GET} url={https://touchpoint.airbridge.io/deferred-deeplink/v1/apps/trickcalrevive?device_uuid=1b31d48a-aef3-4ff4-9d5a-8d04f034f71a&os_name=Android&os_version=13&device_model=Generic%20Android-x86_64&device_type=tablet} error={java.net.ConnectException: Failed to connect to touchpoint.airbridge.io/:::443}
+10-06 01:00:22.631  5264  5305 E Airbridge: Failed on fetching deferred-deeplink: error={java.net.ConnectException: Failed to connect to touchpoint.airbridge.io/:::443}
+10-06 01:00:22.631  5264  5305 E Airbridge: Succeed on loading error of fetching deferred-deeplink from storage: error={java.net.ConnectException: Failed to connect to touchpoint.airbridge.io/:::443}
+10-06 01:00:22.632  5264  5376 I Unity   : MemoryManager: Using 'Dynamic Heap' Allocator.
+10-06 01:00:22.643  5264  5303 D TrafficStats: tagSocket(124) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:22.647  5264  5303 D TrafficStats: tagSocket(124) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:22.648  5264  5303 W Airbridge: Client is failed to receive response: method={GET} url={https://attribution.airbridge.io/attribution-result/v1/apps/trickcalrevive?device_uuid=1b31d48a-aef3-4ff4-9d5a-8d04f034f71a&install_event_uuid=b706071a-ae8b-466c-a97b-dca07a362ca2&long_polling=true} error={java.net.ConnectException: Failed to connect to attribution.airbridge.io/:::443}
+10-06 01:00:22.715  5264  5394 D TrafficStats: tagSocket(134) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:22.719  5264  5394 D TrafficStats: tagSocket(134) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:22.719  5264  5394 W Airbridge: Client is failed to receive response: method={POST} url={https://event.airbridge.io/v1/apps/trickcalrevive} error={java.net.ConnectException: Failed to connect to event.airbridge.io/:::443}
+10-06 01:00:22.721  5264  5394 D TrafficStats: tagSocket(134) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:22.721  5264  5394 D TrafficStats: tagSocket(134) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:22.722  5264  5394 W Airbridge: Client is failed to receive response: method={POST} url={https://event.airbridge.io/v1/apps/trickcalrevive} error={java.net.ConnectException: Failed to connect to event.airbridge.io/:::443}
+10-06 01:00:22.722  5264  5394 W Airbridge: delay 1000ms
+10-06 01:00:22.737  5264  5376 I Unity   : SystemInfo CPU = x86-64, Cores = 2, Memory = 7930mb
+10-06 01:00:22.738  5264  5376 I Unity   : SystemInfo ARM big.LITTLE configuration: 2 big (mask: 0x3), 0 little (mask: 0x0)
+10-06 01:00:22.738  5264  5376 I Unity   : ApplicationInfo 'com.epidgames.trickcalrevive', Version '10644', Min API Level '26', Target API Level '36'
+10-06 01:00:22.738  5264  5376 I Unity   : Built from '6000.3/staging' branch, Version '6000.3.13f1 (8c4f11e4fb20)', Build type 'Release', Scripting Backend 'il2cpp', CPU 'arm64-v8a', Stripping 'Enabled'
+10-06 01:00:22.739  5264  5376 I Unity   : Device Model 'unknown Generic Android-x86_64', OS 'Android OS 13 (API 33)'
+10-06 01:00:22.838  1027  3461 W InputManager-JNI: Input channel object 'b1608ce Splash Screen com.epidgames.trickcalrevive (client)' was disposed without first being removed with the input manager!
+10-06 01:00:23.090  5264  5288 D FirebaseSessions: Fetching settings from server.
+10-06 01:00:23.090  5264  5292 D TrafficStats: tagSocket(139) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:23.091  5264  5292 D TrafficStats: tagSocket(139) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:23.092  1027  1040 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.REGISTER pkg=com.google.android.gms } U=0: not found
+10-06 01:00:23.092  5264  5292 E FirebaseSessions: Error failed to fetch the remote configs: Failed to connect to firebase-settings.crashlytics.com/:::443
+10-06 01:00:23.092  1027  1040 W ActivityManager: Unbind failed: could not find connection for android.os.BinderProxy@b8b61a1
+10-06 01:00:23.093  5264  5313 W FirebaseInstanceId: Token retrieval failed: SERVICE_NOT_AVAILABLE. Will retry token retrieval
+10-06 01:00:23.093  5264  5296 D FirebaseSessions: Fetching settings from server.
+10-06 01:00:23.093  5264  5292 D TrafficStats: tagSocket(139) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:23.094  5264  5292 D TrafficStats: tagSocket(139) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:23.094  5264  5292 E FirebaseSessions: Error failed to fetch the remote configs: Failed to connect to firebase-settings.crashlytics.com/:::443
+10-06 01:00:23.096  5264  5296 D FirebaseSessions: Session Event Type: SESSION_START
+10-06 01:00:23.096  5264  5296 D FirebaseSessions: Successfully logged Session Start event.
+10-06 01:00:23.098  5264  5295 D CompatibilityChangeReporter: Compat change id reported: 194532703; UID 10282; state: ENABLED
+10-06 01:00:23.098  1027  1040 D CompatibilityChangeReporter: Compat change id reported: 194532703; UID 10282; state: ENABLED
+10-06 01:00:23.405   852   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 01:00:23.405   852   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 01:00:23.526  5264  5376 I Unity   : Company Name: EpidGames
+10-06 01:00:23.526  5264  5376 I Unity   : Product Name: Trickcal Revive
+10-06 01:00:23.539  5264  5376 I MESA    : Using gralloc0 CrOS API
+10-06 01:00:23.539  5264  5376 D vulkan  : searching for layers in '/data/app/~~hvVvQB_k3zJwRncOh4qrFg==/com.epidgames.trickcalrevive-5dTlmpvy3WwhMdxanJkQpQ==/lib/arm64'
+10-06 01:00:23.539  5264  5376 D vulkan  : searching for layers in '/data/app/~~hvVvQB_k3zJwRncOh4qrFg==/com.epidgames.trickcalrevive-5dTlmpvy3WwhMdxanJkQpQ==/base.apk!/lib/arm64-v8a'
+10-06 01:00:23.539  5264  5376 D vulkan  : searching for layers in '/data/app/~~hvVvQB_k3zJwRncOh4qrFg==/com.epidgames.trickcalrevive-5dTlmpvy3WwhMdxanJkQpQ==/split_config.arm64_v8a.apk!/lib/arm64-v8a'
+10-06 01:00:23.540  5264  5376 D vulkan  : searching for layers in '/data/app/~~hvVvQB_k3zJwRncOh4qrFg==/com.epidgames.trickcalrevive-5dTlmpvy3WwhMdxanJkQpQ==/split_gpdeku.apk!/lib/arm64-v8a'
+10-06 01:00:23.540  5264  5376 D vulkan  : searching for layers in '/data/app/~~hvVvQB_k3zJwRncOh4qrFg==/com.epidgames.trickcalrevive-5dTlmpvy3WwhMdxanJkQpQ==/split_gpdeku.config.arm64_v8a.apk!/lib/arm64-v8a'
+10-06 01:00:23.616  5264  5376 I SwappyWrapper: SwappyWrapperInit() succeeded. Build: Wed Sep 23 06:58:37 2026
+10-06 01:00:23.629  5264  5432 I SwappyDisplayManager: Starting looper thread
+10-06 01:00:23.694  5264  5376 I AAudio  : AAudioStreamBuilder_openStream() called ----------------------------------------
+10-06 01:00:23.694  5264  5376 I AudioStreamBuilder: rate   =  24000, channels  = 2, channelMask = 0x80000003, format   = 5, sharing = SH, dir = OUTPUT
+10-06 01:00:23.694  5264  5376 I AudioStreamBuilder: device =      0, sessionId = 0, perfMode = 12, callback: ON with frames = 512
+10-06 01:00:23.694  5264  5376 I AudioStreamBuilder: usage  =      0, contentType = 0, inputPreset = 0, allowedCapturePolicy = 0
+10-06 01:00:23.694  5264  5376 I AudioStreamBuilder: privacy sensitive = false, opPackageName = (null), attributionTag = (null)
+10-06 01:00:23.694  5264  5376 D AudioStreamBuilder: build() MMAP not used because sessionId specified.
+10-06 01:00:23.694  5264  5376 D .trickcalrevive: PlayerBase::PlayerBase()
+10-06 01:00:23.694  5264  5376 D AudioStreamTrack: open(), request notificationFrames = 0, frameCount = 8192
+10-06 01:00:23.695   854  1477 D AudioFlinger: AUDIO_OUTPUT_FLAG_FAST denied: sharedBuffer=0x0 frameCount=8192 mFrameCount=512 format=0x5 mFormat=0x5 isLinear=1 channelMask=0x3 sampleRate=24000 mSampleRate=48000 hasFastMixer=1 tid=5435 fastTrackAvailMask=0xfe
+10-06 01:00:23.695   854  1477 D AudioFlinger: Client defaulted notificationFrames to 480 for frameCount 8192
+10-06 01:00:23.695   854  1477 D AF::TrackHandle: OpPlayAudio: track:57 usage:1 not muted
+10-06 01:00:23.696  5264  5376 D AudioStreamTrack: open() flags changed from 0x00000004 to 0x00000000
+10-06 01:00:23.696  5264  5376 D AudioStreamTrack: open() perfMode changed from 12 to 10
+10-06 01:00:23.696  5264  5376 D AAudioStream: setState(s#1) from 0 to 2
+10-06 01:00:23.697  5264  5376 I AAudio  : AAudioStreamBuilder_openStream() returns 0 = AAUDIO_OK for s#1 ----------------
+10-06 01:00:23.699  5264  5376 D AAudio  : AAudioStream_requestStart(s#1) called --------------
+10-06 01:00:23.700  5264  5376 D AAudioStream: setState(s#1) from 2 to 3
+10-06 01:00:23.700  5264  5376 D AAudio  : AAudioStream_requestStart(s#1) returned 0 ---------
+10-06 01:00:23.712  5264  5389 D AudioStreamLegacy: onAudioDeviceUpdate(deviceId = 2)
+10-06 01:00:23.713  5264  5435 D AAudioStream: setState(s#1) from 3 to 4
+10-06 01:00:23.724  5264  5306 D TrafficStats: tagSocket(157) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:23.724  5264  5306 D TrafficStats: tagSocket(157) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:23.725  5264  5306 W Airbridge: Client is failed to receive response: method={POST} url={https://event.airbridge.io/v1/apps/trickcalrevive} error={java.net.ConnectException: Failed to connect to event.airbridge.io/:::443}
+10-06 01:00:23.725  5264  5306 W Airbridge: delay 2000ms
+10-06 01:00:23.983  5264  5291 D AdvertisingIdClient: Creating AdvertisingIdClient
+10-06 01:00:23.983  5264  5291 D AdvertisingIdClient: AdvertisingIdClient already created.
+10-06 01:00:23.983  5264  5291 D AdvertisingIdClient: AdvertisingIdClient is not bounded. Starting to bind it...
+10-06 01:00:23.983  5264  5317 W GoogleApiManager: The service for com.google.android.gms.common.internal.service.zau is not available: ConnectionResult{statusCode=SERVICE_DISABLED, resolution=null, message=null, clientMethodKey=null}
+10-06 01:00:23.984  5264  5291 I AdvertisingIdClient: shouldSendLog -1
+10-06 01:00:23.985  5264  5317 W GoogleApiManager: The service for com.google.android.gms.common.internal.service.zau is not available: ConnectionResult{statusCode=SERVICE_DISABLED, resolution=null, message=null, clientMethodKey=null}
+10-06 01:00:23.985  5264  5264 I AdvertisingIdClient: getting error as 17: API: ClientTelemetry.API is not available on this device. Connection failed with: ConnectionResult{statusCode=SERVICE_DISABLED, resolution=null, message=null, clientMethodKey=null}
+10-06 01:00:23.985  1027  1040 D OomAdjuster: Not killing cached processes
+10-06 01:00:23.988  5264  5291 W ConfigurationContentLdr: Unable to acquire ContentProviderClient, using default values
+10-06 01:00:24.188  5264  5291 W FA      : Callable skipped the worker queue.
+10-06 01:00:24.213  5264  5291 E FA      : Task exception on worker thread: java.lang.IllegalStateException: Unexpected call on client side: com.google.android.gms.measurement.internal.zzic.zzL(com.google.android.gms:play-services-measurement-impl@@23.0.0:1)
+10-06 01:00:24.406   852   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 01:00:24.406   852   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 01:00:25.188  1027  1040 D KbdSensor: poll_batch: dev=0x7f0302d6ba50 sensor_handle=0 flags=0 sampling_period_ns=2000000 max_report_latency_ns=0
+10-06 01:00:25.188  1027  1040 D KbdSensor: poll_setDelay: dev=0x7f0302d6ba50 handle=0 ns=2000000
+10-06 01:00:25.188  1027  1040 D KbdSensor: poll_flush: dev=0x7f0302d6ba50 sensor_handle=0
+10-06 01:00:25.188  1027  1040 D KbdSensor: poll_batch: dev=0x7f0302d6ba50 sensor_handle=0 flags=0 sampling_period_ns=2000000 max_report_latency_ns=20000000
+10-06 01:00:25.188  1027  1040 D KbdSensor: poll_setDelay: dev=0x7f0302d6ba50 handle=0 ns=2000000
+10-06 01:00:25.207  1027  2118 D CompatibilityChangeReporter: Compat change id reported: 161145287; UID 10282; state: DISABLED
+10-06 01:00:25.208  5264  5376 V MediaRouter: Selecting route: RouteInfo{ name=Tablet, description=null, status=null, category=RouteCategory{ name=System types=ROUTE_TYPE_LIVE_AUDIO ROUTE_TYPE_LIVE_VIDEO  groupable=false }, supportedTypes=ROUTE_TYPE_LIVE_AUDIO ROUTE_TYPE_LIVE_VIDEO , presentationDisplay=null }
+10-06 01:00:25.208  5264  5376 I MediaRouter: Skip setBluetoothA2dpOn(): types=8388615, isPlaybackActive()=true, BT route=null
+10-06 01:00:25.407   852   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 01:00:25.407   852   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 01:00:25.450  5264  5438 I IL2CPP  : Locale en-US
+10-06 01:00:25.741  5264  5356 D TrafficStats: tagSocket(157) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:25.742  5264  5356 D TrafficStats: tagSocket(157) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:25.743  5264  5356 W Airbridge: Client is failed to receive response: method={POST} url={https://event.airbridge.io/v1/apps/trickcalrevive} error={java.net.ConnectException: Failed to connect to event.airbridge.io/:::443}
+10-06 01:00:25.743  5264  5356 W Airbridge: delay 4000ms
+10-06 01:00:26.407   852   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 01:00:26.407   852   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 01:00:26.604  4944  4955 D BufferPoolAccessor2.0: evictor expired: 1, evicted: 0
+10-06 01:00:26.712  1810  1880 W GoogleApiManager: The service for akp is not available: aco{statusCode=SERVICE_DISABLED, resolution=null, message=null}
+10-06 01:00:26.712  1810  1880 W GoogleApiManager: The service for abo is not available: aco{statusCode=SERVICE_DISABLED, resolution=null, message=null}
+10-06 01:00:26.712  1810  1880 W GoogleApiManager: The service for acf is not available: aco{statusCode=SERVICE_DISABLED, resolution=null, message=null}
+10-06 01:00:26.918  5264  5376 W Airbridge: Airbridge is already started tracking
+10-06 01:00:26.944  5264  5264 I TrickcalLetterbox: window 1280x800 (1.6) -> player 1280x800
+10-06 01:00:26.944  5264  5264 I TrickcalLetterbox: installed, aspect range 1.3 ~ 2.5
+10-06 01:00:27.049  5264  5376 W ziparchive: Unable to open '/data/user/0/com.epidgames.trickcalrevive/cache/app_resources_lib.dm': No such file or directory
+10-06 01:00:27.050  5264  5431 I .trickcalrevive: Waiting for a blocking GC ClassLinker
+10-06 01:00:27.052  5264  5376 W ziparchive: Unable to open '/data/user/0/com.epidgames.trickcalrevive/cache/google_api_resources_lib.dm': No such file or directory
+10-06 01:00:27.064  5264  5376 I firebase: Firebase Analytics API Initializing
+10-06 01:00:27.064  5264  5376 I firebase: analytics API Initialized
+10-06 01:00:27.068  5264  5376 E firebase: Messaging already shut down.
+10-06 01:00:27.089  5264  5376 E Unity   : InitializationException:  Firebase modules failed to initialize: messaging (missing dependency)
+10-06 01:00:27.089  5264  5376 E Unity   :   at Firebase.FirebaseApp.CreateAndTrack (Firebase.FirebaseApp+CreateDelegate createDelegate, Firebase.FirebaseApp existingProxy) [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.089  5264  5376 E Unity   :   at Firebase.Crashlytics.AndroidImpl..ctor () [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.089  5264  5376 E Unity   :   at Firebase.Crashlytics.Impl.Make () [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.089  5264  5376 E Unity   :   at Firebase.Crashlytics.Crashlytics+PlatformAccessor..cctor () [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.089  5264  5376 E Unity   :   at Firebase.Crashlytics.Crashlytics.Log (System.String message) [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.089  5264  5376 E Unity   :   at DontDestroy.dfpv (System.String a) [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.089  5264  5376 E Unity   :   at DontDestroy.OnApplicationPause (System.Boolean pauseStatus) [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.089  5264  5376 E Unity   : Rethrow as TypeInitializationException: The type initializer for 'Firebase.Crashlytics.Crashlytics.PlatformAccessor' t
+10-06 01:00:27.095  5264  5376 E Unity   : InitializationException:  Firebase modules failed to initialize: messaging (missing dependency)
+10-06 01:00:27.095  5264  5376 E Unity   :   at Firebase.FirebaseApp.CreateAndTrack (Firebase.FirebaseApp+CreateDelegate createDelegate, Firebase.FirebaseApp existingProxy) [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.095  5264  5376 E Unity   :   at Firebase.Crashlytics.AndroidImpl..ctor () [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.095  5264  5376 E Unity   :   at Firebase.Crashlytics.Impl.Make () [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.095  5264  5376 E Unity   :   at Firebase.Crashlytics.Crashlytics+PlatformAccessor..cctor () [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.095  5264  5376 E Unity   :   at Firebase.Crashlytics.Crashlytics.Log (System.String message) [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.095  5264  5376 E Unity   :   at DontDestroy.dfpv (System.String a) [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.095  5264  5376 E Unity   :   at DontDestroy.OnApplicationPause (System.Boolean pauseStatus) [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.095  5264  5376 E Unity   : Rethrow as TypeInitializationException: The type initializer for 'Firebase.Crashlytics.Crashlytics.PlatformAccessor' t
+10-06 01:00:27.097  1027  1040 W SensorService: sensor 00000000 already enabled in connection 0x7f02d2dc33b0 (ignoring)
+10-06 01:00:27.097  1027  1040 D KbdSensor: poll_batch: dev=0x7f0302d6ba50 sensor_handle=0 flags=0 sampling_period_ns=2000000 max_report_latency_ns=0
+10-06 01:00:27.097  1027  1040 D KbdSensor: poll_setDelay: dev=0x7f0302d6ba50 handle=0 ns=2000000
+10-06 01:00:27.097  1027  1040 D KbdSensor: poll_flush: dev=0x7f0302d6ba50 sensor_handle=0
+10-06 01:00:27.097  1027  1040 D KbdSensor: poll_batch: dev=0x7f0302d6ba50 sensor_handle=0 flags=0 sampling_period_ns=2000000 max_report_latency_ns=20000000
+10-06 01:00:27.097  1027  1040 D KbdSensor: poll_setDelay: dev=0x7f0302d6ba50 handle=0 ns=2000000
+10-06 01:00:27.157  1027  3461 I ActivityTaskManager: START u0 {act=android.content.pm.action.REQUEST_PERMISSIONS pkg=com.android.permissioncontroller cmp=com.android.permissioncontroller/.permission.ui.GrantPermissionsActivity (has extras)} from uid 10282
+10-06 01:00:27.157  1027  3461 D CompatibilityChangeReporter: Compat change id reported: 174042980; UID 10282; state: DISABLED
+10-06 01:00:27.159  1027  3461 D ActivityTrigger: ActivityTrigger activityPauseTrigger 
+10-06 01:00:27.161  5264  5264 D FirebaseSessions: App backgrounded on com.epidgames.trickcalrevive
+10-06 01:00:27.163  1027  3461 D CoreBackPreview: Window{7536ec1 u0 com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@33cbf8b, mPriority=-1}
+10-06 01:00:27.157   857   857 I RenderEngine: type=1400 audit(0.0:670): avc: denied { ioctl } for path="/dev/dri/renderD128" dev="tmpfs" ino=475 ioctlcmd=0x6444 scontext=u:r:surfaceflinger:s0 tcontext=u:object_r:gpu_device:s0 tclass=chr_file permissive=1
+10-06 01:00:27.187  5264  5376 I firebase: Firebase Analytics API Initializing
+10-06 01:00:27.187  5264  5376 I firebase: analytics API Initialized
+10-06 01:00:27.187  5264  5376 E firebase: Messaging already shut down.
+10-06 01:00:27.193  5264  5376 E Unity   : InitializationException:  Firebase modules failed to initialize: messaging (missing dependency)
+10-06 01:00:27.193  5264  5376 E Unity   :   at Firebase.FirebaseApp.CreateAndTrack (Firebase.FirebaseApp+CreateDelegate createDelegate, Firebase.FirebaseApp existingProxy) [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.193  5264  5376 E Unity   :   at Firebase.Messaging.FirebaseMessagingInternal+Listener..ctor () [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.193  5264  5376 E Unity   :   at Firebase.Messaging.FirebaseMessagingInternal+Listener.Create () [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.193  5264  5376 E Unity   :   at Firebase.Messaging.FirebaseMessagingInternal..cctor () [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.193  5264  5376 E Unity   :   at Firebase.Messaging.FirebaseMessaging.add_TokenReceived (System.EventHandler`1[TEventArgs] value) [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.193  5264  5376 E Unity   :   at NotificationMgr.cxfd () [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.193  5264  5376 E Unity   :   at NotificationMgr.Init () [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.193  5264  5376 E Unity   :   at Singleton`1[T].dhxt () [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.193  5264  5376 E Unity   :   at
+10-06 01:00:27.222  5264  5376 E Unity   : Sprite Atlas : Exception triggering SpriteAtlasManager.atlasRequested callback.InitializationException:  Firebase modules failed to initialize: messaging (missing dependency)
+10-06 01:00:27.222  5264  5376 E Unity   :   at Firebase.FirebaseApp.CreateAndTrack (Firebase.FirebaseApp+CreateDelegate createDelegate, Firebase.FirebaseApp existingProxy) [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.222  5264  5376 E Unity   :   at Firebase.Crashlytics.AndroidImpl..ctor () [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.222  5264  5376 E Unity   :   at Firebase.Crashlytics.Impl.Make () [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.222  5264  5376 E Unity   :   at Firebase.Crashlytics.Crashlytics+PlatformAccessor..cctor () [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.222  5264  5376 E Unity   :   at Firebase.Crashlytics.Crashlytics.Log (System.String message) [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.222  5264  5376 E Unity   :   at DontDestroy.dfpv (System.String a) [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.222  5264  5376 E Unity   :   at DontDestroy.OnApplicationPause (System.Boolean pauseStatus) [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.222  5264  5376 E Unity   : Rethrow as TypeInitializationException:
+10-06 01:00:27.408   852   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 01:00:27.408   852   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 01:00:27.661  1027  1045 W ActivityTaskManager: Activity pause timeout for ActivityRecord{bca0682 u0 com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity} t7}
+10-06 01:00:27.661  1027  1045 I ActivityTaskManager: The Process com.android.permissioncontroller Already Exists in BG. So sending its PID: 1522
+10-06 01:00:27.661  1027  1045 W ActivityTaskManager: Tried to set launchTime (0) < mLastActivityLaunchTime (81628)
+10-06 01:00:27.662  1027  1045 D CompatibilityInfo: mCompatibilityFlags - 4
+10-06 01:00:27.662  1027  1045 D CompatibilityInfo: applicationDensity - 160
+10-06 01:00:27.662  1027  1045 D CompatibilityInfo: applicationScale - 1.0
+10-06 01:00:27.664  1027  1045 D CompatibilityChangeReporter: Compat change id reported: 181136395; UID 10282; state: DISABLED
+10-06 01:00:27.664  1027  1045 D CompatibilityChangeReporter: Compat change id reported: 174042936; UID 10282; state: DISABLED
+10-06 01:00:27.677  5264  5376 W Unity   : Attempting to get `time` on an audio source that has a resource that is not a clip will always return 0.
+10-06 01:00:27.677  5264  5376 W Unity   : SoundMgr:OnApplicationPause(Boolean)
+10-06 01:00:27.677  5264  5376 W Unity   : 
+10-06 01:00:27.677  5264  5376 W Unity   : [ line -1918736104]
+10-06 01:00:27.677  5264  5376 W Unity   : 
+10-06 01:00:27.678  1027  1882 D CoreBackPreview: Window{896450a u0 com.android.permissioncontroller/com.android.permissioncontroller.permission.ui.GrantPermissionsActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@35a6b98, mPriority=0}
+10-06 01:00:27.679  5264  5376 E Unity   : InitializationException:  Firebase modules failed to initialize: messaging (missing dependency)
+10-06 01:00:27.679  5264  5376 E Unity   :   at Firebase.FirebaseApp.CreateAndTrack (Firebase.FirebaseApp+CreateDelegate createDelegate, Firebase.FirebaseApp existingProxy) [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.679  5264  5376 E Unity   :   at Firebase.Crashlytics.AndroidImpl..ctor () [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.679  5264  5376 E Unity   :   at Firebase.Crashlytics.Impl.Make () [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.679  5264  5376 E Unity   :   at Firebase.Crashlytics.Crashlytics+PlatformAccessor..cctor () [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.679  5264  5376 E Unity   :   at Firebase.Crashlytics.Crashlytics.Log (System.String message) [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.679  5264  5376 E Unity   :   at DontDestroy.dfpv (System.String a) [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.679  5264  5376 E Unity   :   at DontDestroy.OnApplicationPause (System.Boolean pauseStatus) [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.679  5264  5376 E Unity   : Rethrow as TypeInitializationException: The type initializer for 'Firebase.Crashlytics.Crashlytics.PlatformAccessor' t
+10-06 01:00:27.682  5264  5376 D AAudio  : AAudioStream_requestStop(s#1) called
+10-06 01:00:27.683  5264  5376 D AAudioStream: setState(s#1) from 4 to 9
+10-06 01:00:27.683  5264  5376 D AudioTrack: stop(15): called with 97440 frames delivered
+10-06 01:00:27.683  5264  5376 D AAudioStream: setState(s#1) from 9 to 10
+10-06 01:00:27.683  1027  1040 D KbdSensor: poll_batch: dev=0x7f0302d6ba50 sensor_handle=0 flags=0 sampling_period_ns=2000000 max_report_latency_ns=100000000
+10-06 01:00:27.683  1027  1040 D KbdSensor: poll_setDelay: dev=0x7f0302d6ba50 handle=0 ns=2000000
+10-06 01:00:27.685  5264  5456 D ProfileInstaller: Installing profile for com.epidgames.trickcalrevive
+10-06 01:00:27.686   857   857 I BpBinder: onLastStrongRef automatically unlinking death recipients: <uncached descriptor>
+10-06 01:00:27.697  1027  1042 I ActivityTaskManager: Displayed com.android.permissioncontroller/.permission.ui.GrantPermissionsActivity: +539ms
+10-06 01:00:27.704  1027  1463 D EthernetNetworkFactory: eth0: onNetworkUnneeded for request: NetworkRequest [ REQUEST id=91, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10282 RequestorUid: 10266 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-06 01:00:27.706  1027  1882 D ConnectivityService: requestNetwork for uid/pid:10266/1519 asUid: 10274 activeRequest: null callbackRequest: 94 [NetworkRequest [ REQUEST id=95, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10274 RequestorUid: 10266 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647
+10-06 01:00:27.706  1027  1464 D ConnectivityService: NetReassign [95 : null → 100]
+10-06 01:00:27.706  1027  1463 D EthernetNetworkFactory: eth0: onNetworkNeeded for request: NetworkRequest [ REQUEST id=95, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10274 RequestorUid: 10266 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-06 01:00:27.706  1027  1463 D EthernetNetworkFactory: IpClient already started
+10-06 01:00:27.707  5264  5376 E Unity   : InitializationException:  Firebase modules failed to initialize: messaging (missing dependency)
+10-06 01:00:27.707  5264  5376 E Unity   :   at Firebase.FirebaseApp.CreateAndTrack (Firebase.FirebaseApp+CreateDelegate createDelegate, Firebase.FirebaseApp existingProxy) [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.707  5264  5376 E Unity   :   at Firebase.Crashlytics.AndroidImpl..ctor () [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.707  5264  5376 E Unity   :   at Firebase.Crashlytics.Impl.Make () [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.707  5264  5376 E Unity   :   at Firebase.Crashlytics.Crashlytics+PlatformAccessor..cctor () [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.707  5264  5376 E Unity   :   at Firebase.Crashlytics.Crashlytics.Log (System.String message) [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.707  5264  5376 E Unity   :   at DontDestroy.dfpv (System.String a) [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.707  5264  5376 E Unity   :   at DontDestroy.OnApplicationPause (System.Boolean pauseStatus) [0x00000] in <00000000000000000000000000000000>:0 
+10-06 01:00:27.707  5264  5376 E Unity   : Rethrow as TypeInitializationException: The type initializer for 'Firebase.Crashlytics.Crashlytics.PlatformAccessor' t
+10-06 01:00:27.708  1027  1413 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=95, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10274 RequestorUid: 10266 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-06 01:00:27.708  1027  1413 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=95, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10274 RequestorUid: 10266 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-06 01:00:27.708  1027  1413 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=95, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10274 RequestorUid: 10266 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-06 01:00:27.708  1786  1786 D PhoneSwitcherNetworkRequstListener: got request NetworkRequest [ REQUEST id=95, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10274 RequestorUid: 10266 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-06 01:00:27.767  1027  1052 D CompatibilityInfo: mCompatibilityFlags - 4
+10-06 01:00:27.767  1027  1052 D CompatibilityInfo: applicationDensity - 160
+10-06 01:00:27.767  1027  1052 D CompatibilityInfo: applicationScale - 1.0
+10-06 01:00:27.777   857   857 I RegionSampling: type=1400 audit(0.0:671): avc: denied { ioctl } for path="/dev/dri/renderD128" dev="tmpfs" ino=475 ioctlcmd=0x6446 scontext=u:r:surfaceflinger:s0 tcontext=u:object_r:gpu_device:s0 tclass=chr_file permissive=1
+10-06 01:00:27.777   857   857 I RegionSampling: type=1400 audit(0.0:672): avc: denied { ioctl } for path="/dev/dri/renderD128" dev="tmpfs" ino=475 ioctlcmd=0x6448 scontext=u:r:surfaceflinger:s0 tcontext=u:object_r:gpu_device:s0 tclass=chr_file permissive=1
+10-06 01:00:27.829  5264  5331 V <Presto_E>: G-Presto Engine initialization completed
+10-06 01:00:27.920  5264  5461 V <Presto_E>: G-Presto Engine setting options completed
+10-06 01:00:28.409   852   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 01:00:28.409   852   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 01:00:29.227  5264  5291 I FA      : Application backgrounded at: timestamp_millis: 1791216027226
+10-06 01:00:29.410   852   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 01:00:29.410   852   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 01:00:29.746  5264  5394 D TrafficStats: tagSocket(164) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:29.747  5264  5394 D TrafficStats: tagSocket(164) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:29.747  5264  5394 W Airbridge: Client is failed to receive response: method={POST} url={https://event.airbridge.io/v1/apps/trickcalrevive} error={java.net.ConnectException: Failed to connect to event.airbridge.io/:::443}
+10-06 01:00:29.747  5264  5394 W Airbridge: delay 8000ms
+10-06 01:00:30.364  5264  5294 D SharedPreferencesImpl: Time required to fsync /data/user/0/com.epidgames.trickcalrevive/shared_prefs/airbridge-internal.xml: [<1: 0, <2: 0, <4: 0, <8: 4, <16: 2, <32: 0, <64: 0, <128: 0, <256: 0, <512: 0, <1024: 1, <2048: 0, <4096: 0, <8192: 0, <16384: 0, >=16384: 0]
+10-06 01:00:30.411   852   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 01:00:30.411   852   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 01:00:31.411   852   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 01:00:31.411   852   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 01:00:32.140   799  5216 I keystore2: keystore2::watchdog: Watchdog thread idle -> terminating. Have a great day.
+10-06 01:00:32.413   852   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 01:00:32.413   852   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 01:00:32.539  1027  1027 D CompatibilityChangeReporter: Compat change id reported: 168419799; UID 10282; state: DISABLED
+10-06 01:00:32.539  1027  1027 D CompatibilityChangeReporter: Compat change id reported: 273564678; UID 10282; state: DISABLED
+10-06 01:00:32.539  1027  1027 D CompatibilityInfo: mCompatibilityFlags - 4
+10-06 01:00:32.539  1027  1027 D CompatibilityInfo: applicationDensity - 160
+10-06 01:00:32.539  1027  1027 D CompatibilityInfo: applicationScale - 1.0
+10-06 01:00:32.539  1027  1027 D OomAdjuster: Not killing cached processes
+10-06 01:00:32.542  5264  5264 V FA      : AppMeasurementJobService is starting up.
+10-06 01:00:32.550  5264  5264 V FA      : onUnbind called for intent. action: null
+10-06 01:00:32.551  1027  1027 W JobScheduler: Job didn't exist in JobStore: 86e5314 #u0a282/-1794659060 com.epidgames.trickcalrevive/com.google.android.gms.measurement.AppMeasurementJobService
+10-06 01:00:32.551  5264  5264 V FA      : AppMeasurementJobService is shutting down.
+10-06 01:00:32.553  5264  5470 D TrafficStats: tagSocket(164) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:32.554  5264  5470 D TrafficStats: tagSocket(164) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:33.413   852   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 01:00:33.413   852   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 01:00:34.230  5264  5264 V FA      : onUnbind called for intent. action: com.google.android.gms.measurement.START
+10-06 01:00:34.230  5264  5264 V FA      : AppMeasurementService is shutting down.
+10-06 01:00:34.414   852   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 01:00:34.414   852   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 01:00:35.415   852   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 01:00:35.415   852   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 01:00:36.416   852   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 01:00:36.416   852   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 01:00:37.417   852   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 01:00:37.417   852   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 01:00:37.637  5477  5477 W ProcessState: Extra binder thread started, but 0 threads requested. Do not use *startThreadPool when zero threads are requested.
+10-06 01:00:37.649  5477  5477 I binder:5477_1: type=1400 audit(0.0:673): avc: denied { open } for path="/dev/__properties__/u:object_r:vendor_default_prop:s0" dev="tmpfs" ino=257 scontext=u:r:shell:s0 tcontext=u:object_r:vendor_default_prop:s0 tclass=file permissive=1
+10-06 01:00:37.649  5477  5477 I binder:5477_1: type=1400 audit(0.0:674): avc: denied { getattr } for path="/dev/__properties__/u:object_r:vendor_default_prop:s0" dev="tmpfs" ino=257 scontext=u:r:shell:s0 tcontext=u:object_r:vendor_default_prop:s0 tclass=file permissive=1
+10-06 01:00:37.649  5477  5477 I binder:5477_1: type=1400 audit(0.0:675): avc: denied { map } for path="/dev/__properties__/u:object_r:vendor_default_prop:s0" dev="tmpfs" ino=257 scontext=u:r:shell:s0 tcontext=u:object_r:vendor_default_prop:s0 tclass=file permissive=1
+10-06 01:00:37.651  5477  5478 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_CREATE_GUEST_HANDLE
+10-06 01:00:37.651  5477  5478 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_RESOURCE_SYNC
+10-06 01:00:37.651  5477  5478 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_GUEST_VRAM
+10-06 01:00:37.651  5477  5478 I [minigbm:virgl_get_caps(556)]: Supported CAPSET IDs: 6.
+10-06 01:00:37.651  5477  5478 I [minigbm:virgl_add_combination(372)]: Skipping unsupported combination format:842094158
+10-06 01:00:37.651  5477  5478 I [minigbm:virgl_add_combination(372)]: Skipping unsupported combination format:808530000
+10-06 01:00:37.759  5264  5394 D TrafficStats: tagSocket(164) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:37.760  5264  5394 D TrafficStats: tagSocket(164) with statsTag=0xffffffff, statsUid=-1
+10-06 01:00:37.760  5264  5394 W Airbridge: Client is failed to receive response: method={POST} url={https://event.airbridge.io/v1/apps/trickcalrevive} error={java.net.ConnectException: Failed to connect to event.airbridge.io/:::443}
+10-06 01:00:37.761  5264  5394 W Airbridge: delay 16000ms

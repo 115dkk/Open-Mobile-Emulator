@@ -1,0 +1,12 @@
+Filesystem      Size Used Avail Use% Mounted on
+/dev/block/vda1  31G 4.4G   25G  16% /data/user/0
+ Physical size: 1280x800
+ libndk_translation.so
+  VERIFIED base.apk 6d8b2213c30cb5f3e5e9ed3424a388744efc1ded5adce16339af8ac5e7bd0966
+VERIFIED split_config.arm64_v8a.apk 2eac8306e85ab0cea31ca4710b110c7da653ceee9f0788455882ce45d40a0564
+VERIFIED split_gpdeku.apk 48461978018aa0c4a9a2246000af357330607de2b3cc80909b5c0ad82fec6d47
+VERIFIED split_gpdeku.config.arm64_v8a.apk 0f05fbaa5359aaedf4b5ef5059a72f272eea7a37d9ee9c4ebddd553a61fccffd
+Success
+ priority=0 preferredOrder=0 match=0x108000 specificIndex=-1 isDefault=false
+com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity
+ 
