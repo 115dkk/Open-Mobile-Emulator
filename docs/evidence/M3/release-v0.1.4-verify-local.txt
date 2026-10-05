@@ -1,0 +1,33 @@
+User-style verification of release v0.1.4 on the dev PC, 2026-10-05T10:47:12Z
+== sha256sum vs .sha256
+file   4fd478386e547013cba5ea6d85f3f44f8f6f0fa2120a43714be71832a348e8fe
+sha256 4fd478386e547013cba5ea6d85f3f44f8f6f0fa2120a43714be71832a348e8fe  Open-Mobile-Emulator-0.1.4-x64-setup.exe
+MATCH
+== SHA256SUMS
+edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6  LICENSE
+26c2e6fb835d520184bc721dad6fd44a500299553698b90082615c8f42c55028  NOTICE
+4fd478386e547013cba5ea6d85f3f44f8f6f0fa2120a43714be71832a348e8fe  Open-Mobile-Emulator-0.1.4-x64-setup.exe
+a813fbde5f1cd747028210e87b8ed171ef5ec62cfb47f9faa56d1235906967be  Open-Mobile-Emulator-0.1.4-x64-setup.exe.sha256
+c5a3319a7db5226b1f1120ab24c37cbd4cdaf218dda3dbba0293ab6c19212804  qemu-ome-v11.1.1-c3d48b7d1e89-win64.zip
+24833e05ddbf2e97ee1a3c733124ffa285705e798c7452fd1ffb36fe939eab54  qemu-source-offer-v11.1.1-c3d48b7d1e89.tar.gz
+594070cf5c54c645695cd29c4b928175ae6056aa485a896650fcfe18f2c91a9a  THIRD_PARTY.md
+== sha256sum -c SHA256SUMS
+LICENSE: OK
+NOTICE: OK
+Open-Mobile-Emulator-0.1.4-x64-setup.exe: OK
+Open-Mobile-Emulator-0.1.4-x64-setup.exe.sha256: OK
+qemu-ome-v11.1.1-c3d48b7d1e89-win64.zip: OK
+qemu-source-offer-v11.1.1-c3d48b7d1e89.tar.gz: OK
+THIRD_PARTY.md: OK
+== manifests/qemu-release.json pinned sums
+"runtime_zip_sha256": "c5a3319a7db5226b1f1120ab24c37cbd4cdaf218dda3dbba0293ab6c19212804"
+"source_offer_sha256": "24833e05ddbf2e97ee1a3c733124ffa285705e798c7452fd1ffb36fe939eab54"
+== gh attestation verify (signer workflow release.yml)
+LICENSE: refs/tags/v0.1.4 6d85418d718d799db0e95cbdacc70e57a0b0a209 https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/37296755077/attempts/1
+NOTICE: refs/tags/v0.1.4 6d85418d718d799db0e95cbdacc70e57a0b0a209 https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/37296755077/attempts/1
+Open-Mobile-Emulator-0.1.4-x64-setup.exe: refs/tags/v0.1.4 6d85418d718d799db0e95cbdacc70e57a0b0a209 https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/37296755077/attempts/1
+Open-Mobile-Emulator-0.1.4-x64-setup.exe.sha256: refs/tags/v0.1.4 6d85418d718d799db0e95cbdacc70e57a0b0a209 https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/37296755077/attempts/1
+SHA256SUMS: refs/tags/v0.1.4 6d85418d718d799db0e95cbdacc70e57a0b0a209 https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/37296755077/attempts/1
+THIRD_PARTY.md: refs/tags/v0.1.4 6d85418d718d799db0e95cbdacc70e57a0b0a209 https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/37296755077/attempts/1
+qemu-ome-v11.1.1-c3d48b7d1e89-win64.zip: refs/tags/v0.1.4 6d85418d718d799db0e95cbdacc70e57a0b0a209 https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/37296755077/attempts/1
+qemu-source-offer-v11.1.1-c3d48b7d1e89.tar.gz: refs/tags/v0.1.4 6d85418d718d799db0e95cbdacc70e57a0b0a209 https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/37296755077/attempts/1

@@ -325,3 +325,41 @@ v0.1.3 설치기)은 통과했다. 사전 점검부터 정리까지 열두 단�
 뿐이다). 첫 OCR은 그 뒤로 4.1초 걸렸다. 앞선 실행에서 첫 캡처부터 판정까지 걸린 시간(0.1.0 4.1초, 0.1.1 5.5초, 0.1.2 11.0초)은
 OCR을 포함한 값이라 캡처 시간만 따로 알 수 없고, 첫 캡처가 늘 느리다는 근거가 되지 못한다. 첫 시도의 15초 초과는 이 기록들과 맞지 않는 한 번의
 사건이고, 다시 생기면 고친 드라이버가 제품의 상태를 남긴다.
+
+## 10. QEMU 릴리스 ome6과 제품 릴리스 v0.1.4 (2026-10-05, 사전 릴리스)
+
+사용자 보고 2026-10-05: 가상 머신의 포인터가 실제 커서와 다른 자리에 있다. 원인과 측정은 `pointer-alignment.md`에 있다.
+패치 0006을 고친 커밋 a2ab1f2에서 `qemu-release.yml -f suffix=ome6`(실행
+https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/37294107725 )이 `qemu-v11.1.1-ome6`을 올렸다. 런타임 zip
+`c5a3319a…212804`, 소스 묶음 `24833e05…eab54`. 이 zip을 사용자 PC 설치본에 넣고 같은 커밋의 로컬 빌드 `ome.exe`로 시험했고,
+사용자가 포인터가 커서 자리에 온다고 확인한 뒤 0.1.4 릴리스를 지시했다.
+
+태그 `v0.1.4`는 6d85418(버전, `manifests/qemu-release.json`과 `m2-dod.yml`을 ome6으로)에 밀었고, 같은 커밋의 CI(실행
+37296752271)는 통과했다. `release.yml` 실행은 https://github.com/115dkk/Open-Mobile-Emulator/actions/runs/37296755077 이다.
+
+| 잡 | 시간 | 내용 |
+|---|---|---|
+| verify | 7분 45초 | 4절과 같은 게이트 |
+| qemu-source-offer | 53초 | ome6 zip과 소스 묶음의 SHA-256 대조와 출처 증명 확인 |
+| product | 9분 24초 | 버전 일치 확인, 설치기 빌드, 자산 정리와 검사, 출처 증명, 사전 릴리스 생성, 다시 받아 확인 |
+
+| 자산 | 크기 | SHA-256 |
+|---|---|---|
+| `Open-Mobile-Emulator-0.1.4-x64-setup.exe` | 54,302,384 B | `4fd47838…48e8fe` |
+| `Open-Mobile-Emulator-0.1.4-x64-setup.exe.sha256` | 107 B | |
+| `qemu-ome-v11.1.1-c3d48b7d1e89-win64.zip` | 62,777,630 B | `c5a3319a…212804` (ome6) |
+| `qemu-source-offer-v11.1.1-c3d48b7d1e89.tar.gz` | 249,542,104 B | `24833e05…eab54` |
+| `THIRD_PARTY.md`, `NOTICE`, `LICENSE`, `SHA256SUMS` | | 4절과 같은 내용 |
+
+개발 PC에서 사용자 절차대로 다시 확인했다(`release-v0.1.4-verify-local.txt`). 설치기의 SHA-256이 `.sha256`과 같고,
+`SHA256SUMS`의 일곱 항목이 전부 맞으며, 두 QEMU 파일은 `manifests/qemu-release.json`의 고정값과 같다. 여덟 자산 모두
+`gh attestation verify --signer-workflow .../release.yml`을 통과했고, 증명은 `refs/tags/v0.1.4`(6d85418)와 실행 37296755077을
+가리킨다.
+
+### 사용자 PC의 설치본 갱신
+
+제품이 돌고 있지 않은 것을 확인하고 같은 설치기를 `/S`로 기존 설치 위에 깔았다. 종료 코드 0, `ome.exe`의 제품 버전과 제거 항목의
+버전은 0.1.4이고, 설치된 `qemu-system-x86_64.exe`의 SHA-256(`AFCF36C5…`)은 ome6 zip의 파일과 같다. 시험 때 남긴 백업
+(`qemu.ome5.bak`, `ome.exe.v0.1.3.bak`)은 지웠다. 사용자 데이터는 그대로다.
+
+러너에서의 설치기 완주(`m3-release-dod.yml`)는 이번 릴리스에서 돌리지 않았다.
