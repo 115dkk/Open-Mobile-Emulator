@@ -1,0 +1,15 @@
+
+console:/ # 
+console:/ # 
+mkdir -p /data/local/tmp/ome-volume; mount -t ext4 /dev/vda1 /dataa/local/tmp/ome-volume; mount -t ext4 /dev/vda1 /data                         </local/tmp/ome-volume; lsount -t ext4 /dev/vda1 /data/local/tmp/ome-volume; ls                         < -l /data/local/tmp/ome-vata/local/tmp/ome-volume; ls -l /data/local/tmp/ome-v                         <olume/ome/system.before-j ls -l /data/local/tmp/ome-volume/ome/system.before-j                         <ni2.img; df -k /data; rm e-volume/ome/system.before-jni2.img; df -k /data; rm                          <-f /data/local/tmp/ome-voe-jni2.img; df -k /data; rm -f /data/local/tmp/ome-vo                         <lume/ome/system.before-jnrm -f /data/local/tmp/ome-volume/ome/system.before-jn                         <i2.img; sync; df -k /data-volume/ome/system.before-jni2.img; sync; df -k /data                         <; umount /data/local/tmp/-jni2.img; sync; df -k /data; umount /data/local/tmp/                         <ome-volume
+[  406.305247] /dev/vda1: Can't lookup blockdev
+mount: '/dev/vda1'->'/data/local/tmp/ome-volume': No such file or directory
+ls: /data/local/tmp/ome-volume/ome/system.before-jni2.img: No such file or directory
+[  406.321043] audit: rate limit exceeded
+Filesystem     1K-blocks     Used Available Use% Mounted on
+/dev/vda1       65739288 10729732  55009556  17% /data_mirror/data_ce/null/0
+Filesystem     1K-blocks     Used Available Use% Mounted on
+/dev/vda1       65739288 10729732  55009556  17% /data_mirror/data_ce/null/0
+umount: /data/local/tmp/ome-volume: Invalid argument
+1|console:/ # 
+1|console:/ # 

@@ -1,0 +1,115 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# OME backport: AOSP 3428f9be71b0d20978d11d63b5d82962b88d02bf and 6fbb37a7513bf93f63f7a84925cc4d9913590abd.
+# Explicit old-version bounds check; diagnostics default off (debug.ome.jni_trace).
+diff --git a/libnativebridge/include/nativebridge/native_bridge.h b/libnativebridge/include/nativebridge/native_bridge.h
+index 4915216..db3d1e9 100644
+--- a/libnativebridge/include/nativebridge/native_bridge.h
++++ b/libnativebridge/include/nativebridge/native_bridge.h
+@@ -100,6 +100,8 @@ void* NativeBridgeGetTrampolineForFunctionPointer(const void* method,
+                                                   uint32_t len,
+                                                   enum JNICallType jni_call_type);
+ 
++bool NativeBridgeIsNativeBridgeFunctionPointer(const void* method);
++
+ // True if native library paths are valid and is for an ABI that is supported by native bridge.
+ // The *libpath* must point to a library.
+ //
+@@ -403,9 +405,10 @@ struct NativeBridgeCallbacks {
+   // Get a native bridge trampoline for specified native method implementation pointer.
+   //
+   // Parameters:
+-  //   method [IN] pointer to method implementation (ususally registered via call to
++  //   method [IN] pointer to method implementation (usually registered via call to
+   //   RegisterNatives).
+-  //   shorty [IN] short descriptor of native method len [IN] length of shorty
++  //   shorty [IN] short descriptor of native method
++  //   len [IN] length of shorty
+   //   jni_call_type [IN] the type of JNI call
+   // Returns:
+   //   address of trampoline if successful, otherwise NULL
+@@ -413,6 +416,18 @@ struct NativeBridgeCallbacks {
+                                            const char* shorty,
+                                            uint32_t len,
+                                            enum JNICallType jni_call_type);
++
++  // Check if the method pointer belongs to native_bridge address space.
++  //
++  // Parameters:
++  //   method [IN] pointer to a method implementation.
++  //
++  // Returns:
++  //   true if the method is in native bridge implementation executable address
++  //   space or in other words needs a trampoline to be able to run with native bridge.
++  //
++  // Introduced in: version 8
++  bool (*isNativeBridgeFunctionPointer)(const void* method);
+ };
+ 
+ // Runtime interfaces to native bridge.
+diff --git a/libnativebridge/native_bridge.cc b/libnativebridge/native_bridge.cc
+index eecfd0e..92dfa90 100644
+--- a/libnativebridge/native_bridge.cc
++++ b/libnativebridge/native_bridge.cc
+@@ -136,6 +136,8 @@ enum NativeBridgeImplementationVersion {
+   PRE_ZYGOTE_FORK_VERSION = 6,
+   // The version with critical_native support
+   CRITICAL_NATIVE_SUPPORT_VERSION = 7,
++  // The version with native bridge detection fallback for function pointers
++  IDENTIFY_NATIVELY_BRIDGED_FUNCTION_POINTERS_VERSION = 8,
+ };
+ 
+ // Whether we had an error at some point.
+@@ -772,6 +774,22 @@ void* NativeBridgeLoadLibraryExt(const char* libpath, int flag, native_bridge_na
+   return nullptr;
+ }
+ 
++bool NativeBridgeIsNativeBridgeFunctionPointer(const void* method) {
++  // Modified by OME: an older callback table must never be read past its end,
++  // even if that bridge's compatibility hook claims future-version support.
++  if (NativeBridgeInitialized() &&
++      callbacks->version >= IDENTIFY_NATIVELY_BRIDGED_FUNCTION_POINTERS_VERSION &&
++      callbacks->isNativeBridgeFunctionPointer != nullptr) {
++    if (isCompatibleWith(IDENTIFY_NATIVELY_BRIDGED_FUNCTION_POINTERS_VERSION)) {
++      return callbacks->isNativeBridgeFunctionPointer(method);
++    } else {
++      ALOGW("not compatible with version %d, unable to call isNativeBridgeFunctionPointer",
++            IDENTIFY_NATIVELY_BRIDGED_FUNCTION_POINTERS_VERSION);
++    }
++  }
++  return false;
++}
++
+ }  // extern "C"
+ 
+ }  // namespace android
+diff --git a/runtime/jni/jni_internal.cc b/runtime/jni/jni_internal.cc
+index 51350dc..6c0b59d 100644
+--- a/runtime/jni/jni_internal.cc
++++ b/runtime/jni/jni_internal.cc
+@@ -14,6 +14,7 @@
+  * limitations under the License.
+  */
+ 
++#include <android-base/properties.h>
+ #include "jni_internal.h"
+ 
+ #include <log/log.h>
+@@ -2704,9 +2705,17 @@ class JNI {
+         // TODO: make this a hard register error in the future.
+       }
+ 
+-      if (is_class_loader_namespace_natively_bridged) {
++      // Modified by OME: opt-in diagnostic, no registration behavior change.
++      const void* ome_original_fn = fnPtr;
++      if (is_class_loader_namespace_natively_bridged ||
++          android::NativeBridgeIsNativeBridgeFunctionPointer(fnPtr)) {
+         fnPtr = GenerateNativeBridgeTrampoline(fnPtr, m);
+       }
++      if (android::base::GetBoolProperty("debug.ome.jni_trace", false)) {
++        LOG(INFO) << "OME_JNI_REGISTER method=" << m->PrettyMethod()
++                  << " namespace_bridged=" << is_class_loader_namespace_natively_bridged
++                  << " original=" << ome_original_fn << " final=" << fnPtr;
++      }
+       const void* final_function_ptr = class_linker->RegisterNative(soa.Self(), m, fnPtr);
+       UNUSED(final_function_ptr);
+     }

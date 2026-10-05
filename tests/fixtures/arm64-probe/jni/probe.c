@@ -6,6 +6,19 @@
 extern void *dlopen(const char *filename, int flags);
 extern void *dlsym(void *handle, const char *symbol);
 
+static jstring cross_loader_probe(JNIEnv *env, jclass clazz) {
+    (void)clazz;
+    return (*env)->NewStringUTF(env, "cross-loader RegisterNatives PASS");
+}
+
+JNIEXPORT jboolean JNICALL
+Java_org_ome_arm64probe_MainActivity_registerChildProbe(JNIEnv *env, jclass clazz,
+                                                     jclass child) {
+    (void)clazz;
+    JNINativeMethod method = {"crossLoaderProbe", "()Ljava/lang/String;", (void *)cross_loader_probe};
+    return (*env)->RegisterNatives(env, child, &method, 1) == JNI_OK;
+}
+
 static jstring registered_probe(JNIEnv *env, jclass clazz) {
     (void)clazz;
     return (*env)->NewStringUTF(env, "JNI_OnLoad RegisterNatives PASS");

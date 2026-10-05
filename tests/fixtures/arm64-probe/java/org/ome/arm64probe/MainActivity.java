@@ -16,6 +16,7 @@ public final class MainActivity extends Activity {
         System.loadLibrary("probe");
     }
 
+    private static native boolean registerChildProbe(Class<?> child);
     private static native String registeredProbe();
     private static native boolean registerDlopenProbe();
     private static native String dlopenProbe();
@@ -32,6 +33,23 @@ public final class MainActivity extends Activity {
         Log.i(TAG, "dlopen RegisterNatives BEGIN");
         String loaded = registerDlopenProbe() ? dlopenProbe() : "dlopen registration FAILED";
         Log.i(TAG, loaded);
+        String crossLoader;
+        try (java.io.InputStream input = getAssets().open("child.dex")) {
+            java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
+            byte[] buffer = new byte[4096];
+            int count;
+            while ((count = input.read(buffer)) != -1) bytes.write(buffer, 0, count);
+            ClassLoader loader = new dalvik.system.InMemoryDexClassLoader(
+                    java.nio.ByteBuffer.wrap(bytes.toByteArray()), getClassLoader());
+            Class<?> child = loader.loadClass("org.ome.child.RegisteredChild");
+            Log.i(TAG, "cross-loader RegisterNatives BEGIN");
+            crossLoader = registerChildProbe(child)
+                    ? (String) child.getMethod("crossLoaderProbe").invoke(null)
+                    : "cross-loader registration FAILED";
+        } catch (Exception error) {
+            throw new IllegalStateException("cross-loader probe failed", error);
+        }
+        Log.i(TAG, crossLoader);
         Log.i(TAG, "AAssetManager_fromJava BEGIN");
         String assetReport = nativeAssetProbe(getAssets());
         Log.i(TAG, assetReport);

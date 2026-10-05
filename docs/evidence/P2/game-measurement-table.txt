@@ -64,3 +64,17 @@ ART main은 namespace 판정 OR NativeBridgeIsNativeBridgeFunctionPointer로 수
 A15에는 그 공개 API와 콜백 필드가 없어 조건만 이식한 후보 빌드 실패. 설계 판단을 위해 중단.
 리소스 다운로드 이후 시나리오와 전투 수치는 여전히 없음.
 pre-jni1 백업은 승인에 따라 삭제. jni2/jni3 갱신 전 시스템 백업은 디스크에 유지.
+
+Native bridge v8 역이식 뒤 (2026-10-06)
+상류 인터페이스 3428f9be71b0d20978d11d63b5d82962b88d02bf, ART 조건 6fbb37a7513bf93f63f7a84925cc4d9913590abd.
+A15 jni3에서 별도 InMemoryDexClassLoader 재현기는 namespace_bridged=0, SIGSEGV.
+jni6에서 같은 재현기 namespace_bridged=0이지만 guest pointer 판정=1, final이 host trampoline으로 변경, PASS.
+게임 Swappy 두 메서드도 final이 host trampoline으로 변경. 기존 SIGSEGV 없음.
+게임 PID 3288/3360 유지. 첫 알림 권한 화면까지 진행했고 선택적 알림을 거부.
+이후 흰 화면이 지속되어 리소스 다운로드 안내와 계정 화면에 도달하지 못함.
+Unity log: Firebase modules failed to initialize: messaging (missing dependency).
+구글 앱 없는 이미지에서 발생한 의존성 오류이며 흰 화면의 단독 원인인지는 미확정.
+구글 구성요소 추가, 게임 수정, 초기화 생략은 하지 않음.
+전투/10분 플레이/정상 게임 재실행 시나리오는 미완료, 성능 비교 불가.
+원문 game-jni6-three-minute-logcat.txt, jni6-cross-after-logcat.txt.
+승인한 system.before-jni2.img는 jni6 업데이트 도우미가 삭제했고 /data 사용량 약 15GB에서 10GB로 감소.

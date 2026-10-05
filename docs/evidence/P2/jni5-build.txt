@@ -1,0 +1,13 @@
+error: hooks is different in /home/ome/bliss/.repo/projects/frameworks/libs/binary_translation.git vs /home/ome/bliss/.repo/project-objects/platform_frameworks_libs_binary_translation.git
+error: hooks is different in /home/ome/bliss/.repo/projects/frameworks/libs/binary_translation.git vs /home/ome/bliss/.repo/project-objects/platform_frameworks_libs_binary_translation.git
+Finalizing sync state...
+repo sync has finished successfully.
+==> patch already applied: build/make/0001-sysprop-keep-real-build-keys.patch  (00:12:45)
+==> patch already applied: frameworks/base/0001-keep-real-device-identity.patch  (00:12:45)
+==> patch already applied: packages/apps/Settings/0001-drop-hide-developer-status-entry.patch  (00:12:45)
+==> patch already applied: system/core/0001-init-keep-real-build-properties.patch  (00:12:45)
+==> patch applied: art/0001-opt-in-native-registration-trace.patch  (00:12:45)
+error: patch failed: runtime/jni/jni_internal.cc:2704
+error: runtime/jni/jni_internal.cc: patch does not apply
+patch does not apply: /mnt/c/Open Mobile Emulator/guest/build/patches/digitalis/art/0002-native-bridge-v8-pointer-identification.patch
+JNI5_BUILD_EXIT=2 ELAPSED_SECONDS=2

@@ -296,12 +296,26 @@ try {
             $compiledResources
         ) 'APK resource link'
 
+        $childClasses = Join-Path $intermediateRoot 'child-classes'
+        $childDex = Join-Path $intermediateRoot 'child-dex'
+        [void][System.IO.Directory]::CreateDirectory($childClasses)
+        [void][System.IO.Directory]::CreateDirectory($childDex)
+        Invoke-ExternalTool $javac @(
+            '-encoding', 'UTF-8', '-classpath', $androidJar, '-source', '11', '-target', '11',
+            '-d', $childClasses, (Join-Path $probeRoot 'child/org/ome/child/RegisteredChild.java')
+        ) 'Separate classloader Java compilation'
+        Invoke-ExternalTool $d8 @(
+            '--release', '--min-api', '26', '--lib', $androidJar, '--output', $childDex,
+            (Join-Path $childClasses 'org/ome/child/RegisteredChild.class')
+        ) 'Separate classloader DEX compilation'
+
         $archive = [System.IO.Compression.ZipFile]::Open(
             $unsignedApk,
             [System.IO.Compression.ZipArchiveMode]::Update
         )
         try {
             Add-ZipEntry $archive (Join-Path $dexRoot 'classes.dex') 'classes.dex'
+            Add-ZipEntry $archive (Join-Path $childDex 'classes.dex') 'assets/child.dex'
             Add-ZipEntry $archive $nativeLibrary 'lib/arm64-v8a/libprobe.so'
             Add-ZipEntry $archive $secondLibrary 'lib/arm64-v8a/libprobe_second.so'
             $fixedTimestamp = [System.DateTimeOffset]::new(

@@ -86,3 +86,14 @@ ISO `OME-api35-20261005-jni1-digitalis.iso` SHA-256 `9bb72cc07bba1fa1609faf020a4
   라이브러리를 올린 클래스 로더와 메서드의 클래스 로더가 달라 생기는 경우다.
 - ART main은 이 경우 `NativeBridgeIsNativeBridgeFunctionPointer(fnPtr)`로 한 번 더 확인한다(b/393035780). A15 `libnativebridge`에는 이 API와
   콜백 필드가 없어 조건만 옮기면 컴파일되지 않는다(`jni4-*.txt`). Digitalis 본체는 이 콜백(`isNativeBridgeFunctionPointer`)을 이미 구현한다.
+
+## 네이티브 브리지 v8 역이식 뒤 (2026-10-06, jni6)
+
+상류 ART `3428f9be71b0d20978d11d63b5d82962b88d02bf`(`isNativeBridgeFunctionPointer`, 인터페이스 8)와 `6fbb37a7513bf93f63f7a84925cc4d9913590abd`
+(RegisterNatives에서 함수 주소로 한 번 더 판정)를 A15에 옮겼다(`guest/build/patches/digitalis/art/0001-*.patch`, 실험 스위치 안).
+브리지 버전이 8보다 낮으면 새 콜백 필드를 읽지 않는다. 재현기의 '다른 클래스 로더' 경우는 jni3에서 SIGSEGV, jni6에서 통과(`jni5-cross-before-*`, `jni6-cross-after-*`).
+
+게임: 두 SIGSEGV 모두 사라졌고 `SwappyWrapperInit() succeeded`, 전체 화면 안내와 알림 권한 화면까지 갔다. 알림을 거부한 뒤 흰 화면에 머물렀고
+리소스 내려받기 안내가 나오지 않았다. 프로세스는 살아 있다. logcat에 `Firebase modules failed to initialize: messaging (missing dependency)`,
+Crashlytics의 `TypeInitializationException`, `com.google.android.gms` 없음이 있다. 이 이미지에는 구글 앱이 없다. 흰 화면의 원인이 GMS 부재인지
+번역기 결함인지는 아직 가르지 못했다(`game-jni6-*`).

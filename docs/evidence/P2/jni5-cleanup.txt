@@ -1,0 +1,8 @@
+DELETE C:\Users\32170336\AppData\Local/OpenMobileEmulator/p2/OME-api35-20261005-jni1-digitalis.iso bytes=2056644608
+DELETE C:\Users\32170336\AppData\Local/OpenMobileEmulator/p2/OME-api35-20261005-jni2-digitalis.iso bytes=2961022976
+WINDOWS_FREE_BEFORE=48365006848 AFTER=53382676480
+2058809197	/home/ome/bliss/dist/20261005-db973c9-jni1-digitalis
+2965115693	/home/ome/bliss/dist/20261005-db973c9-jni2-digitalis
+Filesystem         1B-blocks         Used    Available Use% Mounted on
+/dev/sde       1081101176832 325522857984 700585963520  32% /
+C:\            1000187039744 946804891648  53382148096  95% /mnt/c

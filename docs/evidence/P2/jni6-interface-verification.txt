@@ -1,0 +1,61 @@
+UPSTREAM_INTERFACE 3428f9be71b0d20978d11d63b5d82962b88d02bf
+UPSTREAM_CONSUMER 6fbb37a7513bf93f63f7a84925cc4d9913590abd
+777:bool NativeBridgeIsNativeBridgeFunctionPointer(const void* method) {
+778-  // Modified by OME: an older callback table must never be read past its end,
+779-  // even if that bridge's compatibility hook claims future-version support.
+780-  if (NativeBridgeInitialized() &&
+781-      callbacks->version >= IDENTIFY_NATIVELY_BRIDGED_FUNCTION_POINTERS_VERSION &&
+782-      callbacks->isNativeBridgeFunctionPointer != nullptr) {
+783-    if (isCompatibleWith(IDENTIFY_NATIVELY_BRIDGED_FUNCTION_POINTERS_VERSION)) {
+784-      return callbacks->isNativeBridgeFunctionPointer(method);
+785-    } else {
+786-      ALOGW("not compatible with version %d, unable to call isNativeBridgeFunctionPointer",
+787-            IDENTIFY_NATIVELY_BRIDGED_FUNCTION_POINTERS_VERSION);
+788-    }
+789-  }
+790-  return false;
+791-}
+792-
+793-}  // extern "C"
+794-
+795-}  // namespace android
+99-
+100-    // Apply the libnativebridge stub symbol file to the exported symbols from
+101-    // this shim library, to ensure that any symbols exposed here are also
+102-    // available as an exported API.
+103:    version_script: "libnativebridge.map.txt",
+104-}
+105-
+106-subdirs = ["tests"]
+#
+# Copyright (C) 2019 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Platform dependencies go through libnativebridge_lazy, which accesses
+# libnativebridge symbols through dlopen/dlsym and hence bypasses the stub.
+LIBNATIVEBRIDGE_1 {
+  global:
+    NativeBridgeGetError; # apex
+    NativeBridgeInitialized; # apex
+    NativeBridgeGetTrampoline; # apex
+    PreInitializeNativeBridge; # apex
+    NativeBridgeAvailable; # apex
+    NeedsNativeBridge; # apex
+  local:
+    *;
+};
+ELF out/soong/.intermediates/art/libnativebridge/libnativebridge/android_x86_64_sandybridge_shared_apex31/libnativebridge.so
+    41: 0000000000005b50   114 FUNC    GLOBAL PROTECTED  14 NativeBridgeIsNativeBridgeFunctionPointer
+672887e15737853277dcb504d367787671362ccf4d68e6256995a77602e7c11e  OME-api35-20261006-jni6-digitalis.iso

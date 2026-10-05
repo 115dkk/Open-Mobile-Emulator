@@ -1,0 +1,14 @@
+warning: [options] system modules path not set in conjunction with -source 11
+1 warning
+warning: [options] system modules path not set in conjunction with -source 11
+Note: C:\Open Mobile Emulator\tests\fixtures\arm64-probe\java\org\ome\arm64probe\MainActivity.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+1 warning
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): true
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1

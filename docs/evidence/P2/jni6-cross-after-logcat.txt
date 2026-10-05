@@ -1,0 +1,471 @@
+--------- beginning of main
+10-05 15:40:30.710  1657  1722 I netd    : tetherGetStats() -> {[]} <0.31ms>
+10-05 15:40:30.777  1690  1690 I RenderEngine: type=1400 audit(0.0:710): avc:  denied  { ioctl } for  path="/dev/dri/renderD128" dev="tmpfs" ino=894 ioctlcmd=0x6448 scontext=u:r:surfaceflinger:s0 tcontext=u:object_r:gpu_device:s0 tclass=chr_file permissive=1
+10-05 15:40:30.777  1690  1690 I RenderEngine: type=1400 audit(0.0:711): avc:  denied  { ioctl } for  path="/dev/dri/renderD128" dev="tmpfs" ino=894 ioctlcmd=0x6442 scontext=u:r:surfaceflinger:s0 tcontext=u:object_r:gpu_device:s0 tclass=chr_file permissive=1
+10-05 15:40:30.777  1690  1690 I RenderEngine: type=1400 audit(0.0:712): avc:  denied  { ioctl } for  path="/dev/dri/renderD128" dev="tmpfs" ino=894 ioctlcmd=0x6444 scontext=u:r:surfaceflinger:s0 tcontext=u:object_r:gpu_device:s0 tclass=chr_file permissive=1
+10-05 15:40:30.777  1690  1690 I RenderEngine: type=1400 audit(0.0:713): avc:  denied  { ioctl } for  path="/dev/dri/renderD128" dev="tmpfs" ino=894 ioctlcmd=0x6441 scontext=u:r:surfaceflinger:s0 tcontext=u:object_r:gpu_device:s0 tclass=chr_file permissive=1
+10-05 15:40:30.777  1690  1690 I RegionSampling: type=1400 audit(0.0:714): avc:  denied  { ioctl } for  path="/dev/dri/renderD128" dev="tmpfs" ino=894 ioctlcmd=0x6446 scontext=u:r:surfaceflinger:s0 tcontext=u:object_r:gpu_device:s0 tclass=chr_file permissive=1
+10-05 15:40:30.821  2149  2417 D KeyguardTransitionRepository: (Internal) Setting current transition info: TransitionInfo(ownerName=FromLockscreenTransitionInteractor, from=LOCKSCREEN, to=GONE, animated)
+--------- beginning of system
+10-05 15:40:30.821  1856  1872 D ActivityTaskManager: Top Process State changed to PROCESS_STATE_TOP
+10-05 15:40:30.821  2149  2336 V WindowManagerShell: UNKNOWN MESSAGE (319134872409225255) 6 android.os.BinderProxy@9e6630c TransitionRequestInfo { type = TO_BACK, triggerTask = null, pipTask = null, remoteTransition = null, displayChange = null, flags = 106, debugId = 6 }
+10-05 15:40:30.821  2149  2336 V ShellDesktopMode: DesktopTasksController: handleRequest request=TransitionRequestInfo { type = TO_BACK, triggerTask = null, pipTask = null, remoteTransition = null, displayChange = null, flags = 106, debugId = 6 }
+10-05 15:40:30.821  2149  2336 V ShellDesktopMode: DesktopTasksController: skipping handleRequest reason=transition type not handled (4)
+10-05 15:40:30.824  1856  1872 W ActivityManager: Unable to start service Intent { act=com.android.launcher3.WINDOW_OVERLAY dat=app://com.android.launcher3:10261/... pkg=com.google.android.googlequicksearchbox } U=0: not found
+10-05 15:40:30.824  2149  2149 I KeyguardTransitionRepository: STARTED transition: TransitionStep(from=LOCKSCREEN, to=GONE, value=0.0, transitionState=STARTED, ownerName=FromLockscreenTransitionInteractor)
+10-05 15:40:30.824  1856  2233 I AppWidgetServiceImpl: startListening() 0
+10-05 15:40:30.825  2149  2336 D WindowManagerShell: UNKNOWN MESSAGE (-2945141395292145768) false 161
+10-05 15:40:30.825  2149  2336 D WindowManagerShell: UNKNOWN MESSAGE (-2945141395292145768) true 161
+10-05 15:40:30.827  2452  3220 W OmniJawsClient: queryWeather while disabled
+10-05 15:40:30.843  1856  2233 W ActivityTaskManager: callingPackage for (uid=2000, pid=3223) has no WPC
+10-05 15:40:30.845  1856  2233 V GrammaticalInflectionUtils: AttributionSource: AttributionSource { uid = 10304, packageName = null, attributionTag = null, token = android.os.Binder@d9acc3f, deviceId = 0, next = null } does not have READ_SYSTEM_GRAMMATICAL_GENDER permission.
+10-05 15:40:30.845  1856  2233 W OptProp : Cannot read opt property android.window.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES
+10-05 15:40:30.845  1856  2233 W OptProp : Cannot read opt property android.window.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE
+10-05 15:40:30.847  1856  2233 W OptProp : Cannot read opt property android.window.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE
+10-05 15:40:30.850  1856  2233 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=org.ome.arm64probe/.MainActivity} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-05 15:40:30.853  1856  1878 V GrammaticalInflectionUtils: AttributionSource: AttributionSource { uid = 10304, packageName = null, attributionTag = null, token = android.os.Binder@d9acc3f, deviceId = 0, next = null } does not have READ_SYSTEM_GRAMMATICAL_GENDER permission.
+10-05 15:40:30.856  2149  2360 D SplashScreenView: Build android.window.SplashScreenView{7a3853e V.E...... ......ID 0,0-0,0}
+10-05 15:40:30.856  2149  2360 D SplashScreenView: Icon: view: android.widget.ImageView{f2ccf9f V.ED..... ......I. 0,0-0,0 #1020527 android:id/splashscreen_icon_view} drawable: com.android.wm.shell.startingsurface.SplashscreenIconDrawableFactory$ImmobileIconDrawable@15108ec size: 160
+10-05 15:40:30.856  2149  2360 D SplashScreenView: Branding: view: android.view.View{2c0e4b5 G.ED..... ......I. 0,0-0,0 #1020526 android:id/splashscreen_branding_view} drawable: null size w: 0 h: 0
+10-05 15:40:30.857  1660  1660 D Zygote  : Forked child process 3227
+10-05 15:40:30.859  3227  3227 W nativebridge: Failed to bind-mount /system/etc/cpuinfo.arm64.txt as /proc/cpuinfo: No such file or directory
+10-05 15:40:30.859  1856  1886 I ActivityManager: Start proc 3227:org.ome.arm64probe/u0a304 for next-top-activity {org.ome.arm64probe/org.ome.arm64probe.MainActivity}
+10-05 15:40:30.859  3227  3227 W nativebridge: Failed to bind-mount /system/lib64/arm64/cpuinfo as /proc/cpuinfo: No such file or directory
+10-05 15:40:30.859  3227  3227 I Zygote  : seccomp disabled by setenforce 0
+10-05 15:40:30.861  3227  3227 I .ome.arm64probe: Using CollectorTypeCC GC.
+10-05 15:40:30.861  3227  3227 W .ome.arm64probe: Unexpected CPU variant for x86: generic.
+10-05 15:40:30.861  3227  3227 W .ome.arm64probe: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, default
+--------- beginning of kernel
+10-05 15:40:28.079     0     0 I KernelSU: handle_setresuid from 0 to 10304
+10-05 15:40:30.861  1690  1690 I RenderEngine: type=1400 audit(0.0:715): avc:  denied  { ioctl } for  path="/dev/dri/renderD128" dev="tmpfs" ino=894 ioctlcmd=0x6448 scontext=u:r:surfaceflinger:s0 tcontext=u:object_r:gpu_device:s0 tclass=chr_file permissive=1
+10-05 15:40:28.084     0     0 W audit_log_lost: 69 callbacks suppressed
+10-05 15:40:28.084     0     0 W audit   : audit_lost=1 audit_rate_limit=5 audit_backlog_limit=64
+10-05 15:40:28.084     0     0 E audit   : rate limit exceeded
+10-05 15:40:30.866  2452  2452 D BaseDepthController: setSurface:
+10-05 15:40:30.866  2452  2452 D BaseDepthController: 	mWaitingOnSurfaceValidity: false
+10-05 15:40:30.866  2452  2452 D BaseDepthController: 	mSurface: Surface(name=com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher)/@0x5722f07
+10-05 15:40:30.890  2452  2452 W SplitSelectStateCtor: Missing session instanceIds
+10-05 15:40:30.890  2452  2452 D StatsLog: LAUNCHER_SPLIT_SELECTION_EXIT_INTERRUPTED
+10-05 15:40:30.890  2149  2336 D WindowManagerShell: UNKNOWN MESSAGE (-2945141395292145768) false 161
+10-05 15:40:30.898  1856  2056 I AppWidgetServiceImpl: Received broadcast: android.intent.action.PACKAGE_UNSTOPPED on user 0
+10-05 15:40:30.899  1856  2056 I AppWidgetServiceImpl: Updating package stopped masked state for uid 10304 package org.ome.arm64probe isStopped false
+10-05 15:40:30.905  2452  2452 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{89a931e VFED..C.. ......ID 0,0-0,0 #8}
+10-05 15:40:30.905  2452  2452 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{9d7f7ff VFED..C.. ......ID 0,0-0,0 #9}
+10-05 15:40:30.905  2452  2452 D TestEventsEmitterProduction: Event sent WORKSPACE_FINISH_LOADING
+10-05 15:40:30.906  2452  2452 D StatsLog: LAUNCHER_ALLAPPS_COUNT
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: Clearing FastScrollerSections.
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: Adding apps with sections. HasPrivateApps: false
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: A with appInfoTitle: About Bliss
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: B with appInfoTitle: Browser
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: C with appInfoTitle: Calendar
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: F with appInfoTitle: Files
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: G with appInfoTitle: Gallery
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: K with appInfoTitle: KernelSU
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: M with appInfoTitle: Messaging
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: O with appInfoTitle: OME arm64 probe
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: P with appInfoTitle: Phone
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: S with appInfoTitle: Set Orientation
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: T with appInfoTitle: Termux
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: X with appInfoTitle: XtMapper
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: Y with appInfoTitle: yetCalc
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: Adding FastScrollSection duplicate to scroll to the bottom.
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: Clearing FastScrollerSections.
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: Adding apps with sections. HasPrivateApps: false
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: A with appInfoTitle: About Bliss
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: B with appInfoTitle: Browser
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: C with appInfoTitle: Calendar
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: F with appInfoTitle: Files
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: G with appInfoTitle: Gallery
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: K with appInfoTitle: KernelSU
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: M with appInfoTitle: Messaging
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: O with appInfoTitle: OME arm64 probe
+10-05 15:40:30.906  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: P with appInfoTitle: Phone
+10-05 15:40:30.907  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: S with appInfoTitle: Set Orientation
+10-05 15:40:30.907  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: T with appInfoTitle: Termux
+10-05 15:40:30.907  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: X with appInfoTitle: XtMapper
+10-05 15:40:30.907  2452  2452 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: Y with appInfoTitle: yetCalc
+10-05 15:40:30.907  2452  2452 D AlphabeticalAppsList: Adding FastScrollSection duplicate to scroll to the bottom.
+10-05 15:40:31.039  2149  2149 D KeyguardViewMediator: exitKeyguardAndFinishSurfaceBehindRemoteAnimation
+10-05 15:40:31.057  2149  2149 D DismissCallbackRegistry: notifyDismissSucceeded(0)
+10-05 15:40:31.057  2149  2149 D KeyguardViewMediator: onKeyguardExitRemoteAnimationFinished#hideKeyguardViewAfterRemoteAnimation
+10-05 15:40:31.058  2149  2149 D CentralSurfaces: occluded=false
+10-05 15:40:28.275     0     0 E ueventd : LoadWithAliases was unable to load platform:regulatory, tried: platform:regulatory
+10-05 15:40:31.059  2149  2149 D OngoingActionProgressController: setForceHidden false
+10-05 15:40:31.059  2149  2149 D OngoingActionProgressController: setForceHidden false
+10-05 15:40:31.060  2149  2149 D CentralSurfaces: !shouldBeKeyguard mStatusBarStateController.isKeyguardRequested() false keyguardForDozing false wakeAndUnlocking false isWakingAndOccluded false
+10-05 15:40:31.060  2149  2149 D CentralSurfaces: hideKeyguardImpl false
+10-05 15:40:31.060  2149  2149 D SbStateController: setState: requested state SHADE!= upcomingState: KEYGUARD. This usually means the status bar state transition was interrupted before the upcoming state could be applied.
+10-05 15:40:31.060  2149  2433 D KeyguardViewMediator: updateActivityLockScreenState(false, false, onKeyguardExitFinished: exitKeyguardAndFinishSurfaceBehindRemoteAnimation)
+10-05 15:40:31.063  1682  1922 D PermissionCache: checking android.permission.MODIFY_PHONE_STATE for uid=10260 => granted (68 us)
+10-05 15:40:31.064  1682  1922 D AudioFlinger: AUDIO_OUTPUT_FLAG_FAST denied: sharedBuffer=0x70063f3e68f0 frameCount=0 mFrameCount=512 format=0x1 mFormat=0x5 isLinear=1 channelMask=0x3 sampleRate=44100 mSampleRate=48000 hasFastMixer=1 tid=3230 fastTrackAvailMask=0xfe
+10-05 15:40:31.065  2149  2433 D Bubbles : handleKeyguardOrDreamChange isUnlockedShade=true keyguardShowing=false dreamingOrInPreview=false
+10-05 15:40:31.066  1856  1872 D SystemServerTiming: getUserSwitchability-0
+10-05 15:40:31.066  1856  1872 D SystemServerTiming: TM.isInCall
+10-05 15:40:31.066  1856  1872 V SystemServerTiming: TM.isInCall took to complete: 0ms
+10-05 15:40:31.066  1856  1872 D SystemServerTiming: hasUserRestriction-DISALLOW_USER_SWITCH
+10-05 15:40:31.066  1856  1872 V SystemServerTiming: hasUserRestriction-DISALLOW_USER_SWITCH took to complete: 0ms
+10-05 15:40:31.066  1856  1872 D SystemServerTiming: getInt-ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED
+10-05 15:40:31.066  1856  1872 V SystemServerTiming: getInt-ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED took to complete: 0ms
+10-05 15:40:31.066  1856  1872 D SystemServerTiming: isUserUnlocked-USER_SYSTEM
+10-05 15:40:31.066  1856  1872 V SystemServerTiming: isUserUnlocked-USER_SYSTEM took to complete: 0ms
+10-05 15:40:31.066  1856  1872 V SystemServerTiming: getUserSwitchability-0 took to complete: 0ms
+10-05 15:40:31.066  1856  3147 D SystemServerTiming: getUserSwitchability-0
+10-05 15:40:31.066  1856  3147 D SystemServerTiming: TM.isInCall
+10-05 15:40:31.066  1856  3147 V SystemServerTiming: TM.isInCall took to complete: 0ms
+10-05 15:40:31.066  1856  3147 D SystemServerTiming: hasUserRestriction-DISALLOW_USER_SWITCH
+10-05 15:40:31.066  1856  3147 V SystemServerTiming: hasUserRestriction-DISALLOW_USER_SWITCH took to complete: 0ms
+10-05 15:40:31.066  1856  3147 D SystemServerTiming: getInt-ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED
+10-05 15:40:31.066  1856  1872 W UserManagerService: Requested status bar icon for non-badged user 0
+10-05 15:40:31.066  1856  3147 V SystemServerTiming: getInt-ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED took to complete: 0ms
+10-05 15:40:31.066  1856  3147 D SystemServerTiming: isUserUnlocked-USER_SYSTEM
+10-05 15:40:31.066  1856  3147 V SystemServerTiming: isUserUnlocked-USER_SYSTEM took to complete: 0ms
+10-05 15:40:31.066  1856  3147 V SystemServerTiming: getUserSwitchability-0 took to complete: 0ms
+10-05 15:40:31.067  1856  1923 D SystemServerTiming: getUserSwitchability-0
+10-05 15:40:31.067  1856  1923 D SystemServerTiming: TM.isInCall
+10-05 15:40:31.067  1856  1923 V SystemServerTiming: TM.isInCall took to complete: 0ms
+10-05 15:40:31.067  1856  1923 D SystemServerTiming: hasUserRestriction-DISALLOW_USER_SWITCH
+10-05 15:40:31.067  1856  1923 V SystemServerTiming: hasUserRestriction-DISALLOW_USER_SWITCH took to complete: 0ms
+10-05 15:40:31.067  1856  1923 D SystemServerTiming: getInt-ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED
+10-05 15:40:31.067  1856  1923 V SystemServerTiming: getInt-ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED took to complete: 0ms
+10-05 15:40:31.067  1856  1923 D SystemServerTiming: isUserUnlocked-USER_SYSTEM
+10-05 15:40:31.067  1856  1923 V SystemServerTiming: isUserUnlocked-USER_SYSTEM took to complete: 0ms
+10-05 15:40:31.067  1856  1923 V SystemServerTiming: getUserSwitchability-0 took to complete: 0ms
+10-05 15:40:31.067  1682  1922 D audioserver: logFgsApiBegin: FGS Logger Transaction failed, -129
+10-05 15:40:31.067  1856  1933 W AS.PlaybackActivityMon: No piid assigned for invalid/internal port id 13
+10-05 15:40:31.068  1856  1872 D SystemServerTiming: getUserSwitchability-0
+10-05 15:40:31.068  1856  1872 D SystemServerTiming: TM.isInCall
+10-05 15:40:31.068  1856  1872 V SystemServerTiming: TM.isInCall took to complete: 0ms
+10-05 15:40:31.068  1856  1872 D SystemServerTiming: hasUserRestriction-DISALLOW_USER_SWITCH
+10-05 15:40:31.068  1856  1872 V SystemServerTiming: hasUserRestriction-DISALLOW_USER_SWITCH took to complete: 0ms
+10-05 15:40:31.068  1856  1872 D SystemServerTiming: getInt-ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED
+10-05 15:40:31.068  1856  1872 V SystemServerTiming: getInt-ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED took to complete: 0ms
+10-05 15:40:31.068  1856  1872 D SystemServerTiming: isUserUnlocked-USER_SYSTEM
+10-05 15:40:31.068  1856  1872 V SystemServerTiming: isUserUnlocked-USER_SYSTEM took to complete: 0ms
+10-05 15:40:31.068  1856  1872 V SystemServerTiming: getUserSwitchability-0 took to complete: 0ms
+10-05 15:40:31.069  1856  1872 W PackageManager: Missing required system package: com.google.android.as.
+10-05 15:40:31.070  1856  1872 D FingerprintProvider/virtual: Starting watchdog for fingerprint
+10-05 15:40:31.073  1664  3231 I audio_hw_primary: chose pcmC0D0p for 0 on cache slot 0
+10-05 15:40:31.128  2149  2336 W Looper  : Slow delivery took 37ms wmshell.main h=android.os.Handler c=com.android.wm.shell.pip.phone.PipController$$ExternalSyntheticLambda3@9356525 m=0
+10-05 15:40:31.129  1664  3231 W audio_hw_primary: out_write underrun: -32
+10-05 15:40:31.129  1664  3231 W StreamHAL: Error from HAL stream in function write: Broken pipe
+10-05 15:40:31.129  1682  1794 E AudioStreamOutSink: Error while writing data to HAL: -61
+10-05 15:40:31.130  1856  1904 V DisplayPowerController[0]: Brightness [0.05] reason changing to: 'manual [ dim ]', previous reason: 'manual'.
+10-05 15:40:31.130  1856  1904 I DisplayPowerController[0]: BrightnessEvent: brt=0.05 (39.0%), nits= -1.0, lux=-1.0, reason=manual [ dim ], strat=FallbackBrightnessStrategy, state=ON, stateReason=DEFAULT_POLICY, policy=DIM, flags=, initBrt=0.39763778, rcmdBrt=NaN, preBrt=NaN, preLux=0.0, wasShortTermModelActive=false, autoBrightness=false (default), unclampedBrt=0.39763778, hbmMax=1.0, hbmMode=off, thrmMax=1.0, rbcStrength=0, powerFactor=1.0, physDisp=Built-in Screen(local:0), logicalId=0
+10-05 15:40:31.132  2149  2336 W Looper  : Drained
+10-05 15:40:31.134  1856  1904 V DisplayPowerController[0]: Brightness [0.39763778] reason changing to: 'manual', previous reason: 'manual [ dim ]'.
+10-05 15:40:31.134  1856  1904 I DisplayPowerController[0]: BrightnessEvent: brt=0.39763778 (83.0%), nits= -1.0, lux=-1.0, reason=manual, strat=FallbackBrightnessStrategy, state=ON, stateReason=DEFAULT_POLICY, policy=BRIGHT, flags=, initBrt=0.05, rcmdBrt=NaN, preBrt=NaN, preLux=0.0, wasShortTermModelActive=false, autoBrightness=false (default), unclampedBrt=0.39763778, hbmMax=1.0, hbmMode=off, thrmMax=1.0, rbcStrength=0, powerFactor=1.0, physDisp=Built-in Screen(local:0), logicalId=0
+10-05 15:40:31.142  2149  2149 D CentralSurfaces: occluded=false
+10-05 15:40:31.143  2149  2149 D OngoingActionProgressController: setForceHidden false
+10-05 15:40:31.143  2149  2149 D OngoingActionProgressController: setForceHidden false
+10-05 15:40:31.143  2149  2149 D BiometricsRepositoryImpl: currentUser authFlags changed, new value: AuthenticationFlags(userId=0, flag=0)
+10-05 15:40:31.143  2149  2149 D BiometricsRepositoryImpl: currentUser authFlags changed, new value: AuthenticationFlags(userId=0, flag=0)
+10-05 15:40:31.143  2149  2149 D BiometricsRepositoryImpl: currentUser authFlags changed, new value: AuthenticationFlags(userId=0, flag=0)
+10-05 15:40:31.143  2149  2149 D BiometricsRepositoryImpl: currentUser authFlags changed, new value: AuthenticationFlags(userId=0, flag=0)
+10-05 15:40:31.143  2149  2149 D BiometricsRepositoryImpl: onStrongAuthRequiredChanged for userId: 0, flag value: 0
+10-05 15:40:31.144  2149  2415 D BiometricsRepositoryImpl: currentUser authFlags changed, new value: AuthenticationFlags(userId=0, flag=0)
+10-05 15:40:31.144  2149  2415 D BiometricsRepositoryImpl: currentUser authFlags changed, new value: AuthenticationFlags(userId=0, flag=0)
+10-05 15:40:31.145  1856  1923 W UserManagerService: Requested status bar icon for non-badged user 0
+10-05 15:40:31.150  1856  3147 W UserManagerService: Requested status bar icon for non-badged user 0
+10-05 15:40:31.151  2149  2433 D Bubbles : handleKeyguardOrDreamChange isUnlockedShade=true keyguardShowing=false dreamingOrInPreview=false
+10-05 15:40:31.152  1856  3147 W UserManagerService: Requested status bar icon for non-badged user 0
+10-05 15:40:31.154  1682  1795 D AudioFlinger: mixer(0x70086ef21880) throttle end: throttle time(10)
+10-05 15:40:31.163  2149  2149 D BiometricsRepositoryImpl: currentUser authFlags changed, new value: AuthenticationFlags(userId=0, flag=0)
+10-05 15:40:31.163  2149  2149 D BiometricsRepositoryImpl: currentUser authFlags changed, new value: AuthenticationFlags(userId=0, flag=0)
+10-05 15:40:31.163  2149  2149 D BiometricsRepositoryImpl: currentUser authFlags changed, new value: AuthenticationFlags(userId=0, flag=0)
+10-05 15:40:31.163  2149  2149 D BiometricsRepositoryImpl: currentUser authFlags changed, new value: AuthenticationFlags(userId=0, flag=0)
+10-05 15:40:31.163  2149  2149 D BiometricsRepositoryImpl: currentUser authFlags changed, new value: AuthenticationFlags(userId=0, flag=0)
+10-05 15:40:31.163  2149  2149 D BiometricsRepositoryImpl: currentUser authFlags changed, new value: AuthenticationFlags(userId=0, flag=0)
+10-05 15:40:31.163  2149  2149 W FrameTracker: Missed SF frame:PREDICTION_ERROR, 2853, 16561734, CUJ=J<NOTIFICATION_SHADE_EXPAND_COLLAPSE::Collapse>
+10-05 15:40:31.163  2149  2149 W FrameTracker: Missed SF frame:PREDICTION_ERROR, 2866, 8422960, CUJ=J<NOTIFICATION_SHADE_EXPAND_COLLAPSE::Collapse>
+10-05 15:40:31.163  2149  2149 W FrameTracker: Missed SF frame:PREDICTION_ERROR, 2879, 13463586, CUJ=J<NOTIFICATION_SHADE_EXPAND_COLLAPSE::Collapse>
+10-05 15:40:31.163  2149  2149 W FrameTracker: Missed App frame:UNKNOWN: 24, 2961, 18921130, CUJ=J<NOTIFICATION_SHADE_EXPAND_COLLAPSE::Collapse>
+10-05 15:40:31.163  2149  2149 W FrameTracker: Missed SF frame:UNKNOWN: 24, 2961, 18921130, CUJ=J<NOTIFICATION_SHADE_EXPAND_COLLAPSE::Collapse>
+10-05 15:40:31.163  2149  2149 W FrameTracker: Missed SF frame:PREDICTION_ERROR, 3090, 0, CUJ=J<NOTIFICATION_SHADE_EXPAND_COLLAPSE::Collapse>
+10-05 15:40:31.163  2149  2149 W FrameTracker: Missing HWUI jank callback for vsyncId: 3090, CUJ=J<NOTIFICATION_SHADE_EXPAND_COLLAPSE::Collapse>
+10-05 15:40:31.164  2149  2340 V PerfettoTrigger: Not triggering com.android.telemetry.interaction-jank-monitor-0 - not enough time since last trigger
+10-05 15:40:31.184  3227  3227 I berberis: Initialized Berberis (aarch64)
+10-05 15:40:31.187  3227  3232 D berberis: berberis: trans#1 pc=0x704f23f60000 size=2 JIT jit=1 interp=0 avg=2
+10-05 15:40:31.188  3227  3232 D berberis: berberis: trans#2 pc=0x704f23fcae00 size=16 JIT jit=2 interp=0 avg=9
+10-05 15:40:31.188  3227  3232 D berberis: berberis: trans#3 pc=0x704f23fcae38 size=2 JIT jit=3 interp=0 avg=6
+10-05 15:40:31.188  3227  3232 D berberis: berberis: trans#4 pc=0x704f23fcae40 size=9 JIT jit=4 interp=0 avg=7
+10-05 15:40:31.188  3227  3232 D berberis: berberis: trans#5 pc=0x704f23fca7a8 size=6 JIT jit=5 interp=0 avg=7
+10-05 15:40:31.188  3227  3232 D berberis: berberis: trans#6 pc=0x704f23fa8530 size=3 JIT jit=6 interp=0 avg=6
+10-05 15:40:31.188  3227  3232 D berberis: berberis: trans#7 pc=0x704f23fca7c0 size=2 JIT jit=7 interp=0 avg=5
+10-05 15:40:31.188  3227  3232 D berberis: berberis: trans#8 pc=0x704f23fca7c8 size=3 JIT jit=8 interp=0 avg=5
+10-05 15:40:31.188  3227  3232 D berberis: berberis: trans#9 pc=0x704f23f916e4 size=2 JIT jit=9 interp=0 avg=5
+10-05 15:40:31.188  3227  3232 D berberis: berberis: trans#10 pc=0x704f23fca7d4 size=4 JIT jit=10 interp=0 avg=4
+10-05 15:40:31.188  3227  3232 D berberis: berberis: trans#11 pc=0x704f23f917dc size=2 JIT jit=11 interp=0 avg=4
+10-05 15:40:31.188  3227  3232 D berberis: berberis: trans#12 pc=0x704f23fcae64 size=2 JIT jit=12 interp=0 avg=4
+10-05 15:40:31.188  3227  3232 D berberis: berberis: trans#13 pc=0x704f23f91780 size=5 JIT jit=13 interp=0 avg=4
+10-05 15:40:31.188  3227  3232 D berberis: berberis: trans#14 pc=0x704f23f91794 size=8 JIT jit=14 interp=0 avg=4
+10-05 15:40:31.188  3227  3232 D berberis: berberis: trans#15 pc=0x704f23f917a4 size=4 JIT jit=15 interp=0 avg=4
+10-05 15:40:31.188  3227  3232 D berberis: berberis: trans#16 pc=0x704f23f917cc size=4 JIT jit=16 interp=0 avg=4
+10-05 15:40:31.188  3227  3232 D berberis: berberis: trans#17 pc=0x704f23fcae6c size=4 JIT jit=17 interp=0 avg=4
+10-05 15:40:31.188  3227  3232 D berberis: berberis: trans#18 pc=0x704f23fcaec0 size=10 JIT jit=18 interp=0 avg=4
+10-05 15:40:31.188  3227  3232 D berberis: berberis: trans#19 pc=0x704f23fcaefc size=4 JIT jit=19 interp=0 avg=4
+10-05 15:40:31.188  3227  3232 D berberis: berberis: trans#20 pc=0x704f23fcaee8 size=9 JIT jit=20 interp=0 avg=5
+10-05 15:40:31.190  3227  3232 D berberis: berberis: trans#100 pc=0x704f23fc33d4 size=4 JIT jit=100 interp=0 avg=5
+10-05 15:40:31.191  3227  3232 D berberis: berberis: trans#200 pc=0x704f23fb29dc size=1 JIT jit=200 interp=0 avg=6
+10-05 15:40:31.192  3227  3232 D berberis: berberis: trans#300 pc=0x704f23f97460 size=8 JIT jit=300 interp=0 avg=6
+10-05 15:40:31.192  3227  3232 D berberis: berberis: trans#400 pc=0x704f23f8837c size=22 JIT jit=400 interp=0 avg=8
+10-05 15:40:31.193  3227  3232 D berberis: berberis: JIT break #1 pc=0x704f23fa933c insn=0xd538062e
+10-05 15:40:31.193  3227  3232 D berberis: berberis: trans#500 pc=0x704f23fd3860 size=4 JIT jit=500 interp=0 avg=8
+10-05 15:40:31.194  3227  3232 D berberis: berberis: trans#600 pc=0x704f23fcb474 size=2 JIT jit=600 interp=0 avg=8
+10-05 15:40:31.195  3227  3232 D berberis: berberis: trans#700 pc=0x704f23f8cc24 size=29 JIT jit=700 interp=0 avg=8
+10-05 15:40:31.196  3227  3232 D berberis: berberis: trans#800 pc=0x704f23f9b718 size=4 JIT jit=800 interp=0 avg=8
+10-05 15:40:31.196  3227  3232 D berberis: berberis: trans#900 pc=0x704f23f604ac size=9 JIT jit=900 interp=0 avg=8
+10-05 15:40:31.197  3227  3232 D berberis: berberis: trans#1000 pc=0x704f23fb2d68 size=4 JIT jit=1000 interp=0 avg=8
+10-05 15:40:31.197  3227  3232 D berberis: berberis: trans#1100 pc=0x704f23f8c6d4 size=8 JIT jit=1100 interp=0 avg=8
+10-05 15:40:28.416     0     0 I snd_hda_intel 0000: 00:03.0: IRQ timing workaround is activated for card #0. Suggest a bigger bdl_pos_adj.
+10-05 15:40:31.198  3227  3232 D berberis: berberis: trans#1200 pc=0x704f23f8436c size=16 JIT jit=1200 interp=0 avg=8
+10-05 15:40:31.198  3227  3232 D berberis: berberis: trans#1300 pc=0x704f23fba020 size=1 JIT jit=1300 interp=0 avg=8
+10-05 15:40:31.198  3227  3232 D berberis: berberis: trans#1400 pc=0x704f23fbea70 size=4 JIT jit=1400 interp=0 avg=8
+10-05 15:40:31.199  3227  3232 D berberis: berberis: trans#1500 pc=0x704f23fbf2b8 size=5 JIT jit=1500 interp=0 avg=8
+10-05 15:40:31.199  3227  3232 D berberis: berberis: trans#1600 pc=0x704f23fc9e00 size=5 JIT jit=1600 interp=0 avg=8
+10-05 15:40:31.199  3227  3232 D berberis: berberis: trans#1700 pc=0x704f23fbd30c size=19 JIT jit=1700 interp=0 avg=8
+10-05 15:40:31.200  3227  3232 D berberis: berberis: trans#1800 pc=0x704f23fbd718 size=6 JIT jit=1800 interp=0 avg=8
+10-05 15:40:31.200  3227  3232 D berberis: berberis: trans#1900 pc=0x704f23fb336c size=19 JIT jit=1900 interp=0 avg=8
+10-05 15:40:31.200  3227  3232 D berberis: berberis: trans#2000 pc=0x704f23f84dd4 size=7 JIT jit=2000 interp=0 avg=8
+10-05 15:40:31.201  3227  3232 D berberis: berberis: trans#2100 pc=0x704f23fabd84 size=3 JIT jit=2100 interp=0 avg=8
+10-05 15:40:31.201  3227  3232 D berberis: berberis: trans#2200 pc=0x704f23fb6ad8 size=5 JIT jit=2200 interp=0 avg=8
+10-05 15:40:31.203  3227  3232 D berberis: berberis: trans#2300 pc=0x704f23fb609c size=8 JIT jit=2300 interp=0 avg=8
+10-05 15:40:31.205  3227  3232 D berberis: berberis: trans#2400 pc=0x704f23fcf9f4 size=14 JIT jit=2400 interp=0 avg=8
+10-05 15:40:31.206  3227  3232 D berberis: berberis: trans#2500 pc=0x704f23fac450 size=3 JIT jit=2500 interp=0 avg=8
+10-05 15:40:31.208  3227  3232 D berberis: berberis: trans#2600 pc=0x704f23faca20 size=3 JIT jit=2600 interp=0 avg=8
+10-05 15:40:31.208  3227  3232 D berberis: berberis: trans#2700 pc=0x704f23fc4ee8 size=8 JIT jit=2700 interp=0 avg=8
+10-05 15:40:31.216  3227  3232 D berberis: berberis: trans#2800 pc=0x704f23fc5984 size=7 JIT jit=2800 interp=0 avg=8
+10-05 15:40:31.219  3227  3232 D berberis: berberis: trans#2900 pc=0x704f23fa81b8 size=11 JIT jit=2900 interp=0 avg=8
+10-05 15:40:31.219  3227  3232 D berberis: berberis: trans#3000 pc=0x704f23f8582c size=16 JIT jit=3000 interp=0 avg=8
+10-05 15:40:31.220  3227  3232 D berberis: berberis: trans#3100 pc=0x704ec9161fb8 size=6 JIT jit=3100 interp=0 avg=8
+10-05 15:40:31.221  3227  3232 D berberis: berberis: trans#3200 pc=0x704ec9150658 size=3 JIT jit=3200 interp=0 avg=8
+10-05 15:40:31.223  3227  3232 D berberis: berberis: trans#3300 pc=0x704ec915fdd0 size=8 JIT jit=3300 interp=0 avg=8
+10-05 15:40:31.223  3227  3232 D berberis: berberis: trans#3400 pc=0x704f23fab070 size=6 JIT jit=3400 interp=0 avg=8
+10-05 15:40:31.223  3227  3232 D berberis: berberis: JIT break #2 pc=0x704ec915de6c insn=0xd538062e
+10-05 15:40:31.223  3227  3232 D berberis: berberis: trans#3500 pc=0x704ec90fdc60 size=7 JIT jit=3500 interp=0 avg=8
+10-05 15:40:31.224  3227  3232 D berberis: berberis: JIT break #3 pc=0x704f1873f6ec insn=0xd538062e
+10-05 15:40:31.226  3227  3232 D berberis: berberis: trans#3600 pc=0x704f1871d4f4 size=2 JIT jit=3600 interp=0 avg=8
+10-05 15:40:31.226  3227  3232 D berberis: berberis: trans#3700 pc=0x704f1871df38 size=2 JIT jit=3700 interp=0 avg=8
+10-05 15:40:31.226  3227  3232 D berberis: berberis: trans#3800 pc=0x704f187061b4 size=9 JIT jit=3800 interp=0 avg=8
+10-05 15:40:31.226  3227  3232 D berberis: berberis: trans#3900 pc=0x704f23faa9b8 size=4 JIT jit=3900 interp=0 avg=8
+10-05 15:40:31.228  3227  3227 E .ome.arm64probe: Not starting debugger since process cannot load the jdwp agent.
+10-05 15:40:31.232  3227  3227 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+10-05 15:40:31.232  3227  3227 I .ome.arm64probe: OME_JNI_REGISTER method=int android.net.TrafficStats.native_tagSocketFd(java.io.FileDescriptor, int, int) namespace_bridged=0 original=0x704eca64e5a0 final=0x704eca64e5a0
+10-05 15:40:31.232  3227  3227 I .ome.arm64probe: OME_JNI_REGISTER method=int android.net.TrafficStats.native_untagSocketFd(java.io.FileDescriptor) namespace_bridged=0 original=0x704eca64e5e0 final=0x704eca64e5e0
+10-05 15:40:31.234  1856  3147 W com.android.internal.protolog.LogcatOnlyProtoLogImpl: ProtoLog message not processed. Failed to log it to proto. Logging it below to logcat instead.
+10-05 15:40:31.234  1856  3147 V WindowManager: Binding proc org.ome.arm64probe with config {1.0 ?mcc0mnc [en_US] ldltr sw800dp w1280dp h800dp 160dpi xlrg land night -touch qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1280, 800) mAppBounds=Rect(0, 0 - 1280, 800) mMaxBounds=Rect(0, 0 - 1280, 800) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.6 s.48 fontWeightAdjustment=0}
+10-05 15:40:31.240  3227  3227 D nativeloader: Configuring clns-7 for other apk /data/app/~~18eONzJeqgGd4Y1Gd_o2Uw==/org.ome.arm64probe-HHOdaZIPUoUP9gixEkzi_g==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~18eONzJeqgGd4Y1Gd_o2Uw==/org.ome.arm64probe-HHOdaZIPUoUP9gixEkzi_g==/lib/arm64:/data/app/~~18eONzJeqgGd4Y1Gd_o2Uw==/org.ome.arm64probe-HHOdaZIPUoUP9gixEkzi_g==/base.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand:/data/user/0/org.ome.arm64probe
+10-05 15:40:31.242  3227  3227 D berberis: getExportedNamespace: guest fallback for 'system' -> default=0x704f23fe6cb8
+10-05 15:40:31.242  3227  3227 D berberis: getExportedNamespace: name=system result=0x704f976957e8 guest=0x704f23fe6cb8
+10-05 15:40:31.242  3227  3227 D berberis: createNamespace: name=clns-7 ld_path=(null) default_path=/data/app/~~18eONzJeqgGd4Y1Gd_o2Uw==/org.ome.arm64probe-HHOdaZIPUoUP9gixEkzi_g==/lib/arm64:/data/app/~~18eONzJeqgGd4Y1Gd_o2Uw==/org.ome.arm64probe-HHOdaZIPUoUP9gixEkzi_g==/base.apk!/lib/arm64-v8a type=268435457 permitted=/data:/mnt/expand:/data/user/0/org.ome.arm64probe parent=0x704f976957e8
+10-05 15:40:31.242  3227  3227 D berberis: createNamespace guest: name=clns-7 default_path=/data/app/~~18eONzJeqgGd4Y1Gd_o2Uw==/org.ome.arm64probe-HHOdaZIPUoUP9gixEkzi_g==/lib/arm64:/data/app/~~18eONzJeqgGd4Y1Gd_o2Uw==/org.ome.arm64probe-HHOdaZIPUoUP9gixEkzi_g==/base.apk!/lib/arm64-v8a permitted=/data:/mnt/expand:/data/user/0/org.ome.arm64probe
+10-05 15:40:31.242  3227  3227 D berberis: berberis: trans#4000 pc=0x704f23fb0e7c size=1 JIT jit=4000 interp=0 avg=8
+10-05 15:40:31.243  3227  3227 D berberis: createNamespace: result=0x7050b769d0c0 guest=0x7051d3002010
+10-05 15:40:31.243  3227  3227 D berberis: getExportedNamespace: name=system result=0x704f976957e8 guest=0x704f23fe6cb8
+10-05 15:40:31.243  3227  3227 D berberis: linkNamespaces: from=0x7050b769d0c0(guest=0x7051d3002010) to=0x704f976957e8(guest=0x704f23fe6cb8) shared_libs=libandroid.so:libaaudio.so:libamidi.so:libbinder_ndk.so:libc.so:libcamera2ndk.so:libclang_rt.hwasan-aarch64-android.so:libdl.so:libEGL.so:libGLESv1_CM.so:libGLESv2.so:libGLESv3.so:libjnigraphics.so:liblog.so:libmediandk.so:libm.so:libnativewindow.so:libOpenMAXAL.so:libOpenSLES.so:libRS.so:libstdc++.
+10-05 15:40:31.243  3227  3227 D berberis: berberis: trans#4100 pc=0x704f23fb17e8 size=20 JIT jit=4100 interp=0 avg=8
+10-05 15:40:31.243  3227  3227 D berberis: linkNamespaces: result=1
+10-05 15:40:31.243  3227  3227 D berberis: getExportedNamespace: guest fallback for 'com_android_art' -> default=0x704f23fe6cb8
+10-05 15:40:31.243  3227  3227 D berberis: getExportedNamespace: name=com_android_art result=0x704f97695b48 guest=0x704f23fe6cb8
+10-05 15:40:31.243  3227  3227 D berberis: linkNamespaces: from=0x7050b769d0c0(guest=0x7051d3002010) to=0x704f97695b48(guest=0x704f23fe6cb8) shared_libs=libnativehelper.so
+10-05 15:40:31.244  3227  3227 D berberis: linkNamespaces: result=1
+10-05 15:40:31.244  3227  3227 D berberis: getExportedNamespace: guest fallback for 'com_android_i18n' -> default=0x704f23fe6cb8
+10-05 15:40:31.244  3227  3227 D berberis: getExportedNamespace: name=com_android_i18n result=0x704f97695cc8 guest=0x704f23fe6cb8
+10-05 15:40:31.244  3227  3227 D berberis: linkNamespaces: from=0x7050b769d0c0(guest=0x7051d3002010) to=0x704f97695cc8(guest=0x704f23fe6cb8) shared_libs=libicui18n.so:libicuuc.so:libicu.so
+10-05 15:40:31.244  3227  3227 D berberis: linkNamespaces: result=1
+10-05 15:40:31.244  3227  3227 D berberis: getExportedNamespace: guest fallback for 'com_android_neuralnetworks' -> default=0x704f23fe6cb8
+10-05 15:40:31.244  3227  3227 D berberis: getExportedNamespace: name=com_android_neuralnetworks result=0x704f97696268 guest=0x704f23fe6cb8
+10-05 15:40:31.244  3227  3227 D berberis: linkNamespaces: from=0x7050b769d0c0(guest=0x7051d3002010) to=0x704f97696268(guest=0x704f23fe6cb8) shared_libs=libneuralnetworks.so
+10-05 15:40:31.244  3227  3227 D berberis: linkNamespaces: result=1
+10-05 15:40:31.247  3227  3227 V GraphicsEnvironment: Currently set values for:
+10-05 15:40:31.247  3227  3227 V GraphicsEnvironment:   angle_gl_driver_selection_pkgs=[com.android.angle, com.linecorp.b612.android, com.campmobile.snow, com.google.android.apps.tachyon]
+10-05 15:40:31.247  3227  3227 V GraphicsEnvironment:   angle_gl_driver_selection_values=[angle, native, native, native]
+10-05 15:40:31.247  3227  3227 V GraphicsEnvironment: org.ome.arm64probe is not listed in per-application setting
+10-05 15:40:31.247  3227  3227 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+10-05 15:40:31.249  2149  2409 D ControlsListingControllerImpl: Unsubscribing callback
+10-05 15:40:31.250  2149  2409 D ControlsListingControllerImpl: Unsubscribing callback
+10-05 15:40:31.250  2149  2409 D ControlsListingControllerImpl: Unsubscribing callback
+10-05 15:40:31.252  2149  2505 V WindowManagerShell: UNKNOWN MESSAGE (6541979577719206723) 7971459301661
+10-05 15:40:31.252  2149  2336 V WindowManagerShell: UNKNOWN MESSAGE (1354476626241269833) 6 android.os.BinderProxy@9e6630c {id=6 t=TO_BACK f=0x106 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@d90d4e3} m=OPEN f=MOVE_TO_TOP p=WCT{android.window.IWindowContainerToken$Stub$Proxy@219fee0} leash=Surface(name=Task=23)/@0x5dc5f74 sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0 taskParent=-1},{WCT{android.window.IWindowContainerToken$Stub$Proxy@1f9f599} m=TO_FRONT f=NONE leash=Surface(name=DefaultTaskDisplayArea)/@0xba22c9d sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0}]}
+10-05 15:40:31.252  1856  1875 V WindowManager: Sent Transition (#6) createdAt=10-05 15:40:30.821 via request=TransitionRequestInfo { type = TO_BACK, triggerTask = null, pipTask = null, remoteTransition = null, displayChange = null, flags = 106, debugId = 6 }
+10-05 15:40:31.253  1856  1875 V WindowManager:     startWCT=WindowContainerTransaction { changes = {} hops = [] errorCallbackToken=null taskFragmentOrganizer=null }
+10-05 15:40:31.253  1856  1875 V WindowManager:     info={id=6 t=TO_BACK f=0x106 trk=0 r=[0@Point(0, 0)] c=[
+10-05 15:40:31.253  1856  1875 V WindowManager:         {WCT{RemoteToken{cdb4716 Task{4cf0f83 #23 type=standard A=10304:org.ome.arm64probe isResizeable=true minWidth=-1 minHeight=-1}}} m=OPEN f=MOVE_TO_TOP p=WCT{RemoteToken{a0a2897 DefaultTaskDisplayArea@48499725}} leash=Surface(name=Task=23)/@0x7b8a8d8 sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0 taskParent=-1},
+10-05 15:40:31.253  1856  1875 V WindowManager:         {WCT{RemoteToken{a0a2897 DefaultTaskDisplayArea@48499725}} m=TO_FRONT f=NONE leash=Surface(name=DefaultTaskDisplayArea)/@0xf7e10dd sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0}
+10-05 15:40:31.253  1856  1875 V WindowManager:     ]}
+10-05 15:40:31.253  2149  2336 V ShellDesktopMode: DesktopModeLogger: taskInfo map after processing changes 0
+10-05 15:40:31.254  3227  3227 D berberis: loadLibraryExt: path=/data/app/~~18eONzJeqgGd4Y1Gd_o2Uw==/org.ome.arm64probe-HHOdaZIPUoUP9gixEkzi_g==/lib/arm64/libprobe.so ns=0x7050b769d0c0(guest=0x7051d3002010)
+10-05 15:40:31.254  3227  3227 D berberis: berberis: DlOpen ENTER libpath="libc.so" flags=0x2
+10-05 15:40:31.255  1856  1923 W UserManagerService: Requested status bar icon for non-badged user 0
+10-05 15:40:31.255  3227  3227 D berberis: berberis: trans#4200 pc=0x704f23fafc14 size=2 JIT jit=4200 interp=0 avg=8
+10-05 15:40:31.255  3227  3227 D berberis: berberis: DlOpen EXIT  0ms set=0 clear=10 libpath="libc.so" handle=0x46a0c447031307eb
+10-05 15:40:31.255  1856  1923 D ConnectivityService: requestNetwork for uid/pid:10260/2149 asUid: 10304 activeRequest: null callbackRequest: 76 [NetworkRequest [ REQUEST id=77, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10304 RequestorUid: 10260 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647 isUidTracked: false declaredMethods: ALL
+10-05 15:40:31.255  1856  2030 D EthernetNetworkFactory: eth0: onNetworkUnneeded for request: NetworkRequest [ REQUEST id=67, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10261 RequestorUid: 10260 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-05 15:40:31.255  3227  3227 D berberis: InjectQtPluginPath: patched guest environ (old_count=24, added=2) QT_PLUGIN_PATH=/data/user/0/org.ome.arm64probe/cache/berberis_extract
+10-05 15:40:31.256  1856  2031 D ConnectivityService: NetReassign [77 : null → 100] [c 0] [a 0] [i 0]
+10-05 15:40:31.256  1856  2023 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=77, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10304 RequestorUid: 10260 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-05 15:40:31.256  1856  2023 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=77, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10304 RequestorUid: 10260 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-05 15:40:31.256  1856  2023 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=77, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10304 RequestorUid: 10260 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-05 15:40:31.257  1856  2030 D EthernetNetworkFactory: eth0: onNetworkNeeded for request: NetworkRequest [ REQUEST id=77, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10304 RequestorUid: 10260 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-05 15:40:31.257  1856  2030 D EthernetNetworkFactory: IpClient already started
+10-05 15:40:31.257  3227  3227 D berberis: berberis: DlOpen ENTER libpath="/data/app/~~18eONzJeqgGd4Y1Gd_o2Uw==/org.ome.arm64probe-HHOdaZIPUoUP9gixEkzi_g==/lib/arm64/libprobe.so" flags=0x2
+10-05 15:40:31.258  3227  3227 D berberis: berberis: trans#4300 pc=0x704f23fb5120 size=10 JIT jit=4300 interp=0 avg=8
+10-05 15:40:31.259  3227  3227 D berberis: berberis: trans#4400 pc=0x704f23fcce9c size=1 JIT jit=4400 interp=0 avg=8
+10-05 15:40:31.259  2149  2336 V WindowManagerShell: UNKNOWN MESSAGE (7933815964243868580) (#6) android.os.BinderProxy@9e6630c@0
+10-05 15:40:31.259  2149  2336 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.transition.DefaultMixedHandler@b891437
+10-05 15:40:31.259  2149  2336 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.keyguard.KeyguardTransitionHandler@7108da4
+10-05 15:40:31.259  2149  2336 V WindowManagerShell: UNKNOWN MESSAGE (8206143507108738884) going-away {id=6 t=TO_BACK f=0x106 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@d90d4e3} m=OPEN f=MOVE_TO_TOP p=WCT{android.window.IWindowContainerToken$Stub$Proxy@219fee0} leash=Surface(name=Task=23)/@0x5dc5f74 sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0 taskParent=-1},{WCT{android.window.IWindowContainerToken$Stub$Proxy@1f9f599} m=TO_FRONT f=NONE leash=Surface(name=DefaultTaskDisplayArea)/@0xba22c9d sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0}]}
+10-05 15:40:31.259  2149  2336 D KeyguardService: Starts IRemoteAnimationRunner: info={id=6 t=TO_BACK f=0x106 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@d90d4e3} m=OPEN f=MOVE_TO_TOP p=WCT{android.window.IWindowContainerToken$Stub$Proxy@219fee0} leash=Surface(name=Task=23)/@0x5dc5f74 sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0 taskParent=-1},{WCT{android.window.IWindowContainerToken$Stub$Proxy@1f9f599} m=TO_FRONT f=NONE leash=Surface(name=DefaultTaskDisplayArea)/@0xba22c9d sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0}]}
+10-05 15:40:31.262  2149  2149 I KeyguardTransitionRepository: FINISHED transition: TransitionStep(from=LOCKSCREEN, to=GONE, value=1.0, transitionState=FINISHED, ownerName=FromLockscreenTransitionInteractor)
+10-05 15:40:31.262  2149  2336 V WindowManagerShell: UNKNOWN MESSAGE (5292399587644158186) com.android.wm.shell.keyguard.KeyguardTransitionHandler@7108da4
+10-05 15:40:31.264  2149  2411 D ResourceTrimmer: Sending TRIM_MEMORY_UI_HIDDEN.
+10-05 15:40:31.266  2149  2149 D KeyguardViewMediator: handleStartKeyguardExitAnimation startTime=0 fadeoutDuration=0
+10-05 15:40:31.266  2149  2149 D KeyguardUnlock: playCannedUnlockAnimation
+10-05 15:40:31.266  2149  2149 D KeyguardUnlock: playCannedUnlockAnimation, surfaceBehindEntryAnimator#start
+10-05 15:40:31.266  2149  2149 D KeyguardViewMediator: KeyguardViewMediator queue processing message: START_KEYGUARD_EXIT_ANIM
+10-05 15:40:31.269  3227  3227 D berberis: berberis: trans#4500 pc=0x704f23fac30c size=3 JIT jit=4500 interp=0 avg=8
+10-05 15:40:31.273  3227  3227 D berberis: berberis: trans#4600 pc=0x704f324dd518 size=6 JIT jit=4600 interp=0 avg=8
+10-05 15:40:31.274  3227  3227 D berberis: berberis: trans#4700 pc=0x704f324dde78 size=6 JIT jit=4700 interp=0 avg=8
+10-05 15:40:31.274  3227  3227 D berberis: berberis: trans#4800 pc=0x704f324de7d8 size=6 JIT jit=4800 interp=0 avg=8
+10-05 15:40:31.274  3227  3227 D berberis: berberis: trans#4900 pc=0x704f324df138 size=6 JIT jit=4900 interp=0 avg=7
+10-05 15:40:31.275  3227  3227 D berberis: berberis: trans#5000 pc=0x704f324dfa98 size=6 JIT jit=5000 interp=0 avg=7
+10-05 15:40:31.275  3227  3227 D berberis: berberis: trans#5100 pc=0x704f324e03f8 size=6 JIT jit=5100 interp=0 avg=7
+10-05 15:40:31.276  3227  3227 D berberis: berberis: trans#5200 pc=0x704f324e0d58 size=6 JIT jit=5200 interp=0 avg=7
+10-05 15:40:31.277  3227  3227 D berberis: berberis: trans#5300 pc=0x704f324e16b8 size=6 JIT jit=5300 interp=0 avg=7
+10-05 15:40:31.280  3227  3227 D berberis: berberis: trans#5400 pc=0x704f324e2018 size=6 JIT jit=5400 interp=0 avg=7
+10-05 15:40:31.281  3227  3227 D berberis: berberis: trans#5500 pc=0x704f324e2978 size=6 JIT jit=5500 interp=0 avg=7
+10-05 15:40:31.282  3227  3227 D berberis: berberis: trans#5600 pc=0x704f324e32c0 size=6 JIT jit=5600 interp=0 avg=7
+10-05 15:40:31.283  3227  3227 D berberis: berberis: trans#5700 pc=0x704f324e3c20 size=6 JIT jit=5700 interp=0 avg=7
+10-05 15:40:31.283  3227  3227 D berberis: berberis: JIT break #4 pc=0x704f325b0764 insn=0xd538062e
+10-05 15:40:31.283  3227  3227 D berberis: berberis: JIT break #5 pc=0x704f325146e4 insn=0xd538062e
+10-05 15:40:31.284  3227  3227 D berberis: berberis: JIT break #6 pc=0x704f3239963c insn=0xd538062e
+10-05 15:40:31.284  3227  3227 D berberis: berberis: trans#5800 pc=0x704f323e6b98 size=8 JIT jit=5800 interp=0 avg=7
+10-05 15:40:31.284  3227  3227 D berberis: berberis: JIT break #7 pc=0x704f323e6dd4 insn=0xd538062e
+10-05 15:40:31.286  3227  3227 D berberis: berberis: trans#5900 pc=0x704f32457160 size=6 JIT jit=5900 interp=0 avg=7
+10-05 15:40:31.286  3227  3227 D berberis: berberis: trans#6000 pc=0x704f32457ac0 size=6 JIT jit=6000 interp=0 avg=7
+10-05 15:40:31.287  3227  3227 D berberis: berberis: trans#6100 pc=0x704f32458420 size=6 JIT jit=6100 interp=0 avg=7
+10-05 15:40:31.288  3227  3227 D berberis: berberis: trans#6200 pc=0x704f32458d80 size=6 JIT jit=6200 interp=0 avg=7
+10-05 15:40:31.288  3227  3227 D berberis: berberis: DlOpen EXIT  30ms set=9 clear=168 libpath="/data/app/~~18eONzJeqgGd4Y1Gd_o2Uw==/org.ome.arm64probe-HHOdaZIPUoUP9gixEkzi_g==/lib/arm64/libprobe.so" handle=0x18104289287afc97
+10-05 15:40:31.288  3227  3227 D berberis: loadLibraryExt: result=0x18104289287afc97 dlerror=ok
+10-05 15:40:31.288  3227  3227 D nativeloader: Load /data/app/~~18eONzJeqgGd4Y1Gd_o2Uw==/org.ome.arm64probe-HHOdaZIPUoUP9gixEkzi_g==/lib/arm64/libprobe.so using ns clns-7 from class loader (caller=/data/app/~~18eONzJeqgGd4Y1Gd_o2Uw==/org.ome.arm64probe-HHOdaZIPUoUP9gixEkzi_g==/base.apk): ok
+10-05 15:40:31.288  3227  3227 I berberis: OME_JNI_POINTER method=0x704f324238b0 executable=1 shorty=L
+10-05 15:40:31.288  3227  3227 I .ome.arm64probe: OME_JNI_REGISTER method=java.lang.String org.ome.arm64probe.MainActivity.registeredProbe() namespace_bridged=1 original=0x704f324238b0 final=0x5c6465c0
+10-05 15:40:31.290  3227  3227 I OMEProbe: JNI_OnLoad RegisterNatives CALL
+10-05 15:40:31.290  3227  3227 I OMEProbe: JNI_OnLoad RegisterNatives PASS
+10-05 15:40:31.290  3227  3227 I OMEProbe: dlopen RegisterNatives BEGIN
+10-05 15:40:31.291  3227  3227 I berberis: OME_JNI_POINTER method=0x704f323392d4 executable=1 shorty=L
+10-05 15:40:31.291  3227  3227 I .ome.arm64probe: OME_JNI_REGISTER method=java.lang.String org.ome.arm64probe.MainActivity.dlopenProbe() namespace_bridged=1 original=0x704f323392d4 final=0x5c6466c0
+10-05 15:40:31.291  3227  3227 I OMEProbe: dlopen RegisterNatives PASS
+10-05 15:40:31.292  3227  3227 I OMEProbe: cross-loader RegisterNatives BEGIN
+10-05 15:40:31.292  3227  3227 I berberis: OME_JNI_POINTER method=0x704f324237f4 executable=1 shorty=L
+10-05 15:40:31.292  3227  3227 I .ome.arm64probe: OME_JNI_REGISTER method=java.lang.String org.ome.child.RegisteredChild.crossLoaderProbe() namespace_bridged=0 original=0x704f324237f4 final=0x5c6467c0
+10-05 15:40:31.292  3227  3227 I OMEProbe: cross-loader RegisterNatives PASS
+10-05 15:40:31.292  3227  3227 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 15:40:31.292  3227  3227 I OMEProbe: AAssetManager_fromJava PASS
+10-05 15:40:31.292  3227  3227 I OMEProbe: native arm64-v8a lib loaded;JNI_OnLoad RegisterNatives PASS;dlopen RegisterNatives PASS;AAssetManager_fromJava PASS;SUPPORTED_ABIS=x86_64,arm64-v8a,x86;os.arch=aarch64;CPU_ABI=arm64-v8a
+10-05 15:40:31.302  3227  3227 D DesktopModeFlagsUtil: Toggle override initialized to: OVERRIDE_UNSET
+10-05 15:40:31.307  3227  3227 W HWUI    : Unknown dataspace 0
+10-05 15:40:31.320  1690  2490 W ServiceManagerCppClient: Permission failure: android.permission.ACCESS_SURFACE_FLINGER from uid=10304 pid=3227
+10-05 15:40:31.320  1690  1764 W ServiceManagerCppClient: Permission failure: android.permission.ACCESS_SURFACE_FLINGER from uid=10304 pid=0
+10-05 15:40:31.320  1690  2490 D PermissionCache: checking android.permission.ACCESS_SURFACE_FLINGER for uid=10304 => denied (132 us)
+10-05 15:40:31.320  1690  1764 D PermissionCache: checking android.permission.ACCESS_SURFACE_FLINGER for uid=10304 => denied (260 us)
+10-05 15:40:31.320  1690  1764 W ServiceManagerCppClient: Permission failure: android.permission.ROTATE_SURFACE_FLINGER from uid=10304 pid=0
+10-05 15:40:31.320  1690  1764 D PermissionCache: checking android.permission.ROTATE_SURFACE_FLINGER for uid=10304 => denied (92 us)
+10-05 15:40:31.320  1690  2490 W ServiceManagerCppClient: Permission failure: android.permission.ROTATE_SURFACE_FLINGER from uid=10304 pid=3227
+10-05 15:40:31.320  1690  2490 D PermissionCache: checking android.permission.ROTATE_SURFACE_FLINGER for uid=10304 => denied (228 us)
+10-05 15:40:31.320  1690  1764 W ServiceManagerCppClient: Permission failure: android.permission.INTERNAL_SYSTEM_WINDOW from uid=10304 pid=0
+10-05 15:40:31.320  1690  1764 D PermissionCache: checking android.permission.INTERNAL_SYSTEM_WINDOW for uid=10304 => denied (134 us)
+10-05 15:40:31.320  1690  2490 W ServiceManagerCppClient: Permission failure: android.permission.INTERNAL_SYSTEM_WINDOW from uid=10304 pid=3227
+10-05 15:40:31.320  1690  2490 D PermissionCache: checking android.permission.INTERNAL_SYSTEM_WINDOW for uid=10304 => denied (162 us)
+10-05 15:40:31.322  3227  3243 I MESA    : Using gralloc0 CrOS API
+10-05 15:40:31.325  3227  3243 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_CREATE_GUEST_HANDLE
+10-05 15:40:31.327  3227  3243 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_RESOURCE_SYNC
+10-05 15:40:31.327  3227  3243 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_GUEST_VRAM
+10-05 15:40:31.327  3227  3243 I [minigbm:virgl_get_caps(586)]: Supported CAPSET IDs: 6.
+10-05 15:40:31.327  3227  3243 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:540422468
+10-05 15:40:31.327  3227  3243 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:1479815748
+10-05 15:40:31.327  3227  3243 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:1395929668
+10-05 15:40:31.327  3227  3243 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:1177695044
+10-05 15:40:31.327  3227  3243 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:944981572
+10-05 15:40:31.327  3227  3243 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:842094158
+10-05 15:40:31.327  3227  3243 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:808530000
+10-05 15:40:31.328  1682  1795 D audioserver: logFgsApiEnd: FGS Logger Transaction failed, -129
+10-05 15:40:31.329  1280  1280 I hwservicemanager: getTransport: Cannot find entry android.hardware.configstore@1.0::ISurfaceFlingerConfigs/default in either framework or device VINTF manifest.
+10-05 15:40:31.330  3227  3243 E HWUI    : Device claims wide gamut support, cannot find matching config, error = EGL_SUCCESS
+10-05 15:40:31.331  3227  3243 W HWUI    : Failed to initialize 101010-2 format, error = EGL_SUCCESS
+10-05 15:40:31.334  1690  1764 D SurfaceFlinger: Native-Android-x86: display 1280 800 density 213.000000
+10-05 15:40:31.334  1690  1764 D SurfaceFlinger: Native-Android-x86: auto set density
+10-05 15:40:31.348  1856  1923 W ServiceManagerCppClient: Permission failure: android.permission.ACCESS_SURFACE_FLINGER from uid=10304 pid=0
+10-05 15:40:31.348  1856  1923 D PermissionCache: checking android.permission.ACCESS_SURFACE_FLINGER for uid=10304 => denied (132 us)
+10-05 15:40:31.348  1856  1923 W ServiceManagerCppClient: Permission failure: android.permission.ROTATE_SURFACE_FLINGER from uid=10304 pid=0
+10-05 15:40:31.348  1856  1923 D PermissionCache: checking android.permission.ROTATE_SURFACE_FLINGER for uid=10304 => denied (14 us)
+10-05 15:40:31.348  1856  1923 W ServiceManagerCppClient: Permission failure: android.permission.INTERNAL_SYSTEM_WINDOW from uid=10304 pid=0
+10-05 15:40:31.348  1856  1923 D PermissionCache: checking android.permission.INTERNAL_SYSTEM_WINDOW for uid=10304 => denied (7 us)
+10-05 15:40:31.349  1856  1875 W system_server: Failed to determine oat file name for dex location /data/app/~~18eONzJeqgGd4Y1Gd_o2Uw==/org.ome.arm64probe-HHOdaZIPUoUP9gixEkzi_g==/base.apk: Dalvik cache directory does not exist
+10-05 15:40:31.350  1856  1875 W ziparchive: Unable to open '/data/app/~~18eONzJeqgGd4Y1Gd_o2Uw==/org.ome.arm64probe-HHOdaZIPUoUP9gixEkzi_g==/base.dm': No such file or directory
+10-05 15:40:31.352  1856  1875 I ActivityTaskManager: Displayed org.ome.arm64probe/.MainActivity for user 0: +506ms
+10-05 15:40:31.375  2985  2985 D nativeloader: Load libjni_latinimegoogle.so using ns product-clns-7 from class loader (caller=/system/product/app/LatinIME/LatinIME.apk): dlopen failed: library "libjni_latinimegoogle.so" not found
+10-05 15:40:31.375  2985  2985 E JniUtils: Could not load native library jni_latinimegoogle
+10-05 15:40:31.375  2985  2985 E JniUtils: java.lang.UnsatisfiedLinkError: dlopen failed: library "libjni_latinimegoogle.so" not found
+10-05 15:40:31.375  2985  2985 E JniUtils: 	at java.lang.Runtime.loadLibrary0(Runtime.java:1081)
+10-05 15:40:31.375  2985  2985 E JniUtils: 	at java.lang.Runtime.loadLibrary0(Runtime.java:1003)
+10-05 15:40:31.375  2985  2985 E JniUtils: 	at java.lang.System.loadLibrary(System.java:1765)
+10-05 15:40:31.375  2985  2985 E JniUtils: 	at com.android.inputmethod.latin.utils.JniUtils.<clinit>(JniUtils.java:29)
+10-05 15:40:31.375  2985  2985 E JniUtils: 	at com.android.inputmethod.latin.LatinIME.<clinit>(LatinIME.java:588)
+10-05 15:40:31.375  2985  2985 E JniUtils: 	at java.lang.Class.newInstance(Native Method)
+10-05 15:40:31.375  2985  2985 E JniUtils: 	at android.app.AppComponentFactory.instantiateService(AppComponentFactory.java:129)
+10-05 15:40:31.375  2985  2985 E JniUtils: 	at androidx.core.app.CoreComponentFactory.instantiateService(CoreComponentFactory.java:74)
+10-05 15:40:31.375  2985  2985 E JniUtils: 	at android.app.ActivityThread.handleCreateService(ActivityThread.java:5030)
+10-05 15:40:31.375  2985  2985 E JniUtils: 	at android.app.ActivityThread.-$$Nest$mhandleCreateService(Unknown Source:0)
+10-05 15:40:31.375  2985  2985 E JniUtils: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2496)
+10-05 15:40:31.375  2985  2985 E JniUtils: 	at android.os.Handler.dispatchMessage(Handler.java:109)
+10-05 15:40:31.375  2985  2985 E JniUtils: 	at android.os.Looper.loopOnce(Looper.java:232)
+10-05 15:40:31.375  2985  2985 E JniUtils: 	at android.os.Looper.loop(Looper.java:317)
+10-05 15:40:31.375  2985  2985 E JniUtils: 	at android.app.ActivityThread.main(ActivityThread.java:8783)
+10-05 15:40:31.375  2985  2985 E JniUtils: 	at java.lang.reflect.Method.invoke(Native Method)
+10-05 15:40:31.375  2985  2985 E JniUtils: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:595)
+10-05 15:40:31.375  2985  2985 E JniUtils: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:871)
+10-05 15:40:31.378  2985  2985 D nativeloader: Load /system/product/app/LatinIME/lib/x86_64/libjni_latinime.so using ns product-clns-7 from class loader (caller=/system/product/app/LatinIME/LatinIME.apk): ok
+10-05 15:40:31.378  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=long com.android.inputmethod.latin.BinaryDictionary.openNative(java.lang.String, long, long, boolean) namespace_bridged=0 original=0x704ec6f38a60 final=0x704ec6f38a60
+10-05 15:40:31.378  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=long com.android.inputmethod.latin.BinaryDictionary.createOnMemoryNative(long, java.lang.String, java.lang.String[], java.lang.String[]) namespace_bridged=0 original=0x704ec6f38bc0 final=0x704ec6f38bc0
+10-05 15:40:31.378  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=void com.android.inputmethod.latin.BinaryDictionary.closeNative(long) namespace_bridged=0 original=0x704ec6f38d90 final=0x704ec6f38d90
+10-05 15:40:31.378  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=int com.android.inputmethod.latin.BinaryDictionary.getFormatVersionNative(long) namespace_bridged=0 original=0x704ec6f38df0 final=0x704ec6f38df0
+10-05 15:40:31.378  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=void com.android.inputmethod.latin.BinaryDictionary.getHeaderInfoNative(long, int[], int[], java.util.ArrayList, java.util.ArrayList) namespace_bridged=0 original=0x704ec6f38e10 final=0x704ec6f38e10
+10-05 15:40:31.378  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=boolean com.android.inputmethod.latin.BinaryDictionary.flushNative(long, java.lang.String) namespace_bridged=0 original=0x704ec6f39030 final=0x704ec6f39030
+10-05 15:40:31.378  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=boolean com.android.inputmethod.latin.BinaryDictionary.needsToRunGCNative(long, boolean) namespace_bridged=0 original=0x704ec6f39100 final=0x704ec6f39100
+10-05 15:40:31.378  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=boolean com.android.inputmethod.latin.BinaryDictionary.flushWithGCNative(long, java.lang.String) namespace_bridged=0 original=0x704ec6f39120 final=0x704ec6f39120
+10-05 15:40:31.378  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=void com.android.inputmethod.latin.BinaryDictionary.getSuggestionsNative(long, long, long, int[], int[], int[], int[], int[], int, int[], int[][], boolean[], int, int[], int[], int[], int[], int[], int[], float[]) namespace_bridged=0 original=0x704ec6f391f0 final=0x704ec6f391f0
+10-05 15:40:31.378  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=int com.android.inputmethod.latin.BinaryDictionary.getProbabilityNative(long, int[]) namespace_bridged=0 original=0x704ec6f39650 final=0x704ec6f39650
+10-05 15:40:31.378  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=int com.android.inputmethod.latin.BinaryDictionary.getMaxProbabilityOfExactMatchesNative(long, int[]) namespace_bridged=0 original=0x704ec6f39710 final=0x704ec6f39710
+10-05 15:40:31.378  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=int com.android.inputmethod.latin.BinaryDictionary.getNgramProbabilityNative(long, int[][], boolean[], int[]) namespace_bridged=0 original=0x704ec6f397d0 final=0x704ec6f397d0
+10-05 15:40:31.378  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=void com.android.inputmethod.latin.BinaryDictionary.getWordPropertyNative(long, int[], boolean, int[], boolean[], int[], java.util.ArrayList, java.util.ArrayList, java.util.ArrayList, java.util.ArrayList, java.util.ArrayList, java.util.ArrayList) namespace_bridged=0 original=0x704ec6f398f0 final=0x704ec6f398f0
+10-05 15:40:31.378  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=int com.android.inputmethod.latin.BinaryDictionary.getNextWordNative(long, int, int[], boolean[]) namespace_bridged=0 original=0x704ec6f39b70 final=0x704ec6f39b70
+10-05 15:40:31.378  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=boolean com.android.inputmethod.latin.BinaryDictionary.addUnigramEntryNative(long, int[], int, int[], int, boolean, boolean, boolean, int) namespace_bridged=0 original=0x704ec6f39cc0 final=0x704ec6f39cc0
+10-05 15:40:31.378  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=boolean com.android.inputmethod.latin.BinaryDictionary.removeUnigramEntryNative(long, int[]) namespace_bridged=0 original=0x704ec6f39f60 final=0x704ec6f39f60
+10-05 15:40:31.378  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=boolean com.android.inputmethod.latin.BinaryDictionary.addNgramEntryNative(long, int[][], boolean[], int[], int, int) namespace_bridged=0 original=0x704ec6f3a020 final=0x704ec6f3a020
+10-05 15:40:31.379  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=boolean com.android.inputmethod.latin.BinaryDictionary.removeNgramEntryNative(long, int[][], boolean[], int[]) namespace_bridged=0 original=0x704ec6f3a250 final=0x704ec6f3a250
+10-05 15:40:31.379  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=boolean com.android.inputmethod.latin.BinaryDictionary.updateEntriesForWordWithNgramContextNative(long, int[][], boolean[], int[], boolean, int, int) namespace_bridged=0 original=0x704ec6f3a360 final=0x704ec6f3a360
+10-05 15:40:31.379  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=int com.android.inputmethod.latin.BinaryDictionary.updateEntriesForInputEventsNative(long, com.android.inputmethod.latin.utils.WordInputEventForPersonalization[], int) namespace_bridged=0 original=0x704ec6f3a4b0 final=0x704ec6f3a4b0
+10-05 15:40:31.379  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=java.lang.String com.android.inputmethod.latin.BinaryDictionary.getPropertyNative(long, java.lang.String) namespace_bridged=0 original=0x704ec6f3a8b0 final=0x704ec6f3a8b0
+10-05 15:40:31.379  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=boolean com.android.inputmethod.latin.BinaryDictionary.isCorruptedNative(long) namespace_bridged=0 original=0x704ec6f3aa00 final=0x704ec6f3aa00
+10-05 15:40:31.379  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=boolean com.android.inputmethod.latin.BinaryDictionary.migrateNative(long, java.lang.String, long) namespace_bridged=0 original=0x704ec6f3aa20 final=0x704ec6f3aa20
+10-05 15:40:31.379  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=boolean com.android.inputmethod.latin.utils.BinaryDictionaryUtils.createEmptyDictFileNative(java.lang.String, long, java.lang.String, java.lang.String[], java.lang.String[]) namespace_bridged=0 original=0x704ec6f3c120 final=0x704ec6f3c120
+10-05 15:40:31.379  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=float com.android.inputmethod.latin.utils.BinaryDictionaryUtils.calcNormalizedScoreNative(int[], int[], int) namespace_bridged=0 original=0x704ec6f3c370 final=0x704ec6f3c370
+10-05 15:40:31.379  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=int com.android.inputmethod.latin.utils.BinaryDictionaryUtils.setCurrentTimeForTestNative(int) namespace_bridged=0 original=0x704ec6f3c480 final=0x704ec6f3c480
+10-05 15:40:31.379  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=long com.android.inputmethod.latin.DicTraverseSession.setDicTraverseSessionNative(java.lang.String, long) namespace_bridged=0 original=0x704ec6f3c4d0 final=0x704ec6f3c4d0
+10-05 15:40:31.379  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=void com.android.inputmethod.latin.DicTraverseSession.initDicTraverseSessionNative(long, long, int[], int) namespace_bridged=0 original=0x704ec6f3ca50 final=0x704ec6f3ca50
+10-05 15:40:31.379  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=void com.android.inputmethod.latin.DicTraverseSession.releaseDicTraverseSessionNative(long) namespace_bridged=0 original=0x704ec6f3cb70 final=0x704ec6f3cb70
+10-05 15:40:31.379  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=long com.android.inputmethod.keyboard.ProximityInfo.setProximityInfoNative(int, int, int, int, int, int, int[], int, int[], int[], int[], int[], int[], float[], float[], float[]) namespace_bridged=0 original=0x704ec6f38970 final=0x704ec6f38970
+10-05 15:40:31.379  2985  2985 I putmethod.latin: OME_JNI_REGISTER method=void com.android.inputmethod.keyboard.ProximityInfo.releaseProximityInfoNative(long) namespace_bridged=0 original=0x704ec6f38a10 final=0x704ec6f38a10
+10-05 15:40:31.379  2985  2985 I LatinIME: Hardware accelerated drawing: true
+10-05 15:40:31.381  2985  2985 D WindowTokenClient: Only apply configuration update to Resources because shouldReportConfigChange is false. context=com.android.inputmethod.latin.LatinIME@273663a, config={1.0 ?mcc0mnc [en_US] ldltr sw800dp w1280dp h800dp 160dpi xlrg land night -touch qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1280, 800) mAppBounds=Rect(0, 0 - 1280, 800) mMaxBounds=Rect(0, 0 - 1280, 800) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.6 s.48 fontWeightAdjustment=0}, display ID=0
+10-05 15:40:31.381  2985  2985 D WindowTokenClient: android.window.WindowTokenClient.onConfigurationChanged:159 android.window.WindowTokenClientController.onWindowContextTokenAttached:197 android.window.WindowTokenClientController.attachToDisplayArea:116 android.window.WindowContextController.attachToDisplayArea:108 android.window.WindowProviderService.attachBaseContext:218 
+10-05 15:40:31.395  2985  2985 D DesktopModeFlagsUtil: Toggle override initialized to: OVERRIDE_UNSET
+10-05 15:40:31.396  2985  2985 W InputAttributes: No editor info for this field. Bug?
+10-05 15:40:31.403  2985  3254 I LatinIME:LogUtils: Dictionary info: dictionary = UserHistoryDictionary.en_US ; version = 1791214831 ; date = ?
+10-05 15:40:31.404  2985  3254 I LatinIME:LogUtils: Dictionary info: dictionary = userunigram.en_US ; version = 1791214831 ; date = ?
+10-05 15:40:31.405  1856  2233 D CompatChangeReporter: Compat change id reported: 161145287; UID 10249; state: ENABLED
+10-05 15:40:31.417  2985  2985 W HWUI    : Unknown dataspace 0
+10-05 15:40:31.419  2985  3254 I LatinIME:LogUtils: Dictionary info: dictionary = main:en_us ; version = 54 ; date = 1414726260
+10-05 15:40:31.423  2985  2985 D WindowTokenClient: Configuration not dispatch to IME because configuration is up to date. Current config={1.0 ?mcc0mnc [en_US] ldltr sw800dp w1280dp h800dp 160dpi xlrg land night -touch qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1280, 800) mAppBounds=Rect(0, 0 - 1280, 800) mMaxBounds=Rect(0, 0 - 1280, 800) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.6 s.48 fontWeightAdjustment=0}, reported config={1.0 ?mcc0mnc [en_US] ldltr sw800dp w1280dp h800dp 160dpi xlrg land night -touch qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1280, 800) mAppBounds=Rect(0, 0 - 1280, 800) mMaxBounds=Rect(0, 0 - 1280, 800) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.6 s.48 fontWeightAdjustment=0}, updated config={1.0 ?mcc0mnc [en_US] ldltr sw800dp w1280dp h800dp 160dpi xlrg land night -touch qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1280, 800) mAppBounds=Rect(0, 0 - 1280, 800) mMaxBounds=Rect(0, 0 - 1280, 800) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.6 s.48 fontWeightAdjustment=0}, updated display ID=0
+10-05 15:40:31.423  2985  2985 D WindowTokenClient: Configuration not dispatch to IME because configuration is up to date. Current config={1.0 ?mcc0mnc [en_US] ldltr sw800dp w1280dp h800dp 160dpi xlrg land night -touch qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1280, 800) mAppBounds=Rect(0, 0 - 1280, 800) mMaxBounds=Rect(0, 0 - 1280, 800) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.6 s.48 fontWeightAdjustment=0}, reported config={1.0 ?mcc0mnc [en_US] ldltr sw800dp w1280dp h800dp 160dpi xlrg land night -touch qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1280, 800) mAppBounds=Rect(0, 0 - 1280, 800) mMaxBounds=Rect(0, 0 - 1280, 800) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.6 s.48 fontWeightAdjustment=0}, updated config={1.0 ?mcc0mnc [en_US] ldltr sw800dp w1280dp h800dp 160dpi xlrg land night -touch qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1280, 800) mAppBounds=Rect(0, 0 - 1280, 800) mMaxBounds=Rect(0, 0 - 1280, 800) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.6 s.48 fontWeightAdjustment=0}, updated display ID=0
+10-05 15:40:31.431  2985  2985 D ViewRootImpl: Skip registering CompatOnBackInvokedCallback on IME dispatcher
