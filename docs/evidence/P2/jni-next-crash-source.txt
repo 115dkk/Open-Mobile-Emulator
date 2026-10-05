@@ -1,0 +1,134 @@
+9faad7d9f3b524fe500f147bc6ce20346a84e8cd
+art/runtime/jni/java_vm_ext.cc:185:    return android::NativeBridgeGetTrampoline2(
+art/runtime/jni/jni_internal.cc:2708:        fnPtr = GenerateNativeBridgeTrampoline(fnPtr, m);
+art/runtime/jni/jni_internal.cc:2943:  static const void* GenerateNativeBridgeTrampoline(const void* fn_ptr, ArtMethod* method)
+art/runtime/jni/jni_internal.cc:2951:    return NativeBridgeGetTrampolineForFunctionPointer(
+        LOG(ERROR)
+            << "Failed to register non-native method "
+            << c->PrettyDescriptor() << "." << name << sig
+            << " as native";
+        ThrowNoSuchMethodError(soa, c.Get(), name, sig, "native");
+        return JNI_ERR;
+      }
+
+      VLOG(jni) << "[Registering JNI native method " << m->PrettyMethod() << "]";
+
+      if (UNLIKELY(is_fast)) {
+        // There are a few reasons to switch:
+        // 1) We don't support !bang JNI anymore, it will turn to a hard error later.
+        // 2) @FastNative is actually faster. At least 1.5x faster than !bang JNI.
+        //    and switching is super easy, remove ! in C code, add annotation in .java code.
+        // 3) Good chance of hitting DCHECK failures in ScopedFastNativeObjectAccess
+        //    since that checks for presence of @FastNative and not for ! in the descriptor.
+        LOG(WARNING) << "!bang JNI is deprecated. Switch to @FastNative for " << m->PrettyMethod();
+        is_fast = false;
+        // TODO: make this a hard register error in the future.
+      }
+
+      if (is_class_loader_namespace_natively_bridged) {
+        fnPtr = GenerateNativeBridgeTrampoline(fnPtr, m);
+      }
+      const void* final_function_ptr = class_linker->RegisterNative(soa.Self(), m, fnPtr);
+      UNUSED(final_function_ptr);
+    }
+    return JNI_OK;
+  }
+
+  static jint UnregisterNatives(JNIEnv* env, jclass java_class) {
+    CHECK_NON_NULL_ARGUMENT_RETURN(java_class, JNI_ERR);
+  }
+
+  static bool IsClassLoaderNamespaceNativelyBridged(JNIEnv* env, jobject jclass_loader) {
+#if defined(ART_TARGET_ANDROID)
+    android::NativeLoaderNamespace* ns =
+        android::FindNativeLoaderNamespaceByClassLoader(env, jclass_loader);
+    return ns != nullptr && android::IsNamespaceNativeBridged(ns);
+#else
+    UNUSED(env, jclass_loader);
+    return false;
+#endif
+  }
+
+  static const void* GenerateNativeBridgeTrampoline(const void* fn_ptr, ArtMethod* method)
+      REQUIRES_SHARED(Locks::mutator_lock_) {
+#if defined(ART_TARGET_ANDROID)
+    uint32_t shorty_length;
+    const char* shorty = method->GetShorty(&shorty_length);
+    android::JNICallType jni_call_type = method->IsCriticalNative() ?
+                                             android::JNICallType::kJNICallTypeCriticalNative :
+                                             android::JNICallType::kJNICallTypeRegular;
+    return NativeBridgeGetTrampolineForFunctionPointer(
+        fn_ptr, shorty, shorty_length, jni_call_type);
+#else
+    UNUSED(method);
+    return fn_ptr;
+#endif
+  }
+
+  template <typename ArrayT, typename ElementT, typename ArtArrayT>
+  static ElementT* GetPrimitiveArray(JNIEnv* env, ArrayT java_array, jboolean* is_copy) {
+    CHECK_NON_NULL_ARGUMENT(java_array);
+    ScopedObjectAccess soa(env);
+    ObjPtr<ArtArrayT> array = DecodeAndCheckArrayType<ArrayT, ElementT, ArtArrayT>(
+        soa, java_array, "GetArrayElements", "get");
+    if (UNLIKELY(array == nullptr)) {
+      return nullptr;
+    }
+    // Only make a copy if necessary.
+611-    // This usually happens for ANativeActivity_onCreate renamed with android.app.func_name.
+612-    // TODO(b/27307664): maybe query android.app.func_name from Java and check exactly?
+613-    TRACE("No wrapper is registered for %s, assume it's ANativeActivity_onCreate", name);
+614-    result = berberis::WrapKnownGuestFunction(guest_addr, "ANativeActivity_onCreate");
+615-  }
+616-  return const_cast<void*>(result);
+617-}
+618-
+619:void* native_bridge_getTrampolineForFunctionPointer(const void* method,
+620-                                                    const char* shorty,
+621-                                                    uint32_t len,
+622-                                                    enum android::JNICallType jni_call_type) {
+623-  LOG_NB(
+624:      "native_bridge_getTrampolineForFunctionPointer(method=%p, shorty='%s', len=%d, "
+625-      "jni_call_type=%d)",
+626-      method,
+627-      shorty ? shorty : "(null)",
+628-      len,
+629-      jni_call_type);
+630-
+631-  auto guest_addr = berberis::ToGuestAddr(method);
+632-  if (!berberis::GuestMapShadow::GetInstance()->IsExecutable(guest_addr, 1)) {
+633-    LOG_NB("Not executable method - assuming it's a host library");
+634-    // This is not guest code - happens when native_bridge falls back
+635-    // to host libraries.
+636-    return const_cast<void*>(method);
+637-  }
+638-
+639-  return const_cast<void*>(berberis::WrapGuestJNIFunction(
+640-      guest_addr,
+641-      shorty,
+642-      "(unknown)",
+643-      jni_call_type != android::JNICallType::kJNICallTypeCriticalNative));
+644-}
+645-
+646-bool native_bridge_isNativeBridgeFunctionPointer(const void* method) {
+647-  bool result =
+648-      berberis::GuestMapShadow::GetInstance()->IsExecutable(berberis::ToGuestAddr(method), 1);
+649-  LOG_NB("native_bridge_isNativeBridgeFunctionPointer(method=%p): %d", method, result);
+650-  return result;
+651-}
+652-
+653-void* native_bridge_getTrampoline(void* handle,
+654-                                  const char* name,
+--
+851-    &native_bridge_initAnonymousNamespace,
+852-    &native_bridge_createNamespace,
+853-    &native_bridge_linkNamespaces,
+854-    &native_bridge_loadLibraryExt,
+855-    &native_bridge_getVendorNamespace,
+856-    &native_bridge_getExportedNamespace,
+857-    &native_bridge_preZygoteFork,
+858-    &native_bridge_getTrampolineWithJNICallType,
+859:    &native_bridge_getTrampolineForFunctionPointer,
+860-    &native_bridge_isNativeBridgeFunctionPointer,
+861-};
+862-}  // extern "C"

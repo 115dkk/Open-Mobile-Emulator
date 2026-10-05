@@ -58,3 +58,20 @@ cpuinfo 경고: A15 `libnativebridge`가 `/system/etc/cpuinfo.<isa>.txt`를 찾�
 `OpenatProcCpuinfoForGuest()`가 memfd로 ARM64 형식을 만들어 준다. 파일을 더하지 않았다.
 
 다음: `e6c71f3`의 JNI 타입 수정 가운데 A15에 있는 심볼만 옮겨 다시 빌드, 재현기, 게임 순으로 확인.
+
+## JNI 타입 이식 뒤 (같은 날, jni1)
+
+상류 `e6c71f3`의 JNI 타입 변경 가운데 A15 헤더와 행이 그대로 맞는 것만 옮겼다(헤더 15개, 심볼 25개, 선언 75개, 빠진 심볼 0, `jni-fix-scope.txt`).
+재현기는 `OMEProbe: AAssetManager_fromJava PASS`. 게임은 이전 충돌을 지나 `IL2CPP: JNI_OnLoad`, Unity `6000.3.13f1`, `CPU 'arm64-v8a'`,
+`OS 'Android OS 15 (API 35)'`까지 갔고, 시작 2.58초 뒤 다른 SIGSEGV로 끝났다.
+
+```text
+E berberis: FATAL host signal NO-RECOVERY: depth=1 sig=11 host_pc=0x7aa4c302764c fault_addr=0x7aa4c302764c si_code=2
+E libsigchain: #03 pc 0002664b .../lib/arm64/libswappywrapper.so
+E libsigchain: #04 pc 0033b5a7 .../dalvik-cache/x86_64/boot.oat (art_jni_trampoline+167)
+```
+
+ART의 JNI 트램펄린이 ARM64 라이브러리(`libswappywrapper.so`) 주소를 호스트 코드로 실행했다. 네이티브 메서드를 등록할 때 게스트 함수 포인터가
+트램펄린으로 감싸지지 않은 것으로 보인다. A15 ART는 클래스 로더 네임스페이스가 네이티브 브리지일 때만 `GenerateNativeBridgeTrampoline()`을 부르고,
+Digitalis는 `GuestMapShadow::IsExecutable()`이 참인 주소만 감싼다. 둘 중 어디서 빠졌는지는 아직 모른다(`jni-next-crash-source.txt`).
+ISO `OME-api35-20261005-jni1-digitalis.iso` SHA-256 `9bb72cc07bba1fa1609faf020a4b1814a39ee6412370c972d41b10ea9a2899ee`.

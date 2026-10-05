@@ -1,0 +1,1199 @@
+--------- beginning of main
+10-05 14:03:50.866  2158  2401 V ShellDesktopMode: DesktopModeLogger: taskInfo map after processing changes 0
+10-05 14:03:50.869  2449  2449 D StateManager: createAtomicAnimation - fromState: Background, toState: Normal, partial trace:
+10-05 14:03:50.869  2449  2449 D StateManager: 	at com.android.quickstep.util.WorkspaceRevealAnim.prepareToAnimate(WorkspaceRevealAnim.java:130)
+10-05 14:03:50.869  2449  2449 D StateManager: 	at com.android.quickstep.util.WorkspaceRevealAnim.<init>(WorkspaceRevealAnim.java:66)
+10-05 14:03:50.869  2449  2449 D StateManager: 	at com.android.launcher3.QuickstepTransitionManager.createWallpaperOpenAnimations(QuickstepTransitionManager.java:1689)
+10-05 14:03:50.869  2449  2449 D b/311077782: LauncherAnimationRunner.setAnimation
+10-05 14:03:50.871  1849  2032 D EthernetNetworkFactory: eth0: onNetworkUnneeded for request: NetworkRequest [ REQUEST id=77, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10304 RequestorUid: 10260 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-05 14:03:50.872  1849  2379 D ConnectivityService: requestNetwork for uid/pid:10260/2158 asUid: 10261 activeRequest: null callbackRequest: 78 [NetworkRequest [ REQUEST id=79, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10261 RequestorUid: 10260 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647 isUidTracked: false declaredMethods: ALL
+10-05 14:03:50.872  1849  2032 D EthernetNetworkFactory: eth0: onNetworkNeeded for request: NetworkRequest [ REQUEST id=79, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10261 RequestorUid: 10260 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-05 14:03:50.872  1849  2032 D EthernetNetworkFactory: IpClient already started
+10-05 14:03:50.872  1849  2025 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=79, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10261 RequestorUid: 10260 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-05 14:03:50.872  1849  2025 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=79, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10261 RequestorUid: 10260 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-05 14:03:50.872  1849  2025 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=79, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10261 RequestorUid: 10260 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-05 14:03:50.872  1849  2033 D ConnectivityService: NetReassign [79 : null → 100] [c 0] [a 0] [i 0]
+--------- beginning of system
+10-05 14:03:50.908  1849  1872 W ActivityTaskManager: Unable to send transaction to client proc org.ome.arm64probe: no app thread
+10-05 14:03:50.986  1849  1865 W ActivityTaskManager: callingPackage for (uid=2000, pid=3320) has no WPC
+10-05 14:03:50.987  1849  1865 V GrammaticalInflectionUtils: AttributionSource: AttributionSource { uid = 10299, packageName = null, attributionTag = null, token = android.os.Binder@3fb8ee2, deviceId = 0, next = null } does not have READ_SYSTEM_GRAMMATICAL_GENDER permission.
+10-05 14:03:50.987  1849  1865 W OptProp : Cannot read opt property android.window.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES
+10-05 14:03:50.987  1849  1865 W OptProp : Cannot read opt property android.window.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE
+10-05 14:03:50.989  1849  1865 W OptProp : Cannot read opt property android.window.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE
+10-05 14:03:50.992  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (319134872409225255) 10 android.os.BinderProxy@b627782 TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=14 effectiveUid=10299 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity } baseActivity=ComponentInfo{com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity} topActivity=ComponentInfo{com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity} origActivity=null realActivity=ComponentInfo{com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity} numActivities=1 lastActiveTime=93412 supportsMultiWindow=true resizeMode=2 isResizeable=true minWidth=400 minHeight=300 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@9e2ae93} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 - 0, 0) topActivityInfo=ActivityInfo{f674ed0 com.google.firebase.MessagingUnityPlayerActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false isTopActivityStyleFloating=false lastNonFullscreenBounds=Rect(160, 96 - 1120, 696) capturedLink=null capturedLinkTimestamp=0 appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false eligibleForLetterboxEducation= false isLetterboxEducationEnabled= false isLetterboxDoubleTapEnabled= false eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=1280 topActivityLetterboxHeight=800 topActivityLetterboxAppWidth=1280 topActivityLetterboxAppHeight=800 isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false cameraCompatTaskInfo=CameraCompatTaskInfo { freeformCameraCompatMode=inactive}}}, pipTask = null, remoteTransition = null, displayChange = null, flags = 0, debugId = 10 }
+10-05 14:03:50.992  1849  1865 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity} with LAUNCH_SINGLE_TASK from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-05 14:03:50.992  2158  2401 D ShellSplitScreen: UNKNOWN MESSAGE (-7501547534164937581)
+10-05 14:03:50.992  2158  2401 V ShellDesktopMode: DesktopTasksController: handleRequest request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=14 effectiveUid=10299 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity } baseActivity=ComponentInfo{com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity} topActivity=ComponentInfo{com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity} origActivity=null realActivity=ComponentInfo{com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity} numActivities=1 lastActiveTime=93412 supportsMultiWindow=true resizeMode=2 isResizeable=true minWidth=400 minHeight=300 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@9e2ae93} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 - 0, 0) topActivityInfo=ActivityInfo{f674ed0 com.google.firebase.MessagingUnityPlayerActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false isTopActivityStyleFloating=false lastNonFullscreenBounds=Rect(160, 96 - 1120, 696) capturedLink=null capturedLinkTimestamp=0 appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false eligibleForLetterboxEducation= false isLetterboxEducationEnabled= false isLetterboxDoubleTapEnabled= false eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=1280 topActivityLetterboxHeight=800 topActivityLetterboxAppWidth=1280 topActivityLetterboxAppHeight=800 isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false cameraCompatTaskInfo=CameraCompatTaskInfo { freeformCameraCompatMode=inactive}}}, pipTask = null, remoteTransition = null, displayChange = null, flags = 0, debugId = 10 }
+10-05 14:03:50.992  2158  2401 V ShellDesktopMode: DesktopTasksController: handleFullscreenTaskLaunch
+10-05 14:03:50.992  2158  2401 D ShellDesktopMode: DesktopModeTaskRepository: getVisibleTaskCount=0
+10-05 14:03:50.992  2158  2401 V ShellDesktopMode: DesktopTasksController: handleRequest result=null
+10-05 14:03:50.993  2449  2449 W SplitSelectStateCtor: Missing session instanceIds
+10-05 14:03:50.993  2449  2449 D StatsLog: LAUNCHER_SPLIT_SELECTION_EXIT_INTERRUPTED
+10-05 14:03:50.994  2158  2401 D WindowManagerShell: UNKNOWN MESSAGE (-2945141395292145768) false 161
+10-05 14:03:50.996  2158  2419 D SplashScreenView: Build android.window.SplashScreenView{163593d V.E...... ......ID 0,0-0,0}
+10-05 14:03:50.996  2158  2419 D SplashScreenView: Icon: view: android.widget.ImageView{eabc532 V.ED..... ......I. 0,0-0,0 #1020527 android:id/splashscreen_icon_view} drawable: com.android.wm.shell.startingsurface.SplashscreenIconDrawableFactory$ImmobileIconDrawable@be46283 size: 160
+10-05 14:03:50.996  2158  2419 D SplashScreenView: Branding: view: android.view.View{a940c00 G.ED..... ......I. 0,0-0,0 #1020526 android:id/splashscreen_branding_view} drawable: null size w: 0 h: 0
+10-05 14:03:50.996  1849  1871 V GrammaticalInflectionUtils: AttributionSource: AttributionSource { uid = 10299, packageName = null, attributionTag = null, token = android.os.Binder@3fb8ee2, deviceId = 0, next = null } does not have READ_SYSTEM_GRAMMATICAL_GENDER permission.
+10-05 14:03:51.000  1849  2062 I AppWidgetServiceImpl: Received broadcast: android.intent.action.PACKAGE_UNSTOPPED on user 0
+10-05 14:03:51.000  1849  2062 I AppWidgetServiceImpl: Updating package stopped masked state for uid 10299 package com.epidgames.trickcalrevive isStopped false
+10-05 14:03:51.001  1653  1653 D Zygote  : Forked child process 3323
+10-05 14:03:51.002  1849  1881 I ActivityManager: Start proc 3323:com.epidgames.trickcalrevive/u0a299 for next-top-activity {com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity}
+10-05 14:03:51.009  1849  1868 V WindowManager: Sent Transition (#10) createdAt=10-05 14:03:50.988 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=14 effectiveUid=10299 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity } baseActivity=ComponentInfo{com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity} topActivity=ComponentInfo{com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity} origActivity=null realActivity=ComponentInfo{com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity} numActivities=1 lastActiveTime=93412 supportsMultiWindow=true resizeMode=2 isResizeable=true minWidth=400 minHeight=300 defaultMinSize=220 token=WCT{RemoteToken{8389aad Task{93a31cd #14 type=standard A=10299:com.epidgames.trickcalrevive isResizeable=true minWidth=400 minHeight=300}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 - 0, 0) topActivityInfo=ActivityInfo{e08c1e2 com.google.firebase.MessagingUnityPlayerActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false isTopActivityStyleFloating=false lastNonFullscreenBounds=Rect(160, 96 - 1120, 696) capturedLink=null capturedLinkTimestamp=0 appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false eligibleForLetterboxEducation= false isLetterboxEducationEnabled= false isLetterboxDoubleTapEnabled= false eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=1280 topActivityLetterboxHeight=800 topActivityLetterboxAppWidth=1280 topActivityLetterboxAppHeight=800 isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false cameraCompatTaskInfo=CameraCompatTaskInfo { freeformCameraCompatMode=inactive}}}, pipTask = null, remoteTransition = null, displayChange = null, flags = 0, debugId = 10 }
+10-05 14:03:51.009  1849  1868 V WindowManager:     startWCT=WindowContainerTransaction { changes = {} hops = [] errorCallbackToken=null taskFragmentOrganizer=null }
+10-05 14:03:51.009  2158  2508 V WindowManagerShell: UNKNOWN MESSAGE (6541979577719206723) 7941394530776
+10-05 14:03:51.009  1849  1868 V WindowManager:     info={id=10 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[
+10-05 14:03:51.009  1849  1868 V WindowManager:         {WCT{RemoteToken{8389aad Task{93a31cd #14 type=standard A=10299:com.epidgames.trickcalrevive isResizeable=true minWidth=400 minHeight=300}}} m=OPEN f=NONE leash=Surface(name=Task=14)/@0xceee871 sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0 taskParent=-1},
+10-05 14:03:51.009  1849  1868 V WindowManager:         {WCT{RemoteToken{aa5ff85 Task{5681d5c #1 type=home isResizeable=true minWidth=-1 minHeight=-1}}} m=TO_BACK f=SHOW_WALLPAPER leash=Surface(name=Task=1)/@0x333cd3c sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0 taskParent=-1}
+10-05 14:03:51.009  1849  1868 V WindowManager:     ]}
+10-05 14:03:51.010  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (1354476626241269833) 10 android.os.BinderProxy@b627782 {id=10 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@64310c4} m=OPEN f=NONE leash=Surface(name=Task=14)/@0xca75b18 sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0 taskParent=-1},{WCT{android.window.IWindowContainerToken$Stub$Proxy@5420bad} m=TO_BACK f=SHOW_WALLPAPER leash=Surface(name=Task=1)/@0xd934971 sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0 taskParent=-1}]}
+10-05 14:03:51.010  2158  2401 V ShellDesktopMode: DesktopModeLogger: taskInfo map after processing changes 0
+10-05 14:03:51.010  1849  2379 W UserManagerService: Requested status bar icon for non-badged user 0
+10-05 14:03:51.011  3323  3323 W nativebridge: Failed to bind-mount /system/etc/cpuinfo.arm64.txt as /proc/cpuinfo: No such file or directory
+10-05 14:03:51.011  3323  3323 W nativebridge: Failed to bind-mount /system/lib64/arm64/cpuinfo as /proc/cpuinfo: No such file or directory
+10-05 14:03:51.011  3323  3323 I Zygote  : seccomp disabled by setenforce 0
+10-05 14:03:51.010  1683  1683 I RenderEngine: type=1400 audit(0.0:779): avc:  denied  { ioctl } for  path="/dev/dri/renderD128" dev="tmpfs" ino=922 ioctlcmd=0x6448 scontext=u:r:surfaceflinger:s0 tcontext=u:object_r:gpu_device:s0 tclass=chr_file permissive=1
+10-05 14:03:51.010  1683  1683 I RenderEngine: type=1400 audit(0.0:780): avc:  denied  { ioctl } for  path="/dev/dri/renderD128" dev="tmpfs" ino=922 ioctlcmd=0x6442 scontext=u:r:surfaceflinger:s0 tcontext=u:object_r:gpu_device:s0 tclass=chr_file permissive=1
+10-05 14:03:51.013  3323  3323 I .trickcalrevive: Using CollectorTypeCC GC.
+10-05 14:03:51.014  3323  3323 W .trickcalrevive: Unexpected CPU variant for x86: generic.
+10-05 14:03:51.014  3323  3323 W .trickcalrevive: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, default
+--------- beginning of kernel
+10-05 14:03:51.015     0     0 I KernelSU: handle_setresuid from 0 to 10299
+10-05 14:03:51.020  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (8857561493841984889) (#10) android.os.BinderProxy@b627782@0 (#9) android.os.BinderProxy@7a89d1e@0
+10-05 14:03:51.020  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (-3133681306894255105) RemoteTransition { remoteTransition = android.window.IRemoteTransition$Stub$Proxy@c863ea9, appThread = android.app.IApplicationThread$Stub$Proxy@bf65c2e, debugName = QuickstepLaunchHome }
+10-05 14:03:51.023  1849  2388 W WindowManager: Failed looking up window session=Session{4e9f4b2 2158:u0a10260} callers=com.android.server.wm.WindowManagerService.removeClientToken:2069 com.android.server.wm.Session.remove:269 android.view.IWindowSession$Stub.onTransact:677 
+10-05 14:03:51.024  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (5216177164274512366) false (#9) android.os.BinderProxy@7a89d1e@0
+10-05 14:03:51.024  1849  2388 E IPCThreadState: Binder transaction failure. id: 102333, BR_*: 29189, error: -22 (Invalid argument)
+10-05 14:03:51.024  1849  2388 W ActivityManager: pid 1849 system sent binder code 7 with flags 1 to frozen apps and got error -32
+10-05 14:03:51.024  1849  2388 W WindowManager: Exception thrown during dispatchAppVisibility Window{2de989a u0 org.ome.arm64probe/org.ome.arm64probe.MainActivity EXITING}
+10-05 14:03:51.024  1849  2388 W WindowManager: android.os.DeadObjectException
+10-05 14:03:51.024  1849  2388 W WindowManager: 	at android.os.BinderProxy.transactNative(Native Method)
+10-05 14:03:51.024  1849  2388 W WindowManager: 	at android.os.BinderProxy.transact(BinderProxy.java:586)
+10-05 14:03:51.024  1849  2388 W WindowManager: 	at android.view.IWindow$Stub$Proxy.dispatchAppVisibility(IWindow.java:553)
+10-05 14:03:51.024  1849  2388 W WindowManager: 	at com.android.server.wm.WindowState.sendAppVisibilityToClients(WindowState.java:3287)
+10-05 14:03:51.024  1849  2388 W WindowManager: 	at com.android.server.wm.WindowContainer.sendAppVisibilityToClients(WindowContainer.java:1298)
+10-05 14:03:51.024  1849  2388 W WindowManager: 	at com.android.server.wm.WindowToken.setClientVisible(WindowToken.java:403)
+10-05 14:03:51.024  1849  2388 W WindowManager: 	at com.android.server.wm.ActivityRecord.setClientVisible(ActivityRecord.java:7038)
+10-05 14:03:51.024  1849  2388 W WindowManager: 	at com.android.server.wm.ActivityRecord.postApplyAnimation(ActivityRecord.java:5732)
+10-05 14:03:51.024  1849  2388 W WindowManager: 	at com.android.server.wm.ActivityRecord.commitVisibility(ActivityRecord.java:5675)
+10-05 14:03:51.024  1849  2388 W WindowManager: 	at com.android.server.wm.Transition.finishTransition(Transition.java:1335)
+10-05 14:03:51.024  1849  2388 W WindowManager: 	at com.android.server.wm.TransitionController.finishTransition(TransitionController.java:945)
+10-05 14:03:51.024  1849  2388 W WindowManager: 	at com.android.server.wm.WindowOrganizerController.finishTransition(WindowOrganizerController.java:521)
+10-05 14:03:51.024  1849  2388 W WindowManager: 	at android.window.IWindowOrganizerController$Stub.onTransact(IWindowOrganizerController.java:289)
+10-05 14:03:51.024  1849  2388 W WindowManager: 	at com.android.server.wm.WindowOrganizerController.onTransact(WindowOrganizerController.java:210)
+10-05 14:03:51.024  1849  2388 W WindowManager: 	at android.os.Binder.execTransactInternal(Binder.java:1408)
+10-05 14:03:51.024  1849  2388 W WindowManager: 	at android.os.Binder.execTransact(Binder.java:1347)
+10-05 14:03:51.024  1849  2388 W Process : Unable to open /proc/3265/status
+10-05 14:03:51.024  1849  1868 V WindowManager: Finish Transition (#9): created at 10-05 14:03:50.820 collect-started=0.026ms request-sent=0.065ms started=2.721ms ready=2.714ms sent=31.46ms finished=203.678ms
+10-05 14:03:51.026  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (7933815964243868580) (#10) android.os.BinderProxy@b627782@0
+10-05 14:03:51.026  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.transition.DefaultMixedHandler@9200bca
+10-05 14:03:51.026  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.keyguard.KeyguardTransitionHandler@e78c13b
+10-05 14:03:51.026  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.pip.PipTransition@2d4b271
+10-05 14:03:51.026  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.activityembedding.ActivityEmbeddingController@7549856
+10-05 14:03:51.026  1849  2379 W UserManagerService: Requested status bar icon for non-badged user 0
+10-05 14:03:51.026  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.splitscreen.StageCoordinator@df340d7
+10-05 14:03:51.026  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.desktopmode.DesktopTasksController@b9e4dc4
+10-05 14:03:51.026  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.recents.RecentsTransitionHandler@7b104ad
+10-05 14:03:51.026  2158  2401 V ShellRecents: UNKNOWN MESSAGE (9121280089055901232)
+10-05 14:03:51.026  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.back.BackAnimationController$BackTransitionHandler@7c11373
+10-05 14:03:51.026  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.transition.RemoteTransitionHandler@f148230
+10-05 14:03:51.027  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (-9146248499991136778) {id=10 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@64310c4} m=OPEN f=NONE leash=Surface(name=Task=14)/@0xca75b18 sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0 taskParent=-1},{WCT{android.window.IWindowContainerToken$Stub$Proxy@5420bad} m=TO_BACK f=SHOW_WALLPAPER leash=Surface(name=Task=1)/@0xd934971 sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0 taskParent=-1}]}
+10-05 14:03:51.027  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (7551344402092077994) Pair{{types=[] flags=0x0] notFlags=0x100 checks=[{atype=home independent=true modes=[OPEN,TO_FRONT] flags=NONE mustBeTask=false order=TOP topActivity=ComponentInfo{com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher} launchCookie=null},{atype=standard independent=true modes=[CLOSE,TO_BACK] flags=NONE mustBeTask=false order=ANY topActivity=null launchCookie=null},{NOT atype=undefined independent=true modes=[] flags=NONE mustBeTask=true order=ANY topActivity=null launchCookie=null customAnim=true}]} RemoteTransition { remoteTransition = android.window.IRemoteTransition$Stub$Proxy@c863ea9, appThread = android.app.IApplicationThread$Stub$Proxy@bf65c2e, debugName = QuickstepLaunchHome }}
+10-05 14:03:51.027  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (-957464960872531856) 10 null
+10-05 14:03:51.027  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.transition.DefaultTransitionHandler@34bc004
+10-05 14:03:51.027  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (-1860574116773740964) {id=10 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@64310c4} m=OPEN f=NONE leash=Surface(name=Task=14)/@0xca75b18 sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0 taskParent=-1},{WCT{android.window.IWindowContainerToken$Stub$Proxy@5420bad} m=TO_BACK f=SHOW_WALLPAPER leash=Surface(name=Task=1)/@0xd934971 sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0 taskParent=-1}]}
+10-05 14:03:51.027  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (-5172949229302105239) android.view.animation.AnimationSet@8f870e1 19 OPEN false
+10-05 14:03:51.027  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (-5172949229302105239) android.view.animation.AnimationSet@332ce06 18 OPEN true
+10-05 14:03:51.028  1849  2388 W UserManagerService: Requested status bar icon for non-badged user 0
+10-05 14:03:51.028  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (5292399587644158186) com.android.wm.shell.transition.DefaultTransitionHandler@34bc004
+10-05 14:03:51.028     0     0 I binder  : 2388:1849 cannot find target node
+10-05 14:03:51.028     0     0 I binder  : 1849:2388 transaction async to 0:0 failed 102333/29189/-22, code 7 size 64-0 line 3343
+10-05 14:03:51.029  2158  2401 V ShellDesktopMode: UNKNOWN MESSAGE (-2894319029625802502) 13 true
+10-05 14:03:51.029  2449  2449 D View    : ---- ST:requestLayout 
+10-05 14:03:51.030  2449  2449 D View    : requestLayout : getStackTrace(Thread.java:1946) <- printStackStrace(View.java:28052) <- requestLayout(View.java:28082) <- setLayoutParams(View.java:20565) <- updateViewLayout(WindowManagerGlobal.java:476) <- updateViewLayout(WindowManagerImpl.java:165) <- notifyUpdateLayoutParams(TaskbarActivityContext.java:1717) <- excludeFromMagnificationRegion(TaskbarActivityContext.java:1705) <- updateInsetsTouchability(TaskbarInsetsController.kt:433) <- updateInsetsTouchability(TaskbarDragLayerController.java:273) <- onComputeTaskbarInsets(TaskbarDragLayer.java:134) <- $r8$lambda$A8jkhOr-Udsa6VIIsWK5fVFvNhI(null:0) <- onComputeInternalInsets(D8$$SyntheticClass:0) <- dispatchOnComputeInternalInsets(ViewTreeObserver.java:1307) <- performTraversals(ViewRootImpl.java:4216) <- doTraversal(ViewRootImpl.java:2997) <- run(ViewRootImpl.java:10456) <- run(Choreographer.java:1415) <- run(Choreographer.java:1424) <- doCallbacks(Choreographer.java:1024) <- 
+10-05 14:03:51.035  2449  2449 D RecentsView: onTaskRemoved: 13, not handling task stack changes
+10-05 14:03:51.035  2449  2449 D RecentsView: onTaskRemoved: 13, not handling task stack changes
+10-05 14:03:51.034  1683  1683 I binder:1683_3: type=1400 audit(0.0:781): avc:  denied  { ioctl } for  path="/dev/dri/renderD128" dev="tmpfs" ino=922 ioctlcmd=0x642e scontext=u:r:surfaceflinger:s0 tcontext=u:object_r:gpu_device:s0 tclass=chr_file permissive=1
+10-05 14:03:51.034  1683  1683 I RenderEngine: type=1400 audit(0.0:782): avc:  denied  { ioctl } for  path="/dev/dri/renderD128" dev="tmpfs" ino=922 ioctlcmd=0x6445 scontext=u:r:surfaceflinger:s0 tcontext=u:object_r:gpu_device:s0 tclass=chr_file permissive=1
+10-05 14:03:51.046  1683  1683 I RenderEngine: type=1400 audit(0.0:783): avc:  denied  { ioctl } for  path="/dev/dri/renderD128" dev="tmpfs" ino=922 ioctlcmd=0x6444 scontext=u:r:surfaceflinger:s0 tcontext=u:object_r:gpu_device:s0 tclass=chr_file permissive=1
+10-05 14:03:51.052     0     0 W audit   : audit_lost=38 audit_rate_limit=5 audit_backlog_limit=64
+10-05 14:03:51.052     0     0 E audit   : rate limit exceeded
+10-05 14:03:51.062  1683  1683 E BpTransactionCompletedListener: Failed to transact (-32)
+10-05 14:03:51.084  2449  2449 W FrameTracker: Missed SF frame:PREDICTION_ERROR, 10712, 4672578, CUJ=J<TASKBAR_EXPAND::App to Home>
+10-05 14:03:51.084  2449  2449 W FrameTracker: Missed SF frame:PREDICTION_ERROR, 10725, 5881604, CUJ=J<TASKBAR_EXPAND::App to Home>
+10-05 14:03:51.084  2449  2449 W FrameTracker: Missed SF frame:PREDICTION_ERROR, 10738, 7598930, CUJ=J<TASKBAR_EXPAND::App to Home>
+10-05 14:03:51.084  2449  2449 W FrameTracker: Missed SF frame:PREDICTION_ERROR, 10751, 4776856, CUJ=J<TASKBAR_EXPAND::App to Home>
+10-05 14:03:51.084  2449  2449 W FrameTracker: Missed SF frame:PREDICTION_ERROR, 10764, 5202882, CUJ=J<TASKBAR_EXPAND::App to Home>
+10-05 14:03:51.084  2449  2449 W FrameTracker: Missed SF frame:PREDICTION_ERROR, 10777, 6004752, CUJ=J<TASKBAR_EXPAND::App to Home>
+10-05 14:03:51.084  2449  2449 W FrameTracker: Missed SF frame:PREDICTION_ERROR, 10784, 4072852, CUJ=J<TASKBAR_EXPAND::App to Home>
+10-05 14:03:51.084  2449  2449 W FrameTracker: Missed SF frame:PREDICTION_ERROR, 10797, 8772478, CUJ=J<TASKBAR_EXPAND::App to Home>
+10-05 14:03:51.084  2449  2449 W FrameTracker: Missed SF frame:PREDICTION_ERROR, 10816, 0, CUJ=J<TASKBAR_EXPAND::App to Home>
+10-05 14:03:51.084  2449  2449 W FrameTracker: Missing HWUI jank callback for vsyncId: 10816, CUJ=J<TASKBAR_EXPAND::App to Home>
+10-05 14:03:51.084  2449  2462 V PerfettoTrigger: Not triggering com.android.telemetry.interaction-jank-monitor-60 - not enough time since last trigger
+10-05 14:03:51.099  1849  2388 W ActivityTaskManager: takeTaskSnapshot: taskId=13 not found or not visible
+10-05 14:03:51.099  3323  3323 I berberis: Initialized Berberis (aarch64)
+10-05 14:03:51.100  3323  3326 D berberis: berberis: trans#1 pc=0x7aa538f60000 size=2 JIT jit=1 interp=0 avg=2
+10-05 14:03:51.100  3323  3326 D berberis: berberis: trans#2 pc=0x7aa538fcae00 size=16 JIT jit=2 interp=0 avg=9
+10-05 14:03:51.100  3323  3326 D berberis: berberis: trans#3 pc=0x7aa538fcae38 size=2 JIT jit=3 interp=0 avg=6
+10-05 14:03:51.100  3323  3326 D berberis: berberis: trans#4 pc=0x7aa538fcae40 size=9 JIT jit=4 interp=0 avg=7
+10-05 14:03:51.100  3323  3326 D berberis: berberis: trans#5 pc=0x7aa538fca7a8 size=6 JIT jit=5 interp=0 avg=7
+10-05 14:03:51.100  3323  3326 D berberis: berberis: trans#6 pc=0x7aa538fa8530 size=3 JIT jit=6 interp=0 avg=6
+10-05 14:03:51.100  3323  3326 D berberis: berberis: trans#7 pc=0x7aa538fca7c0 size=2 JIT jit=7 interp=0 avg=5
+10-05 14:03:51.100  3323  3326 D berberis: berberis: trans#8 pc=0x7aa538fca7c8 size=3 JIT jit=8 interp=0 avg=5
+10-05 14:03:51.100  3323  3326 D berberis: berberis: trans#9 pc=0x7aa538f916e4 size=2 JIT jit=9 interp=0 avg=5
+10-05 14:03:51.100  3323  3326 D berberis: berberis: trans#10 pc=0x7aa538fca7d4 size=4 JIT jit=10 interp=0 avg=4
+10-05 14:03:51.100  3323  3326 D berberis: berberis: trans#11 pc=0x7aa538f917dc size=2 JIT jit=11 interp=0 avg=4
+10-05 14:03:51.100  3323  3326 D berberis: berberis: trans#12 pc=0x7aa538fcae64 size=2 JIT jit=12 interp=0 avg=4
+10-05 14:03:51.100  3323  3326 D berberis: berberis: trans#13 pc=0x7aa538f91780 size=5 JIT jit=13 interp=0 avg=4
+10-05 14:03:51.100  3323  3326 D berberis: berberis: trans#14 pc=0x7aa538f91794 size=8 JIT jit=14 interp=0 avg=4
+10-05 14:03:51.100  3323  3326 D berberis: berberis: trans#15 pc=0x7aa538f917a4 size=4 JIT jit=15 interp=0 avg=4
+10-05 14:03:51.100  3323  3326 D berberis: berberis: trans#16 pc=0x7aa538f917cc size=4 JIT jit=16 interp=0 avg=4
+10-05 14:03:51.100  3323  3326 D berberis: berberis: trans#17 pc=0x7aa538fcae6c size=4 JIT jit=17 interp=0 avg=4
+10-05 14:03:51.100  3323  3326 D berberis: berberis: trans#18 pc=0x7aa538fcaec0 size=10 JIT jit=18 interp=0 avg=4
+10-05 14:03:51.100  3323  3326 D berberis: berberis: trans#19 pc=0x7aa538fcaefc size=4 JIT jit=19 interp=0 avg=4
+10-05 14:03:51.100  3323  3326 D berberis: berberis: trans#20 pc=0x7aa538fcaee8 size=9 JIT jit=20 interp=0 avg=5
+10-05 14:03:51.100  3323  3326 D berberis: berberis: trans#100 pc=0x7aa538fc33d4 size=4 JIT jit=100 interp=0 avg=5
+10-05 14:03:51.101  3323  3326 D berberis: berberis: trans#200 pc=0x7aa538fb29dc size=1 JIT jit=200 interp=0 avg=6
+10-05 14:03:51.101  3323  3326 D berberis: berberis: trans#300 pc=0x7aa538f97460 size=8 JIT jit=300 interp=0 avg=6
+10-05 14:03:51.102  3323  3326 D berberis: berberis: trans#400 pc=0x7aa538f8837c size=22 JIT jit=400 interp=0 avg=8
+10-05 14:03:51.102  3323  3326 D berberis: berberis: JIT break #1 pc=0x7aa538fa933c insn=0xd538062e
+10-05 14:03:51.102  3323  3326 D berberis: berberis: trans#500 pc=0x7aa538fd3860 size=4 JIT jit=500 interp=0 avg=8
+10-05 14:03:51.102  3323  3326 D berberis: berberis: trans#600 pc=0x7aa538fcb474 size=2 JIT jit=600 interp=0 avg=8
+10-05 14:03:51.103  3323  3326 D berberis: berberis: trans#700 pc=0x7aa538f8cc24 size=29 JIT jit=700 interp=0 avg=8
+10-05 14:03:51.103  3323  3326 D berberis: berberis: trans#800 pc=0x7aa538f9b718 size=4 JIT jit=800 interp=0 avg=8
+10-05 14:03:51.104  3323  3326 D berberis: berberis: trans#900 pc=0x7aa538f604ac size=9 JIT jit=900 interp=0 avg=8
+10-05 14:03:51.104  3323  3326 D berberis: berberis: trans#1000 pc=0x7aa538fb2d54 size=5 JIT jit=1000 interp=0 avg=8
+10-05 14:03:51.105  3323  3326 D berberis: berberis: trans#1100 pc=0x7aa538f8c694 size=16 JIT jit=1100 interp=0 avg=8
+10-05 14:03:51.105  3323  3326 D berberis: berberis: trans#1200 pc=0x7aa538f84340 size=11 JIT jit=1200 interp=0 avg=8
+10-05 14:03:51.106  3323  3326 D berberis: berberis: trans#1300 pc=0x7aa538fba010 size=4 JIT jit=1300 interp=0 avg=8
+10-05 14:03:51.106  3323  3326 D berberis: berberis: trans#1400 pc=0x7aa538fbe9dc size=9 JIT jit=1400 interp=0 avg=8
+10-05 14:03:51.106  3323  3326 D berberis: berberis: trans#1500 pc=0x7aa538fbf27c size=10 JIT jit=1500 interp=0 avg=8
+10-05 14:03:51.107  3323  3326 D berberis: berberis: trans#1600 pc=0x7aa538fc9df0 size=4 JIT jit=1600 interp=0 avg=8
+10-05 14:03:51.107  3323  3326 D berberis: berberis: trans#1700 pc=0x7aa538fbdba8 size=1 JIT jit=1700 interp=0 avg=8
+10-05 14:03:51.108  3323  3326 D berberis: berberis: trans#1800 pc=0x7aa538fbd6ec size=17 JIT jit=1800 interp=0 avg=8
+10-05 14:03:51.108  3323  3326 D berberis: berberis: trans#1900 pc=0x7aa538fb335c size=4 JIT jit=1900 interp=0 avg=8
+10-05 14:03:51.108  3323  3326 D berberis: berberis: trans#2000 pc=0x7aa538f84d8c size=16 JIT jit=2000 interp=0 avg=8
+10-05 14:03:51.109  3323  3326 D berberis: berberis: trans#2100 pc=0x7aa538fc8624 size=6 JIT jit=2100 interp=0 avg=8
+10-05 14:03:51.109  3323  3326 D berberis: berberis: trans#2200 pc=0x7aa538fb6a64 size=7 JIT jit=2200 interp=0 avg=8
+10-05 14:03:51.109  3323  3326 D berberis: berberis: trans#2300 pc=0x7aa538fb6044 size=3 JIT jit=2300 interp=0 avg=8
+10-05 14:03:51.110  3323  3326 D berberis: berberis: trans#2400 pc=0x7aa538fc8e3c size=5 JIT jit=2400 interp=0 avg=8
+10-05 14:03:51.110  3323  3326 D berberis: berberis: trans#2500 pc=0x7aa538fc92b0 size=7 JIT jit=2500 interp=0 avg=8
+10-05 14:03:51.110  3323  3326 D berberis: berberis: trans#2600 pc=0x7aa538fc6934 size=25 JIT jit=2600 interp=0 avg=8
+10-05 14:03:51.111  3323  3326 D berberis: berberis: trans#2700 pc=0x7aa538fc4f78 size=3 JIT jit=2700 interp=0 avg=8
+10-05 14:03:51.121  3323  3326 D berberis: berberis: trans#2800 pc=0x7aa538fc5af4 size=9 JIT jit=2800 interp=0 avg=8
+10-05 14:03:51.123  3323  3326 D berberis: berberis: trans#2900 pc=0x7aa538fa8658 size=8 JIT jit=2900 interp=0 avg=8
+10-05 14:03:51.123  3323  3326 D berberis: berberis: trans#3000 pc=0x7aa538f858b8 size=10 JIT jit=3000 interp=0 avg=8
+10-05 14:03:51.124  3323  3326 D berberis: berberis: trans#3100 pc=0x7aa4dfcf4fe8 size=6 JIT jit=3100 interp=0 avg=8
+10-05 14:03:51.124  3323  3326 D berberis: berberis: trans#3200 pc=0x7aa4dfcd25f4 size=11 JIT jit=3200 interp=0 avg=8
+10-05 14:03:51.126  3323  3326 D berberis: berberis: trans#3300 pc=0x7aa4dfd00060 size=4 JIT jit=3300 interp=0 avg=8
+10-05 14:03:51.126  3323  3326 D berberis: berberis: trans#3400 pc=0x7aa538fb4c40 size=4 JIT jit=3400 interp=0 avg=8
+10-05 14:03:51.126  3323  3326 D berberis: berberis: JIT break #2 pc=0x7aa4dfcf0e6c insn=0xd538062e
+10-05 14:03:51.126  3323  3326 D berberis: berberis: trans#3500 pc=0x7aa4dfc90cb4 size=5 JIT jit=3500 interp=0 avg=8
+10-05 14:03:51.127  3323  3326 D berberis: berberis: JIT break #3 pc=0x7aa52c3726ec insn=0xd538062e
+10-05 14:03:51.127  3323  3326 D berberis: berberis: trans#3600 pc=0x7aa52c350590 size=6 JIT jit=3600 interp=0 avg=8
+10-05 14:03:51.128  3323  3326 D berberis: berberis: trans#3700 pc=0x7aa52c350fd4 size=6 JIT jit=3700 interp=0 avg=8
+10-05 14:03:51.128  3323  3326 D berberis: berberis: trans#3800 pc=0x7aa52c357978 size=12 JIT jit=3800 interp=0 avg=8
+10-05 14:03:51.128  3323  3326 D berberis: berberis: trans#3900 pc=0x7aa538fcc560 size=7 JIT jit=3900 interp=0 avg=8
+10-05 14:03:51.129  3323  3323 E .trickcalrevive: Not starting debugger since process cannot load the jdwp agent.
+10-05 14:03:51.130  3323  3323 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+10-05 14:03:51.135  1849  2388 W com.android.internal.protolog.LogcatOnlyProtoLogImpl: ProtoLog message not processed. Failed to log it to proto. Logging it below to logcat instead.
+10-05 14:03:51.135  1849  2388 V WindowManager: Binding proc com.epidgames.trickcalrevive with config {1.0 ?mcc0mnc [en_US] ldltr sw800dp w1280dp h800dp 160dpi xlrg land night -touch qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1280, 800) mAppBounds=Rect(0, 0 - 1280, 800) mMaxBounds=Rect(0, 0 - 1280, 800) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.6 s.48 fontWeightAdjustment=0}
+10-05 14:03:51.137  1849  2023 W IPCThreadState: Sending oneway calls to frozen process.
+10-05 14:03:51.137  1849  2023 W IPCThreadState: Sending oneway calls to frozen process.
+10-05 14:03:51.139  1849  1869 V GameManagerService: setDefaultFrameRateOverride : 10299 , 0.0
+10-05 14:03:51.142  3323  3323 D ApplicationLoaders: Returning zygote-cached class loader: /system/framework/org.apache.http.legacy.jar
+10-05 14:03:51.152  2449  2449 D View    : ---- ST:requestLayout 
+10-05 14:03:51.152  2449  2449 D View    : requestLayout : getStackTrace(Thread.java:1946) <- printStackStrace(View.java:28052) <- requestLayout(View.java:28082) <- setLayoutParams(View.java:20565) <- updateViewLayout(WindowManagerGlobal.java:476) <- updateViewLayout(WindowManagerImpl.java:165) <- notifyUpdateLayoutParams(TaskbarActivityContext.java:1717) <- excludeFromMagnificationRegion(TaskbarActivityContext.java:1705) <- updateInsetsTouchability(TaskbarInsetsController.kt:433) <- updateInsetsTouchability(TaskbarDragLayerController.java:273) <- onComputeTaskbarInsets(TaskbarDragLayer.java:134) <- $r8$lambda$A8jkhOr-Udsa6VIIsWK5fVFvNhI(null:0) <- onComputeInternalInsets(D8$$SyntheticClass:0) <- dispatchOnComputeInternalInsets(ViewTreeObserver.java:1307) <- performTraversals(ViewRootImpl.java:4216) <- doTraversal(ViewRootImpl.java:2997) <- run(ViewRootImpl.java:10456) <- run(Choreographer.java:1415) <- run(Choreographer.java:1424) <- doCallbacks(Choreographer.java:1024) <- 
+10-05 14:03:51.157  3323  3323 W ziparchive: Unable to open '/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/split_config.arm64_v8a.dm': No such file or directory
+10-05 14:03:51.157  3323  3323 W ziparchive: Unable to open '/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/split_config.arm64_v8a.dm': No such file or directory
+10-05 14:03:51.157  3323  3323 W .trickcalrevive: Entry not found
+10-05 14:03:51.158  3323  3323 W ziparchive: Unable to open '/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/split_gpdeku.config.arm64_v8a.dm': No such file or directory
+10-05 14:03:51.158  3323  3323 W ziparchive: Unable to open '/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/split_gpdeku.config.arm64_v8a.dm': No such file or directory
+10-05 14:03:51.158  3323  3323 W .trickcalrevive: Entry not found
+10-05 14:03:51.158  3323  3323 D nativeloader: Configuring clns-7 for other apk /data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/base.apk:/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/split_config.arm64_v8a.apk:/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/split_gpdeku.apk:/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/split_gpdeku.config.arm64_v8a.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64:/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/base.apk!/lib/arm64-v8a:/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/split_config.arm64_v8a.apk!/lib/arm64-v8a:/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/split_gpdeku.apk!/lib/arm64-v8a:/data/app/~~U
+10-05 14:03:51.160  3323  3323 D berberis: getExportedNamespace: guest fallback for 'system' -> default=0x7aa538fe6cb8
+10-05 14:03:51.161  3323  3323 D berberis: getExportedNamespace: name=system result=0x7aa6b203f7e8 guest=0x7aa538fe6cb8
+10-05 14:03:51.161  3323  3323 D berberis: createNamespace: name=clns-7 ld_path=(null) default_path=/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64:/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/base.apk!/lib/arm64-v8a:/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/split_config.arm64_v8a.apk!/lib/arm64-v8a:/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/split_gpdeku.apk!/lib/arm64-v8a:/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/split_gpdeku.config.arm64_v8a.apk!/lib/arm64-v8a type=268435457 permitted=/data:/mnt/expand:/data/user/0/com.epidgames.trickcalrevive parent=0x7aa6b203f7e8
+10-05 14:03:51.161  3323  3323 D berberis: createNamespace guest: name=clns-7 default_path=/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64:/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/base.apk!/lib/arm64-v8a:/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/split_config.arm64_v8a.apk!/lib/arm64-v8a:/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/split_gpdeku.apk!/lib/arm64-v8a:/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/split_gpdeku.config.arm64_v8a.apk!/lib/arm64-v8a permitted=/data:/mnt/expand:/data/user/0/com.epidgames.trickcalrevive
+10-05 14:03:51.162  3323  3323 D berberis: berberis: trans#4000 pc=0x7aa538fb0e40 size=8 JIT jit=4000 interp=0 avg=8
+10-05 14:03:51.162  3323  3323 D berberis: createNamespace: result=0x7aa6e2043130 guest=0x7aa53f5a0010
+10-05 14:03:51.162  3323  3323 D berberis: getExportedNamespace: name=system result=0x7aa6b203f7e8 guest=0x7aa538fe6cb8
+10-05 14:03:51.162  3323  3323 D berberis: linkNamespaces: from=0x7aa6e2043130(guest=0x7aa53f5a0010) to=0x7aa6b203f7e8(guest=0x7aa538fe6cb8) shared_libs=libandroid.so:libaaudio.so:libamidi.so:libbinder_ndk.so:libc.so:libcamera2ndk.so:libclang_rt.hwasan-aarch64-android.so:libdl.so:libEGL.so:libGLESv1_CM.so:libGLESv2.so:libGLESv3.so:libjnigraphics.so:liblog.so:libmediandk.so:libm.so:libnativewindow.so:libOpenMAXAL.so:libOpenSLES.so:libRS.so:libstdc++.
+10-05 14:03:51.162  3323  3323 D berberis: berberis: trans#4100 pc=0x7aa538fb7e40 size=2 JIT jit=4100 interp=0 avg=8
+10-05 14:03:51.163  3323  3323 D berberis: linkNamespaces: result=1
+10-05 14:03:51.163  3323  3323 D berberis: getExportedNamespace: guest fallback for 'com_android_art' -> default=0x7aa538fe6cb8
+10-05 14:03:51.163  3323  3323 D berberis: getExportedNamespace: name=com_android_art result=0x7aa6b203f728 guest=0x7aa538fe6cb8
+10-05 14:03:51.163  3323  3323 D berberis: linkNamespaces: from=0x7aa6e2043130(guest=0x7aa53f5a0010) to=0x7aa6b203f728(guest=0x7aa538fe6cb8) shared_libs=libnativehelper.so
+10-05 14:03:51.163  3323  3323 D berberis: linkNamespaces: result=1
+10-05 14:03:51.163  3323  3323 D berberis: getExportedNamespace: guest fallback for 'com_android_i18n' -> default=0x7aa538fe6cb8
+10-05 14:03:51.163  3323  3323 D berberis: getExportedNamespace: name=com_android_i18n result=0x7aa6b20400e8 guest=0x7aa538fe6cb8
+10-05 14:03:51.163  3323  3323 D berberis: linkNamespaces: from=0x7aa6e2043130(guest=0x7aa53f5a0010) to=0x7aa6b20400e8(guest=0x7aa538fe6cb8) shared_libs=libicui18n.so:libicuuc.so:libicu.so
+10-05 14:03:51.163  3323  3323 D berberis: linkNamespaces: result=1
+10-05 14:03:51.163  3323  3323 D berberis: getExportedNamespace: guest fallback for 'com_android_neuralnetworks' -> default=0x7aa538fe6cb8
+10-05 14:03:51.163  3323  3323 D berberis: getExportedNamespace: name=com_android_neuralnetworks result=0x7aa6b20402c8 guest=0x7aa538fe6cb8
+10-05 14:03:51.163  3323  3323 D berberis: linkNamespaces: from=0x7aa6e2043130(guest=0x7aa53f5a0010) to=0x7aa6b20402c8(guest=0x7aa538fe6cb8) shared_libs=libneuralnetworks.so
+10-05 14:03:51.163  3323  3323 D berberis: linkNamespaces: result=1
+10-05 14:03:51.271  3323  3323 V GraphicsEnvironment: Currently set values for:
+10-05 14:03:51.271  3323  3323 V GraphicsEnvironment:   angle_gl_driver_selection_pkgs=[com.android.angle, com.linecorp.b612.android, com.campmobile.snow, com.google.android.apps.tachyon]
+10-05 14:03:51.271  3323  3323 V GraphicsEnvironment:   angle_gl_driver_selection_values=[angle, native, native, native]
+10-05 14:03:51.271  3323  3323 V GraphicsEnvironment: com.epidgames.trickcalrevive is not listed in per-application setting
+10-05 14:03:51.271  3323  3323 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+10-05 14:03:51.274  3323  3323 D berberis: loadLibraryExt: path=/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libATG_D.so ns=0x7aa6e2043130(guest=0x7aa53f5a0010)
+10-05 14:03:51.274  3323  3323 D berberis: berberis: DlOpen ENTER libpath="libc.so" flags=0x2
+10-05 14:03:51.274  3323  3323 D berberis: berberis: trans#4200 pc=0x7aa538fafba8 size=11 JIT jit=4200 interp=0 avg=8
+10-05 14:03:51.274  3323  3323 D berberis: berberis: DlOpen EXIT  0ms set=0 clear=10 libpath="libc.so" handle=0x80ad02f391d6c9fb
+10-05 14:03:51.275  3323  3323 D berberis: InjectQtPluginPath: patched guest environ (old_count=24, added=2) QT_PLUGIN_PATH=/data/user/0/com.epidgames.trickcalrevive/cache/berberis_extract
+10-05 14:03:51.277  3323  3323 D berberis: berberis: DlOpen ENTER libpath="/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libATG_D.so" flags=0x2
+10-05 14:03:51.277  3323  3323 D berberis: berberis: trans#4300 pc=0x7aa538fabdbc size=3 JIT jit=4300 interp=0 avg=8
+10-05 14:03:51.277  3323  3323 D berberis: berberis: trans#4400 pc=0x7aa538fcce68 size=13 JIT jit=4400 interp=0 avg=8
+10-05 14:03:51.279  3323  3323 D berberis: berberis: trans#4500 pc=0x7aa538fabc68 size=3 JIT jit=4500 interp=0 avg=8
+10-05 14:03:51.283  2449  2449 W FrameTracker: Missed SF frame:UNKNOWN: 80, 10725, 16121704, CUJ=J<LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK>
+10-05 14:03:51.283  2449  2449 W FrameTracker: Missed SF frame:UNKNOWN: 80, 10738, 17447430, CUJ=J<LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK>
+10-05 14:03:51.283  2449  2449 W FrameTracker: Missed SF frame:UNKNOWN: 80, 10751, 5271356, CUJ=J<LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK>
+10-05 14:03:51.283  2449  2449 W FrameTracker: Missed SF frame:UNKNOWN: 80, 10764, 16764782, CUJ=J<LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK>
+10-05 14:03:51.283  2449  2449 W FrameTracker: Missed App frame:UNKNOWN: 24, 10777, 17950052, CUJ=J<LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK>
+10-05 14:03:51.283  2449  2449 W FrameTracker: Missed SF frame:UNKNOWN: 24, 10777, 17950052, CUJ=J<LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK>
+10-05 14:03:51.283  2449  2449 W FrameTracker: Missed SF frame:UNKNOWN: 80, 10784, 5197352, CUJ=J<LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK>
+10-05 14:03:51.283  2449  2449 W FrameTracker: Missed SF frame:UNKNOWN: 80, 10797, 0, CUJ=J<LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK>
+10-05 14:03:51.283  2449  2449 W FrameTracker: Missing HWUI jank callback for vsyncId: 10797, CUJ=J<LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK>
+10-05 14:03:51.283  2449  2449 W FrameTracker: Missed SF frame:UNKNOWN: 80, 10816, 11358204, CUJ=J<LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK>
+10-05 14:03:51.283  2449  2449 W FrameTracker: Missed SF frame:UNKNOWN: 80, 10829, 8273730, CUJ=J<LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK>
+10-05 14:03:51.283  2449  2449 W FrameTracker: Missed SF frame:UNKNOWN: 80, 10854, 17621856, CUJ=J<LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK>
+10-05 14:03:51.283  2449  2449 W FrameTracker: Missed SF frame:UNKNOWN: 80, 10885, 4780082, CUJ=J<LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK>
+10-05 14:03:51.283  2449  2449 W FrameTracker: Missed SF frame:UNKNOWN: 80, 10898, 5075252, CUJ=J<LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK>
+10-05 14:03:51.283  2449  2449 W FrameTracker: Missed SF frame:UNKNOWN: 80, 10917, 4098078, CUJ=J<LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK>
+10-05 14:03:51.283  2449  2449 W FrameTracker: Missed SF frame:UNKNOWN: 80, 10930, 4794704, CUJ=J<LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK>
+10-05 14:03:51.283  2449  2449 W FrameTracker: Missed SF frame:UNKNOWN: 80, 10943, 5534330, CUJ=J<LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK>
+10-05 14:03:51.283  2449  2449 W FrameTracker: Missed SF frame:UNKNOWN: 80, 10956, 16630356, CUJ=J<LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK>
+10-05 14:03:51.283  2449  2449 W FrameTracker: Missed SF frame:UNKNOWN: 80, 10975, 5234582, CUJ=J<LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK>
+10-05 14:03:51.283  2449  2449 W FrameTracker: Missed SF frame:PREDICTION_ERROR, 11000, 8671152, CUJ=J<LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK>
+10-05 14:03:51.283  2449  2449 W FrameTracker: Missed SF frame:UNKNOWN: 80, 11013, 4730352, CUJ=J<LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK>
+10-05 14:03:51.283  2449  2462 V PerfettoTrigger: Not triggering com.android.telemetry.interaction-jank-monitor-78 - not enough time since last trigger
+10-05 14:03:51.283  3323  3323 D berberis: berberis: trans#4600 pc=0x7aa538fc5dc8 size=6 JIT jit=4600 interp=0 avg=8
+10-05 14:03:51.284  3323  3323 D berberis: berberis: JIT break #4 pc=0x7aa54ad31764 insn=0xd538062e
+10-05 14:03:51.285  3323  3323 D berberis: berberis: trans#4700 pc=0x7aa54ae6b890 size=6 JIT jit=4700 interp=0 avg=8
+10-05 14:03:51.285  3323  3323 D berberis: berberis: trans#4800 pc=0x7aa54ae6c1f0 size=6 JIT jit=4800 interp=0 avg=8
+10-05 14:03:51.285  3323  3323 D berberis: berberis: trans#4900 pc=0x7aa54ae6cb50 size=6 JIT jit=4900 interp=0 avg=8
+10-05 14:03:51.286  3323  3323 D berberis: berberis: trans#5000 pc=0x7aa54ae6d4b0 size=6 JIT jit=5000 interp=0 avg=8
+10-05 14:03:51.287  3323  3323 D berberis: berberis: trans#5100 pc=0x7aa54ae6de10 size=6 JIT jit=5100 interp=0 avg=8
+10-05 14:03:51.288  3323  3323 D berberis: berberis: trans#5200 pc=0x7aa54ae6e770 size=6 JIT jit=5200 interp=0 avg=7
+10-05 14:03:51.289  3323  3323 D berberis: berberis: trans#5300 pc=0x7aa54ae6f0d0 size=6 JIT jit=5300 interp=0 avg=7
+10-05 14:03:51.290  3323  3323 D berberis: berberis: trans#5400 pc=0x7aa54ae6fa30 size=6 JIT jit=5400 interp=0 avg=7
+10-05 14:03:51.291  3323  3323 D berberis: berberis: trans#5500 pc=0x7aa54ae70390 size=6 JIT jit=5500 interp=0 avg=7
+10-05 14:03:51.292  3323  3323 D berberis: berberis: trans#5600 pc=0x7aa54ae70cf0 size=6 JIT jit=5600 interp=0 avg=7
+10-05 14:03:51.293  3323  3323 D berberis: berberis: trans#5700 pc=0x7aa54ae71638 size=6 JIT jit=5700 interp=0 avg=7
+10-05 14:03:51.294  3323  3323 D berberis: berberis: trans#5800 pc=0x7aa54aed9460 size=7 JIT jit=5800 interp=0 avg=7
+10-05 14:03:51.294  3323  3323 D berberis: berberis: JIT break #5 pc=0x7aa54aed96e4 insn=0xd538062e
+10-05 14:03:51.294  3323  3323 D berberis: berberis: JIT break #6 pc=0x7aa54add663c insn=0xd538062e
+10-05 14:03:51.294  3323  3323 D berberis: berberis: JIT break #7 pc=0x7aa54ad6bdd4 insn=0xd538062e
+10-05 14:03:51.295  3323  3323 D berberis: berberis: trans#5900 pc=0x7aa54aeafd28 size=6 JIT jit=5900 interp=0 avg=7
+10-05 14:03:51.296  3323  3323 D berberis: berberis: trans#6000 pc=0x7aa54aeb0688 size=6 JIT jit=6000 interp=0 avg=7
+10-05 14:03:51.296  3323  3323 D berberis: berberis: trans#6100 pc=0x7aa54aeb0fe8 size=6 JIT jit=6100 interp=0 avg=7
+10-05 14:03:51.296  3323  3323 D berberis: berberis: trans#6200 pc=0x7aa54aeb1948 size=6 JIT jit=6200 interp=0 avg=7
+10-05 14:03:51.297  3323  3323 D berberis: berberis: DlOpen EXIT  20ms set=9 clear=188 libpath="/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libATG_D.so" handle=0xe250e30774476fff
+10-05 14:03:51.297  3323  3323 D berberis: loadLibraryExt: result=0xe250e30774476fff dlerror=ok
+10-05 14:03:51.297  3323  3323 D nativeloader: Load /data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libATG_D.so using ns clns-7 from class loader (caller=/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/base.apk!classes2.dex): ok
+10-05 14:03:51.297  3323  3323 D berberis: berberis: trans#6300 pc=0x7aa4dfc8d308 size=2 JIT jit=6300 interp=0 avg=7
+10-05 14:03:51.298  3323  3323 D berberis: berberis: trans#6400 pc=0x7aa4dad152fc size=3 JIT jit=6400 interp=0 avg=7
+10-05 14:03:51.302  3323  3323 D berberis: berberis: trans#6500 pc=0x7aa4dad8bf40 size=4 JIT jit=6500 interp=0 avg=7
+10-05 14:03:51.325  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (5216177164274512366) false (#10) android.os.BinderProxy@b627782@0
+10-05 14:03:51.325  1849  1868 V WindowManager: Finish Transition (#10): created at 10-05 14:03:50.988 collect-started=0.03ms request-sent=4.163ms started=4.565ms ready=19.968ms sent=20.532ms finished=337.581ms
+10-05 14:03:51.327  2449  2449 D VRI[QuickstepLauncher]: visibilityChanged oldVisibility=true newVisibility=false
+10-05 14:03:51.327  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (-1071245984949193362) 0
+10-05 14:03:51.327  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (5665710760068723116)
+10-05 14:03:51.328  1849  2379 W UserManagerService: Requested status bar icon for non-badged user 0
+10-05 14:03:51.331  1849  2379 W UserManagerService: Requested status bar icon for non-badged user 0
+10-05 14:03:51.332  3323  3323 D berberis: berberis: trans#6600 pc=0x7aa4dad87ad0 size=6 JIT jit=6600 interp=0 avg=7
+10-05 14:03:51.333  3323  3323 D berberis: berberis: trans#6700 pc=0x7aa4dad4f838 size=11 JIT jit=6700 interp=0 avg=7
+10-05 14:03:51.333  3323  3323 D berberis: berberis: trans#6800 pc=0x7aa4dad508fc size=5 JIT jit=6800 interp=0 avg=7
+10-05 14:03:51.333  3323  3323 D berberis: berberis: trans#6900 pc=0x7aa4dfcd5d2c size=3 JIT jit=6900 interp=0 avg=7
+10-05 14:03:51.334  3323  3323 D berberis: berberis: trans#7000 pc=0x7aa4dad15d3c size=4 JIT jit=7000 interp=0 avg=7
+10-05 14:03:51.334  3323  3323 D berberis: berberis: trans#7100 pc=0x7aa4dfca2f64 size=12 JIT jit=7100 interp=0 avg=7
+10-05 14:03:51.334  3323  3323 D berberis: berberis: trans#7200 pc=0x7aa54ad2e32c size=2 JIT jit=7200 interp=0 avg=7
+10-05 14:03:51.335  3323  3323 D berberis: berberis: trans#7300 pc=0x7aa4dfcd5fd0 size=18 JIT jit=7300 interp=0 avg=7
+10-05 14:03:51.335  3323  3323 E <Presto_D>: e8Hk2vi4CH not found in assets!
+10-05 14:03:51.336  3323  3323 D berberis: berberis: trans#7400 pc=0x7aa4dad17ddc size=14 JIT jit=7400 interp=0 avg=7
+10-05 14:03:51.346  3323  3323 D FirebaseSessions: Dependency to CRASHLYTICS added.
+10-05 14:03:51.347  3323  3323 I FirebaseApp: Device unlocked: initializing all Firebase APIs for app [DEFAULT]
+10-05 14:03:51.350  3323  3323 I FirebaseCrashlytics: Initializing Firebase Crashlytics 20.0.4 for com.epidgames.trickcalrevive
+10-05 14:03:51.354  3323  3323 D berberis: loadLibraryExt: path=/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libcrashlytics.so ns=0x7aa6e2043130(guest=0x7aa53f5a0010)
+10-05 14:03:51.354  3323  3323 D berberis: berberis: DlOpen ENTER libpath="/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libcrashlytics.so" flags=0x2
+10-05 14:03:51.354  3323  3342 E FirebaseInstanceId: Google Play services missing or without correct permission.
+10-05 14:03:51.355  3323  3340 W Metadata: Failed to find package android.content.pm.PackageManager$NameNotFoundException: com.google.android.gms
+10-05 14:03:51.356  3323  3323 D berberis: berberis: DlOpen EXIT  1ms set=1 clear=24 libpath="/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libcrashlytics.so" handle=0x7f9e89c603556119
+10-05 14:03:51.356  3323  3323 D berberis: loadLibraryExt: result=0x7f9e89c603556119 dlerror=ok
+10-05 14:03:51.356  3323  3323 D nativeloader: Load /data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libcrashlytics.so using ns clns-7 from class loader (caller=/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/base.apk!classes4.dex): ok
+10-05 14:03:51.360  3323  3323 D FirebaseSessions: Subscriber CRASHLYTICS registered.
+10-05 14:03:51.362  3323  3344 W GooglePlayServicesUtil: com.epidgames.trickcalrevive requires the Google Play Store, but it is missing.
+10-05 14:03:51.362  3323  3344 E DynamiteModule: Invalid GmsCore APK, remote loading disabled.
+10-05 14:03:51.362  3323  3344 I DynamiteModule: Considering local module com.google.android.gms.measurement.dynamite:155 and remote module com.google.android.gms.measurement.dynamite:0
+10-05 14:03:51.362  3323  3344 I DynamiteModule: Selected local version of com.google.android.gms.measurement.dynamite
+10-05 14:03:51.363  3323  3344 E DynamiteModule: Invalid GmsCore APK, remote loading disabled.
+10-05 14:03:51.368  1650  3352 I resolv  : GetAddrInfoHandler::run: {100 100 100 983140 10299 0}
+10-05 14:03:51.368  1650  3355 I resolv  : res_nmkquery: (QUERY, IN, A)
+10-05 14:03:51.368  1650  3354 I resolv  : res_nmkquery: (QUERY, IN, AAAA)
+10-05 14:03:51.377  3323  3347 I FA      : App measurement initialized, version: 133005
+10-05 14:03:51.377  3323  3347 I FA      : To enable debug logging run: adb shell setprop log.tag.FA VERBOSE
+10-05 14:03:51.377  3323  3347 I FA      : To enable faster debug mode event logging run:
+10-05 14:03:51.377  3323  3347 I FA      :   adb shell setprop debug.firebase.analytics.app com.epidgames.trickcalrevive
+10-05 14:03:51.377  1650  3355 I resolv  : res_nsend: used send_dg 67 terrno: 0
+10-05 14:03:51.377  1650  3355 I resolv  : doQuery: rcode=0, ancount=1, return value=67
+10-05 14:03:51.377  1650  3354 I resolv  : res_nsend: used send_dg 79 terrno: 0
+10-05 14:03:51.378  1650  3354 I resolv  : doQuery: rcode=0, ancount=1, return value=79
+10-05 14:03:51.379  3323  3323 D berberis: loadLibraryExt: path=/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libdatastore_shared_counter.so ns=0x7aa6e2043130(guest=0x7aa53f5a0010)
+10-05 14:03:51.379  3323  3323 D berberis: berberis: DlOpen ENTER libpath="/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libdatastore_shared_counter.so" flags=0x2
+10-05 14:03:51.381  1849  2388 D FileUtils: Rounded bytes from 8323198976 to 16000000000
+10-05 14:03:51.382  3323  3323 D berberis: berberis: DlOpen EXIT  2ms set=1 clear=26 libpath="/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libdatastore_shared_counter.so" handle=0x1541b83e0a181fcb
+10-05 14:03:51.382  3323  3323 D berberis: loadLibraryExt: result=0x1541b83e0a181fcb dlerror=ok
+10-05 14:03:51.382  3323  3323 D nativeloader: Load /data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libdatastore_shared_counter.so using ns clns-7 from class loader (caller=/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/base.apk!classes4.dex): ok
+10-05 14:03:51.383  1650  3357 I resolv  : GetAddrInfoHandler::run: {100 100 100 983140 10299 0}
+10-05 14:03:51.385  3323  3323 D FirebaseSessions: Initializing Firebase Sessions 3.0.4.
+10-05 14:03:51.385  3323  3323 I FirebaseInitProvider: FirebaseApp initialization successful
+10-05 14:03:51.385  3323  3348 I FirebaseCrashlytics: Saved version control info
+10-05 14:03:51.386  3323  3346 E FirebaseCrashlytics: Settings request failed.
+10-05 14:03:51.386  3323  3346 E FirebaseCrashlytics: java.net.ConnectException: Failed to connect to firebase-settings.crashlytics.com/[::]:443
+10-05 14:03:51.386  3323  3346 E FirebaseCrashlytics: 	at com.android.okhttp.internal.io.RealConnection.connectSocket(RealConnection.java:147)
+10-05 14:03:51.386  3323  3346 E FirebaseCrashlytics: 	at com.android.okhttp.internal.io.RealConnection.connect(RealConnection.java:116)
+10-05 14:03:51.386  3323  3346 E FirebaseCrashlytics: 	at com.android.okhttp.internal.http.StreamAllocation.findConnection(StreamAllocation.java:186)
+10-05 14:03:51.386  3323  3346 E FirebaseCrashlytics: 	at com.android.okhttp.internal.http.StreamAllocation.findHealthyConnection(StreamAllocation.java:128)
+10-05 14:03:51.386  3323  3346 E FirebaseCrashlytics: 	at com.android.okhttp.internal.http.StreamAllocation.newStream(StreamAllocation.java:97)
+10-05 14:03:51.386  3323  3346 E FirebaseCrashlytics: 	at com.android.okhttp.internal.http.HttpEngine.connect(HttpEngine.java:289)
+10-05 14:03:51.386  3323  3346 E FirebaseCrashlytics: 	at com.android.okhttp.internal.http.HttpEngine.sendRequest(HttpEngine.java:232)
+10-05 14:03:51.386  3323  3346 E FirebaseCrashlytics: 	at com.android.okhttp.internal.huc.HttpURLConnectionImpl.execute(HttpURLConnectionImpl.java:465)
+10-05 14:03:51.386  3323  3346 E FirebaseCrashlytics: 	at com.android.okhttp.internal.huc.HttpURLConnectionImpl.connect(HttpURLConnectionImpl.java:131)
+10-05 14:03:51.386  3323  3346 E FirebaseCrashlytics: 	at com.android.okhttp.internal.huc.DelegatingHttpsURLConnection.connect(DelegatingHttpsURLConnection.java:90)
+10-05 14:03:51.386  3323  3346 E FirebaseCrashlytics: 	at com.android.okhttp.internal.huc.HttpsURLConnectionImpl.connect(HttpsURLConnectionImpl.java:30)
+10-05 14:03:51.386  3323  3346 E FirebaseCrashlytics: 	at com.google.firebase.crashlytics.internal.network.HttpGetRequest.execute(HttpGetRequest.java:80)
+10-05 14:03:51.386  3323  3346 E FirebaseCrashlytics: 	at com.google.firebase.crashlytics.internal.settings.DefaultSettingsSpiCall.invoke(DefaultSettingsSpiCall.java:114)
+10-05 14:03:51.386  3323  3346 E FirebaseCrashlytics: 	at com.google.firebase.crashlytics.internal.settings.SettingsController$1.lambda$then$0$com-google-firebase-crashlytics-internal-settings-SettingsController$1(SettingsController.java:204)
+10-05 14:03:51.386  3323  3346 E FirebaseCrashlytics: 	at com.google.firebase.crashlytics.internal.settings.SettingsController$1$$ExternalSyntheticLambda0.call(D8$$SyntheticClass:0)
+10-05 14:03:51.386  3323  3346 E FirebaseCrashlytics: 	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+10-05 14:03:51.386  3323  3346 E FirebaseCrashlytics: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-05 14:03:51.386  3323  3346 E FirebaseCrashlytics: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-05 14:03:51.386  3323  3346 E FirebaseCrashlytics: 	at com.google.firebase.concurrent.CustomThreadFactory.lambda$newThread$0$com-google-firebase-concurrent-CustomThreadFactory(CustomThreadFactory.java:47)
+10-05 14:03:51.386  3323  3346 E FirebaseCrashlytics: 	at com.google.firebase.concurrent.CustomThreadFactory$$ExternalSyntheticLambda0.run(D8$$SyntheticClass:0)
+10-05 14:03:51.386  3323  3346 E FirebaseCrashlytics: 	at java.lang.Thread.run(Thread.java:1117)
+10-05 14:03:51.388  1849  2388 D ShortcutService: rescanPackageIfNeeded 0@com.epidgames.trickcalrevive, forceRescan=false , isNewApp=false
+10-05 14:03:51.388  1849  2388 D ShortcutService: Package com.epidgames.trickcalrevive has 0 manifest shortcut(s), and 0 share target(s)
+10-05 14:03:51.388  1849  2388 D ShortcutService: Package com.epidgames.trickcalrevive updated, version -1 -> 10644
+10-05 14:03:51.388  1849  2388 D ShortcutService: Package com.epidgames.trickcalrevive: publishing manifest shortcuts
+10-05 14:03:51.389  1849  2388 D ShortcutService: rescanPackageIfNeeded 0@com.epidgames.trickcalrevive, forceRescan=false , isNewApp=false
+10-05 14:03:51.390  3323  3323 W .trickcalrevive: Unsupported class loader
+10-05 14:03:51.391  3323  3323 W .trickcalrevive: Unsupported class loader
+10-05 14:03:51.391  3323  3323 W .trickcalrevive: Unsupported class loader
+10-05 14:03:51.396  3323  3364 D berberis: berberis: trans#7500 pc=0x7aa54a8b1e3c size=2 JIT jit=7500 interp=0 avg=7
+10-05 14:03:51.397  1849  2388 W ActivityManager: Unable to start service Intent { act=com.google.android.gms.games.internal.appshortcuts.service.START pkg=com.google.android.gms } U=0: not found
+10-05 14:03:51.397  1849  2388 W ActivityManager: Unbind failed: could not find connection for android.os.BinderProxy@ab91cb7
+10-05 14:03:51.398  3323  3366 W GmsClient: unable to connect to service: com.google.android.gms.games.internal.appshortcuts.service.START on com.google.android.gms
+10-05 14:03:51.398  3323  3366 W GoogleApiManager: Not showing notification since connectionResult is not user-facing: ConnectionResult{statusCode=API_UNAVAILABLE, resolution=null, message=null, clientMethodKey=null}
+10-05 14:03:51.401  3323  3370 W GooglePlayServicesUtil: com.epidgames.trickcalrevive requires the Google Play Store, but it is missing.
+10-05 14:03:51.402  1849  2388 W ActivityManager: Unable to start service Intent { act=com.google.android.gms.ads.identifier.service.START pkg=com.google.android.gms } U=0: not found
+10-05 14:03:51.402  3323  3351 D FirebaseSessions: Notified CRASHLYTICS of new session 44d7f0b9de764031812700aafb4775fb
+10-05 14:03:51.402  3323  3372 W com.facebook.internal.NativeProtocol: Apps that target Android API 30+ (Android 11+) cannot call Facebook native apps unless the package visibility needs are declared. Please follow https://developers.facebook.com/docs/android/troubleshooting/#faq_267321845055988 to make the declaration.
+10-05 14:03:51.403  3323  3323 I Airbridge: {setSDKDevelopmentPlatform} is called: {unity}
+10-05 14:03:51.403  3323  3323 I Airbridge: {setSDKSignature} is called
+10-05 14:03:51.403  3323  3323 I Airbridge: {setLogLevel} is called: {WARNING}
+10-05 14:03:51.403  3323  3323 I Airbridge: {setSessionTimeout} is called: {300}
+10-05 14:03:51.403  3323  3323 I Airbridge: {setHashUserInformationEnabled} is called: {true}
+10-05 14:03:51.403  3323  3323 I Airbridge: {setCollectLocationEnabled} is called: {false}
+10-05 14:03:51.403  3323  3323 I Airbridge: {setTrackAirbridgeDeeplinkOnlyEnabled} is called: {false}
+10-05 14:03:51.403  3323  3323 I Airbridge: {setAutoStartTrackingEnabled} is called: {true}
+10-05 14:03:51.403  3323  3323 I Airbridge: {setTrackMetaDeferredAppLinkEnabled} is called: {false}
+10-05 14:03:51.403  3323  3323 I Airbridge: {setOnAttributionReceived} is called
+10-05 14:03:51.403  3323  3323 I Airbridge: {setTrackInSessionLifeCycleEventEnabled} is called: {false}
+10-05 14:03:51.403  3323  3323 I Airbridge: {setPauseEventTransmitOnBackgroundEnabled} is called: {false}
+10-05 14:03:51.403  3323  3323 I Airbridge: {setClearEventBufferOnInitializeEnabled} is called: {false}
+10-05 14:03:51.403  3323  3323 I Airbridge: {setSDKEnabled} is called: {true}
+10-05 14:03:51.403  3323  3323 I Airbridge: {setEventBufferCountLimit} is called: {2147483647}
+10-05 14:03:51.403  3323  3323 I Airbridge: `setEventBufferSizeLimit` is called: {1024.0}
+10-05 14:03:51.403  3323  3323 I Airbridge: {setEventTransmitInterval} is called: {0}
+10-05 14:03:51.404  1650  3375 I resolv  : GetAddrInfoHandler::run: {100 100 100 983140 10299 0}
+10-05 14:03:51.404  3323  3323 I Airbridge: {setLifecycleIntegration} is called
+10-05 14:03:51.404  3323  3323 I Airbridge: {setSDKAttribute} is called: attributes={{wrapperVersion=4.7.0, wrapperName=airbridge-unity-sdk}}
+10-05 14:03:51.404  1650  3376 I resolv  : res_nmkquery: (QUERY, IN, AAAA)
+10-05 14:03:51.404  3323  3323 I Airbridge: {setSDKAttributes} is called: option={{isHandleAirbridgeDeeplinkOnly=false}}
+10-05 14:03:51.404  1650  3377 I resolv  : res_nmkquery: (QUERY, IN, A)
+10-05 14:03:51.404  3323  3323 I Airbridge: {setInAppPurchaseEnvironment} is called
+10-05 14:03:51.404  3323  3323 I Airbridge: {setOnInAppPurchaseReceived} is called
+10-05 14:03:51.404  3323  3323 I Airbridge: {setCollectTCFDataEnabled} is called: {false}
+10-05 14:03:51.404  3323  3323 I Airbridge: {initializeSDK} is called
+10-05 14:03:51.406  3323  3323 D berberis: loadLibraryExt: path=/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libairbridgelib.so ns=0x7aa6e2043130(guest=0x7aa53f5a0010)
+10-05 14:03:51.406  3323  3323 D berberis: berberis: DlOpen ENTER libpath="/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libairbridgelib.so" flags=0x2
+10-05 14:03:51.407  1650  3376 I resolv  : res_nsend: used send_dg 88 terrno: 0
+10-05 14:03:51.407  1650  3378 I resolv  : GetAddrInfoHandler::run: {100 100 100 983140 10299 0}
+10-05 14:03:51.407  1650  3379 I resolv  : GetAddrInfoHandler::run: {100 100 100 983140 10299 0}
+10-05 14:03:51.407  1650  3381 I resolv  : res_nmkquery: (QUERY, IN, AAAA)
+10-05 14:03:51.407  1650  3381 I resolv  : resolv_cache_lookup: FOUND IN CACHE entry=0x7b2601816b70
+10-05 14:03:51.407  1650  3381 I resolv  : doQuery: rcode=0, ancount=2, return value=88
+10-05 14:03:51.407  1650  3382 I resolv  : res_nmkquery: (QUERY, IN, A)
+10-05 14:03:51.407  1650  3382 I resolv  : resolv_cache_lookup: Waiting for previous request
+10-05 14:03:51.407  1650  3384 I resolv  : res_nmkquery: (QUERY, IN, A)
+10-05 14:03:51.407  1650  3384 I resolv  : resolv_cache_lookup: Waiting for previous request
+10-05 14:03:51.409  3323  3323 D berberis: berberis: DlOpen EXIT  3ms set=1 clear=27 libpath="/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libairbridgelib.so" handle=0xd31146215bb4c247
+10-05 14:03:51.409  1650  3377 I resolv  : res_nsend: used send_dg 76 terrno: 0
+10-05 14:03:51.410  3323  3323 D berberis: loadLibraryExt: result=0xd31146215bb4c247 dlerror=ok
+10-05 14:03:51.410  1650  3377 I resolv  : doQuery: rcode=0, ancount=2, return value=76
+10-05 14:03:51.410  1650  3382 I resolv  : resolv_cache_lookup: FOUND IN CACHE entry=0x7b2601818310
+10-05 14:03:51.410  1650  3382 I resolv  : doQuery: rcode=0, ancount=2, return value=76
+10-05 14:03:51.410  1650  3384 I resolv  : resolv_cache_lookup: FOUND IN CACHE entry=0x7b2601818310
+10-05 14:03:51.410  1650  3384 I resolv  : doQuery: rcode=0, ancount=2, return value=76
+10-05 14:03:51.410  1650  3376 I resolv  : doQuery: rcode=0, ancount=2, return value=88
+10-05 14:03:51.410  1650  3380 I resolv  : GetAddrInfoHandler::run: {100 100 100 983140 10299 0}
+10-05 14:03:51.410  3323  3323 D nativeloader: Load /data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libairbridgelib.so using ns clns-7 from class loader (caller=/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/base.apk): ok
+10-05 14:03:51.411  1650  3383 I resolv  : res_nmkquery: (QUERY, IN, AAAA)
+10-05 14:03:51.411  1650  3383 I resolv  : resolv_cache_lookup: FOUND IN CACHE entry=0x7b2601816b70
+10-05 14:03:51.411  1650  3383 I resolv  : doQuery: rcode=0, ancount=2, return value=88
+10-05 14:03:51.412  1650  3386 I resolv  : res_nmkquery: (QUERY, IN, A)
+10-05 14:03:51.412  1650  3386 I resolv  : resolv_cache_lookup: FOUND IN CACHE entry=0x7b2601818310
+10-05 14:03:51.412  1650  3386 I resolv  : doQuery: rcode=0, ancount=2, return value=76
+10-05 14:03:51.412  1650  3385 I resolv  : res_nmkquery: (QUERY, IN, AAAA)
+10-05 14:03:51.412  1650  3385 I resolv  : resolv_cache_lookup: FOUND IN CACHE entry=0x7b2601816b70
+10-05 14:03:51.412  1650  3385 I resolv  : doQuery: rcode=0, ancount=2, return value=88
+10-05 14:03:51.415  1849  2379 D ConnectivityService: requestNetwork for uid/pid:10299/3323 activeRequest: null callbackRequest: 80 [NetworkRequest [ REQUEST id=81, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10299 RequestorUid: 10299 RequestorPkg: com.epidgames.trickcalrevive UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647 isUidTracked: false declaredMethods: ALL
+10-05 14:03:51.417  1849  2032 D EthernetNetworkFactory: eth0: onNetworkNeeded for request: NetworkRequest [ REQUEST id=81, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10299 RequestorUid: 10299 RequestorPkg: com.epidgames.trickcalrevive UnderlyingNetworks: Null] ]
+10-05 14:03:51.417  1849  2032 D EthernetNetworkFactory: IpClient already started
+10-05 14:03:51.417  1849  2025 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=81, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10299 RequestorUid: 10299 RequestorPkg: com.epidgames.trickcalrevive UnderlyingNetworks: Null] ]
+10-05 14:03:51.417  1849  2033 D ConnectivityService: NetReassign [81 : null → 100] [c 0] [a 0] [i 1]
+10-05 14:03:51.417  1849  2025 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=81, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10299 RequestorUid: 10299 RequestorPkg: com.epidgames.trickcalrevive UnderlyingNetworks: Null] ]
+10-05 14:03:51.417  1849  2025 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=81, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10299 RequestorUid: 10299 RequestorPkg: com.epidgames.trickcalrevive UnderlyingNetworks: Null] ]
+10-05 14:03:51.417  1650  3389 I resolv  : GetAddrInfoHandler::run: {100 100 100 983140 10299 0}
+10-05 14:03:51.418  1650  3391 I resolv  : res_nmkquery: (QUERY, IN, A)
+10-05 14:03:51.418  1650  3390 I resolv  : res_nmkquery: (QUERY, IN, AAAA)
+10-05 14:03:51.419  3323  3323 D UnityNotifications: Rescheduling notifications after restart
+10-05 14:03:51.422  1650  3390 I resolv  : res_nsend: used send_dg 278 terrno: 0
+10-05 14:03:51.425  1650  3390 I resolv  : doQuery: rcode=0, ancount=8, return value=278
+10-05 14:03:51.427  3323  3361 W GooglePlayServicesUtil: com.epidgames.trickcalrevive requires the Google Play Store, but it is missing.
+10-05 14:03:51.431  3323  3366 W GooglePlayServicesUtil: com.epidgames.trickcalrevive requires the Google Play Store, but it is missing.
+10-05 14:03:51.431  3323  3366 W GoogleApiManager: The service for com.google.android.gms.internal.appset.zzd is not available: ConnectionResult{statusCode=SERVICE_INVALID, resolution=null, message=null, clientMethodKey=null}
+10-05 14:03:51.434  3323  3366 W GooglePlayServicesUtil: com.epidgames.trickcalrevive requires the Google Play Store, but it is missing.
+10-05 14:03:51.434  3323  3366 W GoogleApiManager: The service for com.google.android.gms.internal.games_v2.zzp is not available: ConnectionResult{statusCode=SERVICE_INVALID, resolution=null, message=null, clientMethodKey=null}
+10-05 14:03:51.434  3323  3323 D berberis: loadLibraryExt: path=/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libATG_L.so ns=0x7aa6e2043130(guest=0x7aa53f5a0010)
+10-05 14:03:51.434  3323  3323 D berberis: berberis: DlOpen ENTER libpath="/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libATG_L.so" flags=0x2
+10-05 14:03:51.434  3323  3366 W GooglePlayServicesUtil: com.epidgames.trickcalrevive requires the Google Play Store, but it is missing.
+10-05 14:03:51.434  3323  3366 W GoogleApiManager: The service for com.google.android.gms.internal.games_v2.zzp is not available: ConnectionResult{statusCode=SERVICE_INVALID, resolution=null, message=null, clientMethodKey=null}
+10-05 14:03:51.435  3323  3323 D berberis: berberis: DlOpen EXIT  1ms set=1 clear=27 libpath="/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libATG_L.so" handle=0x7ef4e3ade432c995
+10-05 14:03:51.435  3323  3323 D berberis: loadLibraryExt: result=0x7ef4e3ade432c995 dlerror=ok
+10-05 14:03:51.435  3323  3323 D nativeloader: Load /data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libATG_L.so using ns clns-7 from class loader (caller=/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/base.apk!classes2.dex): ok
+10-05 14:03:51.435  3323  3323 D berberis: berberis: trans#7600 pc=0x7aa4d50d4350 size=4 JIT jit=7600 interp=0 avg=8
+10-05 14:03:51.438  1650  3391 I resolv  : res_nsend: used send_dg 182 terrno: 0
+10-05 14:03:51.438  1650  3391 I resolv  : doQuery: rcode=0, ancount=8, return value=182
+10-05 14:03:51.440  3323  3323 D berberis: berberis: trans#7700 pc=0x7aa4dfcd7f54 size=13 JIT jit=7700 interp=0 avg=8
+10-05 14:03:51.442  3398  3398 D berberis: berberis: trans#7700 pc=0x7aa4dfce2c98 size=3 JIT jit=7700 interp=0 avg=8
+10-05 14:03:51.490  1849  2077 D ShortcutService: Getting shortcuts for launcher= com.android.launcher3userId=0 pkg=com.epidgames.trickcalrevive
+10-05 14:03:51.490  1849  2076 D ShortcutService: Saving package item com.epidgames.trickcalrevive to /data/system_ce/0/shortcut_service/packages/com.epidgames.trickcalrevive.xml
+10-05 14:03:51.522  1849  2077 D ShortcutService: Getting shortcuts for launcher= com.android.systemuiuserId=0 pkg=com.epidgames.trickcalrevive
+10-05 14:03:51.522  1849  2622 I BroadcastQueue: BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED action:android.intent.action.BOOT_COMPLETED dispatchLatency:1 completeLatency:384 dispatchRealLatency:1 completeRealLatency:384 receiversSize:1 userId:0 userType:android.os.usertype.full.SYSTEM
+10-05 14:03:51.542  3323  3323 D berberis: berberis: trans#7800 pc=0x7aa4d50c352c size=6 JIT jit=7800 interp=0 avg=8
+10-05 14:03:51.563  3323  3323 I Presto  : SDK_Ver = 2026080501
+10-05 14:03:51.565  3323  3374 D berberis: berberis: trans#7900 pc=0x7aa4d50c9b8c size=19 JIT jit=7900 interp=0 avg=8
+10-05 14:03:51.571  3323  3323 D DesktopModeFlagsUtil: Toggle override initialized to: OVERRIDE_UNSET
+10-05 14:03:51.572  3323  3323 D berberis: loadLibraryExt: path=/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libmain.so ns=0x7aa6e2043130(guest=0x7aa53f5a0010)
+10-05 14:03:51.572  3323  3323 D berberis: berberis: DlOpen ENTER libpath="/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libmain.so" flags=0x2
+10-05 14:03:51.573  3323  3323 D berberis: berberis: DlOpen EXIT  0ms set=1 clear=27 libpath="/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libmain.so" handle=0x72a4cdaa6072084d
+10-05 14:03:51.573  3323  3323 D berberis: loadLibraryExt: result=0x72a4cdaa6072084d dlerror=ok
+10-05 14:03:51.573  3323  3323 D nativeloader: Load /data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libmain.so using ns clns-7 from class loader (caller=/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/base.apk!classes5.dex): ok
+10-05 14:03:51.581  3323  3374 D berberis: berberis: trans#8000 pc=0x7aa4dfca3f40 size=9 JIT jit=8000 interp=0 avg=8
+10-05 14:03:51.599  3323  3347 W GooglePlayServicesUtil: com.epidgames.trickcalrevive requires the Google Play Store, but it is missing.
+10-05 14:03:51.599  3323  3347 W FA      : Service invalid
+10-05 14:03:51.606  3323  3323 D berberis: berberis: trans#8100 pc=0x7aa52c4d5470 size=6 JIT jit=8100 interp=0 avg=8
+10-05 14:03:51.613  3323  3323 D berberis: berberis: trans#8200 pc=0x7aa52c51d880 size=6 JIT jit=8200 interp=0 avg=8
+10-05 14:03:51.616  3323  3323 D berberis: berberis: trans#8300 pc=0x7aa52c491850 size=6 JIT jit=8300 interp=0 avg=8
+10-05 14:03:51.618  3323  3323 D berberis: berberis: trans#8400 pc=0x7aa52c4921b0 size=6 JIT jit=8400 interp=0 avg=8
+10-05 14:03:51.619  3323  3347 I FA      : Tag Manager is not found and thus will not be used
+10-05 14:03:51.619  3323  3347 W GooglePlayServicesUtil: Google Play services is missing.
+10-05 14:03:51.631  3323  3323 D berberis: berberis: trans#8500 pc=0x7aa52c492b10 size=6 JIT jit=8500 interp=0 avg=8
+10-05 14:03:51.647  3323  3323 D berberis: berberis: trans#8600 pc=0x7aa4ce557780 size=52 JIT jit=8600 interp=0 avg=8
+10-05 14:03:51.647  3323  3323 D berberis: berberis: trans#8700 pc=0x7aa4cd48b4e0 size=19 JIT jit=8700 interp=0 avg=8
+10-05 14:03:51.648  3323  3323 D berberis: berberis: trans#8800 pc=0x7aa4cd4e7228 size=24 JIT jit=8800 interp=0 avg=8
+10-05 14:03:51.651  3323  3323 D berberis: berberis: trans#8900 pc=0x7aa4cd56a1b8 size=106 JIT jit=8900 interp=0 avg=8
+10-05 14:03:51.651  3323  3323 D berberis: berberis: trans#9000 pc=0x7aa4cd5c0708 size=9 JIT jit=9000 interp=0 avg=9
+10-05 14:03:51.652  3323  3323 D berberis: berberis: trans#9100 pc=0x7aa4cd5d4a88 size=18 JIT jit=9100 interp=0 avg=9
+10-05 14:03:51.652  3323  3323 D berberis: berberis: trans#9200 pc=0x7aa4cd629dc0 size=11 JIT jit=9200 interp=0 avg=9
+10-05 14:03:51.653  3323  3323 D berberis: berberis: trans#9300 pc=0x7aa4cd651210 size=14 JIT jit=9300 interp=0 avg=9
+10-05 14:03:51.653  3323  3323 D berberis: berberis: trans#9400 pc=0x7aa4cd672c3c size=7 JIT jit=9400 interp=0 avg=9
+10-05 14:03:51.654  3323  3323 D berberis: berberis: trans#9500 pc=0x7aa4cd6df234 size=15 JIT jit=9500 interp=0 avg=9
+10-05 14:03:51.654  3323  3323 D berberis: berberis: trans#9600 pc=0x7aa4cd75a738 size=6 JIT jit=9600 interp=0 avg=9
+10-05 14:03:51.655  3323  3323 D berberis: berberis: trans#9700 pc=0x7aa4cd7783dc size=13 JIT jit=9700 interp=0 avg=9
+10-05 14:03:51.657  3323  3323 D berberis: berberis: trans#9800 pc=0x7aa4cd79f08c size=13 JIT jit=9800 interp=0 avg=9
+10-05 14:03:51.658  3323  3370 W AnalyticsUserIDStore: initStore should have been called before calling setUserID
+10-05 14:03:51.660  3323  3323 D berberis: berberis: trans#9900 pc=0x7aa4cd79fec0 size=13 JIT jit=9900 interp=0 avg=9
+10-05 14:03:51.662  3323  3323 D berberis: berberis: trans#10000 pc=0x7aa4cd7b8d88 size=41 JIT jit=10000 interp=0 avg=9
+10-05 14:03:51.663  3323  3323 D berberis: berberis: trans#10100 pc=0x7aa4cd7b9dc4 size=13 JIT jit=10100 interp=0 avg=9
+10-05 14:03:51.666  3323  3323 D berberis: berberis: trans#10200 pc=0x7aa4cd7baa4c size=4 JIT jit=10200 interp=0 avg=9
+10-05 14:03:51.667  3323  3323 D berberis: berberis: trans#10300 pc=0x7aa4cd7bb71c size=13 JIT jit=10300 interp=0 avg=9
+10-05 14:03:51.667  3323  3323 D berberis: berberis: trans#10400 pc=0x7aa4cd7bc464 size=13 JIT jit=10400 interp=0 avg=9
+10-05 14:03:51.668  3323  3323 D berberis: berberis: trans#10500 pc=0x7aa4cd7bd1ac size=13 JIT jit=10500 interp=0 avg=9
+10-05 14:03:51.668  3323  3323 D berberis: berberis: trans#10600 pc=0x7aa4cd7bdef4 size=13 JIT jit=10600 interp=0 avg=9
+10-05 14:03:51.670  3323  3323 D berberis: berberis: trans#10700 pc=0x7aa4cd7bec3c size=13 JIT jit=10700 interp=0 avg=9
+10-05 14:03:51.671  3323  3323 D berberis: berberis: trans#10800 pc=0x7aa4cd7bf94c size=13 JIT jit=10800 interp=0 avg=9
+10-05 14:03:51.672  3323  3323 D berberis: berberis: trans#10900 pc=0x7aa4cd7c833c size=69 JIT jit=10900 interp=0 avg=9
+10-05 14:03:51.672  3323  3323 D berberis: berberis: trans#11000 pc=0x7aa4cd7ccf20 size=13 JIT jit=11000 interp=0 avg=9
+10-05 14:03:51.673  3323  3323 D berberis: berberis: trans#11100 pc=0x7aa4cd806f10 size=8 JIT jit=11100 interp=0 avg=9
+10-05 14:03:51.674  3323  3323 D berberis: berberis: trans#11200 pc=0x7aa4cd831824 size=7 JIT jit=11200 interp=0 avg=9
+10-05 14:03:51.674  3323  3323 D berberis: berberis: trans#11300 pc=0x7aa4cd8a8360 size=26 JIT jit=11300 interp=0 avg=9
+10-05 14:03:51.675  3323  3323 D berberis: berberis: trans#11400 pc=0x7aa4cd9d3880 size=20 JIT jit=11400 interp=0 avg=9
+10-05 14:03:51.675  3323  3323 D berberis: berberis: trans#11500 pc=0x7aa4cda161c4 size=4 JIT jit=11500 interp=0 avg=9
+10-05 14:03:51.676  3323  3323 D berberis: berberis: trans#11600 pc=0x7aa4cdaa0994 size=8 JIT jit=11600 interp=0 avg=9
+10-05 14:03:51.677  3323  3323 D berberis: berberis: trans#11700 pc=0x7aa4cdb3c1c8 size=48 JIT jit=11700 interp=0 avg=9
+10-05 14:03:51.677  3323  3323 D berberis: berberis: trans#11800 pc=0x7aa4cdbc010c size=8 JIT jit=11800 interp=0 avg=9
+10-05 14:03:51.678  3323  3323 D berberis: berberis: trans#11900 pc=0x7aa4cdc18afc size=11 JIT jit=11900 interp=0 avg=9
+10-05 14:03:51.679  3323  3323 D berberis: berberis: trans#12000 pc=0x7aa4cdc7ec94 size=6 JIT jit=12000 interp=0 avg=9
+10-05 14:03:51.679  3323  3323 D berberis: berberis: trans#12100 pc=0x7aa4cdcf0f74 size=8 JIT jit=12100 interp=0 avg=9
+10-05 14:03:51.679  3323  3323 D berberis: berberis: trans#12200 pc=0x7aa4cdd266f4 size=6 JIT jit=12200 interp=0 avg=9
+10-05 14:03:51.680  3323  3323 D berberis: berberis: trans#12300 pc=0x7aa4cdd595d4 size=8 JIT jit=12300 interp=0 avg=9
+10-05 14:03:51.680  3323  3323 D berberis: berberis: trans#12400 pc=0x7aa4cdff9ef0 size=16 JIT jit=12400 interp=0 avg=9
+10-05 14:03:51.681  3323  3323 D berberis: berberis: trans#12500 pc=0x7aa4ce1563b8 size=7 JIT jit=12500 interp=0 avg=9
+10-05 14:03:51.682  3323  3323 D berberis: berberis: trans#12600 pc=0x7aa4ce1609b8 size=8 JIT jit=12600 interp=0 avg=9
+10-05 14:03:51.682  3323  3323 D berberis: berberis: trans#12700 pc=0x7aa4ce16a084 size=7 JIT jit=12700 interp=0 avg=9
+10-05 14:03:51.683  3323  3323 D berberis: berberis: trans#12800 pc=0x7aa4ce4eaab8 size=9 JIT jit=12800 interp=0 avg=9
+10-05 14:03:51.684  3323  3323 D berberis: berberis: trans#12900 pc=0x7aa4cd48b820 size=2 JIT jit=12900 interp=0 avg=9
+10-05 14:03:51.685  3323  3323 D berberis: berberis: trans#13000 pc=0x7aa4dfce3044 size=1 JIT jit=13000 interp=0 avg=9
+10-05 14:03:51.686  3323  3374 D berberis: berberis: trans#13100 pc=0x7aa4c929ee00 size=4 JIT jit=13100 interp=0 avg=9
+10-05 14:03:51.687  3323  3374 D berberis: berberis: trans#13200 pc=0x7aa4c92b7e7c size=8 JIT jit=13200 interp=0 avg=9
+10-05 14:03:51.687  3323  3323 D berberis: berberis: trans#13300 pc=0x7aa4cd783318 size=2 JIT jit=13300 interp=0 avg=9
+10-05 14:03:51.688  3323  3374 D berberis: berberis: trans#13400 pc=0x7aa4c92b7548 size=5 JIT jit=13400 interp=0 avg=9
+10-05 14:03:51.690  3323  3374 D berberis: berberis: trans#13500 pc=0x7aa4dfcdaa00 size=12 JIT jit=13500 interp=0 avg=10
+10-05 14:03:51.692  3323  3374 D berberis: berberis: trans#13600 pc=0x7aa4c932f3a0 size=4 JIT jit=13600 interp=0 avg=10
+10-05 14:03:51.692  3323  3374 D berberis: berberis: trans#13700 pc=0x7aa4c92f16bc size=11 JIT jit=13700 interp=0 avg=10
+10-05 14:03:51.693  3323  3374 D berberis: berberis: trans#13800 pc=0x7aa4c92f2780 size=5 JIT jit=13800 interp=0 avg=10
+10-05 14:03:51.693  3323  3374 D berberis: berberis: trans#13900 pc=0x7aa4c92ac894 size=60 JIT jit=13900 interp=0 avg=10
+10-05 14:03:51.694  3323  3374 D berberis: berberis: trans#14000 pc=0x7aa4c92b1bf0 size=3 JIT jit=14000 interp=0 avg=10
+10-05 14:03:51.712  3323  3323 D berberis: berberis: trans#14100 pc=0x7aa4a2eddffc size=7 JIT jit=14100 interp=0 avg=11
+10-05 14:03:51.713  3323  3323 D berberis: berberis: trans#14200 pc=0x7aa4a2efad14 size=1 JIT jit=14200 interp=0 avg=11
+10-05 14:03:51.714  3323  3323 D berberis: berberis: trans#14300 pc=0x7aa4a2f05a08 size=10 JIT jit=14300 interp=0 avg=11
+10-05 14:03:51.717  3323  3323 D berberis: berberis: trans#14400 pc=0x7aa4a2f429a8 size=3 JIT jit=14400 interp=0 avg=11
+10-05 14:03:51.718  3323  3323 D berberis: berberis: trans#14500 pc=0x7aa4a2f43e40 size=15 JIT jit=14500 interp=0 avg=11
+10-05 14:03:51.719  3323  3323 D berberis: berberis: trans#14600 pc=0x7aa4a2fad0e4 size=7 JIT jit=14600 interp=0 avg=11
+10-05 14:03:51.719  3323  3323 I IL2CPP  : JNI_OnLoad
+10-05 14:03:51.719  3323  3323 V Unity   : Context Type: ActivityOrService
+10-05 14:03:51.720  3323  3323 D berberis: berberis: trans#14700 pc=0x7aa4cd781ae4 size=4 JIT jit=14700 interp=0 avg=11
+10-05 14:03:51.721  3323  3323 D berberis: berberis: trans#14800 pc=0x7aa4ce16ce24 size=7 JIT jit=14800 interp=0 avg=11
+10-05 14:03:51.721  3323  3323 D berberis: berberis: trans#14900 pc=0x7aa4ce14ffdc size=8 JIT jit=14900 interp=0 avg=11
+10-05 14:03:51.722  3323  3323 D berberis: berberis: trans#15000 pc=0x7aa4cdf18590 size=3 JIT jit=15000 interp=0 avg=11
+10-05 14:03:51.724  3323  3323 D berberis: berberis: trans#15100 pc=0x7aa4cd750b48 size=2 JIT jit=15100 interp=0 avg=12
+10-05 14:03:51.725  3323  3323 D berberis: berberis: trans#15200 pc=0x7aa4cdc221d8 size=29 JIT jit=15200 interp=0 avg=12
+10-05 14:03:51.729  3323  3374 D berberis: berberis: trans#15300 pc=0x7aa4c92a3fa0 size=135 JIT jit=15300 interp=0 avg=12
+10-05 14:03:51.729  3323  3323 D FirebaseSessions: App foregrounded on com.epidgames.trickcalrevive
+10-05 14:03:51.729  3323  3323 D FirebaseSessions: Session 44d7f0b9de764031812700aafb4775fb has not backgrounded yet
+10-05 14:03:51.729  3323  3323 D FirebaseSessions: No process data for com.epidgames.trickcalrevive
+10-05 14:03:51.730  1849  2622 W ActivityManager: Unable to start service Intent { act=com.google.android.play.deku.action.BIND_DEKU_BROKER_SERVICE pkg=com.android.vending } U=0: not found
+10-05 14:03:51.733  3323  3345 D FirebaseSessions: Session 755bc38bf8804750a8a5d67cae351d72 has not backgrounded yet
+10-05 14:03:51.733  3323  3345 D FirebaseSessions: No process data map
+10-05 14:03:51.733  3323  3345 D FirebaseSessions: No process data for com.epidgames.trickcalrevive
+10-05 14:03:51.736  3323  3323 W HWUI    : Unknown dataspace 0
+10-05 14:03:51.740  1849  2379 W WindowManager: Failed looking up window session=Session{ac03269 3323:u0a10299} callers=com.android.server.wm.WindowManagerService.windowForClientLocked:6269 com.android.server.wm.Session.updateRequestedVisibleTypes:699 android.view.IWindowSession$Stub.onTransact:1004 
+10-05 14:03:51.745  3323  3323 W PlayGamesServices[GamesApiManager]: PlayStore is too old or not available and the version of GmsCore would attempt PGA installation on automatic sign-in. Skipping it.
+10-05 14:03:51.746  3323  3323 V FA      : AppMeasurementService is starting up.
+10-05 14:03:51.749  3323  3353 D FirebaseSessions: Notified CRASHLYTICS of new session 3f9d18adf27c431f9ed69d691c93a55e
+10-05 14:03:51.750  1683  1952 W ServiceManagerCppClient: Permission failure: android.permission.ACCESS_SURFACE_FLINGER from uid=10299 pid=0
+10-05 14:03:51.750  1683  1952 D PermissionCache: checking android.permission.ACCESS_SURFACE_FLINGER for uid=10299 => denied (146 us)
+10-05 14:03:51.750  1683  1952 W ServiceManagerCppClient: Permission failure: android.permission.ROTATE_SURFACE_FLINGER from uid=10299 pid=0
+10-05 14:03:51.750  1683  1952 D PermissionCache: checking android.permission.ROTATE_SURFACE_FLINGER for uid=10299 => denied (102 us)
+10-05 14:03:51.750  1683  1952 W ServiceManagerCppClient: Permission failure: android.permission.INTERNAL_SYSTEM_WINDOW from uid=10299 pid=0
+10-05 14:03:51.750  1683  1952 D PermissionCache: checking android.permission.INTERNAL_SYSTEM_WINDOW for uid=10299 => denied (70 us)
+10-05 14:03:51.750  1683  1752 W ServiceManagerCppClient: Permission failure: android.permission.ROTATE_SURFACE_FLINGER from uid=10299 pid=3323
+10-05 14:03:51.750  1683  1752 D PermissionCache: checking android.permission.ROTATE_SURFACE_FLINGER for uid=10299 => denied (118 us)
+10-05 14:03:51.752  3323  3410 D berberis: berberis: trans#15400 pc=0x7aa4cdc267a4 size=4 JIT jit=15400 interp=0 avg=13
+10-05 14:03:51.753  3323  3392 I MESA    : Using gralloc0 CrOS API
+10-05 14:03:51.758  3323  3410 D berberis: berberis: trans#15500 pc=0x7aa4cd4e859c size=11 JIT jit=15500 interp=0 avg=13
+10-05 14:03:51.762  3323  3392 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_CREATE_GUEST_HANDLE
+10-05 14:03:51.762  3323  3392 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_RESOURCE_SYNC
+10-05 14:03:51.762  3323  3392 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_GUEST_VRAM
+10-05 14:03:51.762  3323  3392 I [minigbm:virgl_get_caps(586)]: Supported CAPSET IDs: 6.
+10-05 14:03:51.762  3323  3392 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:540422468
+10-05 14:03:51.762  3323  3392 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:1479815748
+10-05 14:03:51.762  3323  3392 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:1395929668
+10-05 14:03:51.762  3323  3392 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:1177695044
+10-05 14:03:51.762  3323  3392 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:944981572
+10-05 14:03:51.762  3323  3392 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:842094158
+10-05 14:03:51.762  3323  3392 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:808530000
+10-05 14:03:51.763  1271  1271 I hwservicemanager: getTransport: Cannot find entry android.hardware.configstore@1.0::ISurfaceFlingerConfigs/default in either framework or device VINTF manifest.
+10-05 14:03:51.763  3323  3392 E HWUI    : Device claims wide gamut support, cannot find matching config, error = EGL_SUCCESS
+10-05 14:03:51.763  3323  3392 W HWUI    : Failed to initialize 101010-2 format, error = EGL_SUCCESS
+10-05 14:03:51.769  1683  1952 D SurfaceFlinger: Native-Android-x86: display 1280 800 density 213.000000
+10-05 14:03:51.769  1683  1952 D SurfaceFlinger: Native-Android-x86: auto set density
+10-05 14:03:51.788  1849  2622 W ServiceManagerCppClient: Permission failure: android.permission.ACCESS_SURFACE_FLINGER from uid=10299 pid=0
+10-05 14:03:51.788  1849  2622 D PermissionCache: checking android.permission.ACCESS_SURFACE_FLINGER for uid=10299 => denied (56 us)
+10-05 14:03:51.788  1849  2622 W ServiceManagerCppClient: Permission failure: android.permission.ROTATE_SURFACE_FLINGER from uid=10299 pid=0
+10-05 14:03:51.788  1849  2622 D PermissionCache: checking android.permission.ROTATE_SURFACE_FLINGER for uid=10299 => denied (9 us)
+10-05 14:03:51.788  1849  2622 W ServiceManagerCppClient: Permission failure: android.permission.INTERNAL_SYSTEM_WINDOW from uid=10299 pid=0
+10-05 14:03:51.788  1849  2622 D PermissionCache: checking android.permission.INTERNAL_SYSTEM_WINDOW for uid=10299 => denied (7 us)
+10-05 14:03:51.789  3323  3367 W GooglePlayServicesUtil: com.epidgames.trickcalrevive requires the Google Play Store, but it is missing.
+10-05 14:03:51.791  1849  2388 W ActivityManager: Unable to start service Intent { act=com.google.android.gms.ads.identifier.service.START pkg=com.google.android.gms } U=0: not found
+10-05 14:03:51.791  3323  3371 W GooglePlayServicesUtil: com.epidgames.trickcalrevive requires the Google Play Store, but it is missing.
+10-05 14:03:51.792  1849  2388 W ActivityManager: Unable to start service Intent { act=com.google.android.gms.ads.identifier.service.START pkg=com.google.android.gms } U=0: not found
+10-05 14:03:51.792  1849  1868 W system_server: Failed to determine oat file name for dex location /data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/base.apk: Dalvik cache directory does not exist
+10-05 14:03:51.792  1849  1868 W ziparchive: Unable to open '/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/base.dm': No such file or directory
+10-05 14:03:51.793  1849  1868 I ActivityTaskManager: Displayed com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity for user 0: +806ms
+10-05 14:03:51.803  2449  2449 D BaseDepthController: setSurface:
+10-05 14:03:51.803  2449  2449 D BaseDepthController: 	mWaitingOnSurfaceValidity: false
+10-05 14:03:51.803  2449  2449 D BaseDepthController: 	mSurface: null
+10-05 14:03:51.803  2449  2449 D StateManager: goToState - fromState: Normal, toState: Normal, partial trace:
+10-05 14:03:51.803  2449  2449 D StateManager: 	at com.android.launcher3.statemanager.StateManager.moveToRestState(StateManager.java:453)
+10-05 14:03:51.803  2449  2449 D StateManager: 	at com.android.launcher3.statemanager.StateManager.moveToRestState(StateManager.java:444)
+10-05 14:03:51.803  2449  2449 D StateManager: 	at com.android.launcher3.statemanager.StatefulActivity.onStop(StatefulActivity.java:119)
+10-05 14:03:51.804  2449  2449 D StatsLog: LAUNCHER_ONSTOP
+10-05 14:03:51.804  1849  1865 I AppWidgetServiceImpl: setAppWidgetHidden() 0
+10-05 14:03:51.805  1849  1869 V GameManagerService: Game power mode ON (only games in foreground)
+10-05 14:03:51.806  1650  3420 I resolv  : GetAddrInfoHandler::run: {100 100 100 983140 10299 0}
+10-05 14:03:51.807  1650  3422 I resolv  : res_nmkquery: (QUERY, IN, A)
+10-05 14:03:51.807  1650  3421 I resolv  : res_nmkquery: (QUERY, IN, AAAA)
+10-05 14:03:51.816  3323  3410 D berberis: berberis: trans#15600 pc=0x7aa4cd782138 size=2 JIT jit=15600 interp=0 avg=13
+10-05 14:03:51.817  3323  3410 D berberis: berberis: trans#15700 pc=0x7aa4ce1ff9b4 size=14 JIT jit=15700 interp=0 avg=13
+10-05 14:03:51.819  3323  3410 D berberis: berberis: trans#15800 pc=0x7aa4ce5327d0 size=8 JIT jit=15800 interp=0 avg=13
+10-05 14:03:51.821  3323  3410 D berberis: berberis: trans#15900 pc=0x7aa4ce5335e0 size=8 JIT jit=15900 interp=0 avg=13
+10-05 14:03:51.821  3323  3410 D berberis: berberis: trans#16000 pc=0x7aa4ce534698 size=24 JIT jit=16000 interp=0 avg=13
+10-05 14:03:51.822  3323  3410 D berberis: berberis: trans#16100 pc=0x7aa4cd799ff0 size=10 JIT jit=16100 interp=0 avg=13
+10-05 14:03:51.822  3323  3410 D berberis: berberis: trans#16200 pc=0x7aa4cd75e8f0 size=17 JIT jit=16200 interp=0 avg=13
+10-05 14:03:51.823  3323  3410 D berberis: berberis: trans#16300 pc=0x7aa4cd75dfe4 size=8 JIT jit=16300 interp=0 avg=13
+10-05 14:03:51.830     0     0 I logd    : logdr: UID=2000 GID=2000 PID=3423 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+10-05 14:03:51.840  3323  3410 D berberis: berberis: trans#16400 pc=0x7aa4ce516588 size=4 JIT jit=16400 interp=0 avg=13
+10-05 14:03:51.844  3323  3410 D berberis: berberis: trans#16500 pc=0x7aa4ce55c560 size=4 JIT jit=16500 interp=0 avg=13
+10-05 14:03:51.856  3323  3410 D berberis: berberis: trans#16600 pc=0x7aa4cdc1d884 size=10 JIT jit=16600 interp=0 avg=13
+10-05 14:03:51.858  3323  3410 D berberis: berberis: trans#16700 pc=0x7aa4cdc203a0 size=6 JIT jit=16700 interp=0 avg=13
+10-05 14:03:51.859  3323  3410 I Unity   : MemoryManager: Using 'Dynamic Heap' Allocator.
+10-05 14:03:51.862  3323  3410 D berberis: berberis: trans#16800 pc=0x7aa4cdc1828c size=2 JIT jit=16800 interp=0 avg=13
+10-05 14:03:51.863  3323  3410 D berberis: berberis: trans#16900 pc=0x7aa4dfc90e54 size=14 JIT jit=16900 interp=0 avg=13
+10-05 14:03:51.866  3323  3410 D berberis: berberis: trans#17000 pc=0x7aa4cd68ad60 size=4 JIT jit=17000 interp=0 avg=13
+10-05 14:03:51.867  3323  3410 D berberis: berberis: trans#17100 pc=0x7aa4cdc28010 size=6 JIT jit=17100 interp=0 avg=13
+10-05 14:03:51.869  3323  3410 D berberis: berberis: trans#17200 pc=0x7aa4cdc283d4 size=1 JIT jit=17200 interp=0 avg=13
+10-05 14:03:51.870  3323  3410 D berberis: berberis: trans#17300 pc=0x7aa4cd747aa4 size=6 JIT jit=17300 interp=0 avg=13
+10-05 14:03:51.872  3323  3410 D berberis: berberis: trans#17400 pc=0x7aa4cd5f6a38 size=2 JIT jit=17400 interp=0 avg=13
+10-05 14:03:51.873  3323  3410 D berberis: berberis: trans#17500 pc=0x7aa4cd5f62d0 size=6 JIT jit=17500 interp=0 avg=13
+10-05 14:03:51.875  3323  3410 D berberis: berberis: trans#17600 pc=0x7aa4cdbc0484 size=6 JIT jit=17600 interp=0 avg=13
+10-05 14:03:51.876  3323  3410 D berberis: berberis: trans#17700 pc=0x7aa4cd47ca20 size=13 JIT jit=17700 interp=0 avg=13
+10-05 14:03:51.877  3323  3410 D berberis: berberis: trans#17800 pc=0x7aa4cd677334 size=2 JIT jit=17800 interp=0 avg=13
+10-05 14:03:51.878  3323  3410 D berberis: berberis: trans#17900 pc=0x7aa4cd6376f0 size=11 JIT jit=17900 interp=0 avg=13
+10-05 14:03:51.879  3323  3410 D berberis: berberis: trans#18000 pc=0x7aa4cdbc0294 size=10 JIT jit=18000 interp=0 avg=13
+10-05 14:03:51.882  3323  3410 D berberis: berberis: trans#18100 pc=0x7aa4cd4cc5dc size=19 JIT jit=18100 interp=0 avg=13
+10-05 14:03:51.883  3323  3410 D berberis: berberis: trans#18200 pc=0x7aa4cd4dcd94 size=9 JIT jit=18200 interp=0 avg=12
+10-05 14:03:51.884  3323  3410 D berberis: berberis: trans#18300 pc=0x7aa4cd676fbc size=25 JIT jit=18300 interp=0 avg=12
+10-05 14:03:51.884  3323  3410 D berberis: berberis: trans#18400 pc=0x7aa4cd5ca548 size=6 JIT jit=18400 interp=0 avg=12
+10-05 14:03:51.885  3323  3426 D berberis: berberis: trans#18500 pc=0x7aa4cdc26948 size=10 JIT jit=18500 interp=0 avg=12
+10-05 14:03:51.885  3323  3410 D berberis: berberis: trans#18600 pc=0x7aa4cd5caddc size=4 JIT jit=18600 interp=0 avg=12
+10-05 14:03:51.886  3323  3410 D berberis: berberis: trans#18700 pc=0x7aa4cdd25488 size=37 JIT jit=18700 interp=0 avg=12
+10-05 14:03:51.887  3323  3410 D berberis: berberis: trans#18800 pc=0x7aa4cdd2711c size=5 JIT jit=18800 interp=0 avg=12
+10-05 14:03:51.888  3323  3410 D berberis: berberis: trans#18900 pc=0x7aa4cd647860 size=6 JIT jit=18900 interp=0 avg=12
+10-05 14:03:51.890  3323  3410 D berberis: berberis: trans#19000 pc=0x7aa4cd6cfe58 size=9 JIT jit=19000 interp=0 avg=12
+10-05 14:03:51.891  3323  3410 D berberis: berberis: trans#19100 pc=0x7aa4cd7570e8 size=4 JIT jit=19100 interp=0 avg=12
+10-05 14:03:51.892  3323  3410 D berberis: berberis: trans#19200 pc=0x7aa4cd6e8ea8 size=3 JIT jit=19200 interp=0 avg=12
+10-05 14:03:51.892  3323  3410 D berberis: berberis: trans#19300 pc=0x7aa4cd79df34 size=8 JIT jit=19300 interp=0 avg=12
+10-05 14:03:51.892  3323  3410 D berberis: berberis: trans#19400 pc=0x7aa4cd7a3bfc size=8 JIT jit=19400 interp=0 avg=12
+10-05 14:03:51.893  3323  3410 D berberis: berberis: trans#19500 pc=0x7aa4cd7a5ef4 size=8 JIT jit=19500 interp=0 avg=12
+10-05 14:03:51.893  3323  3410 D berberis: berberis: trans#19600 pc=0x7aa4cd7a7a38 size=8 JIT jit=19600 interp=0 avg=12
+10-05 14:03:51.893  3323  3410 D berberis: berberis: trans#19700 pc=0x7aa4cd7a9658 size=8 JIT jit=19700 interp=0 avg=12
+10-05 14:03:51.894  3323  3410 D berberis: berberis: trans#19800 pc=0x7aa4cd7ab278 size=8 JIT jit=19800 interp=0 avg=12
+10-05 14:03:51.895  3323  3410 D berberis: berberis: trans#19900 pc=0x7aa4cd7ace98 size=8 JIT jit=19900 interp=0 avg=12
+10-05 14:03:51.895  3323  3410 D berberis: berberis: trans#20000 pc=0x7aa4cd7aeadc size=8 JIT jit=20000 interp=0 avg=12
+10-05 14:03:51.895  3323  3410 D berberis: berberis: trans#20100 pc=0x7aa4cd7b06fc size=8 JIT jit=20100 interp=0 avg=12
+10-05 14:03:51.896  3323  3410 D berberis: berberis: trans#20200 pc=0x7aa4cd7b3898 size=8 JIT jit=20200 interp=0 avg=12
+10-05 14:03:51.897  3323  3410 D berberis: berberis: trans#20300 pc=0x7aa4cd7c4930 size=8 JIT jit=20300 interp=0 avg=12
+10-05 14:03:51.898  3323  3410 D berberis: berberis: trans#20400 pc=0x7aa4cd7ca7ac size=8 JIT jit=20400 interp=0 avg=12
+10-05 14:03:51.900  3323  3410 D berberis: berberis: trans#20500 pc=0x7aa4cd6b59f8 size=9 JIT jit=20500 interp=0 avg=12
+10-05 14:03:51.901  3323  3410 D berberis: berberis: trans#20600 pc=0x7aa4cd829ee0 size=6 JIT jit=20600 interp=0 avg=12
+10-05 14:03:51.901  3323  3410 D berberis: berberis: trans#20700 pc=0x7aa4cd8635b4 size=4 JIT jit=20700 interp=0 avg=12
+10-05 14:03:51.902  3323  3410 D berberis: berberis: trans#20800 pc=0x7aa4cd8d9ba0 size=3 JIT jit=20800 interp=0 avg=12
+10-05 14:03:51.904  3323  3410 D berberis: berberis: trans#20900 pc=0x7aa4cda114f8 size=6 JIT jit=20900 interp=0 avg=12
+10-05 14:03:51.906  3323  3410 D berberis: berberis: trans#21000 pc=0x7aa4cdbdc784 size=4 JIT jit=21000 interp=0 avg=12
+10-05 14:03:51.907  3323  3410 D berberis: berberis: trans#21100 pc=0x7aa4cdbd7a70 size=4 JIT jit=21100 interp=0 avg=12
+10-05 14:03:51.907  3323  3410 D berberis: berberis: trans#21200 pc=0x7aa4cdbd9910 size=3 JIT jit=21200 interp=0 avg=12
+10-05 14:03:51.907  3323  3410 D berberis: berberis: trans#21300 pc=0x7aa4cdcf0fd0 size=3 JIT jit=21300 interp=0 avg=12
+10-05 14:03:51.909  3323  3410 D berberis: berberis: trans#21400 pc=0x7aa4cdb49968 size=11 JIT jit=21400 interp=0 avg=12
+10-05 14:03:51.909  3323  3410 D berberis: berberis: trans#21500 pc=0x7aa4cd4a1c94 size=4 JIT jit=21500 interp=0 avg=11
+10-05 14:03:51.910  3323  3410 D berberis: berberis: trans#21600 pc=0x7aa4cdb589a0 size=5 JIT jit=21600 interp=0 avg=11
+10-05 14:03:51.911  3323  3410 D berberis: berberis: trans#21700 pc=0x7aa4cdb59904 size=22 JIT jit=21700 interp=0 avg=11
+10-05 14:03:51.911  3323  3410 D berberis: berberis: trans#21800 pc=0x7aa4cd835cbc size=1 JIT jit=21800 interp=0 avg=11
+10-05 14:03:51.914  3323  3410 D berberis: berberis: trans#21900 pc=0x7aa4ce14e3f0 size=3 JIT jit=21900 interp=0 avg=11
+10-05 14:03:51.915  3323  3410 D berberis: berberis: trans#22000 pc=0x7aa4ce15cd88 size=3 JIT jit=22000 interp=0 avg=11
+10-05 14:03:51.916  3323  3410 D berberis: berberis: trans#22100 pc=0x7aa4cdc270a4 size=6 JIT jit=22100 interp=0 avg=11
+10-05 14:03:51.917  3323  3410 D berberis: berberis: trans#22200 pc=0x7aa4ce1684e0 size=4 JIT jit=22200 interp=0 avg=11
+10-05 14:03:51.918  3323  3410 D berberis: berberis: trans#22300 pc=0x7aa4cd676568 size=13 JIT jit=22300 interp=0 avg=11
+10-05 14:03:51.919  1650  3421 I resolv  : res_nsend: used send_dg 69 terrno: 0
+10-05 14:03:51.919  1650  3421 I resolv  : doQuery: rcode=0, ancount=1, return value=69
+10-05 14:03:51.920  3323  3410 D berberis: berberis: trans#22400 pc=0x7aa4cd763bfc size=8 JIT jit=22400 interp=0 avg=11
+10-05 14:03:51.921  3323  3410 D berberis: berberis: trans#22500 pc=0x7aa4cd75c824 size=2 JIT jit=22500 interp=0 avg=11
+10-05 14:03:51.922  3323  3410 D berberis: berberis: trans#22600 pc=0x7aa4cd77d3cc size=3 JIT jit=22600 interp=0 avg=11
+10-05 14:03:51.964  3323  3410 D berberis: berberis: trans#22700 pc=0x7aa4cd765ca0 size=17 JIT jit=22700 interp=0 avg=11
+10-05 14:03:51.965  3323  3410 D berberis: berberis: trans#22800 pc=0x7aa4cd686430 size=2 JIT jit=22800 interp=0 avg=11
+10-05 14:03:51.966  3323  3410 D berberis: berberis: trans#22900 pc=0x7aa4cd679738 size=10 JIT jit=22900 interp=0 avg=11
+10-05 14:03:51.967  3323  3410 D berberis: berberis: trans#23000 pc=0x7aa4cd67eb78 size=9 JIT jit=23000 interp=0 avg=11
+10-05 14:03:51.968  3323  3410 D berberis: berberis: trans#23100 pc=0x7aa4cd68197c size=7 JIT jit=23100 interp=0 avg=11
+10-05 14:03:51.970  3323  3410 D berberis: berberis: trans#23200 pc=0x7aa4cd68093c size=9 JIT jit=23200 interp=0 avg=11
+10-05 14:03:51.970  3323  3410 D berberis: berberis: trans#23300 pc=0x7aa4cd783800 size=9 JIT jit=23300 interp=0 avg=11
+10-05 14:03:51.971  3323  3410 D berberis: berberis: trans#23400 pc=0x7aa4cd680f18 size=3 JIT jit=23400 interp=0 avg=11
+10-05 14:03:51.982  3323  3410 D berberis: berberis: trans#23500 pc=0x7aa4cd7809d4 size=2 JIT jit=23500 interp=0 avg=11
+10-05 14:03:51.983  3323  3410 D berberis: berberis: trans#23600 pc=0x7aa4cd780b20 size=13 JIT jit=23600 interp=0 avg=11
+10-05 14:03:51.985  3323  3410 D berberis: berberis: trans#23700 pc=0x7aa4ce14d63c size=3 JIT jit=23700 interp=0 avg=11
+10-05 14:03:51.987  3323  3323 D berberis: berberis: trans#23800 pc=0x7aa4cd754df4 size=3 JIT jit=23800 interp=0 avg=11
+10-05 14:03:51.992  3323  3410 D berberis: berberis: trans#23900 pc=0x7aa4ce153f6c size=1 JIT jit=23900 interp=0 avg=11
+10-05 14:03:51.992  3323  3410 D berberis: berberis: trans#24000 pc=0x7aa4cd5c53d8 size=6 JIT jit=24000 interp=0 avg=11
+10-05 14:03:51.993  3323  3410 D berberis: berberis: trans#24100 pc=0x7aa4cdf18b9c size=19 JIT jit=24100 interp=0 avg=11
+10-05 14:03:51.993  3323  3410 I Unity   : SystemInfo CPU = x86-64 SSE3 SSE4.1 SSE4.2 AVX, Cores = 4, Memory = 7937mb
+10-05 14:03:51.993  3323  3410 I Unity   : SystemInfo ARM big.LITTLE configuration: 4 big (mask: 0xf), 0 little (mask: 0x0)
+10-05 14:03:51.994  3323  3410 D berberis: berberis: trans#24200 pc=0x7aa4cd7721ac size=1 JIT jit=24200 interp=0 avg=11
+10-05 14:03:51.994  3323  3410 I Unity   : ApplicationInfo 'com.epidgames.trickcalrevive', Version '10644', Min API Level '26', Target API Level '36'
+10-05 14:03:51.994  3323  3410 I Unity   : Built from '6000.3/staging' branch, Version '6000.3.13f1 (8c4f11e4fb20)', Build type 'Release', Scripting Backend 'il2cpp', CPU 'arm64-v8a', Stripping 'Enabled'
+10-05 14:03:51.995  3323  3410 D berberis: berberis: trans#24300 pc=0x7aa4ce15be0c size=3 JIT jit=24300 interp=0 avg=11
+10-05 14:03:51.995  3323  3410 D berberis: berberis: trans#24400 pc=0x7aa4cd76dea4 size=5 JIT jit=24400 interp=0 avg=11
+10-05 14:03:51.995  3323  3410 I Unity   : Device Model 'QEMU Generic Android-x86_64', OS 'Android OS 15 (API 35)'
+10-05 14:03:51.996  3323  3410 D berberis: berberis: trans#24500 pc=0x7aa4cdc25c60 size=2 JIT jit=24500 interp=0 avg=11
+10-05 14:03:51.997  3323  3410 D berberis: berberis: trans#24600 pc=0x7aa4cd6e0598 size=5 JIT jit=24600 interp=0 avg=11
+10-05 14:03:51.998  3323  3410 D berberis: berberis: trans#24700 pc=0x7aa4cd6e0edc size=6 JIT jit=24700 interp=0 avg=11
+10-05 14:03:51.999  3323  3410 D berberis: berberis: trans#24800 pc=0x7aa4cd6e183c size=6 JIT jit=24800 interp=0 avg=11
+10-05 14:03:51.999  3323  3410 D berberis: berberis: trans#24900 pc=0x7aa4cd6e219c size=6 JIT jit=24900 interp=0 avg=11
+10-05 14:03:52.000  3323  3410 D berberis: berberis: trans#25000 pc=0x7aa4cd6e2afc size=6 JIT jit=25000 interp=0 avg=11
+10-05 14:03:52.001  3323  3410 D berberis: berberis: trans#25100 pc=0x7aa4cd77fca8 size=11 JIT jit=25100 interp=0 avg=11
+10-05 14:03:52.003  3323  3410 D berberis: berberis: trans#25200 pc=0x7aa4cd6793d4 size=4 JIT jit=25200 interp=0 avg=11
+10-05 14:03:52.005  3323  3410 D berberis: berberis: trans#25300 pc=0x7aa4cd8032cc size=3 JIT jit=25300 interp=0 avg=11
+10-05 14:03:52.007  3323  3410 D berberis: berberis: trans#25400 pc=0x7aa52c459028 size=5 JIT jit=25400 interp=0 avg=11
+10-05 14:03:52.008  3323  3410 D berberis: berberis: trans#25500 pc=0x7aa52c4580f8 size=6 JIT jit=25500 interp=0 avg=11
+10-05 14:03:52.019  3323  3410 D berberis: berberis: trans#25600 pc=0x7aa4cd6851c8 size=10 JIT jit=25600 interp=0 avg=11
+10-05 14:03:52.046  3323  3410 D berberis: berberis: trans#25700 pc=0x7aa4cd75c784 size=5 JIT jit=25700 interp=0 avg=11
+10-05 14:03:52.070  1650  3422 I resolv  : res_nsend: used send_dg 57 terrno: 0
+10-05 14:03:52.070  1650  3422 I resolv  : doQuery: rcode=0, ancount=1, return value=57
+10-05 14:03:52.075  1650  3430 I resolv  : GetAddrInfoHandler::run: {100 100 100 983140 10299 0}
+10-05 14:03:52.078  3323  3360 W Airbridge: Client is failed to receive response: method={GET} url={https://touchpoint.airbridge.io/deferred-deeplink/v1/apps/trickcalrevive?device_uuid=f2c1d623-4daf-4412-99d5-2869e8316d5f&os_name=Android&os_version=15&device_model=Generic%20Android-x86_64&device_type=tablet} error={java.net.ConnectException: Failed to connect to touchpoint.airbridge.io/[::]:443}
+10-05 14:03:52.078  3323  3360 E Airbridge: Failed on fetching deferred-deeplink: error={java.net.ConnectException: Failed to connect to touchpoint.airbridge.io/[::]:443}
+10-05 14:03:52.078  3323  3360 E Airbridge: Succeed on loading error of fetching deferred-deeplink from storage: error={java.net.ConnectException: Failed to connect to touchpoint.airbridge.io/[::]:443}
+10-05 14:03:52.084  1650  3433 I resolv  : GetAddrInfoHandler::run: {100 100 100 983140 10299 0}
+10-05 14:03:52.085  1650  3434 I resolv  : res_nmkquery: (QUERY, IN, AAAA)
+10-05 14:03:52.085  1650  3435 I resolv  : res_nmkquery: (QUERY, IN, A)
+10-05 14:03:52.089  1650  3434 I resolv  : res_nsend: used send_dg 70 terrno: 0
+10-05 14:03:52.091  1650  3434 I resolv  : doQuery: rcode=0, ancount=1, return value=70
+10-05 14:03:52.093  1650  3435 I resolv  : res_nsend: used send_dg 58 terrno: 0
+10-05 14:03:52.095  1650  3435 I resolv  : doQuery: rcode=0, ancount=1, return value=58
+10-05 14:03:52.100  3323  3360 W Airbridge: Client is failed to receive response: method={GET} url={https://attribution.airbridge.io/attribution-result/v1/apps/trickcalrevive?device_uuid=f2c1d623-4daf-4412-99d5-2869e8316d5f&install_event_uuid=6a2e26d8-9386-404b-a785-39dac7ee1196&long_polling=true} error={java.net.ConnectException: Failed to connect to attribution.airbridge.io/[::]:443}
+10-05 14:03:52.123     0     0 I logd    : logdr: UID=2000 GID=2000 PID=3436 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+10-05 14:03:52.159  3323  3431 D berberis: berberis: trans#25800 pc=0x7aa54a8782a4 size=5 JIT jit=25800 interp=0 avg=11
+10-05 14:03:52.161  3323  3419 W InteractionJankMonitor: Initializing without READ_DEVICE_CONFIG permission. enabled=true, interval=1, missedFrameThreshold=3, frameTimeThreshold=64, package=com.epidgames.trickcalrevive
+10-05 14:03:52.163  1650  3440 I resolv  : GetAddrInfoHandler::run: {100 100 100 983140 10299 0}
+10-05 14:03:52.164  1650  3442 I resolv  : res_nmkquery: (QUERY, IN, A)
+10-05 14:03:52.164  1650  3441 I resolv  : res_nmkquery: (QUERY, IN, AAAA)
+10-05 14:03:52.166  1650  3441 I resolv  : res_nsend: used send_dg 64 terrno: 0
+10-05 14:03:52.167  1650  3441 I resolv  : doQuery: rcode=0, ancount=1, return value=64
+10-05 14:03:52.168  1650  3442 I resolv  : res_nsend: used send_dg 52 terrno: 0
+10-05 14:03:52.168  1650  3442 I resolv  : doQuery: rcode=0, ancount=1, return value=52
+10-05 14:03:52.173  3323  3431 W Airbridge: Client is failed to receive response: method={POST} url={https://event.airbridge.io/v1/apps/trickcalrevive} error={java.net.ConnectException: Failed to connect to event.airbridge.io/[::]:443}
+10-05 14:03:52.176  3323  3431 W Airbridge: Client is failed to receive response: method={POST} url={https://event.airbridge.io/v1/apps/trickcalrevive} error={java.net.ConnectException: Failed to connect to event.airbridge.io/[::]:443}
+10-05 14:03:52.176  3323  3361 W Airbridge: delay 1000ms
+10-05 14:03:52.180  1650  1705 I netd    : tetherGetStats() -> {[]} <0.22ms>
+10-05 14:03:52.210  2158  2418 W FrameTracker: Missing SF jank callback for vsyncId: 11386, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 14:03:52.211  2158  2418 W FrameTracker: Missing SF jank callback for vsyncId: 11410, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 14:03:52.211  2158  2418 W FrameTracker: Missing SF jank callback for vsyncId: 11435, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 14:03:52.211  2158  2418 W FrameTracker: Missing SF jank callback for vsyncId: 11460, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 14:03:52.211  2158  2418 W FrameTracker: Missing SF jank callback for vsyncId: 11479, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 14:03:52.211  2158  2418 W FrameTracker: Missing SF jank callback for vsyncId: 11498, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 14:03:52.211  2158  2418 W FrameTracker: Missing SF jank callback for vsyncId: 11517, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 14:03:52.211  2158  2418 W FrameTracker: Missing SF jank callback for vsyncId: 11536, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 14:03:52.211  2158  2418 W FrameTracker: Missing SF jank callback for vsyncId: 11555, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 14:03:52.211  2158  2418 W FrameTracker: Missing SF jank callback for vsyncId: 11574, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 14:03:52.211  2158  2418 W FrameTracker: Missing SF jank callback for vsyncId: 11612, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 14:03:52.211  2158  2418 W FrameTracker: Missing SF jank callback for vsyncId: 11637, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 14:03:52.211  2158  2418 W FrameTracker: Missing SF jank callback for vsyncId: 11662, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 14:03:52.211  2158  2418 W FrameTracker: Missing SF jank callback for vsyncId: 11687, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 14:03:52.211  2158  2418 W FrameTracker: Missing SF jank callback for vsyncId: 11706, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 14:03:52.211  2158  2418 W FrameTracker: Missing SF jank callback for vsyncId: 11744, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 14:03:52.211  2158  2418 W FrameTracker: Missing SF jank callback for vsyncId: 11763, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 14:03:52.275  3323  3345 D FirebaseSessions: Fetching settings from server.
+10-05 14:03:52.276  1650  3444 I resolv  : GetAddrInfoHandler::run: {100 100 100 983140 10299 0}
+10-05 14:03:52.276  1650  3445 I resolv  : res_nmkquery: (QUERY, IN, AAAA)
+10-05 14:03:52.277  1650  3446 I resolv  : res_nmkquery: (QUERY, IN, A)
+10-05 14:03:52.279  1650  3445 I resolv  : res_nsend: used send_dg 79 terrno: 0
+10-05 14:03:52.279  1650  3445 I resolv  : doQuery: rcode=0, ancount=1, return value=79
+10-05 14:03:52.281  1650  3446 I resolv  : res_nsend: used send_dg 67 terrno: 0
+10-05 14:03:52.281  1650  3446 I resolv  : doQuery: rcode=0, ancount=1, return value=67
+10-05 14:03:52.282  3323  3359 E FirebaseSessions: Error failed to fetch the remote configs: Failed to connect to firebase-settings.crashlytics.com/[::]:443
+10-05 14:03:52.287  3323  3345 D FirebaseSessions: Fetching settings from server.
+10-05 14:03:52.289  3323  3359 E FirebaseSessions: Error failed to fetch the remote configs: Failed to connect to firebase-settings.crashlytics.com/[::]:443
+10-05 14:03:52.291  3323  3351 D FirebaseSessions: Session Event Type: SESSION_START
+10-05 14:03:52.291  3323  3351 D FirebaseSessions: Successfully logged Session Start event.
+10-05 14:03:52.295  1849  2622 D ConnectivityService: requestNetwork for uid/pid:1000/1849 asUid: 10299 activeRequest: null callbackRequest: 82 [NetworkRequest [ REQUEST id=83, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10299 RequestorUid: 1000 RequestorPkg: android UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647 isUidTracked: false declaredMethods: ALL
+10-05 14:03:52.296  1849  2033 D ConnectivityService: NetReassign [83 : null → 100] [c 0] [a 0] [i 0]
+10-05 14:03:52.297  1849  2032 D EthernetNetworkFactory: eth0: onNetworkNeeded for request: NetworkRequest [ REQUEST id=83, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10299 RequestorUid: 1000 RequestorPkg: android UnderlyingNetworks: Null] ]
+10-05 14:03:52.297  1849  2025 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=83, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10299 RequestorUid: 1000 RequestorPkg: android UnderlyingNetworks: Null] ]
+10-05 14:03:52.298  1849  2025 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=83, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10299 RequestorUid: 1000 RequestorPkg: android UnderlyingNetworks: Null] ]
+10-05 14:03:52.298  1849  2025 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=83, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10299 RequestorUid: 1000 RequestorPkg: android UnderlyingNetworks: Null] ]
+10-05 14:03:52.298  1849  2032 D EthernetNetworkFactory: IpClient already started
+10-05 14:03:52.376  3323  3374 D berberis: berberis: trans#25900 pc=0x7aa4c92b3c88 size=77 JIT jit=25900 interp=0 avg=11
+10-05 14:03:52.377  3323  3374 D berberis: berberis: trans#26000 pc=0x7aa4c92ab69c size=41 JIT jit=26000 interp=0 avg=11
+10-05 14:03:52.391  3323  3374 D berberis: berberis: trans#26100 pc=0x7aa4c92b2394 size=6 JIT jit=26100 interp=0 avg=11
+10-05 14:03:52.412     0     0 I logd    : logdr: UID=2000 GID=2000 PID=3447 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+10-05 14:03:52.444  3323  3410 D berberis: berberis: trans#26200 pc=0x7aa4cd675c58 size=13 JIT jit=26200 interp=0 avg=11
+10-05 14:03:52.445  3323  3410 D berberis: berberis: trans#26300 pc=0x7aa4cd4758bc size=5 JIT jit=26300 interp=0 avg=11
+10-05 14:03:52.446  3323  3410 D berberis: berberis: trans#26400 pc=0x7aa4cd4defd8 size=24 JIT jit=26400 interp=0 avg=11
+10-05 14:03:52.447  3323  3410 D berberis: berberis: trans#26500 pc=0x7aa4cd4753a8 size=5 JIT jit=26500 interp=0 avg=11
+10-05 14:03:52.447  3323  3410 D berberis: berberis: trans#26600 pc=0x7aa4cd45dd58 size=1 JIT jit=26600 interp=0 avg=11
+10-05 14:03:52.448  3323  3410 D berberis: berberis: trans#26700 pc=0x7aa4cd48b300 size=5 JIT jit=26700 interp=0 avg=11
+10-05 14:03:52.448  3323  3410 D berberis: berberis: trans#26800 pc=0x7aa4cd48b06c size=5 JIT jit=26800 interp=0 avg=11
+10-05 14:03:52.448  3323  3410 D berberis: berberis: trans#26900 pc=0x7aa4cd48b3f0 size=5 JIT jit=26900 interp=0 avg=11
+10-05 14:03:52.449  3323  3410 D berberis: berberis: trans#27000 pc=0x7aa4cd475ca4 size=5 JIT jit=27000 interp=0 avg=11
+10-05 14:03:52.449  3323  3410 D berberis: berberis: trans#27100 pc=0x7aa4cd475e34 size=5 JIT jit=27100 interp=0 avg=11
+10-05 14:03:52.450  3323  3410 D berberis: berberis: trans#27200 pc=0x7aa4cd48ef74 size=5 JIT jit=27200 interp=0 avg=11
+10-05 14:03:52.451  3323  3410 D berberis: berberis: trans#27300 pc=0x7aa4cd47612c size=5 JIT jit=27300 interp=0 avg=11
+10-05 14:03:52.452  3323  3410 D berberis: berberis: trans#27400 pc=0x7aa4cd476208 size=5 JIT jit=27400 interp=0 avg=11
+10-05 14:03:52.452  3323  3410 D berberis: berberis: trans#27500 pc=0x7aa4cd494454 size=5 JIT jit=27500 interp=0 avg=11
+10-05 14:03:52.453  3323  3410 D berberis: berberis: trans#27600 pc=0x7aa4cd4a3f14 size=5 JIT jit=27600 interp=0 avg=11
+10-05 14:03:52.454  3323  3410 D berberis: berberis: trans#27700 pc=0x7aa4cd45e5d4 size=1 JIT jit=27700 interp=0 avg=11
+10-05 14:03:52.455  3323  3410 D berberis: berberis: trans#27800 pc=0x7aa4cd45e694 size=1 JIT jit=27800 interp=0 avg=11
+10-05 14:03:52.455  3323  3410 D berberis: berberis: trans#27900 pc=0x7aa4cd45e75c size=1 JIT jit=27900 interp=0 avg=11
+10-05 14:03:52.456  3323  3410 D berberis: berberis: trans#28000 pc=0x7aa4cd45e820 size=1 JIT jit=28000 interp=0 avg=11
+10-05 14:03:52.456  3323  3410 D berberis: berberis: trans#28100 pc=0x7aa4cd477ec8 size=5 JIT jit=28100 interp=0 avg=11
+10-05 14:03:52.457  3323  3410 D berberis: berberis: trans#28200 pc=0x7aa4cd49d0a4 size=5 JIT jit=28200 interp=0 avg=11
+10-05 14:03:52.457  3323  3410 D berberis: berberis: trans#28300 pc=0x7aa4cd49d16c size=5 JIT jit=28300 interp=0 avg=10
+10-05 14:03:52.460  3323  3410 D berberis: berberis: trans#28400 pc=0x7aa4cd45eae8 size=1 JIT jit=28400 interp=0 avg=10
+10-05 14:03:52.460  3323  3410 D berberis: berberis: trans#28500 pc=0x7aa4cd47ab00 size=5 JIT jit=28500 interp=0 avg=10
+10-05 14:03:52.461  3323  3410 D berberis: berberis: trans#28600 pc=0x7aa4cd4781c0 size=5 JIT jit=28600 interp=0 avg=10
+10-05 14:03:52.461  3323  3410 D berberis: berberis: trans#28700 pc=0x7aa4cd477c70 size=5 JIT jit=28700 interp=0 avg=10
+10-05 14:03:52.462  3323  3410 D berberis: berberis: trans#28800 pc=0x7aa4cd477568 size=5 JIT jit=28800 interp=0 avg=10
+10-05 14:03:52.462  3323  3410 D berberis: berberis: trans#28900 pc=0x7aa4cd478350 size=5 JIT jit=28900 interp=0 avg=10
+10-05 14:03:52.462  3323  3410 D berberis: berberis: trans#29000 pc=0x7aa4cd479a0c size=5 JIT jit=29000 interp=0 avg=10
+10-05 14:03:52.463  3323  3410 D berberis: berberis: trans#29100 pc=0x7aa4cd45f05c size=1 JIT jit=29100 interp=0 avg=10
+10-05 14:03:52.464  3323  3410 D berberis: berberis: trans#29200 pc=0x7aa4cd45f124 size=1 JIT jit=29200 interp=0 avg=10
+10-05 14:03:52.464  3323  3410 D berberis: berberis: trans#29300 pc=0x7aa4cd45f1ec size=1 JIT jit=29300 interp=0 avg=10
+10-05 14:03:52.464  3323  3410 D berberis: berberis: trans#29400 pc=0x7aa4cd45f2b4 size=1 JIT jit=29400 interp=0 avg=10
+10-05 14:03:52.465  3323  3410 D berberis: berberis: trans#29500 pc=0x7aa4cd45f37c size=1 JIT jit=29500 interp=0 avg=10
+10-05 14:03:52.465  3323  3410 D berberis: berberis: trans#29600 pc=0x7aa4cd45f444 size=1 JIT jit=29600 interp=0 avg=10
+10-05 14:03:52.466  3323  3410 D berberis: berberis: trans#29700 pc=0x7aa4cd45f500 size=1 JIT jit=29700 interp=0 avg=10
+10-05 14:03:52.466  3323  3410 D berberis: berberis: trans#29800 pc=0x7aa4cd47b064 size=5 JIT jit=29800 interp=0 avg=10
+10-05 14:03:52.467  3323  3410 D berberis: berberis: trans#29900 pc=0x7aa4cd45f670 size=1 JIT jit=29900 interp=0 avg=10
+10-05 14:03:52.467  3323  3410 D berberis: berberis: trans#30000 pc=0x7aa4cd45f738 size=1 JIT jit=30000 interp=0 avg=10
+10-05 14:03:52.467  3323  3410 D berberis: berberis: trans#30100 pc=0x7aa4cd45f800 size=1 JIT jit=30100 interp=0 avg=10
+10-05 14:03:52.468  3323  3410 D berberis: berberis: trans#30200 pc=0x7aa4cd45f8c8 size=1 JIT jit=30200 interp=0 avg=10
+10-05 14:03:52.468  3323  3410 D berberis: berberis: trans#30300 pc=0x7aa4cd45f990 size=1 JIT jit=30300 interp=0 avg=10
+10-05 14:03:52.468  3323  3410 D berberis: berberis: trans#30400 pc=0x7aa4cd45fa58 size=1 JIT jit=30400 interp=0 avg=10
+10-05 14:03:52.469  3323  3410 D berberis: berberis: trans#30500 pc=0x7aa4cd45fb20 size=1 JIT jit=30500 interp=0 avg=10
+10-05 14:03:52.469  3323  3410 D berberis: berberis: trans#30600 pc=0x7aa4cd45fbe8 size=1 JIT jit=30600 interp=0 avg=10
+10-05 14:03:52.469  3323  3410 D berberis: berberis: trans#30700 pc=0x7aa4cd45fcb0 size=1 JIT jit=30700 interp=0 avg=10
+10-05 14:03:52.470  3323  3410 D berberis: berberis: trans#30800 pc=0x7aa4cd45fd78 size=1 JIT jit=30800 interp=0 avg=10
+10-05 14:03:52.470  3323  3410 D berberis: berberis: trans#30900 pc=0x7aa4cd45fe40 size=1 JIT jit=30900 interp=0 avg=10
+10-05 14:03:52.470  3323  3410 D berberis: berberis: trans#31000 pc=0x7aa4cd45ff08 size=1 JIT jit=31000 interp=0 avg=10
+10-05 14:03:52.471  3323  3410 D berberis: berberis: trans#31100 pc=0x7aa4cd45ffd0 size=1 JIT jit=31100 interp=0 avg=10
+10-05 14:03:52.471  3323  3410 D berberis: berberis: trans#31200 pc=0x7aa4cd460098 size=1 JIT jit=31200 interp=0 avg=10
+10-05 14:03:52.472  3323  3410 D berberis: berberis: trans#31300 pc=0x7aa4cd460160 size=1 JIT jit=31300 interp=0 avg=10
+10-05 14:03:52.472  3323  3410 D berberis: berberis: trans#31400 pc=0x7aa4cd460228 size=1 JIT jit=31400 interp=0 avg=10
+10-05 14:03:52.472  3323  3410 D berberis: berberis: trans#31500 pc=0x7aa4cd4602f0 size=1 JIT jit=31500 interp=0 avg=10
+10-05 14:03:52.473  3323  3410 D berberis: berberis: trans#31600 pc=0x7aa4a2f0dfa8 size=4 JIT jit=31600 interp=0 avg=10
+10-05 14:03:52.474  3323  3410 D berberis: berberis: trans#31700 pc=0x7aa4a2f100ec size=3 JIT jit=31700 interp=0 avg=10
+10-05 14:03:52.475  3323  3410 D berberis: berberis: trans#31800 pc=0x7aa4a2edb5ec size=5 JIT jit=31800 interp=0 avg=10
+10-05 14:03:52.476  3323  3410 D berberis: berberis: trans#31900 pc=0x7aa4a2f0fffc size=2 JIT jit=31900 interp=0 avg=10
+10-05 14:03:52.536  1849  2622 D CompatChangeReporter: Compat change id reported: 151861875; UID 10260; state: ENABLED
+10-05 14:03:52.702     0     0 I logd    : logdr: UID=2000 GID=2000 PID=3453 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+10-05 14:03:52.724  3323  3410 D berberis: berberis: trans#32000 pc=0x7aa4a2ef73e0 size=9 JIT jit=32000 interp=0 avg=10
+10-05 14:03:52.726  3323  3410 D berberis: berberis: trans#32100 pc=0x7aa4a2ef7760 size=10 JIT jit=32100 interp=0 avg=10
+10-05 14:03:52.731  3323  3410 D berberis: berberis: trans#32200 pc=0x7aa4a2ef9fcc size=4 JIT jit=32200 interp=0 avg=10
+10-05 14:03:52.762  3323  3410 D berberis: berberis: trans#32300 pc=0x7aa4a2f44df8 size=7 JIT jit=32300 interp=0 avg=10
+10-05 14:03:52.770  3323  3410 D berberis: berberis: trans#32400 pc=0x7aa4a2f43bac size=10 JIT jit=32400 interp=0 avg=10
+10-05 14:03:52.792  3323  3410 D berberis: berberis: trans#32500 pc=0x7aa4a2f45f84 size=5 JIT jit=32500 interp=0 avg=10
+10-05 14:03:52.794  3323  3410 D berberis: berberis: trans#32600 pc=0x7aa4a2f3083c size=17 JIT jit=32600 interp=0 avg=10
+10-05 14:03:52.795  3323  3410 D berberis: berberis: trans#32700 pc=0x7aa4a2edfe54 size=17 JIT jit=32700 interp=0 avg=10
+10-05 14:03:52.806  3323  3410 D berberis: berberis: trans#32800 pc=0x7aa4a2ef01ec size=13 JIT jit=32800 interp=0 avg=10
+10-05 14:03:52.833  3323  3410 D berberis: berberis: trans#32900 pc=0x7aa4a2f139c8 size=2 JIT jit=32900 interp=0 avg=10
+10-05 14:03:52.859  3323  3410 D berberis: berberis: trans#33000 pc=0x7aa4a2f1368c size=37 HEAVY jit=33000 interp=0 avg=10
+10-05 14:03:52.893  3323  3410 D berberis: berberis: trans#33100 pc=0x7aa4a2f4a080 size=7 JIT jit=33100 interp=0 avg=10
+10-05 14:03:52.894  3323  3410 D berberis: berberis: trans#33200 pc=0x7aa4a2f4ac08 size=16 JIT jit=33200 interp=0 avg=10
+10-05 14:03:52.894  3323  3410 D berberis: berberis: trans#33300 pc=0x7aa4dfc9b608 size=3 JIT jit=33300 interp=0 avg=10
+10-05 14:03:52.895  3323  3410 D berberis: berberis: trans#33400 pc=0x7aa4a2f562d8 size=3 JIT jit=33400 interp=0 avg=10
+10-05 14:03:52.896  3323  3410 D berberis: berberis: trans#33500 pc=0x7aa4a2f4dcf4 size=5 JIT jit=33500 interp=0 avg=10
+10-05 14:03:52.896  3323  3410 D berberis: berberis: trans#33600 pc=0x7aa4a2f4d904 size=11 JIT jit=33600 interp=0 avg=10
+10-05 14:03:52.897  3323  3410 D berberis: berberis: trans#33700 pc=0x7aa4a2f4b1c4 size=5 JIT jit=33700 interp=0 avg=10
+10-05 14:03:52.898  3323  3410 D berberis: berberis: trans#33800 pc=0x7aa4a2f38048 size=9 JIT jit=33800 interp=0 avg=10
+10-05 14:03:52.898  3323  3410 D berberis: berberis: trans#33900 pc=0x7aa4a2f37ab4 size=2 JIT jit=33900 interp=0 avg=10
+10-05 14:03:52.906  3323  3410 D berberis: berberis: trans#34000 pc=0x7aa4a2f37dac size=9 JIT jit=34000 interp=0 avg=10
+10-05 14:03:52.907  3323  3410 D berberis: berberis: trans#34100 pc=0x7aa4a2f3a3dc size=8 JIT jit=34100 interp=0 avg=10
+10-05 14:03:52.909  3323  3410 D berberis: berberis: trans#34200 pc=0x7aa4a2f29290 size=1 JIT jit=34200 interp=0 avg=10
+10-05 14:03:52.909  3323  3410 D berberis: berberis: trans#34300 pc=0x7aa4a2f1afe8 size=2 JIT jit=34300 interp=0 avg=10
+10-05 14:03:52.910  3323  3410 D berberis: berberis: trans#34400 pc=0x7aa4a2f1ddcc size=5 JIT jit=34400 interp=0 avg=10
+10-05 14:03:52.911  3323  3410 D berberis: berberis: trans#34500 pc=0x7aa4a2f21f44 size=25 JIT jit=34500 interp=0 avg=10
+10-05 14:03:52.911  3323  3410 D berberis: berberis: trans#34600 pc=0x7aa4a2efa388 size=3 JIT jit=34600 interp=0 avg=10
+10-05 14:03:52.912  3323  3410 D berberis: berberis: trans#34700 pc=0x7aa4a2f3d304 size=3 JIT jit=34700 interp=0 avg=10
+10-05 14:03:52.913  3323  3410 D berberis: berberis: trans#34800 pc=0x7aa4a2ef508c size=4 JIT jit=34800 interp=0 avg=10
+10-05 14:03:52.913  3323  3410 D berberis: berberis: trans#34900 pc=0x7aa4a2f1b1fc size=8 JIT jit=34900 interp=0 avg=10
+10-05 14:03:52.917  3323  3410 D berberis: berberis: trans#35000 pc=0x7aa4a2f51920 size=31 JIT jit=35000 interp=0 avg=10
+10-05 14:03:52.919  3323  3410 D berberis: berberis: trans#35100 pc=0x7aa4a2ee7fb4 size=1 JIT jit=35100 interp=0 avg=10
+10-05 14:03:52.920  3323  3410 D berberis: berberis: trans#35200 pc=0x7aa4a2f49150 size=6 JIT jit=35200 interp=0 avg=10
+10-05 14:03:52.921  3323  3410 D berberis: berberis: trans#35300 pc=0x7aa4a2f4a80c size=2 JIT jit=35300 interp=0 avg=10
+10-05 14:03:52.921  3323  3410 D berberis: berberis: trans#35400 pc=0x7aa4a2f4a6cc size=16 JIT jit=35400 interp=0 avg=10
+10-05 14:03:52.922  3323  3410 D berberis: berberis: trans#35500 pc=0x7aa4a2f3a900 size=3 JIT jit=35500 interp=0 avg=10
+10-05 14:03:52.922  3323  3456 D berberis: berberis: trans#35600 pc=0x7aa4a2f0434c size=5 JIT jit=35600 interp=0 avg=9
+10-05 14:03:52.923  3323  3410 D berberis: berberis: trans#35700 pc=0x7aa4a2f4bdac size=29 JIT jit=35700 interp=0 avg=9
+10-05 14:03:52.924  3323  3410 D berberis: berberis: trans#35800 pc=0x7aa4a2f31514 size=4 JIT jit=35800 interp=0 avg=9
+10-05 14:03:52.927  3323  3410 D berberis: berberis: trans#35900 pc=0x7aa4a2f321a4 size=3 JIT jit=35900 interp=0 avg=9
+10-05 14:03:52.993     0     0 I logd    : logdr: UID=2000 GID=2000 PID=3457 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+10-05 14:03:53.036  3323  3374 D berberis: berberis: trans#36000 pc=0x7aa4c92b28e0 size=26 JIT jit=36000 interp=0 avg=9
+10-05 14:03:53.179  3323  3431 W Airbridge: Client is failed to receive response: method={POST} url={https://event.airbridge.io/v1/apps/trickcalrevive} error={java.net.ConnectException: Failed to connect to event.airbridge.io/[::]:443}
+10-05 14:03:53.179  3323  3361 W Airbridge: delay 2000ms
+10-05 14:03:53.248  3323  3410 D berberis: berberis: trans#36100 pc=0x7aa4a2f3aa00 size=4 JIT jit=36100 interp=0 avg=9
+10-05 14:03:53.249  3323  3456 D berberis: berberis: trans#36200 pc=0x7aa4a2f561e4 size=8 JIT jit=36200 interp=0 avg=9
+10-05 14:03:53.251  3323  3410 D berberis: berberis: trans#36300 pc=0x7aa4a2f3cc7c size=4 JIT jit=36300 interp=0 avg=9
+10-05 14:03:53.252  3323  3410 D berberis: berberis: trans#36400 pc=0x7aa4a2ef7ddc size=10 JIT jit=36400 interp=0 avg=9
+10-05 14:03:53.252  3323  3410 D berberis: berberis: trans#36500 pc=0x7aa4a2ef8494 size=3 JIT jit=36500 interp=0 avg=9
+10-05 14:03:53.253  3323  3410 D berberis: berberis: trans#36600 pc=0x7aa4a2f2c26c size=3 JIT jit=36600 interp=0 avg=9
+10-05 14:03:53.254  3323  3410 D berberis: berberis: trans#36700 pc=0x7aa4a2f41518 size=8 JIT jit=36700 interp=0 avg=9
+10-05 14:03:53.255  3323  3410 D berberis: berberis: trans#36800 pc=0x7aa4a2ef55c8 size=17 JIT jit=36800 interp=0 avg=9
+10-05 14:03:53.256  3323  3410 D berberis: berberis: trans#36900 pc=0x7aa4a2ef5ba0 size=5 JIT jit=36900 interp=0 avg=9
+10-05 14:03:53.258  3323  3410 D berberis: berberis: trans#37000 pc=0x7aa4a2efd7f8 size=27 HEAVY jit=37000 interp=0 avg=9
+10-05 14:03:53.262  3323  3410 D berberis: berberis: trans#37100 pc=0x7aa4a2f3eb74 size=2 JIT jit=37100 interp=0 avg=9
+10-05 14:03:53.265  3323  3410 D berberis: berberis: trans#37200 pc=0x7aa4a90e2a54 size=3 JIT jit=37200 interp=0 avg=9
+10-05 14:03:53.266  3323  3410 D berberis: berberis: trans#37300 pc=0x7aa4a92068c8 size=4 JIT jit=37300 interp=0 avg=9
+10-05 14:03:53.267  3323  3410 D berberis: berberis: trans#37400 pc=0x7aa4a2f10e20 size=11 JIT jit=37400 interp=0 avg=9
+10-05 14:03:53.269  3323  3410 D berberis: berberis: trans#37500 pc=0x7aa4aa903314 size=35 JIT jit=37500 interp=0 avg=9
+10-05 14:03:53.275  3323  3410 D berberis: berberis: trans#37600 pc=0x7aa4a2f11fb4 size=5 JIT jit=37600 interp=0 avg=9
+10-05 14:03:53.276  3323  3410 D berberis: berberis: trans#37700 pc=0x7aa4cd736be4 size=3 JIT jit=37700 interp=0 avg=9
+10-05 14:03:53.277  3323  3410 D berberis: berberis: trans#37800 pc=0x7aa4cd73cda0 size=5 JIT jit=37800 interp=0 avg=9
+10-05 14:03:53.278  3323  3410 D berberis: berberis: trans#37900 pc=0x7aa4cd5d5854 size=3 JIT jit=37900 interp=0 avg=9
+10-05 14:03:53.286  3323  3410 D berberis: berberis: trans#38000 pc=0x7aa4cdc226dc size=2 JIT jit=38000 interp=0 avg=9
+10-05 14:03:53.289  3323  3410 D berberis: berberis: trans#38100 pc=0x7aa4cd5c4524 size=7 JIT jit=38100 interp=0 avg=9
+10-05 14:03:53.306  3323  3410 D berberis: berberis: trans#38200 pc=0x7aa4cd4cdbe8 size=9 JIT jit=38200 interp=0 avg=9
+10-05 14:03:53.307  3323  3410 D berberis: berberis: trans#38300 pc=0x7aa4cd51a1c8 size=4 JIT jit=38300 interp=0 avg=9
+10-05 14:03:53.309  3323  3410 D berberis: berberis: trans#38400 pc=0x7aa4cd45d888 size=2 JIT jit=38400 interp=0 avg=9
+10-05 14:03:53.311  3323  3410 D berberis: berberis: trans#38500 pc=0x7aa4cd52796c size=3 JIT jit=38500 interp=0 avg=9
+10-05 14:03:53.314  3323  3410 D berberis: berberis: trans#38600 pc=0x7aa4cd45db14 size=2 JIT jit=38600 interp=0 avg=9
+10-05 14:03:53.315  3323  3410 D berberis: berberis: trans#38700 pc=0x7aa4cd5ccb30 size=1 JIT jit=38700 interp=0 avg=9
+10-05 14:03:53.316  3323  3410 D berberis: berberis: trans#38800 pc=0x7aa4cd5b274c size=2 JIT jit=38800 interp=0 avg=9
+10-05 14:03:53.318  3323  3410 D berberis: berberis: trans#38900 pc=0x7aa4cd4dc1a8 size=4 JIT jit=38900 interp=0 avg=9
+10-05 14:03:53.318  3323  3410 D berberis: berberis: trans#39000 pc=0x7aa4cd4d983c size=3 JIT jit=39000 interp=0 avg=9
+10-05 14:03:53.319  3323  3410 D berberis: berberis: trans#39100 pc=0x7aa4cdc169b0 size=4 JIT jit=39100 interp=0 avg=9
+10-05 14:03:53.320  3323  3410 D berberis: berberis: trans#39200 pc=0x7aa4cdc16860 size=4 JIT jit=39200 interp=0 avg=9
+10-05 14:03:53.321  3323  3410 D berberis: berberis: trans#39300 pc=0x7aa4cd69bb3c size=1 JIT jit=39300 interp=0 avg=9
+10-05 14:03:53.321  3323  3410 D berberis: berberis: trans#39400 pc=0x7aa4cda16314 size=2 JIT jit=39400 interp=0 avg=9
+10-05 14:03:53.322  3323  3410 D berberis: berberis: trans#39500 pc=0x7aa4cd45d6d8 size=1 JIT jit=39500 interp=0 avg=9
+10-05 14:03:53.324  3323  3410 D berberis: berberis: trans#39600 pc=0x7aa4cd826930 size=15 JIT jit=39600 interp=0 avg=9
+10-05 14:03:53.325  3323  3410 D berberis: berberis: trans#39700 pc=0x7aa4cd8268a4 size=14 JIT jit=39700 interp=0 avg=9
+10-05 14:03:53.326  3323  3410 D berberis: berberis: trans#39800 pc=0x7aa4cd5ec904 size=4 JIT jit=39800 interp=0 avg=9
+10-05 14:03:53.328  3323  3410 D berberis: berberis: trans#39900 pc=0x7aa4cd5ee330 size=17 JIT jit=39900 interp=0 avg=9
+10-05 14:03:53.328  3323  3410 D berberis: berberis: trans#40000 pc=0x7aa4cd825054 size=3 JIT jit=40000 interp=0 avg=9
+10-05 14:03:53.330  3323  3410 D berberis: berberis: trans#40100 pc=0x7aa4cd835634 size=1 JIT jit=40100 interp=0 avg=9
+10-05 14:03:53.331  3323  3410 D berberis: berberis: trans#40200 pc=0x7aa4cda75944 size=2 JIT jit=40200 interp=0 avg=9
+10-05 14:03:53.332  3323  3410 D berberis: berberis: trans#40300 pc=0x7aa4cdeb0b60 size=10 JIT jit=40300 interp=0 avg=9
+10-05 14:03:53.333  3323  3410 D berberis: berberis: trans#40400 pc=0x7aa4cdb089bc size=3 JIT jit=40400 interp=0 avg=9
+10-05 14:03:53.334  3323  3410 D berberis: berberis: trans#40500 pc=0x7aa4cdb3c368 size=8 JIT jit=40500 interp=0 avg=9
+10-05 14:03:53.336  3323  3410 D berberis: berberis: trans#40600 pc=0x7aa4cda8ef14 size=10 JIT jit=40600 interp=0 avg=9
+10-05 14:03:53.341  3323  3410 D berberis: berberis: trans#40700 pc=0x7aa4cd95b2d0 size=35 JIT jit=40700 interp=0 avg=9
+10-05 14:03:53.342  3323  3410 D berberis: berberis: trans#40800 pc=0x7aa4cd95412c size=10 JIT jit=40800 interp=0 avg=9
+10-05 14:03:53.343  3323  3410 D berberis: berberis: trans#40900 pc=0x7aa4cda9fa14 size=9 JIT jit=40900 interp=0 avg=9
+10-05 14:03:53.344  3323  3410 D berberis: berberis: trans#41000 pc=0x7aa4cdbe0274 size=5 JIT jit=41000 interp=0 avg=9
+10-05 14:03:53.345  3323  3410 D berberis: berberis: trans#41100 pc=0x7aa4cdbc1e28 size=6 JIT jit=41100 interp=0 avg=9
+10-05 14:03:53.347  3323  3410 D berberis: berberis: trans#41200 pc=0x7aa4cd76eecc size=2 JIT jit=41200 interp=0 avg=9
+10-05 14:03:53.348  3323  3410 D berberis: berberis: trans#41300 pc=0x7aa4ce14ebd8 size=1 JIT jit=41300 interp=0 avg=9
+10-05 14:03:53.349  3323  3410 D berberis: berberis: trans#41400 pc=0x7aa4cd76e498 size=2 JIT jit=41400 interp=0 avg=9
+10-05 14:03:53.350  3323  3410 D berberis: berberis: trans#41500 pc=0x7aa4ce153be4 size=5 JIT jit=41500 interp=0 avg=9
+10-05 14:03:53.351  3323  3410 D berberis: berberis: trans#41600 pc=0x7aa4ce1611e0 size=3 JIT jit=41600 interp=0 avg=9
+10-05 14:03:53.352  3323  3410 D berberis: berberis: trans#41700 pc=0x7aa4cd776ab4 size=3 JIT jit=41700 interp=0 avg=9
+10-05 14:03:53.353  3323  3410 D berberis: berberis: trans#41800 pc=0x7aa4cd4cd364 size=2 JIT jit=41800 interp=0 avg=9
+10-05 14:03:53.354  3323  3410 D berberis: berberis: trans#41900 pc=0x7aa4cd5bf54c size=13 JIT jit=41900 interp=0 avg=9
+10-05 14:03:53.358  3323  3410 D berberis: berberis: trans#42000 pc=0x7aa4cdad01f8 size=4 JIT jit=42000 interp=0 avg=9
+10-05 14:03:53.361  3323  3410 D berberis: berberis: trans#42100 pc=0x7aa4cdab2e0c size=9 JIT jit=42100 interp=0 avg=9
+10-05 14:03:53.363  3323  3410 D berberis: berberis: trans#42200 pc=0x7aa4cdab609c size=10 JIT jit=42200 interp=0 avg=9
+10-05 14:03:53.365  3323  3410 D berberis: berberis: trans#42300 pc=0x7aa4cdcad304 size=2 JIT jit=42300 interp=0 avg=9
+10-05 14:03:53.367  3323  3410 D berberis: berberis: trans#42400 pc=0x7aa4cd6a0538 size=8 JIT jit=42400 interp=0 avg=9
+10-05 14:03:53.368  3323  3410 D berberis: berberis: trans#42500 pc=0x7aa4cdf735a8 size=3 JIT jit=42500 interp=0 avg=9
+10-05 14:03:53.369  3323  3410 D berberis: berberis: trans#42600 pc=0x7aa4cdf798a8 size=5 JIT jit=42600 interp=0 avg=9
+10-05 14:03:53.371  3323  3410 D berberis: berberis: trans#42700 pc=0x7aa4cd47dd70 size=7 JIT jit=42700 interp=0 avg=9
+10-05 14:03:53.373  3323  3410 D berberis: berberis: trans#42800 pc=0x7aa4cd571730 size=5 JIT jit=42800 interp=0 avg=9
+10-05 14:03:53.376  3323  3410 D berberis: berberis: trans#42900 pc=0x7aa4ce04d7fc size=8 JIT jit=42900 interp=0 avg=9
+10-05 14:03:53.378  3323  3410 D berberis: berberis: trans#43000 pc=0x7aa4cde7442c size=4 JIT jit=43000 interp=0 avg=9
+10-05 14:03:53.379  3323  3410 D berberis: berberis: trans#43100 pc=0x7aa4cde7fc98 size=5 JIT jit=43100 interp=0 avg=9
+10-05 14:03:53.381  3323  3410 D berberis: berberis: trans#43200 pc=0x7aa4cdeb9994 size=37 JIT jit=43200 interp=0 avg=9
+10-05 14:03:53.382  3323  3410 D berberis: berberis: trans#43300 pc=0x7aa4cd66e9bc size=14 JIT jit=43300 interp=0 avg=9
+10-05 14:03:53.383  3323  3410 D berberis: berberis: trans#43400 pc=0x7aa4cdc02290 size=1 JIT jit=43400 interp=0 avg=9
+10-05 14:03:53.383  3323  3410 D berberis: berberis: trans#43500 pc=0x7aa4cd682018 size=9 JIT jit=43500 interp=0 avg=9
+10-05 14:03:53.385  3323  3410 D berberis: berberis: trans#43600 pc=0x7aa4cd737c68 size=2 JIT jit=43600 interp=0 avg=9
+10-05 14:03:53.386  3323  3410 D berberis: berberis: trans#43700 pc=0x7aa4cd735344 size=7 JIT jit=43700 interp=0 avg=9
+10-05 14:03:53.387  3323  3410 D berberis: berberis: trans#43800 pc=0x7aa4cd73ae14 size=13 JIT jit=43800 interp=0 avg=9
+10-05 14:03:53.388  3323  3410 D berberis: berberis: trans#43900 pc=0x7aa4cd67ece8 size=9 JIT jit=43900 interp=0 avg=9
+10-05 14:03:53.401  3323  3410 D berberis: berberis: trans#44000 pc=0x7aa4cd600bbc size=4 JIT jit=44000 interp=0 avg=9
+10-05 14:03:53.402  3323  3410 D berberis: berberis: trans#44100 pc=0x7aa4cd4cbd48 size=4 JIT jit=44100 interp=0 avg=9
+10-05 14:03:53.403  3323  3410 D berberis: berberis: trans#44200 pc=0x7aa4cd73f704 size=13 JIT jit=44200 interp=0 avg=9
+10-05 14:03:53.403  3323  3410 D berberis: berberis: trans#44300 pc=0x7aa4cd7370ec size=10 JIT jit=44300 interp=0 avg=9
+10-05 14:03:53.404  3323  3410 D berberis: berberis: trans#44400 pc=0x7aa4cdf22078 size=9 JIT jit=44400 interp=0 avg=9
+10-05 14:03:53.405  3323  3410 D berberis: berberis: trans#44500 pc=0x7aa4cd54d90c size=13 JIT jit=44500 interp=0 avg=9
+10-05 14:03:53.406  3323  3410 D berberis: berberis: trans#44600 pc=0x7aa4cdf232bc size=10 JIT jit=44600 interp=0 avg=9
+10-05 14:03:53.406  3323  3410 D berberis: berberis: trans#44700 pc=0x7aa4cdf23d20 size=10 JIT jit=44700 interp=0 avg=9
+10-05 14:03:53.406  3323  3410 D berberis: berberis: trans#44800 pc=0x7aa4cd734710 size=8 JIT jit=44800 interp=0 avg=9
+10-05 14:03:53.407  3323  3410 D berberis: berberis: trans#44900 pc=0x7aa4cd4cf0ac size=2 JIT jit=44900 interp=0 avg=9
+10-05 14:03:53.407  3323  3410 D berberis: berberis: trans#45000 pc=0x7aa4cd5bea84 size=10 JIT jit=45000 interp=0 avg=9
+10-05 14:03:53.408  3323  3410 D berberis: berberis: trans#45100 pc=0x7aa4cd5bb3b0 size=10 JIT jit=45100 interp=0 avg=9
+10-05 14:03:53.408  3323  3410 D berberis: berberis: trans#45200 pc=0x7aa4cd49dda0 size=4 JIT jit=45200 interp=0 avg=9
+10-05 14:03:53.409  3323  3410 D berberis: berberis: trans#45300 pc=0x7aa4cdf1d16c size=1 JIT jit=45300 interp=0 avg=9
+10-05 14:03:53.410  3323  3410 D berberis: berberis: trans#45400 pc=0x7aa4cd74998c size=14 JIT jit=45400 interp=0 avg=9
+10-05 14:03:53.411  3323  3410 D berberis: berberis: trans#45500 pc=0x7aa4cdf10a6c size=4 JIT jit=45500 interp=0 avg=9
+10-05 14:03:53.412  3323  3410 D berberis: berberis: trans#45600 pc=0x7aa4cdf12c60 size=4 JIT jit=45600 interp=0 avg=9
+10-05 14:03:53.413  3323  3410 D berberis: berberis: trans#45700 pc=0x7aa4cdf115cc size=15 JIT jit=45700 interp=0 avg=9
+10-05 14:03:53.414  3323  3410 D berberis: berberis: trans#45800 pc=0x7aa4cd78052c size=11 JIT jit=45800 interp=0 avg=9
+10-05 14:03:53.414  3323  3410 I Unity   : Company Name: EpidGames
+10-05 14:03:53.414  3323  3410 I Unity   : Product Name: Trickcal Revive
+10-05 14:03:53.415  3323  3410 D berberis: berberis: trans#45900 pc=0x7aa4cd76d95c size=1 JIT jit=45900 interp=0 avg=9
+10-05 14:03:53.416  3323  3410 D berberis: berberis: trans#46000 pc=0x7aa4cd777118 size=28 JIT jit=46000 interp=0 avg=9
+10-05 14:03:53.417  3323  3410 D berberis: berberis: trans#46100 pc=0x7aa4ce150af0 size=3 JIT jit=46100 interp=0 avg=9
+10-05 14:03:53.417  3323  3410 D berberis: berberis: trans#46200 pc=0x7aa4ce150884 size=5 JIT jit=46200 interp=0 avg=9
+10-05 14:03:53.418  3323  3410 D berberis: berberis: trans#46300 pc=0x7aa4ce151010 size=7 JIT jit=46300 interp=0 avg=9
+10-05 14:03:53.419  3323  3410 D berberis: berberis: trans#46400 pc=0x7aa4cdd2e310 size=4 JIT jit=46400 interp=0 avg=9
+10-05 14:03:53.419  2158  2401 D ShellDesktopMode: DesktopModeTaskRepository: getVisibleTaskCount=0
+10-05 14:03:53.420  3323  3410 D berberis: berberis: trans#46500 pc=0x7aa4cd6842d8 size=4 JIT jit=46500 interp=0 avg=9
+10-05 14:03:53.421  3323  3410 D berberis: berberis: trans#46600 pc=0x7aa4cdbf2c8c size=2 JIT jit=46600 interp=0 avg=9
+10-05 14:03:53.442  3323  3410 D berberis: berberis: trans#46700 pc=0x7aa4c93ddaa8 size=6 JIT jit=46700 interp=0 avg=9
+10-05 14:03:53.443  3323  3410 D berberis: berberis: trans#46800 pc=0x7aa4c93de408 size=6 JIT jit=46800 interp=0 avg=9
+10-05 14:03:53.444  3323  3410 D berberis: berberis: trans#46900 pc=0x7aa4cdddc7e0 size=9 JIT jit=46900 interp=0 avg=9
+10-05 14:03:53.468  3323  3410 I MESA    : Using gralloc0 CrOS API
+10-05 14:03:53.472  3323  3410 D vulkan  : searching for layers in '/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64'
+10-05 14:03:53.472  3323  3410 D vulkan  : searching for layers in '/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/base.apk!/lib/arm64-v8a'
+10-05 14:03:53.472  3323  3410 D vulkan  : searching for layers in '/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/split_config.arm64_v8a.apk!/lib/arm64-v8a'
+10-05 14:03:53.472  3323  3410 D vulkan  : searching for layers in '/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/split_gpdeku.apk!/lib/arm64-v8a'
+10-05 14:03:53.472  3323  3410 D vulkan  : searching for layers in '/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/split_gpdeku.config.arm64_v8a.apk!/lib/arm64-v8a'
+10-05 14:03:53.474  3323  3410 D berberis: berberis: trans#47000 pc=0x7aa4cddf7a28 size=9 JIT jit=47000 interp=0 avg=9
+10-05 14:03:53.476  3323  3410 D berberis: berberis: trans#47100 pc=0x7aa4cd7e55d4 size=6 JIT jit=47100 interp=0 avg=9
+10-05 14:03:53.484  3323  3410 D berberis: berberis: trans#47200 pc=0x7aa4cd7e62ac size=7 JIT jit=47200 interp=0 avg=9
+10-05 14:03:53.485  3323  3410 D berberis: berberis: trans#47300 pc=0x7aa4cdce2df0 size=15 JIT jit=47300 interp=0 avg=9
+10-05 14:03:53.487  3323  3410 D berberis: berberis: trans#47400 pc=0x7aa4cdd5ed7c size=4 JIT jit=47400 interp=0 avg=9
+10-05 14:03:53.488  3323  3410 D berberis: berberis: trans#47500 pc=0x7aa4cd7e69f0 size=4 JIT jit=47500 interp=0 avg=9
+10-05 14:03:53.489  3323  3410 D berberis: berberis: trans#47600 pc=0x7aa4cd7518c8 size=6 JIT jit=47600 interp=0 avg=9
+10-05 14:03:53.490  3323  3410 D berberis: berberis: trans#47700 pc=0x7aa4cd7e713c size=5 JIT jit=47700 interp=0 avg=9
+10-05 14:03:53.514  3323  3410 D berberis: berberis: trans#47800 pc=0x7aa4c93aaa20 size=4 JIT jit=47800 interp=0 avg=9
+10-05 14:03:53.515  3323  3347 D AdvertisingIdClient: Creating AdvertisingIdClient
+10-05 14:03:53.515  3323  3347 D AdvertisingIdClient: AdvertisingIdClient already created.
+10-05 14:03:53.515  3323  3347 D AdvertisingIdClient: AdvertisingIdClient is not bounded. Starting to bind it...
+10-05 14:03:53.516  3323  3347 I AdvertisingIdClient: shouldSendLog -1
+10-05 14:03:53.516  3323  3366 W GooglePlayServicesUtil: com.epidgames.trickcalrevive requires the Google Play Store, but it is missing.
+10-05 14:03:53.516  3323  3366 W GoogleApiManager: The service for com.google.android.gms.common.internal.service.zau is not available: ConnectionResult{statusCode=SERVICE_INVALID, resolution=null, message=null, clientMethodKey=null}
+10-05 14:03:53.518  3323  3410 D berberis: berberis: trans#47900 pc=0x7aa4c93a63f8 size=6 JIT jit=47900 interp=0 avg=9
+10-05 14:03:53.518  3323  3366 W GooglePlayServicesUtil: com.epidgames.trickcalrevive requires the Google Play Store, but it is missing.
+10-05 14:03:53.518  3323  3366 W GoogleApiManager: The service for com.google.android.gms.common.internal.service.zau is not available: ConnectionResult{statusCode=SERVICE_INVALID, resolution=null, message=null, clientMethodKey=null}
+10-05 14:03:53.518  3323  3323 I AdvertisingIdClient: getting error as 17: API: ClientTelemetry.API is not available on this device. Connection failed with: ConnectionResult{statusCode=SERVICE_INVALID, resolution=null, message=null, clientMethodKey=null}
+10-05 14:03:53.518  3323  3347 I FA      : Install Referrer Reporter is not available
+10-05 14:03:53.518  3323  3410 D berberis: berberis: trans#48000 pc=0x7aa4c93a6d58 size=6 JIT jit=48000 interp=0 avg=9
+10-05 14:03:53.519  3323  3410 D berberis: berberis: trans#48100 pc=0x7aa4c93a76b8 size=6 JIT jit=48100 interp=0 avg=9
+10-05 14:03:53.521  3323  3410 D berberis: berberis: trans#48200 pc=0x7aa4c93a8018 size=6 JIT jit=48200 interp=0 avg=9
+10-05 14:03:53.521  3323  3410 D berberis: berberis: trans#48300 pc=0x7aa4c93a8978 size=6 JIT jit=48300 interp=0 avg=9
+10-05 14:03:53.522  3323  3410 D berberis: berberis: trans#48400 pc=0x7aa4c93a92d8 size=6 JIT jit=48400 interp=0 avg=9
+10-05 14:03:53.524  3323  3410 D berberis: berberis: trans#48500 pc=0x7aa4c93a9c38 size=6 JIT jit=48500 interp=0 avg=9
+10-05 14:03:53.525  3323  3347 W JobInfo : Job 'com.epidgames.trickcalrevive/com.google.android.gms.measurement.AppMeasurementJobService#-1794659060' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+10-05 14:03:53.525  1849  1865 W JobInfo : Job 'com.epidgames.trickcalrevive/com.google.android.gms.measurement.AppMeasurementJobService#-1794659060' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+10-05 14:03:53.525  3323  3410 D berberis: berberis: trans#48600 pc=0x7aa4c93aa598 size=6 JIT jit=48600 interp=0 avg=9
+10-05 14:03:53.527  3323  3410 D berberis: berberis: trans#48700 pc=0x7aa4cdd70ff0 size=4 JIT jit=48700 interp=0 avg=9
+10-05 14:03:53.528  3323  3410 D berberis: berberis: trans#48800 pc=0x7aa4cdd71610 size=4 JIT jit=48800 interp=0 avg=9
+10-05 14:03:53.529  3323  3410 D berberis: berberis: trans#48900 pc=0x7aa4cdd71bb8 size=4 JIT jit=48900 interp=0 avg=9
+10-05 14:03:53.530  3323  3410 D berberis: berberis: trans#49000 pc=0x7aa4cdd86c48 size=4 JIT jit=49000 interp=0 avg=9
+10-05 14:03:53.531  3323  3410 D berberis: berberis: trans#49100 pc=0x7aa4cdd876b8 size=1 JIT jit=49100 interp=0 avg=9
+10-05 14:03:53.532  3323  3410 D berberis: berberis: trans#49200 pc=0x7aa4cdf1951c size=10 JIT jit=49200 interp=0 avg=9
+10-05 14:03:53.532  3323  3410 D berberis: berberis: trans#49300 pc=0x7aa4cdd89828 size=8 JIT jit=49300 interp=0 avg=9
+10-05 14:03:53.533  3323  3410 D berberis: berberis: trans#49400 pc=0x7aa4ce15bc68 size=8 JIT jit=49400 interp=0 avg=9
+10-05 14:03:53.534  3323  3410 D berberis: berberis: trans#49500 pc=0x7aa4ce14e344 size=5 JIT jit=49500 interp=0 avg=9
+10-05 14:03:53.537  3323  3410 D berberis: berberis: trans#49600 pc=0x7aa4cdd8a020 size=26 JIT jit=49600 interp=0 avg=9
+10-05 14:03:53.537  3323  3410 D berberis: berberis: trans#49700 pc=0x7aa4cdd8b214 size=1 JIT jit=49700 interp=0 avg=9
+10-05 14:03:53.539  3323  3410 D berberis: berberis: trans#49800 pc=0x7aa4cd512580 size=5 JIT jit=49800 interp=0 avg=9
+10-05 14:03:53.540  3323  3410 D berberis: berberis: trans#49900 pc=0x7aa4cdd8c0b0 size=8 JIT jit=49900 interp=0 avg=9
+10-05 14:03:53.541  3323  3410 D berberis: berberis: trans#50000 pc=0x7aa4cdd914f8 size=20 JIT jit=50000 interp=0 avg=9
+10-05 14:03:53.542  3323  3410 D berberis: berberis: trans#50100 pc=0x7aa4cdd9ea18 size=28 JIT jit=50100 interp=0 avg=9
+10-05 14:03:53.542  3323  3410 D berberis: berberis: trans#50200 pc=0x7aa4cd5f96d0 size=3 JIT jit=50200 interp=0 avg=9
+10-05 14:03:53.543  3323  3410 D berberis: berberis: trans#50300 pc=0x7aa4cdd84e0c size=18 JIT jit=50300 interp=0 avg=9
+10-05 14:03:53.545  3323  3410 D berberis: berberis: trans#50400 pc=0x7aa4cd5d5e44 size=4 JIT jit=50400 interp=0 avg=9
+10-05 14:03:53.548  3323  3485 D berberis: berberis: trans#50500 pc=0x7aa4cd4ce340 size=6 JIT jit=50500 interp=0 avg=9
+10-05 14:03:53.549  3323  3410 D berberis: berberis: trans#50600 pc=0x7aa4cd51e8e8 size=6 JIT jit=50600 interp=0 avg=9
+10-05 14:03:53.551  3323  3485 D berberis: berberis: trans#50700 pc=0x7aa4cdd773b8 size=24 JIT jit=50700 interp=0 avg=9
+10-05 14:03:53.551  3323  3410 D berberis: berberis: trans#50800 pc=0x7aa4cd767b60 size=1 JIT jit=50800 interp=0 avg=9
+10-05 14:03:53.553  3323  3410 D berberis: berberis: trans#50900 pc=0x7aa4cdd843bc size=3 JIT jit=50900 interp=0 avg=9
+10-05 14:03:53.554  3323  3410 D berberis: berberis: trans#51000 pc=0x7aa4cdd8e4e8 size=5 JIT jit=51000 interp=0 avg=9
+10-05 14:03:53.556  3323  3410 D berberis: berberis: trans#51100 pc=0x7aa4cdd9e7f8 size=28 JIT jit=51100 interp=0 avg=9
+10-05 14:03:53.557  3323  3410 D berberis: berberis: trans#51200 pc=0x7aa4cd772b50 size=10 JIT jit=51200 interp=0 avg=9
+10-05 14:03:53.558  3323  3410 D berberis: loadLibraryExt: path=liblibswappywrapper.so ns=0x7aa6e2043130(guest=0x7aa53f5a0010)
+10-05 14:03:53.558  3323  3410 D berberis: berberis: DlOpen ENTER libpath="liblibswappywrapper.so" flags=0x2
+10-05 14:03:53.559  3323  3410 D berberis: berberis: DlOpen EXIT  1ms set=0 clear=28 libpath="liblibswappywrapper.so" handle=0x0
+10-05 14:03:53.559  3323  3410 D berberis: LoadGuestLibrary FAILED for liblibswappywrapper.so: dlopen failed: library "liblibswappywrapper.so" not found
+10-05 14:03:53.560  3323  3410 D berberis: loadLibraryExt: result=0x0 dlerror=(null)
+10-05 14:03:53.560  3323  3410 D nativeloader: Load liblibswappywrapper.so using ns clns-7 from class loader (caller=/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/base.apk!classes5.dex): no error
+10-05 14:03:53.561  3323  3410 D berberis: loadLibraryExt: path=/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libswappywrapper.so ns=0x7aa6e2043130(guest=0x7aa53f5a0010)
+10-05 14:03:53.561  3323  3410 D berberis: berberis: DlOpen ENTER libpath="/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libswappywrapper.so" flags=0x2
+10-05 14:03:53.564  3323  3410 D berberis: berberis: trans#51300 pc=0x7aa3f2ebb0ac size=7 JIT jit=51300 interp=0 avg=9
+10-05 14:03:53.565  3323  3410 D berberis: berberis: trans#51400 pc=0x7aa3f2f26c54 size=24 JIT jit=51400 interp=0 avg=9
+10-05 14:03:53.566  3323  3410 D berberis: berberis: trans#51500 pc=0x7aa3f2f27c30 size=2 JIT jit=51500 interp=0 avg=9
+10-05 14:03:53.566  3323  3410 D berberis: berberis: trans#51600 pc=0x7aa3f2f0be30 size=12 JIT jit=51600 interp=0 avg=9
+10-05 14:03:53.568  3323  3410 D berberis: berberis: DlOpen EXIT  7ms set=2 clear=56 libpath="/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libswappywrapper.so" handle=0xfce63a6d221b5e11
+10-05 14:03:53.568  3323  3410 D berberis: loadLibraryExt: result=0xfce63a6d221b5e11 dlerror=ok
+10-05 14:03:53.568  3323  3410 D nativeloader: Load /data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libswappywrapper.so using ns clns-7 from class loader (caller=/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/base.apk!classes5.dex): ok
+10-05 14:03:53.569  3323  3410 I SwappyWrapper: SwappyWrapperInit() succeeded. Build: Wed Sep 23 06:58:37 2026
+10-05 14:03:53.569  3323  3410 D berberis: berberis: trans#51700 pc=0x7aa3f2efc4c4 size=4 JIT jit=51700 interp=0 avg=9
+10-05 14:03:53.571  3323  3410 D berberis: berberis: trans#51800 pc=0x7aa4c3020f7c size=6 JIT jit=51800 interp=0 avg=9
+10-05 14:03:53.572  3323  3410 D berberis: berberis: trans#51900 pc=0x7aa4dfc9a244 size=7 JIT jit=51900 interp=0 avg=9
+10-05 14:03:53.573  3323  3410 D berberis: berberis: trans#52000 pc=0x7aa4c30263a4 size=9 JIT jit=52000 interp=0 avg=9
+10-05 14:03:53.575  3323  3410 D berberis: berberis: trans#52100 pc=0x7aa4dfc8a700 size=4 JIT jit=52100 interp=0 avg=9
+10-05 14:03:53.577  3323  3488 D berberis: berberis: trans#52200 pc=0x7aa4c3023bc0 size=1 JIT jit=52200 interp=0 avg=9
+10-05 14:03:53.578  3323  3410 D berberis: berberis: trans#52300 pc=0x7aa4c3027a98 size=4 JIT jit=52300 interp=0 avg=9
+10-05 14:03:53.580  3323  3410 E berberis: FATAL host signal NO-RECOVERY: depth=1 sig=11 host_pc=0x7aa4c302764c fault_addr=0x7aa4c302764c si_code=2 guest_insn_addr=0x7aa54f1ae140
+10-05 14:03:53.580  3323  3410 E berberis:   x0=0x7aa6e205d2d0 x1=0x7aa7f002ea95 x2=0x7aa543263378 x3=0x7aa4d2b40620 x4=0x30aa x5=0x8080808080808080 x6=0xfefefefefefefeff x7=0x7f7f7f7f7f7f7f7f
+10-05 14:03:53.580  3323  3410 E berberis:   x16=0x7aa4c3038fe0 x17=0x7aa4c30253ac x18=0x7aa4c7594000 x19=0x7aa7e7eae040 x20=0x30aa x21=0x7aa543263378 x22=0x7aa7f002ea8d x23=0x7aa7f002ea95
+10-05 14:03:53.580  3323  3410 E berberis:   x24=0x7aa7e7eae040 x25=0x7aa4c3013ac3 x26=0x6fe9db48 x27=0x7aa7f002ea91 x28=0x7aa7f002ea85 x29(fp)=0x7aa4d2b40670 x30(lr)=0x7aa4c3025424 sp=0x7aa4d2b40570
+10-05 14:03:53.580  3323  3410 E berberis: HandleFatalSignal: sig=11 si_addr=0x7aa4c302764c si_code=2 host_rip=0x7aa4c302764c host_rsp=0x7aa52c6afad8 host_rbp=0x17
+10-05 14:03:53.580  3323  3410 E libsigchain: reverting to SIG_DFL handler for signal 11, ucontext 0x7aa7eaec9ac0
+10-05 14:03:53.591  3323  3487 D berberis: berberis: trans#52400 pc=0x7aa4c3022ed4 size=20 JIT jit=52400 interp=0 avg=9
+10-05 14:03:53.613  3323  3410 E libsigchain:   #00 pc 0000670b  /apex/com.android.art/lib64/libsigchain.so (LogStack()+251) (BuildId: f870589318bf22846eff3fd164913171)
+10-05 14:03:53.613  3323  3410 E libsigchain:   #01 pc 00006cdb  /apex/com.android.art/lib64/libsigchain.so (art::SignalChain::Handler(int, siginfo*, void*)+427) (BuildId: f870589318bf22846eff3fd164913171)
+10-05 14:03:53.613  3323  3410 E libsigchain:   #02 pc 0007e980  /apex/com.android.runtime/lib64/bionic/libc.so (__restore_rt+0) (BuildId: dc95ece8612debfa076e3f9022a7aa37)
+10-05 14:03:53.613  3323  3410 E libsigchain:   #03 pc 0002664b  /data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libswappywrapper.so (+0) (BuildId: )
+10-05 14:03:53.613  3323  3410 E libsigchain:   #04 pc 0033b5a7  /data/misc/apexdata/com.android.art/dalvik-cache/x86_64/boot.oat (art_jni_trampoline+167) (BuildId: )
+10-05 14:03:53.613  3323  3410 E libsigchain:   #05 pc 00102b6f  [anon:stack_and_tls:3410] (+0) (BuildId: )
+10-05 14:03:53.621     0     0 I UnityMain[3410]: segfault at 7aa4c302764c ip 00007aa4c302764c sp 00007aa52c6afad8 error 15 in libswappywrapper.so[7aa4c3001000+33000] likely on CPU 0 (core 0, socket 0)
+10-05 14:03:53.621     0     0 I Code    : 5f d6 88 00 00 b0 08 41 16 91 28 00 00 f9 08 04 40 f9 28 04 00 f9 c0 03 5f d6 c0 03 5f d6 38 2e 00 14 00 04 40 f9 72 2d 00 14 <ff> 83 02 d1 fd 7b 04 a9 fc 6f 05 a9 fa 67 06 a9 f8 5f 07 a9 f6 57
+10-05 14:03:53.633  1849  1955 W InputDispatcher: channel '2a08c25 com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity' ~ Consumer closed input channel or an error occurred.  events=0x9
+10-05 14:03:53.633  1849  1955 E InputDispatcher: channel '2a08c25 com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity' ~ Channel is unrecoverably broken and will be disposed!
+10-05 14:03:53.633  1849  1955 I WindowManager: WINDOW DIED Window{2a08c25 u0 com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity}
+10-05 14:03:53.635  1849  1917 I ActivityManager: Process com.epidgames.trickcalrevive (pid 3323) has died: fg  TOP 
+10-05 14:03:53.636  1849  2033 D ConnectivityService: releasing NetworkRequest [ REQUEST id=81, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10299 RequestorUid: 10299 RequestorPkg: com.epidgames.trickcalrevive UnderlyingNetworks: Null] ] (release request)
+10-05 14:03:53.636  1849  2032 D EthernetNetworkFactory: eth0: onNetworkUnneeded for request: NetworkRequest [ REQUEST id=81, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10299 RequestorUid: 10299 RequestorPkg: com.epidgames.trickcalrevive UnderlyingNetworks: Null] ]
+10-05 14:03:53.637  1849  1917 W ActivityTaskManager: Force removing ActivityRecord{f497b64 u0 com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity t14}: app died, no saved state
+10-05 14:03:53.637  1849  1869 V GameManagerService: Game power mode OFF (no games in foreground)
+10-05 14:03:53.638  1849  1869 D DisplayManagerService: Drop pending events for gone uid 10299
+10-05 14:03:53.638  1849  2023 W IPCThreadState: Sending oneway calls to frozen process.
+10-05 14:03:53.638  1849  2023 W IPCThreadState: Sending oneway calls to frozen process.
+10-05 14:03:53.638  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (319134872409225255) 11 android.os.BinderProxy@1ad9cb5 TransitionRequestInfo { type = CLOSE, triggerTask = TaskInfo{userId=0 taskId=14 effectiveUid=10299 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity } baseActivity=ComponentInfo{com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity} topActivity=ComponentInfo{com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity} origActivity=null realActivity=ComponentInfo{com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity} numActivities=1 lastActiveTime=93839 supportsMultiWindow=true resizeMode=2 isResizeable=true minWidth=400 minHeight=300 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@5a90f4a} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 - 0, 0) topActivityInfo=ActivityInfo{8e03ebb com.google.firebase.MessagingUnityPlayerActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false isTopActivityStyleFloating=false lastNonFullscreenBounds=Rect(160, 96 - 1120, 696) capturedLink=null capturedLinkTimestamp=0 appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false eligibleForLetterboxEducation= false isLetterboxEducationEnabled= false isLetterboxDoubleTapEnabled= false eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=1280 topActivityLetterboxHeight=800 topActivityLetterboxAppWidth=1280 topActivityLetterboxAppHeight=800 isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false cameraCompatTaskInfo=CameraCompatTaskInfo { freeformCameraCompatMode=inactive}}}, pipTask = null, remoteTransition = null, displayChange = null, flags = 0, debugId = 11 }
+10-05 14:03:53.638  2158  2401 V ShellDesktopMode: DesktopTasksController: handleRequest request=TransitionRequestInfo { type = CLOSE, triggerTask = TaskInfo{userId=0 taskId=14 effectiveUid=10299 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity } baseActivity=ComponentInfo{com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity} topActivity=ComponentInfo{com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity} origActivity=null realActivity=ComponentInfo{com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity} numActivities=1 lastActiveTime=93839 supportsMultiWindow=true resizeMode=2 isResizeable=true minWidth=400 minHeight=300 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@5a90f4a} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 - 0, 0) topActivityInfo=ActivityInfo{8e03ebb com.google.firebase.MessagingUnityPlayerActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false isTopActivityStyleFloating=false lastNonFullscreenBounds=Rect(160, 96 - 1120, 696) capturedLink=null capturedLinkTimestamp=0 appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false eligibleForLetterboxEducation= false isLetterboxEducationEnabled= false isLetterboxDoubleTapEnabled= false eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=1280 topActivityLetterboxHeight=800 topActivityLetterboxAppWidth=1280 topActivityLetterboxAppHeight=800 isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false cameraCompatTaskInfo=CameraCompatTaskInfo { freeformCameraCompatMode=inactive}}}, pipTask = null, remoteTransition = null, displayChange = null, flags = 0, debugId = 11 }
+10-05 14:03:53.639  2158  2401 V ShellDesktopMode: DesktopTasksController: skipping handleRequest reason=transition type not handled (2)
+10-05 14:03:53.640  1849  2033 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET, states=14
+10-05 14:03:53.640  1849  1871 W ActivityManager: setHasOverlayUi called on unknown pid: 3323
+10-05 14:03:53.641  1849  2033 D InetDiagMessage: Destroyed 4 sockets, proto=IPPROTO_TCP, family=AF_INET6, states=14
+10-05 14:03:53.641  1849  2033 D InetDiagMessage: Destroyed live tcp sockets for uids={10299} in 3ms
+10-05 14:03:53.642  2158  2401 V ShellDesktopMode: UNKNOWN MESSAGE (-2894319029625802502) 14 true
+10-05 14:03:53.642  1849  1918 W ActivityManager: Unable to start service Intent { act=com.android.launcher3.WINDOW_OVERLAY dat=app://com.android.launcher3:10261/... pkg=com.google.android.googlequicksearchbox } U=0: not found
+10-05 14:03:53.645  1849  1918 I AppWidgetServiceImpl: startListening() 0
+10-05 14:03:53.646  1849  2379 W WindowManager: Failed looking up window session=Session{4e9f4b2 2158:u0a10260} callers=com.android.server.wm.WindowManagerService.removeClientToken:2069 com.android.server.wm.Session.remove:269 android.view.IWindowSession$Stub.onTransact:677 
+10-05 14:03:53.648  2158  2401 D WindowManagerShell: UNKNOWN MESSAGE (-2945141395292145768) true 161
+10-05 14:03:53.649  2449  3491 W OmniJawsClient: queryWeather while disabled
+10-05 14:03:53.649  2449  2449 D RecentsView: onTaskRemoved: 14, not handling task stack changes
+10-05 14:03:53.649  2449  2449 D StatsLog: LAUNCHER_ONRESUME
+10-05 14:03:53.652  1650  1705 I netd    : tetherGetStats() -> {[]} <0.20ms>
+10-05 14:03:53.653  2449  2466 D QuickstepModelDelegate: notifyAppTargetEvent action=1 launchLocation=workspace/0/[-1,-1]/[1,1]
+10-05 14:03:53.654  2449  2449 D BaseDepthController: setSurface:
+10-05 14:03:53.654  2449  2449 D BaseDepthController: 	mWaitingOnSurfaceValidity: false
+10-05 14:03:53.654  2449  2449 D BaseDepthController: 	mSurface: Surface(name=com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher)/@0xc99f9e6
+10-05 14:03:53.658     0     0 I init    : Untracked pid 3398 received signal 9
+10-05 14:03:53.658     0     0 I init    : Untracked pid 3398 did not have an associated service entry and will not be reaped
+10-05 14:03:53.655  1653  1653 I Zygote  : Process 3323 exited due to signal 11 (Segmentation fault)
+10-05 14:03:53.659  1849  1882 I libprocessgroup: Removed cgroup /sys/fs/cgroup/uid_10299/pid_3323
+10-05 14:03:53.665  2449  2449 D RecentsView: onTaskRemoved: 14, not handling task stack changes
+10-05 14:03:53.667  1849  1868 V WindowManager: Sent Transition (#11) createdAt=10-05 14:03:53.637 via request=TransitionRequestInfo { type = CLOSE, triggerTask = TaskInfo{userId=0 taskId=14 effectiveUid=10299 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity } baseActivity=ComponentInfo{com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity} topActivity=ComponentInfo{com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity} origActivity=null realActivity=ComponentInfo{com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity} numActivities=1 lastActiveTime=93839 supportsMultiWindow=true resizeMode=2 isResizeable=true minWidth=400 minHeight=300 defaultMinSize=220 token=WCT{RemoteToken{8389aad Task{93a31cd #14 type=standard A=10299:com.epidgames.trickcalrevive isResizeable=true minWidth=400 minHeight=300}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 - 0, 0) topActivityInfo=ActivityInfo{e08c1e2 com.google.firebase.MessagingUnityPlayerActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false isTopActivityStyleFloating=false lastNonFullscreenBounds=Rect(160, 96 - 1120, 696) capturedLink=null capturedLinkTimestamp=0 appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false eligibleForLetterboxEducation= false isLetterboxEducationEnabled= false isLetterboxDoubleTapEnabled= false eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=1280 topActivityLetterboxHeight=800 topActivityLetterboxAppWidth=1280 topActivityLetterboxAppHeight=800 isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false cameraCompatTaskInfo=CameraCompatTaskInfo { freeformCameraCompatMode=inactive}}}, pipTask = null, remoteTransition = null, displayChange = null, flags = 0, debugId = 11 }
+10-05 14:03:53.668  1849  1868 V WindowManager:     startWCT=WindowContainerTransaction { changes = {} hops = [] errorCallbackToken=null taskFragmentOrganizer=null }
+10-05 14:03:53.668  1849  1868 V WindowManager:     info={id=11 t=CLOSE f=0x0 trk=0 r=[0@Point(0, 0)] c=[
+10-05 14:03:53.668  1849  1868 V WindowManager:         {WCT{RemoteToken{aa5ff85 Task{5681d5c #1 type=home isResizeable=true minWidth=-1 minHeight=-1}}} m=TO_FRONT f=SHOW_WALLPAPER|MOVE_TO_TOP leash=Surface(name=Task=1)/@0x333cd3c sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0 taskParent=-1},
+10-05 14:03:53.668  1849  1868 V WindowManager:         {null m=TO_FRONT f=IS_WALLPAPER leash=Surface(name=WallpaperWindowToken{e4ff52a token=android.os.Binder@f6aee15})/@0x364e482 sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0}
+10-05 14:03:53.668  1849  1868 V WindowManager:     ]}
+10-05 14:03:53.669  2158  2497 V WindowManagerShell: UNKNOWN MESSAGE (6541979577719206723) 7941394530846
+10-05 14:03:53.671  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (1354476626241269833) 11 android.os.BinderProxy@1ad9cb5 {id=11 t=CLOSE f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@9592184} m=TO_FRONT f=SHOW_WALLPAPER|MOVE_TO_TOP leash=Surface(name=Task=1)/@0x5e84f31 sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0 taskParent=-1},{null m=TO_FRONT f=IS_WALLPAPER leash=Surface(name=WallpaperWindowToken{e4ff52a token=android.os.Binder@f6aee15})/@0xcf0d616 sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0}]}
+10-05 14:03:53.671  2158  2401 V ShellDesktopMode: DesktopModeLogger: taskInfo map after processing changes 0
+10-05 14:03:53.671  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (7933815964243868580) (#11) android.os.BinderProxy@1ad9cb5@0
+10-05 14:03:53.671  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.transition.DefaultMixedHandler@9200bca
+10-05 14:03:53.671  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.keyguard.KeyguardTransitionHandler@e78c13b
+10-05 14:03:53.671  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.pip.PipTransition@2d4b271
+10-05 14:03:53.671  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.activityembedding.ActivityEmbeddingController@7549856
+10-05 14:03:53.671  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.splitscreen.StageCoordinator@df340d7
+10-05 14:03:53.671  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.desktopmode.DesktopTasksController@b9e4dc4
+10-05 14:03:53.671  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.recents.RecentsTransitionHandler@7b104ad
+10-05 14:03:53.671  2158  2401 V ShellRecents: UNKNOWN MESSAGE (9121280089055901232)
+10-05 14:03:53.671  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.back.BackAnimationController$BackTransitionHandler@7c11373
+10-05 14:03:53.671  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.transition.RemoteTransitionHandler@f148230
+10-05 14:03:53.671  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (-9146248499991136778) {id=11 t=CLOSE f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@9592184} m=TO_FRONT f=SHOW_WALLPAPER|MOVE_TO_TOP leash=Surface(name=Task=1)/@0x5e84f31 sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0 taskParent=-1},{null m=TO_FRONT f=IS_WALLPAPER leash=Surface(name=WallpaperWindowToken{e4ff52a token=android.os.Binder@f6aee15})/@0xcf0d616 sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0}]}
+10-05 14:03:53.671  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (7551344402092077994) Pair{{types=[] flags=0x0] notFlags=0x100 checks=[{atype=home independent=true modes=[OPEN,TO_FRONT] flags=NONE mustBeTask=false order=TOP topActivity=ComponentInfo{com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher} launchCookie=null},{atype=standard independent=true modes=[CLOSE,TO_BACK] flags=NONE mustBeTask=false order=ANY topActivity=null launchCookie=null},{NOT atype=undefined independent=true modes=[] flags=NONE mustBeTask=true order=ANY topActivity=null launchCookie=null customAnim=true}]} RemoteTransition { remoteTransition = android.window.IRemoteTransition$Stub$Proxy@c863ea9, appThread = android.app.IApplicationThread$Stub$Proxy@bf65c2e, debugName = QuickstepLaunchHome }}
+10-05 14:03:53.671  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (-957464960872531856) 11 null
+10-05 14:03:53.671  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.transition.DefaultTransitionHandler@34bc004
+10-05 14:03:53.671  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (-1860574116773740964) {id=11 t=CLOSE f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@9592184} m=TO_FRONT f=SHOW_WALLPAPER|MOVE_TO_TOP leash=Surface(name=Task=1)/@0x5e84f31 sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0 taskParent=-1},{null m=TO_FRONT f=IS_WALLPAPER leash=Surface(name=WallpaperWindowToken{e4ff52a token=android.os.Binder@f6aee15})/@0xcf0d616 sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0}]}
+10-05 14:03:53.671  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (-5172949229302105239) android.view.animation.AnimationSet@51c3da2 16 CLOSE true
+10-05 14:03:53.672  2158  2401 V WindowManagerShell: UNKNOWN MESSAGE (5292399587644158186) com.android.wm.shell.transition.DefaultTransitionHandler@34bc004
+10-05 14:03:53.672  1849  1866 W UserManagerService: Requested status bar icon for non-badged user 0
+10-05 14:03:53.693  1683  1683 E BpTransactionCompletedListener: Failed to transact (-32)

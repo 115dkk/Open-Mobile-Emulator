@@ -244,8 +244,11 @@ do_digitalis_iso() {
     [ "$OME_TRANSLATOR" = digitalis ] || { echo "digitalis-iso requires OME_TRANSLATOR=digitalis" >&2; exit 2; }
     [ "$(git -C "$OME_BUILD_ROOT/frameworks/libs/binary_translation" rev-parse HEAD)" = f5f1c90b17d0c1df9e9be41534c653a3e74bfc64 ] || exit 2
     cd "$OME_BUILD_ROOT"
-    local name="OME-api35-$(date +%Y%m%d)-digitalis"
-    local dist="$OME_BUILD_ROOT/dist/$(date +%Y%m%d)-$(git -C .repo/manifests rev-parse --short HEAD)-digitalis"
+    local suffix=${OME_DIGITALIS_RUN:-}
+    [[ "$suffix" =~ ^[a-zA-Z0-9-]*$ ]] || { echo "invalid OME_DIGITALIS_RUN" >&2; exit 2; }
+    [ -z "$suffix" ] || suffix="-$suffix"
+    local name="OME-api35-$(date +%Y%m%d)${suffix}-digitalis"
+    local dist="$OME_BUILD_ROOT/dist/$(date +%Y%m%d)-$(git -C .repo/manifests rev-parse --short HEAD)${suffix}-digitalis"
     [ ! -e "$dist" ] || { echo "refusing to overwrite experimental dist: $dist" >&2; exit 2; }
     apply_ome_patches
     apply_ome_patches "$HERE/patches/digitalis"

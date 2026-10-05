@@ -1,0 +1,632 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Only existing API35 rows from AOSP e6c71f3874270863e410dea228b75461f2199462.
+--- a/android_api/libamidi/proxy/trampolines_arm64_to_x86_64-inl.h
++++ b/android_api/libamidi/proxy/trampolines_arm64_to_x86_64-inl.h
+@@ -1,6 +1,8 @@
++// SPDX-License-Identifier: Apache-2.0
++// Modified by OME: backport AOSP e6c71f3 JNI argument types to API 35.
+ // clang-format off
+ const KnownTrampoline kKnownTrampolines[] = {
+-{"AMidiDevice_fromJava", GetTrampolineFunc<auto(void*, void*, void*) -> uint32_t>(), reinterpret_cast<void*>(NULL)},
++{"AMidiDevice_fromJava", GetTrampolineFunc<auto(JNIEnv*, void*, void*) -> uint32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AMidiDevice_getDefaultProtocol", GetTrampolineFunc<auto(void*) -> uint32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AMidiDevice_getNumInputPorts", GetTrampolineFunc<auto(void*) -> int64_t>(), reinterpret_cast<void*>(NULL)},
+ {"AMidiDevice_getNumOutputPorts", GetTrampolineFunc<auto(void*) -> int64_t>(), reinterpret_cast<void*>(NULL)},
+--- a/android_api/libamidi/proxy/trampolines_arm_to_x86-inl.h
++++ b/android_api/libamidi/proxy/trampolines_arm_to_x86-inl.h
+@@ -1,6 +1,8 @@
++// SPDX-License-Identifier: Apache-2.0
++// Modified by OME: backport AOSP e6c71f3 JNI argument types to API 35.
+ // clang-format off
+ const KnownTrampoline kKnownTrampolines[] = {
+-{"AMidiDevice_fromJava", GetTrampolineFunc<auto(void*, void*, void*) -> uint32_t>(), reinterpret_cast<void*>(NULL)},
++{"AMidiDevice_fromJava", GetTrampolineFunc<auto(JNIEnv*, void*, void*) -> uint32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AMidiDevice_getDefaultProtocol", GetTrampolineFunc<auto(void*) -> uint32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AMidiDevice_getNumInputPorts", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AMidiDevice_getNumOutputPorts", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+--- a/android_api/libamidi/proxy/trampolines_riscv64_to_x86_64-inl.h
++++ b/android_api/libamidi/proxy/trampolines_riscv64_to_x86_64-inl.h
+@@ -1,6 +1,8 @@
++// SPDX-License-Identifier: Apache-2.0
++// Modified by OME: backport AOSP e6c71f3 JNI argument types to API 35.
+ // clang-format off
+ const KnownTrampoline kKnownTrampolines[] = {
+-{"AMidiDevice_fromJava", GetTrampolineFunc<auto(void*, void*, void*) -> uint32_t>(), reinterpret_cast<void*>(NULL)},
++{"AMidiDevice_fromJava", GetTrampolineFunc<auto(JNIEnv*, void*, void*) -> uint32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AMidiDevice_getDefaultProtocol", GetTrampolineFunc<auto(void*) -> uint32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AMidiDevice_getNumInputPorts", GetTrampolineFunc<auto(void*) -> int64_t>(), reinterpret_cast<void*>(NULL)},
+ {"AMidiDevice_getNumOutputPorts", GetTrampolineFunc<auto(void*) -> int64_t>(), reinterpret_cast<void*>(NULL)},
+--- a/android_api/libandroid/proxy/trampolines_arm64_to_x86_64-inl.h
++++ b/android_api/libandroid/proxy/trampolines_arm64_to_x86_64-inl.h
+@@ -1,3 +1,5 @@
++// SPDX-License-Identifier: Apache-2.0
++// Modified by OME: backport AOSP e6c71f3 JNI argument types to API 35.
+ // clang-format off
+ const KnownTrampoline kKnownTrampolines[] = {
+ {"AActivityManager_addUidImportanceListener", GetTrampolineFunc<auto(auto(*)(uint32_t, int32_t, void*) -> void, int32_t, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+@@ -7,7 +9,7 @@
+ {"AAssetDir_close", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"AAssetDir_getNextFileName", GetTrampolineFunc<auto(void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AAssetDir_rewind", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AAssetManager_fromJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AAssetManager_fromJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AAssetManager_open", GetTrampolineFunc<auto(void*, void*, int32_t) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AAssetManager_openDir", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AAsset_close", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+@@ -104,7 +106,7 @@
+ {"AHardwareBuffer_acquire", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"AHardwareBuffer_allocate", GetTrampolineFunc<auto(void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AHardwareBuffer_describe", GetTrampolineFunc<auto(void*, void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AHardwareBuffer_fromHardwareBuffer", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AHardwareBuffer_fromHardwareBuffer", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AHardwareBuffer_getId", GetTrampolineFunc<auto(void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AHardwareBuffer_getNativeHandle", GetTrampolineFunc<auto(void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AHardwareBuffer_isSupported", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+@@ -114,17 +116,17 @@
+ {"AHardwareBuffer_recvHandleFromUnixSocket", GetTrampolineFunc<auto(int32_t, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AHardwareBuffer_release", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"AHardwareBuffer_sendHandleToUnixSocket", GetTrampolineFunc<auto(void*, int32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"AHardwareBuffer_toHardwareBuffer", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AHardwareBuffer_toHardwareBuffer", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AHardwareBuffer_unlock", GetTrampolineFunc<auto(void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AInputEvent_getDeviceId", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AInputEvent_getSource", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AInputEvent_getType", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AInputEvent_release", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AInputEvent_toJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AInputEvent_toJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AInputQueue_attachLooper", DoCustomTrampoline_AInputQueue_attachLooper, reinterpret_cast<void*>(DoBadThunk)},
+ {"AInputQueue_detachLooper", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"AInputQueue_finishEvent", GetTrampolineFunc<auto(void*, void*, int32_t) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AInputQueue_fromJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AInputQueue_fromJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AInputQueue_getEvent", GetTrampolineFunc<auto(void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AInputQueue_hasEvents", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AInputQueue_preDispatchEvent", GetTrampolineFunc<auto(void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+@@ -136,10 +138,10 @@
+ {"AInputReceiver_createUnbatchedInputReceiver", GetTrampolineFunc<auto(void*, void*, void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AInputReceiver_getInputTransferToken", GetTrampolineFunc<auto(void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AInputReceiver_release", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AInputTransferToken_fromJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AInputTransferToken_fromJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AInputTransferToken_release", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AInputTransferToken_toJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+-{"AKeyEvent_fromJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AInputTransferToken_toJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AKeyEvent_fromJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AKeyEvent_getAction", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AKeyEvent_getDownTime", GetTrampolineFunc<auto(void*) -> int64_t>(), reinterpret_cast<void*>(NULL)},
+ {"AKeyEvent_getEventTime", GetTrampolineFunc<auto(void*) -> int64_t>(), reinterpret_cast<void*>(NULL)},
+@@ -157,7 +159,7 @@
+ {"ALooper_release", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"ALooper_removeFd", GetTrampolineFunc<auto(void*, int32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ALooper_wake", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AMotionEvent_fromJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AMotionEvent_fromJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AMotionEvent_getAction", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AMotionEvent_getActionButton", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AMotionEvent_getAxisValue", GetTrampolineFunc<auto(void*, int32_t, uint64_t) -> float>(), reinterpret_cast<void*>(NULL)},
+@@ -206,14 +208,14 @@
+ {"ANativeActivity_setWindowFormat", DoCustomTrampoline_ANativeActivity_setWindowFormat, reinterpret_cast<void*>(DoBadThunk)},
+ {"ANativeActivity_showSoftInput", DoCustomTrampoline_ANativeActivity_showSoftInput, reinterpret_cast<void*>(DoBadThunk)},
+ {"ANativeWindow_acquire", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"ANativeWindow_fromSurface", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"ANativeWindow_fromSurface", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ANativeWindow_getFormat", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ANativeWindow_getHeight", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ANativeWindow_getWidth", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ANativeWindow_lock", GetTrampolineFunc<auto(void*, void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ANativeWindow_release", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"ANativeWindow_setBuffersGeometry", GetTrampolineFunc<auto(void*, int32_t, int32_t, int32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"ANativeWindow_toSurface", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"ANativeWindow_toSurface", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ANativeWindow_unlockAndPost", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AObbInfo_delete", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"AObbInfo_getFlags", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+@@ -266,7 +268,7 @@
+ {"ASensor_isDirectChannelTypeSupported", GetTrampolineFunc<auto(void*, int32_t) -> uint8_t>(), reinterpret_cast<void*>(NULL)},
+ {"ASensor_isWakeUpSensor", GetTrampolineFunc<auto(void*) -> uint8_t>(), reinterpret_cast<void*>(NULL)},
+ {"ASharedMemory_create", GetTrampolineFunc<auto(void*, uint64_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"ASharedMemory_dupFromJava", GetTrampolineFunc<auto(void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
++{"ASharedMemory_dupFromJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ASharedMemory_getSize", GetTrampolineFunc<auto(int32_t) -> uint64_t>(), reinterpret_cast<void*>(NULL)},
+ {"ASharedMemory_setProt", GetTrampolineFunc<auto(int32_t, int32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AStorageManager_delete", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+@@ -280,7 +282,7 @@
+ {"ASurfaceControl_acquire", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceControl_create", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceControl_createFromWindow", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+-{"ASurfaceControl_fromJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"ASurfaceControl_fromJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceControl_getChoreographer", GetTrampolineFunc<auto(void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceControl_registerSurfaceStatsListener", GetTrampolineFunc<auto(void*, int32_t, void*, auto(*)(void*, int32_t, void*) -> void) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceControl_release", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+@@ -288,7 +290,7 @@
+ {"ASurfaceTexture_acquireANativeWindow", GetTrampolineFunc<auto(void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTexture_attachToGLContext", GetTrampolineFunc<auto(void*, uint32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTexture_detachFromGLContext", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"ASurfaceTexture_fromSurfaceTexture", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"ASurfaceTexture_fromSurfaceTexture", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTexture_getTimestamp", GetTrampolineFunc<auto(void*) -> int64_t>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTexture_getTransformMatrix", GetTrampolineFunc<auto(void*, void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTexture_release", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+@@ -303,7 +305,7 @@
+ {"ASurfaceTransaction_clearFrameRate", GetTrampolineFunc<auto(void*, void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTransaction_create", GetTrampolineFunc<auto(void) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTransaction_delete", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"ASurfaceTransaction_fromJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"ASurfaceTransaction_fromJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTransaction_reparent", GetTrampolineFunc<auto(void*, void*, void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTransaction_setBuffer", GetTrampolineFunc<auto(void*, void*, void*, int32_t) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTransaction_setBufferAlpha", GetTrampolineFunc<auto(void*, void*, float) -> void>(), reinterpret_cast<void*>(NULL)},
+--- a/android_api/libandroid/proxy/trampolines_arm_to_x86-inl.h
++++ b/android_api/libandroid/proxy/trampolines_arm_to_x86-inl.h
+@@ -1,3 +1,5 @@
++// SPDX-License-Identifier: Apache-2.0
++// Modified by OME: backport AOSP e6c71f3 JNI argument types to API 35.
+ // clang-format off
+ const KnownTrampoline kKnownTrampolines[] = {
+ {"AActivityManager_addUidImportanceListener", GetTrampolineFunc<auto(auto(*)(uint32_t, int32_t, void*) -> void, int32_t, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+@@ -7,7 +9,7 @@
+ {"AAssetDir_close", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"AAssetDir_getNextFileName", GetTrampolineFunc<auto(void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AAssetDir_rewind", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AAssetManager_fromJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AAssetManager_fromJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AAssetManager_open", GetTrampolineFunc<auto(void*, void*, int32_t) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AAssetManager_openDir", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AAsset_close", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+@@ -104,7 +106,7 @@
+ {"AHardwareBuffer_acquire", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"AHardwareBuffer_allocate", GetTrampolineFunc<auto(void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AHardwareBuffer_describe", GetTrampolineFunc<auto(void*, void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AHardwareBuffer_fromHardwareBuffer", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AHardwareBuffer_fromHardwareBuffer", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AHardwareBuffer_getId", GetTrampolineFunc<auto(void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AHardwareBuffer_getNativeHandle", GetTrampolineFunc<auto(void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AHardwareBuffer_isSupported", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+@@ -114,17 +116,17 @@
+ {"AHardwareBuffer_recvHandleFromUnixSocket", GetTrampolineFunc<auto(int32_t, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AHardwareBuffer_release", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"AHardwareBuffer_sendHandleToUnixSocket", GetTrampolineFunc<auto(void*, int32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"AHardwareBuffer_toHardwareBuffer", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AHardwareBuffer_toHardwareBuffer", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AHardwareBuffer_unlock", GetTrampolineFunc<auto(void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AInputEvent_getDeviceId", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AInputEvent_getSource", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AInputEvent_getType", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AInputEvent_release", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AInputEvent_toJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AInputEvent_toJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AInputQueue_attachLooper", DoCustomTrampoline_AInputQueue_attachLooper, reinterpret_cast<void*>(DoBadThunk)},
+ {"AInputQueue_detachLooper", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"AInputQueue_finishEvent", GetTrampolineFunc<auto(void*, void*, int32_t) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AInputQueue_fromJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AInputQueue_fromJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AInputQueue_getEvent", GetTrampolineFunc<auto(void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AInputQueue_hasEvents", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AInputQueue_preDispatchEvent", GetTrampolineFunc<auto(void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+@@ -136,10 +138,10 @@
+ {"AInputReceiver_createUnbatchedInputReceiver", GetTrampolineFunc<auto(void*, void*, void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AInputReceiver_getInputTransferToken", GetTrampolineFunc<auto(void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AInputReceiver_release", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AInputTransferToken_fromJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AInputTransferToken_fromJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AInputTransferToken_release", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AInputTransferToken_toJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+-{"AKeyEvent_fromJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AInputTransferToken_toJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AKeyEvent_fromJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AKeyEvent_getAction", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AKeyEvent_getDownTime", GetTrampolineFunc<auto(void*) -> int64_t>(), reinterpret_cast<void*>(NULL)},
+ {"AKeyEvent_getEventTime", GetTrampolineFunc<auto(void*) -> int64_t>(), reinterpret_cast<void*>(NULL)},
+@@ -157,7 +159,7 @@
+ {"ALooper_release", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"ALooper_removeFd", GetTrampolineFunc<auto(void*, int32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ALooper_wake", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AMotionEvent_fromJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AMotionEvent_fromJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AMotionEvent_getAction", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AMotionEvent_getActionButton", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AMotionEvent_getAxisValue", GetTrampolineFunc<auto(void*, int32_t, uint32_t) -> float>(), reinterpret_cast<void*>(NULL)},
+@@ -206,14 +208,14 @@
+ {"ANativeActivity_setWindowFormat", DoCustomTrampoline_ANativeActivity_setWindowFormat, reinterpret_cast<void*>(DoBadThunk)},
+ {"ANativeActivity_showSoftInput", DoCustomTrampoline_ANativeActivity_showSoftInput, reinterpret_cast<void*>(DoBadThunk)},
+ {"ANativeWindow_acquire", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"ANativeWindow_fromSurface", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"ANativeWindow_fromSurface", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ANativeWindow_getFormat", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ANativeWindow_getHeight", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ANativeWindow_getWidth", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ANativeWindow_lock", GetTrampolineFunc<auto(void*, void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ANativeWindow_release", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"ANativeWindow_setBuffersGeometry", GetTrampolineFunc<auto(void*, int32_t, int32_t, int32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"ANativeWindow_toSurface", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"ANativeWindow_toSurface", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ANativeWindow_unlockAndPost", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AObbInfo_delete", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"AObbInfo_getFlags", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+@@ -266,7 +268,7 @@
+ {"ASensor_isDirectChannelTypeSupported", GetTrampolineFunc<auto(void*, int32_t) -> uint8_t>(), reinterpret_cast<void*>(NULL)},
+ {"ASensor_isWakeUpSensor", GetTrampolineFunc<auto(void*) -> uint8_t>(), reinterpret_cast<void*>(NULL)},
+ {"ASharedMemory_create", GetTrampolineFunc<auto(void*, uint32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"ASharedMemory_dupFromJava", GetTrampolineFunc<auto(void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
++{"ASharedMemory_dupFromJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ASharedMemory_getSize", GetTrampolineFunc<auto(int32_t) -> uint32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ASharedMemory_setProt", GetTrampolineFunc<auto(int32_t, int32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AStorageManager_delete", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+@@ -280,7 +282,7 @@
+ {"ASurfaceControl_acquire", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceControl_create", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceControl_createFromWindow", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+-{"ASurfaceControl_fromJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"ASurfaceControl_fromJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceControl_getChoreographer", GetTrampolineFunc<auto(void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceControl_registerSurfaceStatsListener", GetTrampolineFunc<auto(void*, int32_t, void*, auto(*)(void*, int32_t, void*) -> void) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceControl_release", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+@@ -288,7 +290,7 @@
+ {"ASurfaceTexture_acquireANativeWindow", GetTrampolineFunc<auto(void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTexture_attachToGLContext", GetTrampolineFunc<auto(void*, uint32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTexture_detachFromGLContext", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"ASurfaceTexture_fromSurfaceTexture", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"ASurfaceTexture_fromSurfaceTexture", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTexture_getTimestamp", GetTrampolineFunc<auto(void*) -> int64_t>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTexture_getTransformMatrix", GetTrampolineFunc<auto(void*, void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTexture_release", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+@@ -303,7 +305,7 @@
+ {"ASurfaceTransaction_clearFrameRate", GetTrampolineFunc<auto(void*, void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTransaction_create", GetTrampolineFunc<auto(void) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTransaction_delete", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"ASurfaceTransaction_fromJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"ASurfaceTransaction_fromJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTransaction_reparent", GetTrampolineFunc<auto(void*, void*, void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTransaction_setBuffer", GetTrampolineFunc<auto(void*, void*, void*, int32_t) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTransaction_setBufferAlpha", GetTrampolineFunc<auto(void*, void*, float) -> void>(), reinterpret_cast<void*>(NULL)},
+--- a/android_api/libandroid/proxy/trampolines_riscv64_to_x86_64-inl.h
++++ b/android_api/libandroid/proxy/trampolines_riscv64_to_x86_64-inl.h
+@@ -1,3 +1,5 @@
++// SPDX-License-Identifier: Apache-2.0
++// Modified by OME: backport AOSP e6c71f3 JNI argument types to API 35.
+ // clang-format off
+ const KnownTrampoline kKnownTrampolines[] = {
+ {"AActivityManager_addUidImportanceListener", GetTrampolineFunc<auto(auto(*)(uint32_t, int32_t, void*) -> void, int32_t, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+@@ -7,7 +9,7 @@
+ {"AAssetDir_close", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"AAssetDir_getNextFileName", GetTrampolineFunc<auto(void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AAssetDir_rewind", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AAssetManager_fromJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AAssetManager_fromJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AAssetManager_open", GetTrampolineFunc<auto(void*, void*, int32_t) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AAssetManager_openDir", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AAsset_close", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+@@ -104,7 +106,7 @@
+ {"AHardwareBuffer_acquire", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"AHardwareBuffer_allocate", GetTrampolineFunc<auto(void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AHardwareBuffer_describe", GetTrampolineFunc<auto(void*, void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AHardwareBuffer_fromHardwareBuffer", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AHardwareBuffer_fromHardwareBuffer", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AHardwareBuffer_getId", GetTrampolineFunc<auto(void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AHardwareBuffer_getNativeHandle", GetTrampolineFunc<auto(void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AHardwareBuffer_isSupported", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+@@ -114,17 +116,17 @@
+ {"AHardwareBuffer_recvHandleFromUnixSocket", GetTrampolineFunc<auto(int32_t, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AHardwareBuffer_release", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"AHardwareBuffer_sendHandleToUnixSocket", GetTrampolineFunc<auto(void*, int32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"AHardwareBuffer_toHardwareBuffer", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AHardwareBuffer_toHardwareBuffer", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AHardwareBuffer_unlock", GetTrampolineFunc<auto(void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AInputEvent_getDeviceId", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AInputEvent_getSource", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AInputEvent_getType", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AInputEvent_release", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AInputEvent_toJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AInputEvent_toJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AInputQueue_attachLooper", DoCustomTrampoline_AInputQueue_attachLooper, reinterpret_cast<void*>(DoBadThunk)},
+ {"AInputQueue_detachLooper", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"AInputQueue_finishEvent", GetTrampolineFunc<auto(void*, void*, int32_t) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AInputQueue_fromJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AInputQueue_fromJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AInputQueue_getEvent", GetTrampolineFunc<auto(void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AInputQueue_hasEvents", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AInputQueue_preDispatchEvent", GetTrampolineFunc<auto(void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+@@ -136,10 +138,10 @@
+ {"AInputReceiver_createUnbatchedInputReceiver", GetTrampolineFunc<auto(void*, void*, void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AInputReceiver_getInputTransferToken", GetTrampolineFunc<auto(void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AInputReceiver_release", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AInputTransferToken_fromJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AInputTransferToken_fromJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AInputTransferToken_release", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AInputTransferToken_toJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+-{"AKeyEvent_fromJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AInputTransferToken_toJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AKeyEvent_fromJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AKeyEvent_getAction", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AKeyEvent_getDownTime", GetTrampolineFunc<auto(void*) -> int64_t>(), reinterpret_cast<void*>(NULL)},
+ {"AKeyEvent_getEventTime", GetTrampolineFunc<auto(void*) -> int64_t>(), reinterpret_cast<void*>(NULL)},
+@@ -157,7 +159,7 @@
+ {"ALooper_release", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"ALooper_removeFd", GetTrampolineFunc<auto(void*, int32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ALooper_wake", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AMotionEvent_fromJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AMotionEvent_fromJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AMotionEvent_getAction", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AMotionEvent_getActionButton", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AMotionEvent_getAxisValue", GetTrampolineFunc<auto(void*, int32_t, uint64_t) -> float>(), reinterpret_cast<void*>(NULL)},
+@@ -206,14 +208,14 @@
+ {"ANativeActivity_setWindowFormat", DoCustomTrampoline_ANativeActivity_setWindowFormat, reinterpret_cast<void*>(DoBadThunk)},
+ {"ANativeActivity_showSoftInput", DoCustomTrampoline_ANativeActivity_showSoftInput, reinterpret_cast<void*>(DoBadThunk)},
+ {"ANativeWindow_acquire", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"ANativeWindow_fromSurface", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"ANativeWindow_fromSurface", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ANativeWindow_getFormat", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ANativeWindow_getHeight", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ANativeWindow_getWidth", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ANativeWindow_lock", GetTrampolineFunc<auto(void*, void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ANativeWindow_release", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"ANativeWindow_setBuffersGeometry", GetTrampolineFunc<auto(void*, int32_t, int32_t, int32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"ANativeWindow_toSurface", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"ANativeWindow_toSurface", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ANativeWindow_unlockAndPost", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AObbInfo_delete", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"AObbInfo_getFlags", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+@@ -266,7 +268,7 @@
+ {"ASensor_isDirectChannelTypeSupported", GetTrampolineFunc<auto(void*, int32_t) -> uint8_t>(), reinterpret_cast<void*>(NULL)},
+ {"ASensor_isWakeUpSensor", GetTrampolineFunc<auto(void*) -> uint8_t>(), reinterpret_cast<void*>(NULL)},
+ {"ASharedMemory_create", GetTrampolineFunc<auto(void*, uint64_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"ASharedMemory_dupFromJava", GetTrampolineFunc<auto(void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
++{"ASharedMemory_dupFromJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ASharedMemory_getSize", GetTrampolineFunc<auto(int32_t) -> uint64_t>(), reinterpret_cast<void*>(NULL)},
+ {"ASharedMemory_setProt", GetTrampolineFunc<auto(int32_t, int32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AStorageManager_delete", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+@@ -280,7 +282,7 @@
+ {"ASurfaceControl_acquire", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceControl_create", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceControl_createFromWindow", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+-{"ASurfaceControl_fromJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"ASurfaceControl_fromJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceControl_getChoreographer", GetTrampolineFunc<auto(void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceControl_registerSurfaceStatsListener", GetTrampolineFunc<auto(void*, int32_t, void*, auto(*)(void*, int32_t, void*) -> void) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceControl_release", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+@@ -288,7 +290,7 @@
+ {"ASurfaceTexture_acquireANativeWindow", GetTrampolineFunc<auto(void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTexture_attachToGLContext", GetTrampolineFunc<auto(void*, uint32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTexture_detachFromGLContext", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"ASurfaceTexture_fromSurfaceTexture", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"ASurfaceTexture_fromSurfaceTexture", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTexture_getTimestamp", GetTrampolineFunc<auto(void*) -> int64_t>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTexture_getTransformMatrix", GetTrampolineFunc<auto(void*, void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTexture_release", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+@@ -303,7 +305,7 @@
+ {"ASurfaceTransaction_clearFrameRate", GetTrampolineFunc<auto(void*, void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTransaction_create", GetTrampolineFunc<auto(void) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTransaction_delete", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"ASurfaceTransaction_fromJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"ASurfaceTransaction_fromJava", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTransaction_reparent", GetTrampolineFunc<auto(void*, void*, void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTransaction_setBuffer", GetTrampolineFunc<auto(void*, void*, void*, int32_t) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"ASurfaceTransaction_setBufferAlpha", GetTrampolineFunc<auto(void*, void*, float) -> void>(), reinterpret_cast<void*>(NULL)},
+--- a/android_api/libbinder_ndk/proxy/trampolines_arm64_to_x86_64-inl.h
++++ b/android_api/libbinder_ndk/proxy/trampolines_arm64_to_x86_64-inl.h
+@@ -1,3 +1,5 @@
++// SPDX-License-Identifier: Apache-2.0
++// Modified by OME: backport AOSP e6c71f3 JNI argument types to API 35.
+ // clang-format off
+ const KnownTrampoline kKnownTrampolines[] = {
+ {"ABinderProcess_handlePolledCommands", GetTrampolineFunc<auto(void) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+@@ -25,7 +27,7 @@
+ {"AIBinder_dump", GetTrampolineFunc<auto(void*, int32_t, void*, uint32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_forceDowngradeToSystemStability", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_forceDowngradeToVendorStability", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AIBinder_fromJavaBinder", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AIBinder_fromJavaBinder", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_getCallingPid", GetTrampolineFunc<auto(void) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_getCallingSid", GetTrampolineFunc<auto(void) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_getCallingUid", GetTrampolineFunc<auto(void) -> uint32_t>(), reinterpret_cast<void*>(NULL)},
+@@ -48,13 +50,13 @@
+ {"AIBinder_setInheritRt", GetTrampolineFunc<auto(void*, uint8_t) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_setMinSchedulerPolicy", GetTrampolineFunc<auto(void*, int32_t, int32_t) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_setRequestingSid", GetTrampolineFunc<auto(void*, uint8_t) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AIBinder_toJavaBinder", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AIBinder_toJavaBinder", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_transact", GetTrampolineFunc<auto(void*, uint32_t, void*, void*, uint32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_unlinkToDeath", GetTrampolineFunc<auto(void*, void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AParcel_appendFrom", GetTrampolineFunc<auto(void*, void*, int32_t, int32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AParcel_create", GetTrampolineFunc<auto(void) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AParcel_delete", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AParcel_fromJavaParcel", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AParcel_fromJavaParcel", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AParcel_getAllowFds", GetTrampolineFunc<auto(void*) -> uint8_t>(), reinterpret_cast<void*>(NULL)},
+ {"AParcel_getDataPosition", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AParcel_getDataSize", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+--- a/android_api/libbinder_ndk/proxy/trampolines_arm_to_x86-inl.h
++++ b/android_api/libbinder_ndk/proxy/trampolines_arm_to_x86-inl.h
+@@ -1,3 +1,5 @@
++// SPDX-License-Identifier: Apache-2.0
++// Modified by OME: backport AOSP e6c71f3 JNI argument types to API 35.
+ // clang-format off
+ const KnownTrampoline kKnownTrampolines[] = {
+ {"ABinderProcess_handlePolledCommands", GetTrampolineFunc<auto(void) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+@@ -25,7 +27,7 @@
+ {"AIBinder_dump", GetTrampolineFunc<auto(void*, int32_t, void*, uint32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_forceDowngradeToSystemStability", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_forceDowngradeToVendorStability", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AIBinder_fromJavaBinder", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AIBinder_fromJavaBinder", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_getCallingPid", GetTrampolineFunc<auto(void) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_getCallingSid", GetTrampolineFunc<auto(void) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_getCallingUid", GetTrampolineFunc<auto(void) -> uint32_t>(), reinterpret_cast<void*>(NULL)},
+@@ -48,13 +50,13 @@
+ {"AIBinder_setInheritRt", GetTrampolineFunc<auto(void*, uint8_t) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_setMinSchedulerPolicy", GetTrampolineFunc<auto(void*, int32_t, int32_t) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_setRequestingSid", GetTrampolineFunc<auto(void*, uint8_t) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AIBinder_toJavaBinder", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AIBinder_toJavaBinder", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_transact", GetTrampolineFunc<auto(void*, uint32_t, void*, void*, uint32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_unlinkToDeath", GetTrampolineFunc<auto(void*, void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AParcel_appendFrom", GetTrampolineFunc<auto(void*, void*, int32_t, int32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AParcel_create", GetTrampolineFunc<auto(void) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AParcel_delete", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AParcel_fromJavaParcel", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AParcel_fromJavaParcel", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AParcel_getAllowFds", GetTrampolineFunc<auto(void*) -> uint8_t>(), reinterpret_cast<void*>(NULL)},
+ {"AParcel_getDataPosition", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AParcel_getDataSize", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+--- a/android_api/libbinder_ndk/proxy/trampolines_riscv64_to_x86_64-inl.h
++++ b/android_api/libbinder_ndk/proxy/trampolines_riscv64_to_x86_64-inl.h
+@@ -1,3 +1,5 @@
++// SPDX-License-Identifier: Apache-2.0
++// Modified by OME: backport AOSP e6c71f3 JNI argument types to API 35.
+ // clang-format off
+ const KnownTrampoline kKnownTrampolines[] = {
+ {"ABinderProcess_handlePolledCommands", GetTrampolineFunc<auto(void) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+@@ -25,7 +27,7 @@
+ {"AIBinder_dump", GetTrampolineFunc<auto(void*, int32_t, void*, uint32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_forceDowngradeToSystemStability", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_forceDowngradeToVendorStability", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AIBinder_fromJavaBinder", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AIBinder_fromJavaBinder", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_getCallingPid", GetTrampolineFunc<auto(void) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_getCallingSid", GetTrampolineFunc<auto(void) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_getCallingUid", GetTrampolineFunc<auto(void) -> uint32_t>(), reinterpret_cast<void*>(NULL)},
+@@ -48,13 +50,13 @@
+ {"AIBinder_setInheritRt", GetTrampolineFunc<auto(void*, uint8_t) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_setMinSchedulerPolicy", GetTrampolineFunc<auto(void*, int32_t, int32_t) -> void>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_setRequestingSid", GetTrampolineFunc<auto(void*, uint8_t) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AIBinder_toJavaBinder", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AIBinder_toJavaBinder", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_transact", GetTrampolineFunc<auto(void*, uint32_t, void*, void*, uint32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AIBinder_unlinkToDeath", GetTrampolineFunc<auto(void*, void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AParcel_appendFrom", GetTrampolineFunc<auto(void*, void*, int32_t, int32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AParcel_create", GetTrampolineFunc<auto(void) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AParcel_delete", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"AParcel_fromJavaParcel", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"AParcel_fromJavaParcel", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"AParcel_getAllowFds", GetTrampolineFunc<auto(void*) -> uint8_t>(), reinterpret_cast<void*>(NULL)},
+ {"AParcel_getDataPosition", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AParcel_getDataSize", GetTrampolineFunc<auto(void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+--- a/android_api/libcamera2ndk/proxy/trampolines_arm64_to_x86_64-inl.h
++++ b/android_api/libcamera2ndk/proxy/trampolines_arm64_to_x86_64-inl.h
+@@ -1,3 +1,5 @@
++// SPDX-License-Identifier: Apache-2.0
++// Modified by OME: backport AOSP e6c71f3 JNI argument types to API 35.
+ // clang-format off
+ const KnownTrampoline kKnownTrampolines[] = {
+ {"ACameraCaptureSession_abortCaptures", GetTrampolineFunc<auto(void*) -> uint32_t>(), reinterpret_cast<void*>(NULL)},
+@@ -34,7 +36,7 @@
+ {"ACameraManager_unregisterExtendedAvailabilityCallback", GetTrampolineFunc<auto(void*, void*) -> uint32_t>(), reinterpret_cast<void*>(DoThunk_ACameraManager_unregisterExtendedAvailabilityCallback)},
+ {"ACameraMetadata_copy", GetTrampolineFunc<auto(void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ACameraMetadata_free", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"ACameraMetadata_fromCameraMetadata", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"ACameraMetadata_fromCameraMetadata", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ACameraMetadata_getAllTags", GetTrampolineFunc<auto(void*, void*, void*) -> uint32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ACameraMetadata_getConstEntry", GetTrampolineFunc<auto(void*, uint32_t, void*) -> uint32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ACameraMetadata_getTagFromName", GetTrampolineFunc<auto(void*, void*, void*) -> uint32_t>(), reinterpret_cast<void*>(NULL)},
+--- a/android_api/libcamera2ndk/proxy/trampolines_arm_to_x86-inl.h
++++ b/android_api/libcamera2ndk/proxy/trampolines_arm_to_x86-inl.h
+@@ -1,3 +1,5 @@
++// SPDX-License-Identifier: Apache-2.0
++// Modified by OME: backport AOSP e6c71f3 JNI argument types to API 35.
+ // clang-format off
+ const KnownTrampoline kKnownTrampolines[] = {
+ {"ACameraCaptureSession_abortCaptures", GetTrampolineFunc<auto(void*) -> uint32_t>(), reinterpret_cast<void*>(NULL)},
+@@ -34,7 +36,7 @@
+ {"ACameraManager_unregisterExtendedAvailabilityCallback", GetTrampolineFunc<auto(void*, void*) -> uint32_t>(), reinterpret_cast<void*>(DoThunk_ACameraManager_unregisterExtendedAvailabilityCallback)},
+ {"ACameraMetadata_copy", GetTrampolineFunc<auto(void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ACameraMetadata_free", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"ACameraMetadata_fromCameraMetadata", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"ACameraMetadata_fromCameraMetadata", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ACameraMetadata_getAllTags", GetTrampolineFunc<auto(void*, void*, void*) -> uint32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ACameraMetadata_getConstEntry", GetTrampolineFunc<auto(void*, uint32_t, void*) -> uint32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ACameraMetadata_getTagFromName", GetTrampolineFunc<auto(void*, void*, void*) -> uint32_t>(), reinterpret_cast<void*>(NULL)},
+--- a/android_api/libcamera2ndk/proxy/trampolines_riscv64_to_x86_64-inl.h
++++ b/android_api/libcamera2ndk/proxy/trampolines_riscv64_to_x86_64-inl.h
+@@ -1,3 +1,5 @@
++// SPDX-License-Identifier: Apache-2.0
++// Modified by OME: backport AOSP e6c71f3 JNI argument types to API 35.
+ // clang-format off
+ const KnownTrampoline kKnownTrampolines[] = {
+ {"ACameraCaptureSession_abortCaptures", GetTrampolineFunc<auto(void*) -> uint32_t>(), reinterpret_cast<void*>(NULL)},
+@@ -34,7 +36,7 @@
+ {"ACameraManager_unregisterExtendedAvailabilityCallback", GetTrampolineFunc<auto(void*, void*) -> uint32_t>(), reinterpret_cast<void*>(DoThunk_ACameraManager_unregisterExtendedAvailabilityCallback)},
+ {"ACameraMetadata_copy", GetTrampolineFunc<auto(void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ACameraMetadata_free", GetTrampolineFunc<auto(void*) -> void>(), reinterpret_cast<void*>(NULL)},
+-{"ACameraMetadata_fromCameraMetadata", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
++{"ACameraMetadata_fromCameraMetadata", GetTrampolineFunc<auto(JNIEnv*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+ {"ACameraMetadata_getAllTags", GetTrampolineFunc<auto(void*, void*, void*) -> uint32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ACameraMetadata_getConstEntry", GetTrampolineFunc<auto(void*, uint32_t, void*) -> uint32_t>(), reinterpret_cast<void*>(NULL)},
+ {"ACameraMetadata_getTagFromName", GetTrampolineFunc<auto(void*, void*, void*) -> uint32_t>(), reinterpret_cast<void*>(NULL)},
+--- a/android_api/libjnigraphics/proxy/trampolines_arm64_to_x86_64-inl.h
++++ b/android_api/libjnigraphics/proxy/trampolines_arm64_to_x86_64-inl.h
+@@ -1,3 +1,5 @@
++// SPDX-License-Identifier: Apache-2.0
++// Modified by OME: backport AOSP e6c71f3 JNI argument types to API 35.
+ // clang-format off
+ const KnownTrampoline kKnownTrampolines[] = {
+ {"AImageDecoderFrameInfo_create", GetTrampolineFunc<auto(void) -> void*>(), reinterpret_cast<void*>(NULL)},
+@@ -34,11 +36,11 @@
+ {"AImageDecoder_setTargetSize", GetTrampolineFunc<auto(void*, int32_t, int32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AImageDecoder_setUnpremultipliedRequired", GetTrampolineFunc<auto(void*, uint8_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AndroidBitmap_compress", GetTrampolineFunc<auto(void*, int32_t, void*, int32_t, int32_t, void*, auto(*)(void*, void*, uint64_t) -> uint8_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"AndroidBitmap_getDataSpace", GetTrampolineFunc<auto(void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"AndroidBitmap_getHardwareBuffer", GetTrampolineFunc<auto(void*, void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"AndroidBitmap_getInfo", GetTrampolineFunc<auto(void*, void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"AndroidBitmap_lockPixels", GetTrampolineFunc<auto(void*, void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"AndroidBitmap_unlockPixels", GetTrampolineFunc<auto(void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
++{"AndroidBitmap_getDataSpace", GetTrampolineFunc<auto(JNIEnv*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
++{"AndroidBitmap_getHardwareBuffer", GetTrampolineFunc<auto(JNIEnv*, void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
++{"AndroidBitmap_getInfo", GetTrampolineFunc<auto(JNIEnv*, void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
++{"AndroidBitmap_lockPixels", GetTrampolineFunc<auto(JNIEnv*, void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
++{"AndroidBitmap_unlockPixels", GetTrampolineFunc<auto(JNIEnv*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ };  // kKnownTrampolines
+ const KnownVariable kKnownVariables[] = {
+ };  // kKnownVariables
+--- a/android_api/libjnigraphics/proxy/trampolines_arm_to_x86-inl.h
++++ b/android_api/libjnigraphics/proxy/trampolines_arm_to_x86-inl.h
+@@ -1,3 +1,5 @@
++// SPDX-License-Identifier: Apache-2.0
++// Modified by OME: backport AOSP e6c71f3 JNI argument types to API 35.
+ // clang-format off
+ const KnownTrampoline kKnownTrampolines[] = {
+ {"AImageDecoderFrameInfo_create", GetTrampolineFunc<auto(void) -> void*>(), reinterpret_cast<void*>(NULL)},
+@@ -34,11 +36,11 @@
+ {"AImageDecoder_setTargetSize", GetTrampolineFunc<auto(void*, int32_t, int32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AImageDecoder_setUnpremultipliedRequired", GetTrampolineFunc<auto(void*, uint8_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AndroidBitmap_compress", GetTrampolineFunc<auto(void*, int32_t, void*, int32_t, int32_t, void*, auto(*)(void*, void*, uint32_t) -> uint8_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"AndroidBitmap_getDataSpace", GetTrampolineFunc<auto(void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"AndroidBitmap_getHardwareBuffer", GetTrampolineFunc<auto(void*, void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"AndroidBitmap_getInfo", GetTrampolineFunc<auto(void*, void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"AndroidBitmap_lockPixels", GetTrampolineFunc<auto(void*, void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"AndroidBitmap_unlockPixels", GetTrampolineFunc<auto(void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
++{"AndroidBitmap_getDataSpace", GetTrampolineFunc<auto(JNIEnv*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
++{"AndroidBitmap_getHardwareBuffer", GetTrampolineFunc<auto(JNIEnv*, void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
++{"AndroidBitmap_getInfo", GetTrampolineFunc<auto(JNIEnv*, void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
++{"AndroidBitmap_lockPixels", GetTrampolineFunc<auto(JNIEnv*, void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
++{"AndroidBitmap_unlockPixels", GetTrampolineFunc<auto(JNIEnv*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ };  // kKnownTrampolines
+ const KnownVariable kKnownVariables[] = {
+ };  // kKnownVariables
+--- a/android_api/libjnigraphics/proxy/trampolines_riscv64_to_x86_64-inl.h
++++ b/android_api/libjnigraphics/proxy/trampolines_riscv64_to_x86_64-inl.h
+@@ -1,3 +1,5 @@
++// SPDX-License-Identifier: Apache-2.0
++// Modified by OME: backport AOSP e6c71f3 JNI argument types to API 35.
+ // clang-format off
+ const KnownTrampoline kKnownTrampolines[] = {
+ {"AImageDecoderFrameInfo_create", GetTrampolineFunc<auto(void) -> void*>(), reinterpret_cast<void*>(NULL)},
+@@ -34,11 +36,11 @@
+ {"AImageDecoder_setTargetSize", GetTrampolineFunc<auto(void*, int32_t, int32_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AImageDecoder_setUnpremultipliedRequired", GetTrampolineFunc<auto(void*, uint8_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ {"AndroidBitmap_compress", GetTrampolineFunc<auto(void*, int32_t, void*, int32_t, int32_t, void*, auto(*)(void*, void*, uint64_t) -> uint8_t) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"AndroidBitmap_getDataSpace", GetTrampolineFunc<auto(void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"AndroidBitmap_getHardwareBuffer", GetTrampolineFunc<auto(void*, void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"AndroidBitmap_getInfo", GetTrampolineFunc<auto(void*, void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"AndroidBitmap_lockPixels", GetTrampolineFunc<auto(void*, void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+-{"AndroidBitmap_unlockPixels", GetTrampolineFunc<auto(void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
++{"AndroidBitmap_getDataSpace", GetTrampolineFunc<auto(JNIEnv*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
++{"AndroidBitmap_getHardwareBuffer", GetTrampolineFunc<auto(JNIEnv*, void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
++{"AndroidBitmap_getInfo", GetTrampolineFunc<auto(JNIEnv*, void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
++{"AndroidBitmap_lockPixels", GetTrampolineFunc<auto(JNIEnv*, void*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
++{"AndroidBitmap_unlockPixels", GetTrampolineFunc<auto(JNIEnv*, void*) -> int32_t>(), reinterpret_cast<void*>(NULL)},
+ };  // kKnownTrampolines
+ const KnownVariable kKnownVariables[] = {
+ };  // kKnownVariables

@@ -130,6 +130,10 @@ OME_TRANSLATOR=digitalis OME_BUILD_ROOT=/home/ome/bliss OME_JOBS=8 \
     bash '/mnt/c/Open Mobile Emulator/guest/build/build-image.sh' digitalis-iso
 ```
 
+Use an optional `OME_DIGITALIS_RUN=jni1` (letters, digits and hyphens only) to distinguish
+multiple experiments on one day. It becomes part of both the ISO name and the dist directory;
+existing experiment directories are still never overwritten.
+
 The command applies normal OME identity patches and Digitalis compatibility patches, verifies
 the pinned installer cache, builds `iso_img`, renames the successful output to
 `OME-api35-<date>-digitalis.iso`, and collects it in

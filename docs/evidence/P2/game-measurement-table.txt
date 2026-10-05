@@ -34,3 +34,18 @@ logcat Zygote 종료 확인 13:30:40.978
 
 M0 비교값 출처: docs/evidence/M0/metrics.md, GPU harness battle 1-3 행.
 이번에는 첫 실행에 실패했으므로 성능의 우열을 판정하지 않음.
+
+JNI 타입 수정 뒤 재측정 (2026-10-05)
+수정: AOSP e6c71f3874270863e410dea228b75461f2199462의 JNI 인자 타입 75개를 A15 생성 헤더에 이식.
+새 ISO SHA-256 9bb72cc07bba1fa1609faf020a4b1814a39ee6412370c972d41b10ea9a2899ee
+자체 AAssetManager_fromJava 재현기: PASS. 이전 GetLongField 충돌 해결.
+게임 첫 실행: Unity 6000.3.13f1 / IL2CPP 초기화까지 진행.
+게임 PID 3323 시작 14:03:51.002, 새 SIGSEGV 14:03:53.580 (약 2.58초).
+새 오류: FATAL host signal NO-RECOVERY, sig=11, si_code=2.
+host_pc=fault_addr=0x7aa4c302764c; libswappywrapper.so 오프셋 0x2664b.
+호출 스택: ARM64 libswappywrapper.so 주소, ART art_jni_trampoline.
+기존 JNI 인자 타입 오류와 다른 함수 포인터 실행 문제. 정확한 등록 원인은 미확정.
+첫 오류 감지 뒤 게임 force-stop. 추가 게임 재시도나 우회 없음.
+리소스 다운로드, 계정, 튜토리얼, 10분 세션, 전투 성능은 여전히 측정 불가.
+원문: game-jni1-logcat.txt, jni-probe-after-logcat.txt.
+이전 APK와 데이터 디렉터리는 보존했고 system.img만 교체. 원본 system은 system.before-jni1.img로 디스크 안에 보존.
