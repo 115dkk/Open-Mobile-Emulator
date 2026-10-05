@@ -1,0 +1,14 @@
+2026-10-06 A15 Digitalis jni6 + local GApps intro diagnostic
+Game PID 3414, secondary process 3492. 1280x800, virgl.
+Codec trace: c2.android.avc.decoder, video/avc, 1600x1024; c2.android.aac.decoder, audio/mp4a-latm.
+A15: decoder creation succeeded; no Codec2 component death or fatal MediaCodec/berberis error observed in captured interval.
+A13 known-progress baseline: same AVC 1600x1024; c2.android.avc.decoder died, NdkMediaCodec error -38, yet tap advanced to title/update notice.
+A15 warning: Cannot Prepare a disabled VideoPlayer.
+SurfaceFlinger BLAST samples: 127 valid presentations each; measured means 38.93 fps and 41.93 fps.
+Last present timestamps advanced from 188483694700 to 191573177700 ns over the sampling interval. Black content is being presented; not a frozen host window.
+Root debuggerd collected. UnityMain blocked in guest syscall/JIT; main Java thread and RenderThread use message polling; FMOD audio threads wait/sleep.
+Guest thread syscall/wchan snapshot: UnityMain futex/poll, FMOD futex/nanosleep. Native stack unwinding stops at memfd JIT code and does not identify the managed/video completion state.
+Root ss snapshot: only Play Store, GMS and adb sockets present; no established game socket at that instant. This alone does not prove no network request ever occurred.
+No game asset modification or initialization bypass performed.
+A15 libndk comparison not performed: this needs extracting and validating a complete API35 translator bundle and preserving/restoring Digitalis state; current evidence does not justify a partial library swap.
+Remaining question: guest MediaCodec/SurfaceTexture callback or Unity video completion handling through Digitalis, versus API35 image behavior. No confirmed small correction found.

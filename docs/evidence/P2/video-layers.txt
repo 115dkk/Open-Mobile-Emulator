@@ -1,0 +1,101 @@
+RequestedLayerState{StatusBar#88 parentId=82}
+RequestedLayerState{9fa7989 Taskbar#96 parentId=121}
+RequestedLayerState{WindowedMagnification:0:31#3 parentId=43}
+RequestedLayerState{HideDisplayCutout:0:14#4 parentId=3}
+RequestedLayerState{OneHanded:0:14#5 parentId=4}
+RequestedLayerState{FullscreenMagnification:0:12#6 parentId=5}
+RequestedLayerState{Leaf:0:1#7 parentId=6}
+RequestedLayerState{DefaultTaskDisplayArea#8 parentId=6 z=1}
+RequestedLayerState{Leaf:3:12#9 parentId=6 z=2}
+RequestedLayerState{ImePlaceholder:13:14#10 parentId=5 z=1}
+RequestedLayerState{ImeContainer#11 parentId=105 relativeParentId=118 z=1}
+RequestedLayerState{OneHanded:15:15#12 parentId=3 z=1}
+RequestedLayerState{FullscreenMagnification:15:15#13 parentId=12}
+RequestedLayerState{Leaf:15:15#14 parentId=13}
+RequestedLayerState{HideDisplayCutout:16:16#15 parentId=3 z=2}
+RequestedLayerState{OneHanded:16:16#16 parentId=15}
+RequestedLayerState{FullscreenMagnification:16:16#17 parentId=16}
+RequestedLayerState{Leaf:16:16#18 parentId=17}
+RequestedLayerState{OneHanded:17:17#19 parentId=3 z=3}
+RequestedLayerState{FullscreenMagnification:17:17#20 parentId=19}
+RequestedLayerState{Leaf:17:17#21 parentId=20}
+RequestedLayerState{HideDisplayCutout:18:23#22 parentId=3 z=4}
+RequestedLayerState{OneHanded:18:23#23 parentId=22}
+RequestedLayerState{FullscreenMagnification:18:23#24 parentId=23}
+RequestedLayerState{Leaf:18:23#25 parentId=24}
+RequestedLayerState{Leaf:24:25#26 parentId=3 z=5}
+RequestedLayerState{HideDisplayCutout:26:31#27 parentId=3 z=6}
+RequestedLayerState{OneHanded:26:31#28 parentId=27}
+RequestedLayerState{FullscreenMagnification:26:27#29 parentId=28}
+RequestedLayerState{Leaf:26:27#30 parentId=29}
+RequestedLayerState{Leaf:28:28#31 parentId=28 z=1}
+RequestedLayerState{FullscreenMagnification:29:31#32 parentId=28 z=2}
+RequestedLayerState{Leaf:29:31#33 parentId=32}
+RequestedLayerState{HideDisplayCutout:32:35#34 parentId=43 z=1}
+RequestedLayerState{OneHanded:32:32#35 parentId=34}
+RequestedLayerState{Leaf:32:32#36 parentId=35}
+RequestedLayerState{FullscreenMagnification:33:33#37 parentId=34 z=1}
+RequestedLayerState{Leaf:33:33#38 parentId=37}
+RequestedLayerState{OneHanded:34:35#39 parentId=34 z=2}
+RequestedLayerState{FullscreenMagnification:34:35#40 parentId=39}
+RequestedLayerState{Leaf:34:35#41 parentId=40}
+RequestedLayerState{Leaf:36:36#42 parentId=43 z=2}
+RequestedLayerState{Display 0 name="Built-in Screen"#43}
+RequestedLayerState{Display Overlays#44 parentId=43 z=2147483647}
+RequestedLayerState{Input Overlays#45 parentId=43 z=2147483646}
+RequestedLayerState{Accessibility Overlays#46 parentId=43 z=2147483645}
+RequestedLayerState{Task=1#47 parentId=8}
+RequestedLayerState{Sprite#48 parentId=44 z=351000}
+RequestedLayerState{[BBQ] Sprite#48#49 parentId=48}
+RequestedLayerState{home_task_overlay_container#50 parentId=47 z=2147483647}
+RequestedLayerState{ActivityRecord{fe64b2 u0 com.android.launcher3/.uioverrides.QuickstepLauncher#92 parentId=91}
+RequestedLayerState{Taskbar#99 parentId=96}
+RequestedLayerState{[Gesture Monitor] onehanded-touch#53 parentId=45 z=1}
+RequestedLayerState{Task=3#54 parentId=8 z=1}
+RequestedLayerState{Task=4#55 parentId=54}
+RequestedLayerState{Task=5#56 parentId=54 z=1}
+RequestedLayerState{WindowToken{b5d0918 type=2038 android.os.BinderProxy@97ba7ce}#57 parentId=9}
+RequestedLayerState{7cb28f5 ShellDropTarget#58 parentId=57}
+RequestedLayerState{Dim layer#59 parentId=55 z=2147483647}
+RequestedLayerState{Surface(name=d964238 com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity)/@0x584c06f - animation-leash of starting_reveal#126}
+RequestedLayerState{Dim layer#61 parentId=56 z=2147483647}
+RequestedLayerState{Task=26#91 parentId=47}
+RequestedLayerState{[Gesture Monitor] swipe-up#83 parentId=45 z=1}
+RequestedLayerState{WallpaperWindowToken{bec7014 token=android.os.Binder@2163a67}#64 parentId=7}
+RequestedLayerState{bc7c09 com.android.systemui.wallpapers.ImageWallpaper#65 parentId=64}
+RequestedLayerState{com.android.systemui.wallpapers.ImageWallpaper#66 parentId=65}
+RequestedLayerState{Wallpaper BBQ wrapper#67 parentId=66}
+RequestedLayerState{WindowToken{e5fc6be type=2024 android.os.BinderProxy@6ff7979}#68 z=1073741826}
+RequestedLayerState{249b31f ScreenDecorOverlay#69 parentId=68}
+RequestedLayerState{WindowToken{5aec29c type=2024 android.os.BinderProxy@1cba20f}#70 z=1073741826}
+RequestedLayerState{b5c94a5 ScreenDecorOverlayBottom#71 parentId=70}
+RequestedLayerState{Input Consumer recents_animation_input_consumer#94}
+RequestedLayerState{a87cb91 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher#93 parentId=92}
+RequestedLayerState{[Gesture Monitor] edge-swipe#76 parentId=45 z=1}
+RequestedLayerState{WindowToken{94a99a6 type=2024 android.os.BinderProxy@ee7a701}#77 parentId=26}
+RequestedLayerState{bf82fe7 EdgeBackGestureHandler0#78 parentId=77}
+RequestedLayerState{WindowToken{87badc7 type=2040 android.os.BinderProxy@d20b9e1}#79 parentId=21}
+RequestedLayerState{a85cff4 NotificationShade#80 parentId=79}
+RequestedLayerState{WindowToken{f8258ea type=2000 android.os.BinderProxy@a27298c}#81 parentId=14}
+RequestedLayerState{9357db StatusBar#82 parentId=120}
+RequestedLayerState{9cf9822 ActivityRecordInputSink com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity#115 parentId=105 z=-2147483648}
+RequestedLayerState{Caption of Task=27#114 parentId=113}
+RequestedLayerState{WindowToken{36659af type=2024 android.os.BinderProxy@4164cf4}#95 parentId=26 z=1}
+RequestedLayerState{Task=27#104 parentId=8 z=2}
+RequestedLayerState{ActivityRecord{a0a52b3 u0 com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity#105 parentId=104}
+RequestedLayerState{Surface(name=6b04dd3 InputMethod)/@0xba7f42f - animation-leash of insets_animation#130 parentId=127}
+RequestedLayerState{6b04dd3 InputMethod#128 parentId=130}
+RequestedLayerState{Background for SurfaceView[com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity]#125 parentId=123 relativeParentId=119 z=-2147483648}
+RequestedLayerState{DefaultWindowDecorViewHost surface#109 parentId=110 z=-1}
+RequestedLayerState{Decor container of Task=27#110 parentId=104 z=20000}
+RequestedLayerState{[Gesture Monitor] caption-touch#111 parentId=45 z=1}
+RequestedLayerState{Surface(name=Task=27)/@0xffdb0c6_transition-leash#112 z=2}
+RequestedLayerState{Caption of Task=27Leash#113 parentId=109}
+RequestedLayerState{d964238 com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity#118 parentId=105}
+RequestedLayerState{com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity#119 parentId=118}
+RequestedLayerState{Surface(name=9357db StatusBar)/@0xe9288dc - animation-leash of insets_animation#120 parentId=81}
+RequestedLayerState{Surface(name=9fa7989 Taskbar)/@0x4c86c31 - animation-leash of insets_animation#121 parentId=95}
+RequestedLayerState{Bounds for - com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity#122 parentId=119}
+RequestedLayerState{SurfaceView[com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity]#123 parentId=122 relativeParentId=119 z=-2}
+RequestedLayerState{SurfaceView[com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity](BLAST)#124 parentId=123}
+RequestedLayerState{WindowToken{362b1ac type=2011 android.os.Binder@cd25fb9}#127 parentId=11}

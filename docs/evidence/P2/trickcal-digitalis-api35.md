@@ -124,3 +124,13 @@ jni6 system.img에 넣었다(라벨 `system_file`, 다시 읽어 해시와 라�
 - 게임: Firebase messaging 의존성 오류가 사라졌다. 권한 화면 뒤 인트로 단계에서 검은 화면으로 머물렀고(프로세스 살아 있음, 치명 오류 없음)
   업데이트 필수 알림에는 가지 못했다. logcat에 `AndroidVideoMedia`, `Cannot Prepare a disabled VideoPlayer`. A13 기준선에서는 인트로가 검은 채로 나와도
   탭 한 번에 넘어갔다.
+
+## 인트로 검은 화면 진단 (2026-10-06)
+
+- 인트로 영상은 AVC 1600x1024 + AAC(`assets/meta.mp4`가 아닌 게임 자산, 코덱은 logcat 기준). A15에서는 `c2.android.avc.decoder` 생성이 성공했고
+  SurfaceFlinger의 게임 레이어는 초당 약 39~42 프레임을 내지만 내용이 검다. 창이 멈춘 것은 아니다(`video-sf.txt`, `video-latency-*.txt`).
+- A13 기준선에서는 같은 디코더가 곧바로 죽었고(`Codec2 component "c2.android.avc.decoder" died`, `NdkMediaCodec ... -38`) 유니티가 영상을 건너뛰어 탭 한 번에 타이틀로 갔다
+  (`video-a13-codec-comparison.txt`).
+- minigbm 로그에 `virgl_add_combination: Skipping unsupported combination format:842094158`(NV12)이 있다. 디코더 출력 형식(YUV)을 virgl 그래픽 버퍼로 만들 수 없는 것이
+  두 이미지 공통의 원인일 가능성이 있다(확인 중). UnityMain은 게스트 JIT 안의 futex/poll에 있고 치명 오류는 없다(`video-stack-root.txt`, `video-thread-waits.txt`).
+- 정리: `p2\gapps\`의 중간 이미지 세 개를 지워 C: 여유가 22.6 GB에서 34.7 GB가 되었다(`video-disk-cleanup.txt`).

@@ -1,0 +1,36 @@
+10-06 00:57:39.843  4693  4936 D CCodec  : allocate(c2.android.avc.decoder)
+10-06 00:57:39.846   849   849 D android.hardware.media.c2@1.2-service: createComponent: c2.android.avc.decoder
+10-06 00:57:39.850  4693  4936 I CCodec  : Created component [c2.android.avc.decoder]
+10-06 00:57:39.851  4693  4936 D CCodecConfig:   c2::u32 raw.max-size.height = 240
+10-06 00:57:39.851  4693  4936 D CCodecConfig:   c2::u32 raw.max-size.width = 320
+10-06 00:57:39.851  4693  4936 D CCodecConfig:   c2::u32 raw.sar.height = 1
+10-06 00:57:39.851  4693  4936 D CCodecConfig:   c2::u32 raw.sar.width = 1
+10-06 00:57:39.851  4693  4936 D CCodecConfig:   c2::u32 raw.size.height = 240
+10-06 00:57:39.851  4693  4936 D CCodecConfig:   c2::u32 raw.size.width = 320
+10-06 00:57:39.852  4693  4936 D CCodec  : [c2.android.avc.decoder] buffers are bound to CCodec for this session
+10-06 00:57:39.852  4693  4936 D CCodecConfig:   c2::u32 raw.size.height = 1024
+10-06 00:57:39.852  4693  4936 D CCodecConfig:   c2::u32 raw.size.width = 1600
+10-06 00:57:39.852  4693  4936 D CCodec  :   int32_t height = 1024
+10-06 00:57:39.852  4693  4936 D CCodec  :   string mime = "video/avc"
+10-06 00:57:39.852  4693  4936 D CCodec  :   int32_t width = 1600
+10-06 00:57:39.852  4693  4936 D CCodec  :   int32_t sar-height = 1
+10-06 00:57:39.852  4693  4936 D CCodec  :   int32_t sar-width = 1
+10-06 00:57:39.852  4693  4936 D CCodec  :   int32_t width = 1600
+10-06 00:57:39.852  4693  4936 D CCodec  :   int32_t height = 1024
+10-06 00:57:39.852  4693  4936 D CCodec  :   int32_t max-height = 240
+10-06 00:57:39.852  4693  4936 D CCodec  :   int32_t max-width = 320
+10-06 00:57:39.852  4693  4936 D CCodec  :   string mime = "video/raw"
+10-06 00:57:39.852  4693  4936 D CCodecConfig:   c2::u32 raw.max-size.height = 1024
+10-06 00:57:39.852  4693  4936 D CCodecConfig:   c2::u32 raw.max-size.width = 1600
+10-06 00:57:39.854  4693  4936 D CCodecBufferChannel: [c2.android.avc.decoder#939] Created input block pool with allocatorID 16 => poolID 17 - OK (0)
+10-06 00:57:39.854  4693  4936 D CCodecBufferChannel: [c2.android.avc.decoder#939] Configured output block pool ids 1 => OK
+10-06 00:57:39.899  4693  4940 E CCodec  : Codec2 component "c2.android.avc.decoder" died.
+10-06 00:57:39.901  4693  4942 W MediaCodec: allocate interrupted by error or release, current state 0/UNINITIALIZED
+10-06 00:57:39.963  4693  4942 D CCodec  :   string mime = "audio/mp4a-latm"
+10-06 00:57:39.963  4693  4942 D CCodec  :   string mime = "audio/raw"
+10-06 00:57:39.979  4693  4863 W Unity   : AndroidVideoMedia: Got negative sample time -44000 us for media track 1, type audio/mp4a-latm.
+10-06 00:57:39.980  4693  4863 W Unity   : AndroidVideoMedia: Got negative sample time -22666 us for media track 1, type audio/mp4a-latm.
+10-06 00:57:39.981  4693  4863 W Unity   : AndroidVideoMedia: Got negative sample time -1333 us for media track 1, type audio/mp4a-latm.
+10-06 00:57:39.982  4693  4863 E NdkMediaCodec: untranslated sf error code: -38
+10-06 00:57:39.983  4693  4942 D CCodecBuffers:   string mime = "audio/raw"
+10-06 00:59:18.770  4693  4824 W Unity   : Cannot Prepare a disabled VideoPlayer

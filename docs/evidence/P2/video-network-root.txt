@@ -1,0 +1,5 @@
+State       Recv-Q Send-Q Local Address:Port               Peer Address:Port              
+CLOSE-WAIT  130    0      10.0.2.15:52130              172.253.124.102:443                 users:(("android.vending",pid=2867,fd=141))
+ESTAB       0      0       [::ffff:10.0.2.15]:38494                 [::ffff:108.177.122.188]:5228                users:(("gle.android.gms",pid=3592,fd=169))
+ESTAB       0      0       [::ffff:10.0.2.15]:5555                 [::ffff:10.0.2.2]:58317               users:(("adbd",pid=1583,fd=8))
+CLOSE-WAIT  1      0       [::ffff:10.0.2.15]:55882               [::ffff:172.217.117.4]:443                 users:(("android.vending",pid=2867,fd=157))

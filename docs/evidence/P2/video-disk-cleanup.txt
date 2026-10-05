@@ -1,0 +1,4 @@
+DELETE C:\Users\32170336\AppData\Local\OpenMobileEmulator\p2\gapps\target-system.img 4999999488
+DELETE C:\Users\32170336\AppData\Local\OpenMobileEmulator\p2\gapps\assembly1\google-system-disk.img 2154823680
+DELETE C:\Users\32170336\AppData\Local\OpenMobileEmulator\p2\gapps\system-gapps.img 4999999488
+FREE_BEFORE=22577885184 AFTER=34732707840
