@@ -1,0 +1,4 @@
+for p in 3101 3304; do echo PID=$p; cat /proc/$p/maps; done > /dat 3304; do echo PID=$p; cat /proc/$p/maps; done > /dat                         <a/local/tmp/p2b-maps.txt;t /proc/$p/maps; done > /data/local/tmp/p2b-maps.txt;                         < chmod 644 /data/local/tmdata/local/tmp/p2b-maps.txt; chmod 644 /data/local/tm                         <p/p2b-maps.txt; id
+uid=0(root) gid=2000(shell) groups=2000(shell),1007(log),3009(readproc) context=u:r:shell:s0
+console:/ # 
+console:/ # 

@@ -1,0 +1,67 @@
+{
+	"_comment" : "vkjson is deprecated, and will be replaced in a future release",
+	"apiVersion" : 4206592.0,
+	"deviceGroups" : [],
+	"devices" : [],
+	"extensions" : 
+	[
+		{
+			"extensionName" : "VK_KHR_surface",
+			"specVersion" : 25.0
+		},
+		{
+			"extensionName" : "VK_KHR_surface_protected_capabilities",
+			"specVersion" : 1.0
+		},
+		{
+			"extensionName" : "VK_KHR_android_surface",
+			"specVersion" : 6.0
+		},
+		{
+			"extensionName" : "VK_EXT_swapchain_colorspace",
+			"specVersion" : 4.0
+		},
+		{
+			"extensionName" : "VK_KHR_get_surface_capabilities2",
+			"specVersion" : 1.0
+		},
+		{
+			"extensionName" : "VK_GOOGLE_surfaceless_query",
+			"specVersion" : 2.0
+		},
+		{
+			"extensionName" : "VK_EXT_surface_maintenance1",
+			"specVersion" : 1.0
+		},
+		{
+			"extensionName" : "VK_EXT_debug_report",
+			"specVersion" : 10.0
+		},
+		{
+			"extensionName" : "VK_KHR_device_group_creation",
+			"specVersion" : 1.0
+		},
+		{
+			"extensionName" : "VK_KHR_external_fence_capabilities",
+			"specVersion" : 1.0
+		},
+		{
+			"extensionName" : "VK_KHR_external_memory_capabilities",
+			"specVersion" : 1.0
+		},
+		{
+			"extensionName" : "VK_KHR_external_semaphore_capabilities",
+			"specVersion" : 1.0
+		},
+		{
+			"extensionName" : "VK_KHR_get_physical_device_properties2",
+			"specVersion" : 2.0
+		},
+		{
+			"extensionName" : "VK_EXT_headless_surface",
+			"specVersion" : 1.0
+		}
+	],
+	"layers" : []
+}
+

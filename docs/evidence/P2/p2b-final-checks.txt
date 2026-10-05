@@ -1,0 +1,45 @@
+2026-10-06T03:44:28.9736114+09:00
+SUMMARY forbidden findings=0 candidates=1440
+forbidden_exit=0
+SUMMARY spdx findings=0 checked=358 candidates=1440
+spdx_exit=0
+baseline_check_exit=0
+qemu_count=0
+free_C_bytes=34457817088
+
+mingw-w64-ucrt-x86_64-virglrenderer 1.3.0-1
+?? docs/evidence/P2/a15-title-p2b-activities.txt
+?? docs/evidence/P2/a15-title-p2b-after-store.png
+?? docs/evidence/P2/a15-title-p2b-before-store.png
+?? docs/evidence/P2/a15-title-p2b-tap-logcat.txt
+?? docs/evidence/P2/p2b-a13-astc-probe.txt
+?? docs/evidence/P2/p2b-a13-game-maps.txt
+?? docs/evidence/P2/p2b-a13-gl-info.txt
+?? docs/evidence/P2/p2b-a13-gpu.txt
+?? docs/evidence/P2/p2b-a13-logcat.txt
+?? docs/evidence/P2/p2b-a13-qemu-stderr.txt
+?? docs/evidence/P2/p2b-a13-serial.txt
+?? docs/evidence/P2/p2b-a13-surfaceflinger.txt
+?? docs/evidence/P2/p2b-a13-title.png
+?? docs/evidence/P2/p2b-a13-vkjson.txt
+?? docs/evidence/P2/p2b-a15-astc-probe.txt
+?? docs/evidence/P2/p2b-a15-game-maps.txt
+?? docs/evidence/P2/p2b-a15-gl-info.txt
+?? docs/evidence/P2/p2b-a15-gpu.txt
+?? docs/evidence/P2/p2b-a15-logcat.txt
+?? docs/evidence/P2/p2b-a15-qemu-stderr.txt
+?? docs/evidence/P2/p2b-a15-serial.txt
+?? docs/evidence/P2/p2b-a15-surfaceflinger.txt
+?? docs/evidence/P2/p2b-a15-title.png
+?? docs/evidence/P2/p2b-a15-verbose-gl.txt
+?? docs/evidence/P2/p2b-a15-vkjson.txt
+?? docs/evidence/P2/p2b-final-checks.txt
+?? docs/evidence/P2/p2b-gl-diff.txt
+?? docs/evidence/P2/p2b-host-package-source.txt
+?? docs/evidence/P2/p2b-java-probe-source.txt
+?? docs/evidence/P2/p2b-mesa-more-source.txt
+?? docs/evidence/P2/p2b-mesa-source.txt
+?? docs/evidence/P2/p2b-upstream-source.txt
+?? docs/evidence/P2/p2b-venus-source.txt
+?? docs/evidence/P2/p2b-yuv-source.txt
+

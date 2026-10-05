@@ -1,0 +1,76 @@
+Stable Game Driver: unsupported
+Pre-release Game Driver: unsupported
+
+Failed to initialize GPU memory eBPF
+
+driverPackageName = system
+driverVersionName = 
+driverVersionCode = 0
+driverBuildTime = 0
+glLoadingCount = 4
+glLoadingFailureCount = 0
+angleLoadingCount = 0
+angleLoadingFailureCount = 0
+vkLoadingCount = 2
+vkLoadingFailureCount = 0
+vulkanVersion = 4198400
+cpuVulkanVersion = 0
+glesVersion = 196608
+
+appPackageName = com.epidgames.trickcalrevive
+driverVersionCode = 0
+cpuVulkanInUse = 0
+falsePrerotation = 0
+gles1InUse = 0
+angleInUse = 0
+createdGlesContext = 1
+createdVulkanDevice = 0
+createdVulkanSwapchain = 0
+vulkanApiVersion = 0x401000
+vulkanDeviceFeaturesEnabled = 0x0
+glDriverLoadingTime: 27417500 27417500
+angleDriverLoadingTime:
+vkDriverLoadingTime: 7134400 1280200
+vulkanInstanceExtensions: 0x87325ffc 0x3466e6d9 0x68569f04 0x2092dd74 0xa69c5c09 0xd59acd01 0xf3a8bad9
+vulkanDeviceExtensions:
+vulkanEngineNames: Unity,
+
+appPackageName = com.android.launcher3
+driverVersionCode = 0
+cpuVulkanInUse = 0
+falsePrerotation = 0
+gles1InUse = 0
+angleInUse = 0
+createdGlesContext = 1
+createdVulkanDevice = 0
+createdVulkanSwapchain = 0
+vulkanApiVersion = 0x0
+vulkanDeviceFeaturesEnabled = 0x0
+glDriverLoadingTime: 27417500
+angleDriverLoadingTime:
+vkDriverLoadingTime:
+vulkanInstanceExtensions:
+vulkanDeviceExtensions:
+vulkanEngineNames:
+
+appPackageName = com.android.settings
+driverVersionCode = 0
+cpuVulkanInUse = 0
+falsePrerotation = 0
+gles1InUse = 0
+angleInUse = 0
+createdGlesContext = 1
+createdVulkanDevice = 0
+createdVulkanSwapchain = 0
+vulkanApiVersion = 0x0
+vulkanDeviceFeaturesEnabled = 0x0
+glDriverLoadingTime: 27417500
+angleDriverLoadingTime:
+vkDriverLoadingTime:
+vulkanInstanceExtensions:
+vulkanDeviceExtensions:
+vulkanEngineNames:
+
+
+GPU work information is not available.
+

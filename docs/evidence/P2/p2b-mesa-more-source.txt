@@ -1,0 +1,591 @@
+=== src/mesa/state_tracker/st_extensions.c ===
+   950	
+   951	      { { o(EXT_color_buffer_float) },
+   952	        { PIPE_FORMAT_R16_FLOAT,
+   953	          PIPE_FORMAT_R16G16_FLOAT,
+   954	          PIPE_FORMAT_R16G16B16A16_FLOAT,
+   955	          PIPE_FORMAT_R32_FLOAT,
+   956	          PIPE_FORMAT_R32G32_FLOAT,
+   957	          PIPE_FORMAT_R32G32B32A32_FLOAT } },
+   958	   };
+   959	
+   960	   /* Required: render target, sampler, and blending */
+   961	   static const struct st_extension_format_mapping rt_blendable[] = {
+   962	      { { o(EXT_float_blend) },
+   963	        { PIPE_FORMAT_R32G32B32A32_FLOAT } },
+   964	   };
+   965	
+   966	   /* Required: depth stencil and sampler support */
+   967	   static const struct st_extension_format_mapping depthstencil_mapping[] = {
+   968	      { { o(ARB_depth_buffer_float) },
+   969	        { PIPE_FORMAT_Z32_FLOAT,
+   970	          PIPE_FORMAT_Z32_FLOAT_S8X24_UINT } },
+   971	   };
+   972	
+   973	   /* Required: sampler support */
+   974	   static const struct st_extension_format_mapping texture_mapping[] = {
+   975	      { { o(OES_texture_float) },
+   976	        { PIPE_FORMAT_R32G32B32A32_FLOAT } },
+   977	
+   978	      { { o(OES_texture_half_float) },
+   979	        { PIPE_FORMAT_R16G16B16A16_FLOAT } },
+   980	
+   981	      { { o(ARB_texture_compression_rgtc) },
+   982	        { PIPE_FORMAT_RGTC1_UNORM,
+   983	          PIPE_FORMAT_RGTC1_SNORM,
+   984	          PIPE_FORMAT_RGTC2_UNORM,
+   985	          PIPE_FORMAT_RGTC2_SNORM } },
+   986	
+   987	      { { o(EXT_texture_compression_latc) },
+   988	        { PIPE_FORMAT_LATC1_UNORM,
+   989	          PIPE_FORMAT_LATC1_SNORM,
+   990	          PIPE_FORMAT_LATC2_UNORM,
+   991	          PIPE_FORMAT_LATC2_SNORM } },
+   992	
+   993	      { { o(EXT_texture_compression_s3tc),
+   994	          o(ANGLE_texture_compression_dxt) },
+   995	        { PIPE_FORMAT_DXT1_RGB,
+   996	          PIPE_FORMAT_DXT1_RGBA,
+   997	          PIPE_FORMAT_DXT3_RGBA,
+   998	          PIPE_FORMAT_DXT5_RGBA } },
+   999	
+  1000	      { { o(EXT_texture_compression_s3tc_srgb) },
+  1001	        { PIPE_FORMAT_DXT1_SRGB,
+  1002	          PIPE_FORMAT_DXT1_SRGBA,
+  1003	          PIPE_FORMAT_DXT3_SRGBA,
+  1004	          PIPE_FORMAT_DXT5_SRGBA } },
+  1005	
+  1006	      { { o(ARB_texture_compression_bptc) },
+  1007	        { PIPE_FORMAT_BPTC_RGBA_UNORM,
+  1008	          PIPE_FORMAT_BPTC_SRGBA,
+  1009	          PIPE_FORMAT_BPTC_RGB_FLOAT,
+  1010	          PIPE_FORMAT_BPTC_RGB_UFLOAT } },
+  1011	
+  1012	      { { o(TDFX_texture_compression_FXT1) },
+  1013	        { PIPE_FORMAT_FXT1_RGB,
+  1014	          PIPE_FORMAT_FXT1_RGBA } },
+  1015	
+  1016	      { { o(KHR_texture_compression_astc_ldr),
+  1017	          o(KHR_texture_compression_astc_sliced_3d) },
+  1018	        { PIPE_FORMAT_ASTC_4x4,
+  1019	          PIPE_FORMAT_ASTC_5x4,
+  1020	          PIPE_FORMAT_ASTC_5x5,
+  1021	          PIPE_FORMAT_ASTC_6x5,
+  1022	          PIPE_FORMAT_ASTC_6x6,
+  1023	          PIPE_FORMAT_ASTC_8x5,
+  1024	          PIPE_FORMAT_ASTC_8x6,
+  1025	          PIPE_FORMAT_ASTC_8x8,
+  1026	          PIPE_FORMAT_ASTC_10x5,
+  1027	          PIPE_FORMAT_ASTC_10x6,
+  1028	          PIPE_FORMAT_ASTC_10x8,
+  1029	          PIPE_FORMAT_ASTC_10x10,
+  1030	          PIPE_FORMAT_ASTC_12x10,
+  1031	          PIPE_FORMAT_ASTC_12x12,
+  1032	          PIPE_FORMAT_ASTC_4x4_SRGB,
+  1033	          PIPE_FORMAT_ASTC_5x4_SRGB,
+  1034	          PIPE_FORMAT_ASTC_5x5_SRGB,
+  1035	          PIPE_FORMAT_ASTC_6x5_SRGB,
+  1036	          PIPE_FORMAT_ASTC_6x6_SRGB,
+  1037	          PIPE_FORMAT_ASTC_8x5_SRGB,
+  1038	          PIPE_FORMAT_ASTC_8x6_SRGB,
+  1039	          PIPE_FORMAT_ASTC_8x8_SRGB,
+  1040	          PIPE_FORMAT_ASTC_10x5_SRGB,
+  1041	          PIPE_FORMAT_ASTC_10x6_SRGB,
+  1042	          PIPE_FORMAT_ASTC_10x8_SRGB,
+  1043	          PIPE_FORMAT_ASTC_10x10_SRGB,
+  1044	          PIPE_FORMAT_ASTC_12x10_SRGB,
+  1045	          PIPE_FORMAT_ASTC_12x12_SRGB } },
+  1046	
+  1047	      { { o(EXT_texture_shared_exponent) },
+  1048	        { PIPE_FORMAT_R9G9B9E5_FLOAT } },
+  1049	
+  1050	      { { o(EXT_texture_snorm) },
+  1051	        { PIPE_FORMAT_R8G8B8A8_SNORM } },
+  1052	
+  1053	      { { o(EXT_texture_sRGB),
+  1054	          o(EXT_texture_sRGB_decode) },
+  1055	        { PIPE_FORMAT_A8B8G8R8_SRGB,
+  1056		  PIPE_FORMAT_B8G8R8A8_SRGB,
+  1057		  PIPE_FORMAT_A8R8G8B8_SRGB,
+  1058		  PIPE_FORMAT_R8G8B8A8_SRGB},
+  1059	        GL_TRUE }, /* at least one format must be supported */
+  1060	
+  1061	      { { o(EXT_texture_sRGB_R8) },
+  1062	        { PIPE_FORMAT_R8_SRGB }, },
+  1063	
+  1064	      { { o(EXT_texture_sRGB_RG8) },
+  1065	        { PIPE_FORMAT_R8G8_SRGB }, },
+  1066	
+  1067	      { { o(EXT_texture_type_2_10_10_10_REV) },
+  1068	        { PIPE_FORMAT_R10G10B10A2_UNORM,
+  1069	          PIPE_FORMAT_B10G10R10A2_UNORM },
+  1070	         GL_TRUE }, /* at least one format must be supported */
+  1071	
+  1072	      { { o(ATI_texture_compression_3dc) },
+  1073	        { PIPE_FORMAT_LATC2_UNORM } },
+  1074	
+  1075	      { { o(MESA_ycbcr_texture) },
+  1076	        { PIPE_FORMAT_UYVY,
+  1077	          PIPE_FORMAT_YUYV },
+  1078	        GL_TRUE }, /* at least one format must be supported */
+  1079	
+  1080	      { { o(OES_compressed_ETC1_RGB8_texture) },
+  1081	        { PIPE_FORMAT_ETC1_RGB8,
+  1082	          PIPE_FORMAT_R8G8B8A8_UNORM },
+  1083	        GL_TRUE }, /* at least one format must be supported */
+  1084	
+  1085	      { { o(ARB_stencil_texturing),
+  1086	          o(ARB_texture_stencil8) },
+  1087	        { PIPE_FORMAT_X24S8_UINT,
+  1088	          PIPE_FORMAT_S8X24_UINT },
+  1089	        GL_TRUE }, /* at least one format must be supported */
+  1090	
+  1091	      { { o(AMD_compressed_ATC_texture) },
+  1092	        { PIPE_FORMAT_ATC_RGB,
+  1093	          PIPE_FORMAT_ATC_RGBA_EXPLICIT,
+  1094	          PIPE_FORMAT_ATC_RGBA_INTERPOLATED } },
+  1095	   };
+  1096	
+  1097	   /* Required: sampler support */
+  1098	   static const struct st_extension_format_mapping texture_mapping_compressed_fallback[] = {
+  1099	      { { o(KHR_texture_compression_astc_ldr),
+  1100	          o(KHR_texture_compression_astc_sliced_3d) },
+  1101	        { PIPE_FORMAT_R8G8B8A8_UNORM,
+  1102	          PIPE_FORMAT_R8G8B8A8_SRGB } },
+  1103	
+  1104	      { { o(ARB_texture_compression_rgtc) },
+  1105	        { PIPE_FORMAT_R8_UNORM,
+  1106	          PIPE_FORMAT_R8_SNORM,
+  1107	          PIPE_FORMAT_R8G8_UNORM,
+  1108	          PIPE_FORMAT_R8G8_SNORM } },
+  1109	
+  1110	      { { o(EXT_texture_compression_latc) },
+  1111	        { PIPE_FORMAT_L8_UNORM,
+  1112	          PIPE_FORMAT_L8_SNORM,
+  1113	          PIPE_FORMAT_L8A8_UNORM,
+  1114	          PIPE_FORMAT_L8A8_SNORM } },
+  1115	
+  1116	      { { o(EXT_texture_compression_s3tc),
+  1117	          o(ANGLE_texture_compression_dxt) },
+  1118	        { PIPE_FORMAT_R8G8B8A8_UNORM } },
+  1119	
+  1120	      { { o(EXT_texture_compression_s3tc_srgb) },
+=== src/mesa/state_tracker/st_format.c ===
+    55	#include "st_texture.h"
+    56	
+    57	
+    58	/**
+    59	 * Translate Mesa format to Gallium format.
+    60	 */
+    61	enum pipe_format
+    62	st_mesa_format_to_pipe_format(const struct st_context *st,
+    63	                              mesa_format mesaFormat)
+    64	{
+    65	   struct pipe_screen *screen = st->screen;
+    66	
+    67	   /* The destination RGBA format mustn't be changed, because it's also
+    68	    * a destination format of the unpack/decompression function.
+    69	    */
+    70	   if (mesaFormat == MESA_FORMAT_ETC1_RGB8 && !st->has_etc1)
+    71	      return st->transcode_etc ? PIPE_FORMAT_DXT1_RGB : PIPE_FORMAT_R8G8B8A8_UNORM;
+    72	
+    73	   /* ETC2 formats are emulated as uncompressed ones.
+    74	    * The destination formats mustn't be changed, because they are also
+    75	    * destination formats of the unpack/decompression function.
+    76	    */
+    77	   if (_mesa_is_format_etc2(mesaFormat) && !st->has_etc2) {
+    78	      bool has_bgra_srgb = screen->is_format_supported(screen,
+    79	                                                       PIPE_FORMAT_B8G8R8A8_SRGB,
+    80	                                                       PIPE_TEXTURE_2D, 0, 0,
+    81	                                                       PIPE_BIND_SAMPLER_VIEW);
+    82	
+    83	      switch (mesaFormat) {
+    84	      case MESA_FORMAT_ETC2_RGB8:
+    85	         return st->transcode_etc ? PIPE_FORMAT_DXT1_RGB : PIPE_FORMAT_R8G8B8A8_UNORM;
+    86	      case MESA_FORMAT_ETC2_SRGB8:
+    87	         return st->transcode_etc ? PIPE_FORMAT_DXT1_SRGB :
+    88	                has_bgra_srgb ? PIPE_FORMAT_B8G8R8A8_SRGB : PIPE_FORMAT_R8G8B8A8_SRGB;
+    89	      case MESA_FORMAT_ETC2_RGBA8_EAC:
+    90	         return st->transcode_etc ? PIPE_FORMAT_DXT5_RGBA : PIPE_FORMAT_R8G8B8A8_UNORM;
+    91	      case MESA_FORMAT_ETC2_SRGB8_ALPHA8_EAC:
+    92	         return st->transcode_etc ? PIPE_FORMAT_DXT5_SRGBA :
+    93	                has_bgra_srgb ? PIPE_FORMAT_B8G8R8A8_SRGB : PIPE_FORMAT_R8G8B8A8_SRGB;
+    94	      case MESA_FORMAT_ETC2_R11_EAC:
+    95	         return PIPE_FORMAT_R16_UNORM;
+    96	      case MESA_FORMAT_ETC2_RG11_EAC:
+    97	         return PIPE_FORMAT_R16G16_UNORM;
+    98	      case MESA_FORMAT_ETC2_SIGNED_R11_EAC:
+    99	         return PIPE_FORMAT_R16_SNORM;
+   100	      case MESA_FORMAT_ETC2_SIGNED_RG11_EAC:
+   101	         return PIPE_FORMAT_R16G16_SNORM;
+   102	      case MESA_FORMAT_ETC2_RGB8_PUNCHTHROUGH_ALPHA1:
+   103	         return st->transcode_etc ? PIPE_FORMAT_DXT1_RGBA : PIPE_FORMAT_R8G8B8A8_UNORM;
+   104	      case MESA_FORMAT_ETC2_SRGB8_PUNCHTHROUGH_ALPHA1:
+   105	         return st->transcode_etc ? PIPE_FORMAT_DXT1_SRGBA :
+   106	                has_bgra_srgb ? PIPE_FORMAT_B8G8R8A8_SRGB : PIPE_FORMAT_R8G8B8A8_SRGB;
+   107	      default:
+   108	         unreachable("Unknown ETC2 format");
+   109	      }
+   110	   }
+   111	
+   112	   if (st_astc_format_fallback(st, mesaFormat)) {
+   113	      const bool is_5x5 = mesaFormat == PIPE_FORMAT_ASTC_5x5 ||
+   114	                          mesaFormat == PIPE_FORMAT_ASTC_5x5_SRGB;
+   115	
+   116	      /* If we're only emulating ASTC void extents, use the original format */
+   117	      if (st->astc_void_extents_need_denorm_flush &&
+   118	          (is_5x5 ? st->has_astc_5x5_ldr : st->has_astc_2d_ldr))
+   119	         return mesaFormat;
+   120	
+   121	      /* We're emulating all of ASTC via transcoding or decompression */
+   122	      if (_mesa_is_format_srgb(mesaFormat)) {
+   123	         return st->transcode_astc ? PIPE_FORMAT_DXT5_SRGBA :
+   124	                                     PIPE_FORMAT_R8G8B8A8_SRGB;
+   125	      } else {
+   126	         return st->transcode_astc ? PIPE_FORMAT_DXT5_RGBA :
+   127	                                     PIPE_FORMAT_R8G8B8A8_UNORM;
+   128	      }
+   129	   }
+   130	
+   131	   if (_mesa_is_format_s3tc(mesaFormat) && !st->has_s3tc) {
+   132	      return _mesa_is_format_srgb(mesaFormat) ? PIPE_FORMAT_R8G8B8A8_SRGB :
+   133	                                                PIPE_FORMAT_R8G8B8A8_UNORM;
+   134	   }
+   135	
+   136	   if ((_mesa_is_format_rgtc(mesaFormat) && !st->has_rgtc) ||
+   137	       (_mesa_is_format_latc(mesaFormat) && !st->has_latc)) {
+   138	      switch (mesaFormat) {
+   139	      case MESA_FORMAT_R_RGTC1_UNORM:
+   140	         return PIPE_FORMAT_R8_UNORM;
+   141	      case MESA_FORMAT_R_RGTC1_SNORM:
+   142	         return PIPE_FORMAT_R8_SNORM;
+   143	      case MESA_FORMAT_RG_RGTC2_UNORM:
+   144	         return PIPE_FORMAT_R8G8_UNORM;
+   145	      case MESA_FORMAT_RG_RGTC2_SNORM:
+=== src/mesa/state_tracker/st_context.c ===
+   500	      st->util_velems.velems[0].src_offset = 0;
+   501	      st->util_velems.velems[0].vertex_buffer_index = 0;
+   502	      st->util_velems.velems[0].src_format = PIPE_FORMAT_R32G32B32_FLOAT;
+   503	      st->util_velems.velems[0].src_stride = sizeof(struct st_util_vertex);
+   504	      st->util_velems.velems[1].src_offset = 3 * sizeof(float);
+   505	      st->util_velems.velems[1].vertex_buffer_index = 0;
+   506	      st->util_velems.velems[1].src_format = PIPE_FORMAT_R32G32B32A32_FLOAT;
+   507	      st->util_velems.velems[1].src_stride = sizeof(struct st_util_vertex);
+   508	      st->util_velems.velems[2].src_offset = 7 * sizeof(float);
+   509	      st->util_velems.velems[2].vertex_buffer_index = 0;
+   510	      st->util_velems.velems[2].src_format = PIPE_FORMAT_R32G32_FLOAT;
+   511	      st->util_velems.velems[2].src_stride = sizeof(struct st_util_vertex);
+   512	   }
+   513	
+   514	   ctx->Const.PackedDriverUniformStorage =
+   515	      screen->get_param(screen, PIPE_CAP_PACKED_UNIFORMS);
+   516	
+   517	   ctx->Const.BitmapUsesRed =
+   518	      screen->is_format_supported(screen, PIPE_FORMAT_R8_UNORM,
+   519	                                  PIPE_TEXTURE_2D, 0, 0,
+   520	                                  PIPE_BIND_SAMPLER_VIEW);
+   521	
+   522	   ctx->Const.QueryCounterBits.Timestamp =
+   523	      screen->get_param(screen, PIPE_CAP_QUERY_TIMESTAMP_BITS);
+   524	
+   525	   st->has_stencil_export =
+   526	      screen->get_param(screen, PIPE_CAP_SHADER_STENCIL_EXPORT);
+   527	   st->has_etc1 = screen->is_format_supported(screen, PIPE_FORMAT_ETC1_RGB8,
+   528	                                              PIPE_TEXTURE_2D, 0, 0,
+   529	                                              PIPE_BIND_SAMPLER_VIEW);
+   530	   st->has_etc2 = screen->is_format_supported(screen, PIPE_FORMAT_ETC2_RGB8,
+   531	                                              PIPE_TEXTURE_2D, 0, 0,
+   532	                                              PIPE_BIND_SAMPLER_VIEW);
+   533	   st->transcode_etc = options->transcode_etc &&
+   534	                       screen->is_format_supported(screen, PIPE_FORMAT_DXT1_SRGBA,
+   535	                                                   PIPE_TEXTURE_2D, 0, 0,
+   536	                                                   PIPE_BIND_SAMPLER_VIEW);
+   537	   st->transcode_astc = options->transcode_astc &&
+   538	                        screen->is_format_supported(screen, PIPE_FORMAT_DXT5_SRGBA,
+   539	                                                    PIPE_TEXTURE_2D, 0, 0,
+   540	                                                    PIPE_BIND_SAMPLER_VIEW) &&
+   541	                        screen->is_format_supported(screen, PIPE_FORMAT_DXT5_RGBA,
+   542	                                                    PIPE_TEXTURE_2D, 0, 0,
+   543	                                                    PIPE_BIND_SAMPLER_VIEW);
+   544	   st->has_astc_2d_ldr =
+   545	      screen->is_format_supported(screen, PIPE_FORMAT_ASTC_4x4_SRGB,
+   546	                                  PIPE_TEXTURE_2D, 0, 0, PIPE_BIND_SAMPLER_VIEW);
+   547	   st->has_astc_5x5_ldr =
+   548	      screen->is_format_supported(screen, PIPE_FORMAT_ASTC_5x5_SRGB,
+   549	                                  PIPE_TEXTURE_2D, 0, 0, PIPE_BIND_SAMPLER_VIEW);
+   550	   st->astc_void_extents_need_denorm_flush =
+   551	      screen->get_param(screen, PIPE_CAP_ASTC_VOID_EXTENTS_NEED_DENORM_FLUSH);
+   552	
+   553	   st->has_s3tc = screen->is_format_supported(screen, PIPE_FORMAT_DXT5_RGBA,
+   554	                                              PIPE_TEXTURE_2D, 0, 0,
+   555	                                              PIPE_BIND_SAMPLER_VIEW);
+   556	   st->has_rgtc = screen->is_format_supported(screen, PIPE_FORMAT_RGTC2_UNORM,
+   557	                                              PIPE_TEXTURE_2D, 0, 0,
+   558	                                              PIPE_BIND_SAMPLER_VIEW);
+   559	   st->has_latc = screen->is_format_supported(screen, PIPE_FORMAT_LATC2_UNORM,
+   560	                                              PIPE_TEXTURE_2D, 0, 0,
+   561	                                              PIPE_BIND_SAMPLER_VIEW);
+   562	   st->has_bptc = screen->is_format_supported(screen, PIPE_FORMAT_BPTC_SRGBA,
+   563	                                              PIPE_TEXTURE_2D, 0, 0,
+   564	                                              PIPE_BIND_SAMPLER_VIEW);
+   565	   st->force_persample_in_shader =
+   566	      screen->get_param(screen, PIPE_CAP_SAMPLE_SHADING) &&
+   567	      !screen->get_param(screen, PIPE_CAP_FORCE_PERSAMPLE_INTERP);
+   568	   st->has_shareable_shaders = screen->get_param(screen,
+   569	                                                 PIPE_CAP_SHAREABLE_SHADERS);
+   570	   st->needs_texcoord_semantic =
+   571	      screen->get_param(screen, PIPE_CAP_TGSI_TEXCOORD);
+   572	   st->apply_texture_swizzle_to_border_color =
+   573	      !!(screen->get_param(screen, PIPE_CAP_TEXTURE_BORDER_COLOR_QUIRK) &
+   574	         (PIPE_QUIRK_TEXTURE_BORDER_COLOR_SWIZZLE_NV50 |
+   575	          PIPE_QUIRK_TEXTURE_BORDER_COLOR_SWIZZLE_R600));
+   576	   st->use_format_with_border_color =
+   577	      !!(screen->get_param(screen, PIPE_CAP_TEXTURE_BORDER_COLOR_QUIRK) &
+   578	         PIPE_QUIRK_TEXTURE_BORDER_COLOR_SWIZZLE_FREEDRENO);
+   579	   st->alpha_border_color_is_not_w =
+   580	      !!(screen->get_param(screen, PIPE_CAP_TEXTURE_BORDER_COLOR_QUIRK) &
+   581	         PIPE_QUIRK_TEXTURE_BORDER_COLOR_SWIZZLE_ALPHA_NOT_W);
+   582	   st->emulate_gl_clamp =
+   583	      !screen->get_param(screen, PIPE_CAP_GL_CLAMP);
+   584	   st->has_time_elapsed =
+   585	      screen->get_param(screen, PIPE_CAP_QUERY_TIME_ELAPSED);
+   586	   ctx->Const.GLSLHasHalfFloatPacking =
+   587	      screen->get_param(screen, PIPE_CAP_SHADER_PACK_HALF_FLOAT);
+   588	   st->has_multi_draw_indirect =
+   589	      screen->get_param(screen, PIPE_CAP_MULTI_DRAW_INDIRECT);
+   590	   st->has_indirect_partial_stride =
+   591	      screen->get_param(screen, PIPE_CAP_MULTI_DRAW_INDIRECT_PARTIAL_STRIDE);
+   592	   st->has_occlusion_query =
+   593	      screen->get_param(screen, PIPE_CAP_OCCLUSION_QUERY);
+   594	   st->has_single_pipe_stat =
+   595	      screen->get_param(screen, PIPE_CAP_QUERY_PIPELINE_STATISTICS_SINGLE);
+   596	   st->has_pipeline_stat =
+   597	      screen->get_param(screen, PIPE_CAP_QUERY_PIPELINE_STATISTICS);
+   598	   st->has_indep_blend_enable =
+   599	      screen->get_param(screen, PIPE_CAP_INDEP_BLEND_ENABLE);
+   600	   st->has_indep_blend_func =
+   601	      screen->get_param(screen, PIPE_CAP_INDEP_BLEND_FUNC);
+   602	   st->can_dither =
+   603	      screen->get_param(screen, PIPE_CAP_DITHERING);
+   604	   st->lower_flatshade =
+   605	      !screen->get_param(screen, PIPE_CAP_FLATSHADE);
+   606	   st->lower_alpha_test =
+   607	      !screen->get_param(screen, PIPE_CAP_ALPHA_TEST);
+   608	   switch (screen->get_param(screen, PIPE_CAP_POINT_SIZE_FIXED)) {
+   609	   case PIPE_POINT_SIZE_LOWER_ALWAYS:
+   610	      st->lower_point_size = true;
+   611	      st->add_point_size = true;
+   612	      break;
+   613	   case PIPE_POINT_SIZE_LOWER_USER_ONLY:
+   614	      st->lower_point_size = true;
+   615	      break;
+   616	   default: break;
+   617	   }
+   618	   st->lower_two_sided_color =
+   619	      !screen->get_param(screen, PIPE_CAP_TWO_SIDED_COLOR);
+   620	   st->lower_ucp =
+   621	      !screen->get_param(screen, PIPE_CAP_CLIP_PLANES);
+   622	   st->prefer_real_buffer_in_constbuf0 =
+   623	      screen->get_param(screen, PIPE_CAP_PREFER_REAL_BUFFER_IN_CONSTBUF0);
+   624	   st->has_conditional_render =
+   625	      screen->get_param(screen, PIPE_CAP_CONDITIONAL_RENDER);
+   626	   st->lower_rect_tex =
+   627	      !screen->get_param(screen, PIPE_CAP_TEXRECT);
+   628	   st->allow_st_finalize_nir_twice = screen->finalize_nir != NULL;
+   629	
+   630	   st->has_hw_atomics =
+   631	      screen->get_shader_param(screen, PIPE_SHADER_FRAGMENT,
+   632	                               PIPE_SHADER_CAP_MAX_HW_ATOMIC_COUNTERS)
+   633	      ? true : false;
+   634	
+   635	   st->validate_all_dirty_states =
+   636	      screen->get_param(screen, PIPE_CAP_VALIDATE_ALL_DIRTY_STATES)
+   637	      ? true : false;
+   638	   st->can_null_texture =
+   639	      screen->get_param(screen, PIPE_CAP_NULL_TEXTURES)
+   640	      ? true : false;
+=== src/gallium/drivers/virgl/virgl_context.c ===
+   650	
+   651	      if (take_ownership) {
+   652	         pipe_resource_reference(&binding->ubos[index].buffer, NULL);
+   653	         binding->ubos[index].buffer = buf->buffer;
+   654	      } else {
+   655	         pipe_resource_reference(&binding->ubos[index].buffer, buf->buffer);
+   656	      }
+   657	      binding->ubos[index] = *buf;
+   658	      binding->ubo_enabled_mask |= 1 << index;
+   659	   } else {
+   660	      static const struct pipe_constant_buffer dummy_ubo;
+   661	      if (!buf)
+   662	         buf = &dummy_ubo;
+   663	      virgl_encoder_write_constant_buffer(vctx, shader, index,
+   664	                                          buf->buffer_size / 4,
+   665	                                          buf->user_buffer);
+   666	
+   667	      pipe_resource_reference(&binding->ubos[index].buffer, NULL);
+   668	      binding->ubo_enabled_mask &= ~(1 << index);
+   669	   }
+   670	}
+   671	
+   672	static bool
+   673	lower_gles_arrayshadow_offset_filter(const nir_instr *instr,
+   674	                                     UNUSED const void *data)
+   675	{
+   676	   if (instr->type != nir_instr_type_tex)
+   677	      return false;
+   678	
+   679	   nir_tex_instr *tex = nir_instr_as_tex(instr);
+   680	
+   681	   if (!tex->is_shadow || !tex->is_array)
+   682	      return false;
+   683	
+   684	   // textureGradOffset can be used directly
+   685	   int grad_index = nir_tex_instr_src_index(tex, nir_tex_src_ddx);
+   686	   int proj_index = nir_tex_instr_src_index(tex, nir_tex_src_projector);
+   687	   if (grad_index >= 0 && proj_index < 0)
+   688	      return false;
+   689	
+   690	   int offset_index = nir_tex_instr_src_index(tex, nir_tex_src_offset);
+   691	   if (offset_index >= 0)
+   692	      return true;
+   693	
+   694	   return false;
+   695	}
+   696	
+   697	static void *virgl_shader_encoder(struct pipe_context *ctx,
+   698	                                  const struct pipe_shader_state *shader,
+   699	                                  unsigned type)
+   700	{
+   701	   struct virgl_context *vctx = virgl_context(ctx);
+   702	   struct virgl_screen *rs = virgl_screen(ctx->screen);
+   703	   uint32_t handle;
+   704	   const struct tgsi_token *tokens;
+   705	   const struct tgsi_token *ntt_tokens = NULL;
+   706	   struct tgsi_token *new_tokens;
+   707	   int ret;
+   708	   bool is_separable = false;
+   709	
+   710	   if (shader->type == PIPE_SHADER_IR_NIR) {
+   711	      struct nir_to_tgsi_options options = {
+   712	         .unoptimized_ra = true,
+   713	         .lower_fabs = true,
+   714	         .lower_ssbo_bindings =
+   715	               rs->caps.caps.v2.host_feature_check_version >= 16,
+   716	         .non_compute_membar_needs_all_modes = true
+   717	      };
+   718	
+   719	      if (!(rs->caps.caps.v2.capability_bits_v2 & VIRGL_CAP_V2_TEXTURE_SHADOW_LOD) &&
+   720	          rs->caps.caps.v2.capability_bits & VIRGL_CAP_HOST_IS_GLES) {
+   721	         nir_lower_tex_options lower_tex_options = {
+   722	            .lower_offset_filter = lower_gles_arrayshadow_offset_filter,
+   723	         };
+   724	
+   725	         NIR_PASS_V(shader->ir.nir, nir_lower_tex, &lower_tex_options);
+   726	      }
+   727	
+   728	      nir_shader *s = nir_shader_clone(NULL, shader->ir.nir);
+   729	
+   730	      /* The host can't handle certain IO slots as separable, because we can't assign
+   731	       * more than 32 IO locations explicitly, and with varyings and patches we already
+   732	       * exhaust the possible ways of handling this for the varyings with generic names,
+   733	       * so drop the flag in these cases */
+   734	      const uint64_t drop_slots_for_separable_io = 0xffull << VARYING_SLOT_TEX0 |
+   735	                                                        1 <<  VARYING_SLOT_FOGC |
+   736	                                                        1 <<  VARYING_SLOT_BFC0 |
+   737	                                                        1 <<  VARYING_SLOT_BFC1 |
+   738	                                                        1 <<  VARYING_SLOT_COL0 |
+   739	                                                        1 <<  VARYING_SLOT_COL1;
+   740	      bool keep_separable_flags = true;
+   741	      if (s->info.stage != MESA_SHADER_VERTEX)
+   742	         keep_separable_flags &= !(s->info.inputs_read & drop_slots_for_separable_io);
+   743	      if (s->info.stage != MESA_SHADER_FRAGMENT)
+   744	         keep_separable_flags &= !(s->info.outputs_written & drop_slots_for_separable_io);
+   745	
+   746	      /* Propagare the separable shader property to the host, unless
+   747	       * it is an internal shader - these are marked separable even though they are not. */
+   748	      is_separable = s->info.separate_shader && !s->info.internal && keep_separable_flags;
+   749	      ntt_tokens = tokens = nir_to_tgsi_options(s, vctx->base.screen, &options); /* takes ownership */
+   750	   } else {
+   751	      tokens = shader->tokens;
+   752	   }
+   753	
+   754	   new_tokens = virgl_tgsi_transform(rs, tokens, is_separable);
+   755	   if (!new_tokens)
+   756	      return NULL;
+   757	
+   758	   handle = virgl_object_assign_handle();
+   759	   /* encode VS state */
+   760	   ret = virgl_encode_shader_state(vctx, handle, type,
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_context.c:530:   st->has_etc2 = screen->is_format_supported(screen, PIPE_FORMAT_ETC2_RGB8,
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_context.c:537:   st->transcode_astc = options->transcode_astc &&
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_context.c:544:   st->has_astc_2d_ldr =
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_context.h:153:   bool has_astc_2d_ldr;
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_cb_texture.c:492:   return !st->has_astc_2d_ldr;
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_format.c:118:          (is_5x5 ? st->has_astc_5x5_ldr : st->has_astc_2d_ldr))
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/tests/st_format.c:60:      .has_etc2 = true,
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/tests/st_format.c:61:      .has_astc_2d_ldr = true,
+
+PROXY EGL
+/home/ome/bliss/frameworks/libs/native_bridge_support/android_api/libEGL/stubs_arm64.cc:100:DEFINE_INTERCEPTABLE_STUB_FUNCTION(eglGetProcAddress);
+/home/ome/bliss/frameworks/libs/native_bridge_support/android_api/libEGL/stubs_arm64.cc:219:  INIT_INTERCEPTABLE_STUB_FUNCTION("libEGL.so", eglGetProcAddress);
+/home/ome/bliss/frameworks/libs/native_bridge_support/android_api/libEGL/stubs_arm.cc:100:DEFINE_INTERCEPTABLE_STUB_FUNCTION(eglGetProcAddress);
+/home/ome/bliss/frameworks/libs/native_bridge_support/android_api/libEGL/stubs_arm.cc:219:  INIT_INTERCEPTABLE_STUB_FUNCTION("libEGL.so", eglGetProcAddress);
+/home/ome/bliss/frameworks/libs/native_bridge_support/android_api/libEGL/stubs_riscv64.cc:100:DEFINE_INTERCEPTABLE_STUB_FUNCTION(eglGetProcAddress);
+/home/ome/bliss/frameworks/libs/native_bridge_support/android_api/libEGL/stubs_riscv64.cc:219:  INIT_INTERCEPTABLE_STUB_FUNCTION("libEGL.so", eglGetProcAddress);
+/home/ome/bliss/frameworks/libs/native_bridge_support/android_api/libEGL/proxy/opengl_trampolines-inl.h:76:{"eglGetProcAddress", DoCustomTrampolineWithThunk_eglGetProcAddress, [](GuestAddr pc) { return WrapGuestFunctionImpl(pc, kGuestFunctionWrapperSignature<void*(void*)>, RunGuest_eglGetProcAddress, "eglGetProcAddress");}},
+/home/ome/bliss/frameworks/libs/native_bridge_support/android_api/libEGL/proxy/api_x86_64.json:336:		"eglGetProcAddress" : 
+/home/ome/bliss/frameworks/libs/native_bridge_support/android_api/libEGL/proxy/api_x86_64.json:338:			"type" : "func eglGetProcAddress"
+/home/ome/bliss/frameworks/libs/native_bridge_support/android_api/libEGL/proxy/api_x86_64.json:13536:		"func eglGetProcAddress" : 
+/home/ome/bliss/frameworks/libs/native_bridge_support/android_api/libEGL/proxy/api_x86_64.json:14458:					"name" : "eglGetProcAddress",
+/home/ome/bliss/frameworks/libs/native_bridge_support/android_api/libEGL/proxy/api_x86_64.json:20023:					"name" : "eglGetProcAddress",
+/home/ome/bliss/frameworks/libs/native_bridge_support/android_api/libEGL/proxy/custom_trampolines_arm64_to_x86_64.json:6:    "eglGetProcAddress": {
+/home/ome/bliss/frameworks/libs/native_bridge_support/android_api/libEGL/proxy/api_arm.json:336:		"eglGetProcAddress" : 
+/home/ome/bliss/frameworks/libs/native_bridge_support/android_api/libEGL/proxy/api_arm.json:338:			"type" : "func eglGetProcAddress"
+/home/ome/bliss/frameworks/libs/native_bridge_support/android_api/libEGL/proxy/api_arm.json:13488:		"func eglGetProcAddress" : 
+/home/ome/bliss/frameworks/libs/native_bridge_support/android_api/libEGL/proxy/api_arm.json:14404:					"name" : "eglGetProcAddress",
+/home/ome/bliss/frameworks/libs/native_bridge_support/android_api/libEGL/proxy/api_arm.json:19969:					"name" : "eglGetProcAddress",
+/home/ome/bliss/frameworks/libs/native_bridge_support/android_api/libEGL/proxy/api_riscv64.json:336:		"eglGetProcAddress" : 
+/home/ome/bliss/frameworks/libs/native_bridge_support/android_api/libEGL/proxy/api_riscv64.json:338:			"type" : "func eglGetProcAddress"
+/home/ome/bliss/frameworks/libs/native_bridge_support/android_api/libEGL/proxy/api_riscv64.json:13488:		"func eglGetProcAddress" : 
+/home/ome/bliss/frameworks/libs/native_bridge_support/android_api/libEGL/proxy/api_riscv64.json:14410:					"name" : "eglGetProcAddress",
+/home/ome/bliss/frameworks/libs/native_bridge_support/android_api/libEGL/proxy/api_riscv64.json:19975:					"name" : "eglGetProcAddress",
+/home/ome/bliss/frameworks/libs/native_bridge_support/android_api/libEGL/proxy/egl_trampolines.cc:108:void DoCustomTrampolineWithThunk_eglGetProcAddress(HostCode callee, ProcessState* state);
+/home/ome/bliss/frameworks/libs/native_bridge_support/android_api/libEGL/proxy/egl_trampolines.cc:109:void RunGuest_eglGetProcAddress(GuestAddr pc, GuestArgumentBuffer* buf);
+
+DRM VENUS
+99:      enum virgl_renderer_capset id;
+101:      struct virgl_renderer_capset_venus data;
+102:   } capset;
+584:                       enum virgl_renderer_capset id,
+586:                       void *capset,
+587:                       size_t capset_size)
+592:      .addr = (uintptr_t)capset,
+593:      .size = capset_size,
+601:                           enum virgl_renderer_capset capset_id)
+606:         .value = capset_id,
+1387:   const struct virgl_renderer_capset_venus *capset = &gpu->capset.data;
+1388:   info->wire_format_version = capset->wire_format_version;
+1389:   info->vk_xml_version = capset->vk_xml_version;
+1391:      capset->vk_ext_command_serialization_spec_version;
+1393:      capset->vk_mesa_venus_protocol_spec_version;
+1394:   assert(capset->supports_blob_id_0);
+1396:   /* ensure vk_extension_mask is large enough to hold all capset masks */
+1398:                 sizeof(capset->vk_extension_mask1));
+1399:   memcpy(info->vk_extension_mask, capset->vk_extension_mask1,
+1400:          sizeof(capset->vk_extension_mask1));
+1402:   assert(capset->allow_vk_wait_syncs);
+1404:   assert(capset->supports_multiple_timelines);
+1411:   if (gpu->bo_blob_mem == VIRTGPU_BLOB_MEM_HOST3D && capset->use_guest_vram)
+1456:   assert(gpu->capset.data.supports_blob_id_0);
+1463:   assert(!gpu->capset.version);
+1464:   const int ret = virtgpu_ioctl_context_init(gpu, gpu->capset.id);
+1477:virtgpu_init_capset(struct virtgpu *gpu)
+1479:   gpu->capset.id = VIRGL_RENDERER_CAPSET_VENUS;
+1480:   gpu->capset.version = 0;
+1483:      virtgpu_ioctl_get_caps(gpu, gpu->capset.id, gpu->capset.version,
+1484:                             &gpu->capset.data, sizeof(gpu->capset.data));
+1487:         vn_log(gpu->instance, "failed to get venus v%d capset: %s",
+1488:                gpu->capset.version, strerror(errno));
+1669:      result = virtgpu_init_capset(gpu);
+
+CURRENT BUILD TREE

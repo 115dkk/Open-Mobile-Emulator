@@ -1,0 +1,226 @@
+URL https://gitlab.freedesktop.org/virgl/virglrenderer/-/raw/1.3.0/src/virgl_hw.h
+SHA256 191ca5cea527949a29e9753b1e31d550f2fed922895d78dabc5c5c3585aa2ff7
+210:    VIRGL_FORMAT_A16_FLOAT               = 155,
+211:    VIRGL_FORMAT_L16_FLOAT               = 156,
+212:    VIRGL_FORMAT_L16A16_FLOAT            = 157,
+213:    VIRGL_FORMAT_I16_FLOAT               = 158,
+214:    VIRGL_FORMAT_A32_FLOAT               = 159,
+215:    VIRGL_FORMAT_L32_FLOAT               = 160,
+216:    VIRGL_FORMAT_L32A32_FLOAT            = 161,
+217:    VIRGL_FORMAT_I32_FLOAT               = 162,
+218: 
+219:    VIRGL_FORMAT_Y8_V8_U8_420_UNORM      = 163,
+220:    VIRGL_FORMAT_Y8_V8_U8_422_UNORM      = 164,
+221:    VIRGL_FORMAT_Y8_U8_V8_420_UNORM      = 165,  /**< aka I420 */
+222:    VIRGL_FORMAT_Y8_U8V8_420_UNORM       = 166,
+223:    VIRGL_FORMAT_Y8_V8U8_420_UNORM       = 167,
+
+URL https://gitlab.freedesktop.org/virgl/virglrenderer/-/raw/1.3.0/src/vrend/vrend_formats.c
+SHA256 1b4b48526638b7b16293e7eb552b6d6cbdea44d551358bdc02f17c99b1d86844
+265:   { VIRGL_FORMAT_DXT3_SRGBA, GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT, GL_RGBA, GL_UNSIGNED_BYTE, NO_SWIZZLE, view_class_dxt3_rgba },
+266:   { VIRGL_FORMAT_DXT5_SRGBA, GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT, GL_RGBA, GL_UNSIGNED_BYTE, NO_SWIZZLE, view_class_dxt5_rgba },
+267: };
+268: 
+269: static struct vrend_format_table etc2_formats[] = {
+270:   {VIRGL_FORMAT_ETC2_RGB8, GL_COMPRESSED_RGB8_ETC2, GL_RGB, GL_UNSIGNED_BYTE, NO_SWIZZLE, view_class_etc2_rgb },
+271:   {VIRGL_FORMAT_ETC2_SRGB8, GL_COMPRESSED_SRGB8_ETC2, GL_RGB, GL_BYTE, NO_SWIZZLE, view_class_etc2_rgb },
+272:   {VIRGL_FORMAT_ETC2_RGB8A1, GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2, GL_RGBA, GL_UNSIGNED_BYTE, NO_SWIZZLE, view_class_etc2_rgba },
+273:   {VIRGL_FORMAT_ETC2_SRGB8A1, GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2, GL_RGBA, GL_BYTE, NO_SWIZZLE, view_class_etc2_rgba },
+274:   {VIRGL_FORMAT_ETC2_RGBA8, GL_COMPRESSED_RGBA8_ETC2_EAC, GL_RGBA, GL_UNSIGNED_BYTE, NO_SWIZZLE, view_class_etc2_eac_rgba },
+275:   {VIRGL_FORMAT_ETC2_SRGBA8, GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC, GL_RGBA, GL_BYTE, NO_SWIZZLE, view_class_etc2_eac_rgba },
+276:   {VIRGL_FORMAT_ETC2_R11_UNORM, GL_COMPRESSED_R11_EAC, GL_RED, GL_UNSIGNED_BYTE, NO_SWIZZLE, view_class_unsupported},
+277:   {VIRGL_FORMAT_ETC2_R11_SNORM, GL_COMPRESSED_SIGNED_R11_EAC, GL_RED, GL_BYTE, NO_SWIZZLE, view_class_unsupported},
+278:   {VIRGL_FORMAT_ETC2_RG11_UNORM, GL_COMPRESSED_RG11_EAC, GL_RG, GL_UNSIGNED_BYTE, NO_SWIZZLE, view_class_unsupported},
+279:   {VIRGL_FORMAT_ETC2_RG11_SNORM, GL_COMPRESSED_SIGNED_RG11_EAC, GL_RG, GL_BYTE, NO_SWIZZLE, view_class_unsupported},
+280: };
+281: 
+282: #define ASTC_FORMAT(size) \
+283:   {VIRGL_FORMAT_ASTC_ ## size, GL_COMPRESSED_RGBA_ASTC_ ## size, GL_RGBA, GL_UNSIGNED_BYTE, NO_SWIZZLE, view_class_astc_## size ##_rgba}, \
+284:   {VIRGL_FORMAT_ASTC_ ## size, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_ ## size, GL_RGBA, GL_BYTE, NO_SWIZZLE, view_class_astc_## size ##_rgba}
+285: 
+286: static struct vrend_format_table astc_formats[] = {
+287:    ASTC_FORMAT(4x4),
+288:    ASTC_FORMAT(5x4),
+289:    ASTC_FORMAT(5x5),
+290:    ASTC_FORMAT(6x5),
+291:    ASTC_FORMAT(6x6),
+292:    ASTC_FORMAT(8x5),
+293:    ASTC_FORMAT(8x6),
+294:    ASTC_FORMAT(8x8),
+295:    ASTC_FORMAT(10x5),
+296:    ASTC_FORMAT(10x6),
+297:    ASTC_FORMAT(10x8),
+298:    ASTC_FORMAT(10x10),
+299:    ASTC_FORMAT(12x10),
+300:    ASTC_FORMAT(12x12),
+301: };
+
+URL https://gitlab.freedesktop.org/virgl/virglrenderer/-/raw/1.3.0/src/vrend/vrend_renderer.c
+SHA256 be7e5c63fb501cb77bd5b2c13c332f8b93c49fd04d207f17d434932c237f4ea3
+2661: int vrend_create_sampler_view(struct vrend_context *ctx,
+2662:                               uint32_t handle,
+2663:                               struct vrend_resource *res,
+2664:                               enum virgl_formats format, enum pipe_texture_target pipe_target,
+2665:                               uint32_t val0, uint32_t val1, uint32_t swizzle_packed)
+2666: {
+2667:    struct vrend_sampler_view *view;
+2668:    int ret_handle;
+2669:    enum pipe_swizzle swizzle[4];
+2670: 
+2671:    assert(format < PIPE_FORMAT_COUNT);
+2672:    if (unlikely(format >= PIPE_FORMAT_COUNT)) {
+2673:       vrend_report_context_error(ctx, VIRGL_ERROR_CTX_ILLEGAL_FORMAT, format);
+2674:       return EINVAL;
+2675:    }
+2707:    vrend_resource_reference(&view->texture, res);
+2708: 
+2709:    view->gl_id = view->texture->gl_id;
+2710: 
+2711:    if (view->target == PIPE_BUFFER) {
+2712:       view->target = view->texture->target;
+2713: 
+2714:       view->u.buf.first_element = val0;
+2715:       view->u.buf.last_element = val1;
+2716:    } else {
+2717:       view->u.tex.first_layer = val0 & 0xffff;
+2718:       view->u.tex.last_layer = (val0 >> 16) & 0xffff;
+2719:       view->u.tex.first_level = val1 & 0xff;
+2720:       view->u.tex.last_level = (val1 >> 8) & 0xff;
+2721:    }
+2787:       format = view->format;
+2788:       if (util_format_is_depth_or_stencil(view->texture->base.format))
+2789:          format = view->texture->base.format;
+2790:       else if (view->format != view->texture->base.format)
+2791:          needs_view = true;
+2792: 
+2793:       if (view->u.tex.first_layer > 0 || view->u.tex.first_level > 0)
+2794:          needs_view = true;
+2795: 
+2796:       if (needs_view &&
+2797:           has_bit(view->texture->storage_bits, VREND_STORAGE_GL_IMMUTABLE) &&
+2798:           has_feature(feat_texture_view)) {
+2799:         GLenum internalformat = tex_conv_table[format].internalformat;
+2800:         view->levels = (view->u.tex.last_level - view->u.tex.first_level) + 1;
+2801: 
+2802:         int num_layers = view->u.tex.last_layer - view->u.tex.first_layer + 1;
+2803: 
+2804:         if (view->levels == 0 || num_layers <= 0) {
+2805:             vrend_resource_reference(&view->texture, NULL);
+2806:             FREE(view);
+2807:             virgl_error("%s: Invalid number of layers (%d) or zero levels requested\n",
+2808:                         __func__, num_layers);
+2809:             return EINVAL;
+2810:         }
+8728:    } else {
+8729:       internalformat = tex_conv_table[format].internalformat;
+8730:       glformat = tex_conv_table[format].glformat;
+8731:       gltype = tex_conv_table[format].gltype;
+8732: 
+8733:       if (internalformat == 0) {
+8734:          virgl_error("Unknown format is %d\n", pr->format);
+8735:          glBindTexture(gr->target, 0);
+8736:          return EINVAL;
+8737:       }
+
+URL https://gitlab.freedesktop.org/mesa/mesa/-/raw/mesa-24.0.8/src/mesa/state_tracker/st_format.c
+SHA256 78899f298fa86a41216c3ab332d5db050acae100f2c7dd2d844d2971d4831e78
+65:    struct pipe_screen *screen = st->screen;
+66: 
+67:    /* The destination RGBA format mustn't be changed, because it's also
+68:     * a destination format of the unpack/decompression function.
+69:     */
+70:    if (mesaFormat == MESA_FORMAT_ETC1_RGB8 && !st->has_etc1)
+71:       return st->transcode_etc ? PIPE_FORMAT_DXT1_RGB : PIPE_FORMAT_R8G8B8A8_UNORM;
+72: 
+73:    /* ETC2 formats are emulated as uncompressed ones.
+74:     * The destination formats mustn't be changed, because they are also
+75:     * destination formats of the unpack/decompression function.
+76:     */
+77:    if (_mesa_is_format_etc2(mesaFormat) && !st->has_etc2) {
+78:       bool has_bgra_srgb = screen->is_format_supported(screen,
+79:                                                        PIPE_FORMAT_B8G8R8A8_SRGB,
+80:                                                        PIPE_TEXTURE_2D, 0, 0,
+81:                                                        PIPE_BIND_SAMPLER_VIEW);
+82: 
+83:       switch (mesaFormat) {
+84:       case MESA_FORMAT_ETC2_RGB8:
+85:          return st->transcode_etc ? PIPE_FORMAT_DXT1_RGB : PIPE_FORMAT_R8G8B8A8_UNORM;
+86:       case MESA_FORMAT_ETC2_SRGB8:
+87:          return st->transcode_etc ? PIPE_FORMAT_DXT1_SRGB :
+88:                 has_bgra_srgb ? PIPE_FORMAT_B8G8R8A8_SRGB : PIPE_FORMAT_R8G8B8A8_SRGB;
+89:       case MESA_FORMAT_ETC2_RGBA8_EAC:
+90:          return st->transcode_etc ? PIPE_FORMAT_DXT5_RGBA : PIPE_FORMAT_R8G8B8A8_UNORM;
+91:       case MESA_FORMAT_ETC2_SRGB8_ALPHA8_EAC:
+92:          return st->transcode_etc ? PIPE_FORMAT_DXT5_SRGBA :
+93:                 has_bgra_srgb ? PIPE_FORMAT_B8G8R8A8_SRGB : PIPE_FORMAT_R8G8B8A8_SRGB;
+94:       case MESA_FORMAT_ETC2_R11_EAC:
+95:          return PIPE_FORMAT_R16_UNORM;
+96:       case MESA_FORMAT_ETC2_RG11_EAC:
+97:          return PIPE_FORMAT_R16G16_UNORM;
+98:       case MESA_FORMAT_ETC2_SIGNED_R11_EAC:
+99:          return PIPE_FORMAT_R16_SNORM;
+100:       case MESA_FORMAT_ETC2_SIGNED_RG11_EAC:
+101:          return PIPE_FORMAT_R16G16_SNORM;
+102:       case MESA_FORMAT_ETC2_RGB8_PUNCHTHROUGH_ALPHA1:
+103:          return st->transcode_etc ? PIPE_FORMAT_DXT1_RGBA : PIPE_FORMAT_R8G8B8A8_UNORM;
+104:       case MESA_FORMAT_ETC2_SRGB8_PUNCHTHROUGH_ALPHA1:
+105:          return st->transcode_etc ? PIPE_FORMAT_DXT1_SRGBA :
+106:                 has_bgra_srgb ? PIPE_FORMAT_B8G8R8A8_SRGB : PIPE_FORMAT_R8G8B8A8_SRGB;
+107:       default:
+108:          unreachable("Unknown ETC2 format");
+109:       }
+110:    }
+111: 
+112:    if (st_astc_format_fallback(st, mesaFormat)) {
+113:       const bool is_5x5 = mesaFormat == PIPE_FORMAT_ASTC_5x5 ||
+114:                           mesaFormat == PIPE_FORMAT_ASTC_5x5_SRGB;
+115: 
+116:       /* If we're only emulating ASTC void extents, use the original format */
+117:       if (st->astc_void_extents_need_denorm_flush &&
+118:           (is_5x5 ? st->has_astc_5x5_ldr : st->has_astc_2d_ldr))
+119:          return mesaFormat;
+120: 
+121:       /* We're emulating all of ASTC via transcoding or decompression */
+122:       if (_mesa_is_format_srgb(mesaFormat)) {
+123:          return st->transcode_astc ? PIPE_FORMAT_DXT5_SRGBA :
+124:                                      PIPE_FORMAT_R8G8B8A8_SRGB;
+125:       } else {
+126:          return st->transcode_astc ? PIPE_FORMAT_DXT5_RGBA :
+127:                                      PIPE_FORMAT_R8G8B8A8_UNORM;
+128:       }
+129:    }
+
+URL https://gitlab.freedesktop.org/mesa/mesa/-/raw/mesa-24.0.8/src/mesa/state_tracker/st_extensions.c
+SHA256 689cd1d62f58d9f522db543910d602ba73056de545d586e6bef6fb3fffda1067
+1090:         GL_TRUE }, /* at least one format must be supported */
+1091: 
+1092:       { { o(ARB_stencil_texturing),
+1093:           o(ARB_texture_stencil8) },
+1094:         { PIPE_FORMAT_X24S8_UINT,
+1095:           PIPE_FORMAT_S8X24_UINT },
+1096:         GL_TRUE }, /* at least one format must be supported */
+1097: 
+1098:       { { o(AMD_compressed_ATC_texture) },
+1099:         { PIPE_FORMAT_ATC_RGB,
+1100:           PIPE_FORMAT_ATC_RGBA_EXPLICIT,
+1101:           PIPE_FORMAT_ATC_RGBA_INTERPOLATED } },
+1102:    };
+1103: 
+1104:    /* Required: vertex fetch support. */
+1105:    static const struct st_extension_format_mapping vertex_mapping[] = {
+1106:       { { o(EXT_vertex_array_bgra) },
+1107:         { PIPE_FORMAT_B8G8R8A8_UNORM } },
+1108:       { { o(ARB_vertex_type_2_10_10_10_rev) },
+1109:         { PIPE_FORMAT_R10G10B10A2_UNORM,
+1110:           PIPE_FORMAT_B10G10R10A2_UNORM,
+1111:           PIPE_FORMAT_R10G10B10A2_SNORM,
+1112:           PIPE_FORMAT_B10G10R10A2_SNORM,
+1113:           PIPE_FORMAT_R10G10B10A2_USCALED,
+1114:           PIPE_FORMAT_B10G10R10A2_USCALED,
+1115:           PIPE_FORMAT_R10G10B10A2_SSCALED,
+1116:           PIPE_FORMAT_B10G10R10A2_SSCALED } },
+1117:       { { o(ARB_vertex_type_10f_11f_11f_rev) },
+1118:         { PIPE_FORMAT_R11G11B10_FLOAT } },
+1119:    };
+1120: 
+

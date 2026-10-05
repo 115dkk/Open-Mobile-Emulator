@@ -1,0 +1,42 @@
+Stable Game Driver: unsupported
+Pre-release Game Driver: unsupported
+
+Failed to initialize GPU memory eBPF
+
+driverPackageName = system
+driverVersionName = 
+driverVersionCode = 0
+driverBuildTime = 0
+glLoadingCount = 2
+glLoadingFailureCount = 0
+angleLoadingCount = 0
+angleLoadingFailureCount = 0
+vkLoadingCount = 1
+vkLoadingFailureCount = 0
+vulkanVersion = 4198400
+cpuVulkanVersion = 0
+glesVersion = 196608
+
+appPackageName = com.epidgames.trickcalrevive
+driverVersionCode = 0
+cpuVulkanInUse = 0
+falsePrerotation = 0
+gles1InUse = 0
+angleInUse = 0
+glDriverLoadingTime: 2181000
+angleDriverLoadingTime:
+vkDriverLoadingTime: 32929600
+
+appPackageName = com.google.android.setupwizard
+driverVersionCode = 0
+cpuVulkanInUse = 0
+falsePrerotation = 0
+gles1InUse = 0
+angleInUse = 0
+glDriverLoadingTime: 2181000
+angleDriverLoadingTime:
+vkDriverLoadingTime:
+
+
+GPU work information is not available.
+

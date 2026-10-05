@@ -1,0 +1,199 @@
+
+VIRGL FORMAT SUPPORT
+   790	          target == PIPE_TEXTURE_2D_ARRAY ||
+   791	          target == PIPE_TEXTURE_RECT ||
+   792	          target == PIPE_TEXTURE_3D ||
+   793	          target == PIPE_TEXTURE_CUBE ||
+   794	          target == PIPE_TEXTURE_CUBE_ARRAY);
+   795	
+   796	   format_desc = util_format_description(format);
+   797	
+   798	   if (util_format_is_intensity(format))
+   799	      return false;
+   800	
+   801	   if (sample_count > 1) {
+   802	      if (!caps->v1.bset.texture_multisample)
+   803	         return false;
+   804	
+   805	      if (bind & PIPE_BIND_SHADER_IMAGE) {
+   806	         if (sample_count > caps->v2.max_image_samples)
+   807	            return false;
+   808	      }
+   809	
+   810	      if (sample_count > caps->v1.max_samples)
+   811	         return false;
+   812	
+   813	      if (caps->v2.host_feature_check_version >= 9 &&
+   814	          !has_format_bit(&caps->v2.supported_multisample_formats,
+   815	                          pipe_to_virgl_format(format)))
+   816	         return false;
+   817	   }
+   818	
+   819	   if (bind & PIPE_BIND_VERTEX_BUFFER) {
+   820	      return virgl_is_vertex_format_supported(screen, format);
+   821	   }
+   822	
+   823	   if (util_format_is_compressed(format) && target == PIPE_BUFFER)
+   824	      return false;
+   825	
+   826	   /* Allow 3-comp 32 bit textures only for TBOs (needed for ARB_tbo_rgb32) */
+   827	   if ((format == PIPE_FORMAT_R32G32B32_FLOAT ||
+   828	       format == PIPE_FORMAT_R32G32B32_SINT ||
+   829	       format == PIPE_FORMAT_R32G32B32_UINT) &&
+   830	       target != PIPE_BUFFER)
+   831	      return false;
+   832	
+   833	   if ((format_desc->layout == UTIL_FORMAT_LAYOUT_RGTC ||
+   834	        format_desc->layout == UTIL_FORMAT_LAYOUT_ETC ||
+   835	        format_desc->layout == UTIL_FORMAT_LAYOUT_S3TC) &&
+   836	       target == PIPE_TEXTURE_3D)
+   837	      return false;
+   838	
+   839	
+   840	   if (bind & PIPE_BIND_RENDER_TARGET) {
+   841	      /* For ARB_framebuffer_no_attachments. */
+   842	      if (format == PIPE_FORMAT_NONE)
+   843	         return true;
+   844	
+   845	      if (format_desc->colorspace == UTIL_FORMAT_COLORSPACE_ZS)
+   846	         return false;
+   847	
+   848	      /*
+   849	       * Although possible, it is unnatural to render into compressed or YUV
+   850	       * surfaces. So disable these here to avoid going into weird paths
+   851	       * inside gallium frontends.
+   852	       */
+   853	      if (format_desc->block.width != 1 ||
+   854	          format_desc->block.height != 1)
+   855	         return false;
+   856	
+   857	      if (!virgl_format_check_bitmask(format,
+   858	                                      caps->v1.render.bitmask,
+   859	                                      may_emulate_bgra))
+   860	         return false;
+   861	   }
+   862	
+   863	   if (bind & PIPE_BIND_DEPTH_STENCIL) {
+   864	      if (format_desc->colorspace != UTIL_FORMAT_COLORSPACE_ZS)
+   865	         return false;
+   866	   }
+   867	
+   868	   if (bind & PIPE_BIND_SCANOUT) {
+   869	      if (!virgl_format_check_bitmask(format, caps->v2.scanout.bitmask, false))
+   870	         return false;
+   871	   }
+   872	
+   873	   /*
+   874	    * All other operations (sampling, transfer, etc).
+   875	    */
+   876	
+   877	   if (format_desc->layout == UTIL_FORMAT_LAYOUT_S3TC) {
+   878	      goto out_lookup;
+   879	   }
+   880	   if (format_desc->layout == UTIL_FORMAT_LAYOUT_RGTC) {
+   881	      goto out_lookup;
+   882	   }
+   883	   if (format_desc->layout == UTIL_FORMAT_LAYOUT_BPTC) {
+   884	      goto out_lookup;
+   885	   }
+   886	   if (format_desc->layout == UTIL_FORMAT_LAYOUT_ETC) {
+   887	      goto out_lookup;
+   888	   }
+   889	
+   890	   if (format == PIPE_FORMAT_R11G11B10_FLOAT) {
+   891	      goto out_lookup;
+   892	   } else if (format == PIPE_FORMAT_R9G9B9E5_FLOAT) {
+   893	      goto out_lookup;
+   894	   }
+   895	
+   896	   if (format_desc->layout == UTIL_FORMAT_LAYOUT_ASTC) {
+   897	     goto out_lookup;
+   898	   }
+   899	
+   900	   i = util_format_get_first_non_void_channel(format);
+   901	   if (i == -1)
+   902	      return false;
+   903	
+   904	   /* no L4A4 */
+   905	   if (format_desc->nr_channels < 4 && format_desc->channel[i].size == 4)
+   906	      return false;
+   907	
+   908	 out_lookup:
+   909	   return virgl_format_check_bitmask(format,
+   910	                                     caps->v1.sampler.bitmask,
+   911	                                     may_emulate_bgra);
+   912	}
+   913	
+   914	static bool virgl_is_video_format_supported(struct pipe_screen *screen,
+   915	                                            enum pipe_format format,
+   916	                                            enum pipe_video_profile profile,
+   917	                                            enum pipe_video_entrypoint entrypoint)
+   918	{
+   919	    return vl_video_buffer_is_format_supported(screen, format, profile, entrypoint);
+   920	}
+
+MESA COMPRESSED EMULATION
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_context.c:344:   if (_mesa_has_compute_shaders(st->ctx) && st->transcode_astc)
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_context.c:530:   st->has_etc2 = screen->is_format_supported(screen, PIPE_FORMAT_ETC2_RGB8,
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_context.c:537:   st->transcode_astc = options->transcode_astc &&
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_context.c:544:   st->has_astc_2d_ldr =
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_context.c:547:   st->has_astc_5x5_ldr =
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_context.c:757:       st->transcode_astc && !st_init_texcompress_compute(st)) {
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_texture.h:237:st_astc_format_fallback(const struct st_context *st, mesa_format format);
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_context.h:150:   bool has_etc2;
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_context.h:152:   bool transcode_astc;
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_context.h:153:   bool has_astc_2d_ldr;
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_context.h:154:   bool has_astc_5x5_ldr;
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_texcompress_compute.c:807:st_compute_transcode_astc_to_dxt5(struct st_context *st,
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_cb_texture.c:480:st_astc_format_fallback(const struct st_context *st, mesa_format format)
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_cb_texture.c:490:      return !st->has_astc_5x5_ldr;
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_cb_texture.c:492:   return !st->has_astc_2d_ldr;
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_cb_texture.c:502:      return !st->has_etc2;
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_cb_texture.c:512:      return st_astc_format_fallback(st, format);
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_cb_texture.c:707:                st_compute_transcode_astc_to_dxt5(st,
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_format.c:77:   if (_mesa_is_format_etc2(mesaFormat) && !st->has_etc2) {
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_format.c:112:   if (st_astc_format_fallback(st, mesaFormat)) {
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_format.c:118:          (is_5x5 ? st->has_astc_5x5_ldr : st->has_astc_2d_ldr))
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_format.c:123:         return st->transcode_astc ? PIPE_FORMAT_DXT5_SRGBA :
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_format.c:126:         return st->transcode_astc ? PIPE_FORMAT_DXT5_RGBA :
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/tests/st_format.c:60:      .has_etc2 = true,
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/tests/st_format.c:61:      .has_astc_2d_ldr = true,
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/tests/st_format.c:62:      .has_astc_5x5_ldr = true,
+/home/ome/bliss/external/mesa/src/mesa/state_tracker/st_texcompress_compute.h:43:st_compute_transcode_astc_to_dxt5(struct st_context *st,
+
+YV12 AND SAMPLER VIEWS
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_context.c:380:   surf->base.u.tex.first_layer = templ->u.tex.first_layer;
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_context.c:381:   surf->base.u.tex.last_layer = templ->u.tex.last_layer;
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:597:                                  uint32_t plane,
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:599:                                  uint32_t plane_offset,
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:631:   metadata->plane = plane;
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:632:   metadata->plane_offset = plane_offset;
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:715:   uint32_t winsys_stride, plane_offset, plane;
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:729:   plane = winsys_stride = plane_offset = modifier = 0;
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:732:                                                      &plane,
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:734:                                                      &plane_offset,
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:746:      plane_offset = 0;
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:750:   virgl_resource_layout(&res->b, &res->metadata, plane, winsys_stride,
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:751:                         plane_offset, modifier);
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:767:   if (res->blob_mem && plane == 0 &&
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:770:      uint32_t plane_strides[VIRGL_MAX_PLANE_COUNT];
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:771:      uint32_t plane_offsets[VIRGL_MAX_PLANE_COUNT];
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:772:      uint32_t plane_count = 0;
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:776:         struct virgl_resource *plane = virgl_resource(iter);
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:779:         if (plane->b.target != PIPE_TEXTURE_2D ||
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:780:             plane->b.depth0 != 1 ||
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:781:             plane->b.array_size != 1 ||
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:782:             plane->b.last_level != 0 ||
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:783:             plane->b.nr_samples > 1 ||
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:784:             plane->hw_res != res->hw_res ||
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:785:             plane_count >= VIRGL_MAX_PLANE_COUNT) {
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:791:         plane_strides[plane_count] = plane->metadata.stride[0];
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:792:         plane_offsets[plane_count] = plane->metadata.plane_offset;
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:793:         plane_count++;
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:805:                                 plane_count,
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:806:                                 plane_strides,
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:807:                                 plane_offsets);
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:819:                         unsigned plane,
+/home/ome/bliss/external/mesa/src/gallium/drivers/virgl/virgl_resource.c:897:   unsigned offset = metadata->plane_offset + metadata->level_offset[level];
+
+GPU REPORT SOURCE

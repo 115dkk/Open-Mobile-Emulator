@@ -1,0 +1,18 @@
+A13 only:
+A15 only:
+EXT GL_EXT_EGL_image_storage_compression
+EXT GL_EXT_multi_draw_indirect
+EXT GL_EXT_shadow_samplers
+EXT GL_EXT_texture_storage
+EXT GL_EXT_texture_storage_compression
+a13
+GL_RENDERER=virgl (NVIDIA GeForce RTX 2080 SUPER/PCIe/SSE2)
+GL_VERSION=OpenGL ES 3.2 Mesa 24.0.8
+ASTC_UPLOAD_ERROR=0
+ASTC_RED_PIXEL=255,0,0,255 GL_ERROR=0
+a15
+GL_RENDERER=virgl (NVIDIA GeForce RTX 2080 SUPER/PCIe/SSE2)
+GL_VERSION=OpenGL ES 3.2 Mesa 24.3.3
+ASTC_UPLOAD_ERROR=0
+ASTC_RED_PIXEL=255,0,0,255 GL_ERROR=0
+Compressed-format sets equal: True

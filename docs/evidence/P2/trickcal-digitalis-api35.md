@@ -156,3 +156,12 @@ A15 game64(jni6 + GApps)에서 게임을 띄우고 가운데를 한 번 탭한 �
 Play 스토어를 열었다(`START u0 {act=android.intent.action.VIEW dat=https://play.google.com/... } from uid 10299`). `게임 종료` 자리(518,594)를 탭하면 프로세스가
 SIGKILL(status 9)로 끝났다. Unity 로그에 `Title:vwm()`. 게임 논리는 타이틀과 업데이트 알림까지 가고 입력도 받는데 화면이 검다(위아래 40 px 흰 띠, 가운데 1280x720 검정).
 같은 시험의 호스트 stderr에 `Unknown format is 163` 23번과 sampler view 오류(`a15-title-tapcheck-qemu-stderr.txt`). 원인 조사는 이어서 한다.
+
+## 형식 163과 YUV 평면 샘플러 뷰 (2026-10-06, p2b)
+
+- `Unknown format is 163`은 virglrenderer 1.3.0 `src/virgl_hw.h`의 `VIRGL_FORMAT_Y8_V8_U8_420_UNORM`(옛 이름 YV12)이다. 압축 텍스처가 아니다.
+- A15 게임은 GLES 컨텍스트를 만든다(`dumpsys gpu`: `createdGlesContext=1`, `createdVulkanDevice=0`). 두 이미지의 압축 형식 목록은 같고 ASTC 단색 블록 시험도 둘 다 통과.
+- 게스트 Mesa 24.3.3 `virgl_encode.c`는 영상의 추가 평면이면 `res->metadata.plane`을 샘플러 뷰의 레이어 값 자리에 쓰고, 호스트 1.3.0 `vrend_renderer.c`는
+  그 값의 하위 16비트를 첫 레이어, 상위 16비트를 마지막 레이어로 읽는다. 세 번째 평면(2)이면 첫 레이어 2, 마지막 0이 되어 `Invalid number of layers (-1)`과 맞는다
+  (소스 대조, 명령 버퍼를 직접 잡아 본 것은 아니다, `p2b-yuv-source.txt`).
+- 이 오류가 게임 화면 전체를 검게 만드는지는 아직 확인하지 않았다. 판별기에 매 프레임 초록으로 지우는 구석을 더해, 영상 오류 뒤 그 GL 컨텍스트 전체가 그리기를 멈추는지 본다.

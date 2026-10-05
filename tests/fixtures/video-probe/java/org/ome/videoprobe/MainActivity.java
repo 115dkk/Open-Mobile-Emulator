@@ -29,8 +29,8 @@ import javax.microedition.khronos.opengles.GL10;
  * Start with `am start -n org.ome.videoprobe/.MainActivity --es mode gl|view`.
  * Mode `gl` (default) decodes into a SurfaceTexture sampled as an external OES texture, the path
  * Unity's VideoPlayer takes. Mode `view` lets VideoView hand the decoder a window surface.
- * Every line is tagged OMEVideo: prepared, first frame, per-second frame count and centre-pixel
- * luminance (gl mode), completion and errors.
+ * Every line is tagged OMEVideo: prepared, first frame, per-second frame count, the centre pixel
+ * and a green control corner (gl mode), completion and errors.
  */
 public final class MainActivity extends Activity {
     private static final String TAG = "OMEVideo";
@@ -210,6 +210,13 @@ public final class MainActivity extends Activity {
             GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, texture);
             GLES20.glUniform1i(GLES20.glGetUniformLocation(program, "uSampler"), 0);
             GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
+            // A corner the video does not touch: cleared to green every frame. If it stops reading
+            // green, the whole GL context stopped rendering (not just the video texture).
+            GLES20.glEnable(GLES20.GL_SCISSOR_TEST);
+            GLES20.glScissor(0, 0, 8, 8);
+            GLES20.glClearColor(0f, 1f, 0f, 1f);
+            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+            GLES20.glDisable(GLES20.GL_SCISSOR_TEST);
 
             totalFrames++;
             framesThisSecond++;
@@ -226,11 +233,18 @@ public final class MainActivity extends Activity {
             }
         }
 
-        /** Reads the centre pixel; magenta means the draw failed, black means an empty video texture. */
+        /**
+         * Reads the centre pixel (magenta: the quad was not drawn, black: empty video texture) and
+         * the green corner (anything else: the context no longer renders at all).
+         */
         private String centre() {
+            return "centre=" + read(width / 2, height / 2) + " corner=" + read(2, 2);
+        }
+
+        private String read(int x, int y) {
             pixel.clear();
-            GLES20.glReadPixels(width / 2, height / 2, 1, 1, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, pixel);
-            return "centre=" + (pixel.get(0) & 0xff) + "," + (pixel.get(1) & 0xff) + "," + (pixel.get(2) & 0xff);
+            GLES20.glReadPixels(x, y, 1, 1, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, pixel);
+            return (pixel.get(0) & 0xff) + "," + (pixel.get(1) & 0xff) + "," + (pixel.get(2) & 0xff);
         }
 
         private int compile(int type, String source) {

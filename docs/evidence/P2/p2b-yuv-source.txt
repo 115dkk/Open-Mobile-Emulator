@@ -1,0 +1,404 @@
+=== src/gallium/drivers/virgl/virgl_encode.c ===
+  1090	   return 0;
+  1091	}
+  1092	
+  1093	int virgl_encode_sampler_state(struct virgl_context *ctx,
+  1094	                              uint32_t handle,
+  1095	                              const struct pipe_sampler_state *state)
+  1096	{
+  1097	   uint32_t tmp;
+  1098	   int i;
+  1099	   virgl_encoder_write_cmd_dword(ctx, VIRGL_CMD0(VIRGL_CCMD_CREATE_OBJECT, VIRGL_OBJECT_SAMPLER_STATE, VIRGL_OBJ_SAMPLER_STATE_SIZE));
+  1100	   virgl_encoder_write_dword(ctx->cbuf, handle);
+  1101	
+  1102	   tmp = VIRGL_OBJ_SAMPLE_STATE_S0_WRAP_S(state->wrap_s) |
+  1103	      VIRGL_OBJ_SAMPLE_STATE_S0_WRAP_T(state->wrap_t) |
+  1104	      VIRGL_OBJ_SAMPLE_STATE_S0_WRAP_R(state->wrap_r) |
+  1105	      VIRGL_OBJ_SAMPLE_STATE_S0_MIN_IMG_FILTER(state->min_img_filter) |
+  1106	      VIRGL_OBJ_SAMPLE_STATE_S0_MIN_MIP_FILTER(state->min_mip_filter) |
+  1107	      VIRGL_OBJ_SAMPLE_STATE_S0_MAG_IMG_FILTER(state->mag_img_filter) |
+  1108	      VIRGL_OBJ_SAMPLE_STATE_S0_COMPARE_MODE(state->compare_mode) |
+  1109	      VIRGL_OBJ_SAMPLE_STATE_S0_COMPARE_FUNC(state->compare_func) |
+  1110	      VIRGL_OBJ_SAMPLE_STATE_S0_SEAMLESS_CUBE_MAP(state->seamless_cube_map) |
+  1111	      VIRGL_OBJ_SAMPLE_STATE_S0_MAX_ANISOTROPY(state->max_anisotropy);
+  1112	
+  1113	   virgl_encoder_write_dword(ctx->cbuf, tmp);
+  1114	   virgl_encoder_write_dword(ctx->cbuf, fui(state->lod_bias));
+  1115	   virgl_encoder_write_dword(ctx->cbuf, fui(state->min_lod));
+  1116	   virgl_encoder_write_dword(ctx->cbuf, fui(state->max_lod));
+  1117	   for (i = 0; i <  4; i++)
+  1118	      virgl_encoder_write_dword(ctx->cbuf, state->border_color.ui[i]);
+  1119	   return 0;
+  1120	}
+  1121	
+  1122	
+  1123	int virgl_encode_sampler_view(struct virgl_context *ctx,
+  1124	                             uint32_t handle,
+  1125	                             struct virgl_resource *res,
+  1126	                             const struct pipe_sampler_view *state)
+  1127	{
+  1128	   unsigned elem_size = util_format_get_blocksize(state->format);
+  1129	   struct virgl_screen *rs = virgl_screen(ctx->base.screen);
+  1130	   uint32_t tmp;
+  1131	   uint32_t dword_fmt_target = pipe_to_virgl_format(state->format);
+  1132	   virgl_encoder_write_cmd_dword(ctx, VIRGL_CMD0(VIRGL_CCMD_CREATE_OBJECT, VIRGL_OBJECT_SAMPLER_VIEW, VIRGL_OBJ_SAMPLER_VIEW_SIZE));
+  1133	   virgl_encoder_write_dword(ctx->cbuf, handle);
+  1134	   virgl_encoder_write_res(ctx, res);
+  1135	   if (rs->caps.caps.v2.capability_bits & VIRGL_CAP_TEXTURE_VIEW)
+  1136	     dword_fmt_target |= (state->target << 24);
+  1137	   virgl_encoder_write_dword(ctx->cbuf, dword_fmt_target);
+  1138	   if (res->b.target == PIPE_BUFFER) {
+  1139	      virgl_encoder_write_dword(ctx->cbuf, state->u.buf.offset / elem_size);
+  1140	      virgl_encoder_write_dword(ctx->cbuf, (state->u.buf.offset + state->u.buf.size) / elem_size - 1);
+  1141	   } else {
+  1142	      if (res->metadata.plane) {
+  1143	         assert(state->u.tex.first_layer == 0 && state->u.tex.last_layer == 0);
+  1144	         virgl_encoder_write_dword(ctx->cbuf, res->metadata.plane);
+  1145	      } else {
+  1146	         virgl_encoder_write_dword(ctx->cbuf, state->u.tex.first_layer | state->u.tex.last_layer << 16);
+  1147	      }
+  1148	      virgl_encoder_write_dword(ctx->cbuf, state->u.tex.first_level | state->u.tex.last_level << 8);
+  1149	   }
+  1150	   tmp = VIRGL_OBJ_SAMPLER_VIEW_SWIZZLE_R(state->swizzle_r) |
+  1151	      VIRGL_OBJ_SAMPLER_VIEW_SWIZZLE_G(state->swizzle_g) |
+  1152	      VIRGL_OBJ_SAMPLER_VIEW_SWIZZLE_B(state->swizzle_b) |
+  1153	      VIRGL_OBJ_SAMPLER_VIEW_SWIZZLE_A(state->swizzle_a);
+  1154	   virgl_encoder_write_dword(ctx->cbuf, tmp);
+  1155	   return 0;
+  1156	}
+  1157	
+  1158	int virgl_encode_set_sampler_views(struct virgl_context *ctx,
+  1159	                                  enum pipe_shader_type shader_type,
+  1160	                                  uint32_t start_slot,
+  1161	                                  uint32_t num_views,
+  1162	                                  struct virgl_sampler_view **views)
+  1163	{
+  1164	   int i;
+  1165	   virgl_encoder_write_cmd_dword(ctx, VIRGL_CMD0(VIRGL_CCMD_SET_SAMPLER_VIEWS, 0, VIRGL_SET_SAMPLER_VIEWS_SIZE(num_views)));
+  1166	   virgl_encoder_write_dword(ctx->cbuf, virgl_shader_stage_convert(shader_type));
+  1167	   virgl_encoder_write_dword(ctx->cbuf, start_slot);
+  1168	   for (i = 0; i < num_views; i++) {
+  1169	      uint32_t handle = views[i] ? views[i]->handle : 0;
+  1170	      virgl_encoder_write_dword(ctx->cbuf, handle);
+=== src/mesa/state_tracker/st_atom_texture.c ===
+   140	       * Note: the "statically" will be added to the language per
+   141	       *       https://cvs.khronos.org/bugzilla/show_bug.cgi?id=14934
+   142	       *
+   143	       * So we simply ignore the setting entirely for samplers that are
+   144	       * (statically) accessed with a texelFetch function.
+   145	       */
+   146	      sampler_views[unit] =
+   147	         st_update_single_texture(st, prog->SamplerUnits[unit], glsl130,
+   148	                                  texel_fetch_samplers & bit, true);
+   149	   }
+   150	
+   151	   /* For any external samplers with multiplaner YUV, stuff the additional
+   152	    * sampler views we need at the end.
+   153	    *
+   154	    * Trying to cache the sampler view in the texObj looks painful, so just
+   155	    * re-create the sampler view for the extra planes each time.  Main use
+   156	    * case is video playback (ie. fps games wouldn't be using this) so I
+   157	    * guess no point to try to optimize this feature.
+   158	    */
+   159	   while (unlikely(external_samplers_used)) {
+   160	      GLuint unit = u_bit_scan(&external_samplers_used);
+   161	      GLuint extra = 0;
+   162	      struct gl_texture_object *stObj =
+   163	            st_get_texture_object(st->ctx, prog, unit);
+   164	      struct pipe_sampler_view tmpl;
+   165	
+   166	      if (!stObj)
+   167	         continue;
+   168	
+   169	      /* use original view as template: */
+   170	      tmpl = *sampler_views[unit];
+   171	
+   172	      /* if resource format matches then YUV wasn't lowered */
+   173	      if (st_get_view_format(stObj) == stObj->pt->format)
+   174	         continue;
+   175	
+   176	      switch (st_get_view_format(stObj)) {
+   177	      case PIPE_FORMAT_NV12:
+   178	         if (stObj->pt->format == PIPE_FORMAT_R8_G8B8_420_UNORM)
+   179	            /* no additional views needed */
+   180	            break;
+   181	
+   182	         /* we need one additional R8G8 view: */
+   183	         tmpl.format = PIPE_FORMAT_RG88_UNORM;
+   184	         tmpl.swizzle_g = PIPE_SWIZZLE_Y;   /* tmpl from Y plane is R8 */
+   185	         extra = u_bit_scan(&free_slots);
+   186	         sampler_views[extra] =
+   187	               pipe->create_sampler_view(pipe, stObj->pt->next, &tmpl);
+   188	         break;
+   189	      case PIPE_FORMAT_NV21:
+   190	         if (stObj->pt->format == PIPE_FORMAT_R8_B8G8_420_UNORM)
+   191	            /* no additional views needed */
+   192	            break;
+   193	
+   194	         /* we need one additional R8G8 view: */
+   195	         tmpl.format = PIPE_FORMAT_RG88_UNORM;
+   196	         tmpl.swizzle_g = PIPE_SWIZZLE_Y;   /* tmpl from Y plane is R8 */
+   197	         extra = u_bit_scan(&free_slots);
+   198	         sampler_views[extra] =
+   199	               pipe->create_sampler_view(pipe, stObj->pt->next, &tmpl);
+   200	         break;
+   201	      case PIPE_FORMAT_P010:
+   202	      case PIPE_FORMAT_P012:
+   203	      case PIPE_FORMAT_P016:
+   204	      case PIPE_FORMAT_P030:
+   205	         /* we need one additional R16G16 view: */
+   206	         tmpl.format = PIPE_FORMAT_RG1616_UNORM;
+   207	         tmpl.swizzle_g = PIPE_SWIZZLE_Y;   /* tmpl from Y plane is R16 */
+   208	         extra = u_bit_scan(&free_slots);
+   209	         sampler_views[extra] =
+   210	               pipe->create_sampler_view(pipe, stObj->pt->next, &tmpl);
+   211	         break;
+   212	      case PIPE_FORMAT_IYUV:
+   213	         if (stObj->pt->format == PIPE_FORMAT_R8_G8_B8_420_UNORM ||
+   214	             stObj->pt->format == PIPE_FORMAT_R8_B8_G8_420_UNORM)
+   215	            /* no additional views needed */
+   216	            break;
+   217	
+   218	         /* we need two additional R8 views: */
+   219	         tmpl.format = PIPE_FORMAT_R8_UNORM;
+   220	         extra = u_bit_scan(&free_slots);
+   221	         sampler_views[extra] =
+   222	               pipe->create_sampler_view(pipe, stObj->pt->next, &tmpl);
+   223	         extra = u_bit_scan(&free_slots);
+   224	         sampler_views[extra] =
+   225	               pipe->create_sampler_view(pipe, stObj->pt->next->next, &tmpl);
+   226	         break;
+   227	      case PIPE_FORMAT_YUYV:
+   228	      case PIPE_FORMAT_YVYU:
+   229	         if (stObj->pt->format == PIPE_FORMAT_R8G8_R8B8_UNORM ||
+   230	             stObj->pt->format == PIPE_FORMAT_R8B8_R8G8_UNORM)
+   231	            /* no additional views needed */
+   232	            break;
+   233	
+   234	         /* we need one additional BGRA8888 view: */
+   235	         tmpl.format = PIPE_FORMAT_BGRA8888_UNORM;
+   236	         tmpl.swizzle_b = PIPE_SWIZZLE_Z;
+   237	         tmpl.swizzle_a = PIPE_SWIZZLE_W;
+   238	         extra = u_bit_scan(&free_slots);
+   239	         sampler_views[extra] =
+   240	               pipe->create_sampler_view(pipe, stObj->pt->next, &tmpl);
+   241	         break;
+   242	      case PIPE_FORMAT_UYVY:
+   243	      case PIPE_FORMAT_VYUY:
+   244	         if (stObj->pt->format == PIPE_FORMAT_G8R8_B8R8_UNORM ||
+   245	             stObj->pt->format == PIPE_FORMAT_B8R8_G8R8_UNORM)
+   246	            /* no additional views needed */
+   247	            break;
+   248	
+   249	         /* we need one additional RGBA8888 view: */
+   250	         tmpl.format = PIPE_FORMAT_RGBA8888_UNORM;
+=== src/mesa/state_tracker/st_sampler_view.c ===
+   330	{
+   331	   unsigned ret = MIN2(texObj->Attrib.MinLevel + texObj->_MaxLevel,
+   332	                       texObj->pt->last_level);
+   333	   if (texObj->Immutable)
+   334	      ret = MIN2(ret, texObj->Attrib.MinLevel +
+   335	                 texObj->Attrib.NumLevels - 1);
+   336	   return ret;
+   337	}
+   338	
+   339	
+   340	static unsigned
+   341	last_layer(const struct gl_texture_object *texObj)
+   342	{
+   343	   if (texObj->Immutable && texObj->pt->array_size > 1)
+   344	      return MIN2(texObj->Attrib.MinLayer +
+   345	                  texObj->Attrib.NumLayers - 1,
+   346	                  texObj->pt->array_size - 1);
+   347	   return texObj->pt->array_size - 1;
+   348	}
+   349	
+   350	
+   351	/**
+   352	 * Determine the format for the texture sampler view.
+   353	 */
+   354	enum pipe_format
+   355	st_get_sampler_view_format(const struct st_context *st,
+   356	                           const struct gl_texture_object *texObj,
+   357	                           bool srgb_skip_decode)
+   358	{
+   359	   enum pipe_format format;
+   360	
+   361	   GLenum baseFormat = _mesa_base_tex_image(texObj)->_BaseFormat;
+   362	   format = texObj->surface_based ? texObj->surface_format : texObj->pt->format;
+   363	
+   364	   /* From OpenGL 4.3 spec, "Combined Depth/Stencil Textures":
+   365	    *
+=== src/mesa/state_tracker/st_sampler_view.c ===
+   460	      return PIPE_ASTC_DECODE_FORMAT_UNORM8;
+   461	   case GL_RGB9_E5:
+   462	      return PIPE_ASTC_DECODE_FORMAT_RGB9E5;
+   463	   case GL_RGBA16F:
+   464	   default:
+   465	      return PIPE_ASTC_DECODE_FORMAT_FLOAT16;
+   466	   }
+   467	}
+   468	
+   469	static struct pipe_sampler_view *
+   470	st_create_texture_sampler_view_from_stobj(struct st_context *st,
+   471	                                          struct gl_texture_object *texObj,
+   472	                                          enum pipe_format format,
+   473	                                          bool glsl130_or_later)
+   474	{
+   475	   /* There is no need to clear this structure (consider CPU overhead). */
+   476	   struct pipe_sampler_view templ;
+   477	   unsigned swizzle = glsl130_or_later ? texObj->SwizzleGLSL130 : texObj->Swizzle;
+   478	
+   479	   templ.format = format;
+   480	   templ.is_tex2d_from_buf = false;
+   481	
+   482	   if (texObj->level_override >= 0) {
+   483	      templ.u.tex.first_level = templ.u.tex.last_level = texObj->level_override;
+   484	   } else {
+   485	      templ.u.tex.first_level = texObj->Attrib.MinLevel +
+   486	                                texObj->Attrib.BaseLevel;
+   487	      templ.u.tex.last_level = last_level(texObj);
+   488	   }
+   489	   if (texObj->layer_override >= 0) {
+   490	      templ.u.tex.first_layer = templ.u.tex.last_layer = texObj->layer_override;
+   491	   } else {
+   492	      templ.u.tex.first_layer = texObj->Attrib.MinLayer;
+   493	      templ.u.tex.last_layer = last_layer(texObj);
+   494	   }
+   495	   assert(templ.u.tex.first_layer <= templ.u.tex.last_layer);
+   496	   assert(templ.u.tex.first_level <= templ.u.tex.last_level);
+   497	   templ.target = gl_target_to_pipe(texObj->Target);
+   498	
+   499	   templ.swizzle_r = GET_SWZ(swizzle, 0);
+   500	   templ.swizzle_g = GET_SWZ(swizzle, 1);
+   501	   templ.swizzle_b = GET_SWZ(swizzle, 2);
+   502	   templ.swizzle_a = GET_SWZ(swizzle, 3);
+   503	
+   504	   templ.astc_decode_format =
+   505	      gl_astc_decode_precision_to_pipe(texObj->AstcDecodePrecision);
+   506	
+   507	   return st->pipe->create_sampler_view(st->pipe, texObj->pt, &templ);
+   508	}
+   509	
+   510	struct pipe_sampler_view *
+   875				if (close_ret)
+   876					drv_loge("DRM_IOCTL_GEM_CLOSE failed (handle=%x) error %d\n",
+   877						 handle, close_ret);
+   878	
+   879				if (info_ret) {
+   880					pthread_mutex_unlock(&priv->host_blob_format_lock);
+   881					drv_loge("Getting resource info failed with %s\n", strerror(errno));
+   882					return info_ret;
+   883				}
+   884	
+   885				entry = calloc(1, sizeof(*entry));
+   886				entry->meta = *meta;
+   887	
+   888				for (int i = 0; i < num_planes; i++) {
+   889					entry->meta.strides[i] = info.strides[i];
+   890					entry->meta.sizes[i] =
+   891					    info.strides[i] *
+   892					    drv_height_from_format(meta->format, meta->height, i);
+   893					entry->meta.offsets[i] = info.offsets[i];
+   894				}
+   895				entry->meta.total_size =
+   896				    entry->meta.offsets[num_planes - 1] + entry->meta.sizes[num_planes - 1];
+   897				entry->meta.format_modifier = info.format_modifier;
+   898	
+   899				lru_insert(&priv->virgl_blob_metadata_cache, &entry->entry);
+   900			}
+   901	
+   902			memcpy(meta->offsets, entry->meta.offsets, sizeof(meta->offsets));
+   903			memcpy(meta->sizes, entry->meta.sizes, sizeof(meta->sizes));
+   904			memcpy(meta->strides, entry->meta.strides, sizeof(meta->strides));
+   905			meta->total_size = entry->meta.total_size;
+   906			meta->format_modifier = entry->meta.format_modifier;
+   907		}
+   908		pthread_mutex_unlock(&priv->host_blob_format_lock);
+   909	
+   910		meta->total_size = ALIGN(meta->total_size, PAGE_SIZE);
+   911		meta->tiling = blob_flags_from_use_flags(meta->use_flags);
+   912	
+   913		return 0;
+   914	}
+   915	
+   916	static int virgl_bo_create_blob(struct driver *drv, struct bo *bo)
+   917	{
+   918		int ret;
+   919		uint32_t virgl_format = translate_format(bo->meta.format);
+   920		uint32_t bo_handle;
+   921	
+   922		virgl_blob_get_host_format(drv, &bo->meta);
+   923		ret = virgl_blob_do_create(drv, bo->meta.width, bo->meta.height, bo->meta.use_flags,
+   924					   virgl_format, bo->meta.total_size, &bo_handle);
+   925		if (ret)
+   926			return ret;
+   927	
+   928		bo->handle.u32 = bo_handle;
+   929	
+   930		return 0;
+   931	}
+   932	
+   933	static bool should_use_blob(struct driver *drv, uint32_t format, uint64_t use_flags)
+   934	{
+   935		struct virgl_priv *priv = (struct virgl_priv *)drv->priv;
+   936	
+   937		// TODO(gurchetansingh): remove once all minigbm users are blob-safe
+   938	#ifndef VIRTIO_GPU_NEXT
+   939		return false;
+   940	#endif
+   941	
+   942		// Only use blob when host gbm is available
+   943		if (!priv->host_gbm_enabled)
+   944			return false;
+   945	
+   946		// Use regular resources if only the GPU needs efficient access. Blob resource is a better
+   947		// fit for BO_USE_GPU_DATA_BUFFER which is mapped to VIRGL_BIND_LINEAR.
+   948		if (!(use_flags & (BO_USE_SW_READ_OFTEN | BO_USE_SW_WRITE_OFTEN | BO_USE_LINEAR |
+   949				   BO_USE_NON_GPU_HW | BO_USE_GPU_DATA_BUFFER)))
+   950			return false;
+   951	
+   952		switch (format) {
+   953		case DRM_FORMAT_R8:
+   954			// Formats with strictly defined strides are supported
+   955			return true;
+   956		case DRM_FORMAT_ABGR8888:
+   957			// Formats used with frequent software reads are supported as long as they
+   958			// will not be used by non-GPU hardware.
+   959			return (use_flags & BO_USE_SW_READ_OFTEN) && !(use_flags & BO_USE_NON_GPU_HW);
+   960		case DRM_FORMAT_YVU420_ANDROID:
+   961		case DRM_FORMAT_NV12:
+   962			// Zero copy buffers are exposed for guest software access via a persistent
+   963			// mapping, with no flush/invalidate messages. However, the virtio-video
+   964			// device relies transfers to/from the host waiting on implicit fences in
+   965			// the host kernel to synchronize with hardware output. As such, we can only
+   966			// use zero copy if the guest doesn't need software access.
+   967			return (use_flags & BO_USE_SW_MASK) == 0;
+   968		default:
+   969			return false;
+   970		}
+   971	}
+   972	
+   973	static int virgl_bo_create(struct bo *bo, uint32_t width, uint32_t height, uint32_t format,
+   974				   uint64_t use_flags)
+   975	{
+   976		if (params[param_resource_blob].value && params[param_host_visible].value &&
+   977		    should_use_blob(bo->drv, format, use_flags))
+   978			return virgl_bo_create_blob(bo->drv, bo);
+   979	
+   980		if (params[param_3d].value)
+   981			return virgl_3d_bo_create(bo, width, height, format, use_flags);
+   982		else
+   983			return virgl_2d_dumb_bo_create(bo, width, height, format, use_flags);
+   984	}
+   985	
+   986	static int virgl_bo_create_with_modifiers(struct bo *bo, uint32_t width, uint32_t height,
+   987						  uint32_t format, const uint64_t *modifiers,
+   988						  uint32_t count)
+   989	{
+   990		uint64_t use_flags = 0;
+   991	
+   992		for (uint32_t i = 0; i < count; i++) {
+   993			if (modifiers[i] == DRM_FORMAT_MOD_LINEAR) {
+   994				return virgl_bo_create(bo, width, height, format, use_flags);
+   995			}

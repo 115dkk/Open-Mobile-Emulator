@@ -1,0 +1,248 @@
+=== src/gallium/drivers/virgl/virgl_screen.c ===
+    30	#include "util/os_time.h"
+    31	#include "util/xmlconfig.h"
+    32	#include "pipe/p_defines.h"
+    33	#include "pipe/p_screen.h"
+    34	#include "nir/nir_to_tgsi.h"
+    35	#include "vl/vl_decoder.h"
+    36	#include "vl/vl_video_buffer.h"
+    37	
+    38	#include "virgl_screen.h"
+    39	#include "virgl_resource.h"
+    40	#include "virgl_public.h"
+    41	#include "virgl_context.h"
+    42	#include "virgl_encode.h"
+    43	
+    44	int virgl_debug = 0;
+    45	const struct debug_named_value virgl_debug_options[] = {
+    46	   { "verbose",         VIRGL_DEBUG_VERBOSE,                 NULL },
+    47	   { "tgsi",            VIRGL_DEBUG_TGSI,                    NULL },
+    48	   { "noemubgra",       VIRGL_DEBUG_NO_EMULATE_BGRA,         "Disable tweak to emulate BGRA as RGBA on GLES hosts" },
+    49	   { "nobgraswz",       VIRGL_DEBUG_NO_BGRA_DEST_SWIZZLE,    "Disable tweak to swizzle emulated BGRA on GLES hosts" },
+    50	   { "sync",            VIRGL_DEBUG_SYNC,                    "Sync after every flush" },
+    51	   { "xfer",            VIRGL_DEBUG_XFER,                    "Do not optimize for transfers" },
+    52	   { "r8srgb-readback", VIRGL_DEBUG_L8_SRGB_ENABLE_READBACK, "Enable redaback for L8 sRGB textures" },
+    53	   { "nocoherent",      VIRGL_DEBUG_NO_COHERENT,             "Disable coherent memory" },
+    54	   { "video",           VIRGL_DEBUG_VIDEO,                   "Video codec" },
+    55	   { "shader_sync",     VIRGL_DEBUG_SHADER_SYNC,             "Sync after every shader link" },
+    56	   DEBUG_NAMED_VALUE_END
+    57	};
+    58	DEBUG_GET_ONCE_FLAGS_OPTION(virgl_debug, "VIRGL_DEBUG", virgl_debug_options, 0)
+    59	
+    60	static const char *
+    61	virgl_get_vendor(struct pipe_screen *screen)
+    62	{
+    63	   return "Mesa";
+    64	}
+    65	
+    66	
+    67	static const char *
+    68	virgl_get_name(struct pipe_screen *screen)
+    69	{
+    70	   struct virgl_screen *vscreen = virgl_screen(screen);
+    71	   if (vscreen->caps.caps.v2.host_feature_check_version >= 5)
+    72	      return vscreen->caps.caps.v2.renderer;
+    73	
+    74	   return "virgl";
+    75	}
+    76	
+    77	static int
+    78	virgl_get_param(struct pipe_screen *screen, enum pipe_cap param)
+    79	{
+    80	   struct virgl_screen *vscreen = virgl_screen(screen);
+    81	   switch (param) {
+    82	   case PIPE_CAP_NPOT_TEXTURES:
+=== src/gallium/drivers/virgl/virgl_screen.c ===
+=== src/virtio/vulkan/vn_renderer_virtgpu.c ===
+  1540	   /* implied by CONTEXT_INIT uapi */
+  1541	   gpu->max_timeline_count = 64;
+  1542	
+  1543	   return VK_SUCCESS;
+  1544	}
+  1545	
+  1546	static VkResult
+  1547	virtgpu_open_device(struct virtgpu *gpu, const drmDevicePtr dev)
+  1548	{
+  1549	   bool supported_bus = false;
+  1550	
+  1551	   switch (dev->bustype) {
+  1552	   case DRM_BUS_PCI:
+  1553	      if (dev->deviceinfo.pci->vendor_id == VIRTGPU_PCI_VENDOR_ID &&
+  1554	          dev->deviceinfo.pci->device_id == VIRTGPU_PCI_DEVICE_ID)
+  1555	         supported_bus = true;
+  1556	      break;
+  1557	   case DRM_BUS_PLATFORM:
+  1558	      supported_bus = true;
+  1559	      break;
+  1560	   default:
+  1561	      break;
+  1562	   }
+  1563	
+  1564	   if (!supported_bus || !(dev->available_nodes & (1 << DRM_NODE_RENDER))) {
+  1565	      if (VN_DEBUG(INIT)) {
+  1566	         const char *name = "unknown";
+  1567	         for (uint32_t i = 0; i < DRM_NODE_MAX; i++) {
+  1568	            if (dev->available_nodes & (1 << i)) {
+  1569	               name = dev->nodes[i];
+  1570	               break;
+  1571	            }
+  1572	         }
+  1573	         vn_log(gpu->instance, "skipping DRM device %s", name);
+  1574	      }
+  1575	      return VK_ERROR_INITIALIZATION_FAILED;
+  1576	   }
+  1577	
+  1578	   const char *primary_path = dev->nodes[DRM_NODE_PRIMARY];
+  1579	   const char *node_path = dev->nodes[DRM_NODE_RENDER];
+  1580	
+  1581	   int fd = open(node_path, O_RDWR | O_CLOEXEC);
+  1582	   if (fd < 0) {
+  1583	      if (VN_DEBUG(INIT))
+  1584	         vn_log(gpu->instance, "failed to open %s", node_path);
+  1585	      return VK_ERROR_INITIALIZATION_FAILED;
+  1586	   }
+  1587	
+  1588	   drmVersionPtr version = drmGetVersion(fd);
+  1589	   if (!version || strcmp(version->name, "virtio_gpu") ||
+  1590	       version->version_major != 0) {
+  1591	      if (VN_DEBUG(INIT)) {
+  1592	         if (version) {
+  1593	            vn_log(gpu->instance, "unknown DRM driver %s version %d",
+  1594	                   version->name, version->version_major);
+  1595	         } else {
+  1596	            vn_log(gpu->instance, "failed to get DRM driver version");
+  1597	         }
+  1598	      }
+  1599	      if (version)
+  1600	         drmFreeVersion(version);
+  1601	      close(fd);
+  1602	      return VK_ERROR_INITIALIZATION_FAILED;
+  1603	   }
+  1604	
+  1605	   gpu->fd = fd;
+  1606	
+  1607	   struct stat st;
+  1608	   if (stat(primary_path, &st) == 0) {
+  1609	      gpu->has_primary = true;
+  1610	      gpu->primary_major = major(st.st_rdev);
+  1611	      gpu->primary_minor = minor(st.st_rdev);
+  1612	   } else {
+  1613	      gpu->has_primary = false;
+  1614	      gpu->primary_major = 0;
+  1615	      gpu->primary_minor = 0;
+  1616	   }
+  1617	   stat(node_path, &st);
+  1618	   gpu->render_major = major(st.st_rdev);
+  1619	   gpu->render_minor = minor(st.st_rdev);
+  1620	
+  1621	   gpu->bustype = dev->bustype;
+  1622	   if (dev->bustype == DRM_BUS_PCI)
+  1623	      gpu->pci_bus_info = *dev->businfo.pci;
+  1624	
+  1625	   drmFreeVersion(version);
+  1626	
+  1627	   if (VN_DEBUG(INIT))
+  1628	      vn_log(gpu->instance, "using DRM device %s", node_path);
+  1629	
+  1630	   return VK_SUCCESS;
+  1631	}
+  1632	
+  1633	static VkResult
+  1634	virtgpu_open(struct virtgpu *gpu)
+  1635	{
+  1636	   drmDevicePtr devs[8];
+  1637	   int count = drmGetDevices2(0, devs, ARRAY_SIZE(devs));
+  1638	   if (count < 0) {
+  1639	      if (VN_DEBUG(INIT))
+  1640	         vn_log(gpu->instance, "failed to enumerate DRM devices");
+  1641	      return VK_ERROR_INITIALIZATION_FAILED;
+  1642	   }
+  1643	
+  1644	   VkResult result = VK_ERROR_INITIALIZATION_FAILED;
+  1645	   for (int i = 0; i < count; i++) {
+  1646	      result = virtgpu_open_device(gpu, devs[i]);
+  1647	      if (result == VK_SUCCESS)
+  1648	         break;
+  1649	   }
+  1650	
+=== src/gallium/drivers/virgl/virgl_resource.c ===
+   710	static struct pipe_resource *virgl_resource_from_handle(struct pipe_screen *screen,
+   711	                                                        const struct pipe_resource *templ,
+   712	                                                        struct winsys_handle *whandle,
+   713	                                                        unsigned usage)
+   714	{
+   715	   uint32_t winsys_stride, plane_offset, plane;
+   716	   uint64_t modifier;
+   717	   uint32_t storage_size;
+   718	
+   719	   struct virgl_screen *vs = virgl_screen(screen);
+   720	   if (templ && templ->target == PIPE_BUFFER)
+   721	      return NULL;
+   722	
+   723	   struct virgl_resource *res = CALLOC_STRUCT(virgl_resource);
+   724	   if (templ)
+   725	      res->b = *templ;
+   726	   res->b.screen = &vs->base;
+   727	   pipe_reference_init(&res->b.reference, 1);
+   728	
+   729	   plane = winsys_stride = plane_offset = modifier = 0;
+   730	   res->hw_res = vs->vws->resource_create_from_handle(vs->vws, whandle,
+   731	                                                      &res->b,
+   732	                                                      &plane,
+   733	                                                      &winsys_stride,
+   734	                                                      &plane_offset,
+   735	                                                      &modifier,
+   736	                                                      &res->blob_mem);
+   737	
+   738	   if (!res->hw_res) {
+   739	      FREE(res);
+   740	      return NULL;
+   741	   }
+   742	
+   743	   /* do not use winsys returns for guest storage info of classic resource */
+   744	   if (!res->blob_mem) {
+   745	      winsys_stride = 0;
+   746	      plane_offset = 0;
+   747	      modifier = 0;
+   748	   }
+   749	
+   750	   virgl_resource_layout(&res->b, &res->metadata, plane, winsys_stride,
+   751	                         plane_offset, modifier);
+   752	
+   753	   /*
+   754	   *  If the overall resource is larger than a single page in size, we can
+   755	   *  compare it with the amount of memory allocated on the guest to determine
+   756	   *  if we should be using the staging path.
+   757	   *
+   758	   *  If not, the decision is not as clear. However, since the resource can
+   759	   *  fit within a single page, the import will function correctly.
+   760	   */
+
+VKJSON CLI
+35:#include <vkjson.h>
+49:void dumpGameDriverInfo(std::string* result);
+160:        if (args[0] == String16("vkjson")) return cmdVkjson(out, err);
+177:        StringAppendF(&result, "Permission Denial: can't dump gpu from pid=%d, uid=%d\n", pid, uid);
+179:        bool dumpAll = true;
+180:        bool dumpDriverInfo = false;
+181:        bool dumpMem = false;
+182:        bool dumpStats = false;
+183:        bool dumpWork = false;
+189:                    dumpStats = true;
+191:                    dumpDriverInfo = true;
+193:                    dumpMem = true;
+195:                    dumpWork = true;
+198:            dumpAll = !(dumpDriverInfo || dumpMem || dumpStats || dumpWork);
+201:        if (dumpAll || dumpDriverInfo) {
+202:            dumpGameDriverInfo(&result);
+205:        if (dumpAll || dumpMem) {
+206:            mGpuMem->dump(args, &result);
+209:        if (dumpAll || dumpStats) {
+210:            mGpuStats->dump(args, &result);
+213:         if (dumpAll || dumpWork) {
+214:            mGpuWork->dump(args, &result);
+233:            "  vkjson      dump Vulkan properties as JSON\n"
+249:void dumpGameDriverInfo(std::string* result) {
+
+VIRGL CAPS DUMP
+46:   { "verbose",         VIRGL_DEBUG_VERBOSE,                 NULL },
