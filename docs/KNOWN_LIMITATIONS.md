@@ -1,6 +1,6 @@
 # Known limitations
 
-Final for release 0.1.3 (2026-10-03). Items are added as they are found and removed
+Final for release 0.1.4 (2026-10-05). Items are added as they are found and removed
 only when a release fixes them.
 
 - The release is not code-signed (CLAUDE.md section 8 item 3: no certificate until a
@@ -13,7 +13,7 @@ only when a release fixes them.
   There is no all-users option. Uninstalling removes the program folder and leaves
   the data folder `%LOCALAPPDATA%\OpenMobileEmulator` (guest disks, logs,
   settings) in place.
-- 0.1.0 to 0.1.3 are pre-releases. The product's update check reads GitHub's `latest`
+- 0.1.0 to 0.1.4 are pre-releases. The product's update check reads GitHub's `latest`
   release, which never points at a pre-release, so no update is offered between
   pre-releases; the first regular release will be.
 - Security software that controls outbound connections per program (seen with

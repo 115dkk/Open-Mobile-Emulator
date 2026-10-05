@@ -8,7 +8,7 @@ guest, and a thin Windows front end.
 **Status:** pre-release. M0 (translation check), M1 (Windows execution path) and
 M2 (product shell: the first-run wizard installs the guest unattended and reaches
 the game) are done, and M3 (release) published the first pre-release, v0.1.0, on
-2026-10-01, followed by v0.1.1 on 2026-10-02 and v0.1.2 and v0.1.3 on 2026-10-03.
+2026-10-01, followed by v0.1.1 on 2026-10-02 and v0.1.2 and v0.1.3 on 2026-10-03, and v0.1.4 on 2026-10-05.
 Releases are built only on GitHub Actions and every file carries a build
 provenance attestation (`docs/adr/0007-release-build-provenance.md`, evidence in
 `docs/evidence/M3/release.md`).

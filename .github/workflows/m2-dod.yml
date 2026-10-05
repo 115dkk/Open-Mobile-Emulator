@@ -118,7 +118,7 @@ jobs:
         run: |
           $destination = Join-Path $env:RUNNER_TEMP 'ome-qemu-release'
           New-Item -ItemType Directory -Path $destination -Force | Out-Null
-          gh release download qemu-v11.1.1-ome5 --pattern '*.zip' --dir $destination
+          gh release download qemu-v11.1.1-ome6 --pattern '*.zip' --dir $destination
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           $archive = Join-Path $destination 'qemu-ome-v11.1.1-c3d48b7d1e89-win64.zip'
           $expected = '3ff59ee8d3a00a52b046b8665c1bf7a1ab0a8056f9b87e78c7a01beb704cbdf3'

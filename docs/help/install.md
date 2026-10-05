@@ -27,13 +27,13 @@ Open Mobile Emulator는 GitHub Releases에서 설치기 하나로 받습니다. 
 PowerShell에서 다음을 실행해 나온 값이 `.sha256` 파일의 값과 같아야 합니다.
 
 ```powershell
-Get-FileHash .\Open-Mobile-Emulator-0.1.3-x64-setup.exe -Algorithm SHA256
+Get-FileHash .\Open-Mobile-Emulator-0.1.4-x64-setup.exe -Algorithm SHA256
 ```
 
 명령 프롬프트라면 다음과 같이 합니다.
 
 ```
-certutil -hashfile Open-Mobile-Emulator-0.1.3-x64-setup.exe SHA256
+certutil -hashfile Open-Mobile-Emulator-0.1.4-x64-setup.exe SHA256
 ```
 
 ### 빌드 출처 증명 확인
@@ -43,7 +43,7 @@ certutil -hashfile Open-Mobile-Emulator-0.1.3-x64-setup.exe SHA256
 누구나 그 파일이 이 저장소의 어느 커밋과 워크플로에서 나왔는지 확인할 수 있습니다.
 
 ```
-gh attestation verify Open-Mobile-Emulator-0.1.3-x64-setup.exe --repo 115dkk/Open-Mobile-Emulator
+gh attestation verify Open-Mobile-Emulator-0.1.4-x64-setup.exe --repo 115dkk/Open-Mobile-Emulator
 ```
 
 설치기 안의 QEMU는 별도의 워크플로가 빌드한 것이며, 같은 릴리스에 올라간 `qemu-ome-*-win64.zip`과 소스

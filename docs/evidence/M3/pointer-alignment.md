@@ -62,4 +62,17 @@ y 40~760에 그려진다. 그래서 QEMU의 변환이 맞아도 세로로 최대
 
 ## 5. 수정 뒤 측정
 
-(QEMU 릴리스 ome6과 수정한 제품으로 같은 스크립트를 돌린 결과를 여기에 적는다.)
+러너가 빌드한 `qemu-v11.1.1-ome6`(실행 37294107725, 커밋 a2ab1f2, SHA-256과 출처 증명 확인)을 설치본의 `qemu`에, 같은 커밋에서
+로컬로 빌드한 `ome.exe`를 설치본에 바꿔 넣고(이전 파일은 `qemu.ome5.bak`, `ome.exe.v0.1.3.bak`) 게스트를 다시 시작했다.
+그 사이 사용자가 표시 설정을 2560x1440으로 바꿔 두었다.
+
+- QEMU 인자: `-device virtio-vga-gl,edid=off,xres=2560,yres=1440`.
+- `wm size`: `Physical size: 2560x1440`, 덮어쓰기 없음.
+- `dumpsys input`: `logicalFrame=[0, 0, 2560, 1440], physicalFrame=[0, 0, 2560, 1440], deviceSize=[2560, 1440]`.
+  물리 화면과 논리 화면이 같아 띠가 없다.
+- 사용자가 같은 설치본을 직접 써 보고 포인터가 커서 자리에 온다고 확인했다(2026-10-05, "문제 해결되었습니다").
+
+`probe.ps1`을 다시 돌린 결과는 일곱 점 모두 `32741,4141`로 움직이지 않았다. 그때 무대 가운데의 창을
+`WindowFromPoint`로 보니 Claude 데스크톱 앱(`Claude.exe`)의 `Chrome_RenderWidgetHostHWND`가 무대 위에 있어,
+`SetCursorPos`의 마우스 이동이 SDL 창에 가지 않았다. 사용자가 원격으로 이 PC를 보던 창이다. 그래서 수정 뒤의 좌표표는
+사용자의 확인으로 대신한다.

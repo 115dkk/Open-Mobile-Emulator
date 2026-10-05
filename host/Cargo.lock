@@ -2341,7 +2341,7 @@ dependencies = [
 
 [[package]]
 name = "ome-adb"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "serde",
  "tempfile",
@@ -2351,7 +2351,7 @@ dependencies = [
 
 [[package]]
 name = "ome-app"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "arboard",
  "ome-adb",
@@ -2372,7 +2372,7 @@ dependencies = [
 
 [[package]]
 name = "ome-artifacts"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "serde",
  "serde_json",
@@ -2384,7 +2384,7 @@ dependencies = [
 
 [[package]]
 name = "ome-diagnostics"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "tempfile",
  "thiserror 2.0.21",
@@ -2393,7 +2393,7 @@ dependencies = [
 
 [[package]]
 name = "ome-guest-config"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "serde",
  "serde_json",
@@ -2402,7 +2402,7 @@ dependencies = [
 
 [[package]]
 name = "ome-guest-image"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "serde",
  "serde_json",
@@ -2412,7 +2412,7 @@ dependencies = [
 
 [[package]]
 name = "ome-guest-install"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "serde",
  "thiserror 2.0.21",
@@ -2420,7 +2420,7 @@ dependencies = [
 
 [[package]]
 name = "ome-host-check"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "ome-platform-win",
  "serde",
@@ -2429,7 +2429,7 @@ dependencies = [
 
 [[package]]
 name = "ome-input"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "serde",
  "serde_json",
@@ -2438,7 +2438,7 @@ dependencies = [
 
 [[package]]
 name = "ome-overlay"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "ome-runtime",
  "serde_json",
@@ -2446,7 +2446,7 @@ dependencies = [
 
 [[package]]
 name = "ome-platform-win"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "thiserror 2.0.21",
  "windows 0.62.2",
@@ -2454,7 +2454,7 @@ dependencies = [
 
 [[package]]
 name = "ome-qmp"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "serde",
  "serde_json",
@@ -2463,7 +2463,7 @@ dependencies = [
 
 [[package]]
 name = "ome-runtime"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "jiff",
  "ome-adb",
@@ -2490,14 +2490,14 @@ dependencies = [
 
 [[package]]
 name = "ome-setup"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "thiserror 2.0.21",
 ]
 
 [[package]]
 name = "ome-supervisor"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "ome-guest-config",
  "ome-platform-win",
@@ -2509,7 +2509,7 @@ dependencies = [
 
 [[package]]
 name = "ome-window-host"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "ome-platform-win",
  "ome-qmp",
@@ -2519,7 +2519,7 @@ dependencies = [
 
 [[package]]
 name = "ome-wizard"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "serde",
  "thiserror 2.0.21",
