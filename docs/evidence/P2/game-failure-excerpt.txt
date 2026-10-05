@@ -1,0 +1,16 @@
+10-05 13:30:40.702  4082  4082 W nativebridge: Failed to bind-mount /system/etc/cpuinfo.arm64.txt as /proc/cpuinfo: No such file or directory
+10-05 13:30:40.702  4082  4082 W nativebridge: Failed to bind-mount /system/lib64/arm64/cpuinfo as /proc/cpuinfo: No such file or directory
+10-05 13:30:40.790  4082  4082 I berberis: Initialized Berberis (aarch64)
+10-05 13:30:40.881  4082  4082 D berberis: loadLibraryExt: path=/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libATG_D.so ns=0x7a9564ffc200(guest=0x7a9708d24010)
+10-05 13:30:40.883  4082  4082 D berberis: berberis: DlOpen ENTER libpath="/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libATG_D.so" flags=0x2
+10-05 13:30:40.958  4082  4082 D berberis: berberis: DlOpen EXIT  74ms set=9 clear=188 libpath="/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libATG_D.so" handle=0xb6cdcb4e44070917
+10-05 13:30:40.958  4082  4082 D nativeloader: Load /data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libATG_D.so using ns clns-7 from class loader (caller=/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/base.apk!classes2.dex): ok
+10-05 13:30:40.959  4082  4082 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7a94730ed379 host_rsp=0x7ffccc5eccf0 host_rbp=0x7ffccc5ecd70
+10-05 13:30:40.959  4082  4082 E libsigchain: reverting to SIG_DFL handler for signal 11, ucontext 0x7a973f16cac0
+10-05 13:30:40.969  4082  4082 E libsigchain:   #00 pc 0000670b  /apex/com.android.art/lib64/libsigchain.so (LogStack()+251) (BuildId: f870589318bf22846eff3fd164913171)
+10-05 13:30:40.969  4082  4082 E libsigchain:   #01 pc 00006cdb  /apex/com.android.art/lib64/libsigchain.so (art::SignalChain::Handler(int, siginfo*, void*)+427) (BuildId: f870589318bf22846eff3fd164913171)
+10-05 13:30:40.969  4082  4082 E libsigchain:   #02 pc 0007e980  /apex/com.android.runtime/lib64/bionic/libc.so (__restore_rt+0) (BuildId: dc95ece8612debfa076e3f9022a7aa37)
+10-05 13:30:40.969  4082  4082 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:30:40.969  4082  4082 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:30:40.969  4082  4082 E libsigchain:   #05 pc 002e0bee  /memfd:exec (deleted) (+0) (BuildId: )
+10-05 13:30:40.978  2013  2013 I Zygote  : Process 4082 exited due to signal 11 (Segmentation fault)

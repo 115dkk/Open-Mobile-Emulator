@@ -1,0 +1,8 @@
+ACTIVITY MANAGER PROCESS EXIT INFO (dumpsys activity exit-info)
+Last Timestamp of Persistence Into Persistent Storage: 1970-01-01 00:00:00.000
+  package: com.epidgames.trickcalrevive
+    Historical Process Exit for uid=10299
+        ApplicationExitInfo #0:
+          timestamp=2026-10-05 13:30:41.010 pid=4082 realUid=10299 packageUid=10299 definingUid=10299 user=0
+          process=com.epidgames.trickcalrevive reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=11
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null

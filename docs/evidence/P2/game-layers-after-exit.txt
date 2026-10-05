@@ -1,0 +1,95 @@
+RequestedLayerState{StatusBar#91 parentId=85}
+RequestedLayerState{7d292d4 ActivityRecordInputSink com.android.launcher3/.uioverrides.QuickstepLauncher#125 parentId=95 z=-2147483648}
+RequestedLayerState{WindowedMagnification:0:31#3 parentId=43}
+RequestedLayerState{HideDisplayCutout:0:14#4 parentId=3}
+RequestedLayerState{OneHanded:0:14#5 parentId=4}
+RequestedLayerState{FullscreenMagnification:0:12#6 parentId=5}
+RequestedLayerState{Leaf:0:1#7 parentId=6}
+RequestedLayerState{DefaultTaskDisplayArea#8 parentId=6 z=1}
+RequestedLayerState{Leaf:3:12#9 parentId=6 z=2}
+RequestedLayerState{ImePlaceholder:13:14#10 parentId=5 z=1}
+RequestedLayerState{ImeContainer#11 parentId=95 relativeParentId=116 z=1}
+RequestedLayerState{OneHanded:15:15#12 parentId=3 z=1}
+RequestedLayerState{FullscreenMagnification:15:15#13 parentId=12}
+RequestedLayerState{Leaf:15:15#14 parentId=13}
+RequestedLayerState{HideDisplayCutout:16:16#15 parentId=3 z=2}
+RequestedLayerState{OneHanded:16:16#16 parentId=15}
+RequestedLayerState{FullscreenMagnification:16:16#17 parentId=16}
+RequestedLayerState{Leaf:16:16#18 parentId=17}
+RequestedLayerState{OneHanded:17:17#19 parentId=3 z=3}
+RequestedLayerState{FullscreenMagnification:17:17#20 parentId=19}
+RequestedLayerState{Leaf:17:17#21 parentId=20}
+RequestedLayerState{HideDisplayCutout:18:23#22 parentId=3 z=4}
+RequestedLayerState{OneHanded:18:23#23 parentId=22}
+RequestedLayerState{FullscreenMagnification:18:23#24 parentId=23}
+RequestedLayerState{Leaf:18:23#25 parentId=24}
+RequestedLayerState{Leaf:24:25#26 parentId=3 z=5}
+RequestedLayerState{HideDisplayCutout:26:31#27 parentId=3 z=6}
+RequestedLayerState{OneHanded:26:31#28 parentId=27}
+RequestedLayerState{FullscreenMagnification:26:27#29 parentId=28}
+RequestedLayerState{Leaf:26:27#30 parentId=29}
+RequestedLayerState{Leaf:28:28#31 parentId=28 z=1}
+RequestedLayerState{FullscreenMagnification:29:31#32 parentId=28 z=2}
+RequestedLayerState{Leaf:29:31#33 parentId=32}
+RequestedLayerState{HideDisplayCutout:32:35#34 parentId=43 z=1}
+RequestedLayerState{OneHanded:32:32#35 parentId=34}
+RequestedLayerState{Leaf:32:32#36 parentId=35}
+RequestedLayerState{FullscreenMagnification:33:33#37 parentId=34 z=1}
+RequestedLayerState{Leaf:33:33#38 parentId=37}
+RequestedLayerState{OneHanded:34:35#39 parentId=34 z=2}
+RequestedLayerState{FullscreenMagnification:34:35#40 parentId=39}
+RequestedLayerState{Leaf:34:35#41 parentId=40}
+RequestedLayerState{Leaf:36:36#42 parentId=43 z=2}
+RequestedLayerState{Display 0 name="Built-in Screen"#43}
+RequestedLayerState{Display Overlays#44 parentId=43 z=2147483647}
+RequestedLayerState{Input Overlays#45 parentId=43 z=2147483646}
+RequestedLayerState{Accessibility Overlays#46 parentId=43 z=2147483645}
+RequestedLayerState{Task=1#47 parentId=8}
+RequestedLayerState{Sprite#48 parentId=44 z=351000}
+RequestedLayerState{[BBQ] Sprite#48#49 parentId=48}
+RequestedLayerState{home_task_overlay_container#50 parentId=47 z=2147483647}
+RequestedLayerState{[Gesture Monitor] onehanded-touch#51 parentId=45 z=1}
+RequestedLayerState{Wallpaper BBQ wrapper#74 parentId=73}
+RequestedLayerState{com.android.systemui.wallpapers.ImageWallpaper#73 parentId=72}
+RequestedLayerState{Task=3#54 parentId=8 z=1}
+RequestedLayerState{Task=4#55 parentId=54}
+RequestedLayerState{Task=5#56 parentId=54 z=1}
+RequestedLayerState{WindowToken{c6c6a54 type=2038 android.os.BinderProxy@f797948}#57 parentId=9}
+RequestedLayerState{cb3ba8 ShellDropTarget#58 parentId=57}
+RequestedLayerState{Dim layer#59 parentId=55 z=2147483647}
+RequestedLayerState{ActivityRecord{15d4c7d u0 com.android.launcher3/.uioverrides.QuickstepLauncher#95 parentId=94}
+RequestedLayerState{NavigationBar0#110 parentId=105}
+RequestedLayerState{Task=7#94 parentId=47}
+RequestedLayerState{Surface(name=Task=1)/@0x4eeada5_transition-leash#124 z=3}
+RequestedLayerState{Dim layer#71 parentId=56 z=2147483647}
+RequestedLayerState{e2cd0eb StatusBar#85 parentId=144}
+RequestedLayerState{WindowToken{59609ee type=2024 android.os.BinderProxy@cc50b69}#66 z=1073741826}
+RequestedLayerState{3dcd6fa ScreenDecorOverlay#67 parentId=66}
+RequestedLayerState{WindowToken{e7354bd type=2024 android.os.BinderProxy@b34c226}#68 z=1073741826}
+RequestedLayerState{21adab2 ScreenDecorOverlayBottom#69 parentId=68}
+RequestedLayerState{WallpaperWindowToken{b0045e3 token=android.os.Binder@7ddf59d}#70 parentId=7}
+RequestedLayerState{b6cdb47 com.android.systemui.wallpapers.ImageWallpaper#72 parentId=70}
+RequestedLayerState{com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher#118 parentId=116}
+RequestedLayerState{WindowToken{bc0cc3a type=2000 android.os.BinderProxy@9f4785c}#84 parentId=14}
+RequestedLayerState{5090673 NotificationShade#83 parentId=82}
+RequestedLayerState{Taskbar#117 parentId=113}
+RequestedLayerState{Surface(name=Task=1)/@0x311f214_transition-leash#148 z=2}
+RequestedLayerState{WindowToken{50dc2e2 type=2040 android.os.BinderProxy@6a154c4}#82 parentId=21}
+RequestedLayerState{WindowToken{1e90740 type=2019 android.os.BinderProxy@af0fe72}#104 parentId=26}
+RequestedLayerState{bedc679 NavigationBar0#105 parentId=145}
+RequestedLayerState{[Gesture Monitor] edge-swipe#106 parentId=45 z=1}
+RequestedLayerState{WindowToken{90afbcc type=2024 android.os.BinderProxy@15d41ff}#107 parentId=26 z=2}
+RequestedLayerState{e2d8e15 EdgeBackGestureHandler0#108 parentId=107}
+RequestedLayerState{Surface(name=Task=8)/@0xa8068b2_transition-leash#149 z=5}
+RequestedLayerState{Input Consumer recents_animation_input_consumer#111}
+RequestedLayerState{WindowToken{4c28a64 type=2024 android.os.BinderProxy@c13fc18}#112 parentId=26 z=2}
+RequestedLayerState{efc8091 Taskbar#113 parentId=146}
+RequestedLayerState{[Gesture Monitor] swipe-up#122 parentId=45 z=1}
+RequestedLayerState{Surface(name=e2cd0eb StatusBar)/@0xf204001 - animation-leash of insets_animation#144 parentId=84}
+RequestedLayerState{b11acde com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher#116 parentId=95}
+RequestedLayerState{WindowToken{4e40f73 type=2011 android.os.Binder@8bb4fe2}#126 parentId=11}
+RequestedLayerState{464d1d3 InputMethod#127 parentId=129}
+RequestedLayerState{Surface(name=464d1d3 InputMethod)/@0x4f51409 - animation-leash of insets_animation#129 parentId=126}
+RequestedLayerState{Task=8#130 z=2}
+RequestedLayerState{Surface(name=bedc679 NavigationBar0)/@0xc371f7 - animation-leash of insets_animation#145 parentId=104}
+RequestedLayerState{Surface(name=efc8091 Taskbar)/@0xa2f0182 - animation-leash of insets_animation#146 parentId=112}

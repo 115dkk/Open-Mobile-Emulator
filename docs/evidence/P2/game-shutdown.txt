@@ -1,0 +1,23 @@
+QEMU_NORMAL_SHUTDOWN=PASS PID=32048
+
+Name                                 Length
+----                                 ------
+disk.qcow2                           197120
+efivars.fd                           540672
+game-boot-args.txt                     1138
+game-efivars.fd                      540672
+game-install-args.txt                  1072
+game-install-serial.txt               43022
+game-qemu.pid                             7
+game64.qcow2                     6019350528
+initrd.img                          1829185
+install-initrd.img                  1841900
+kernel                             18703360
+OME-api35-20261005-digitalis.iso 2961014784
+qemu-args.txt                          1327
+qemu.pid                                  7
+
+
+Used : 916035719168
+Free : 84151320576
+

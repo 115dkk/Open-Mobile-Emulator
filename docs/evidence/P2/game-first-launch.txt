@@ -1,0 +1,6 @@
+Starting: Intent { cmp=com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity }
+Status: ok
+LaunchState: UNKNOWN (0)
+Activity: com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity
+WaitTime: 309
+Complete

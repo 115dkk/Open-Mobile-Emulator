@@ -1,0 +1,2 @@
+GLES: Mesa, virgl (NVIDIA GeForce RTX 2080 SUPER/PCIe/SSE2), OpenGL ES 3.2 Mesa 24.3.3
+  peak-refresh-rate         : 59.96 Hz

@@ -1,0 +1,4 @@
+    primaryCpuAbi=arm64-v8a
+    secondaryCpuAbi=null
+    versionCode=10644 minSdk=26 targetSdk=36
+    versionName=10644
