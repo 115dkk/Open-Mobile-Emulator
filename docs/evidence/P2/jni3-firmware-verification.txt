@@ -1,0 +1,6 @@
+ORIGINAL_FIRMWARE_FILES 4301 MISSING 0 SIZE_DIFFERENT 0
+/home/ome/bliss/dist/20261005-db973c9-jni3-digitalis/OME-api35-20261005-jni3-digitalis.iso 2961022976
+/mnt/ome-p2-fwcheck/iso/system.efs 2644668416
+/mnt/ome-p2-fwcheck/efs/system.img 4999999488
+d31c952c4115b6458d6d2ad7e1e21ba9e7d070771d7e63435eb20731b3a1b5c6  /home/ome/bliss/dist/20261005-db973c9-jni3-digitalis/OME-api35-20261005-jni3-digitalis.iso
+FIRMWARE_VERIFICATION=PASS

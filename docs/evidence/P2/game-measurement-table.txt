@@ -49,3 +49,18 @@ host_pc=fault_addr=0x7aa4c302764c; libswappywrapper.so 오프셋 0x2664b.
 리소스 다운로드, 계정, 튜토리얼, 10분 세션, 전투 성능은 여전히 측정 불가.
 원문: game-jni1-logcat.txt, jni-probe-after-logcat.txt.
 이전 APK와 데이터 디렉터리는 보존했고 system.img만 교체. 원본 system은 system.before-jni1.img로 디스크 안에 보존.
+
+RegisterNatives 계측 (2026-10-05)
+jni1 ISO는 펌웨어 4301개(910121844 bytes)가 빠진 불완전 빌드였음.
+reset_kernel_firmware가 installclean 뒤 남은 bzImage도 지우도록 수정.
+jni3 ISO: 2961022976 bytes, SHA256 d31c952c4115b6458d6d2ad7e1e21ba9e7d070771d7e63435eb20731b3a1b5c6.
+기존 펌웨어 4301개 전부 존재, 크기 일치.
+자체 JNI_OnLoad RegisterNatives: PASS.
+자체 dlopen 두 번째 라이브러리 RegisterNatives: PASS.
+게임 SwappyDisplayManager.nSetSupportedRefreshPeriods 등록: namespace_bridged=0.
+original=final=0x7b1db00e664c, 같은 주소에서 SIGSEGV.
+Digitalis 함수 포인터 판정은 이 등록에서 호출되지 않았음.
+ART main은 namespace 판정 OR NativeBridgeIsNativeBridgeFunctionPointer로 수정되어 있음.
+A15에는 그 공개 API와 콜백 필드가 없어 조건만 이식한 후보 빌드 실패. 설계 판단을 위해 중단.
+리소스 다운로드 이후 시나리오와 전투 수치는 여전히 없음.
+pre-jni1 백업은 승인에 따라 삭제. jni2/jni3 갱신 전 시스템 백업은 디스크에 유지.

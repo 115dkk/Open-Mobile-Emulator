@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Opt-in diagnostics: debug.ome.jni_trace=1; default false.
+--- a/runtime/jni/jni_internal.cc
++++ b/runtime/jni/jni_internal.cc
+@@ -14,6 +14,7 @@
+  * limitations under the License.
+  */
+ 
++#include <android-base/properties.h>
+ #include "jni_internal.h"
+ 
+ #include <log/log.h>
+@@ -2704,8 +2705,15 @@
+         // TODO: make this a hard register error in the future.
+       }
+ 
++      // Modified by OME: opt-in diagnostic, no registration behavior change.
++      const void* ome_original_fn = fnPtr;
+       if (is_class_loader_namespace_natively_bridged) {
+         fnPtr = GenerateNativeBridgeTrampoline(fnPtr, m);
++      }
++      if (android::base::GetBoolProperty("debug.ome.jni_trace", false)) {
++        LOG(INFO) << "OME_JNI_REGISTER method=" << m->PrettyMethod()
++                  << " namespace_bridged=" << is_class_loader_namespace_natively_bridged
++                  << " original=" << ome_original_fn << " final=" << fnPtr;
+       }
+       const void* final_function_ptr = class_linker->RegisterNative(soa.Self(), m, fnPtr);
+       UNUSED(final_function_ptr);

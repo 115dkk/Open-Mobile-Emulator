@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Backport ART main JNI RegisterNatives pointer check (b/393035780).
+--- a/runtime/jni/jni_internal.cc
++++ b/runtime/jni/jni_internal.cc
+@@ -2707,7 +2707,10 @@
+ 
+       // Modified by OME: opt-in diagnostic, no registration behavior change.
+       const void* ome_original_fn = fnPtr;
+-      if (is_class_loader_namespace_natively_bridged) {
++      // Modified by OME: backport upstream ART b/393035780. A native method
++      // may belong to a different classloader than the library that registers it.
++      if (is_class_loader_namespace_natively_bridged ||
++          android::NativeBridgeIsNativeBridgeFunctionPointer(fnPtr)) {
+         fnPtr = GenerateNativeBridgeTrampoline(fnPtr, m);
+       }
+       if (android::base::GetBoolProperty("debug.ome.jni_trace", false)) {

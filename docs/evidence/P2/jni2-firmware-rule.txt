@@ -1,0 +1,140 @@
+1-#
+2-# Copyright (C) 2014-2019 The Android-x86 Open Source Project
+3-#
+4-# Licensed under the Apache License, Version 2.0 (the "License");
+5-# you may not use this file except in compliance with the License.
+6-# You may obtain a copy of the License at
+7-#
+8-#      http://www.apache.org/licenses/LICENSE-2.0
+9-#
+10-
+11-TARGET_CLANG_PATH := prebuilts/clang/host/linux-x86/clang-r536225/bin
+12-
+13-ifneq ($(TARGET_NO_KERNEL),true)
+14-
+15-INSTALLED_KERNELIMAGE_TARGET := $(PRODUCT_OUT)/kernel.img
+16-
+17-ifeq ($(TARGET_PREBUILT_KERNEL),)
+18-ifneq ($(filter x86%,$(TARGET_ARCH)),)
+19-
+20-KERNEL_DIR ?= kernel/x86/common
+21-SOF_FIRMWARE_DIR := vendor/intel/proprietary/sof-bin
+22:COPY_FIRMWARE_SCRIPT := device/generic/firmware/copy-firmware.sh
+23:COPY_FIRMWARE_SILEAD_SCRIPT := vendor/silead/proprietary/firmware/firmware/linux/copy-firmware.sh
+24-COPY_FIRMWARE_SOF_SCRIPT :=$(SOF_FIRMWARE_DIR)/install.sh
+25-FIRMWARE_DEST := $(abspath $(TARGET_OUT_VENDOR))/firmware
+26-
+27-TARGET_KERNEL_ARCH := $(TARGET_ARCH)
+28-KERNEL_TARGET := bzImage
+29-TARGET_KERNEL_CONFIG ?= android-$(TARGET_KERNEL_ARCH)_defconfig
+30-KERNEL_CONFIG_DIR := arch/x86/configs
+31-
+32-ifeq ($(TARGET_KERNEL_ARCH),x86_64)
+33-KERNEL_CLANG_FLAGS := \
+34-        LLVM=1 \
+35-        CC=$(abspath $(TARGET_CLANG_PATH)/clang) \
+36-        LD=$(abspath $(TARGET_CLANG_PATH)/ld.lld) \
+37-        AR=$(abspath $(TARGET_CLANG_PATH)/llvm-ar) \
+38-        NM=$(abspath $(TARGET_CLANG_PATH)/llvm-nm) \
+39-        OBJCOPY=$(abspath $(TARGET_CLANG_PATH)/llvm-objcopy) \
+40-        OBJDUMP=$(abspath $(TARGET_CLANG_PATH)/llvm-objdump) \
+41-        READELF=$(abspath $(TARGET_CLANG_PATH)/llvm-readelf) \
+42-        OBJSIZE=$(abspath $(TARGET_CLANG_PATH)/llvm-size) \
+43-        STRIP=$(abspath $(TARGET_CLANG_PATH)/llvm-strip) \
+44-        HOSTCC=$(abspath $(TARGET_CLANG_PATH)/clang) \
+45-        HOSTCXX=$(abspath $(TARGET_CLANG_PATH)/clang++) \
+46-        HOSTLD=$(abspath $(TARGET_CLANG_PATH)/ld.lld) \
+47-        HOSTLDFLAGS=-fuse-ld=lld \
+48-        HOSTAR=$(abspath $(TARGET_CLANG_PATH)/llvm-ar)
+49-else
+50-$(error not implemented)
+51-endif
+52-
+53-KBUILD_OUTPUT := $(TARGET_OUT_INTERMEDIATES)/kernel
+54-ifeq ($(HOST_OS),darwin)
+55-KBUILD_JOBS := $(shell /usr/sbin/sysctl -n hw.ncpu)
+56-else
+57-KBUILD_JOBS := $(shell echo $$((1-(`cat /sys/devices/system/cpu/present`))))
+58-endif
+59-
+60-mk_kernel := + $(hide) prebuilts/build-tools/$(HOST_PREBUILT_TAG)/bin/make -j$(KBUILD_JOBS) -l$$(($(KBUILD_JOBS)+2)) \
+61-	-C $(KERNEL_DIR) O=$(abspath $(KBUILD_OUTPUT)) ARCH=$(TARGET_ARCH) CROSS_COMPILE=$(CROSS_COMPILE) \
+62-	YACC=$(abspath $(BISON)) LEX=$(abspath $(LEX)) M4=$(abspath $(M4)) DEPMOD=/sbin/depmod PERL=/usr/bin/perl \
+63-	$(KERNEL_CLANG_FLAGS)
+64-
+65-KERNEL_CONFIG_FILE := $(if $(wildcard $(TARGET_KERNEL_CONFIG)),$(TARGET_KERNEL_CONFIG),$(KERNEL_DIR)/$(KERNEL_CONFIG_DIR)/$(TARGET_KERNEL_CONFIG))
+66-
+67-MOD_ENABLED := $(shell grep ^CONFIG_MODULES=y $(KERNEL_CONFIG_FILE))
+68-FIRMWARE_ENABLED := $(shell grep ^CONFIG_FIRMWARE_IN_KERNEL=y $(KERNEL_CONFIG_FILE))
+69-
+70-# I understand Android build system discourage to use submake,
+71-# but I don't want to write a complex Android.mk to build kernel.
+72-# This is the simplest way I can think.
+73-KERNEL_DOTCONFIG_FILE := $(KBUILD_OUTPUT)/.config
+74-ifneq ($(filter 0,$(shell grep -s ^$(if $(filter x86,$(TARGET_KERNEL_ARCH)),\#.)CONFIG_64BIT $(KERNEL_DOTCONFIG_FILE) | wc -l)),)
+75-KERNEL_ARCH_CHANGED := $(KERNEL_DOTCONFIG_FILE)-
+76-$(KERNEL_ARCH_CHANGED):
+77-		@touch $@
+78-endif
+79-$(KERNEL_DOTCONFIG_FILE): $(KERNEL_CONFIG_FILE) $(wildcard $(TARGET_KERNEL_DIFFCONFIG)) $(KERNEL_ARCH_CHANGED)
+80-	$(hide) mkdir -p $(@D) && cat $(wildcard $^) > $@
+81-	$(hide) rm -f $(KERNEL_ARCH_CHANGED)
+82-
+83:BUILT_KERNEL_TARGET := $(KBUILD_OUTPUT)/arch/$(TARGET_ARCH)/boot/$(KERNEL_TARGET)
+84:$(BUILT_KERNEL_TARGET): $(KERNEL_DOTCONFIG_FILE) $(M4) $(LEX) $(BISON)
+85-	# A dirty hack to use ar & ld
+86-	$(mk_kernel) olddefconfig
+87-	$(mk_kernel) $(KERNEL_TARGET) $(if $(MOD_ENABLED),modules)
+88-	$(COPY_FIRMWARE_SCRIPT) --zstd -v $(FIRMWARE_DEST)
+89-	$(if $(TARGET_HAS_SILEAD_FIRMWARE), $(COPY_FIRMWARE_SILEAD_SCRIPT) --zstd -v $(FIRMWARE_DEST))
+90-	$(if $(TARGET_HAS_SOF_FIRMWARE), FW_DEST=$(FIRMWARE_DEST)/intel FW_LOCATION=$(SOF_FIRMWARE_DIR) $(COPY_FIRMWARE_SOF_SCRIPT) $(SOF_FIRMWARE_VERSION))
+91-	$(if $(FIRMWARE_ENABLED),$(mk_kernel) INSTALL_MOD_PATH=$(abspath $(TARGET_OUT)) firmware_install)
+92-
+93:$(INSTALLED_KERNELIMAGE_TARGET): $(BUILT_KERNEL_TARGET)
+94:	$(hide) cp $(BUILT_KERNEL_TARGET) $(INSTALLED_KERNELIMAGE_TARGET)
+95-
+96-ifneq ($(MOD_ENABLED),)
+97-KERNEL_MODULES_DEP := $(firstword $(wildcard $(TARGET_OUT)/lib/modules/*/modules.dep))
+98-KERNEL_MODULES_DEP := $(if $(KERNEL_MODULES_DEP),$(KERNEL_MODULES_DEP),$(TARGET_OUT)/lib/modules)
+99-
+100-ALL_EXTRA_MODULES := $(patsubst %,$(TARGET_OUT_INTERMEDIATES)/kmodule/%,$(TARGET_EXTRA_KERNEL_MODULES))
+101:$(ALL_EXTRA_MODULES): $(TARGET_OUT_INTERMEDIATES)/kmodule/%: $(BUILT_KERNEL_TARGET) | $(ACP)
+102-	@echo Building additional kernel module $*
+103-	$(hide) mkdir -p $(@D) && $(ACP) -fr $(EXTRA_KERNEL_MODULE_PATH_$*) $(@D)
+104-	$(mk_kernel) M=$(abspath $@) modules || ( rm -rf $@ && exit 1 )
+105-
+106:$(KERNEL_MODULES_DEP): $(BUILT_KERNEL_TARGET) $(ALL_EXTRA_MODULES)
+107-	$(hide) rm -rf $(TARGET_OUT)/lib/modules
+108-	$(mk_kernel) INSTALL_MOD_PATH=$(abspath $(TARGET_OUT)) modules_install
+109-	+ $(hide) for kmod in $(TARGET_EXTRA_KERNEL_MODULES) ; do \
+110-		echo Installing additional kernel module $${kmod} ; \
+111-		$(subst +,,$(subst $(hide),,$(mk_kernel))) INSTALL_MOD_PATH=$(abspath $(TARGET_OUT)) M=$(abspath $(TARGET_OUT_INTERMEDIATES))/kmodule/$${kmod} modules_install ; \
+112-	done
+113-	$(hide) rm -f $(TARGET_OUT)/lib/modules/*/{build,source}
+114-endif
+115-
+116-$(BUILT_SYSTEMIMAGE): $(KERNEL_MODULES_DEP)
+117-
+118:installclean: FILES += $(KBUILD_OUTPUT) $(INSTALLED_KERNEL_TARGET)
+119-
+120:TARGET_PREBUILT_KERNEL := $(BUILT_KERNEL_TARGET)
+121-
+122-.PHONY: kernel
+123:kernel: $(INSTALLED_KERNEL_TARGET) $(KERNEL_MODULES_DEP)
+124-
+125-endif # TARGET_ARCH
+126-endif # TARGET_PREBUILT_KERNEL
+127-
+128-#ifndef LINEAGE_BUILD
+129:$(INSTALLED_KERNEL_TARGET): $(TARGET_PREBUILT_KERNEL) | $(ACP)
+130-	$(copy-file-to-new-target)
+131-	$(hide) cp $@ $(INSTALLED_KERNELIMAGE_TARGET)
+132-ifdef TARGET_PREBUILT_MODULES
+133-	mkdir -p $(TARGET_OUT)/lib
+134-	$(hide) cp -r $(TARGET_PREBUILT_MODULES) $(TARGET_OUT)/lib
+135-endif
+136-#endif # LINEAGE_BUILD
+137-
+138-INSTALLED_RADIOIMAGE_TARGET += $(INSTALLED_KERNELIMAGE_TARGET)
+139-
+140-endif # TARGET_NO_KERNEL

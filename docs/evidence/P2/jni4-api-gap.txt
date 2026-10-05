@@ -1,0 +1,2 @@
+art/libnativebridge/native_bridge.cc:632:void* NativeBridgeGetTrampolineForFunctionPointer(const void* method,
+art/libnativebridge/include/nativebridge/native_bridge.h:98:void* NativeBridgeGetTrampolineForFunctionPointer(const void* method,

@@ -225,6 +225,7 @@ try {
         Invoke-ExternalTool $arm64Api26Clang @(
             '-shared',
             '-landroid',
+            '-ldl',
             '-fPIC',
             '-O2',
             '-Wl,-soname,libprobe.so',
@@ -232,6 +233,12 @@ try {
             $nativeLibrary,
             (Join-Path $probeRoot 'jni/probe.c')
         ) 'arm64 JNI library build'
+
+        $secondLibrary = Join-Path $nativeRoot 'libprobe_second.so'
+        Invoke-ExternalTool $arm64Api26Clang @(
+            '-shared', '-fPIC', '-O2', '-Wl,-soname,libprobe_second.so',
+            '-o', $secondLibrary, (Join-Path $probeRoot 'jni/probe_second.c')
+        ) 'arm64 dlopen JNI library build'
 
         $javaSource = Join-Path $probeRoot 'java/org/ome/arm64probe/MainActivity.java'
         Invoke-ExternalTool $javac @(
@@ -296,6 +303,7 @@ try {
         try {
             Add-ZipEntry $archive (Join-Path $dexRoot 'classes.dex') 'classes.dex'
             Add-ZipEntry $archive $nativeLibrary 'lib/arm64-v8a/libprobe.so'
+            Add-ZipEntry $archive $secondLibrary 'lib/arm64-v8a/libprobe_second.so'
             $fixedTimestamp = [System.DateTimeOffset]::new(
                 1980,
                 1,

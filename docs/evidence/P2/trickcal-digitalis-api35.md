@@ -75,3 +75,14 @@ ART의 JNI 트램펄린이 ARM64 라이브러리(`libswappywrapper.so`) 주소�
 트램펄린으로 감싸지지 않은 것으로 보인다. A15 ART는 클래스 로더 네임스페이스가 네이티브 브리지일 때만 `GenerateNativeBridgeTrampoline()`을 부르고,
 Digitalis는 `GuestMapShadow::IsExecutable()`이 참인 주소만 감싼다. 둘 중 어디서 빠졌는지는 아직 모른다(`jni-next-crash-source.txt`).
 ISO `OME-api35-20261005-jni1-digitalis.iso` SHA-256 `9bb72cc07bba1fa1609faf020a4b1814a39ee6412370c972d41b10ea9a2899ee`.
+
+## Swappy 충돌의 원인 (2026-10-06, jni2~jni4)
+
+- jni1 ISO가 0.9 GB 작았던 것은 `installclean` 뒤 남은 커널 산출물 때문에 펌웨어 복사(`copy-firmware.sh`)가 건너뛰어진 결함이었다
+  (`system/vendor/firmware/` 4,301개). `build-image.sh`의 `reset_kernel_firmware()`를 고쳤고 jni3 ISO에서 4,301개가 모두 있다(`jni3-firmware-verification.txt`).
+- 재현기의 `JNI_OnLoad`에서의 `RegisterNatives`와 `dlopen`한 두 번째 라이브러리 함수의 `RegisterNatives`는 둘 다 통과.
+- 기본 꺼짐 계측(`debug.ome.jni_trace=1`)으로 본 게임: `SwappyDisplayManager.nSetSupportedRefreshPeriods`와 `nOnRefreshPeriodChanged`를 등록할 때
+  ART가 `namespace_bridged=0`으로 판정해 ARM64 주소를 그대로 등록했고, 충돌한 호스트 PC가 그 주소와 같다(`jni3-game-trace-excerpt.txt`).
+  라이브러리를 올린 클래스 로더와 메서드의 클래스 로더가 달라 생기는 경우다.
+- ART main은 이 경우 `NativeBridgeIsNativeBridgeFunctionPointer(fnPtr)`로 한 번 더 확인한다(b/393035780). A15 `libnativebridge`에는 이 API와
+  콜백 필드가 없어 조건만 옮기면 컴파일되지 않는다(`jni4-*.txt`). Digitalis 본체는 이 콜백(`isNativeBridgeFunctionPointer`)을 이미 구현한다.

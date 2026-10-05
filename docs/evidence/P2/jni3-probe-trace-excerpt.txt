@@ -1,0 +1,11 @@
+10-05 14:51:04.473  3246  3246 I berberis: OME_JNI_POINTER method=0x7b1e283f4734 executable=1 shorty=L
+10-05 14:51:04.473  3246  3246 I .ome.arm64probe: OME_JNI_REGISTER method=java.lang.String org.ome.arm64probe.MainActivity.registeredProbe() namespace_bridged=1 original=0x7b1e283f4734 final=0x5c6465c0
+10-05 14:51:04.474  3246  3246 I OMEProbe: JNI_OnLoad RegisterNatives CALL
+10-05 14:51:04.475  3246  3246 I OMEProbe: JNI_OnLoad RegisterNatives PASS
+10-05 14:51:04.475  3246  3246 I OMEProbe: dlopen RegisterNatives BEGIN
+10-05 14:51:04.475  3246  3246 I berberis: OME_JNI_POINTER method=0x7b1e282a82d4 executable=1 shorty=L
+10-05 14:51:04.475  3246  3246 I .ome.arm64probe: OME_JNI_REGISTER method=java.lang.String org.ome.arm64probe.MainActivity.dlopenProbe() namespace_bridged=1 original=0x7b1e282a82d4 final=0x5c6466c0
+10-05 14:51:04.476  3246  3246 I OMEProbe: dlopen RegisterNatives PASS
+10-05 14:51:04.476  3246  3246 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 14:51:04.476  3246  3246 I OMEProbe: AAssetManager_fromJava PASS
+10-05 14:51:04.476  3246  3246 I OMEProbe: native arm64-v8a lib loaded;JNI_OnLoad RegisterNatives PASS;dlopen RegisterNatives PASS;AAssetManager_fromJava PASS;SUPPORTED_ABIS=x86_64,arm64-v8a,x86;os.arch=aarch64;CPU_ABI=arm64-v8a

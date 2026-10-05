@@ -190,7 +190,9 @@ apply_ome_patches() {
 # going out with the firmware missing.
 reset_kernel_firmware() {
     local product="$OME_BUILD_ROOT/out/target/product/x86_64"
-    if [ -d "$product/system/vendor/firmware" ]; then
+    # installclean removes installed firmware but keeps the kernel object cache.
+    # Invalidate bzImage even when that installed directory is already absent.
+    if [ -d "$product/system/vendor/firmware" ] || [ -f "$product/obj/kernel/arch/x86_64/boot/bzImage" ]; then
         rm -rf "$product/system/vendor/firmware" "$product/obj/kernel/arch/x86_64/boot/bzImage"
         say "removed the previous firmware tree and bzImage so the kernel rule copies firmware afresh"
     fi

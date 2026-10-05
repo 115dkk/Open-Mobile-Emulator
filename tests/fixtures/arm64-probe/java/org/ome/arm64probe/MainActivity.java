@@ -16,6 +16,9 @@ public final class MainActivity extends Activity {
         System.loadLibrary("probe");
     }
 
+    private static native String registeredProbe();
+    private static native boolean registerDlopenProbe();
+    private static native String dlopenProbe();
     private static native String nativeProbe();
     private static native String nativeAssetProbe(android.content.res.AssetManager assets);
 
@@ -23,10 +26,17 @@ public final class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Log.i(TAG, "JNI_OnLoad RegisterNatives CALL");
+        String registered = registeredProbe();
+        Log.i(TAG, registered);
+        Log.i(TAG, "dlopen RegisterNatives BEGIN");
+        String loaded = registerDlopenProbe() ? dlopenProbe() : "dlopen registration FAILED";
+        Log.i(TAG, loaded);
         Log.i(TAG, "AAssetManager_fromJava BEGIN");
         String assetReport = nativeAssetProbe(getAssets());
         Log.i(TAG, assetReport);
         String report = nativeProbe()
+                + "\n" + registered + "\n" + loaded
                 + "\n" + assetReport
                 + "\nSUPPORTED_ABIS=" + String.join(",", Build.SUPPORTED_ABIS)
                 + "\nos.arch=" + System.getProperty("os.arch")

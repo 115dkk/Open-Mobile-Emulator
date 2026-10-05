@@ -1,0 +1,16 @@
+10-05 14:51:27.417  3311  3397 D berberis: loadLibraryExt: path=liblibswappywrapper.so ns=0x7b1fc15471b0(guest=0x7b1e31409010)
+10-05 14:51:27.417  3311  3397 D berberis: berberis: DlOpen ENTER libpath="liblibswappywrapper.so" flags=0x2
+10-05 14:51:27.419  3311  3397 D berberis: berberis: DlOpen EXIT  1ms set=0 clear=28 libpath="liblibswappywrapper.so" handle=0x0
+10-05 14:51:27.419  3311  3397 D berberis: LoadGuestLibrary FAILED for liblibswappywrapper.so: dlopen failed: library "liblibswappywrapper.so" not found
+10-05 14:51:27.419  3311  3397 D nativeloader: Load liblibswappywrapper.so using ns clns-7 from class loader (caller=/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/base.apk!classes5.dex): no error
+10-05 14:51:27.420  3311  3397 D berberis: loadLibraryExt: path=/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libswappywrapper.so ns=0x7b1fc15471b0(guest=0x7b1e31409010)
+10-05 14:51:27.420  3311  3397 D berberis: berberis: DlOpen ENTER libpath="/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libswappywrapper.so" flags=0x2
+10-05 14:51:27.426  3311  3397 D berberis: berberis: DlOpen EXIT  5ms set=2 clear=59 libpath="/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libswappywrapper.so" handle=0xf861a79fd02d13fb
+10-05 14:51:27.426  3311  3397 D nativeloader: Load /data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libswappywrapper.so using ns clns-7 from class loader (caller=/data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/base.apk!classes5.dex): ok
+10-05 14:51:27.435  3311  3397 I .trickcalrevive: OME_JNI_REGISTER method=void com.google.androidgamesdk.SwappyDisplayManager.nSetSupportedRefreshPeriods(long, long[], int[]) namespace_bridged=0 original=0x7b1db00e664c final=0x7b1db00e664c
+10-05 14:51:27.435  3311  3397 I .trickcalrevive: OME_JNI_REGISTER method=void com.google.androidgamesdk.SwappyDisplayManager.nOnRefreshPeriodChanged(long, long, long, long) namespace_bridged=0 original=0x7b1db00e6920 final=0x7b1db00e6920
+10-05 14:51:27.436  3311  3397 E berberis: FATAL host signal NO-RECOVERY: depth=1 sig=11 host_pc=0x7b1db00e664c fault_addr=0x7b1db00e664c si_code=2 guest_insn_addr=0x7b1e2ca30140
+10-05 14:51:27.436  3311  3397 E berberis: HandleFatalSignal: sig=11 si_addr=0x7b1db00e664c si_code=2 host_rip=0x7b1db00e664c host_rsp=0x7b1db5d87ad8 host_rbp=0x17
+10-05 14:51:27.471  3311  3397 E libsigchain:   #03 pc 0002664b  /data/app/~~UGWb44-heG7AO4Ya-HVmBA==/com.epidgames.trickcalrevive-gWtYaDP09IqImHGPdAVQTQ==/lib/arm64/libswappywrapper.so (+0) (BuildId: )
+10-05 14:51:27.471  3311  3397 E libsigchain:   #04 pc 0033b5a7  /data/misc/apexdata/com.android.art/dalvik-cache/x86_64/boot.oat (art_jni_trampoline+167) (BuildId: )
+10-05 14:51:27.474     0     0 I UnityMain[3397]: segfault at 7b1db00e664c ip 00007b1db00e664c sp 00007b1db5d87ad8 error 15 in libswappywrapper.so[7b1db00c0000+33000] likely on CPU 2 (core 2, socket 0)

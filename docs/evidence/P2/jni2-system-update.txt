@@ -1,0 +1,37 @@
+qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=01h].ECX.tsc-deadline [bit 24]
+qemu-system-x86_64.exe: warning: host doesn't support requested feature: CPUID[eax=06h].EAX.arat [bit 2]
+OME-INSTALL start disk=/dev/vda dir=ome kernel=6.6.129-crimson-xanmod1
+OME-INSTALL efi=64
+OME-INSTALL env aaropa
+OME-INSTALL step tools 1
+OME-INSTALL tools sgdisk=/usr/sbin/sgdisk pv= mke2fs=/usr/sbin/mke2fs mkfs.ext3= mkfs.ext4= rsync=
+OME-INSTALL source kernel=18703360 initrd=1829198 system=4999999488
+OME-INSTALL update preserved data; removed pre-jni1 backup
+OME-INSTALL step copy 15
+OME-INSTALL step copy 15
+OME-INSTALL step copy 20
+OME-INSTALL step copy 24
+OME-INSTALL step copy 30
+OME-INSTALL step copy 35
+OME-INSTALL step copy 40
+OME-INSTALL step copy 45
+OME-INSTALL step copy 51
+OME-INSTALL step copy 55
+OME-INSTALL step copy 77
+OME-INSTALL step copy 84
+OME-INSTALL step copy 86
+OME-INSTALL step copy 87
+OME-INSTALL step copy 88
+OME-INSTALL step copy 89
+OME-INSTALL step keys 91
+OME-INSTALL keys 1
+OME-INSTALL adb already on
+OME-INSTALL step finish 92
+OME-INSTALL df Filesystem           1K-blocks      Used Available Use% Mounted on
+OME-INSTALL done

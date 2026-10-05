@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Opt-in diagnostics: debug.ome.jni_trace=1; default false.
+--- a/native_bridge/native_bridge.cc
++++ b/native_bridge/native_bridge.cc
+@@ -14,6 +14,7 @@
+  * limitations under the License.
+  */
+ 
++#include <android-base/properties.h>
+ #include "native_bridge.h"
+ 
+ #include <dlfcn.h>
+@@ -629,7 +630,12 @@
+       jni_call_type);
+ 
+   auto guest_addr = berberis::ToGuestAddr(method);
+-  if (!berberis::GuestMapShadow::GetInstance()->IsExecutable(guest_addr, 1)) {
++  // Modified by OME: opt-in diagnostic for raw guest JNI function pointers.
++  const bool ome_executable = berberis::GuestMapShadow::GetInstance()->IsExecutable(guest_addr, 1);
++  if (android::base::GetBoolProperty("debug.ome.jni_trace", false)) {
++    __android_log_print(ANDROID_LOG_INFO, "berberis", "OME_JNI_POINTER method=%p executable=%d shorty=%s", method, ome_executable, shorty);
++  }
++  if (!ome_executable) {
+     LOG_NB("Not executable method - assuming it's a host library");
+     // This is not guest code - happens when native_bridge falls back
+     // to host libraries.

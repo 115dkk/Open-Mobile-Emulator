@@ -1,0 +1,66 @@
+407-  //   RegisterNatives).
+408-  //   shorty [IN] short descriptor of native method len [IN] length of shorty
+409-  //   jni_call_type [IN] the type of JNI call
+410-  // Returns:
+411-  //   address of trampoline if successful, otherwise NULL
+412:  void* (*getTrampolineForFunctionPointer)(const void* method,
+413-                                           const char* shorty,
+414-                                           uint32_t len,
+415-                                           enum JNICallType jni_call_type);
+416-};
+417-
+418-// Runtime interfaces to native bridge.
+419-struct NativeBridgeRuntimeCallbacks {
+420-  // Get shorty of a Java method. The shorty is supposed to be persistent in memory.
+421-  //
+422-  // Parameters:
+423-  //   env [IN] pointer to JNIenv.
+424-  //   mid [IN] Java methodID.
+425-  // Returns:
+426-  //   short descriptor for method.
+427-  const char* (*getMethodShorty)(JNIEnv* env, jmethodID mid);
+428-
+429-  // Get number of native methods for specified class.
+430-  //
+431-  // Parameters:
+432-  //   env [IN] pointer to JNIenv.
+error: hooks is different in /home/ome/bliss/.repo/projects/frameworks/libs/binary_translation.git vs /home/ome/bliss/.repo/project-objects/platform/frameworks/libs/binary_translation.git
+error: hooks is different in /home/ome/bliss/.repo/projects/frameworks/libs/binary_translation.git vs /home/ome/bliss/.repo/project-objects/platform/frameworks/libs/binary_translation.git
+Finalizing sync state...
+repo sync has finished successfully.
+RESTORED art 9faad7d9f3b524fe500f147bc6ce20346a84e8cd
+RESTORED bionic a24e6f0fba0515fbde6eded5237ae542044c2ba3
+RESTORED device/generic/x86_64 866b096a447099b29a9703ae8867aceb3727ef55
+RESTORED external/arm-optimized-routines 1df26ce886fce15a197b1d3496d93741b6b88aa5
+RESTORED frameworks/libs/binary_translation cf1446707cc8e12aa42c024026d42c95228dea38
+RESTORED frameworks/libs/native_bridge_support aa99591cb20cf7cd2eadab8d176abf7442c7b674
+Running product configuration...
+============================================
+PLATFORM_VERSION_CODENAME=REL
+PLATFORM_VERSION=15
+BLISS_BUILD_VERSION=Bliss-v18.4--UNOFFICIAL-vanilla-20261005
+BLISS_CODENAME=Voyager
+BLISS_VERSION=18.4
+BLISS_BUILDTYPE=UNOFFICIAL
+BLISS_BUILD_VARIANT=vanilla
+TARGET_PRODUCT=bliss_x86_64
+TARGET_BUILD_VARIANT=userdebug
+TARGET_ARCH=x86_64
+TARGET_ARCH_VARIANT=sandybridge
+TARGET_CPU_VARIANT=generic
+TARGET_2ND_ARCH=x86
+TARGET_2ND_ARCH_VARIANT=sandybridge
+TARGET_2ND_CPU_VARIANT=generic
+HOST_OS=linux
+HOST_OS_EXTRA=Linux-6.6.87.1-microsoft-standard-WSL2-x86_64-Ubuntu-22.04.5-LTS
+HOST_CROSS_OS=windows
+BUILD_ID=AP4A.250205.002
+OUT_DIR=out
+PRODUCT_SOONG_NAMESPACES=hardware/google/camera hardware/google/camera/devices/EmulatedCamera vendor/SystemUIClocks
+============================================
+23:58:45 Entire data directory removed.
+23:58:46 Deleted images and staging directories.
+BASELINE_CHECK=PASS
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sde       1007G  308G  648G  33% /
+C:\             932G  887G   46G  96% /mnt/c
