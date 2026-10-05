@@ -1,0 +1,2 @@
+PASS: four YUV formats reject texture emulation, preserve CPU masks; GBM native and RGB unchanged
+checks=17

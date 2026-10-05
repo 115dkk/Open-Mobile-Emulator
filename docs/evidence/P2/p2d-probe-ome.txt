@@ -1,0 +1,7 @@
+10-05 19:12:15.482  3192  3192 I OMEVideo: t=4ms start mode=gl
+10-05 19:12:15.608  3192  3211 I OMEVideo: t=131ms gl renderer=virgl (NVIDIA GeForce RTX 2080 SUPER/PCIe/SSE2) version=OpenGL ES 3.2 Mesa 24.3.3
+10-05 19:12:15.708  3192  3211 I OMEVideo: t=230ms first-frame centre=0,0,0 corner=0,255,0
+10-05 19:12:15.967  3192  3192 I OMEVideo: t=489ms prepared width=1600 height=1024 durationMs=10000
+10-05 19:12:16.053  3192  3192 I OMEVideo: t=576ms info what=805 extra=14
+10-05 19:12:16.054  3192  3192 I OMEVideo: t=577ms info what=805 extra=-38
+10-05 19:12:26.109  3192  3192 I OMEVideo: t=10632ms completed frames=1

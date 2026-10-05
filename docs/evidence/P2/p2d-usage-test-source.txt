@@ -1,0 +1,107 @@
+
+#include <assert.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include "drv_priv.h"
+#include "drv_helpers.h"
+struct virgl_priv { bool host_gbm_enabled; bool native_yuv; bool native_r8; };
+static struct { int value; } params[]={{1}};
+enum { param_3d=0 };
+static int added;
+static uint64_t registered;
+static bool yuv(uint32_t f) { return f==DRM_FORMAT_NV12 || f==DRM_FORMAT_NV21 || f==DRM_FORMAT_YVU420 || f==DRM_FORMAT_YVU420_ANDROID; }
+static bool virgl_supports_combination_natively(struct driver *d,uint32_t f,uint64_t u) {
+ struct virgl_priv *p=d->priv;
+ if(f==DRM_FORMAT_R8) return p->native_r8;
+ if(yuv(f) && (u&(BO_USE_TEXTURE|BO_USE_RENDERING))) return p->native_yuv;
+ return true;
+}
+void drv_add_combination(struct driver *d,uint32_t f,struct format_metadata *m,uint64_t u) { (void)d;(void)f;(void)m;added++;registered=u; }
+#undef drv_logi
+#define drv_logi(...) ((void)0)
+static bool virgl_supports_combination_through_emulation(struct driver *drv, uint32_t drm_format,
+							 uint64_t use_flags)
+{
+	struct virgl_priv *priv = (struct virgl_priv *)drv->priv;
+
+	// Only enable emulation on non-gbm virtio backends.
+	if (priv->host_gbm_enabled)
+		return false;
+
+	/* R8 storage emulates CPU access, not per-plane GPU sampling. */
+	if (use_flags & (BO_USE_RENDERING | BO_USE_SCANOUT | BO_USE_TEXTURE))
+		return false;
+
+	if (!virgl_supports_combination_natively(drv, DRM_FORMAT_R8, use_flags))
+		return false;
+
+	return drm_format == DRM_FORMAT_NV12 || drm_format == DRM_FORMAT_NV21 ||
+	       drm_format == DRM_FORMAT_YVU420 || drm_format == DRM_FORMAT_YVU420_ANDROID;
+}
+
+// Adds the given buffer combination to the list of supported buffer combinations if the
+// combination is supported by the virtio backend.
+static void virgl_add_combination(struct driver *drv, uint32_t drm_format,
+				  struct format_metadata *metadata, uint64_t use_flags)
+{
+#ifdef __ANDROID__
+	// Modified by OME: diagnostic only; support decisions remain unchanged.
+	char ome_trace[PROP_VALUE_MAX] = { 0 };
+	__system_property_get("debug.ome.minigbm_trace", ome_trace);
+	if (strcmp(ome_trace, "1") == 0) {
+		struct virgl_priv *priv = (struct virgl_priv *)drv->priv;
+		drv_logi("OME_FORMAT format=%u usage=0x%llx gbm=%d caps=%u v2=%d native=%d emulated=%d nv12_sampler=%d r8_sampler=%d\n",
+			 drm_format, (unsigned long long)use_flags, priv->host_gbm_enabled,
+			 priv->caps.max_version, priv->caps_is_v2,
+			 virgl_supports_combination_natively(drv, drm_format, use_flags),
+			 virgl_supports_combination_through_emulation(drv, drm_format, use_flags),
+			 virgl_bitmask_supports_format(&priv->caps.v1.sampler, DRM_FORMAT_NV12),
+			 virgl_bitmask_supports_format(&priv->caps.v1.sampler, DRM_FORMAT_R8));
+	}
+#endif
+	if (params[param_3d].value) {
+		if ((use_flags & BO_USE_SCANOUT) &&
+		    !virgl_supports_combination_natively(drv, drm_format, BO_USE_SCANOUT)) {
+			drv_logi("Strip scanout on format: %d\n", drm_format);
+			use_flags &= ~BO_USE_SCANOUT;
+		}
+
+		/* Preserve CPU usages from mixed texture/CPU registration masks. */
+		if ((use_flags & BO_USE_TEXTURE) &&
+		    !virgl_supports_combination_natively(drv, drm_format, use_flags) &&
+		    virgl_supports_combination_through_emulation(drv, drm_format,
+							 use_flags & ~BO_USE_TEXTURE)) {
+			use_flags &= ~BO_USE_TEXTURE;
+		}
+
+		if (!virgl_supports_combination_natively(drv, drm_format, use_flags) &&
+		    !virgl_supports_combination_through_emulation(drv, drm_format, use_flags)) {
+			drv_logi("Skipping unsupported combination format:%d\n", drm_format);
+			return;
+		}
+	}
+
+	drv_add_combination(drv, drm_format, metadata, use_flags);
+}
+
+
+int main(void) {
+ struct virgl_priv p={.native_r8=true}; struct driver d={.priv=&p};
+ uint32_t formats[]={DRM_FORMAT_NV12,DRM_FORMAT_NV21,DRM_FORMAT_YVU420,DRM_FORMAT_YVU420_ANDROID};
+ unsigned checks=0;
+ for(unsigned i=0;i<4;i++) {
+   assert(!virgl_supports_combination_through_emulation(&d,formats[i],BO_USE_TEXTURE));checks++;
+   assert(virgl_supports_combination_through_emulation(&d,formats[i],BO_USE_SW_MASK));checks++;
+   added=0;virgl_add_combination(&d,formats[i],&LINEAR_METADATA,BO_USE_TEXTURE_MASK);
+   assert(added==1 && !(registered&BO_USE_TEXTURE) && (registered&BO_USE_SW_MASK)==BO_USE_SW_MASK);checks++;
+   p.host_gbm_enabled=true;p.native_yuv=true;added=0;
+   virgl_add_combination(&d,formats[i],&LINEAR_METADATA,BO_USE_TEXTURE_MASK);
+   assert(added==1 && registered==BO_USE_TEXTURE_MASK);checks++;
+   p.host_gbm_enabled=false;p.native_yuv=false;
+ }
+ added=0;virgl_add_combination(&d,DRM_FORMAT_ABGR8888,&LINEAR_METADATA,BO_USE_TEXTURE_MASK);
+ assert(added==1 && registered==BO_USE_TEXTURE_MASK);checks++;
+ puts("PASS: four YUV formats reject texture emulation, preserve CPU masks; GBM native and RGB unchanged");
+ printf("checks=%u\n",checks);return 0;
+}

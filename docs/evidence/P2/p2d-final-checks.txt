@@ -1,0 +1,33 @@
+2026-10-06T04:15:44.9256466+09:00
+SUMMARY forbidden findings=0 candidates=1478
+forbidden_exit=0
+SUMMARY spdx findings=0 checked=358 candidates=1478
+spdx_exit=0
+diff_check_exit=0
+qemu_count=0
+free_C_bytes=34356547584
+ M docs/evidence/P2/p2b-a15-qemu-stderr.txt
+?? docs/evidence/P2/p2d-a13-left-a15-right.png
+?? docs/evidence/P2/p2d-bind-probe-logcat.txt
+?? docs/evidence/P2/p2d-bind-probe.png
+?? docs/evidence/P2/p2d-bind-probe.txt
+?? docs/evidence/P2/p2d-bind-serial.txt
+?? docs/evidence/P2/p2d-final-checks.txt
+?? docs/evidence/P2/p2d-game-before-tap.png
+?? docs/evidence/P2/p2d-game-logcat.txt
+?? docs/evidence/P2/p2d-game-title.png
+?? docs/evidence/P2/p2d-installed-files.txt
+?? docs/evidence/P2/p2d-launcher.png
+?? docs/evidence/P2/p2d-minigbm-build.txt
+?? docs/evidence/P2/p2d-play-store.png
+?? docs/evidence/P2/p2d-probe-logcat.txt
+?? docs/evidence/P2/p2d-probe-ome.txt
+?? docs/evidence/P2/p2d-probe.png
+?? docs/evidence/P2/p2d-qemu-stderr.txt
+?? docs/evidence/P2/p2d-restore.txt
+?? docs/evidence/P2/p2d-settings.png
+?? docs/evidence/P2/p2d-system-update.txt
+?? docs/evidence/P2/p2d-update-qemu.txt
+?? docs/evidence/P2/p2d-usage-test-source.txt
+?? docs/evidence/P2/p2d-usage-test.txt
+?? guest/build/patches/digitalis/external/minigbm/0002-reject-emulated-yuv-texture-usage.patch

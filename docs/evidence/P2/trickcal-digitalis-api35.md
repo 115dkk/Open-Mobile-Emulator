@@ -176,3 +176,16 @@ SIGKILL(status 9)로 끝났다. Unity 로그에 `Title:vwm()`. 게임 논리는 
   `SCANOUT_USES_GBM=0`, YV12와 NV12 sampler 0, R8 sampler 1(`p2c-host-caps.txt`). 상류 Mesa main과 virglrenderer main도 이 경우를 고치지 않았고,
   관련 이슈 #222("Cannot play yuv data without gbm")와 #586(열림)이 있다.
 - A13은 디코더가 먼저 죽어 이 오류에 이르지 않으므로 영상만 건너뛰고 타이틀이 그려진다.
+
+## 타이틀이 보인다: minigbm이 할 수 없는 YUV 텍스처를 알리지 않게 함 (2026-10-06, p2d)
+
+`guest/build/patches/digitalis/external/minigbm/0002-reject-emulated-yuv-texture-usage.patch`: GBM 없는 virgl 호스트에서 NV12, NV21, YVU420, YVU420_ANDROID를
+R8로 흉내 내는 조합은 텍스처 용도로 등록하지 않는다(CPU 읽기·쓰기 용도는 남긴다). GBM 호스트는 기존 함수가 이미 흉내를 쓰지 않으므로 바뀌지 않는다.
+함수 단위 시험 17개 통과(`p2d-usage-test.txt`). game64의 system.img 안 minigbm 두 파일만 도우미의 debugfs로 바꿨다(GApps, Digitalis, 게임 데이터 유지).
+
+- 판별기: 영상 표면 할당이 게스트 안에서 실패(`GraphicBufferAllocator: Failed to allocate ... format 842094169`), 디코더가 오류로 멈추고, 호스트 stderr에 컨텍스트 오류가 없다.
+- 게임: 가운데 탭 뒤 타이틀, 캐릭터, 업데이트 필수 알림이 A13과 같이 그려진다(`p2d-game-title.png`, `p2d-a13-left-a15-right.png`). 런처, 설정, Play 스토어도 정상.
+- 남는 것: 앱 안 영상은 재생되지 않는다(A13과 같다). 같은 표면 출력을 쓰는 카메라 등은 시험하지 않았다. `Unknown format is 163`은 남지만 오류로 이어지지 않는다.
+
+이로써 Digitalis + 사용자 PC GApps 조립 + 이 수정으로 안드로이드 15 게스트가 트릭컬을 A13과 같은 지점(서버의 업데이트 요구)까지 돌린다.
+그 뒤(내려받기, 계정, 전투, 측정)는 최신 APK가 있어야 한다.

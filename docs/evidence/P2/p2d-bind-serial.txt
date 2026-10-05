@@ -1,0 +1,39 @@
+
+
+
+console:/ # 
+
+
+console:/ # [   17.762549] audit: rate limit exceeded
+
+[   18.261394] ueventd: LoadWithAliases was unable to load platform:regulatory, tried: platform:regulatory
+
+[   18.787577] audit: rate limit 
+exceeded
+
+chown root:root /data/local/tmp/p2d-minigbm*.so; chmod 644 /data/l
+ot /data/local/tmp/p2d-minigbm*.so; chmod 644 /data/l                         <ocal/tmp/p2d-minigbm*.so;
+nigbm*.so; chmod 644 /data/local/tmp/p2d-minigbm*.so;                         < chcon u:object_r:vendor_
+a/local/tmp/p2d-minigbm*.so; chcon u:object_r:vendor_                         <file:s0 /data/local/tmp/p
+so; chcon u:object_r:vendor_file:s0 /data/local/tmp/p                         <2d-minigbm*.so; mount --b
+or_file:s0 /data/local/tmp/p2d-minigbm*.so; mount --b                         <ind /data/local/tmp/p2d-m
+p/p2d-minigbm*.so; mount --bind /data/local/tmp/p2d-m                         <inigbm64.so /vendor/lib64
+--bind /data/local/tmp/p2d-minigbm64.so /vendor/lib64                         </libminigbm_gralloc_arcvm
+d-minigbm64.so /vendor/lib64/libminigbm_gralloc_arcvm                         <.so; mount --bind /data/l
+b64/libminigbm_gralloc_arcvm.so; mount --bind /data/l                         <ocal/tmp/p2d-minigbm32.so
+cvm.so; mount --bind /data/local/tmp/p2d-minigbm32.so                         < /vendor/lib/libminigbm_g
+a/local/tmp/p2d-minigbm32.so /vendor/lib/libminigbm_g                         <ralloc_arcvm.so; setprop 
+.so /vendor/lib/libminigbm_gralloc_arcvm.so; setprop                          <debug.ome.minigbm_trace 1
+m_gralloc_arcvm.so; setprop debug.ome.minigbm_trace 1                         <
+
+
+console:/ # 
+
+
+console:/ # [   21.574457] ueventd: LoadWithAliases was unable to load platform:regulatory, tried: platform:regulatory
+
+[   21.779754] libprocessgroup: Failed to write 1 to /sys/fs/cgroup/uid_1000/pid_1579/cgroup.kill: No such file or directory
+
+[   21.784555] libprocessgroup: Failed to open /sys/fs/cgroup/uid_1000/pid_1579/cgroup.procs: No such file or directory
+
+

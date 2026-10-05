@@ -1,0 +1,34 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Modified by OME: an R8 byte buffer on a host without GBM does not provide
+# per-plane EGLImages. Advertising YUV texture usage makes virglrenderer reject
+# the plane index as an invalid texture layer and poison the rendering context.
+# Keep CPU-only combinations, and leave native/GBM sampling support unchanged.
+# https://gitlab.freedesktop.org/virgl/virglrenderer/-/issues/222
+# https://gitlab.freedesktop.org/virgl/virglrenderer/-/issues/586
+--- a/virtgpu_virgl.c
++++ b/virtgpu_virgl.c
+@@ -374,7 +374,8 @@
+ 	if (priv->host_gbm_enabled)
+ 		return false;
+
+-	if (use_flags & (BO_USE_RENDERING | BO_USE_SCANOUT))
++	/* R8 storage emulates CPU access, not per-plane GPU sampling. */
++	if (use_flags & (BO_USE_RENDERING | BO_USE_SCANOUT | BO_USE_TEXTURE))
+ 		return false;
+
+ 	if (!virgl_supports_combination_natively(drv, DRM_FORMAT_R8, use_flags))
+@@ -396,6 +397,14 @@
+ 			use_flags &= ~BO_USE_SCANOUT;
+ 		}
+
++		/* Preserve CPU usages from mixed texture/CPU registration masks. */
++		if ((use_flags & BO_USE_TEXTURE) &&
++		    !virgl_supports_combination_natively(drv, drm_format, use_flags) &&
++		    virgl_supports_combination_through_emulation(drv, drm_format,
++							 use_flags & ~BO_USE_TEXTURE)) {
++			use_flags &= ~BO_USE_TEXTURE;
++		}
++
+ 		if (!virgl_supports_combination_natively(drv, drm_format, use_flags) &&
+ 		    !virgl_supports_combination_through_emulation(drv, drm_format, use_flags)) {
+ 			drv_logi("Skipping unsupported combination format:%d\n", drm_format);

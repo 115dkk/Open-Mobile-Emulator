@@ -1,0 +1,31 @@
+RESTORED external/minigbm 4f6d49c6c0cfbc7f2ffb2cbeab715319ffd0b505
+RESTORED device/generic/x86_64 866b096a447099b29a9703ae8867aceb3727ef55
+Running product configuration...
+============================================
+PLATFORM_VERSION_CODENAME=REL
+PLATFORM_VERSION=15
+BLISS_BUILD_VERSION=Bliss-v18.4--UNOFFICIAL-vanilla-20261006
+BLISS_CODENAME=Voyager
+BLISS_VERSION=18.4
+BLISS_BUILDTYPE=UNOFFICIAL
+BLISS_BUILD_VARIANT=vanilla
+TARGET_PRODUCT=bliss_x86_64
+TARGET_BUILD_VARIANT=userdebug
+TARGET_ARCH=x86_64
+TARGET_ARCH_VARIANT=sandybridge
+TARGET_CPU_VARIANT=generic
+TARGET_2ND_ARCH=x86
+TARGET_2ND_ARCH_VARIANT=sandybridge
+TARGET_2ND_CPU_VARIANT=generic
+HOST_OS=linux
+HOST_OS_EXTRA=Linux-6.6.87.1-microsoft-standard-WSL2-x86_64-Ubuntu-22.04.5-LTS
+HOST_CROSS_OS=windows
+BUILD_ID=AP4A.250205.002
+OUT_DIR=out
+PRODUCT_SOONG_NAMESPACES=hardware/google/camera hardware/google/camera/devices/EmulatedCamera vendor/SystemUIClocks
+============================================
+04:15:28 Entire data directory removed.
+04:15:28 Deleted images and staging directories.
+BASELINE_CHECK=PASS
+Filesystem      Size  Used Avail Use% Mounted on
+C:\             932G  900G   33G  97% /mnt/c
