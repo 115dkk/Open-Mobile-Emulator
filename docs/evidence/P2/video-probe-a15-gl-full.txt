@@ -1,0 +1,1424 @@
+--------- beginning of system
+10-05 17:51:14.420  1726  2209 W ActivityTaskManager: callingPackage for (uid=2000, pid=3347) has no WPC
+10-05 17:51:14.421  1726  2209 D CompatChangeReporter: Compat change id reported: 151861875; UID 10307; state: ENABLED
+--------- beginning of main
+10-05 17:51:14.421  1726  2209 V GrammaticalInflectionUtils: AttributionSource: AttributionSource { uid = 10307, packageName = null, attributionTag = null, token = android.os.Binder@c60addf, deviceId = 0, next = null } does not have READ_SYSTEM_GRAMMATICAL_GENDER permission.
+10-05 17:51:14.422  1726  2209 W OptProp : Cannot read opt property android.window.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES
+10-05 17:51:14.422  1726  2209 W OptProp : Cannot read opt property android.window.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE
+10-05 17:51:14.424  1726  2209 W OptProp : Cannot read opt property android.window.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE
+10-05 17:51:14.425  1726  2209 V SplashScreenExceptionList: SplashScreen checking exception for package org.ome.videoprobe (target sdk:35) -> false
+10-05 17:51:14.426  1726  2209 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=org.ome.videoprobe/.MainActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-05 17:51:14.426  1984  2115 V WindowManagerShell: UNKNOWN MESSAGE (319134872409225255) 7 android.os.BinderProxy@efb60b0 TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=29 effectiveUid=10307 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=org.ome.videoprobe/.MainActivity } baseActivity=ComponentInfo{org.ome.videoprobe/org.ome.videoprobe.MainActivity} topActivity=ComponentInfo{org.ome.videoprobe/org.ome.videoprobe.MainActivity} origActivity=null realActivity=ComponentInfo{org.ome.videoprobe/org.ome.videoprobe.MainActivity} numActivities=1 lastActiveTime=19331 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@9dfb29} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 - 0, 0) topActivityInfo=ActivityInfo{809eae org.ome.videoprobe.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false isTopActivityStyleFloating=false lastNonFullscreenBounds=Rect(160, 100 - 1120, 700) capturedLink=null capturedLinkTimestamp=0 appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false eligibleForLetterboxEducation= false isLetterboxEducationEnabled= false isLetterboxDoubleTapEnabled= false eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=1280 topActivityLetterboxHeight=800 topActivityLetterboxAppWidth=1280 topActivityLetterboxAppHeight=800 isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false cameraCompatTaskInfo=CameraCompatTaskInfo { freeformCameraCompatMode=inactive}}}, pipTask = null, remoteTransition = null, displayChange = null, flags = 0, debugId = 7 }
+10-05 17:51:14.426  1984  2115 D ShellSplitScreen: UNKNOWN MESSAGE (-7501547534164937581)
+10-05 17:51:14.426  1984  2115 V ShellDesktopMode: DesktopTasksController: handleRequest request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=29 effectiveUid=10307 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=org.ome.videoprobe/.MainActivity } baseActivity=ComponentInfo{org.ome.videoprobe/org.ome.videoprobe.MainActivity} topActivity=ComponentInfo{org.ome.videoprobe/org.ome.videoprobe.MainActivity} origActivity=null realActivity=ComponentInfo{org.ome.videoprobe/org.ome.videoprobe.MainActivity} numActivities=1 lastActiveTime=19331 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@9dfb29} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 - 0, 0) topActivityInfo=ActivityInfo{809eae org.ome.videoprobe.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false isTopActivityStyleFloating=false lastNonFullscreenBounds=Rect(160, 100 - 1120, 700) capturedLink=null capturedLinkTimestamp=0 appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false eligibleForLetterboxEducation= false isLetterboxEducationEnabled= false isLetterboxDoubleTapEnabled= false eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=1280 topActivityLetterboxHeight=800 topActivityLetterboxAppWidth=1280 topActivityLetterboxAppHeight=800 isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false cameraCompatTaskInfo=CameraCompatTaskInfo { freeformCameraCompatMode=inactive}}}, pipTask = null, remoteTransition = null, displayChange = null, flags = 0, debugId = 7 }
+10-05 17:51:14.426  1984  2115 V ShellDesktopMode: DesktopTasksController: handleFullscreenTaskLaunch
+10-05 17:51:14.426  1984  2115 D ShellDesktopMode: DesktopModeTaskRepository: getVisibleTaskCount=0
+10-05 17:51:14.426  1984  2115 V ShellDesktopMode: DesktopTasksController: handleRequest result=null
+10-05 17:51:14.427  1726  1748 V GrammaticalInflectionUtils: AttributionSource: AttributionSource { uid = 10307, packageName = null, attributionTag = null, token = android.os.Binder@c60addf, deviceId = 0, next = null } does not have READ_SYSTEM_GRAMMATICAL_GENDER permission.
+10-05 17:51:14.428  1726  2209 D CompatChangeReporter: Compat change id reported: 309578419; UID 10307; state: ENABLED
+10-05 17:51:14.428  1984  2115 D WindowManagerShell: UNKNOWN MESSAGE (-2945141395292145768) false 161
+10-05 17:51:14.430  2302  2302 W SplitSelectStateCtor: Missing session instanceIds
+10-05 17:51:14.430  2302  2302 D StatsLog: LAUNCHER_SPLIT_SELECTION_EXIT_INTERRUPTED
+10-05 17:51:14.434  1726  1906 I AppWidgetServiceImpl: Received broadcast: android.intent.action.PACKAGE_UNSTOPPED on user 0
+10-05 17:51:14.434  1726  1906 I AppWidgetServiceImpl: Updating package stopped masked state for uid 10307 package org.ome.videoprobe isStopped false
+10-05 17:51:14.435  1545  1545 D Zygote  : Forked child process 3350
+10-05 17:51:14.436  1726  1756 I ActivityManager: Start proc 3350:org.ome.videoprobe/u0a307 for next-top-activity {org.ome.videoprobe/org.ome.videoprobe.MainActivity}
+10-05 17:51:14.438  3350  3350 I Zygote  : seccomp disabled by setenforce 0
+--------- beginning of kernel
+10-05 17:51:11.902     0     0 I KernelSU: handle_setresuid from 0 to 10307
+10-05 17:51:14.439  1984  2198 D SplashScreenView: Build android.window.SplashScreenView{c0826bf V.E...... ......ID 0,0-0,0}
+10-05 17:51:14.439  1984  2198 D SplashScreenView: Icon: view: android.widget.ImageView{200e18c V.ED..... ......I. 0,0-0,0 #1020527 android:id/splashscreen_icon_view} drawable: com.android.wm.shell.startingsurface.SplashscreenIconDrawableFactory$ImmobileIconDrawable@d60e0d5 size: 160
+10-05 17:51:14.439  1984  2198 D SplashScreenView: Branding: view: android.view.View{7ed0ea G.ED..... ......I. 0,0-0,0 #1020526 android:id/splashscreen_branding_view} drawable: null size w: 0 h: 0
+10-05 17:51:14.440  3350  3350 I .ome.videoprobe: Using CollectorTypeCC GC.
+10-05 17:51:14.441  3350  3350 W .ome.videoprobe: Unexpected CPU variant for x86: generic.
+10-05 17:51:14.441  3350  3350 W .ome.videoprobe: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, default
+10-05 17:51:14.443  3350  3350 E .ome.videoprobe: Not starting debugger since process cannot load the jdwp agent.
+10-05 17:51:14.445  3350  3350 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+10-05 17:51:14.440  1570  1570 I RenderEngine: type=1400 audit(0.0:730): avc:  denied  { ioctl } for  path="/dev/dri/renderD128" dev="tmpfs" ino=887 ioctlcmd=0x6448 scontext=u:r:surfaceflinger:s0 tcontext=u:object_r:gpu_device:s0 tclass=chr_file permissive=1
+10-05 17:51:14.440  1570  1570 I RenderEngine: type=1400 audit(0.0:731): avc:  denied  { ioctl } for  path="/dev/dri/renderD128" dev="tmpfs" ino=887 ioctlcmd=0x6442 scontext=u:r:surfaceflinger:s0 tcontext=u:object_r:gpu_device:s0 tclass=chr_file permissive=1
+10-05 17:51:14.447  1726  2655 W com.android.internal.protolog.LogcatOnlyProtoLogImpl: ProtoLog message not processed. Failed to log it to proto. Logging it below to logcat instead.
+10-05 17:51:14.447  1726  2655 V WindowManager: Binding proc org.ome.videoprobe with config {1.0 ?mcc0mnc [en_US] ldltr sw800dp w1280dp h800dp 160dpi xlrg land night -touch qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1280, 800) mAppBounds=Rect(0, 0 - 1280, 800) mMaxBounds=Rect(0, 0 - 1280, 800) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.6 s.52 fontWeightAdjustment=0}
+10-05 17:51:14.452  1570  1570 I binder:1570_5: type=1400 audit(0.0:732): avc:  denied  { ioctl } for  path="/dev/dri/renderD128" dev="tmpfs" ino=887 ioctlcmd=0x642e scontext=u:r:surfaceflinger:s0 tcontext=u:object_r:gpu_device:s0 tclass=chr_file permissive=1
+10-05 17:51:14.452  1570  1570 I RenderEngine: type=1400 audit(0.0:733): avc:  denied  { ioctl } for  path="/dev/dri/renderD128" dev="tmpfs" ino=887 ioctlcmd=0x6445 scontext=u:r:surfaceflinger:s0 tcontext=u:object_r:gpu_device:s0 tclass=chr_file permissive=1
+10-05 17:51:14.457  1984  2569 V WindowManagerShell: UNKNOWN MESSAGE (6541979577719206723) 7413113553203
+10-05 17:51:14.457  1726  1745 V WindowManager: Sent Transition (#7) createdAt=10-05 17:51:14.422 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=29 effectiveUid=10307 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=org.ome.videoprobe/.MainActivity } baseActivity=ComponentInfo{org.ome.videoprobe/org.ome.videoprobe.MainActivity} topActivity=ComponentInfo{org.ome.videoprobe/org.ome.videoprobe.MainActivity} origActivity=null realActivity=ComponentInfo{org.ome.videoprobe/org.ome.videoprobe.MainActivity} numActivities=1 lastActiveTime=19331 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{bc96ebc Task{502352e #29 type=standard A=10307:org.ome.videoprobe isResizeable=true minWidth=-1 minHeight=-1}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 - 0, 0) topActivityInfo=ActivityInfo{5e99e45 org.ome.videoprobe.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false isTopActivityStyleFloating=false lastNonFullscreenBounds=Rect(160, 100 - 1120, 700) capturedLink=null capturedLinkTimestamp=0 appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false eligibleForLetterboxEducation= false isLetterboxEducationEnabled= false isLetterboxDoubleTapEnabled= false eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=1280 topActivityLetterboxHeight=800 topActivityLetterboxAppWidth=1280 topActivityLetterboxAppHeight=800 isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false cameraCompatTaskInfo=CameraCompatTaskInfo { freeformCameraCompatMode=inactive}}}, pipTask = null, remoteTransition = null, displayChange = null, flags = 0, debugId = 7 }
+10-05 17:51:14.457  1726  1745 V WindowManager:     startWCT=WindowContainerTransaction { changes = {} hops = [] errorCallbackToken=null taskFragmentOrganizer=null }
+10-05 17:51:14.457  1726  1745 V WindowManager:     info={id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[
+10-05 17:51:14.457  1726  1745 V WindowManager:         {WCT{RemoteToken{bc96ebc Task{502352e #29 type=standard A=10307:org.ome.videoprobe isResizeable=true minWidth=-1 minHeight=-1}}} m=OPEN f=NONE leash=Surface(name=Task=29)/@0xeb3e28e sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0 taskParent=-1},
+10-05 17:51:14.457  1726  1745 V WindowManager:         {WCT{RemoteToken{d5c6c94 Task{6776ddb #1 type=home isResizeable=true minWidth=-1 minHeight=-1}}} m=TO_BACK f=SHOW_WALLPAPER leash=Surface(name=Task=1)/@0xcbb9af7 sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0 taskParent=-1}
+10-05 17:51:14.457  1726  1745 V WindowManager:     ]}
+10-05 17:51:14.457  1984  2115 V WindowManagerShell: UNKNOWN MESSAGE (1354476626241269833) 7 android.os.BinderProxy@efb60b0 {id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@5cebd89} m=OPEN f=NONE leash=Surface(name=Task=29)/@0x5749342 sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0 taskParent=-1},{WCT{android.window.IWindowContainerToken$Stub$Proxy@7bca18e} m=TO_BACK f=SHOW_WALLPAPER leash=Surface(name=Task=1)/@0xe8cff53 sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0 taskParent=-1}]}
+10-05 17:51:14.457  1984  2115 V ShellDesktopMode: DesktopModeLogger: taskInfo map after processing changes 0
+10-05 17:51:14.458  3350  3350 D nativeloader: Configuring clns-7 for other apk /data/app/~~RL0vfkupOgpgb55ShZQHAw==/org.ome.videoprobe-29OXjucDvoJzypH1ZS_Iag==/base.apk. target_sdk_version=35, uses_libraries=, library_path=/data/app/~~RL0vfkupOgpgb55ShZQHAw==/org.ome.videoprobe-29OXjucDvoJzypH1ZS_Iag==/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/org.ome.videoprobe
+10-05 17:51:14.458  3350  3350 D CompatChangeReporter: Compat change id reported: 202956589; UID 10307; state: ENABLED
+10-05 17:51:14.459  1726  1742 W UserManagerService: Requested status bar icon for non-badged user 0
+10-05 17:51:14.461  3350  3350 V GraphicsEnvironment: Currently set values for:
+10-05 17:51:14.461  3350  3350 V GraphicsEnvironment:   angle_gl_driver_selection_pkgs=[com.android.angle, com.linecorp.b612.android, com.campmobile.snow, com.google.android.apps.tachyon]
+10-05 17:51:14.461  3350  3350 V GraphicsEnvironment:   angle_gl_driver_selection_values=[angle, native, native, native]
+10-05 17:51:14.461  3350  3350 V GraphicsEnvironment: org.ome.videoprobe is not listed in per-application setting
+10-05 17:51:14.461  3350  3350 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+10-05 17:51:14.463  1726  1742 D CompatChangeReporter: Compat change id reported: 324203798; UID 10307; state: ENABLED
+10-05 17:51:14.465  1984  2115 V WindowManagerShell: UNKNOWN MESSAGE (7933815964243868580) (#7) android.os.BinderProxy@efb60b0@0
+10-05 17:51:14.465  1984  2115 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.transition.DefaultMixedHandler@a5fdaf2
+10-05 17:51:14.465  1984  2115 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.keyguard.KeyguardTransitionHandler@8b22543
+10-05 17:51:14.465  1984  2115 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.pip.PipTransition@413bbfd
+10-05 17:51:14.465  1984  2115 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.activityembedding.ActivityEmbeddingController@25c50f2
+10-05 17:51:14.466  1984  2115 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.splitscreen.StageCoordinator@f246343
+10-05 17:51:14.466  1984  2115 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.desktopmode.DesktopTasksController@18eddc0
+10-05 17:51:14.466  1984  2115 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.recents.RecentsTransitionHandler@3e51af9
+10-05 17:51:14.466  1984  2115 V ShellRecents: UNKNOWN MESSAGE (9121280089055901232)
+10-05 17:51:14.466  1984  2115 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.back.BackAnimationController$BackTransitionHandler@c5a8a3e
+10-05 17:51:14.466  1984  2115 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.transition.RemoteTransitionHandler@29ff09f
+10-05 17:51:14.466  1984  2115 V WindowManagerShell: UNKNOWN MESSAGE (-9146248499991136778) {id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@5cebd89} m=OPEN f=NONE leash=Surface(name=Task=29)/@0x5749342 sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0 taskParent=-1},{WCT{android.window.IWindowContainerToken$Stub$Proxy@7bca18e} m=TO_BACK f=SHOW_WALLPAPER leash=Surface(name=Task=1)/@0xe8cff53 sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0 taskParent=-1}]}
+10-05 17:51:14.466  1984  2115 V WindowManagerShell: UNKNOWN MESSAGE (7551344402092077994) Pair{{types=[] flags=0x0] notFlags=0x100 checks=[{atype=home independent=true modes=[OPEN,TO_FRONT] flags=NONE mustBeTask=false order=TOP topActivity=ComponentInfo{com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher} launchCookie=null},{atype=standard independent=true modes=[CLOSE,TO_BACK] flags=NONE mustBeTask=false order=ANY topActivity=null launchCookie=null},{NOT atype=undefined independent=true modes=[] flags=NONE mustBeTask=true order=ANY topActivity=null launchCookie=null customAnim=true}]} RemoteTransition { remoteTransition = android.window.IRemoteTransition$Stub$Proxy@36415ec, appThread = android.app.IApplicationThread$Stub$Proxy@d36db5, debugName = QuickstepLaunchHome }}
+10-05 17:51:14.466  1984  2115 V WindowManagerShell: UNKNOWN MESSAGE (-957464960872531856) 7 null
+10-05 17:51:14.467  1984  2115 V WindowManagerShell: UNKNOWN MESSAGE (2316055606185049262) com.android.wm.shell.transition.DefaultTransitionHandler@4710c4a
+10-05 17:51:14.467  1984  2115 V WindowManagerShell: UNKNOWN MESSAGE (-1860574116773740964) {id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@5cebd89} m=OPEN f=NONE leash=Surface(name=Task=29)/@0x5749342 sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0 taskParent=-1},{WCT{android.window.IWindowContainerToken$Stub$Proxy@7bca18e} m=TO_BACK f=SHOW_WALLPAPER leash=Surface(name=Task=1)/@0xe8cff53 sb=Rect(0, 0 - 1280, 800) eb=Rect(0, 0 - 1280, 800) epz=Point(1280, 800) d=0 taskParent=-1}]}
+10-05 17:51:14.467  1984  2115 V WindowManagerShell: UNKNOWN MESSAGE (-5172949229302105239) android.view.animation.AnimationSet@1a3031 19 OPEN false
+10-05 17:51:14.468  3350  3350 I OMEVideo: t=1ms start mode=gl
+10-05 17:51:14.468  1984  2115 V WindowManagerShell: UNKNOWN MESSAGE (-5172949229302105239) android.view.animation.AnimationSet@5309e6d 18 OPEN true
+10-05 17:51:14.468  1984  2115 V WindowManagerShell: UNKNOWN MESSAGE (5292399587644158186) com.android.wm.shell.transition.DefaultTransitionHandler@4710c4a
+10-05 17:51:14.469  3350  3350 D CompatChangeReporter: Compat change id reported: 279646685; UID 10307; state: ENABLED
+10-05 17:51:14.469  3350  3350 D CompatChangeReporter: Compat change id reported: 309578419; UID 10307; state: ENABLED
+10-05 17:51:14.471  3350  3350 D DesktopModeFlagsUtil: Toggle override initialized to: OVERRIDE_UNSET
+10-05 17:51:14.473  2133  2133 D BootBroadcastReceiver: refresh periodic job from action=com.android.settings.battery.action.PERIODIC_JOB_RECHECK
+10-05 17:51:14.475  2133  2133 D PeriodicJobManager: schedule next alarm job at Oct 05, 2026, 19:00:00
+10-05 17:51:14.475  3350  3350 D CompatChangeReporter: Compat change id reported: 349153669; UID 10307; state: ENABLED
+10-05 17:51:14.478  3350  3350 W HWUI    : Unknown dataspace 0
+10-05 17:51:14.480  1726  2209 W WindowManager: Failed looking up window session=Session{2144416 3350:u0a10307} callers=com.android.server.wm.WindowManagerService.windowForClientLocked:6269 com.android.server.wm.Session.updateRequestedVisibleTypes:699 android.view.IWindowSession$Stub.onTransact:1004 
+10-05 17:51:14.493  1570  1719 W ServiceManagerCppClient: Permission failure: android.permission.ACCESS_SURFACE_FLINGER from uid=10307 pid=0
+10-05 17:51:14.493  1570  1622 W ServiceManagerCppClient: Permission failure: android.permission.ACCESS_SURFACE_FLINGER from uid=10307 pid=3350
+10-05 17:51:14.493  1570  1719 D PermissionCache: checking android.permission.ACCESS_SURFACE_FLINGER for uid=10307 => denied (190 us)
+10-05 17:51:14.493  1570  1622 D PermissionCache: checking android.permission.ACCESS_SURFACE_FLINGER for uid=10307 => denied (121 us)
+10-05 17:51:14.493  1570  1719 W ServiceManagerCppClient: Permission failure: android.permission.ROTATE_SURFACE_FLINGER from uid=10307 pid=0
+10-05 17:51:14.493  1570  1719 D PermissionCache: checking android.permission.ROTATE_SURFACE_FLINGER for uid=10307 => denied (63 us)
+10-05 17:51:14.493  1570  1622 W ServiceManagerCppClient: Permission failure: android.permission.ROTATE_SURFACE_FLINGER from uid=10307 pid=3350
+10-05 17:51:14.493  1570  1622 D PermissionCache: checking android.permission.ROTATE_SURFACE_FLINGER for uid=10307 => denied (76 us)
+10-05 17:51:14.493  1570  1719 W ServiceManagerCppClient: Permission failure: android.permission.INTERNAL_SYSTEM_WINDOW from uid=10307 pid=0
+10-05 17:51:14.493  1570  1719 D PermissionCache: checking android.permission.INTERNAL_SYSTEM_WINDOW for uid=10307 => denied (64 us)
+10-05 17:51:14.493  1570  1622 W ServiceManagerCppClient: Permission failure: android.permission.INTERNAL_SYSTEM_WINDOW from uid=10307 pid=3350
+10-05 17:51:14.493  1570  1622 D PermissionCache: checking android.permission.INTERNAL_SYSTEM_WINDOW for uid=10307 => denied (105 us)
+10-05 17:51:14.488  3350  3350 I RenderThread: type=1400 audit(0.0:734): avc:  denied  { read } for  name="uevent" dev="sysfs" ino=1590 scontext=u:r:untrusted_app:s0:c51,c257,c512,c768 tcontext=u:object_r:sysfs:s0 tclass=file permissive=1 app=org.ome.videoprobe
+10-05 17:51:11.958     0     0 W audit   : audit_lost=133 audit_rate_limit=5 audit_backlog_limit=64
+10-05 17:51:11.958     0     0 E audit   : rate limit exceeded
+10-05 17:51:14.496  3350  3363 I MESA    : Using gralloc0 CrOS API
+10-05 17:51:14.499  3350  3363 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_CREATE_GUEST_HANDLE
+10-05 17:51:14.501  3350  3363 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_RESOURCE_SYNC
+10-05 17:51:14.501  3350  3363 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_GUEST_VRAM
+10-05 17:51:14.501  3350  3363 I [minigbm:virgl_get_caps(586)]: Supported CAPSET IDs: 6.
+10-05 17:51:14.501  3350  3363 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:540422468
+10-05 17:51:14.501  3350  3363 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:1479815748
+10-05 17:51:14.501  3350  3363 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:1395929668
+10-05 17:51:14.501  3350  3363 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:1177695044
+10-05 17:51:14.501  3350  3363 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:944981572
+10-05 17:51:14.501  3350  3363 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:842094158
+10-05 17:51:14.501  3350  3363 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:808530000
+10-05 17:51:14.501  1300  1300 I hwservicemanager: getTransport: Cannot find entry android.hardware.configstore@1.0::ISurfaceFlingerConfigs/default in either framework or device VINTF manifest.
+10-05 17:51:14.501  3350  3363 E HWUI    : Device claims wide gamut support, cannot find matching config, error = EGL_SUCCESS
+10-05 17:51:14.501  3350  3363 W HWUI    : Failed to initialize 101010-2 format, error = EGL_SUCCESS
+10-05 17:51:14.505  1570  1622 D SurfaceFlinger: Native-Android-x86: display 1280 800 density 213.000000
+10-05 17:51:14.505  1570  1622 D SurfaceFlinger: Native-Android-x86: auto set density
+10-05 17:51:14.511  3350  3366 I OMEVideo: t=45ms gl renderer=virgl (NVIDIA GeForce RTX 2080 SUPER/PCIe/SSE2) version=OpenGL ES 3.2 Mesa 24.3.3
+10-05 17:51:14.516  2302  2302 D View    : ---- ST:requestLayout 
+10-05 17:51:14.516  2302  2302 D View    : requestLayout : getStackTrace(Thread.java:1946) <- printStackStrace(View.java:28052) <- requestLayout(View.java:28082) <- setLayoutParams(View.java:20565) <- updateViewLayout(WindowManagerGlobal.java:476) <- updateViewLayout(WindowManagerImpl.java:165) <- notifyUpdateLayoutParams(TaskbarActivityContext.java:1717) <- excludeFromMagnificationRegion(TaskbarActivityContext.java:1705) <- updateInsetsTouchability(TaskbarInsetsController.kt:433) <- updateInsetsTouchability(TaskbarDragLayerController.java:273) <- onComputeTaskbarInsets(TaskbarDragLayer.java:134) <- $r8$lambda$A8jkhOr-Udsa6VIIsWK5fVFvNhI(null:0) <- onComputeInternalInsets(D8$$SyntheticClass:0) <- dispatchOnComputeInternalInsets(ViewTreeObserver.java:1307) <- performTraversals(ViewRootImpl.java:4216) <- doTraversal(ViewRootImpl.java:2997) <- run(ViewRootImpl.java:10456) <- run(Choreographer.java:1415) <- run(Choreographer.java:1424) <- doCallbacks(Choreographer.java:1024) <- 
+10-05 17:51:14.544  1605  2371 D NuPlayerDriver: NuPlayerDriver(0xeaec03d0) created, clientPid(3350)
+10-05 17:51:14.549  1726  2107 W ServiceManagerCppClient: Permission failure: android.permission.ACCESS_SURFACE_FLINGER from uid=10307 pid=0
+10-05 17:51:14.549  1726  2107 D PermissionCache: checking android.permission.ACCESS_SURFACE_FLINGER for uid=10307 => denied (307 us)
+10-05 17:51:14.549  1726  2107 W ServiceManagerCppClient: Permission failure: android.permission.ROTATE_SURFACE_FLINGER from uid=10307 pid=0
+10-05 17:51:14.549  1726  2107 D PermissionCache: checking android.permission.ROTATE_SURFACE_FLINGER for uid=10307 => denied (22 us)
+10-05 17:51:14.549  1726  2107 W ServiceManagerCppClient: Permission failure: android.permission.INTERNAL_SYSTEM_WINDOW from uid=10307 pid=0
+10-05 17:51:14.549  1726  2107 D PermissionCache: checking android.permission.INTERNAL_SYSTEM_WINDOW for uid=10307 => denied (129 us)
+10-05 17:51:14.553  1726  1745 I ActivityTaskManager: Displayed org.ome.videoprobe/.MainActivity for user 0: +131ms
+10-05 17:51:14.553  1605  2371 D SurfaceUtils: connecting to surface 0xe5341948, reason setVideoSurfaceTexture
+10-05 17:51:14.554  1605  3377 D NuPlayer: onSetVideoSurface(0xe5344ba0, no video decoder)
+10-05 17:51:14.604  3350  3366 I OMEVideo: t=138ms first-frame centre=0,0,0
+10-05 17:51:14.606  2302  2346 D IconPackManager: Received intent action android.intent.action.PACKAGE_ADDED for org.ome.videoprobe
+10-05 17:51:14.612  2917  2917 I Finsky  : [2] amzt - Received: android.intent.action.PACKAGE_ADDED, [Ak3g56fr1HTcofDr33qsH8zgxp3-1G8jDWSlBehmau0]
+10-05 17:51:14.613  2302  2302 D View    : ---- ST:requestLayout 
+10-05 17:51:14.613  2302  2302 D View    : requestLayout : getStackTrace(Thread.java:1946) <- printStackStrace(View.java:28052) <- requestLayout(View.java:28082) <- setLayoutParams(View.java:20565) <- updateViewLayout(WindowManagerGlobal.java:476) <- updateViewLayout(WindowManagerImpl.java:165) <- notifyUpdateLayoutParams(TaskbarActivityContext.java:1717) <- excludeFromMagnificationRegion(TaskbarActivityContext.java:1705) <- updateInsetsTouchability(TaskbarInsetsController.kt:433) <- updateInsetsTouchability(TaskbarDragLayerController.java:273) <- onComputeTaskbarInsets(TaskbarDragLayer.java:134) <- $r8$lambda$A8jkhOr-Udsa6VIIsWK5fVFvNhI(null:0) <- onComputeInternalInsets(D8$$SyntheticClass:0) <- dispatchOnComputeInternalInsets(ViewTreeObserver.java:1307) <- performTraversals(ViewRootImpl.java:4216) <- doTraversal(ViewRootImpl.java:2997) <- run(ViewRootImpl.java:10456) <- run(Choreographer.java:1415) <- run(Choreographer.java:1424) <- doCallbacks(Choreographer.java:1024) <- 
+10-05 17:51:14.614  1726  3384 I MESA    : Using gralloc0 CrOS API
+10-05 17:51:14.615  1984  1984 D ControlsListingControllerImpl: ServiceConfig reloaded, count: 0
+10-05 17:51:14.616  1984  1984 D ControlsListingControllerImpl: ServiceConfig reloaded, count: 0
+10-05 17:51:14.616  1984  2174 W Looper  : Slow delivery took 43ms wmshell.anim h=android.view.Choreographer$FrameHandler c=android.view.Choreographer$FrameDisplayEventReceiver@6629187 m=0
+10-05 17:51:14.628  1726  3384 E HWUI    : Device claims wide gamut support, cannot find matching config, error = EGL_SUCCESS
+10-05 17:51:14.628  1726  3384 W HWUI    : Failed to initialize 101010-2 format, error = EGL_SUCCESS
+10-05 17:51:14.632  1984  2174 W Looper  : Drained
+10-05 17:51:14.635  2917  2917 I Finsky  : [2] SCH: Received scheduling request: Id: 12-1, Constraints: [{ L: 15000, D: 86400000, C: CHARGING_NONE, I: IDLE_NONE, N: NET_ANY, B: BATTERY_ANY }]
+10-05 17:51:14.635  2917  2917 I Finsky  : [2] DTU: Received onPackageAdded, replacing: false
+10-05 17:51:14.648  1545  1545 D Zygote  : Forked child process 3389
+10-05 17:51:14.651  2302  2346 D IconPackManager: Received intent action android.intent.action.PACKAGE_CHANGED for org.ome.videoprobe
+10-05 17:51:14.651  3389  3389 I Zygote  : seccomp disabled by setenforce 0
+10-05 17:51:14.652  1605  3380 D GenericSource: FileSource remote
+10-05 17:51:12.116     0     0 I KernelSU: handle_setresuid from 0 to 10305
+10-05 17:51:14.654  3389  3389 I ding:background: Using CollectorTypeCC GC.
+10-05 17:51:14.655  3389  3389 W ding:background: Unexpected CPU variant for x86: generic.
+10-05 17:51:14.655  3389  3389 W ding:background: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, default
+10-05 17:51:14.656  3389  3389 E ding:background: Not starting debugger since process cannot load the jdwp agent.
+10-05 17:51:14.656  1603  2002 I SampleTable: There are reordered frames present.
+10-05 17:51:14.657  3389  3389 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+10-05 17:51:14.664  1603  2002 D MediaBufferGroup: creating MemoryDealer
+10-05 17:51:14.665  1726  1756 I ActivityManager: Start proc 3389:com.android.vending:background/u0a305 for broadcast {com.android.vending/com.google.android.finsky.packagemonitor.backgroundimpl.BackgroundPackageMonitorReceiverImpl$RegisteredReceiver}
+10-05 17:51:14.668  2917  2920 I android.vending: JIT allocated 51KB for compiled code of java.lang.Object rjx.g()
+10-05 17:51:14.674  2917  2917 I Finsky  : [2] Clearing split related stale data.
+10-05 17:51:14.681  3350  3350 I OMEVideo: t=215ms prepared width=1600 height=1024 durationMs=10000
+10-05 17:51:14.686  1726  1741 W com.android.internal.protolog.LogcatOnlyProtoLogImpl: ProtoLog message not processed. Failed to log it to proto. Logging it below to logcat instead.
+10-05 17:51:14.687  1726  1741 V WindowManager: Binding proc com.android.vending:background with config {0.0 ?mcc0mnc ?localeList ?layoutDir ?swdp ?wdp ?hdp ?density ?lsize ?long ?ldr ?wideColorGamut ?orien ?uimode ?night ?touch ?keyb/?/? ?nav/? winConfig={ mBounds=Rect(0, 0 - 0, 0) mAppBounds=null mMaxBounds=Rect(0, 0 - 0, 0) mDisplayRotation=undefined mWindowingMode=undefined mActivityType=undefined mAlwaysOnTop=undefined mRotation=undefined} ?fontWeightAdjustment}
+10-05 17:51:14.688  1605  3377 I GenericSource: start
+10-05 17:51:14.700  1605  3410 D CCodec  : allocate(c2.android.avc.decoder)
+10-05 17:51:14.700  2917  2917 I Finsky  : [2] Do not start WearSupportService due to Wear service optimization
+10-05 17:51:14.703  1605  3412 D CCodec  : allocate(c2.android.aac.decoder)
+10-05 17:51:14.707  2917  2917 I Finsky  : [2] amzt - Received: android.intent.action.PACKAGE_CHANGED, [Ak3g56fr1HTcofDr33qsH8zgxp3-1G8jDWSlBehmau0]
+10-05 17:51:14.707  1726  2262 D BufferPoolAccessor2.0: bufferpool2 0x7d8eecb02388 : 0(0 size) total buffers - 0(0 size) used buffers - 1/7 (recycle/alloc) - 6/18 (fetch/transfer)
+10-05 17:51:14.707  1726  2262 D BufferPoolAccessor2.0: Destruction - bufferpool2 0x7d8eecb02388 cached: 0/0M, 0/0% in use; allocs: 7, 14% recycled; transfers: 18, 67% unfetched
+10-05 17:51:14.707  1984  2375 D BufferPoolAccessor2.0: Destruction - bufferpool2 0x7d8eecb0cc58 cached: 0/0M, 0/0% in use; allocs: 7, 14% recycled; transfers: 36, 81% unfetched
+10-05 17:51:14.707  1984  2375 D BufferPoolAccessor2.0: Destruction - bufferpool2 0x7d8eecb0dc88 cached: 0/0M, 0/0% in use; allocs: 7, 14% recycled; transfers: 38, 84% unfetched
+10-05 17:51:14.707  1984  2375 D BufferPoolAccessor2.0: Destruction - bufferpool2 0x7d8eecb0ecb8 cached: 0/0M, 0/0% in use; allocs: 7, 29% recycled; transfers: 18, 72% unfetched
+10-05 17:51:14.707  1726  2262 D BufferPoolAccessor2.0: Destruction - bufferpool2 0x7d8eecb0b2e8 cached: 0/0M, 0/0% in use; allocs: 7, 29% recycled; transfers: 20, 75% unfetched
+10-05 17:51:14.708  1605  3412 I CCodec  : Created component [c2.android.aac.decoder]
+10-05 17:51:14.708  1726  2262 D BufferPoolAccessor2.0: Destruction - bufferpool2 0x7d8eecb0a758 cached: 0/0M, 0/0% in use; allocs: 7, 29% recycled; transfers: 34, 65% unfetched
+10-05 17:51:14.708  1726  2064 D BufferPoolAccessor2.0: Destruction - bufferpool2 0x7d8eecb0ff38 cached: 0/0M, 0/0% in use; allocs: 7, 29% recycled; transfers: 20, 75% unfetched
+10-05 17:51:14.708  1605  3410 I CCodec  : Created component [c2.android.avc.decoder]
+10-05 17:51:14.708  1605  3412 D CCodecConfig: read media type: audio/mp4a-latm
+10-05 17:51:14.709  2917  2920 I android.vending: JIT allocated 67KB for compiled code of java.lang.Object rjv.o()
+10-05 17:51:14.709  1605  3412 D ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.max-count.values
+10-05 17:51:14.709  1605  3412 D ReflectedParamUpdater: extent() != 1 for single value type: output.subscribed-indices.values
+10-05 17:51:14.709  1605  3412 D ReflectedParamUpdater: extent() != 1 for single value type: input.buffers.allocator-ids.values
+10-05 17:51:14.709  1605  3412 D ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.allocator-ids.values
+10-05 17:51:14.709  1605  3412 D ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.allocator-ids.values
+10-05 17:51:14.709  1605  3412 D ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.pool-ids.values
+10-05 17:51:14.709  1605  3412 D ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.pool-ids.values
+10-05 17:51:14.710  1605  3410 D CCodecConfig: read media type: video/avc
+10-05 17:51:14.712  1605  3412 I CCodecConfig: query failed after returning 21 values (BAD_INDEX)
+10-05 17:51:14.713  1605  3412 D CCodecConfig: c2 config diff is Dict {
+10-05 17:51:14.713  1605  3412 D CCodecConfig:   c2::u32 coded.aac-packaging.value = 0
+10-05 17:51:14.713  1605  3412 D CCodecConfig:   c2::u32 coded.bitrate.value = 64000
+10-05 17:51:14.713  1605  3412 D CCodecConfig:   c2::u32 coded.pl.level = 0
+10-05 17:51:14.713  1605  3412 D CCodecConfig:   c2::u32 coded.pl.profile = 8192
+10-05 17:51:14.713  1605  3412 D CCodecConfig:   c2::i32 coding.drc.album-mode.value = 0
+10-05 17:51:14.713  1605  3412 D CCodecConfig:   c2::float coding.drc.attenuation-factor.value = 1
+10-05 17:51:14.713  1605  3412 D CCodecConfig:   c2::float coding.drc.boost-factor.value = 1
+10-05 17:51:14.713  1605  3412 D CCodecConfig:   c2::i32 coding.drc.compression-mode.value = 3
+10-05 17:51:14.713  1605  3412 D CCodecConfig:   c2::i32 coding.drc.effect-type.value = 3
+10-05 17:51:14.713  1605  3412 D CCodecConfig:   c2::float coding.drc.encoded-level.value = 0.25
+10-05 17:51:14.713  1605  3412 D CCodecConfig:   c2::float coding.drc.reference-level.value = -16
+10-05 17:51:14.713  1605  3412 D CCodecConfig:   c2::u32 input.buffers.max-size.value = 8192
+10-05 17:51:14.713  1605  3412 D CCodecConfig:   c2::u32 input.delay.value = 0
+10-05 17:51:14.713  1605  3412 D CCodecConfig:   string input.media-type.value = "audio/mp4a-latm"
+10-05 17:51:14.713  1605  3412 D CCodecConfig:   c2::u32 output.delay.value = 2
+10-05 17:51:14.713  1605  3412 D CCodecConfig:   c2::float output.drc.output-loudness.value = 0.25
+10-05 17:51:14.713  1605  3412 D CCodecConfig:   c2::u32 output.large-frame.max-size = 0
+10-05 17:51:14.713  1605  3412 D CCodecConfig:   c2::u32 output.large-frame.threshold-size = 0
+10-05 17:51:14.713  1605  3412 D CCodecConfig:   string output.media-type.value = "audio/raw"
+10-05 17:51:14.713  1605  3412 D CCodecConfig:   c2::u32 raw.channel-count.value = 1
+10-05 17:51:14.713  1605  3412 D CCodecConfig:   c2::u32 raw.channel-mask.value = 0
+10-05 17:51:14.713  1605  3412 D CCodecConfig:   c2::u32 raw.max-channel-count.value = 8
+10-05 17:51:14.713  1605  3412 D CCodecConfig:   c2::u32 raw.sample-rate.value = 44100
+10-05 17:51:14.713  1605  3412 D CCodecConfig: }
+10-05 17:51:14.713  1726  2655 W ActivityTaskManager: takeTaskSnapshot: taskId=27 not found or not visible
+10-05 17:51:14.713  1605  3412 D CCodec  : [c2.android.aac.decoder] buffers are bound to CCodec for this session
+10-05 17:51:14.713  1605  3412 D CCodecConfig: no c2 equivalents for durationUs
+10-05 17:51:14.713  1605  3412 D CCodecConfig: no c2 equivalents for track-id
+10-05 17:51:14.713  1605  3412 D CCodecConfig: no c2 equivalents for language
+10-05 17:51:14.713  1605  3412 D CCodecConfig: no c2 equivalents for encoder-delay
+10-05 17:51:14.713  1605  3412 D CCodecConfig: no c2 equivalents for encoder-padding
+10-05 17:51:14.713  1605  3412 D CCodecConfig: no c2 equivalents for flags
+10-05 17:51:14.714  1616  2061 E Codec2-ComponentInterface: We have a failed config
+10-05 17:51:14.714  1605  3412 D CCodecConfig: config failed => CORRUPTED
+10-05 17:51:14.714  1605  3412 D CCodecConfig: c2 config diff is   c2::u32 coded.bitrate.value = 62331
+10-05 17:51:14.714  1605  3412 D CCodecConfig:   c2::u32 raw.sample-rate.value = 48000
+10-05 17:51:14.714  1605  3410 D ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.max-count.values
+10-05 17:51:14.715  1605  3412 W Codec2Client: query -- param skipped: index = 1107298332.
+10-05 17:51:14.715  1605  3412 D CCodec  : client requested max input size 600, which is smaller than what component recommended (8192); overriding with component recommendation.
+10-05 17:51:14.715  1605  3412 W CCodec  : This behavior is subject to change. It is recommended that app developers double check whether the requested max input size is in reasonable range.
+10-05 17:51:14.715  1605  3412 D CCodec  : encoding statistics level = 0
+10-05 17:51:14.715  1605  3412 D CCodec  : setup formats input: AMessage(what = 0x00000000) = {
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t aac-drc-album-mode = 0
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t aac-drc-boost-level = 127
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t aac-drc-cut-level = 127
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t aac-drc-effect-type = 3
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t aac-encoded-target-level = -1
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t aac-max-output-channel_count = 8
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t aac-target-ref-level = 64
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t bitrate = 62331
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t channel-count = 1
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t channel-mask = 0
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t level = 0
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t max-input-size = 8192
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t max-output-channel-count = 8
+10-05 17:51:14.715  1605  3412 D CCodec  :   string mime = "audio/mp4a-latm"
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t profile = 2
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t sample-rate = 48000
+10-05 17:51:14.715  1605  3412 D CCodec  : }
+10-05 17:51:14.715  1605  3412 D CCodec  : setup formats output: AMessage(what = 0x00000000) = {
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t aac-drc-album-mode = 0
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t aac-drc-boost-level = 127
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t aac-drc-cut-level = 127
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t aac-drc-effect-type = 3
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t aac-drc-output-loudness = -1
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t aac-encoded-target-level = -1
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t aac-max-output-channel_count = 8
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t aac-target-ref-level = 64
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t buffer-batch-max-output-size = 0
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t buffer-batch-threshold-output-size = 0
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t channel-count = 1
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t channel-mask = 0
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t max-output-channel-count = 8
+10-05 17:51:14.715  1605  3412 D CCodec  :   string mime = "audio/raw"
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t sample-rate = 48000
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t encoder-delay = 1024
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t encoder-padding = 0
+10-05 17:51:14.715  1605  3412 D CCodec  :   int32_t android._config-pcm-encoding = 2
+10-05 17:51:14.715  1605  3412 D CCodec  : }
+10-05 17:51:14.715  1605  3410 D ReflectedParamUpdater: extent() != 1 for single value type: output.subscribed-indices.values
+10-05 17:51:14.715  1605  3412 I CCodecConfig: query failed after returning 21 values (BAD_INDEX)
+10-05 17:51:14.715  1605  3410 D ReflectedParamUpdater: extent() != 1 for single value type: input.buffers.allocator-ids.values
+10-05 17:51:14.715  1605  3410 D ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.allocator-ids.values
+10-05 17:51:14.715  2917  3011 I Finsky  : [32] RECEIVER_PACKAGE_MONITOR#logWorkEndAndFinishGoAsync: SUCCESS
+10-05 17:51:14.715  1605  3410 D ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.allocator-ids.values
+10-05 17:51:14.716  1726  1797 D BufferPoolAccessor2.0: Destruction - bufferpool2 0x7d8eecb0bc28 cached: 0/0M, 0/0% in use; allocs: 7, 14% recycled; transfers: 34, 74% unfetched
+10-05 17:51:14.716  1605  3412 I MediaCodec: MediaCodec will operate in async mode
+10-05 17:51:14.716  1605  3411 D MediaCodec: keep callback message for reclaim
+10-05 17:51:14.717  1605  3410 D ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.pool-ids.values
+10-05 17:51:14.717  1605  3410 D ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.pool-ids.values
+10-05 17:51:14.719  1726  1797 D BufferPoolAccessor2.0: Destruction - bufferpool2 0x7d8eecb0f3a8 cached: 0/0M, 0/0% in use; allocs: 7, 14% recycled; transfers: 34, 82% unfetched
+10-05 17:51:14.720  2917  3012 I Finsky  : [33] SCH: Received scheduling request: Id: 37-4, Constraints: [{ L: 0, D: 0, C: CHARGING_NONE, I: IDLE_NONE, N: NET_NONE, B: BATTERY_ANY }]
+10-05 17:51:14.723  1605  3410 D ReflectedParamUpdater: ignored struct field coded.color-format.locations
+10-05 17:51:14.724  1525  3418 I resolv  : GetAddrInfoHandler::run: {100 262244 100 983140 10305 0}
+10-05 17:51:14.724  1525  3419 I resolv  : res_nmkquery: (QUERY, IN, AAAA)
+10-05 17:51:14.724  1525  3420 I resolv  : res_nmkquery: (QUERY, IN, A)
+10-05 17:51:14.724  1525  3420 I resolv  : resolv_cache_lookup: FOUND IN CACHE entry=0x73c615065ef0
+10-05 17:51:14.724  1525  3420 I resolv  : doQuery: rcode=0, ancount=1, return value=63
+10-05 17:51:14.733  1525  3419 I resolv  : res_nsend: used send_dg 75 terrno: 0
+10-05 17:51:14.733  1525  3419 I resolv  : doQuery: rcode=0, ancount=1, return value=75
+10-05 17:51:14.733  1605  3410 D CCodecConfig: ignoring local param raw.size (0xd2001800) as it is already supported
+10-05 17:51:14.733  1605  3410 D CCodecConfig: ignoring local param default.color (0x5200180b) as it is already supported
+10-05 17:51:14.733  1605  3410 D ReflectedParamUpdater: ignored struct field raw.hdr-static-info.mastering
+10-05 17:51:14.735  1605  3410 I CCodecConfig: query failed after returning 12 values (BAD_INDEX)
+10-05 17:51:14.735  1605  3410 D CCodecConfig: c2 config diff is Dict {
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::u32 coded.pl.level = 20496
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::u32 coded.pl.profile = 20481
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::u32 coded.vui.color.matrix = 0
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::u32 coded.vui.color.primaries = 0
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::u32 coded.vui.color.range = 2
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::u32 coded.vui.color.transfer = 0
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::u32 default.color.matrix = 0
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::u32 default.color.primaries = 0
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::u32 default.color.range = 0
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::u32 default.color.transfer = 0
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::u32 input.buffers.max-size.value = 2097152
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::u32 input.delay.value = 0
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   string input.media-type.value = "video/avc"
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::u32 output.delay.value = 8
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   string output.media-type.value = "video/raw"
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::u32 raw.color.matrix = 0
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::u32 raw.color.primaries = 0
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::u32 raw.color.range = 2
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::u32 raw.color.transfer = 0
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::u32 raw.max-size.height = 240
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::u32 raw.max-size.width = 320
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::u32 raw.pixel-format.value = 35
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::i32 raw.rotation.flip = 0
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::i32 raw.rotation.value = 0
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::u32 raw.sar.height = 1
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::u32 raw.sar.width = 1
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::u32 raw.size.height = 240
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2::u32 raw.size.width = 320
+10-05 17:51:14.735  1605  3410 D CCodecConfig:   c2:
+10-05 17:51:14.735  1605  3410 W ColorUtils: expected specified color aspects (2:0:0:0)
+10-05 17:51:14.736  1605  3412 W Codec2Client: query -- param skipped: index = 1342179345.
+10-05 17:51:14.736  1605  3412 W Codec2Client: query -- param skipped: index = 2415921170.
+10-05 17:51:14.736  1605  3412 W Codec2Client: query -- param skipped: index = 1610614798.
+10-05 17:51:14.736  2315  2440 I Fitness : OnPackageChangedOperation got intent: Intent { act=android.intent.action.PACKAGE_CHANGED dat=package: flg=0x5000010 pkg=com.google.android.gms cmp=com.google.android.gms/.chimera.PersistentIntentOperationService (has extras) } [CONTEXT service_id=17 ]
+10-05 17:51:14.736  2315  2318 I gle.android.gms: Method exceeds compiler instruction limit: 31300 in java.lang.Object bpqx.apply(java.lang.Object)
+10-05 17:51:14.739  3389  3389 D ApplicationLoaders: Returning zygote-cached class loader: /system/framework/org.apache.http.legacy.jar
+10-05 17:51:14.740  3389  3389 D ApplicationLoaders: Returning zygote-cached class loader: /system_ext/framework/androidx.window.extensions.jar
+10-05 17:51:14.740  3389  3389 D ApplicationLoaders: Returning zygote-cached class loader: /system_ext/framework/androidx.window.sidecar.jar
+10-05 17:51:14.742  1605  3412 D C2Store : Using DMABUF Heaps
+10-05 17:51:14.742  1605  3408 D SurfaceUtils: disconnecting from surface 0xe5344ba8, reason onConfigure
+10-05 17:51:14.742  1605  3412 D CCodecBufferChannel: [c2.android.aac.decoder#540] Created input block pool with allocatorID 16 => poolID 17 - OK (0)
+10-05 17:51:14.742  1605  3409 D SurfaceUtils: connecting to surface 0xe5344ba8, reason connectToSurface
+10-05 17:51:14.742  1605  3409 I MediaCodec: [c2.android.avc.decoder] setting surface generation to 1643521
+10-05 17:51:14.742  1605  3409 D SurfaceUtils: disconnecting from surface 0xe5344ba8, reason connectToSurface(reconnect)
+10-05 17:51:14.742  1605  3409 D SurfaceUtils: connecting to surface 0xe5344ba0, reason connectToSurface(reconnect-with-listener)
+10-05 17:51:14.743  1605  3412 I CCodecBufferChannel: [c2.android.aac.decoder#540] Created output block pool with allocatorID 16 => poolID 36 - OK
+10-05 17:51:14.743  1605  3412 D CCodecBufferChannel: [c2.android.aac.decoder#540] Configured output block pool ids 36 => OK
+10-05 17:51:14.743  1616  1671 E Codec2-ComponentInterface: We have a failed config
+10-05 17:51:14.743  3389  3389 W ziparchive: Unable to open '/data/app/~~y4Up1tP2staEf8JQPWrf7A==/com.android.vending-rduGzotwZA5PHQvv7SDI8w==/split_config.en.dm': No such file or directory
+10-05 17:51:14.743  3389  3389 W ziparchive: Unable to open '/data/app/~~y4Up1tP2staEf8JQPWrf7A==/com.android.vending-rduGzotwZA5PHQvv7SDI8w==/split_config.en.dm': No such file or directory
+10-05 17:51:14.744  3389  3389 W ding:background: Entry not found
+10-05 17:51:14.744  1605  3412 I DMABUFHEAPS: Using DMA-BUF heap named: system
+10-05 17:51:14.744  3389  3389 W ziparchive: Unable to open '/data/app/~~y4Up1tP2staEf8JQPWrf7A==/com.android.vending-rduGzotwZA5PHQvv7SDI8w==/split_config.x86_64.dm': No such file or directory
+10-05 17:51:14.744  3389  3389 W ziparchive: Unable to open '/data/app/~~y4Up1tP2staEf8JQPWrf7A==/com.android.vending-rduGzotwZA5PHQvv7SDI8w==/split_config.x86_64.dm': No such file or directory
+10-05 17:51:14.744  3389  3389 W ding:background: Entry not found
+10-05 17:51:14.744  3389  3389 W ziparchive: Unable to open '/data/app/~~y4Up1tP2staEf8JQPWrf7A==/com.android.vending-rduGzotwZA5PHQvv7SDI8w==/split_phonesky_data_loader.dm': No such file or directory
+10-05 17:51:14.744  3389  3389 W ziparchive: Unable to open '/data/app/~~y4Up1tP2staEf8JQPWrf7A==/com.android.vending-rduGzotwZA5PHQvv7SDI8w==/split_phonesky_data_loader.dm': No such file or directory
+10-05 17:51:14.744  1616  3417 D SimpleC2Component: Using output block pool with poolID 36 => got 36 - 0
+10-05 17:51:14.744  3389  3389 W ding:background: Entry not found
+10-05 17:51:14.745  1605  3410 D CCodec  : [c2.android.avc.decoder] buffers are bound to CCodec for this session
+10-05 17:51:14.745  1605  3410 D CCodecConfig: no c2 equivalents for durationUs
+10-05 17:51:14.745  1605  3410 D CCodecConfig: no c2 equivalents for frame-count
+10-05 17:51:14.745  1605  3410 D CCodecConfig: no c2 equivalents for track-id
+10-05 17:51:14.745  1605  3410 D CCodecConfig: no c2 equivalents for language
+10-05 17:51:14.745  1605  3410 D CCodecConfig: no c2 equivalents for display-width
+10-05 17:51:14.745  1605  3410 D CCodecConfig: no c2 equivalents for display-height
+10-05 17:51:14.745  1605  3410 D CCodecConfig: no c2 equivalents for csd-1
+10-05 17:51:14.745  3389  3389 W ziparchive: Unable to open '/data/app/~~y4Up1tP2staEf8JQPWrf7A==/com.android.vending-rduGzotwZA5PHQvv7SDI8w==/split_phonesky_data_loader.config.x86_64.dm': No such file or directory
+10-05 17:51:14.745  3389  3389 W ziparchive: Unable to open '/data/app/~~y4Up1tP2staEf8JQPWrf7A==/com.android.vending-rduGzotwZA5PHQvv7SDI8w==/split_phonesky_data_loader.config.x86_64.dm': No such file or directory
+10-05 17:51:14.745  1605  3410 D CCodecConfig: no c2 equivalents for native-window
+10-05 17:51:14.745  1605  3410 D CCodecConfig: no c2 equivalents for native-window-generation
+10-05 17:51:14.745  1605  3410 D CCodecConfig: no c2 equivalents for flags
+10-05 17:51:14.745  3389  3389 W ding:background: Entry not found
+10-05 17:51:14.745  3389  3389 W ziparchive: Unable to open '/data/app/~~y4Up1tP2staEf8JQPWrf7A==/com.android.vending-rduGzotwZA5PHQvv7SDI8w==/split_phonesky_webrtc_native_lib.dm': No such file or directory
+10-05 17:51:14.745  3389  3389 W ziparchive: Unable to open '/data/app/~~y4Up1tP2staEf8JQPWrf7A==/com.android.vending-rduGzotwZA5PHQvv7SDI8w==/split_phonesky_webrtc_native_lib.dm': No such file or directory
+10-05 17:51:14.745  1605  3410 D CCodecConfig: config failed => CORRUPTED
+10-05 17:51:14.745  3389  3389 W ding:background: Entry not found
+10-05 17:51:14.745  3389  3389 W ziparchive: Unable to open '/data/app/~~y4Up1tP2staEf8JQPWrf7A==/com.android.vending-rduGzotwZA5PHQvv7SDI8w==/split_phonesky_webrtc_native_lib.config.x86_64.dm': No such file or directory
+10-05 17:51:14.745  3389  3389 W ziparchive: Unable to open '/data/app/~~y4Up1tP2staEf8JQPWrf7A==/com.android.vending-rduGzotwZA5PHQvv7SDI8w==/split_phonesky_webrtc_native_lib.config.x86_64.dm': No such file or directory
+10-05 17:51:14.745  3389  3389 W ding:background: Entry not found
+10-05 17:51:14.745  1605  3410 D CCodecConfig: c2 config diff is   c2::u32 coded.pl.level = 20491
+10-05 17:51:14.745  1605  3410 D CCodecConfig:   c2::u32 coded.pl.profile = 20484
+10-05 17:51:14.745  1605  3410 D CCodecConfig:   c2::u32 raw.size.height = 1024
+10-05 17:51:14.745  1605  3410 D CCodecConfig:   c2::u32 raw.size.width = 1600
+10-05 17:51:14.745  1605  3410 W Codec2Client: query -- param skipped: index = 1107298332.
+10-05 17:51:14.745  1605  3410 D CCodec  : client requested max input size 35792, which is smaller than what component recommended (2097152); overriding with component recommendation.
+10-05 17:51:14.745  1605  3410 W CCodec  : This behavior is subject to change. It is recommended that app developers double check whether the requested max input size is in reasonable range.
+10-05 17:51:14.745  1605  3410 D CCodec  : encoding statistics level = 0
+10-05 17:51:14.745  1605  3410 D CCodec  : setup formats input: AMessage(what = 0x00000000) = {
+10-05 17:51:14.745  1605  3410 D CCodec  :   int32_t height = 1024
+10-05 17:51:14.745  1605  3410 D CCodec  :   int32_t level = 2048
+10-05 17:51:14.745  1605  3410 D CCodec  :   int32_t max-input-size = 2097152
+10-05 17:51:14.745  1605  3410 D CCodec  :   string mime = "video/avc"
+10-05 17:51:14.745  1605  3410 D CCodec  :   int32_t profile = 8
+10-05 17:51:14.745  1605  3410 D CCodec  :   int32_t width = 1600
+10-05 17:51:14.745  1605  3410 D CCodec  :   Rect crop(0, 0, 1599, 1023)
+10-05 17:51:14.745  1605  3410 D CCodec  : }
+10-05 17:51:14.745  3389  3389 D nativeloader: Configuring clns-7 for other apk /data/app/~~y4Up1tP2staEf8JQPWrf7A==/com.android.vending-rduGzotwZA5PHQvv7SDI8w==/base.apk:/data/app/~~y4Up1tP2staEf8JQPWrf7A==/com.android.vending-rduGzotwZA5PHQvv7SDI8w==/split_config.en.apk:/data/app/~~y4Up1tP2staEf8JQPWrf7A==/com.android.vending-rduGzotwZA5PHQvv7SDI8w==/split_config.x86_64.apk:/data/app/~~y4Up1tP2staEf8JQPWrf7A==/com.android.vending-rduGzotwZA5PHQvv7SDI8w==/split_phonesky_data_loader.apk:/data/app/~~y4Up1tP2staEf8JQPWrf7A==/com.android.vending-rduGzotwZA5PHQvv7SDI8w==/split_phonesky_data_loader.config.x86_64.apk:/data/app/~~y4Up1tP2staEf8JQPWrf7A==/com.android.vending-rduGzotwZA5PHQvv7SDI8w==/split_phonesky_webrtc_native_lib.apk:/data/app/~~y4Up1tP2staEf8JQPWrf7A==/com.android.vending-rduGzotwZA5PHQvv7SDI8w==/split_phonesky_webrtc_native_lib.config.x86_64.apk. target_sdk_version=37, uses_libraries=, library_path=/data/app/~~y4Up1tP2staEf8JQPWrf7A==/com.android.vending-rduGzotwZA5PHQvv7SDI8w==/lib/x86_64:/data/app/~~y4Up1tP2staEf8JQPWrf7A==/com.android.ven
+10-05 17:51:14.746  1605  3410 D CCodec  : setup formats output: AMessage(what = 0x00000000) = {
+10-05 17:51:14.746  1605  3410 D CCodec  :   int32_t android._color-format = 2135033992
+10-05 17:51:14.746  1605  3410 D CCodec  :   int32_t android._video-scaling = 1
+10-05 17:51:14.746  1605  3410 D CCodec  :   int32_t rotation-degrees = 0
+10-05 17:51:14.746  1605  3410 D CCodec  :   int32_t color-standard = 1
+10-05 17:51:14.746  1605  3410 D CCodec  :   int32_t color-range = 2
+10-05 17:51:14.746  1605  3410 D CCodec  :   int32_t color-transfer = 3
+10-05 17:51:14.746  1605  3410 D CCodec  :   int32_t sar-height = 1
+10-05 17:51:14.746  1605  3410 D CCodec  :   int32_t sar-width = 1
+10-05 17:51:14.746  1605  3410 D CCodec  :   Rect crop(0, 0, 1599, 1023)
+10-05 17:51:14.746  1605  3410 D CCodec  :   int32_t width = 1600
+10-05 17:51:14.746  1605  3410 D CCodec  :   int32_t height = 1024
+10-05 17:51:14.746  1605  3410 D CCodec  :   int32_t max-height = 240
+10-05 17:51:14.746  1605  3410 D CCodec  :   int32_t max-width = 320
+10-05 17:51:14.746  1605  3410 D CCodec  :   string mime = "video/raw"
+10-05 17:51:14.746  1605  3410 D CCodec  :   int32_t android._dataspace = 260
+10-05 17:51:14.746  1605  3410 D CCodec  :   int32_t color-format = 2130708361
+10-05 17:51:14.746  1605  3410 D CCodec  : }
+10-05 17:51:14.746  1605  3410 I CCodecConfig: query failed after returning 12 values (BAD_INDEX)
+10-05 17:51:14.746  1605  3410 D CCodecConfig: c2 config diff is   c2::u32 raw.max-size.height = 1024
+10-05 17:51:14.746  1605  3410 D CCodecConfig:   c2::u32 raw.max-size.width = 1600
+10-05 17:51:14.746  1616  3417 I C2SoftAacDec: Reconfiguring decoder: 0->48000 Hz, 0->1 channels
+10-05 17:51:14.747  1605  3409 I MediaCodec: MediaCodec will operate in async mode
+10-05 17:51:14.747  1605  3408 D MediaCodec: keep callback message for reclaim
+10-05 17:51:14.748  1605  3412 D CCodecConfig: c2 config diff is   c2::u32 raw.channel-mask.value = 4
+10-05 17:51:14.748  1605  3412 D CCodecBuffers: [c2.android.aac.decoder#540:Output[N]] popFromStashAndRegister: at -21333us, output format changed to AMessage(what = 0x00000000) = {
+10-05 17:51:14.748  1605  3412 D CCodecBuffers:   int32_t aac-drc-album-mode = 0
+10-05 17:51:14.748  1605  3412 D CCodecBuffers:   int32_t aac-drc-boost-level = 127
+10-05 17:51:14.748  1605  3412 D CCodecBuffers:   int32_t aac-drc-cut-level = 127
+10-05 17:51:14.748  1605  3412 D CCodecBuffers:   int32_t aac-drc-effect-type = 3
+10-05 17:51:14.748  1605  3412 D CCodecBuffers:   int32_t aac-drc-output-loudness = -1
+10-05 17:51:14.748  1605  3412 D CCodecBuffers:   int32_t aac-encoded-target-level = -1
+10-05 17:51:14.748  1605  3412 D CCodecBuffers:   int32_t aac-max-output-channel_count = 8
+10-05 17:51:14.748  1605  3412 D CCodecBuffers:   int32_t aac-target-ref-level = 64
+10-05 17:51:14.748  1605  3412 D CCodecBuffers:   int32_t buffer-batch-max-output-size = 0
+10-05 17:51:14.748  1605  3412 D CCodecBuffers:   int32_t buffer-batch-threshold-output-size = 0
+10-05 17:51:14.748  1605  3412 D CCodecBuffers:   int32_t channel-count = 1
+10-05 17:51:14.748  1605  3412 D CCodecBuffers:   int32_t channel-mask = 4
+10-05 17:51:14.748  1605  3412 D CCodecBuffers:   int32_t max-output-channel-count = 8
+10-05 17:51:14.748  1605  3412 D CCodecBuffers:   string mime = "audio/raw"
+10-05 17:51:14.748  1605  3412 D CCodecBuffers:   int32_t sample-rate = 48000
+10-05 17:51:14.748  1605  3412 D CCodecBuffers:   int32_t encoder-delay = 1024
+10-05 17:51:14.748  1605  3412 D CCodecBuffers:   int32_t encoder-padding = 0
+10-05 17:51:14.748  1605  3412 D CCodecBuffers:   int32_t android._config-pcm-encoding = 2
+10-05 17:51:14.748  1605  3412 D CCodecBuffers: }
+10-05 17:51:14.757  1566  2083 W ServiceManagerCppClient: Permission failure: android.permission.MODIFY_PHONE_STATE from uid=10307 pid=3350
+10-05 17:51:14.757  1566  2083 D PermissionCache: checking android.permission.MODIFY_PHONE_STATE for uid=10307 => denied (55 us)
+10-05 17:51:14.757  1566  2083 W ServiceManagerCppClient: Permission failure: android.permission.WRITE_SECURE_SETTINGS from uid=10307 pid=3350
+10-05 17:51:14.757  1566  2083 D PermissionCache: checking android.permission.WRITE_SECURE_SETTINGS for uid=10307 => denied (20 us)
+10-05 17:51:14.757  1566  2083 W ServiceManagerCppClient: Permission failure: android.permission.MODIFY_AUDIO_ROUTING from uid=10307 pid=3350
+10-05 17:51:14.757  1566  2083 D PermissionCache: checking android.permission.MODIFY_AUDIO_ROUTING for uid=10307 => denied (29 us)
+10-05 17:51:14.757  1566  2083 E ServiceUtilities: Request requires android.permission.MODIFY_PHONE_STATE or android.permission.WRITE_SECURE_SETTINGS
+10-05 17:51:14.757  1566  2083 W AudioFlinger: createTrack_l(): mismatch between requested flags (00000008) and output flags (00000006)
+10-05 17:51:14.759  1566  2083 D AudioFlinger: Client defaulted notificationFrames to 12288 for frameCount 24576
+10-05 17:51:14.760  1605  3410 W Codec2Client: query -- param skipped: index = 1342179345.
+10-05 17:51:14.760  1605  3410 W Codec2Client: query -- param skipped: index = 2415921170.
+10-05 17:51:14.760  1605  3410 W Codec2Client: query -- param skipped: index = 1610614798.
+10-05 17:51:14.760  1605  3410 D CCodecBufferChannel: [c2.android.avc.decoder#333] Created input block pool with allocatorID 16 => poolID 18 - OK (0)
+10-05 17:51:14.761  2917  2920 I android.vending: JIT allocated 65KB for compiled code of java.lang.Object rjv.q()
+10-05 17:51:14.761  2315  2382 I GmscoreIpa: Using regular flags by method 2 [CONTEXT service_id=255 ]
+10-05 17:51:14.762  1605  3410 D CCodecBufferChannel: [c2.android.avc.decoder#333] Query output surface allocator returned 0 params => BAD_INDEX (6)
+10-05 17:51:14.763  1726  2655 D FileUtils: Rounded bytes from 8323198976 to 16000000000
+10-05 17:51:14.763  3389  3389 V GraphicsEnvironment: Currently set values for:
+10-05 17:51:14.763  3389  3389 V GraphicsEnvironment:   angle_gl_driver_selection_pkgs=[com.android.angle, com.linecorp.b612.android, com.campmobile.snow, com.google.android.apps.tachyon]
+10-05 17:51:14.763  3389  3389 V GraphicsEnvironment:   angle_gl_driver_selection_values=[angle, native, native, native]
+10-05 17:51:14.763  3389  3389 V GraphicsEnvironment: com.android.vending is not listed in per-application setting
+10-05 17:51:14.763  3389  3389 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+10-05 17:51:14.765  2315  2315 I IcingInternalCorpora: Contacts corpus disabled.
+10-05 17:51:14.765  1605  3410 I CCodecBufferChannel: [c2.android.avc.decoder#333] Created output block pool with allocatorID 18 => poolID 37 - OK
+10-05 17:51:14.766  2315  2972 I Icing   : Storage manager: low false usage 1.57MB avail 48.49GB capacity 62.69GB
+10-05 17:51:14.767  1605  3410 D CCodecBufferChannel: [c2.android.avc.decoder#333] Configured output block pool ids 37 => OK
+10-05 17:51:14.767  2315  2745 I Icing   : IndexChimeraService.getServiceInterface callingPackage=com.google.android.gms componentName=ContactsIndexer serviceId=33
+10-05 17:51:14.767  1605  3410 D Codec2-OutputBufferQueue: C2SurfaceSyncMemory created 20(20)
+10-05 17:51:14.767  1605  3410 D Codec2-OutputBufferQueue: remote graphic buffer migration 0/0
+10-05 17:51:14.767  2315  2438 I Fitness : FitCleanupIntentOperation received Intent android.intent.action.PACKAGE_CHANGED [CONTEXT service_id=17 ]
+10-05 17:51:14.770  1605  3410 D Codec2Client: setOutputSurface -- failed to set consumer usage (6/BAD_INDEX)
+10-05 17:51:14.770  1605  3410 D Codec2Client: setOutputSurface -- generation=1643521 consumer usage=0x900 sync
+10-05 17:51:14.770  1616  1672 D C2BqBuffer: local generation change 1643521 , bqId: 14388140441602 migrated buffers # 0
+10-05 17:51:14.770  1605  3410 D Codec2Client: Surface configure completed
+10-05 17:51:14.771  2315  2506 I Auth    : [SupervisedAccountIntentOperation] onHandleIntent: android.intent.action.PACKAGE_ADDED [CONTEXT service_id=42 ]
+10-05 17:51:14.771  2315  2440 I ProximityAuth: [RecentAppsMediator] Package added: (user=UserHandle{0}) org.ome.videoprobe
+10-05 17:51:14.771  2315  2508 I Blockstore: [DataStoreImpl] Clearing Blockstore Data for package org.ome.videoprobe [CONTEXT service_id=258 ]
+10-05 17:51:14.772  2315  2506 W Dck     : Disable DCK module - Android debug build without fullaccess [CONTEXT service_id=289 ]
+10-05 17:51:14.772  2315  2506 I Dck     : Dck module not eligible for asynchronous downloading [CONTEXT service_id=289 ]
+10-05 17:51:14.773  2315  2506 W AppInstallOperation: FDL Migration::InstallIntentOperation by FDL Module [CONTEXT service_id=77 ]
+10-05 17:51:14.773  3389  3389 I Finsky:background: [2] Process created at version: 53.3.21-34 [0] [PR] 986224237
+10-05 17:51:14.773  2917  2920 I android.vending: JIT allocated 59KB for compiled code of java.lang.Object rjv.i()
+10-05 17:51:14.775  2315  2438 W GCM     : Unexpected forwarded intent: Intent { act=android.intent.action.PACKAGE_ADDED dat=package: flg=0x4000010 pkg=com.google.android.gms cmp=com.google.android.gms/.chimera.PersistentIntentOperationService (has extras) }
+10-05 17:51:14.775  2315  2381 I FontLog : Package org.ome.videoprobe has no metadata [CONTEXT service_id=132 ]
+10-05 17:51:14.776  1984  2115 V WindowManagerShell: UNKNOWN MESSAGE (5216177164274512366) false (#7) android.os.BinderProxy@efb60b0@0
+10-05 17:51:14.776  2315  3427 I Fitness : OnPackageChangedOperation got intent: Intent { act=android.intent.action.PACKAGE_CHANGED dat=package: flg=0x5000010 pkg=com.google.android.gms cmp=com.google.android.gms/.chimera.PersistentIntentOperationService (has extras) } [CONTEXT service_id=17 ]
+10-05 17:51:14.777  2315  2506 I FraudProtectUtils: Not in testing population, skipping local test bank apps. [CONTEXT service_id=469 ]
+10-05 17:51:14.777  2315  2506 I FraudProtectUtils: Latest bank app list size: 13, org.ome.videoprobe isBankApp: false [CONTEXT service_id=469 ]
+10-05 17:51:14.777  2315  2506 I PackageInstallIntentOp: Package org.ome.videoprobe is not a bank app. Skipping updates. [CONTEXT service_id=469 ]
+10-05 17:51:14.778  2315  2647 W NetworkScheduler: Unexpected forwarded intent: Intent { act=android.intent.action.PACKAGE_ADDED dat=package: flg=0x4000010 pkg=com.google.android.gms cmp=com.google.android.gms/.chimera.PersistentIntentOperationService (has extras) }
+10-05 17:51:14.779  1726  1745 V WindowManager: Finish Transition (#7): created at 10-05 17:51:14.422 collect-started=0.017ms request-sent=3.495ms started=4.345ms ready=33.962ms sent=34.944ms finished=355.506ms
+10-05 17:51:14.779  2315  3427 I Fitness : FitCleanupIntentOperation received Intent android.intent.action.PACKAGE_CHANGED [CONTEXT service_id=17 ]
+10-05 17:51:14.780  1984  2115 V WindowManagerShell: UNKNOWN MESSAGE (-1071245984949193362) 0
+10-05 17:51:14.780  1984  2115 V WindowManagerShell: UNKNOWN MESSAGE (5665710760068723116)
+10-05 17:51:14.781  1726  1741 W UserManagerService: Requested status bar icon for non-badged user 0
+10-05 17:51:14.783  2315  3058 I NearbyDiscovery: processGrantSlicePermission: org.ome.videoprobe [CONTEXT service_id=265 ]
+10-05 17:51:14.784  3389  3389 I Finsky:background: [2] [BGP] Initializing early flags...
+10-05 17:51:14.784  3389  3389 I Finsky:background: [2] [BGP] Initializing Gservices...
+10-05 17:51:14.784  3389  3389 I Finsky:background: [2] [BGP] Initializing flags...
+10-05 17:51:14.785  1726  1878 D EthernetNetworkFactory: eth0: onNetworkUnneeded for request: NetworkRequest [ REQUEST id=86, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10261 RequestorUid: 10260 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-05 17:51:14.786  1726  1741 D ConnectivityService: requestNetwork for uid/pid:10260/1984 asUid: 10307 activeRequest: null callbackRequest: 111 [NetworkRequest [ REQUEST id=112, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10307 RequestorUid: 10260 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647 isUidTracked: false declaredMethods: ALL
+10-05 17:51:14.790  1726  1878 D EthernetNetworkFactory: eth0: onNetworkNeeded for request: NetworkRequest [ REQUEST id=112, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10307 RequestorUid: 10260 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-05 17:51:14.790  1726  1878 D EthernetNetworkFactory: IpClient already started
+10-05 17:51:14.790  1726  1742 W UserManagerService: Requested status bar icon for non-badged user 0
+10-05 17:51:14.790  1726  1865 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=112, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10307 RequestorUid: 10260 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-05 17:51:14.790  2315  2972 D nativeloader: Load /data/app/~~G36QJhZqgSlw2xknhqZovQ==/com.google.android.gms-X4yhhOIFDF2TmBFXy-Atcw==/base.apk!/lib/x86_64/libAppDataSearch.so using ns clns-9 from class loader (caller=/data/app/~~G36QJhZqgSlw2xknhqZovQ==/com.google.android.gms-X4yhhOIFDF2TmBFXy-Atcw==/base.apk): ok
+10-05 17:51:14.791  1726  1865 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=112, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10307 RequestorUid: 10260 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-05 17:51:14.791  1726  1865 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=112, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10307 RequestorUid: 10260 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-05 17:51:14.791  1726  1879 D ConnectivityService: NetReassign [112 : null → 100] [c 0] [a 2] [i 2]
+10-05 17:51:14.791  2315  2972 W native  : W0000 00:00:1791222674.791690    2972 model-utils.cc:17] No CRC32, most likely an old model; skip CRC32 check
+10-05 17:51:14.792  2315  2972 I native  : I0000 00:00:1791222674.792032    2972 permission-checker.cc:82] Creating PermissionChecker based on ACL with config_version 1 having 9 permissions defined.
+10-05 17:51:14.792  2315  2972 W native  : W0000 00:00:1791222674.792282    2972 words-map.cc:34] INVALID_ARGUMENT: Empty URI
+10-05 17:51:14.792  2315  2972 W native  : W0000 00:00:1791222674.792299    2972 words-map.cc:38] WordsMap was not properly initialized
+10-05 17:51:14.793  1566  1646 D audioserver: logFgsApiBegin: FGS Logger Transaction failed, -129
+10-05 17:51:14.796  1525  3431 I resolv  : GetAddrInfoHandler::run: {100 786532 100 983140 10306 0}
+10-05 17:51:14.796  1525  3432 I resolv  : res_nmkquery: (QUERY, IN, AAAA)
+10-05 17:51:14.796  1525  3433 I resolv  : res_nmkquery: (QUERY, IN, A)
+10-05 17:51:14.797  2917  2920 I android.vending: JIT allocated 55KB for compiled code of java.lang.Object rjv.O()
+10-05 17:51:14.799  1525  3432 I resolv  : res_nsend: used send_dg 272 terrno: 0
+10-05 17:51:14.799  1525  3432 I resolv  : doQuery: rcode=0, ancount=8, return value=272
+10-05 17:51:14.800  2934  2934 D CompatChangeReporter: Compat change id reported: 311402873; UID 10209; state: ENABLED
+10-05 17:51:14.800  2934  2934 D CompatChangeReporter: Compat change id reported: 323349338; UID 10209; state: ENABLED
+10-05 17:51:14.801  1726  2655 D CompatChangeReporter: Compat change id reported: 311402873; UID 10209; state: ENABLED
+10-05 17:51:14.801  1726  2655 D CompatChangeReporter: Compat change id reported: 323349338; UID 10209; state: ENABLED
+10-05 17:51:14.802  1525  3433 I resolv  : res_nsend: used send_dg 176 terrno: 0
+10-05 17:51:14.802  1525  3433 I resolv  : doQuery: rcode=0, ancount=8, return value=176
+10-05 17:51:14.812  2315  2315 D BoundBrokerSvc: onBind: Intent { act=com.google.android.gms.icing.LIGHTWEIGHT_INDEX_SERVICE dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentApiService }
+10-05 17:51:14.812  2315  2315 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.icing.LIGHTWEIGHT_INDEX_SERVICE dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentApiService }
+10-05 17:51:14.818  2315  2933 I Blockstore: [DataStoreImpl] Keyless data not found or its IsLastInstallationData = false. [CONTEXT service_id=258 ]
+10-05 17:51:14.830  3389  3389 I Finsky:background: [2] Finished reading experiment flags from file [0tGUNCGIkbk4o6-fQ335kUYSKwVj4lusnHT-A5Dsy08] numFlags=2712.
+10-05 17:51:14.831  2302  2302 D VRI[QuickstepLauncher]: visibilityChanged oldVisibility=true newVisibility=false
+10-05 17:51:14.833  2302  2302 D BaseDepthController: setSurface:
+10-05 17:51:14.833  2302  2302 D BaseDepthController: 	mWaitingOnSurfaceValidity: false
+10-05 17:51:14.833  2302  2302 D BaseDepthController: 	mSurface: null
+10-05 17:51:14.833  2302  2302 D StateManager: goToState - fromState: Normal, toState: Normal, partial trace:
+10-05 17:51:14.833  2302  2302 D StateManager: 	at com.android.launcher3.statemanager.StateManager.moveToRestState(StateManager.java:453)
+10-05 17:51:14.833  2302  2302 D StateManager: 	at com.android.launcher3.statemanager.StateManager.moveToRestState(StateManager.java:444)
+10-05 17:51:14.833  2302  2302 D StateManager: 	at com.android.launcher3.statemanager.StatefulActivity.onStop(StatefulActivity.java:119)
+10-05 17:51:14.833  2302  2302 D StatsLog: LAUNCHER_ONSTOP
+10-05 17:51:14.833  1726  2210 I AppWidgetServiceImpl: setAppWidgetHidden() 0
+10-05 17:51:14.844  3389  3441 D nativeloader: Load /data/app/~~y4Up1tP2staEf8JQPWrf7A==/com.android.vending-rduGzotwZA5PHQvv7SDI8w==/split_config.x86_64.apk!/lib/x86_64/libmappedcountercacheversionjni.so using ns clns-7 from class loader (caller=/data/app/~~y4Up1tP2staEf8JQPWrf7A==/com.android.vending-rduGzotwZA5PHQvv7SDI8w==/base.apk): ok
+10-05 17:51:14.853  1525  1541 I netd    : tetherGetStats() -> {[]} <1.13ms>
+10-05 17:51:14.853  1605  3409 W ResourceManagerServiceUtils: Ignoring request to add new resource entry with value <= 0
+10-05 17:51:14.856  2315  2972 I Icing   : updateResources: need to parse ctak{com.google.android.gms}
+10-05 17:51:14.858  1616  3416 D SimpleC2Component: Using output block pool with poolID 37 => got 37 - 0
+10-05 17:51:14.862  2315  2315 D BoundBrokerSvc: onBind: Intent { act=com.google.android.gms.feedback.internal.IFeedbackService dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsBoundBrokerService }
+10-05 17:51:14.862  2315  2315 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.feedback.internal.IFeedbackService dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsBoundBrokerService }
+10-05 17:51:14.869  1605  1964 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_CREATE_GUEST_HANDLE
+10-05 17:51:14.869  1605  1964 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_RESOURCE_SYNC
+10-05 17:51:14.869  1605  1964 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_GUEST_VRAM
+10-05 17:51:14.869  1605  1964 I [minigbm:virgl_get_caps(586)]: Supported CAPSET IDs: 6.
+10-05 17:51:14.869  1605  1964 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:540422468
+10-05 17:51:14.869  1605  1964 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:1479815748
+10-05 17:51:14.869  1605  1964 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:1395929668
+10-05 17:51:14.869  1605  1964 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:1177695044
+10-05 17:51:14.869  1605  1964 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:944981572
+10-05 17:51:14.869  1605  1964 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:842094158
+10-05 17:51:14.869  1605  1964 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:808530000
+10-05 17:51:14.871  3389  3389 I Finsky:background: [2] Finished reading experiment flags from file [Se-xCc4LzNyh3UrKMIU2sUf-PUKz4oQEbpKZDMuaFno] numFlags=2100.
+10-05 17:51:14.873  1616  3416 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_CREATE_GUEST_HANDLE
+10-05 17:51:14.873  1616  3416 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_RESOURCE_SYNC
+10-05 17:51:14.873  1616  3416 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_GUEST_VRAM
+10-05 17:51:14.873  1616  3416 I [minigbm:virgl_get_caps(586)]: Supported CAPSET IDs: 6.
+10-05 17:51:14.873  1616  3416 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:540422468
+10-05 17:51:14.873  1616  3416 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:1479815748
+10-05 17:51:14.873  1616  3416 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:1395929668
+10-05 17:51:14.873  1616  3416 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:1177695044
+10-05 17:51:14.873  1616  3416 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:944981572
+10-05 17:51:14.873  1616  3416 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:842094158
+10-05 17:51:14.873  1616  3416 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:808530000
+10-05 17:51:14.878  1726  1788 D CompatChangeReporter: Compat change id reported: 311208629; UID 10209; state: ENABLED
+10-05 17:51:14.890  1605  3410 D CCodecConfig: c2 config diff is   c2::u32 output.delay.value = 5
+10-05 17:51:14.891  1605  3410 D Codec2-OutputBufferQueue: set max dequeue count 15 from update
+10-05 17:51:14.897  3350  3375 W InteractionJankMonitor: Initializing without READ_DEVICE_CONFIG permission. enabled=true, interval=1, missedFrameThreshold=3, frameTimeThreshold=64, package=org.ome.videoprobe
+10-05 17:51:14.907  2315  2753 W PlayGamesServices[UiUtils]: AppVersion: Cannot find the installed destination app.
+10-05 17:51:14.908  2315  2753 I GetServiceValidatorImpl: onGetService() from Client SDK version [263635000], Module version [263635038], PGA version [0], Account [Account {name=<<default account>>, type=com.google}], Calling package [com.google.android.gms], Game package [com.google.android.gms] [CONTEXT service_id=1 ]
+10-05 17:51:14.908  2315  2753 I GetGamesServiceReqFacto: Parsing request with ignored arguments. signInOptionsBundle [Bundle[{com.google.android.gms.signin.internal.serverClientId=null, com.google.android.gms.signin.internal.usePromptModeForAuthCode=true, com.google.android.gms.signin.internal.logSessionId=null, com.google.android.gms.signin.internal.hostedDomain=null, com.google.android.gms.signin.internal.offlineAccessRequested=false, com.google.android.gms.signin.internal.waitForAccessTokenRefresh=false, com.google.android.gms.signin.internal.clientRequestedAccount=Account {name=<<default account>>, type=com.google}, com.google.android.gms.signin.internal.idTokenRequested=false, com.google.android.gms.signin.internal.forceCodeForRefreshToken=false}]], isRetryingSignIn [false], skipWelcomePopup [false], requireGooglePlus [false]
+10-05 17:51:14.909  2315  2753 I GetGamesServiceReqFacto: Replacing request for `games` scope with `games_lite`
+10-05 17:51:14.929  3389  3389 I Finsky:background: [2] [BGP] Initializing crash detector...
+10-05 17:51:14.944  3389  3389 I Finsky:background: [2] amzi - Registering in memory receiver for android.intent.action.PACKAGE_ADDED and android.intent.action.PACKAGE_REMOVED
+10-05 17:51:14.947  1605  3410 D CCodecConfig: c2 config diff is   c2::u32 raw.crop.height = 1024
+10-05 17:51:14.947  1605  3410 D CCodecConfig:   c2::u32 raw.crop.left = 0
+10-05 17:51:14.947  1605  3410 D CCodecConfig:   c2::u32 raw.crop.top = 0
+10-05 17:51:14.947  1605  3410 D CCodecConfig:   c2::u32 raw.crop.width = 1600
+10-05 17:51:14.952  3350  3361 W MediaPlayerNative: info/warning (3, 0)
+10-05 17:51:14.953  3350  3350 I OMEVideo: t=486ms info what=3 extra=0
+10-05 17:51:14.953  1984  2196 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=android.view.ViewRootImpl$$ExternalSyntheticLambda11@45bb551
+10-05 17:51:14.962  2917  3036 I Finsky  : [39] WM::SCH: Logging work initialize for 12-1
+10-05 17:51:14.972  2315  3448 I SignInPerformer-0: Handling request [GetGamesServiceRequest{gamePackageName=com.google.android.gms, gameUid=10306, gamePlayServicesClientLibraryVersion=263635000, sdkVariation=1052947, requestedScopes=[https://www.googleapis.com/auth/games_lite], callingIdentity=CallingIdentity{uid=10306, pid=2315, packageName=com.google.android.gms, playServicesClientLibraryVersion=263635000}, requestedAccount=Optional.absent(), forceResolveAccountKey=null, requestedServiceMode=2, initiatorCategory=1, signInType=Optional.absent()}], isFirstPartyCaller [true] [CONTEXT service_id=1 ]
+10-05 17:51:14.973  2315  3448 I SignInPerformer-0: Successfully brokered first-party unauthenticated GamesService [CONTEXT service_id=1 ]
+10-05 17:51:14.973  3389  3389 I Finsky:background: [2] This process start was not selected for Play memory metrics collection.
+10-05 17:51:14.975  2302  2302 W FrameTracker: Missed SF frame:PREDICTION_ERROR, 4044, 8111178, CUJ=J<TASKBAR_COLLAPSE::Home to App>
+10-05 17:51:14.975  2302  2302 W FrameTracker: Missed App frame:UNKNOWN: 24, 4063, 0, CUJ=J<TASKBAR_COLLAPSE::Home to App>
+10-05 17:51:14.975  2302  2302 W FrameTracker: Missed SF frame:UNKNOWN: 24, 4063, 0, CUJ=J<TASKBAR_COLLAPSE::Home to App>
+10-05 17:51:14.975  2302  2302 W FrameTracker: Missing HWUI jank callback for vsyncId: 4063, CUJ=J<TASKBAR_COLLAPSE::Home to App>
+10-05 17:51:14.975  2302  2302 W FrameTracker: Missed SF frame:UNKNOWN: 80, 4094, 66066530, CUJ=J<TASKBAR_COLLAPSE::Home to App>
+10-05 17:51:14.975  2302  2302 W FrameTracker: Missed SF frame:UNKNOWN: 80, 4125, 66825656, CUJ=J<TASKBAR_COLLAPSE::Home to App>
+10-05 17:51:14.975  2302  2302 W FrameTracker: Missed SF frame:UNKNOWN: 80, 4168, 29451734, CUJ=J<TASKBAR_COLLAPSE::Home to App>
+10-05 17:51:14.975  2302  2302 W FrameTracker: Missed SF frame:UNKNOWN: 80, 4202, 49435865, CUJ=J<TASKBAR_COLLAPSE::Home to App>
+10-05 17:51:14.975  2302  2302 W FrameTracker: Missed SF frame:UNKNOWN: 80, 4229, 33146452, CUJ=J<TASKBAR_COLLAPSE::Home to App>
+10-05 17:51:14.975  2302  2302 W FrameTracker: Missed SF frame:UNKNOWN: 80, 4260, 25104552, CUJ=J<TASKBAR_COLLAPSE::Home to App>
+10-05 17:51:14.975  2302  2302 W FrameTracker: Missed SF frame:UNKNOWN: 80, 4291, 32567078, CUJ=J<TASKBAR_COLLAPSE::Home to App>
+10-05 17:51:14.975  2302  2302 W FrameTracker: Missed SF frame:UNKNOWN: 80, 4316, 0, CUJ=J<TASKBAR_COLLAPSE::Home to App>
+10-05 17:51:14.975  2302  2302 W FrameTracker: Missing HWUI jank callback for vsyncId: 4316, CUJ=J<TASKBAR_COLLAPSE::Home to App>
+10-05 17:51:14.975  2302  2302 W FrameTracker: Missing HWUI jank callback for vsyncId: 4341, CUJ=J<TASKBAR_COLLAPSE::Home to App>
+10-05 17:51:14.975  2302  2302 W FrameTracker: Missed App frame:UNKNOWN: 88, 4366, 80398556, CUJ=J<TASKBAR_COLLAPSE::Home to App>
+10-05 17:51:14.975  2302  2302 W FrameTracker: Missed SF frame:UNKNOWN: 88, 4366, 80398556, CUJ=J<TASKBAR_COLLAPSE::Home to App>
+10-05 17:51:14.975  2302  2302 W FrameTracker: Missed SF frame:UNKNOWN: 80, 4391, 75236382, CUJ=J<TASKBAR_COLLAPSE::Home to App>
+10-05 17:51:14.975  2302  2302 W FrameTracker: Missed SF frame:UNKNOWN: 80, 4416, 66441152, CUJ=J<TASKBAR_COLLAPSE::Home to App>
+10-05 17:51:14.975  2302  2302 W FrameTracker: Missed SF frame:UNKNOWN: 80, 4479, 17828430, CUJ=J<TASKBAR_COLLAPSE::Home to App>
+10-05 17:51:14.975  2302  2302 W FrameTracker: Missed SF frame:UNKNOWN: 80, 4504, 19703656, CUJ=J<TASKBAR_COLLAPSE::Home to App>
+10-05 17:51:14.975  2302  2302 W FrameTracker: Missed SF frame:UNKNOWN: 80, 4529, 14932782, CUJ=J<TASKBAR_COLLAPSE::Home to App>
+10-05 17:51:14.975  2302  2302 W FrameTracker: Missed SF frame:UNKNOWN: 80, 4554, 25095008, CUJ=J<TASKBAR_COLLAPSE::Home to App>
+10-05 17:51:14.975  2302  2302 W FrameTracker: Missed SF frame:UNKNOWN: 80, 4573, 4085078, CUJ=J<TASKBAR_COLLAPSE::Home to App>
+10-05 17:51:14.976  3389  3389 I Finsky:background: [2] amzi - Received: android.intent.action.PACKAGE_CHANGED, [Ak3g56fr1HTcofDr33qsH8zgxp3-1G8jDWSlBehmau0]
+10-05 17:51:14.978  2302  2335 V PerfettoTrigger: Not triggering com.android.telemetry.interaction-jank-monitor-61 - not enough time since last trigger
+10-05 17:51:14.984  2315  3448 I GetGamesServiceV2Op: Successfully brokered GamesService for request gba{gamePackageName=com.google.android.gms, gameUid=10306, gamePlayServicesClientLibraryVersion=263635000, sdkVariation=1052947, requestedScopes=[https://www.googleapis.com/auth/games_lite], callingIdentity=CallingIdentity{uid=10306, pid=2315, packageName=com.google.android.gms, playServicesClientLibraryVersion=263635000}, requestedAccount=Optional.absent(), forceResolveAccountKey=null, requestedServiceMode=2, initiatorCategory=1, signInType=Optional.absent()} [CONTEXT service_id=1 ]
+10-05 17:51:14.989  2917  3061 I Finsky  : [47] SCH: Scheduling phonesky job Id: 12-1, CT: 1791222674635, Constraints: [{ L: 15000, D: 86400000, C: CHARGING_NONE, I: IDLE_NONE, N: NET_ANY, B: BATTERY_ANY }]
+10-05 17:51:14.990  3389  3460 W Settings: Setting download_manager_max_bytes_over_mobile has moved from android.provider.Settings.Secure to android.provider.Settings.Global.
+10-05 17:51:14.992  2315  2753 I GamesModuleInfoProvider: Retrieved module info: GamesModuleInfo{version=263635001} [CONTEXT service_id=1 ]
+10-05 17:51:14.992  3389  3460 I Finsky:background: [44] SettingNotFoundException for download_manager_max_bytes_over_mobile
+10-05 17:51:14.992  3389  3460 W Settings: Setting download_manager_recommended_max_bytes_over_mobile has moved from android.provider.Settings.Secure to android.provider.Settings.Global.
+10-05 17:51:14.992  2315  2753 W PlayGamesServices[UiUtils]: AppVersion: Cannot find the installed destination app.
+10-05 17:51:14.993  3389  3460 I Finsky:background: [44] SettingNotFoundException for download_manager_recommended_max_bytes_over_mobile
+10-05 17:51:14.993  3389  3460 I Finsky:background: [44] registerListener
+10-05 17:51:14.994  2315  2753 W PlayGamesServices[UiUtils]: AppVersionName: Cannot find the installed destination app.
+10-05 17:51:14.995  3389  3460 I Finsky:background: [44] DFS: Listener added for ulr@a7049ee
+10-05 17:51:14.995  3389  3460 I Finsky:background: [44] registerListener
+10-05 17:51:14.996  3389  3460 I Finsky:background: [44] registerListener
+10-05 17:51:14.996  3389  3460 I Finsky:background: [44] DFS: Listener added for arpu@31cfea1
+10-05 17:51:14.998  2917  3047 I Finsky  : [43] SCH: Scheduling 1 system job(s)
+10-05 17:51:15.004  2315  2972 I Icing   : Internal init done: storage state 0
+10-05 17:51:15.005  3389  3460 I Finsky:background: [44] IV2: IQv2 is disabled. Recovering all active installs: []
+10-05 17:51:15.005  1984  2196 W FrameTracker: Missing SF jank callback for vsyncId: 4119, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 17:51:15.005  1984  2196 W FrameTracker: Missing SF jank callback for vsyncId: 4156, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 17:51:15.005  1984  2196 W FrameTracker: Missing SF jank callback for vsyncId: 4188, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 17:51:15.005  1984  2196 W FrameTracker: Missing SF jank callback for vsyncId: 4223, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 17:51:15.005  1984  2196 W FrameTracker: Missing SF jank callback for vsyncId: 4254, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 17:51:15.005  1984  2196 W FrameTracker: Missing SF jank callback for vsyncId: 4285, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 17:51:15.005  1984  2196 W FrameTracker: Missing SF jank callback for vsyncId: 4310, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 17:51:15.005  1984  2196 W FrameTracker: Missing SF jank callback for vsyncId: 4335, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 17:51:15.005  1984  2196 W FrameTracker: Missing SF jank callback for vsyncId: 4360, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 17:51:15.005  1984  2196 W FrameTracker: Missing SF jank callback for vsyncId: 4385, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 17:51:15.005  1984  2196 W FrameTracker: Missing SF jank callback for vsyncId: 4410, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 17:51:15.005  1984  2196 W FrameTracker: Missing SF jank callback for vsyncId: 4441, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 17:51:15.005  1984  2196 W FrameTracker: Missing SF jank callback for vsyncId: 4460, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 17:51:15.005  1984  2196 W FrameTracker: Missing SF jank callback for vsyncId: 4473, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 17:51:15.005  1984  2196 W FrameTracker: Missing SF jank callback for vsyncId: 4492, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 17:51:15.005  1984  2196 W FrameTracker: Missing SF jank callback for vsyncId: 4523, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 17:51:15.005  1984  2196 W FrameTracker: Missing SF jank callback for vsyncId: 4542, CUJ=J<SPLASHSCREEN_EXIT_ANIM>
+10-05 17:51:15.007  2917  3047 I Finsky  : [43] SCH: Scheduling system job Id: 9240, L: 14637, D: 56975670, C: false, I: false, N: 1
+10-05 17:51:15.011  2315  2972 I Icing   : Post-init done
+10-05 17:51:15.014  2315  2745 I Icing   : IndexChimeraService.getServiceInterface callingPackage=com.google.android.gms componentName=null serviceId=30
+10-05 17:51:15.016  2315  2507 W IcingInternalCorpora: Contacts corpus disabled.
+10-05 17:51:15.017  2917  3039 I Finsky  : [41] [ContentSync] finished, scheduled=true
+10-05 17:51:15.026  3389  3457 I Finsky:background: [41] Device is eligible for platform Cronet and will attempt to use it.
+10-05 17:51:15.026  2315  2833 I cn_CronetUrlRequestContext: destroyNativeStreamLocked org.chromium.net.impl.CronetBidirectionalStream@8a83909
+10-05 17:51:15.026  1726  1788 D ConnectivityService: requestNetwork for uid/pid:10305/3389 activeRequest: null callbackRequest: 113 [NetworkRequest [ REQUEST id=114, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10305 RequestorUid: 10305 RequestorPkg: com.android.vending UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647 isUidTracked: false declaredMethods: ALL
+10-05 17:51:15.027  1726  1879 D ConnectivityService: NetReassign [114 : null → 100] [c 0] [a 0] [i 0]
+10-05 17:51:15.029  3389  3459 I Finsky:background: [43] IQ: start evaluating install requests.
+10-05 17:51:15.029  3389  3459 I Finsky:background: [43] IQ: no jobs active. Skipping
+10-05 17:51:15.029  2315  3051 W IcingInternalCorpora: Contacts corpus disabled.
+10-05 17:51:15.030  1726  1878 D EthernetNetworkFactory: eth0: onNetworkNeeded for request: NetworkRequest [ REQUEST id=114, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10305 RequestorUid: 10305 RequestorPkg: com.android.vending UnderlyingNetworks: Null] ]
+10-05 17:51:15.030  1726  1865 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=114, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10305 RequestorUid: 10305 RequestorPkg: com.android.vending UnderlyingNetworks: Null] ]
+10-05 17:51:15.030  1726  1865 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=114, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10305 RequestorUid: 10305 RequestorPkg: com.android.vending UnderlyingNetworks: Null] ]
+10-05 17:51:15.030  1726  1865 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=114, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10305 RequestorUid: 10305 RequestorPkg: com.android.vending UnderlyingNetworks: Null] ]
+10-05 17:51:15.030  1726  1878 D EthernetNetworkFactory: IpClient already started
+10-05 17:51:15.032  3389  3468 I Finsky:background: [51] IQ: Pruning inactive install requests
+10-05 17:51:15.033  3389  3459 I Finsky:background: [43] IQ: 0 scheduled install statuses found to proceed. 
+10-05 17:51:15.034  1616  3416 D SimpleC2Component: applied 1 configUpdates => BAD_INDEX (6)
+10-05 17:51:15.035  2315  3056 W IcingInternalCorpora: Contacts corpus disabled.
+10-05 17:51:15.036  3389  3464 I Finsky:background: [48] RECEIVER_PACKAGE_MONITOR_BACKGROUND#logWorkEndAndFinishGoAsync: SUCCESS
+10-05 17:51:15.036  3389  3474 D cr_CronetLibraryLoader: [CronetLibraryLoader.java:171] Not loading HTTP flags because they are disabled in the manifest
+10-05 17:51:15.037  2315  2439 W IcingInternalCorpora: Contacts corpus disabled.
+10-05 17:51:15.037  3389  3468 I Finsky:background: [51] Resetting scheduler db
+10-05 17:51:15.038  2315  3056 W IcingInternalCorpora: Contacts corpus disabled.
+10-05 17:51:15.038  2315  2382 I Icing   : Using regular flags by method 2
+10-05 17:51:15.041  3389  3457 D nativeloader: Load libmainlinecronet.126.0.6423.0.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity.jar: ok
+10-05 17:51:15.041  3389  3455 I Finsky:background: [39] SCH: Scheduling phonesky job Id: 47-15, CT: 1791220604188, Constraints: [{ L: 0, D: 15846444, C: CHARGING_NONE, I: IDLE_REQUIRED, N: NET_NONE, B: BATTERY_ANY }]
+10-05 17:51:15.041  3389  3469 I Finsky:background: [52] RECEIVER_ENGAGE_PACKAGE_CHANGED#logWorkEndAndFinishGoAsync: SKIPPED_PRECONDITIONS_UNMET
+10-05 17:51:15.043  3389  3474 W ding:background: Core platform API violation: Llibcore/io/Memory;->pokeByte(JB)V from Landroid/net/connectivity/com/google/protobuf/UnsafeUtil; using reflection
+10-05 17:51:15.043  3389  3474 W ding:background: Core platform API violation: Llibcore/io/Memory;->peekByte(J)B from Landroid/net/connectivity/com/google/protobuf/UnsafeUtil; using reflection
+10-05 17:51:15.044  3389  3457 I cr_CronetLibraryLoader: Cronet version: 126.0.6423.0, arch: x86_64
+10-05 17:51:15.045  3389  3457 V ExperimentalOptions: Failed to get connection_options options: No value for connection_options
+10-05 17:51:15.045  3389  3457 V ExperimentalOptions: Failed to get store_server_configs_in_properties options: No value for store_server_configs_in_properties
+10-05 17:51:15.045  3389  3457 V ExperimentalOptions: Failed to get max_server_configs_stored_in_properties options: No value for max_server_configs_stored_in_properties
+10-05 17:51:15.045  3389  3457 V ExperimentalOptions: Failed to get goaway_sessions_on_ip_change options: No value for goaway_sessions_on_ip_change
+10-05 17:51:15.045  3389  3457 V ExperimentalOptions: Failed to get close_sessions_on_ip_change options: No value for close_sessions_on_ip_change
+10-05 17:51:15.045  3389  3457 V ExperimentalOptions: Failed to get migrate_sessions_on_network_change_v2 options: No value for migrate_sessions_on_network_change_v2
+10-05 17:51:15.045  3389  3457 V ExperimentalOptions: Failed to get migrate_sessions_early_v2 options: No value for migrate_sessions_early_v2
+10-05 17:51:15.045  3389  3457 V ExperimentalOptions: Failed to get disable_bidirectional_streams options: No value for disable_bidirectional_streams
+10-05 17:51:15.045  3389  3457 V ExperimentalOptions: Failed to get max_time_before_crypto_handshake_seconds options: No value for max_time_before_crypto_handshake_seconds
+10-05 17:51:15.045  3389  3457 V ExperimentalOptions: Failed to get max_idle_time_before_crypto_handshake_seconds options: No value for max_idle_time_before_crypto_handshake_seconds
+10-05 17:51:15.045  3389  3457 V ExperimentalOptions: Failed to get enable_socket_recv_optimization options: No value for enable_socket_recv_optimization
+10-05 17:51:15.045  3389  3457 V ExperimentalOptions: Failed to get max_stale_uses options: No value for max_stale_uses
+10-05 17:51:15.045  3389  3457 V ExperimentalOptions: Failed to get persist_to_disk options: No value for persist_to_disk
+10-05 17:51:15.045  3389  3457 V ExperimentalOptions: Failed to get persist_delay_ms options: No value for persist_delay_ms
+10-05 17:51:15.045  3389  3457 V ExperimentalOptions: Failed to get use_stale_on_name_not_resolved options: No value for use_stale_on_name_not_resolved
+10-05 17:51:15.045  3389  3457 V ExperimentalOptions: Failed to get disable_ipv6_on_wifi options: No value for disable_ipv6_on_wifi
+10-05 17:51:15.045  3389  3457 I Finsky:background: [41] CronetEngine is present. Using Cronet for the networking stack.
+10-05 17:51:15.046  1726  2655 D ConnectivityService: requestNetwork for uid/pid:10305/3389 activeRequest: null callbackRequest: 115 [NetworkRequest [ REQUEST id=116, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10305 RequestorUid: 10305 RequestorPkg: com.android.vending UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647 isUidTracked: false declaredMethods: ALL
+10-05 17:51:15.047  1726  1879 D ConnectivityService: NetReassign [116 : null → 100] [c 0] [a 0] [i 1]
+10-05 17:51:15.049  1726  1878 D EthernetNetworkFactory: eth0: onNetworkNeeded for request: NetworkRequest [ REQUEST id=116, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10305 RequestorUid: 10305 RequestorPkg: com.android.vending UnderlyingNetworks: Null] ]
+10-05 17:51:15.049  1726  1878 D EthernetNetworkFactory: IpClient already started
+10-05 17:51:15.050  1726  1865 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=116, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10305 RequestorUid: 10305 RequestorPkg: com.android.vending UnderlyingNetworks: Null] ]
+10-05 17:51:15.050  1726  1865 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=116, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10305 RequestorUid: 10305 RequestorPkg: com.android.vending UnderlyingNetworks: Null] ]
+10-05 17:51:15.050  1726  1865 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=116, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10305 RequestorUid: 10305 RequestorPkg: com.android.vending UnderlyingNetworks: Null] ]
+10-05 17:51:15.051  1726  1879 D ConnectivityService: NetReassign [no changes] [c 0] [a 1] [i 1]
+10-05 17:51:15.051  2315  2382 E native  : E0000 00:00:1791222675.051899    2382 document-store.cc:1359] Failed to update per-doc-data with usage report
+10-05 17:51:15.052  2315  2382 I Icing   : Usage reports ok 1, Failed Usage reports 1, indexed 0, rejected 0
+10-05 17:51:15.053  3389  3457 I Finsky:background: [41] Subscription detail: N/A
+10-05 17:51:15.053  3389  3457 I Finsky:background: [41] PlayInstallAPI: Registering Play install service listener.
+10-05 17:51:15.054  3389  3467 I Finsky:background: [50] Wrote row to frosting DB: 480
+10-05 17:51:15.066  2315  2382 I Icing   : Usage reports ok 0, Failed Usage reports 0, indexed 0, rejected 0
+10-05 17:51:15.067  2315  2382 W Bundle  : Key identifier expected com.google.firebase.appindexing.internal.Thing[] but value was of a different type.  The default value <null> was returned.
+10-05 17:51:15.067  2315  2382 W Bundle  : Attempt to cast generated internal exception:
+10-05 17:51:15.067  2315  2382 W Bundle  : java.lang.ClassCastException: Cannot cast [Ljava.lang.String; to [Landroid.os.Parcelable;
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at java.lang.Class.cast(Class.java:4193)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at android.os.BaseBundle.getValueAt(BaseBundle.java:405)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at android.os.BaseBundle.getValue(BaseBundle.java:382)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at android.os.Bundle.getParcelableArray(Bundle.java:1114)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at mim.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):1)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at com.google.firebase.appindexing.internal.Thing.h(:com.google.android.gms@263635038@26.36.35 (260800-991383798):5)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at cszj.g(:com.google.android.gms@263635038@26.36.35 (260800-991383798):582)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at cszj.c(:com.google.android.gms@263635038@26.36.35 (260800-991383798):54)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at cszc.i(:com.google.android.gms@263635038@26.36.35 (260800-991383798):8)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at csxt.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):19)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at csze.f(:com.google.android.gms@263635038@26.36.35 (260800-991383798):26)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at csxt.g(:com.google.android.gms@263635038@26.36.35 (260800-991383798):3)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at csya.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):10)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at ctfx.k(:com.google.android.gms@263635038@26.36.35 (260800-991383798):103)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at ctfu.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):71)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:487)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at bpzg.d(:com.google.android.gms@263635038@26.36.35 (260800-991383798):50)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at bpzg.c(:com.google.android.gms@263635038@26.36.35 (260800-991383798):28)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at bpzg.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):33)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at bqfi.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):8)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at java.lang.Thread.run(Thread.java:1117)
+10-05 17:51:15.067  2315  2382 W Bundle  : Key name expected com.google.firebase.appindexing.internal.Thing[] but value was of a different type.  The default value <null> was returned.
+10-05 17:51:15.067  2315  2382 W Bundle  : Attempt to cast generated internal exception:
+10-05 17:51:15.067  2315  2382 W Bundle  : java.lang.ClassCastException: Cannot cast [Ljava.lang.String; to [Landroid.os.Parcelable;
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at java.lang.Class.cast(Class.java:4193)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at android.os.BaseBundle.getValueAt(BaseBundle.java:405)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at android.os.BaseBundle.getValue(BaseBundle.java:382)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at android.os.Bundle.getParcelableArray(Bundle.java:1114)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at mim.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):1)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at com.google.firebase.appindexing.internal.Thing.h(:com.google.android.gms@263635038@26.36.35 (260800-991383798):5)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at cszj.g(:com.google.android.gms@263635038@26.36.35 (260800-991383798):582)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at cszj.c(:com.google.android.gms@263635038@26.36.35 (260800-991383798):54)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at cszc.i(:com.google.android.gms@263635038@26.36.35 (260800-991383798):8)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at csxt.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):19)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at csze.f(:com.google.android.gms@263635038@26.36.35 (260800-991383798):26)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at csxt.g(:com.google.android.gms@263635038@26.36.35 (260800-991383798):3)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at csya.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):10)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at ctfx.k(:com.google.android.gms@263635038@26.36.35 (260800-991383798):103)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at ctfu.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):71)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:487)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at bpzg.d(:com.google.android.gms@263635038@26.36.35 (260800-991383798):50)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at bpzg.c(:com.google.android.gms@263635038@26.36.35 (260800-991383798):28)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at bpzg.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):33)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at bqfi.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):8)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at java.lang.Thread.run(Thread.java:1117)
+10-05 17:51:15.067  2315  2382 W Bundle  : Key dateModified expected com.google.firebase.appindexing.internal.Thing[] but value was of a different type.  The default value <null> was returned.
+10-05 17:51:15.067  2315  2382 W Bundle  : Attempt to cast generated internal exception:
+10-05 17:51:15.067  2315  2382 W Bundle  : java.lang.ClassCastException: Cannot cast [J to [Landroid.os.Parcelable;
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at java.lang.Class.cast(Class.java:4193)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at android.os.BaseBundle.getValueAt(BaseBundle.java:405)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at android.os.BaseBundle.getValue(BaseBundle.java:382)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at android.os.Bundle.getParcelableArray(Bundle.java:1114)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at mim.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):1)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at com.google.firebase.appindexing.internal.Thing.h(:com.google.android.gms@263635038@26.36.35 (260800-991383798):5)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at cszj.g(:com.google.android.gms@263635038@26.36.35 (260800-991383798):582)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at cszj.c(:com.google.android.gms@263635038@26.36.35 (260800-991383798):54)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at cszc.i(:com.google.android.gms@263635038@26.36.35 (260800-991383798):8)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at csxt.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):19)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at csze.f(:com.google.android.gms@263635038@26.36.35 (260800-991383798):26)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at csxt.g(:com.google.android.gms@263635038@26.36.35 (260800-991383798):3)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at csya.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):10)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at ctfx.k(:com.google.android.gms@263635038@26.36.35 (260800-991383798):103)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at ctfu.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):71)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:487)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at bpzg.d(:com.google.android.gms@263635038@26.36.35 (260800-991383798):50)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at bpzg.c(:com.google.android.gms@263635038@26.36.35 (260800-991383798):28)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at bpzg.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):33)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at bqfi.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):8)
+10-05 17:51:15.067  2315  2382 W Bundle  : 	at java.lang.Thread.run(Thread.java:1117)
+10-05 17:51:15.071  3389  3457 I Finsky:background: [41] SCH: Scheduling 1 system job(s)
+10-05 17:51:15.071  3389  3457 I Finsky:background: [41] SCH: Scheduling system job Id: 10019, L: 0, D: 13775561, C: false, I: true, N: 0
+10-05 17:51:15.087  3389  3455 I Finsky:background: [39] SSM: Start staged session task with 0 tracked staged sessions
+10-05 17:51:15.087  3389  3467 I Finsky:background: [50] Wrote row to frosting DB: 481
+10-05 17:51:15.094  2315  2382 W Bundle  : Key identifier expected com.google.firebase.appindexing.internal.Thing[] but value was of a different type.  The default value <null> was returned.
+10-05 17:51:15.094  2315  2382 W Bundle  : Attempt to cast generated internal exception:
+10-05 17:51:15.094  2315  2382 W Bundle  : java.lang.ClassCastException: Cannot cast [Ljava.lang.String; to [Landroid.os.Parcelable;
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at java.lang.Class.cast(Class.java:4193)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at android.os.BaseBundle.getValueAt(BaseBundle.java:405)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at android.os.BaseBundle.getValue(BaseBundle.java:382)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at android.os.Bundle.getParcelableArray(Bundle.java:1114)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at mim.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):1)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at com.google.firebase.appindexing.internal.Thing.h(:com.google.android.gms@263635038@26.36.35 (260800-991383798):5)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at cszj.g(:com.google.android.gms@263635038@26.36.35 (260800-991383798):582)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at cszj.c(:com.google.android.gms@263635038@26.36.35 (260800-991383798):54)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at cszc.i(:com.google.android.gms@263635038@26.36.35 (260800-991383798):8)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at csxt.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):19)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at csze.f(:com.google.android.gms@263635038@26.36.35 (260800-991383798):26)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at csxt.g(:com.google.android.gms@263635038@26.36.35 (260800-991383798):3)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at csya.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):10)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at ctfx.k(:com.google.android.gms@263635038@26.36.35 (260800-991383798):103)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at ctfu.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):71)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:487)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at bpzg.d(:com.google.android.gms@263635038@26.36.35 (260800-991383798):50)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at bpzg.c(:com.google.android.gms@263635038@26.36.35 (260800-991383798):6)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at bpzg.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):33)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at bqfi.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):8)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at java.lang.Thread.run(Thread.java:1117)
+10-05 17:51:15.094  2315  2382 W Bundle  : Key name expected com.google.firebase.appindexing.internal.Thing[] but value was of a different type.  The default value <null> was returned.
+10-05 17:51:15.094  2315  2382 W Bundle  : Attempt to cast generated internal exception:
+10-05 17:51:15.094  2315  2382 W Bundle  : java.lang.ClassCastException: Cannot cast [Ljava.lang.String; to [Landroid.os.Parcelable;
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at java.lang.Class.cast(Class.java:4193)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at android.os.BaseBundle.getValueAt(BaseBundle.java:405)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at android.os.BaseBundle.getValue(BaseBundle.java:382)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at android.os.Bundle.getParcelableArray(Bundle.java:1114)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at mim.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):1)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at com.google.firebase.appindexing.internal.Thing.h(:com.google.android.gms@263635038@26.36.35 (260800-991383798):5)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at cszj.g(:com.google.android.gms@263635038@26.36.35 (260800-991383798):582)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at cszj.c(:com.google.android.gms@263635038@26.36.35 (260800-991383798):54)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at cszc.i(:com.google.android.gms@263635038@26.36.35 (260800-991383798):8)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at csxt.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):19)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at csze.f(:com.google.android.gms@263635038@26.36.35 (260800-991383798):26)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at csxt.g(:com.google.android.gms@263635038@26.36.35 (260800-991383798):3)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at csya.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):10)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at ctfx.k(:com.google.android.gms@263635038@26.36.35 (260800-991383798):103)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at ctfu.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):71)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:487)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at bpzg.d(:com.google.android.gms@263635038@26.36.35 (260800-991383798):50)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at bpzg.c(:com.google.android.gms@263635038@26.36.35 (260800-991383798):6)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at bpzg.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):33)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at bqfi.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):8)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at java.lang.Thread.run(Thread.java:1117)
+10-05 17:51:15.094  2315  2382 W Bundle  : Key dateModified expected com.google.firebase.appindexing.internal.Thing[] but value was of a different type.  The default value <null> was returned.
+10-05 17:51:15.094  2315  2382 W Bundle  : Attempt to cast generated internal exception:
+10-05 17:51:15.094  2315  2382 W Bundle  : java.lang.ClassCastException: Cannot cast [J to [Landroid.os.Parcelable;
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at java.lang.Class.cast(Class.java:4193)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at android.os.BaseBundle.getValueAt(BaseBundle.java:405)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at android.os.BaseBundle.getValue(BaseBundle.java:382)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at android.os.Bundle.getParcelableArray(Bundle.java:1114)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at mim.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):1)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at com.google.firebase.appindexing.internal.Thing.h(:com.google.android.gms@263635038@26.36.35 (260800-991383798):5)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at cszj.g(:com.google.android.gms@263635038@26.36.35 (260800-991383798):582)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at cszj.c(:com.google.android.gms@263635038@26.36.35 (260800-991383798):54)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at cszc.i(:com.google.android.gms@263635038@26.36.35 (260800-991383798):8)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at csxt.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):19)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at csze.f(:com.google.android.gms@263635038@26.36.35 (260800-991383798):26)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at csxt.g(:com.google.android.gms@263635038@26.36.35 (260800-991383798):3)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at csya.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):10)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at ctfx.k(:com.google.android.gms@263635038@26.36.35 (260800-991383798):103)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at ctfu.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):71)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:487)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at bpzg.d(:com.google.android.gms@263635038@26.36.35 (260800-991383798):50)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at bpzg.c(:com.google.android.gms@263635038@26.36.35 (260800-991383798):6)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at bpzg.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):33)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at bqfi.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):8)
+10-05 17:51:15.094  2315  2382 W Bundle  : 	at java.lang.Thread.run(Thread.java:1117)
+10-05 17:51:15.121  2315  2382 W Bundle  : Key identifier expected com.google.firebase.appindexing.internal.Thing[] but value was of a different type.  The default value <null> was returned.
+10-05 17:51:15.121  2315  2382 W Bundle  : Attempt to cast generated internal exception:
+10-05 17:51:15.121  2315  2382 W Bundle  : java.lang.ClassCastException: Cannot cast [Ljava.lang.String; to [Landroid.os.Parcelable;
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at java.lang.Class.cast(Class.java:4193)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at android.os.BaseBundle.getValueAt(BaseBundle.java:405)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at android.os.BaseBundle.getValue(BaseBundle.java:382)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at android.os.Bundle.getParcelableArray(Bundle.java:1114)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at mim.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):1)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at com.google.firebase.appindexing.internal.Thing.h(:com.google.android.gms@263635038@26.36.35 (260800-991383798):5)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at cszj.g(:com.google.android.gms@263635038@26.36.35 (260800-991383798):582)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at cszj.c(:com.google.android.gms@263635038@26.36.35 (260800-991383798):54)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at cszc.i(:com.google.android.gms@263635038@26.36.35 (260800-991383798):8)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at csxt.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):19)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at csze.f(:com.google.android.gms@263635038@26.36.35 (260800-991383798):26)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at csxt.g(:com.google.android.gms@263635038@26.36.35 (260800-991383798):3)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at csya.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):10)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at ctfx.k(:com.google.android.gms@263635038@26.36.35 (260800-991383798):103)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at ctfu.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):71)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:487)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at bpzg.d(:com.google.android.gms@263635038@26.36.35 (260800-991383798):50)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at bpzg.c(:com.google.android.gms@263635038@26.36.35 (260800-991383798):6)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at bpzg.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):33)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at bqfi.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):8)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at java.lang.Thread.run(Thread.java:1117)
+10-05 17:51:15.121  2315  2382 W Bundle  : Key name expected com.google.firebase.appindexing.internal.Thing[] but value was of a different type.  The default value <null> was returned.
+10-05 17:51:15.121  2315  2382 W Bundle  : Attempt to cast generated internal exception:
+10-05 17:51:15.121  2315  2382 W Bundle  : java.lang.ClassCastException: Cannot cast [Ljava.lang.String; to [Landroid.os.Parcelable;
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at java.lang.Class.cast(Class.java:4193)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at android.os.BaseBundle.getValueAt(BaseBundle.java:405)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at android.os.BaseBundle.getValue(BaseBundle.java:382)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at android.os.Bundle.getParcelableArray(Bundle.java:1114)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at mim.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):1)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at com.google.firebase.appindexing.internal.Thing.h(:com.google.android.gms@263635038@26.36.35 (260800-991383798):5)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at cszj.g(:com.google.android.gms@263635038@26.36.35 (260800-991383798):582)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at cszj.c(:com.google.android.gms@263635038@26.36.35 (260800-991383798):54)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at cszc.i(:com.google.android.gms@263635038@26.36.35 (260800-991383798):8)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at csxt.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):19)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at csze.f(:com.google.android.gms@263635038@26.36.35 (260800-991383798):26)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at csxt.g(:com.google.android.gms@263635038@26.36.35 (260800-991383798):3)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at csya.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):10)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at ctfx.k(:com.google.android.gms@263635038@26.36.35 (260800-991383798):103)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at ctfu.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):71)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:487)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at bpzg.d(:com.google.android.gms@263635038@26.36.35 (260800-991383798):50)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at bpzg.c(:com.google.android.gms@263635038@26.36.35 (260800-991383798):6)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at bpzg.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):33)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at bqfi.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):8)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at java.lang.Thread.run(Thread.java:1117)
+10-05 17:51:15.121  2315  2382 W Bundle  : Key dateModified expected com.google.firebase.appindexing.internal.Thing[] but value was of a different type.  The default value <null> was returned.
+10-05 17:51:15.121  2315  2382 W Bundle  : Attempt to cast generated internal exception:
+10-05 17:51:15.121  2315  2382 W Bundle  : java.lang.ClassCastException: Cannot cast [J to [Landroid.os.Parcelable;
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at java.lang.Class.cast(Class.java:4193)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at android.os.BaseBundle.getValueAt(BaseBundle.java:405)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at android.os.BaseBundle.getValue(BaseBundle.java:382)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at android.os.Bundle.getParcelableArray(Bundle.java:1114)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at mim.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):1)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at com.google.firebase.appindexing.internal.Thing.h(:com.google.android.gms@263635038@26.36.35 (260800-991383798):5)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at cszj.g(:com.google.android.gms@263635038@26.36.35 (260800-991383798):582)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at cszj.c(:com.google.android.gms@263635038@26.36.35 (260800-991383798):54)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at cszc.i(:com.google.android.gms@263635038@26.36.35 (260800-991383798):8)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at csxt.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):19)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at csze.f(:com.google.android.gms@263635038@26.36.35 (260800-991383798):26)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at csxt.g(:com.google.android.gms@263635038@26.36.35 (260800-991383798):3)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at csya.a(:com.google.android.gms@263635038@26.36.35 (260800-991383798):10)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at ctfx.k(:com.google.android.gms@263635038@26.36.35 (260800-991383798):103)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at ctfu.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):71)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:487)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at bpzg.d(:com.google.android.gms@263635038@26.36.35 (260800-991383798):50)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at bpzg.c(:com.google.android.gms@263635038@26.36.35 (260800-991383798):6)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at bpzg.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):33)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at bqfi.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):8)
+10-05 17:51:15.121  2315  2382 W Bundle  : 	at java.lang.Thread.run(Thread.java:1117)
+10-05 17:51:15.299  1726  2107 W ActivityManager: Unable to start service Intent { act=com.google.android.verifier.backport.VERIFY_PACKAGE pkg=com.google.android.verifier } U=0: not found
+10-05 17:51:15.299  1726  2107 W ActivityManager: Unbind failed: could not find connection for android.os.BinderProxy@521c172
+10-05 17:51:15.551  2917  3032 I Finsky  : [37] WM::SCH: Logging work initialize for 37-4
+10-05 17:51:15.566  2917  3050 I Finsky  : [44] SCH: Scheduling phonesky job Id: 37-4, CT: 1791222674723, Constraints: [{ L: 0, D: 0, C: CHARGING_NONE, I: IDLE_NONE, N: NET_NONE, B: BATTERY_ANY }, { L: 0, D: 0, C: CHARGING_NONE, I: IDLE_NONE, N: NET_NONE, B: BATTERY_ANY }]
+10-05 17:51:15.571  2917  3061 I Finsky  : [47] SCH: Scheduling 1 system job(s)
+10-05 17:51:15.571  2917  3061 I Finsky  : [47] SCH: Scheduling expedited system job 9239
+10-05 17:51:15.576  2917  2917 I Finsky  : [2] SCH: job service start with id 9239.
+10-05 17:51:15.592  2917  3064 I Finsky  : [49] SCH: Satisfied jobs for 9239 are: 37-4
+10-05 17:51:15.595  2917  3082 I Finsky  : [52] SCH: Job 37-4 starting
+10-05 17:51:15.598  2917  2917 I Finsky  : [2] WM::SCH: Logging work start for 37-4
+10-05 17:51:15.598  2917  2917 I Finsky  : [2] Received an install/uninstall event for package org.ome.videoprobe
+10-05 17:51:15.598  2917  2917 I Finsky  : [2] SCH: jobFinished: 37-4. TimeElapsed: 2ms.
+10-05 17:51:15.598  2917  2917 I Finsky  : [2] WM::SCH: Logging work end for 37-4
+10-05 17:51:15.600  1726  2655 I AppWidgetServiceImpl: getAppWidgetIds() 0
+10-05 17:51:15.600  1726  2107 I AppWidgetServiceImpl: getInstalledProvidersForProfiles() 0
+10-05 17:51:15.601  1726  2655 I AppWidgetServiceImpl: notifyProviderInheritance() 0
+10-05 17:51:15.601  1726  2107 I AppWidgetServiceImpl: getAppWidgetIds() 0
+10-05 17:51:15.609  2917  3061 I Finsky  : [47] Not an active Cubes user. Ignoring package install/uninstall event.
+10-05 17:51:15.634  3350  3366 I OMEVideo: t=1168ms frames=22 total=22 centre=0,0,0 glError=0
+10-05 17:51:15.637  2917  3047 I Finsky  : [43] SCH: Scheduling phonesky job Id: 26-1414141414, CT: 1791221555487, Constraints: [{ L: 43199999, D: 44099999, C: CHARGING_NONE, I: IDLE_NONE, N: NET_NONE, B: BATTERY_ANY }]
+10-05 17:51:15.646  2917  3061 I Finsky  : [47] SCH: Scheduling 1 system job(s)
+10-05 17:51:15.646  2917  3061 W JobInfo : Job 'com.android.vending/com.google.android.finsky.scheduler.process.mainimpl.PhoneskyJobServiceMain#9244' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+10-05 17:51:15.646  2917  3061 I Finsky  : [47] SCH: Scheduling system job Id: 9244, L: 42079840, D: 42979840, C: false, I: false, N: 0
+10-05 17:51:15.646  1726  2107 W JobInfo : Job 'com.android.vending/com.google.android.finsky.scheduler.process.mainimpl.PhoneskyJobServiceMain#9244' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+10-05 17:51:15.653  2917  3082 I Finsky  : [52] SCH: job service finished with id 9239.
+10-05 17:51:13.646     0     0 I init    : Sending signal 9 to service 'idmap2d' (pid 1600) process group...
+10-05 17:51:13.646     0     0 I libprocessgroup: Removed cgroup /sys/fs/cgroup/uid_1000/pid_1600
+10-05 17:51:16.182  1726  2107 W OverlayManager: service 'idmap' died
+10-05 17:51:13.646     0     0 I init    : Control message: Processed ctl.stop for 'idmap2d' from pid: 1726 (system_server)
+10-05 17:51:13.646     0     0 I init    : Service 'idmap2d' (pid 1600) received signal 9
+10-05 17:51:16.408  1380  1380 I composer@2.4-se: type=1400 audit(0.0:776): avc:  denied  { read } for  path="socket:[1829]" dev="sockfs" ino=1829 scontext=u:r:hal_graphics_composer_default:s0 tcontext=u:r:hal_graphics_composer_default:s0 tclass=netlink_kobject_uevent_socket permissive=1
+10-05 17:51:13.876     0     0 E ueventd : LoadWithAliases was unable to load platform:regulatory, tried: platform:regulatory
+10-05 17:51:16.667  3350  3366 I OMEVideo: t=2200ms frames=31 total=53 centre=0,0,0 glError=0
+10-05 17:51:17.137  2315  2701 I GetConfigSnapshotOp: Succeeded but not registered: com.google.android.libraries.performance.primes#com.android.vending [CONTEXT service_id=51 ]
+10-05 17:51:17.435  1726  2540 E TaskPersister: File error accessing recents directory (directory doesn't exist?).
+10-05 17:51:17.468  3493  3493 W BpBinder: Linking to death on android.gui.ISurfaceComposer but there are no threads (yet?) listening to incoming transactions. See ProcessState::startThreadPool and ProcessState::setThreadPoolMaxThreadCount. Generally you should setup the binder threadpool before other initialization steps.
+10-05 17:51:17.468  3493  3493 W ProcessState: Extra binder thread started, but 0 threads requested. Do not use *startThreadPool when zero threads are requested.
+10-05 17:51:17.480  3493  3493 I binder:3493_1: type=1400 audit(0.0:777): avc:  denied  { getattr } for  path="/system/vendor/lib64/hw/gralloc.minigbm_arcvm.so" dev="loop0" ino=18269 scontext=u:r:shell:s0 tcontext=u:object_r:vendor_file:s0 tclass=file permissive=1
+10-05 17:51:17.480  3493  3493 I binder:3493_1: type=1400 audit(0.0:778): avc:  denied  { read } for  name="gralloc.minigbm_arcvm.so" dev="loop0" ino=18269 scontext=u:r:shell:s0 tcontext=u:object_r:vendor_file:s0 tclass=file permissive=1
+10-05 17:51:17.480  3493  3493 I binder:3493_1: type=1400 audit(0.0:779): avc:  denied  { open } for  path="/system/vendor/lib64/hw/gralloc.minigbm_arcvm.so" dev="loop0" ino=18269 scontext=u:r:shell:s0 tcontext=u:object_r:vendor_file:s0 tclass=file permissive=1
+10-05 17:51:17.480  3493  3493 I binder:3493_1: type=1400 audit(0.0:780): avc:  denied  { map } for  path="/system/vendor/lib64/hw/gralloc.minigbm_arcvm.so" dev="loop0" ino=18269 scontext=u:r:shell:s0 tcontext=u:object_r:vendor_file:s0 tclass=file permissive=1
+10-05 17:51:17.480  3493  3493 I binder:3493_1: type=1400 audit(0.0:781): avc:  denied  { execute } for  path="/system/vendor/lib64/libdrm.so" dev="loop0" ino=18333 scontext=u:r:shell:s0 tcontext=u:object_r:vendor_file:s0 tclass=file permissive=1
+10-05 17:51:17.480  3493  3493 I binder:3493_1: type=1400 audit(0.0:782): avc:  denied  { open } for  path="/dev/__properties__/u:object_r:vendor_default_prop:s0" dev="tmpfs" ino=327 scontext=u:r:shell:s0 tcontext=u:object_r:vendor_default_prop:s0 tclass=file permissive=1
+10-05 17:51:17.480  3493  3493 I binder:3493_1: type=1400 audit(0.0:783): avc:  denied  { getattr } for  path="/dev/__properties__/u:object_r:vendor_default_prop:s0" dev="tmpfs" ino=327 scontext=u:r:shell:s0 tcontext=u:object_r:vendor_default_prop:s0 tclass=file permissive=1
+10-05 17:51:17.480  3493  3493 I binder:3493_1: type=1400 audit(0.0:784): avc:  denied  { map } for  path="/dev/__properties__/u:object_r:vendor_default_prop:s0" dev="tmpfs" ino=327 scontext=u:r:shell:s0 tcontext=u:object_r:vendor_default_prop:s0 tclass=file permissive=1
+10-05 17:51:17.481  3493  3494 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_CREATE_GUEST_HANDLE
+10-05 17:51:17.481  3493  3494 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_RESOURCE_SYNC
+10-05 17:51:17.481  3493  3494 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_GUEST_VRAM
+10-05 17:51:17.481  3493  3494 I [minigbm:virgl_get_caps(586)]: Supported CAPSET IDs: 6.
+10-05 17:51:17.481  3493  3494 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:540422468
+10-05 17:51:17.481  3493  3494 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:1479815748
+10-05 17:51:17.481  3493  3494 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:1395929668
+10-05 17:51:17.481  3493  3494 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:1177695044
+10-05 17:51:17.481  3493  3494 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:944981572
+10-05 17:51:17.481  3493  3494 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:842094158
+10-05 17:51:17.481  3493  3494 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:808530000
+10-05 17:51:17.609  1726  2107 W ActivityManager: Unable to start service Intent { act=com.google.android.verifier.backport.VERIFY_PACKAGE pkg=com.google.android.verifier } U=0: not found
+10-05 17:51:17.609  1726  2107 W ActivityManager: Unbind failed: could not find connection for android.os.BinderProxy@2603304
+10-05 17:51:17.670  3350  3366 I OMEVideo: t=3203ms frames=30 total=83 centre=0,0,0 glError=0
+10-05 17:51:18.398  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.castauth.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentDirectBootAwareApiService }
+10-05 17:51:18.400  1726  2107 D OomAdjuster: Not killing cached processes
+10-05 17:51:18.700  3350  3366 I OMEVideo: t=4234ms frames=31 total=114 centre=0,0,0 glError=0
+10-05 17:51:18.838  2315  2354 I SharingClientImpl: client com.google.android.gms disconnecting
+10-05 17:51:18.838  2315  2354 I NearbySharing: Package com.google.android.gms has requested to unsuspend Quick Share
+10-05 17:51:18.838  2315  2354 E SharingClientImpl: Unsuspend failed: null
+10-05 17:51:18.838  2315  2354 I NearbyUWB: Client com.google.android.gms (com.google.android.gms248922527) disconnecting  [CONTEXT service_id=49 ]
+10-05 17:51:18.839  2315  2745 I NearbyUWB: User opted in for analytics reporting: false. [CONTEXT service_id=49 ]
+10-05 17:51:18.839  2315  2745 I NearbyUWB: AnalyticsLogger is shutdown. [CONTEXT service_id=49 ]
+10-05 17:51:19.019  1525  1541 I netd    : tetherGetStats() -> {[]} <0.46ms>
+10-05 17:51:19.147  1569  1569 E misctrl : Could not read reserved space: failed to stat /dev/block/by-name/misc try 1: No such file or directory
+10-05 17:51:19.147  1569  1569 E misctrl : failed to stat /dev/block/by-name/misc try 2: No such file or directory
+10-05 17:51:19.147  1569  1569 E misctrl : failed to stat /dev/block/by-name/misc try 3: No such file or directory
+10-05 17:51:19.147  1569  1569 E misctrl : failed to stat /dev/block/by-name/misc try 4: No such file or directory
+10-05 17:51:19.147  1569  1569 E misctrl : failed to stat /dev/block/by-name/misc try 5: No such file or directory
+10-05 17:51:19.147  1569  1569 E misctrl : failed to stat /dev/block/by-name/misc try 6: No such file or directory
+10-05 17:51:19.147  1569  1569 E misctrl : failed to stat /dev/block/by-name/misc try 7: No such file or directory
+10-05 17:51:19.147  1569  1569 E misctrl : failed to stat /dev/block/by-name/misc try 8: No such file or directory
+10-05 17:51:19.147  1569  1569 E misctrl : failed to stat /dev/block/by-name/misc try 9: No such file or directory
+10-05 17:51:19.147  1569  1569 E misctrl : failed to stat /dev/block/by-name/misc try 10: No such file or directory
+10-05 17:51:19.147  1569  1569 E misctrl : failed to stat /dev/block/by-name/misc
+10-05 17:51:16.611     0     0 I init    : Service 'misctrl' (pid 1569) exited with status 1 oneshot service took 20.028999 seconds in background
+10-05 17:51:16.611     0     0 I init    : Sending signal 9 to service 'misctrl' (pid 1569) process group...
+10-05 17:51:16.611     0     0 I libprocessgroup: Removed cgroup /sys/fs/cgroup/uid_0/pid_1569
+10-05 17:51:19.703  3350  3366 I OMEVideo: t=5236ms frames=30 total=144 centre=0,0,0 glError=0
+10-05 17:51:19.713  1984  2374 D BufferPoolAccessor2.0: evictor expired: 3, evicted: 0
+10-05 17:51:19.713  1726  2219 D BufferPoolAccessor2.0: evictor expired: 4, evicted: 0
+10-05 17:51:19.713  1616  2063 D BufferPoolAccessor2.0: bufferpool2 0x748040c8ee78 : 0(0 size) total buffers - 0(0 size) used buffers - 0/0 (recycle/alloc) - 0/0 (fetch/transfer)
+10-05 17:51:19.713  1616  2063 D BufferPoolAccessor2.0: evictor expired: 1, evicted: 1
+10-05 17:51:19.737  1525  1541 I netd    : setProcSysNet(4, 2, eth0, retrans_time_ms, 750) <0.04ms>
+10-05 17:51:19.737  1525  1541 I netd    : setProcSysNet(4, 2, eth0, ucast_solicit, 10) <0.01ms>
+10-05 17:51:19.737  1525  1541 I netd    : setProcSysNet(6, 2, eth0, retrans_time_ms, 750) <0.01ms>
+10-05 17:51:19.737  1525  1525 I netd    : setProcSysNet(6, 2, eth0, ucast_solicit, 10) <0.02ms>
+10-05 17:51:17.204     0     0 E ueventd : LoadWithAliases was unable to load platform:regulatory, tried: platform:regulatory
+10-05 17:51:19.748  1570  1570 I RenderEngine: type=1400 audit(0.0:785): avc:  denied  { ioctl } for  path="/dev/dri/renderD128" dev="tmpfs" ino=887 ioctlcmd=0x6448 scontext=u:r:surfaceflinger:s0 tcontext=u:object_r:gpu_device:s0 tclass=chr_file permissive=1
+10-05 17:51:19.748  1570  1570 I RenderEngine: type=1400 audit(0.0:786): avc:  denied  { ioctl } for  path="/dev/dri/renderD128" dev="tmpfs" ino=887 ioctlcmd=0x6442 scontext=u:r:surfaceflinger:s0 tcontext=u:object_r:gpu_device:s0 tclass=chr_file permissive=1
+10-05 17:51:19.796  1570  1570 I RegionSampling: type=1400 audit(0.0:787): avc:  denied  { ioctl } for  path="/dev/dri/renderD128" dev="tmpfs" ino=887 ioctlcmd=0x6446 scontext=u:r:surfaceflinger:s0 tcontext=u:object_r:gpu_device:s0 tclass=chr_file permissive=1
+10-05 17:51:19.898  1605  3435 D BufferPoolAccessor2.0: bufferpool2 0xe62c6958 : 5(10485760 size) total buffers - 5(10485760 size) used buffers - 172/177 (recycle/alloc) - 5/176 (fetch/transfer)
+10-05 17:51:19.912  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.common.telemetry.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentApiService }
+10-05 17:51:20.024  1726  1754 W VoiceInteractionManager: no available voice recognition services found for user 0
+10-05 17:51:20.025  1726  1906 I AppWidgetServiceImpl: Received broadcast: android.intent.action.PACKAGE_CHANGED on user 0
+10-05 17:51:20.026  1726  1906 I AppWidgetServiceImpl: Received broadcast: android.intent.action.PACKAGE_CHANGED on user 0
+10-05 17:51:20.027  2302  2346 D LauncherApps: getActivityList: No launchable activities found forpackageName=com.android.rkpdapp, user=UserHandle{0}
+10-05 17:51:20.028  1726  1922 D ShortcutService: received package broadcast intent: Intent { act=android.intent.action.PACKAGE_CHANGED dat=package: flg=0x45000010 (has extras) }
+10-05 17:51:20.028  1726  1922 D ShortcutService: changing package: com.android.rkpdapp userId=0
+10-05 17:51:20.028  1726  1922 D ShortcutService: handlePackageChanged: com.android.rkpdapp userId=0
+10-05 17:51:20.029  2185  2205 I PermissionControllerServiceImpl: Updating user sensitive for uid 10286
+10-05 17:51:20.029  2185  2205 I PermissionControllerServiceImpl: Updating user sensitive for uid 10306
+10-05 17:51:20.030  2302  2346 D LauncherApps: getActivityList: No launchable activities found forpackageName=com.android.rkpdapp, user=UserHandle{0}
+10-05 17:51:20.030  2302  2346 W AllAppsList: updatePackage: no Activities matched updated package, removing any AppInfo with package=com.android.rkpdapp, user=UserHandle{0}
+10-05 17:51:20.030  1726  1922 D ShortcutService: rescanPackageIfNeeded 0@com.android.rkpdapp, forceRescan=true , isNewApp=true
+10-05 17:51:20.030  1726  1922 D ShortcutService: Package com.android.rkpdapp has 0 manifest shortcut(s), and 0 share target(s)
+10-05 17:51:20.031  1726  1922 D ShortcutService: received package broadcast intent: Intent { act=android.intent.action.PACKAGE_CHANGED dat=package: flg=0x45000010 (has extras) }
+10-05 17:51:20.035  1726  1922 D ShortcutService: changing package: com.google.android.gms userId=0
+10-05 17:51:20.035  1726  1754 W MagnificationConnectionManager: requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+10-05 17:51:20.035  1726  1922 D ShortcutService: handlePackageChanged: com.google.android.gms userId=0
+10-05 17:51:20.035  1726  1922 D ShortcutService: rescanPackageIfNeeded 0@com.google.android.gms, forceRescan=true , isNewApp=false
+10-05 17:51:20.035  2185  2255 D AccessibilitySourceService: enabled a11y services count 0
+10-05 17:51:20.036  2185  2255 D AccessibilitySourceService: a11y source sending 0 issue to sc
+10-05 17:51:20.036  1726  1754 W VoiceInteractionManager: no available voice recognition services found for user 0
+10-05 17:51:20.038  2302  2346 D LauncherApps: getActivityList: No launchable activities found forpackageName=com.google.android.gms, user=UserHandle{0}
+10-05 17:51:20.038  1726  1922 D ShortcutService: Package com.google.android.gms has 0 manifest shortcut(s), and 2 share target(s)
+10-05 17:51:20.038  1726  1922 D ShortcutService: Package com.google.android.gms updated, version 263635038 -> 263635038
+10-05 17:51:20.038  1726  1922 D ShortcutService: Package com.google.android.gms: publishing manifest shortcuts
+10-05 17:51:20.038  1726  1754 W MagnificationConnectionManager: requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+10-05 17:51:20.039  1726  1741 D SafetySourceDataValidat: No cert check requested for package com.android.permissioncontroller
+10-05 17:51:20.041  2302  2346 D LauncherApps: getActivityList: No launchable activities found forpackageName=com.google.android.gms, user=UserHandle{0}
+10-05 17:51:20.041  2302  2346 W AllAppsList: updatePackage: no Activities matched updated package, removing any AppInfo with package=com.google.android.gms, user=UserHandle{0}
+10-05 17:51:20.042  2185  2255 D AccessibilitySourceService: enabled a11y services count 0
+10-05 17:51:20.042  2185  2255 D AccessibilitySourceService: a11y source sending 0 issue to sc
+10-05 17:51:20.042  1726  1742 D SafetySourceDataValidat: No cert check requested for package com.android.permissioncontroller
+10-05 17:51:20.043  2185  2255 D AccessibilitySourceService: enabled a11y services count 0
+10-05 17:51:20.043  2185  2255 D AccessibilitySourceService: a11y source sending 0 issue to sc
+10-05 17:51:20.044  1726  1788 D SafetySourceDataValidat: No cert check requested for package com.android.permissioncontroller
+10-05 17:51:20.044  2185  2255 D AccessibilitySourceService: enabled a11y services count 0
+10-05 17:51:20.044  2185  2255 D AccessibilitySourceService: a11y source sending 0 issue to sc
+10-05 17:51:20.045  1726  1741 D SafetySourceDataValidat: No cert check requested for package com.android.permissioncontroller
+10-05 17:51:20.047  1605  3412 D BufferPoolAccessor2.0: bufferpool2 0xe62c1458 : 8(65536 size) total buffers - 5(40960 size) used buffers - 262/273 (recycle/alloc) - 11/272 (fetch/transfer)
+10-05 17:51:20.047  1616  3417 D BufferPoolAccessor2.0: bufferpool2 0x748040c90ed8 : 4(8192 size) total buffers - 1(2048 size) used buffers - 265/269 (recycle/alloc) - 5/268 (fetch/transfer)
+10-05 17:51:20.142  1726  1923 D ShortcutService: Getting shortcuts for launcher= com.android.systemuiuserId=0 pkg=com.google.android.gms
+10-05 17:51:20.144  1726  1922 D ShortcutService: Saving package item com.google.android.gms to /data/system_ce/0/shortcut_service/packages/com.google.android.gms.xml
+10-05 17:51:20.144  1726  1922 D ShortcutService: Persisting shortcuts from 0@com.google.android.gms
+10-05 17:51:20.155  1726  1923 D ShortcutService: Getting shortcuts for launcher= com.android.launcher3userId=0 pkg=com.google.android.gms
+10-05 17:51:20.158  2917  3053 I Finsky  : [45] CronetEngine is present. Using Cronet for the networking stack.
+10-05 17:51:20.160  1525  3502 I resolv  : GetAddrInfoHandler::run: {100 262244 100 983140 10305 0}
+10-05 17:51:20.160  1525  3503 I resolv  : res_nmkquery: (QUERY, IN, AAAA)
+10-05 17:51:20.160  1525  3504 I resolv  : res_nmkquery: (QUERY, IN, A)
+10-05 17:51:20.174  2917  3027 I Finsky  : [35] Initializing pausers from value store.
+10-05 17:51:20.175  1525  3504 I resolv  : res_nsend: used send_dg 324 terrno: 0
+10-05 17:51:20.175  1525  3504 I resolv  : doQuery: rcode=0, ancount=17, return value=324
+10-05 17:51:20.176  2917  3027 I Finsky  : [35] IQ::HLD: Callers (Pausers) in PauseUpdatesCallersValueStore: []
+10-05 17:51:20.181  3389  3389 I Endpoint: (REDACTED) Created gRPC endpoint for service %s
+10-05 17:51:20.191  2917  3013 I Finsky  : [34] registerListener
+10-05 17:51:20.192  2917  3013 I Finsky  : [34] DFS: Listener added for ulr@4e66555
+10-05 17:51:20.192  2917  3013 I Finsky  : [34] registerListener
+10-05 17:51:20.196  2917  3510 I Finsky  : [99] SM: There are no stale sessions to be pruned
+10-05 17:51:20.199  2917  2917 I Finsky  : [2] Connecting InstallListener to SplitInstallService broadcaster...
+10-05 17:51:20.204  2917  2920 I android.vending: JIT allocated 52KB for compiled code of java.lang.Object rjv.d()
+10-05 17:51:20.206  2917  3027 I Finsky  : [35] Triggered update for experiment package com.google.android.finsky.stable.
+10-05 17:51:20.208  2315  2315 D BoundBrokerSvc: onBind: Intent { act=com.google.android.gms.potokens.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsApiService }
+10-05 17:51:20.208  2315  2315 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.potokens.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsApiService }
+10-05 17:51:20.211  2917  3061 I Finsky  : [47] Component class com.google.android.finsky.wearsupport.WearSupportService disabled via PackageManager.
+10-05 17:51:20.211  2917  3061 I Finsky  : [47] Component class com.google.android.finsky.wearsupport.WearChangeListenerService disabled via PackageManager.
+10-05 17:51:20.213  2315  2745 W PhBaseOp: Phenotype API error. Event: # jkjj@ad3396f1, EventCode: COMMIT_CONFIG [CONTEXT service_id=51 ]
+10-05 17:51:20.213  2315  2745 W PhBaseOp: fqrz: 29538: Stale snapshot for com.google.android.gms.phenotype(change count changed - expected 4  but was 3)
+10-05 17:51:20.213  2315  2745 W PhBaseOp: 	at fquc.d(:com.google.android.gms@263635038@26.36.35 (260800-991383798):1453)
+10-05 17:51:20.213  2315  2745 W PhBaseOp: 	at fquc.b(:com.google.android.gms@263635038@26.36.35 (260800-991383798):44)
+10-05 17:51:20.213  2315  2745 W PhBaseOp: 	at fqub.i(:com.google.android.gms@263635038@26.36.35 (260800-991383798):3)
+10-05 17:51:20.213  2315  2745 W PhBaseOp: 	at fqtx.h(:com.google.android.gms@263635038@26.36.35 (260800-991383798):34)
+10-05 17:51:20.213  2315  2745 W PhBaseOp: 	at fqtx.f(:com.google.android.gms@263635038@26.36.35 (260800-991383798):16)
+10-05 17:51:20.213  2315  2745 W PhBaseOp: 	at dkbo.fw(:com.google.android.gms@263635038@26.36.35 (260800-991383798):1)
+10-05 17:51:20.213  2315  2745 W PhBaseOp: 	at dkca.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):122)
+10-05 17:51:20.213  2315  2745 W PhBaseOp: 	at htqx.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):23)
+10-05 17:51:20.213  2315  2745 W PhBaseOp: 	at bpzg.d(:com.google.android.gms@263635038@26.36.35 (260800-991383798):50)
+10-05 17:51:20.213  2315  2745 W PhBaseOp: 	at bpzg.c(:com.google.android.gms@263635038@26.36.35 (260800-991383798):6)
+10-05 17:51:20.213  2315  2745 W PhBaseOp: 	at bpzg.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):33)
+10-05 17:51:20.213  2315  2745 W PhBaseOp: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-05 17:51:20.213  2315  2745 W PhBaseOp: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-05 17:51:20.213  2315  2745 W PhBaseOp: 	at bqfi.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):8)
+10-05 17:51:20.213  2315  2745 W PhBaseOp: 	at java.lang.Thread.run(Thread.java:1117)
+10-05 17:51:20.213  2315  2745 W AsyncOperation: operation=CommitToConfigurationOperationCall, opStatusCode=29538 [CONTEXT service_id=51 ]
+10-05 17:51:20.213  2315  2745 W AsyncOperation: OperationException[Status{statusCode=Stale snapshot for com.google.android.gms.phenotype(change count changed - expected 4  but was 3), resolution=null}]
+10-05 17:51:20.213  2315  2745 W AsyncOperation: 	at fqtx.h(:com.google.android.gms@263635038@26.36.35 (260800-991383798):63)
+10-05 17:51:20.213  2315  2745 W AsyncOperation: 	at fqtx.f(:com.google.android.gms@263635038@26.36.35 (260800-991383798):16)
+10-05 17:51:20.213  2315  2745 W AsyncOperation: 	at dkbo.fw(:com.google.android.gms@263635038@26.36.35 (260800-991383798):1)
+10-05 17:51:20.213  2315  2745 W AsyncOperation: 	at dkca.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):122)
+10-05 17:51:20.213  2315  2745 W AsyncOperation: 	at htqx.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):23)
+10-05 17:51:20.213  2315  2745 W AsyncOperation: 	at bpzg.d(:com.google.android.gms@263635038@26.36.35 (260800-991383798):50)
+10-05 17:51:20.213  2315  2745 W AsyncOperation: 	at bpzg.c(:com.google.android.gms@263635038@26.36.35 (260800-991383798):6)
+10-05 17:51:20.213  2315  2745 W AsyncOperation: 	at bpzg.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):33)
+10-05 17:51:20.213  2315  2745 W AsyncOperation: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-05 17:51:20.213  2315  2745 W AsyncOperation: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-05 17:51:20.213  2315  2745 W AsyncOperation: 	at bqfi.run(:com.google.android.gms@263635038@26.36.35 (260800-991383798):8)
+10-05 17:51:20.213  2315  2745 W AsyncOperation: 	at java.lang.Thread.run(Thread.java:1117)
+10-05 17:51:20.215  1525  3503 I resolv  : res_nsend: used send_dg 118 terrno: 0
+10-05 17:51:20.215  1525  3503 I resolv  : doQuery: rcode=0, ancount=1, return value=118
+10-05 17:51:20.217  1525  3513 I resolv  : GetAddrInfoHandler::run: {100 262244 100 983140 10305 0}
+10-05 17:51:20.218  1525  3514 I resolv  : res_nmkquery: (QUERY, IN, AAAA)
+10-05 17:51:20.218  1525  3515 I resolv  : res_nmkquery: (QUERY, IN, A)
+10-05 17:51:20.221  1525  3514 I resolv  : res_nsend: used send_dg 152 terrno: 0
+10-05 17:51:20.221  1525  3514 I resolv  : doQuery: rcode=0, ancount=4, return value=152
+10-05 17:51:20.224  1525  3515 I resolv  : res_nsend: used send_dg 136 terrno: 0
+10-05 17:51:20.224  1525  3515 I resolv  : doQuery: rcode=0, ancount=6, return value=136
+10-05 17:51:20.226  1525  3516 I resolv  : GetAddrInfoHandler::run: {100 262244 100 983140 10305 0}
+10-05 17:51:20.226  2917  2920 I android.vending: JIT allocated 64KB for compiled code of java.lang.Object rjv.h()
+10-05 17:51:20.226  1525  3517 I resolv  : res_nmkquery: (QUERY, IN, AAAA)
+10-05 17:51:20.227  1525  3518 I resolv  : res_nmkquery: (QUERY, IN, A)
+10-05 17:51:20.229  1525  3517 I resolv  : res_nsend: used send_dg 261 terrno: 0
+10-05 17:51:20.230  1525  3517 I resolv  : doQuery: rcode=0, ancount=8, return value=261
+10-05 17:51:20.233  1525  3518 I resolv  : res_nsend: used send_dg 165 terrno: 0
+10-05 17:51:20.233  1525  3518 I resolv  : doQuery: rcode=0, ancount=8, return value=165
+10-05 17:51:20.236  1525  3519 I resolv  : GetAddrInfoHandler::run: {100 262244 100 983140 10305 0}
+10-05 17:51:20.237  1525  3521 I resolv  : res_nmkquery: (QUERY, IN, A)
+10-05 17:51:20.237  1525  3520 I resolv  : res_nmkquery: (QUERY, IN, AAAA)
+10-05 17:51:20.240  1525  3520 I resolv  : res_nsend: used send_dg 283 terrno: 0
+10-05 17:51:20.240  1525  3520 I resolv  : doQuery: rcode=0, ancount=8, return value=283
+10-05 17:51:20.242  1525  3521 I resolv  : res_nsend: used send_dg 187 terrno: 0
+10-05 17:51:20.244  1525  3521 I resolv  : doQuery: rcode=0, ancount=8, return value=187
+10-05 17:51:20.250  1525  3522 I resolv  : GetAddrInfoHandler::run: {100 262244 100 983140 10305 0}
+10-05 17:51:20.251  1525  3524 I resolv  : res_nmkquery: (QUERY, IN, A)
+10-05 17:51:20.251  1525  3523 I resolv  : res_nmkquery: (QUERY, IN, AAAA)
+10-05 17:51:20.256  2917  3027 I Finsky  : [35] Already at the latest configurations for experiment package com.google.android.finsky.stable.
+10-05 17:51:20.257  2917  3511 I Finsky  : [100] Triggered update for experiment package com.google.android.finsky.stable_new.
+10-05 17:51:20.267  1525  3523 I resolv  : res_nsend: used send_dg 291 terrno: 0
+10-05 17:51:20.267  1525  3523 I resolv  : doQuery: rcode=0, ancount=8, return value=291
+10-05 17:51:20.268  1525  3524 I resolv  : res_nsend: used send_dg 195 terrno: 0
+10-05 17:51:20.268  1525  3524 I resolv  : doQuery: rcode=0, ancount=8, return value=195
+10-05 17:51:20.269  1525  3525 I resolv  : GetAddrInfoHandler::run: {100 262244 100 983140 10305 0}
+10-05 17:51:20.270  1525  3526 I resolv  : res_nmkquery: (QUERY, IN, AAAA)
+10-05 17:51:20.270  1525  3527 I resolv  : res_nmkquery: (QUERY, IN, A)
+10-05 17:51:20.272  1525  3526 I resolv  : res_nsend: used send_dg 75 terrno: 0
+10-05 17:51:20.272  1525  3526 I resolv  : doQuery: rcode=0, ancount=1, return value=75
+10-05 17:51:20.274  1525  3527 I resolv  : res_nsend: used send_dg 63 terrno: 0
+10-05 17:51:20.274  1525  3527 I resolv  : doQuery: rcode=0, ancount=1, return value=63
+10-05 17:51:20.276  1525  3528 I resolv  : GetAddrInfoHandler::run: {100 262244 100 983140 10305 0}
+10-05 17:51:20.277  1525  3529 I resolv  : res_nmkquery: (QUERY, IN, AAAA)
+10-05 17:51:20.277  1525  3530 I resolv  : res_nmkquery: (QUERY, IN, A)
+10-05 17:51:20.280  1525  3529 I resolv  : res_nsend: used send_dg 141 terrno: 0
+10-05 17:51:20.280  1525  3529 I resolv  : doQuery: rcode=0, ancount=4, return value=141
+10-05 17:51:20.280  2917  3511 I Finsky  : [100] Already at the latest configurations for experiment package com.google.android.finsky.stable_new.
+10-05 17:51:20.280  2917  3027 I Finsky  : [35] Triggered update for experiment package com.google.android.finsky.regular.
+10-05 17:51:20.281  1525  3530 I resolv  : res_nsend: used send_dg 173 terrno: 0
+10-05 17:51:20.281  1525  3530 I resolv  : doQuery: rcode=0, ancount=9, return value=173
+10-05 17:51:20.290  2917  3027 I Finsky  : [35] Already at the latest configurations for experiment package com.google.android.finsky.regular.
+10-05 17:51:20.524  2302  2346 D IconPackManager: Received intent action android.intent.action.PACKAGE_CHANGED for com.android.rkpdapp
+10-05 17:51:20.525  1984  1984 D ControlsListingControllerImpl: ServiceConfig reloaded, count: 0
+10-05 17:51:20.525  2577  2577 I MediaProvider: Invalidating LocalCallingIdentity cache for package com.google.android.gsf. Reason: package android.intent.action.PACKAGE_CHANGED
+10-05 17:51:20.525  1984  1984 D ControlsListingControllerImpl: ServiceConfig reloaded, count: 0
+10-05 17:51:20.535  2315  3056 I FraudProtectUtils: Not in testing population, skipping local test bank apps. [CONTEXT service_id=469 ]
+10-05 17:51:20.535  2315  3056 I FraudProtectUtils: Latest bank app list size: 13, com.android.rkpdapp isBankApp: false [CONTEXT service_id=469 ]
+10-05 17:51:20.535  2315  3056 W ComponentChangedIO: No package name in intent data or package is not a bank app [CONTEXT service_id=469 ]
+10-05 17:51:20.536  2302  2346 D IconPackManager: Received intent action android.intent.action.PACKAGE_CHANGED for com.google.android.gms
+10-05 17:51:20.537  2315  3056 I FraudProtectUtils: Not in testing population, skipping local test bank apps. [CONTEXT service_id=469 ]
+10-05 17:51:20.537  2315  3056 I FraudProtectUtils: Latest bank app list size: 13, com.google.android.gms isBankApp: false [CONTEXT service_id=469 ]
+10-05 17:51:20.537  2315  3056 W ComponentChangedIO: No package name in intent data or package is not a bank app [CONTEXT service_id=469 ]
+10-05 17:51:20.537  2315  2561 W PeopleGalProvider: Don't have Contacts permission.
+10-05 17:51:20.537  2315  2561 I PeopleGalProvider: Method 0 completed.
+10-05 17:51:20.537  2594  3386 I ContactDirectoryManager: Directory provider com.google.android.gms(com.google.android.gms.people.gal.provider) returned a NULL cursor.
+10-05 17:51:20.714  1726  2219 D BufferPoolAccessor2.0: evictor expired: 2, evicted: 0
+10-05 17:51:20.733  3350  3366 I OMEVideo: t=6267ms frames=31 total=175 centre=0,0,0 glError=0
+10-05 17:51:21.062  1726  2209 W ActivityManager: Unable to start service Intent { act=com.google.android.verifier.backport.VERIFY_PACKAGE pkg=com.google.android.verifier } U=0: not found
+10-05 17:51:21.062  1726  2209 W ActivityManager: Unbind failed: could not find connection for android.os.BinderProxy@6a2656c
+10-05 17:51:21.737  3350  3366 I OMEVideo: t=7270ms frames=30 total=205 centre=0,0,0 glError=0
+10-05 17:51:21.929  3389  3533 I Finsky:background: [66] playLoggingServerUrl: https://play.googleapis.com/play/log
+10-05 17:51:21.929  3389  3533 I Finsky:background: [66] playLoggingServerTimestampUrl: https://play.googleapis.com/play/log/timestamp
+10-05 17:51:21.930  2315  2701 I GetConfigSnapshotOp: Succeeded but not registered: com.google.android.libraries.performance.primes#com.android.vending [CONTEXT service_id=51 ]
+10-05 17:51:22.170  1726  1813 D ActivityManager: freezing 2545 com.android.printspooler
+10-05 17:51:22.171  1726  1879 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET, states=14
+10-05 17:51:22.171  1726  1879 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET6, states=14
+10-05 17:51:22.171  1726  1879 D InetDiagMessage: Destroyed live tcp sockets for uids={10222} in 1ms
+10-05 17:51:22.210  1726  1813 D ActivityManager: freezing 3250 com.android.photopicker
+10-05 17:51:22.210  1726  1879 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET, states=14
+10-05 17:51:22.210  1726  1879 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET6, states=14
+10-05 17:51:22.210  1726  1879 D InetDiagMessage: Destroyed live tcp sockets for uids={10276} in 1ms
+10-05 17:51:22.243  1726  1813 D ActivityManager: freezing 3264 com.android.externalstorage
+10-05 17:51:22.244  1726  1879 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET, states=14
+10-05 17:51:22.244  1726  1879 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET6, states=14
+10-05 17:51:22.244  1726  1879 D InetDiagMessage: Destroyed live tcp sockets for uids={10207} in 0ms
+10-05 17:51:22.730  3350  3366 I OMEVideo: t=8264ms frames=30 total=235 centre=0,0,0 glError=0
+10-05 17:51:23.064  1380  1380 I composer@2.4-se: type=1400 audit(0.0:788): avc:  denied  { read } for  path="socket:[1829]" dev="sockfs" ino=1829 scontext=u:r:hal_graphics_composer_default:s0 tcontext=u:r:hal_graphics_composer_default:s0 tclass=netlink_kobject_uevent_socket permissive=1
+10-05 17:51:20.531     0     0 E ueventd : LoadWithAliases was unable to load platform:regulatory, tried: platform:regulatory
+10-05 17:51:23.413  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.significantplaces.api.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentApiService }
+10-05 17:51:23.414  1726  2209 D OomAdjuster: Not killing cached processes
+10-05 17:51:23.556  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.findmydevice.spot.service.locationreport.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentApiService }
+10-05 17:51:23.768  3350  3366 I OMEVideo: t=9301ms frames=31 total=266 centre=0,0,0 glError=0
+10-05 17:51:23.842  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.nearby.uwb.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentApiServiceNoInstantApps }
+10-05 17:51:23.935  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.nearby.presence.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentApiServiceNoInstantApps }
+10-05 17:51:23.935  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.auth.blockstore.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsApiService }
+10-05 17:51:23.935  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.clearcut.bootcount.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentBoundBrokerService }
+10-05 17:51:23.937  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.logaggregation.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsApiService }
+10-05 17:51:23.938  2315  2658 I AggregationService: Starting finalization task for expired aggregation windows. Total number of expired files: 0 [CONTEXT service_id=446 ]
+10-05 17:51:24.218  1605  3412 D CCodecBufferChannel: [c2.android.aac.decoder#540] buffers after EOS ignored (0 us)
+10-05 17:51:24.475  1605  3407 D AudioTrack: stop(14): called with 480256 frames delivered
+10-05 17:51:24.583  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.auth.account.workaccount.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentApiService }
+10-05 17:51:24.598  1412  1422 I keystore2: system/security/keystore2/watchdog/src/lib.rs:356 - Watchdog thread idle -> terminating. Have a great day.
+10-05 17:51:24.666  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.auth.cryptauth.cryptauthservice.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsBoundBrokerService }
+10-05 17:51:24.666  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.auth.proximity.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentBoundBrokerService }
+10-05 17:51:24.808  3350  3366 I OMEVideo: t=10341ms frames=31 total=297 centre=0,0,0 glError=0
+10-05 17:51:24.828  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.credential.manager.service.zeroparty.checkup.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsApiService }
+10-05 17:51:24.857  3350  3350 I OMEVideo: t=10391ms completed frames=297
+10-05 17:51:24.869  1566  1667 D audioserver: logFgsApiEnd: FGS Logger Transaction failed, -129
+10-05 17:51:25.020  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.auth.proximity.devicesyncservice.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentBoundBrokerService }
+10-05 17:51:25.043  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.findmydevice.spot.service.management.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsApiService }
+10-05 17:51:25.191  2302  2308 W droid.launcher3: ApkAssets: Deleting an ApkAssets object '<empty> and /system/product/app/BOSWallpapers/BOSWallpapers.apk' with 1 weak references
+10-05 17:51:25.191  2302  2308 W droid.launcher3: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~18eONzJeqgGd4Y1Gd_o2Uw==/org.ome.arm64probe-HHOdaZIPUoUP9gixEkzi_g==/base.apk' with 1 weak references
+10-05 17:51:25.191  2302  2308 W droid.launcher3: ApkAssets: Deleting an ApkAssets object '<empty> and /system/system_ext/priv-app/BlissSystemUI/BlissSystemUI.apk' with 1 weak references
+10-05 17:51:25.191  2302  2308 W droid.launcher3: ApkAssets: Deleting an ApkAssets object '<empty> and /system/product/app/Twelve/Twelve.apk' with 1 weak references
+10-05 17:51:25.191  2302  2308 W droid.launcher3: ApkAssets: Deleting an ApkAssets object '<empty> and /system/system_ext/app/OmniJaws/OmniJaws.apk' with 1 weak references
+10-05 17:51:25.298  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.mdd.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsApiService }
+10-05 17:51:25.311  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.gmscompliance.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentBoundBrokerService }
+10-05 17:51:25.419  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.checkin.START pkg=com.google.android.gms }
+10-05 17:51:25.512  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.chimera.container.moduleinstall.ModuleInstallService.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsApiService }
+10-05 17:51:25.559  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.onboardingconsent.api.ConsentManagerApiService.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsApiService }
+10-05 17:51:26.036  2133  2146 W ndroid.settings: ApkAssets: Deleting an ApkAssets object '/data/resource-cache/com.android.systemui-accent-APt5.frro' with 4 weak references
+10-05 17:51:26.036  2133  2146 W ndroid.settings: ApkAssets: Deleting an ApkAssets object '/data/resource-cache/com.android.systemui-dynamic-oJi4.frro' with 4 weak references
+10-05 17:51:26.036  2133  2146 W ndroid.settings: ApkAssets: Deleting an ApkAssets object '/data/resource-cache/com.android.systemui-neutral-vvL6.frro' with 4 weak references
+10-05 17:51:23.856     0     0 E ueventd : LoadWithAliases was unable to load platform:regulatory, tried: platform:regulatory
+10-05 17:51:26.457  3541  3541 W BpBinder: Linking to death on android.gui.ISurfaceComposer but there are no threads (yet?) listening to incoming transactions. See ProcessState::startThreadPool and ProcessState::setThreadPoolMaxThreadCount. Generally you should setup the binder threadpool before other initialization steps.
+10-05 17:51:26.457  3541  3541 W ProcessState: Extra binder thread started, but 0 threads requested. Do not use *startThreadPool when zero threads are requested.
+10-05 17:51:26.456  1570  1570 I binder:1570_5: type=1400 audit(0.0:789): avc:  denied  { ioctl } for  path="/dev/dri/renderD128" dev="tmpfs" ino=887 ioctlcmd=0x642e scontext=u:r:surfaceflinger:s0 tcontext=u:object_r:gpu_device:s0 tclass=chr_file permissive=1
+10-05 17:51:26.456  1570  1570 I RenderEngine: type=1400 audit(0.0:790): avc:  denied  { ioctl } for  path="/dev/dri/renderD128" dev="tmpfs" ino=887 ioctlcmd=0x6445 scontext=u:r:surfaceflinger:s0 tcontext=u:object_r:gpu_device:s0 tclass=chr_file permissive=1
+10-05 17:51:26.468  3541  3541 I binder:3541_1: type=1400 audit(0.0:791): avc:  denied  { getattr } for  path="/system/vendor/lib64/hw/gralloc.minigbm_arcvm.so" dev="loop0" ino=18269 scontext=u:r:shell:s0 tcontext=u:object_r:vendor_file:s0 tclass=file permissive=1
+10-05 17:51:26.468  3541  3541 I binder:3541_1: type=1400 audit(0.0:792): avc:  denied  { read } for  name="gralloc.minigbm_arcvm.so" dev="loop0" ino=18269 scontext=u:r:shell:s0 tcontext=u:object_r:vendor_file:s0 tclass=file permissive=1
+10-05 17:51:26.468  3541  3541 I binder:3541_1: type=1400 audit(0.0:793): avc:  denied  { open } for  path="/system/vendor/lib64/hw/gralloc.minigbm_arcvm.so" dev="loop0" ino=18269 scontext=u:r:shell:s0 tcontext=u:object_r:vendor_file:s0 tclass=file permissive=1
+10-05 17:51:26.468  3541  3541 I binder:3541_1: type=1400 audit(0.0:794): avc:  denied  { map } for  path="/system/vendor/lib64/hw/gralloc.minigbm_arcvm.so" dev="loop0" ino=18269 scontext=u:r:shell:s0 tcontext=u:object_r:vendor_file:s0 tclass=file permissive=1
+10-05 17:51:26.468  3541  3541 I binder:3541_1: type=1400 audit(0.0:795): avc:  denied  { execute } for  path="/system/vendor/lib64/hw/gralloc.minigbm_arcvm.so" dev="loop0" ino=18269 scontext=u:r:shell:s0 tcontext=u:object_r:vendor_file:s0 tclass=file permissive=1
+10-05 17:51:26.474  3541  3542 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_CREATE_GUEST_HANDLE
+10-05 17:51:26.474  3541  3542 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_RESOURCE_SYNC
+10-05 17:51:26.474  3541  3542 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_GUEST_VRAM
+10-05 17:51:26.474  3541  3542 I [minigbm:virgl_get_caps(586)]: Supported CAPSET IDs: 6.
+10-05 17:51:26.474  3541  3542 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:540422468
+10-05 17:51:26.474  3541  3542 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:1479815748
+10-05 17:51:26.474  3541  3542 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:1395929668
+10-05 17:51:26.474  3541  3542 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:1177695044
+10-05 17:51:26.474  3541  3542 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:944981572
+10-05 17:51:26.474  3541  3542 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:842094158
+10-05 17:51:26.474  3541  3542 I [minigbm:virgl_add_combination(401)]: Skipping unsupported combination format:808530000
+10-05 17:51:23.937     0     0 W audit   : audit_lost=174 audit_rate_limit=5 audit_backlog_limit=64
+10-05 17:51:23.937     0     0 E audit   : rate limit exceeded
+10-05 17:51:26.684  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.audit.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsBoundBrokerService }
+10-05 17:51:27.100  1726  1742 W ActivityManager: Unable to start service Intent { act=com.google.android.verifier.backport.VERIFY_PACKAGE pkg=com.google.android.verifier } U=0: not found
+10-05 17:51:27.100  1726  1742 W ActivityManager: Unbind failed: could not find connection for android.os.BinderProxy@60aa31e
+10-05 17:51:27.316  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.safetynet.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsBoundBrokerService }
+10-05 17:51:27.583  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.safetynet.service.START pkg=com.google.android.gms }
+10-05 17:51:27.758  1726  1800 W BroadcastLoopers: Found previously unknown looper Thread[appscheduling.default,5,main]
+10-05 17:51:27.840  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.tapandpay.service.BIND dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentApiService }
+10-05 17:51:27.976  2101  2110 W rkstack.process: ApkAssets: Deleting an ApkAssets object '/data/resource-cache/com.android.systemui-accent-APt5.frro' with 6 weak references
+10-05 17:51:27.976  2101  2110 W rkstack.process: ApkAssets: Deleting an ApkAssets object '/data/resource-cache/com.android.systemui-dynamic-oJi4.frro' with 6 weak references
+10-05 17:51:27.976  2101  2110 W rkstack.process: ApkAssets: Deleting an ApkAssets object '/data/resource-cache/com.android.systemui-neutral-vvL6.frro' with 6 weak references
+10-05 17:51:28.164  1726  1934 I SdkSandboxManager: Reconciling sdk data package directories for 0
+10-05 17:51:28.167  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.auth.aang.events.services.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentApiService }
+10-05 17:51:28.372  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.pay.service.BIND dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsApiService }
+10-05 17:51:28.396  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.cast.firstparty.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentApiService }
+10-05 17:51:28.451  1726  1800 D OomAdjuster: Not killing cached processes
+10-05 17:51:28.840  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.clearcut.service.START pkg=com.google.android.gms }
+10-05 17:51:28.961  1726  1879 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET, states=14
+10-05 17:51:28.961  1726  1879 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET6, states=14
+10-05 17:51:28.961  1726  1879 D InetDiagMessage: Destroyed live tcp sockets for uids={10271} in 1ms
+10-05 17:51:29.025  1726  1879 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET, states=14
+10-05 17:51:29.025  1726  1879 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET6, states=14
+10-05 17:51:29.025  1726  1879 D InetDiagMessage: Destroyed live tcp sockets for uids={10297} in 1ms
+10-05 17:51:29.251  1568  1578 E GpuMem  : Failed to attach bpf program to gpu_mem/gpu_mem_total tracepoint [2(No such file or directory)]
+10-05 17:51:29.251  1568  1578 E GpuMemTracer: Cannot initialize GpuMemTracer before GpuMem
+10-05 17:51:29.516  1726  1879 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET, states=14
+10-05 17:51:29.516  1726  1879 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET6, states=14
+10-05 17:51:29.516  1726  1879 D InetDiagMessage: Destroyed live tcp sockets for uids={10213} in 0ms
+10-05 17:51:29.590  1726  1879 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET, states=14
+10-05 17:51:29.590  1726  1879 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET6, states=14
+10-05 17:51:29.591  1726  1879 D InetDiagMessage: Destroyed live tcp sockets for uids={10296} in 1ms
+10-05 17:51:29.639  2917  2917 I Finsky  : [2] Memory trim requested to level 40
+10-05 17:51:29.639  3389  3389 I Finsky:background: [2] Memory trim requested to level 40
+10-05 17:51:29.639  2917  2917 I Finsky  : [2] Flushing in-memory image cache
+10-05 17:51:29.719  1616  2063 D BufferPoolAccessor2.0: bufferpool2 0x748040c90ed8 : 4(8192 size) total buffers - 0(0 size) used buffers - 466/470 (recycle/alloc) - 7/470 (fetch/transfer)
+10-05 17:51:29.719  1616  2063 D BufferPoolAccessor2.0: evictor expired: 1, evicted: 1
+10-05 17:51:27.184     0     0 E ueventd : LoadWithAliases was unable to load platform:regulatory, tried: platform:regulatory
+10-05 17:51:29.754  1605  3415 D BufferPoolAccessor2.0: bufferpool2 0xe62c1458 : 8(65536 size) total buffers - 4(32768 size) used buffers - 463/474 (recycle/alloc) - 11/472 (fetch/transfer)
+10-05 17:51:29.754  1605  3415 D BufferPoolAccessor2.0: bufferpool2 0xe62c6958 : 5(10485760 size) total buffers - 4(8388608 size) used buffers - 298/303 (recycle/alloc) - 5/302 (fetch/transfer)
+10-05 17:51:29.754  1605  3415 D BufferPoolAccessor2.0: evictor expired: 2, evicted: 2
+10-05 17:51:29.888  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.feedback.internal.IFeedbackService dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsBoundBrokerService }
+10-05 17:51:29.897  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.time.trustedtime.singleuserapi.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentSingleUserInternalApiService }
+10-05 17:51:29.923  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.time.trustedtime.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentDirectBootAwareApiService }
+10-05 17:51:30.022  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.clearcut.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentDirectBootAwareApiService }
+10-05 17:51:30.049  1726  1952 D CompatChangeReporter: Compat change id reported: 311208629; UID 10273; state: ENABLED
+10-05 17:51:30.058  2185  2192 W ssioncontroller: ApkAssets: Deleting an ApkAssets object '/data/resource-cache/com.android.systemui-accent-APt5.frro' with 2 weak references
+10-05 17:51:30.058  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.icing.LIGHTWEIGHT_INDEX_SERVICE dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentApiService }
+10-05 17:51:30.058  2185  2192 W ssioncontroller: ApkAssets: Deleting an ApkAssets object '/data/resource-cache/com.android.systemui-dynamic-oJi4.frro' with 2 weak references
+10-05 17:51:30.058  2185  2192 W ssioncontroller: ApkAssets: Deleting an ApkAssets object '/data/resource-cache/com.android.systemui-neutral-vvL6.frro' with 2 weak references
+10-05 17:51:30.063  1525  1525 I netd    : tetherGetStats() -> {[]} <0.37ms>
+10-05 17:51:30.192  2917  3061 I Finsky  : [47] Initializing the instant apps module.
+10-05 17:51:30.195  2917  2917 I Finsky  : [2] setup::RES: shouldRecoverRestoredPackages: versionCodeSystem 84132530
+10-05 17:51:30.203  2917  2917 I Finsky  : [2] Detected restoreservicev2://recovery not needed, will not run
+10-05 17:51:30.204  2917  3546 I Finsky  : [105] registerListener
+10-05 17:51:30.204  2917  3546 I Finsky  : [105] DSC: reviveDownloads()
+10-05 17:51:30.205  2917  3546 I Finsky  : [105] Initialized AssetModuleDownloader.
+10-05 17:51:30.206  3389  3456 I Finsky:background: [40] DS: reviveDownloads()
+10-05 17:51:30.216  1726  2213 D ConnectivityService: requestNetwork for uid/pid:10305/3389 activeRequest: null callbackRequest: 118 [NetworkRequest [ REQUEST id=119, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10305 RequestorUid: 10305 RequestorPkg: com.android.vending UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647 isUidTracked: false declaredMethods: ALL
+10-05 17:51:30.217  1726  1878 D EthernetNetworkFactory: eth0: onNetworkNeeded for request: NetworkRequest [ REQUEST id=119, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10305 RequestorUid: 10305 RequestorPkg: com.android.vending UnderlyingNetworks: Null] ]
+10-05 17:51:30.217  1726  1878 D EthernetNetworkFactory: IpClient already started
+10-05 17:51:30.217  1726  1865 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=119, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10305 RequestorUid: 10305 RequestorPkg: com.android.vending UnderlyingNetworks: Null] ]
+10-05 17:51:30.217  1726  1865 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=119, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10305 RequestorUid: 10305 RequestorPkg: com.android.vending UnderlyingNetworks: Null] ]
+10-05 17:51:30.217  1726  1865 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=119, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10305 RequestorUid: 10305 RequestorPkg: com.android.vending UnderlyingNetworks: Null] ]
+10-05 17:51:30.217  1726  1879 D ConnectivityService: NetReassign [119 : null → 100] [c 0] [a 0] [i 0]
+10-05 17:51:30.217  3389  3470 I Finsky:background: [53] DS: Network is available [NetworkState(isConnected=true, isWifi=false, isMetered=false, isRoaming=false)].
+10-05 17:51:30.217  3389  3470 I Finsky:background: [53] DS: Updating downloads for network change
+10-05 17:51:30.223  2917  3050 W Finsky  : [44] PreloadClasses: Unable to load [androidx.compose.ui.platform.ViewCompositionStrategy$DisposeOnViewTreeLifecycleDestroyed$installFor$1, androidx.compose.ui.platform.AndroidUiDispatcher$Companion$Main$2, androidx.compose.ui.platform.AndroidCompositionLocals_androidKt$LocalConfiguration$1, androidx.compose.ui.platform.AndroidCompositionLocals_androidKt$LocalContext$1, androidx.compose.ui.platform.AndroidCompositionLocals_androidKt$LocalView$1, androidx.compose.ui.platform.DisposableSaveableStateRegistry_androidKt$DisposableSaveableStateRegistry$saveableStateRegistry$1, androidx.compose.ui.platform.DisposableSaveableStateRegistry_androidKt$DisposableSaveableStateRegistry$1, androidx.compose.ui.platform.InspectableValueKt$NoInspectorInfo$1, androidx.compose.ui.node.ComposeUiNode$Companion$SetModifier$1, androidx.compose.ui.node.ComposeUiNode$Companion$SetLayoutDirection$1, androidx.compose.ui.semantics.SemanticsProperties$ContentDescription$1, androidx.compose.ui.semantics.SemanticsPropertyKey$1, androidx.compose.ui.semantics.SemanticsProperties$PaneTitle$1, androidx.compose.ui.semantics.SemanticsProperties$InvisibleToUser$1, androidx.compose.ui.semantics.SemanticsProperties$IsPopup$1, androidx.compose.ui.semantics.SemanticsProperties$IsDialog$1, androidx.compose.ui.semantics.SemanticsProperties$Role$1, androidx.compose.ui.semantics.SemanticsProperties$TestTag$1, androidx.compose.ui.semantics.SemanticsProperties$Text$1, androidx.compose.ui.platform.ComposeView$Content$1, androidx.compose.ui.platform.CompositionLocalsKt$ProvideCommonCompositionLocals$1, androidx.compose.ui.layout.RootMeasurePolicy$measure$2, androidx.compose.ui.input.pointer.PointerInteropFilter_androidKt$pointerInteropFilter$2, androidx.compose.ui.graphics.painter.Painter$drawLambda$1, androidx.compose.ui.graphics.SimpleGraphicsLayerModifier$layerBlock$1, androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher$calculateNestedScrollScope$1, androidx.compose.animation.TransitionData, androidx.compose.animation.Fade, androidx.compose.ui.layout.SubcomposeLayoutState$setRoot$1, androidx.compose.ui.layout.SubcomposeLayoutState$setMeasurePolicy$1, androidx.compose.ui.graphics.BlockGraphicsLayerModifier$measure$1, androidx.compose.ui.text.platform.AndroidParagraphIntrinsics, androidx.compose.ui.graphics.SimpleGraphicsLayerModifier$measure$1, androidx.compose.ui.layout.SubcomposeLayoutKt$SubcomposeLayout$2, androidx.compose.ui.platform.ViewCompositionStrategy$DisposeOnDetachedFromWindowOrReleasedFromPool$installFor$1, androidx.navigation.NavControllerViewModel, androidx.navigation.NavControllerViewModel$Companion]
+10-05 17:51:30.247  1726  1879 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET, states=14
+10-05 17:51:30.248  3389  3549 I Finsky:background: [72] DS: downloadState filtering results: {1=false, 2=false, 3=false, 4=false, 5=false, 6=false, 7=false, 8=false, 9=false, 10=false, 11=false, 12=false, 13=false, 14=false, 15=false, 16=false, 17=false, 18=false, 19=false, 20=false, 21=false, 22=false, 23=false, 24=false, 25=false, 26=false, 27=false, 28=false, 29=false}
+10-05 17:51:30.248  1726  1879 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET6, states=14
+10-05 17:51:30.248  1726  1879 D InetDiagMessage: Destroyed live tcp sockets for uids={10197} in 0ms
+10-05 17:51:30.429  1726  1879 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET, states=14
+10-05 17:51:30.429  1726  1879 D InetDiagMessage: Destroyed 1 sockets, proto=IPPROTO_TCP, family=AF_INET6, states=14
+10-05 17:51:30.430  1726  1879 D InetDiagMessage: Destroyed live tcp sockets for uids={10255} in 1ms
+10-05 17:51:31.624  2118  2126 W com.android.se: ApkAssets: Deleting an ApkAssets object '/data/resource-cache/com.android.systemui-accent-APt5.frro' with 2 weak references
+10-05 17:51:31.624  2118  2126 W com.android.se: ApkAssets: Deleting an ApkAssets object '/data/resource-cache/com.android.systemui-dynamic-oJi4.frro' with 2 weak references
+10-05 17:51:31.624  2118  2126 W com.android.se: ApkAssets: Deleting an ApkAssets object '/data/resource-cache/com.android.systemui-neutral-vvL6.frro' with 2 weak references
+10-05 17:51:31.737  2917  2917 I Finsky  : [2] SCH: job service start with id 9240.
+10-05 17:51:31.748  2315  2382 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.tapandpay.gcmtask.TapAndPayGcmTaskService started execution. cause:4 exec_start_elapsed_seconds: 36 [CONTEXT service_id=218 ]
+10-05 17:51:31.750  2315  2315 D BoundBrokerSvc: onBind: Intent { act=com.google.android.gms.esim.cloud.EsimBackupTaskService.ACTION_TASK_READY dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentInternalBoundBrokerService }
+10-05 17:51:31.750  2315  2315 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.esim.cloud.EsimBackupTaskService.ACTION_TASK_READY dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentInternalBoundBrokerService }
+10-05 17:51:31.751  2315  3555 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.tapandpay.gcmtask.TapAndPayGcmTaskService finished executing. cause:4 result: 1 elapsed_millis: 6 uptime_millis: 6 exec_start_elapsed_seconds: 36 [CONTEXT service_id=218 ]
+10-05 17:51:31.751  2315  2660 I EsimBackupTaskService: onRunTask for tag: EsimCloudBackupTask
+10-05 17:51:31.751  2315  3555 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.esim.cloud.EsimBackupTaskService started execution. cause:4 exec_start_elapsed_seconds: 36 [CONTEXT service_id=218 ]
+10-05 17:51:31.752  2315  2660 I GmsCoreXrpcWrapper: Returning a channel provider with trafficStatsTag=67147776 trafficStatsUid=-1
+10-05 17:51:31.754  2315  2660 I Backup  : [GmsBackupAccountManager] Backup account not found in gmscore.
+10-05 17:51:31.755  2315  2660 I EsimCloudBackupClient: No backup account found.
+10-05 17:51:31.756  1525  1525 I netd    : tetherGetStats() -> {[]} <0.19ms>
+10-05 17:51:31.756  2315  3552 W ChimeraUtils: Module com.google.android.gms.backup_base missing resource null(0)
+10-05 17:51:31.756  2315  3552 V Backup  : [BackupAccountNotifier] Handling new intent. Show notification: true
+10-05 17:51:31.759  2315  2660 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.esim.cloud.EsimBackupTaskService finished executing. cause:4 result: 1 elapsed_millis: 8 uptime_millis: 8 exec_start_elapsed_seconds: 36 [CONTEXT service_id=218 ]
+10-05 17:51:31.759  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.esim.cloud.EsimBackupTaskService.ACTION_TASK_READY dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentInternalBoundBrokerService }
+10-05 17:51:31.761  2315  2660 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.clearcut.uploader.QosUploaderService started execution. cause:5 exec_start_elapsed_seconds: 36 [CONTEXT service_id=218 ]
+10-05 17:51:31.880  2315  2660 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.clearcut.uploader.QosUploaderService finished executing. cause:5 result: 1 elapsed_millis: 123 uptime_millis: 123 exec_start_elapsed_seconds: 36 [CONTEXT service_id=218 ]
+10-05 17:51:31.881  2917  3064 I Finsky  : [49] SCH: Satisfied jobs for 9240 are: 12-1
+10-05 17:51:31.882  2917  3082 I Finsky  : [52] SCH: Job 12-1 starting
+10-05 17:51:31.882  2917  2917 I Finsky  : [2] WM::SCH: Logging work start for 12-1
+10-05 17:51:31.882  2917  2917 I Finsky  : [2] [ContentSync] job started
+10-05 17:51:31.886  2315  3550 I Authzen : [DeviceStateSyncManager] The server is in sync with current state. Nothing to do
+10-05 17:51:31.945  2917  3557 E Finsky  : [108] [Counters] attempted to use a non-positive increment for: 9200
+10-05 17:51:31.945  2917  3557 I Finsky  : [108] App states replicator found 10 unowned apps
+10-05 17:51:31.948  2917  3050 I Finsky  : [44] Completed 0 account content syncs with 0 successful.
+10-05 17:51:31.948  2917  2917 I Finsky  : [2] [ContentSync] Installation state replication succeeded.
+10-05 17:51:31.948  2917  2917 I Finsky  : [2] SCH: jobFinished: 12-1. TimeElapsed: 67ms.
+10-05 17:51:31.948  2917  2917 I Finsky  : [2] WM::SCH: Logging work end for 12-1
+10-05 17:51:31.978  2917  3061 I Finsky  : [47] SCH: Scheduling phonesky job Id: 1-1337, CT: 1791220601160, Constraints: [{ L: 15849508, D: 59049508, C: CHARGING_NONE, I: IDLE_NONE, N: NET_ANY, B: BATTERY_ANY }]
+10-05 17:51:31.984  2917  3053 I Finsky  : [45] SCH: Scheduling 1 system job(s)
+10-05 17:51:31.984  2917  3053 I Finsky  : [45] SCH: Scheduling system job Id: 9245, L: 13758684, D: 56958684, C: false, I: false, N: 1
+10-05 17:51:31.992  2917  3082 I Finsky  : [52] SCH: job service finished with id 9240.
+10-05 17:51:31.994  3389  3389 I Finsky:background: [2] Memory trim requested to level 40
+10-05 17:51:31.994  2917  2917 I Finsky  : [2] Memory trim requested to level 40
+10-05 17:51:31.994  2917  2917 I Finsky  : [2] Flushing in-memory image cache
+10-05 17:51:30.512     0     0 E ueventd : LoadWithAliases was unable to load platform:regulatory, tried: platform:regulatory
+10-05 17:51:33.407  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.pseudonymous.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentApiService }
+10-05 17:51:33.520  2315  2315 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.scheduler.ACTION_PROXY_SCHEDULE dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentDirectBootAwareApiService }
+10-05 17:51:33.520  1726  2650 D OomAdjuster: Not killing cached processes
+10-05 17:51:34.086  2963  2969 W id.gms.unstable: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~G36QJhZqgSlw2xknhqZovQ==/com.google.android.gms-X4yhhOIFDF2TmBFXy-Atcw==/split_AdsDynamite_installtime.apk' with 1 weak references
+10-05 17:51:34.086  2963  2969 W id.gms.unstable: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~G36QJhZqgSlw2xknhqZovQ==/com.google.android.gms-X4yhhOIFDF2TmBFXy-Atcw==/split_CronetDynamite_installtime.apk' with 1 weak references
+10-05 17:51:34.086  2963  2969 W id.gms.unstable: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~G36QJhZqgSlw2xknhqZovQ==/com.google.android.gms-X4yhhOIFDF2TmBFXy-Atcw==/split_DynamiteLoader_installtime.apk' with 1 weak references
+10-05 17:51:34.086  2963  2969 W id.gms.unstable: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~G36QJhZqgSlw2xknhqZovQ==/com.google.android.gms-X4yhhOIFDF2TmBFXy-Atcw==/split_DynamiteModulesA_installtime.apk' with 1 weak references
+10-05 17:51:34.086  2963  2969 W id.gms.unstable: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~G36QJhZqgSlw2xknhqZovQ==/com.google.android.gms-X4yhhOIFDF2TmBFXy-Atcw==/split_DynamiteModulesC_installtime.apk' with 1 weak references
+10-05 17:51:34.086  2963  2969 W id.gms.unstable: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~G36QJhZqgSlw2xknhqZovQ==/com.google.android.gms-X4yhhOIFDF2TmBFXy-Atcw==/split_GoogleCertificates_installtime.apk' with 1 weak references
+10-05 17:51:34.086  2963  2969 W id.gms.unstable: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~G36QJhZqgSlw2xknhqZovQ==/com.google.android.gms-X4yhhOIFDF2TmBFXy-Atcw==/split_MapsDynamite_installtime.apk' with 1 weak references
+10-05 17:51:34.086  2963  2969 W id.gms.unstable: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~G36QJhZqgSlw2xknhqZovQ==/com.google.android.gms-X4yhhOIFDF2TmBFXy-Atcw==/split_MeasurementDynamite_installtime.apk' with 1 weak references
+10-05 17:51:34.086  2963  2969 W id.gms.unstable: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~G36QJhZqgSlw2xknhqZovQ==/com.google.android.gms-X4yhhOIFDF2TmBFXy-Atcw==/split_all_locale_splits.apk' with 1 weak references
+10-05 17:51:31.881     0     0 I logd    : logdr: UID=2000 GID=2000 PID=3558 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns

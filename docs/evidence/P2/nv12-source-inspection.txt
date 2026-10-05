@@ -1,0 +1,330 @@
+681:		virgl_add_combinations(drv, depth_stencil_formats,
+682-				       ARRAY_SIZE(depth_stencil_formats), &LINEAR_METADATA,
+683-				       BO_USE_GPU_HW);
+684-		/* NV12 with scanout must flow through virgl_add_combination, so that the native
+685-		 * support is checked and scanout use_flag can be conditionally stripped. */
+686-		virgl_add_combination(drv, DRM_FORMAT_NV12, &LINEAR_METADATA,
+687-				      BO_USE_TEXTURE_MASK | BO_USE_CAMERA_READ |
+688-					  BO_USE_CAMERA_WRITE | BO_USE_HW_VIDEO_DECODER |
+689-					  BO_USE_HW_VIDEO_ENCODER | BO_USE_SCANOUT);
+690-	} else {
+691-		/* Virtio primary plane only allows this format. */
+692-		virgl_add_combination(drv, DRM_FORMAT_XRGB8888, &LINEAR_METADATA,
+693-				      BO_USE_RENDER_MASK | BO_USE_SCANOUT);
+694-		/* Virtio cursor plane only allows this format and Chrome cannot live without
+695-		 * ARGB888 renderable format. */
+696-		virgl_add_combination(drv, DRM_FORMAT_ARGB8888, &LINEAR_METADATA,
+697-				      BO_USE_RENDER_MASK | BO_USE_CURSOR);
+698-		/* Android needs more, but they cannot be bound as scanouts anymore after
+699-		 * "drm/virtio: fix DRM_FORMAT_* handling" */
+700:		virgl_add_combinations(drv, render_target_formats,
+701-				       ARRAY_SIZE(render_target_formats), &LINEAR_METADATA,
+702-				       BO_USE_RENDER_MASK);
+703:		virgl_add_combinations(drv, dumb_texture_source_formats,
+704-				       ARRAY_SIZE(dumb_texture_source_formats), &LINEAR_METADATA,
+705-				       BO_USE_TEXTURE_MASK);
+706-		drv_modify_combination(drv, DRM_FORMAT_NV12, &LINEAR_METADATA,
+707-				       BO_USE_CAMERA_READ | BO_USE_CAMERA_WRITE |
+708-					   BO_USE_HW_VIDEO_DECODER | BO_USE_HW_VIDEO_ENCODER);
+709-	}
+710-
+711-	/* Android CTS tests require this. */
+712-	virgl_add_combination(drv, DRM_FORMAT_RGB888, &LINEAR_METADATA, BO_USE_SW_MASK);
+713-	virgl_add_combination(drv, DRM_FORMAT_BGR888, &LINEAR_METADATA, BO_USE_SW_MASK);
+714-	/* Android Camera CTS tests requires this. Additionally, the scanout usage is needed for
+715-	 * Camera preview and is expected to be conditionally stripped by virgl_add_combination
+716-	 * when not natively supported and instead handled by HWComposer. */
+717-	virgl_add_combination(drv, DRM_FORMAT_P010, &LINEAR_METADATA,
+718-			      BO_USE_SCANOUT | BO_USE_TEXTURE | BO_USE_SW_MASK |
+719-				  BO_USE_CAMERA_READ | BO_USE_CAMERA_WRITE);
+720-	/* Android VTS sensors hal tests require BO_USE_SENSOR_DIRECT_DATA. */
+721-	drv_modify_combination(drv, DRM_FORMAT_R8, &LINEAR_METADATA,
+722-			       BO_USE_CAMERA_READ | BO_USE_CAMERA_WRITE | BO_USE_HW_VIDEO_DECODER |
+723-				   BO_USE_HW_VIDEO_ENCODER | BO_USE_SENSOR_DIRECT_DATA |
+724-				   BO_USE_GPU_DATA_BUFFER);
+725-
+726:	if (!priv->host_gbm_enabled) {
+727-		drv_modify_combination(drv, DRM_FORMAT_ABGR8888, &LINEAR_METADATA,
+728-				       BO_USE_CAMERA_READ | BO_USE_CAMERA_WRITE |
+729-					   BO_USE_HW_VIDEO_DECODER | BO_USE_HW_VIDEO_ENCODER);
+730-		drv_modify_combination(drv, DRM_FORMAT_XBGR8888, &LINEAR_METADATA,
+731-				       BO_USE_CAMERA_READ | BO_USE_CAMERA_WRITE |
+732-					   BO_USE_HW_VIDEO_DECODER | BO_USE_HW_VIDEO_ENCODER);
+733-		drv_modify_combination(drv, DRM_FORMAT_NV21, &LINEAR_METADATA,
+734-				       BO_USE_CAMERA_READ | BO_USE_CAMERA_WRITE |
+735-					   BO_USE_HW_VIDEO_DECODER | BO_USE_HW_VIDEO_ENCODER);
+736-		drv_modify_combination(drv, DRM_FORMAT_R16, &LINEAR_METADATA,
+737-				       BO_USE_CAMERA_READ | BO_USE_CAMERA_WRITE |
+738-					   BO_USE_HW_VIDEO_DECODER);
+739-		drv_modify_combination(drv, DRM_FORMAT_YVU420, &LINEAR_METADATA,
+740-				       BO_USE_CAMERA_READ | BO_USE_CAMERA_WRITE |
+741-					   BO_USE_HW_VIDEO_DECODER | BO_USE_HW_VIDEO_ENCODER);
+742-		drv_modify_combination(drv, DRM_FORMAT_YVU420_ANDROID, &LINEAR_METADATA,
+743-				       BO_USE_CAMERA_READ | BO_USE_CAMERA_WRITE |
+744-					   BO_USE_HW_VIDEO_DECODER | BO_USE_HW_VIDEO_ENCODER);
+--
+931-}
+932-
+933-static bool should_use_blob(struct driver *drv, uint32_t format, uint64_t use_flags)
+934-{
+935-	struct virgl_priv *priv = (struct virgl_priv *)drv->priv;
+936-
+937-	// TODO(gurchetansingh): remove once all minigbm users are blob-safe
+938-#ifndef VIRTIO_GPU_NEXT
+939-	return false;
+940-#endif
+941-
+942-	// Only use blob when host gbm is available
+943:	if (!priv->host_gbm_enabled)
+944-		return false;
+945-
+946-	// Use regular resources if only the GPU needs efficient access. Blob resource is a better
+947-	// fit for BO_USE_GPU_DATA_BUFFER which is mapped to VIRGL_BIND_LINEAR.
+948-	if (!(use_flags & (BO_USE_SW_READ_OFTEN | BO_USE_SW_WRITE_OFTEN | BO_USE_LINEAR |
+949-			   BO_USE_NON_GPU_HW | BO_USE_GPU_DATA_BUFFER)))
+950-		return false;
+951-
+952-	switch (format) {
+953-	case DRM_FORMAT_R8:
+954-		// Formats with strictly defined strides are supported
+955-		return true;
+956-	case DRM_FORMAT_ABGR8888:
+957-		// Formats used with frequent software reads are supported as long as they
+958-		// will not be used by non-GPU hardware.
+959-		return (use_flags & BO_USE_SW_READ_OFTEN) && !(use_flags & BO_USE_NON_GPU_HW);
+960-	case DRM_FORMAT_YVU420_ANDROID:
+961-	case DRM_FORMAT_NV12:
+--
+1094-			    drv_bytes_per_pixel_from_format(bo->meta.format, 0) * mapping->rect.x;
+1095-		}
+1096-	}
+1097-
+1098-	if ((bo->meta.use_flags & BO_USE_RENDERING) == 0) {
+1099-		// Unfortunately, the kernel doesn't actually pass the guest layer_stride
+1100-		// and guest stride to the host (compare virgl.h and virtgpu_drm.h).
+1101-		// For gbm based resources, we can work around this by using the level field
+1102-		// to pass the stride to virglrenderer's gbm transfer code. However, we need
+1103-		// to avoid doing this for resources which don't rely on that transfer code,
+1104-		// which is resources with the BO_USE_RENDERING flag set.
+1105-		// TODO(b/145993887): Send also stride when the patches are landed
+1106:		if (priv->host_gbm_enabled)
+1107-			xfer.level = bo->meta.strides[0];
+1108-	}
+1109-
+1110-	if (virgl_supports_combination_natively(bo->drv, bo->meta.format, bo->meta.use_flags)) {
+1111-		xfer_params.xfers_needed = 1;
+1112-		xfer_params.xfer_boxes[0] = mapping->rect;
+1113-	} else {
+1114-		assert(virgl_supports_combination_through_emulation(bo->drv, bo->meta.format,
+1115-								    bo->meta.use_flags));
+1116-
+1117-		virgl_get_emulated_transfers_params(bo, &mapping->rect, &xfer_params);
+1118-	}
+1119-
+1120-	for (i = 0; i < xfer_params.xfers_needed; i++) {
+1121-		xfer.box.x = xfer_params.xfer_boxes[i].x;
+1122-		xfer.box.y = xfer_params.xfer_boxes[i].y;
+1123-		xfer.box.w = xfer_params.xfer_boxes[i].width;
+1124-		xfer.box.h = xfer_params.xfer_boxes[i].height;
+--
+1171-		 * images
+1172-		 */
+1173-		if (bo->meta.num_planes == 1) {
+1174-			xfer.offset =
+1175-			    (bo->meta.strides[0] * mapping->rect.y) +
+1176-			    drv_bytes_per_pixel_from_format(bo->meta.format, 0) * mapping->rect.x;
+1177-		}
+1178-	}
+1179-
+1180-	// Unfortunately, the kernel doesn't actually pass the guest layer_stride and
+1181-	// guest stride to the host (compare virgl.h and virtgpu_drm.h). We can use
+1182-	// the level to work around this.
+1183:	if (priv->host_gbm_enabled)
+1184-		xfer.level = bo->meta.strides[0];
+1185-
+1186-	if (virgl_supports_combination_natively(bo->drv, bo->meta.format, bo->meta.use_flags)) {
+1187-		xfer_params.xfers_needed = 1;
+1188-		xfer_params.xfer_boxes[0] = mapping->rect;
+1189-	} else {
+1190-		assert(virgl_supports_combination_through_emulation(bo->drv, bo->meta.format,
+1191-								    bo->meta.use_flags));
+1192-
+1193-		virgl_get_emulated_transfers_params(bo, &mapping->rect, &xfer_params);
+1194-	}
+1195-
+1196-	for (i = 0; i < xfer_params.xfers_needed; i++) {
+1197-		xfer.box.x = xfer_params.xfer_boxes[i].x;
+1198-		xfer.box.y = xfer_params.xfer_boxes[i].y;
+1199-		xfer.box.w = xfer_params.xfer_boxes[i].width;
+1200-		xfer.box.h = xfer_params.xfer_boxes[i].height;
+1201-		xfer.box.d = 1;
+809-                    1,                              // mRowSampling
+810:                    8,                              // allocatedDepth
+811-                    8,                              // bitDepth
+812-                    0,                              // rightShift
+813-                    C2PlaneInfo::NATIVE,            // endianness
+814-                    C2PlanarLayout::PLANE_Y,        // rootIx
+815-                    0,                              // offset
+816-                };
+817-                layout->planes[C2PlanarLayout::PLANE_U] = {
+818-                    C2PlaneInfo::CHANNEL_CB,          // channel
+819-                    (int32_t)ycbcrLayout.chroma_step, // colInc
+820-                    (int32_t)ycbcrLayout.cstride,     // rowInc
+821-                    2,                                // mColSampling
+822-                    2,                                // mRowSampling
+823:                    8,                                // allocatedDepth
+824-                    8,                                // bitDepth
+825-                    0,                                // rightShift
+826-                    C2PlaneInfo::NATIVE,              // endianness
+827-                    C2PlanarLayout::PLANE_U,          // rootIx
+828-                    0,                                // offset
+829-                };
+830-                layout->planes[C2PlanarLayout::PLANE_V] = {
+831-                    C2PlaneInfo::CHANNEL_CR,          // channel
+832-                    (int32_t)ycbcrLayout.chroma_step, // colInc
+833-                    (int32_t)ycbcrLayout.cstride,     // rowInc
+834-                    2,                                // mColSampling
+835-                    2,                                // mRowSampling
+836:                    8,                                // allocatedDepth
+837-                    8,                                // bitDepth
+838-                    0,                                // rightShift
+839-                    C2PlaneInfo::NATIVE,              // endianness
+840-                    C2PlanarLayout::PLANE_V,          // rootIx
+841-                    0,                                // offset
+842-                };
+843-                break;
+844-            }
+845-
+846-            // We really don't know what this is; lock the buffer and pass it through ---
+847-            // the client may know how to interpret it.
+848-
+849-            // unlock previous allocation if it was successful
+850-            if (err == OK) {
+851-                err = GraphicBufferMapper::get().unlock(buffer);
+852-                if (err) {
+853-                    ALOGE("failed transaction: unlock");
+854-                    return C2_CORRUPTED;
+855-                }
+856-            }
+857-
+858-            void *pointer = nullptr;
+859-            err = GraphicBufferMapper::get().lock(
+860-                    const_cast<native_handle_t *>(buffer), grallocUsage, rect, &pointer);
+861-            if (err) {
+862-                ALOGE("failed transaction: lock(??? %x)", format);
+863-                return C2_CORRUPTED;
+864-            }
+865-            addr[0] = (uint8_t *)pointer;
+866-            layout->type = C2PlanarLayout::TYPE_UNKNOWN;
+867-            layout->numPlanes = 1;
+868-            layout->rootPlanes = 1;
+869-            layout->planes[0] = {
+870-                // TODO: CHANNEL_UNKNOWN?
+871-                C2PlaneInfo::channel_t(0xFF),   // channel
+872-                1,                              // colInc
+873-                int32_t(stride),               // rowInc
+874-                1,                              // mColSampling
+875-                1,                              // mRowSampling
+876:                8,                              // allocatedDepth
+877-                8,                              // bitDepth
+878-                0,                              // rightShift
+879-                C2PlaneInfo::NATIVE,            // endianness
+880-                0,                              // rootIx
+881-                0,                              // offset
+882-            };
+883-            break;
+884-        }
+885-    }
+886-    return C2_OK;
+887-}
+888-
+889-static void HandleInterleavedPlanes(
+890-        C2PlanarLayout *layout /* nonnull */, uint8_t **addr /* nonnull */) {
+891-    if (layout->type == C2PlanarLayout::TYPE_YUV && layout->rootPlanes == 3) {
+892-        intptr_t uvOffset = addr[C2PlanarLayout::PLANE_V] - addr[C2PlanarLayout::PLANE_U];
+893-        intptr_t uvColInc = layout->planes[C2PlanarLayout::PLANE_U].colInc;
+894-        if (uvOffset > 0 && uvOffset < uvColInc) {
+895-            layout->rootPlanes = 2;
+896-            layout->planes[C2PlanarLayout::PLANE_V].rootIx = C2PlanarLayout::PLANE_U;
+897-            layout->planes[C2PlanarLayout::PLANE_V].offset = uvOffset;
+898-        } else if (uvOffset < 0 && uvOffset > -uvColInc) {
+899-            layout->rootPlanes = 2;
+900-            layout->planes[C2PlanarLayout::PLANE_U].rootIx = C2PlanarLayout::PLANE_V;
+901-            layout->planes[C2PlanarLayout::PLANE_U].offset = -uvOffset;
+902-        }
+903-    }
+904-}
+905-
+906-} // unnamed namespace
+--
+1209-
+1210-c2_status_t C2AllocatorGralloc::Impl::newGraphicAllocation(
+1211-        uint32_t width, uint32_t height, uint32_t format, const C2MemoryUsage &usage,
+1212-        std::shared_ptr<C2GraphicAllocation> *allocation) {
+1213-    uint64_t grallocUsage = static_cast<C2AndroidMemoryUsage>(usage).asGrallocUsage();
+1214-    ALOGV("allocating buffer with usage %#llx => %#llx",
+1215-          (long long)usage.expected, (long long)grallocUsage);
+1216-
+1217-    buffer_handle_t buffer;
+1218-
+1219-    uint32_t stride = 0;
+1220-
+1221:    status_t err = GraphicBufferAllocator::get().allocateRawHandle(width, height, format,
+1222-            1u /* layer count */, grallocUsage, &buffer, &stride, "C2GrallocAllocation");
+1223-    if (err) {
+1224:        ALOGE("failed transaction: allocate");
+1225-        return C2_CORRUPTED;
+1226-    }
+1227-
+1228-    hidl_handle hidlHandle;
+1229-    hidlHandle.setTo(const_cast<native_handle_t*>(buffer), true);
+1230-
+1231-    allocation->reset(new C2AllocationGralloc(
+1232-            width, height, format, 1u /* layer count */, grallocUsage, stride, hidlHandle,
+1233-            C2HandleGralloc::WrapAndMoveNativeHandle(
+1234-                    hidlHandle, width, height,
+1235-                    format, grallocUsage, stride,
+1236-                    0, 0, mBufferQueue ? ~0 : 0),
+1237-            mTraits->id));
+1238-    return C2_OK;
+1239-}
+1240-
+1241-c2_status_t C2AllocatorGralloc::Impl::priorGraphicAllocation(
+1242-        const C2Handle *handle,
+1243-        std::shared_ptr<C2GraphicAllocation> *allocation) {
+1244-
+1245-    uint32_t generation;
+1246-    uint64_t igbp_id;
+1247-    uint32_t igbp_slot;
+1248-
+1249-    uint32_t width;
+1250-    uint32_t height;
+1251-    uint32_t format;
+1252-    uint32_t layerCount = 1;
+1253-    uint64_t grallocUsage;
+1254-    uint32_t stride;
+783-        return C2_CORRUPTED;
+784-    }
+785-    if (mOutBlock &&
+786-            (mOutBlock->width() != ALIGN128(mWidth) || mOutBlock->height() != mHeight)) {
+787-        mOutBlock.reset();
+788-    }
+789-    if (!mOutBlock) {
+790-        uint32_t format = HAL_PIXEL_FORMAT_YV12;
+791-        C2MemoryUsage usage = { C2MemoryUsage::CPU_READ, C2MemoryUsage::CPU_WRITE };
+792-        c2_status_t err =
+793:            pool->fetchGraphicBlock(ALIGN128(mWidth), mHeight, format, usage, &mOutBlock);
+794-        if (err != C2_OK) {
+795:            ALOGE("fetchGraphicBlock for Output failed with status %d", err);
+796-            return err;
+797-        }
+798-        ALOGV("provided (%dx%d) required (%dx%d)",
+799-              mOutBlock->width(), mOutBlock->height(), ALIGN128(mWidth), mHeight);
+800-    }
+801-
+802-    return C2_OK;
+803-}
+804-
+805-// TODO: can overall error checking be improved?
+806-// TODO: allow configuration of color format and usage for graphic buffers instead
+807-//       of hard coding them to HAL_PIXEL_FORMAT_YV12

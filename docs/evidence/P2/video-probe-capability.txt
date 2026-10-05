@@ -1,0 +1,38 @@
+10-05 18:00:14.530  3331  3331 I OMEVideo: t=57ms start mode=gl
+10-05 18:00:14.571  3331  3347 I [minigbm:virgl_add_combination(407)]: OME_FORMAT format=875708993 usage=0x31e35 gbm=0 caps=2 v2=1 native=1 emulated=0 nv12_sampler=0 r8_sampler=1
+10-05 18:00:14.571  3331  3347 I [minigbm:virgl_add_combination(407)]: OME_FORMAT format=875713089 usage=0x31e35 gbm=0 caps=2 v2=1 native=1 emulated=0 nv12_sampler=0 r8_sampler=1
+10-05 18:00:14.571  3331  3347 I [minigbm:virgl_add_combination(407)]: OME_FORMAT format=909199186 usage=0x31e35 gbm=0 caps=2 v2=1 native=1 emulated=0 nv12_sampler=0 r8_sampler=1
+10-05 18:00:14.571  3331  3347 I [minigbm:virgl_add_combination(407)]: OME_FORMAT format=875709016 usage=0x31e35 gbm=0 caps=2 v2=1 native=1 emulated=0 nv12_sampler=0 r8_sampler=1
+10-05 18:00:14.571  3331  3347 I [minigbm:virgl_add_combination(407)]: OME_FORMAT format=875713112 usage=0x31e35 gbm=0 caps=2 v2=1 native=1 emulated=0 nv12_sampler=0 r8_sampler=1
+10-05 18:00:14.571  3331  3347 I [minigbm:virgl_add_combination(407)]: OME_FORMAT format=842094158 usage=0x31e30 gbm=0 caps=2 v2=1 native=0 emulated=1 nv12_sampler=0 r8_sampler=1
+10-05 18:00:14.571  3331  3347 I [minigbm:virgl_add_combination(407)]: OME_FORMAT format=825382478 usage=0x31e30 gbm=0 caps=2 v2=1 native=0 emulated=1 nv12_sampler=0 r8_sampler=1
+10-05 18:00:14.571  3331  3347 I [minigbm:virgl_add_combination(407)]: OME_FORMAT format=538982482 usage=0x31e30 gbm=0 caps=2 v2=1 native=1 emulated=0 nv12_sampler=0 r8_sampler=1
+10-05 18:00:14.571  3331  3347 I [minigbm:virgl_add_combination(407)]: OME_FORMAT format=540422482 usage=0x31e30 gbm=0 caps=2 v2=1 native=1 emulated=0 nv12_sampler=0 r8_sampler=1
+10-05 18:00:14.571  3331  3347 I [minigbm:virgl_add_combination(407)]: OME_FORMAT format=943212370 usage=0x31e30 gbm=0 caps=2 v2=1 native=1 emulated=0 nv12_sampler=0 r8_sampler=1
+10-05 18:00:14.571  3331  3347 I [minigbm:virgl_add_combination(407)]: OME_FORMAT format=926497081 usage=0x31e30 gbm=0 caps=2 v2=1 native=0 emulated=1 nv12_sampler=0 r8_sampler=1
+10-05 18:00:14.571  3331  3347 I [minigbm:virgl_add_combination(407)]: OME_FORMAT format=808665665 usage=0x31e30 gbm=0 caps=2 v2=1 native=1 emulated=0 nv12_sampler=0 r8_sampler=1
+10-05 18:00:14.571  3331  3347 I [minigbm:virgl_add_combination(407)]: OME_FORMAT format=1211384385 usage=0x31e30 gbm=0 caps=2 v2=1 native=1 emulated=0 nv12_sampler=0 r8_sampler=1
+10-05 18:00:14.571  3331  3347 I [minigbm:virgl_add_combination(407)]: OME_FORMAT format=540422468 usage=0x40024 gbm=0 caps=2 v2=1 native=0 emulated=0 nv12_sampler=0 r8_sampler=1
+10-05 18:00:14.571  3331  3347 I [minigbm:virgl_add_combination(407)]: OME_FORMAT format=1479815748 usage=0x40024 gbm=0 caps=2 v2=1 native=0 emulated=0 nv12_sampler=0 r8_sampler=1
+10-05 18:00:14.571  3331  3347 I [minigbm:virgl_add_combination(407)]: OME_FORMAT format=1395929668 usage=0x40024 gbm=0 caps=2 v2=1 native=0 emulated=0 nv12_sampler=0 r8_sampler=1
+10-05 18:00:14.571  3331  3347 I [minigbm:virgl_add_combination(407)]: OME_FORMAT format=1177695044 usage=0x40024 gbm=0 caps=2 v2=1 native=0 emulated=0 nv12_sampler=0 r8_sampler=1
+10-05 18:00:14.571  3331  3347 I [minigbm:virgl_add_combination(407)]: OME_FORMAT format=944981572 usage=0x40024 gbm=0 caps=2 v2=1 native=0 emulated=0 nv12_sampler=0 r8_sampler=1
+10-05 18:00:14.571  3331  3347 I [minigbm:virgl_add_combination(407)]: OME_FORMAT format=842094158 usage=0x37ef1 gbm=0 caps=2 v2=1 native=0 emulated=0 nv12_sampler=0 r8_sampler=1
+10-05 18:00:14.571  3331  3347 I [minigbm:virgl_add_combination(407)]: OME_FORMAT format=875710290 usage=0x11e00 gbm=0 caps=2 v2=1 native=1 emulated=0 nv12_sampler=0 r8_sampler=1
+10-05 18:00:14.571  3331  3347 I [minigbm:virgl_add_combination(407)]: OME_FORMAT format=875710274 usage=0x11e00 gbm=0 caps=2 v2=1 native=1 emulated=0 nv12_sampler=0 r8_sampler=1
+10-05 18:00:14.571  3331  3347 I [minigbm:virgl_add_combination(407)]: OME_FORMAT format=808530000 usage=0x11ee1 gbm=0 caps=2 v2=1 native=0 emulated=0 nv12_sampler=0 r8_sampler=1
+10-05 18:00:14.593  3331  3352 I OMEVideo: t=120ms gl renderer=virgl (NVIDIA GeForce RTX 2080 SUPER/PCIe/SSE2) version=OpenGL ES 3.2 Mesa 24.3.3
+10-05 18:00:14.632  3331  3352 I OMEVideo: t=160ms first-frame centre=0,0,0
+10-05 18:00:14.664  3331  3331 I OMEVideo: t=192ms prepared width=1600 height=1024 durationMs=10000
+10-05 18:00:14.884  3331  3331 I OMEVideo: t=411ms info what=3 extra=0
+10-05 18:00:15.649  3331  3352 I OMEVideo: t=1177ms frames=22 total=22 centre=0,0,0 glError=0
+10-05 18:00:16.677  3331  3352 I OMEVideo: t=2205ms frames=31 total=53 centre=0,0,0 glError=0
+10-05 18:00:17.725  3331  3352 I OMEVideo: t=3253ms frames=31 total=84 centre=0,0,0 glError=0
+10-05 18:00:18.748  3331  3352 I OMEVideo: t=4276ms frames=31 total=115 centre=0,0,0 glError=0
+10-05 18:00:19.748  3331  3352 I OMEVideo: t=5276ms frames=30 total=145 centre=0,0,0 glError=0
+10-05 18:00:20.746  3331  3352 I OMEVideo: t=6274ms frames=30 total=175 centre=0,0,0 glError=0
+10-05 18:00:21.745  3331  3352 I OMEVideo: t=7272ms frames=30 total=205 centre=0,0,0 glError=0
+10-05 18:00:22.739  3331  3352 I OMEVideo: t=8266ms frames=30 total=235 centre=0,0,0 glError=0
+10-05 18:00:23.786  3331  3352 I OMEVideo: t=9313ms frames=31 total=266 centre=0,0,0 glError=0
+10-05 18:00:24.788  3331  3352 I OMEVideo: t=10316ms frames=30 total=296 centre=0,0,0 glError=0
+10-05 18:00:24.838  3331  3331 I OMEVideo: t=10365ms completed frames=296

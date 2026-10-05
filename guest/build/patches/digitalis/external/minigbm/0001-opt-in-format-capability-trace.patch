@@ -1,0 +1,36 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Diagnostic only; debug.ome.minigbm_trace defaults off.
+--- a/virtgpu_virgl.c
++++ b/virtgpu_virgl.c
+@@ -5,6 +5,9 @@
+  */
+ 
+ #include <assert.h>
++#ifdef __ANDROID__
++#include <sys/system_properties.h>
++#endif
+ #include <errno.h>
+ #include <fcntl.h>
+ #include <pthread.h>
+@@ -389,6 +392,21 @@
+ static void virgl_add_combination(struct driver *drv, uint32_t drm_format,
+ 				  struct format_metadata *metadata, uint64_t use_flags)
+ {
++#ifdef __ANDROID__
++	// Modified by OME: diagnostic only; support decisions remain unchanged.
++	char ome_trace[PROP_VALUE_MAX] = { 0 };
++	__system_property_get("debug.ome.minigbm_trace", ome_trace);
++	if (strcmp(ome_trace, "1") == 0) {
++		struct virgl_priv *priv = (struct virgl_priv *)drv->priv;
++		drv_logi("OME_FORMAT format=%u usage=0x%llx gbm=%d caps=%u v2=%d native=%d emulated=%d nv12_sampler=%d r8_sampler=%d\n",
++			 drm_format, (unsigned long long)use_flags, priv->host_gbm_enabled,
++			 priv->caps.max_version, priv->caps_is_v2,
++			 virgl_supports_combination_natively(drv, drm_format, use_flags),
++			 virgl_supports_combination_through_emulation(drv, drm_format, use_flags),
++			 virgl_bitmask_supports_format(&priv->caps.v1.sampler, DRM_FORMAT_NV12),
++			 virgl_bitmask_supports_format(&priv->caps.v1.sampler, DRM_FORMAT_R8));
++	}
++#endif
+ 	if (params[param_3d].value) {
+ 		if ((use_flags & BO_USE_SCANOUT) &&
+ 		    !virgl_supports_combination_natively(drv, drm_format, BO_USE_SCANOUT)) {

@@ -71,3 +71,6 @@ ds-bundle/
 .design-sync/node_modules
 host/types/
 /host/qemu-dist/
+
+# Generated test clip for the video probe (ffmpeg testsrc), built locally
+tests/fixtures/video-probe/res/raw/

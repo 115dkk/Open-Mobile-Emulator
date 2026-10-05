@@ -1,0 +1,4 @@
+10-05 17:51:34.836  3580  3580 I OMEVideo: t=5ms start mode=view
+10-05 17:51:34.900  3580  3580 I OMEVideo: t=68ms prepared width=1600 height=1024 durationMs=10000
+10-05 17:51:34.995  3580  3580 I OMEVideo: t=164ms first-frame
+10-05 17:51:45.043  3580  3580 I OMEVideo: t=10212ms completed

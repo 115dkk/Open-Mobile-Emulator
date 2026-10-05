@@ -1,0 +1,12 @@
+Generating 2,048 bit RSA key pair and self-signed certificate (SHA256withRSA) with a validity of 30 days
+	for: CN=OME Video Probe
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): true
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+OUTPUT C:\Open Mobile Emulator\tests\fixtures\video-probe\out\video-probe.apk
+SHA256 b93e42cde4d2f8435e3202dcbc924fb718c738223f10dfcbcc8442a587b5940c

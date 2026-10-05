@@ -134,3 +134,18 @@ jni6 system.img에 넣었다(라벨 `system_file`, 다시 읽어 해시와 라�
 - minigbm 로그에 `virgl_add_combination: Skipping unsupported combination format:842094158`(NV12)이 있다. 디코더 출력 형식(YUV)을 virgl 그래픽 버퍼로 만들 수 없는 것이
   두 이미지 공통의 원인일 가능성이 있다(확인 중). UnityMain은 게스트 JIT 안의 futex/poll에 있고 치명 오류는 없다(`video-stack-root.txt`, `video-thread-waits.txt`).
 - 정리: `p2\gapps\`의 중간 이미지 세 개를 지워 C: 여유가 22.6 GB에서 34.7 GB가 되었다(`video-disk-cleanup.txt`).
+
+## 영상 판별기: 검은 영상은 번역기 없이도 난다 (2026-10-06)
+
+자바만으로 된 `tests/fixtures/video-probe`(네이티브 없음, 변환기를 거치지 않음)로 직접 만든 AVC 1600x1024, 30 fps, 10초 영상을 재생했다(`video-probe-results.txt`).
+
+| 환경 | 모드 | 결과 |
+|---|---|---|
+| A15 jni6+GApps, Mesa 24.3.3 | SurfaceTexture → GLES 외부 텍스처 | 297프레임, 가운데 픽셀 계속 `0,0,0`, `glError=0`, 완료 콜백 10,391 ms |
+| 같은 A15 | VideoView | 첫 프레임과 완료 콜백, 화면은 검다 |
+| A13 공식, Mesa 24.0.8 | 두 모드 | 미디어 서버 오류 `what=100 extra=2`, 완료 없음 |
+
+호스트 QEMU stderr에 virglrenderer 오류가 나왔다: `vrend_create_sampler_view: Invalid number of layers (-1) or zero levels requested`,
+`context ... "RenderThread" Illegal command buffer`. minigbm 계측(`debug.ome.minigbm_trace=1`, 실험 패치)으로는 `nv12_sampler=0 r8_sampler=1 gbm=0`이고
+기본 텍스처 용도의 NV12는 R8 대체로 허용된다(`video-probe-capability.txt`). 영상이 검게 나오는 것은 virgl 경로(게스트 Mesa의 YUV 샘플러 뷰 생성과
+호스트 virglrenderer 1.3.0의 해석 가운데 하나)의 문제이고 Digitalis와 무관하다. 이는 M1의 열린 문제(앱 안 영상이 검다)와 같은 것으로 보인다.

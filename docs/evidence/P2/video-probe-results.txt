@@ -1,0 +1,35 @@
+2026-10-06 Java-only video probe, no native libraries, no ARM translation.
+Synthetic video: testsrc2 1600x1024 30fps 10s, H.264 yuv420p + AAC 440Hz sine.
+Activity and manifest supplied by coordinator and left unchanged.
+
+A15 jni6 + local GApps / Mesa 24.3.3 / virgl RTX2080 SUPER
+GL: first onDrawFrame t=138ms centre=0,0,0 (before prepared t=215ms; not a decoded-frame timestamp).
+MEDIA_INFO_VIDEO_RENDERING_START at t=486ms.
+Every sampled centre remains 0,0,0, glError=0. Frames increase at about 30/s.
+completed t=10391ms frames=297. Both 3s and 12s screenshot show black video.
+VideoView: prepared t=68ms, first-frame t=164ms, completed t=10212ms. Screenshot black.
+
+A13 official Bliss / Mesa 24.0.8 / same host and APK
+GL: prepared t=121ms, first onDrawFrame t=132ms centre=0,0,0.
+error what=100 extra=2 at 292ms, subsequent -32/-38 errors. No completed callback in 20s.
+VideoView: prepared t=102ms, server error at 192ms, subsequent -32/-38 errors. No completed callback.
+
+A15 opt-in minigbm diagnostic (new app process only, temporary bind mount)
+Host caps=2, v2=1, host_gbm_enabled=0, NV12 sampler=0, R8 sampler=1.
+NV12 texture usage 0x31e30: native=0 emulated=1.
+NV12 combined scanout/camera/video usage 0x37ef1: native=0 emulated=0 before scanout stripping.
+Existing rejected-combination warning therefore does not mean all NV12 texture allocation is disabled.
+Diagnostic repeat GL: black pixels, no GL error, completion still delivered.
+Property debug.ome.minigbm_trace reset to 0 and bind mount removed before normal shutdown.
+
+Host stderr observed during initial A15 run (tool command output, not guest logcat):
+vrend_create_sampler_view: Invalid number of layers (-1) or zero levels requested
+context 16 failed to dispatch CREATE_OBJECT: 22
+vrend_decode_ctx_submit_cmd: context error reported 16 "RenderThread" Illegal command buffer 394753
+vrend_create_sampler_view: Invalid number of layers (-1) or zero levels requested
+context 3 failed to dispatch CREATE_OBJECT: 22
+vrend_decode_ctx_submit_cmd: context error reported 3 "surfaceflinger" Illegal command buffer 394753
+
+Conclusion: black video independently reproduced without Digitalis. Both SurfaceTexture/OES and window-surface display fail visually on A15, but decoding callbacks and completion work. Exact guest-Mesa versus host-virglrenderer responsibility is not yet isolated. Do not force-enable NV12 capability bits.
+This does not by itself explain why Unity's game fails to leave its intro: Java playback completes while game does not progress.
+No host QEMU/virglrenderer changes, no game changes, no video-probe Activity/manifest changes.

@@ -1,0 +1,238 @@
+10-06 02:52:49.172  3083  3100 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_CREATE_GUEST_HANDLE
+10-06 02:52:49.175  3083  3100 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_RESOURCE_SYNC
+10-06 02:52:49.175  3083  3100 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_GUEST_VRAM
+10-06 02:52:49.175  3083  3100 I [minigbm:virgl_get_caps(556)]: Supported CAPSET IDs: 6.
+10-06 02:52:49.175  3083  3100 I [minigbm:virgl_add_combination(372)]: Skipping unsupported combination format:842094158
+10-06 02:52:49.175  3083  3100 I [minigbm:virgl_add_combination(372)]: Skipping unsupported combination format:808530000
+10-06 02:52:49.254   885  3136 D CCodec  : allocate(c2.android.avc.decoder)
+10-06 02:52:49.254   885  3135 D CCodec  : allocate(c2.android.aac.decoder)
+10-06 02:52:49.256   885  3136 I CCodec  : Created component [c2.android.avc.decoder]
+10-06 02:52:49.256   885  3136 D CCodecConfig: read media type: video/avc
+10-06 02:52:49.256   885  3135 I CCodec  : Created component [c2.android.aac.decoder]
+10-06 02:52:49.256   885  3135 D CCodecConfig: read media type: audio/mp4a-latm
+10-06 02:52:49.260   885  3136 D CCodecConfig: ignoring local param raw.size (0xd2001800) as it is already supported
+10-06 02:52:49.260   885  3136 D CCodecConfig: ignoring local param default.color (0x5200180b) as it is already supported
+10-06 02:52:49.261   885  3135 I CCodecConfig: query failed after returning 20 values (BAD_INDEX)
+10-06 02:52:49.261   885  3135 D CCodecConfig: c2 config diff is Dict {
+10-06 02:52:49.261   885  3135 D CCodecConfig:   c2::u32 coded.aac-packaging.value = 0
+10-06 02:52:49.261   885  3135 D CCodecConfig:   c2::u32 coded.bitrate.value = 64000
+10-06 02:52:49.261   885  3135 D CCodecConfig:   c2::u32 coded.pl.level = 0
+10-06 02:52:49.261   885  3135 D CCodecConfig:   c2::u32 coded.pl.profile = 8192
+10-06 02:52:49.261   885  3135 D CCodecConfig:   c2::i32 coding.drc.album-mode.value = 0
+10-06 02:52:49.261   885  3135 D CCodecConfig:   c2::float coding.drc.attenuation-factor.value = 1
+10-06 02:52:49.261   885  3135 D CCodecConfig:   c2::float coding.drc.boost-factor.value = 1
+10-06 02:52:49.261   885  3135 D CCodecConfig:   c2::i32 coding.drc.compression-mode.value = 3
+10-06 02:52:49.261   885  3135 D CCodecConfig:   c2::i32 coding.drc.effect-type.value = 3
+10-06 02:52:49.261   885  3135 D CCodecConfig:   c2::float coding.drc.encoded-level.value = 0.25
+10-06 02:52:49.261   885  3135 D CCodecConfig:   c2::float coding.drc.reference-level.value = -16
+10-06 02:52:49.261   885  3135 D CCodecConfig:   c2::u32 input.buffers.max-size.value = 8192
+10-06 02:52:49.261   885  3135 D CCodecConfig:   c2::u32 input.delay.value = 0
+10-06 02:52:49.261   885  3135 D CCodecConfig:   string input.media-type.value = "audio/mp4a-latm"
+10-06 02:52:49.261   885  3135 D CCodecConfig:   c2::u32 output.delay.value = 2
+10-06 02:52:49.261   885  3135 D CCodecConfig:   c2::float output.drc.output-loudness.value = 0.25
+10-06 02:52:49.261   885  3135 D CCodecConfig:   string output.media-type.value = "audio/raw"
+10-06 02:52:49.261   885  3135 D CCodecConfig:   c2::u32 raw.channel-count.value = 1
+10-06 02:52:49.261   885  3135 D CCodecConfig:   c2::u32 raw.channel-mask.value = 0
+10-06 02:52:49.261   885  3135 D CCodecConfig:   c2::u32 raw.max-channel-count.value = 8
+10-06 02:52:49.261   885  3135 D CCodecConfig:   c2::u32 raw.sample-rate.value = 44100
+10-06 02:52:49.261   885  3135 D CCodecConfig: }
+10-06 02:52:49.262   885  3136 I CCodecConfig: query failed after returning 12 values (BAD_INDEX)
+10-06 02:52:49.262   885  3135 D MediaCodec: flushMediametrics
+10-06 02:52:49.262   885  3136 D CCodecConfig: c2 config diff is Dict {
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::u32 coded.pl.level = 20496
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::u32 coded.pl.profile = 20481
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::u32 coded.vui.color.matrix = 0
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::u32 coded.vui.color.primaries = 0
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::u32 coded.vui.color.range = 2
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::u32 coded.vui.color.transfer = 0
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::u32 default.color.matrix = 0
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::u32 default.color.primaries = 0
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::u32 default.color.range = 0
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::u32 default.color.transfer = 0
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::u32 input.buffers.max-size.value = 2097152
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::u32 input.delay.value = 0
+10-06 02:52:49.262   885  3136 D CCodecConfig:   string input.media-type.value = "video/avc"
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::u32 output.delay.value = 8
+10-06 02:52:49.262   885  3136 D CCodecConfig:   string output.media-type.value = "video/raw"
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::u32 raw.color.matrix = 0
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::u32 raw.color.primaries = 0
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::u32 raw.color.range = 2
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::u32 raw.color.transfer = 0
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::u32 raw.max-size.height = 240
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::u32 raw.max-size.width = 320
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::u32 raw.pixel-format.value = 35
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::i32 raw.rotation.flip = 0
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::i32 raw.rotation.value = 0
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::u32 raw.sar.height = 1
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::u32 raw.sar.width = 1
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::u32 raw.size.height = 240
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2::u32 raw.size.width = 320
+10-06 02:52:49.262   885  3136 D CCodecConfig:   c2:
+10-06 02:52:49.262   885  3135 D CCodec  : [c2.android.aac.decoder] buffers are bound to CCodec for this session
+10-06 02:52:49.262   885  3135 D CCodecConfig: no c2 equivalents for durationUs
+10-06 02:52:49.262   885  3135 D CCodecConfig: no c2 equivalents for track-id
+10-06 02:52:49.262   885  3135 D CCodecConfig: no c2 equivalents for language
+10-06 02:52:49.262   885  3135 D CCodecConfig: no c2 equivalents for encoder-delay
+10-06 02:52:49.262   885  3135 D CCodecConfig: no c2 equivalents for encoder-padding
+10-06 02:52:49.262   885  3135 D CCodecConfig: no c2 equivalents for flags
+10-06 02:52:49.262   885  3135 D CCodecConfig: config failed => CORRUPTED
+10-06 02:52:49.262   885  3135 D CCodecConfig: c2 config diff is   c2::u32 coded.bitrate.value = 62331
+10-06 02:52:49.262   885  3135 D CCodecConfig:   c2::u32 raw.sample-rate.value = 48000
+10-06 02:52:49.262   885  3135 W Codec2Client: query -- param skipped: index = 1107298332.
+10-06 02:52:49.262   885  3135 D CCodec  : client requested max input size 600, which is smaller than what component recommended (8192); overriding with component recommendation.
+10-06 02:52:49.262   885  3135 W CCodec  : This behavior is subject to change. It is recommended that app developers double check whether the requested max input size is in reasonable range.
+10-06 02:52:49.262   885  3135 D CCodec  : encoding statistics level = 0
+10-06 02:52:49.262   885  3135 D CCodec  : setup formats input: AMessage(what = 0x00000000) = {
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t aac-drc-album-mode = 0
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t aac-drc-boost-level = 127
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t aac-drc-cut-level = 127
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t aac-drc-effect-type = 3
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t aac-encoded-target-level = -1
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t aac-max-output-channel_count = 8
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t aac-target-ref-level = 64
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t bitrate = 62331
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t channel-count = 1
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t channel-mask = 0
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t level = 0
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t max-input-size = 8192
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t max-output-channel-count = 8
+10-06 02:52:49.262   885  3135 D CCodec  :   string mime = "audio/mp4a-latm"
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t profile = 2
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t sample-rate = 48000
+10-06 02:52:49.262   885  3135 D CCodec  : }
+10-06 02:52:49.262   885  3135 D CCodec  : setup formats output: AMessage(what = 0x00000000) = {
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t aac-drc-album-mode = 0
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t aac-drc-boost-level = 127
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t aac-drc-cut-level = 127
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t aac-drc-effect-type = 3
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t aac-drc-output-loudness = -1
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t aac-encoded-target-level = -1
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t aac-max-output-channel_count = 8
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t aac-target-ref-level = 64
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t channel-count = 1
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t channel-mask = 0
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t max-output-channel-count = 8
+10-06 02:52:49.262   885  3135 D CCodec  :   string mime = "audio/raw"
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t sample-rate = 48000
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t encoder-delay = 1024
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t encoder-padding = 0
+10-06 02:52:49.262   885  3135 D CCodec  :   int32_t android._config-pcm-encoding = 2
+10-06 02:52:49.262   885  3135 D CCodec  : }
+10-06 02:52:49.263   885  3135 I CCodecConfig: query failed after returning 20 values (BAD_INDEX)
+10-06 02:52:49.263   885  3133 D MediaCodec: flushMediametrics
+10-06 02:52:49.263   885  3135 I MediaCodec: MediaCodec will operate in async mode
+10-06 02:52:49.263   885  3134 D MediaCodec: keep callback message for reclaim
+10-06 02:52:49.264   885  3133 I MediaCodec: [c2.android.avc.decoder] setting surface generation to 906241
+10-06 02:52:49.267   885  3135 W Codec2Client: query -- param skipped: index = 1342179345.
+10-06 02:52:49.267   885  3135 W Codec2Client: query -- param skipped: index = 2415921170.
+10-06 02:52:49.267   885  3135 W Codec2Client: query -- param skipped: index = 1610614798.
+10-06 02:52:49.268   885  3136 D CCodec  : [c2.android.avc.decoder] buffers are bound to CCodec for this session
+10-06 02:52:49.268   885  3136 D CCodecConfig: no c2 equivalents for durationUs
+10-06 02:52:49.268   885  3136 D CCodecConfig: no c2 equivalents for frame-count
+10-06 02:52:49.268   885  3136 D CCodecConfig: no c2 equivalents for track-id
+10-06 02:52:49.268   885  3136 D CCodecConfig: no c2 equivalents for language
+10-06 02:52:49.268   885  3136 D CCodecConfig: no c2 equivalents for display-width
+10-06 02:52:49.268   885  3136 D CCodecConfig: no c2 equivalents for display-height
+10-06 02:52:49.268   885  3136 D CCodecConfig: no c2 equivalents for csd-1
+10-06 02:52:49.268   885  3136 D CCodecConfig: no c2 equivalents for native-window
+10-06 02:52:49.268   885  3136 D CCodecConfig: no c2 equivalents for flags
+10-06 02:52:49.268   885  3136 D CCodecConfig: config failed => CORRUPTED
+10-06 02:52:49.268   885  3136 D CCodecConfig: c2 config diff is   c2::u32 coded.pl.level = 20491
+10-06 02:52:49.268   885  3136 D CCodecConfig:   c2::u32 coded.pl.profile = 20484
+10-06 02:52:49.268   885  3136 D CCodecConfig:   c2::u32 raw.size.height = 1024
+10-06 02:52:49.268   885  3136 D CCodecConfig:   c2::u32 raw.size.width = 1600
+10-06 02:52:49.268   885  3136 W Codec2Client: query -- param skipped: index = 1107298332.
+10-06 02:52:49.268   885  3136 D CCodec  : client requested max input size 35792, which is smaller than what component recommended (2097152); overriding with component recommendation.
+10-06 02:52:49.268   885  3136 W CCodec  : This behavior is subject to change. It is recommended that app developers double check whether the requested max input size is in reasonable range.
+10-06 02:52:49.268   885  3136 D CCodec  : encoding statistics level = 0
+10-06 02:52:49.268   885  3136 D CCodec  : setup formats input: AMessage(what = 0x00000000) = {
+10-06 02:52:49.268   885  3136 D CCodec  :   int32_t height = 1024
+10-06 02:52:49.268   885  3136 D CCodec  :   int32_t level = 2048
+10-06 02:52:49.268   885  3136 D CCodec  :   int32_t max-input-size = 2097152
+10-06 02:52:49.268   885  3136 D CCodec  :   string mime = "video/avc"
+10-06 02:52:49.268   885  3136 D CCodec  :   int32_t profile = 8
+10-06 02:52:49.268   885  3136 D CCodec  :   int32_t width = 1600
+10-06 02:52:49.268   885  3136 D CCodec  :   Rect crop(0, 0, 1599, 1023)
+10-06 02:52:49.268   885  3136 D CCodec  : }
+10-06 02:52:49.268   885  3136 D CCodec  : setup formats output: AMessage(what = 0x00000000) = {
+10-06 02:52:49.268   885  3136 D CCodec  :   int32_t android._color-format = 2135033992
+10-06 02:52:49.268   885  3136 D CCodec  :   int32_t android._video-scaling = 1
+10-06 02:52:49.268   885  3136 D CCodec  :   int32_t rotation-degrees = 0
+10-06 02:52:49.268   885  3136 D CCodec  :   int32_t color-standard = 1
+10-06 02:52:49.268   885  3136 D CCodec  :   int32_t color-range = 2
+10-06 02:52:49.268   885  3136 D CCodec  :   int32_t color-transfer = 3
+10-06 02:52:49.268   885  3136 D CCodec  :   int32_t sar-height = 1
+10-06 02:52:49.268   885  3136 D CCodec  :   int32_t sar-width = 1
+10-06 02:52:49.268   885  3136 D CCodec  :   Rect crop(0, 0, 1599, 1023)
+10-06 02:52:49.268   885  3136 D CCodec  :   int32_t width = 1600
+10-06 02:52:49.268   885  3136 D CCodec  :   int32_t height = 1024
+10-06 02:52:49.268   885  3136 D CCodec  :   int32_t max-height = 240
+10-06 02:52:49.268   885  3136 D CCodec  :   int32_t max-width = 320
+10-06 02:52:49.268   885  3136 D CCodec  :   string mime = "video/raw"
+10-06 02:52:49.268   885  3136 D CCodec  :   int32_t android._dataspace = 260
+10-06 02:52:49.268   885  3136 D CCodec  :   int32_t color-format = 2130708361
+10-06 02:52:49.268   885  3136 D CCodec  : }
+10-06 02:52:49.269   885  3136 I CCodecConfig: query failed after returning 12 values (BAD_INDEX)
+10-06 02:52:49.269   885  3136 D CCodecConfig: c2 config diff is   c2::u32 raw.max-size.height = 1024
+10-06 02:52:49.269   885  3136 D CCodecConfig:   c2::u32 raw.max-size.width = 1600
+10-06 02:52:49.269   885  3133 I MediaCodec: MediaCodec will operate in async mode
+10-06 02:52:49.269   885  3132 D MediaCodec: keep callback message for reclaim
+10-06 02:52:49.270   885  3135 D CCodecBufferChannel: [c2.android.aac.decoder#315] Created input block pool with allocatorID 16 => poolID 17 - OK (0)
+10-06 02:52:49.271   885  3135 I CCodecBufferChannel: [c2.android.aac.decoder#315] Created output block pool with allocatorID 16 => poolID 26 - OK
+10-06 02:52:49.272   885  3135 D CCodecBufferChannel: [c2.android.aac.decoder#315] Configured output block pool ids 26 => OK
+10-06 02:52:49.274   885  3136 W Codec2Client: query -- param skipped: index = 1342179345.
+10-06 02:52:49.274   885  3136 W Codec2Client: query -- param skipped: index = 2415921170.
+10-06 02:52:49.274   885  3136 W Codec2Client: query -- param skipped: index = 1610614798.
+10-06 02:52:49.274   885  3136 D CCodecBufferChannel: [c2.android.avc.decoder#666] Created input block pool with allocatorID 16 => poolID 18 - OK (0)
+10-06 02:52:49.277   885  3136 D CCodecBufferChannel: [c2.android.avc.decoder#666] Query output surface allocator returned 0 params => BAD_INDEX (6)
+10-06 02:52:49.278   885  3136 I CCodecBufferChannel: [c2.android.avc.decoder#666] Created output block pool with allocatorID 18 => poolID 27 - OK
+10-06 02:52:49.278   885  3136 D CCodecBufferChannel: [c2.android.avc.decoder#666] Configured output block pool ids 27 => OK
+10-06 02:52:49.278   885  3136 D Codec2-OutputBufferQueue: C2SurfaceSyncMemory created 20(20)
+10-06 02:52:49.278   885  3136 D Codec2-OutputBufferQueue: remote graphic buffer migration 0/0
+10-06 02:52:49.278   885  3136 D Codec2Client: setOutputSurface -- failed to set consumer usage (6/BAD_INDEX)
+10-06 02:52:49.278   885  3136 D Codec2Client: setOutputSurface -- generation=906241 consumer usage=0x900 sync
+10-06 02:52:49.278   885  3136 D Codec2Client: Surface configure completed
+10-06 02:52:49.290   885  3135 D CCodecConfig: c2 config diff is   c2::u32 raw.channel-mask.value = 4
+10-06 02:52:49.290   885  3135 D CCodecBuffers: [c2.android.aac.decoder#315:Output[N]] popFromStashAndRegister: at -21333us, output format changed to AMessage(what = 0x00000000) = {
+10-06 02:52:49.290   885  3135 D CCodecBuffers:   int32_t aac-drc-album-mode = 0
+10-06 02:52:49.290   885  3135 D CCodecBuffers:   int32_t aac-drc-boost-level = 127
+10-06 02:52:49.290   885  3135 D CCodecBuffers:   int32_t aac-drc-cut-level = 127
+10-06 02:52:49.290   885  3135 D CCodecBuffers:   int32_t aac-drc-effect-type = 3
+10-06 02:52:49.290   885  3135 D CCodecBuffers:   int32_t aac-drc-output-loudness = -1
+10-06 02:52:49.290   885  3135 D CCodecBuffers:   int32_t aac-encoded-target-level = -1
+10-06 02:52:49.290   885  3135 D CCodecBuffers:   int32_t aac-max-output-channel_count = 8
+10-06 02:52:49.290   885  3135 D CCodecBuffers:   int32_t aac-target-ref-level = 64
+10-06 02:52:49.290   885  3135 D CCodecBuffers:   int32_t channel-count = 1
+10-06 02:52:49.290   885  3135 D CCodecBuffers:   int32_t channel-mask = 4
+10-06 02:52:49.290   885  3135 D CCodecBuffers:   int32_t max-output-channel-count = 8
+10-06 02:52:49.290   885  3135 D CCodecBuffers:   string mime = "audio/raw"
+10-06 02:52:49.290   885  3135 D CCodecBuffers:   int32_t sample-rate = 48000
+10-06 02:52:49.290   885  3135 D CCodecBuffers:   int32_t encoder-delay = 1024
+10-06 02:52:49.290   885  3135 D CCodecBuffers:   int32_t encoder-padding = 0
+10-06 02:52:49.290   885  3135 D CCodecBuffers:   int32_t android._config-pcm-encoding = 2
+10-06 02:52:49.290   885  3135 D CCodecBuffers: }
+10-06 02:52:49.419   885  1333 E CCodec  : Codec2 component "c2.android.avc.decoder" died.
+10-06 02:52:49.419   885  1387 E CCodec  : Codec2 component "c2.android.aac.decoder" died.
+10-06 02:52:49.419   885  1502 I MediaPlayerService: Codec2 service "software" died. Sending death notification.
+10-06 02:52:49.419   885  3133 E MediaCodec: Codec reported err 0xffffffe0/DEAD_OBJECT, actionCode 0, while in state 6/STARTED
+10-06 02:52:49.419   885  3133 D MediaCodec: flushMediametrics
+10-06 02:52:49.419   885  1502 I MediaPlayerService: Codec2 service "software" died. Sending death notification.
+10-06 02:52:49.420   885  3135 E MediaCodec: Codec reported err 0xffffffe0/DEAD_OBJECT, actionCode 0, while in state 6/STARTED
+10-06 02:52:49.420   885  3135 D MediaCodec: flushMediametrics
+10-06 02:52:49.421   885  3132 D MediaCodec: flushMediametrics
+10-06 02:52:49.439  3154  3154 I CodecServiceRegistrant: Creating software Codec2 service...
+10-06 02:52:49.439  3154  3154 I CodecServiceRegistrant: Preferred Codec2 store is defaulted to "software".
+10-06 02:52:49.439  3154  3154 I CodecServiceRegistrant: Software Codec2 service created and registered.
+10-06 02:52:49.458   885  3134 D MediaCodec: flushMediametrics
+10-06 02:52:52.133  3163  3164 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_CREATE_GUEST_HANDLE
+10-06 02:52:52.133  3163  3164 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_RESOURCE_SYNC
+10-06 02:52:52.133  3163  3164 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_GUEST_VRAM
+10-06 02:52:52.133  3163  3164 I [minigbm:virgl_get_caps(556)]: Supported CAPSET IDs: 6.
+10-06 02:52:52.133  3163  3164 I [minigbm:virgl_add_combination(372)]: Skipping unsupported combination format:842094158
+10-06 02:52:52.133  3163  3164 I [minigbm:virgl_add_combination(372)]: Skipping unsupported combination format:808530000
+10-06 02:53:01.142  3185  3186 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_CREATE_GUEST_HANDLE
+10-06 02:53:01.142  3185  3186 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_RESOURCE_SYNC
+10-06 02:53:01.142  3185  3186 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_GUEST_VRAM
+10-06 02:53:01.142  3185  3186 I [minigbm:virgl_get_caps(556)]: Supported CAPSET IDs: 6.
+10-06 02:53:01.142  3185  3186 I [minigbm:virgl_add_combination(372)]: Skipping unsupported combination format:842094158
+10-06 02:53:01.142  3185  3186 I [minigbm:virgl_add_combination(372)]: Skipping unsupported combination format:808530000

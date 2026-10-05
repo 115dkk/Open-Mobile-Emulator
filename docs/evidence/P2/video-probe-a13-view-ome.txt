@@ -1,0 +1,7 @@
+10-06 02:53:09.396  3211  3211 I OMEVideo: t=2ms start mode=view
+10-06 02:53:09.496  3211  3211 I OMEVideo: t=102ms prepared width=1600 height=1024 durationMs=10000
+10-06 02:53:09.586  3211  3211 I OMEVideo: t=192ms error what=100 extra=2
+10-06 02:53:09.586  3211  3211 I OMEVideo: t=192ms info what=805 extra=-32
+10-06 02:53:09.595  3211  3211 I OMEVideo: t=201ms error what=1 extra=-32
+10-06 02:53:09.595  3211  3211 I OMEVideo: t=201ms error what=1 extra=-38
+10-06 02:53:09.622  3211  3211 I OMEVideo: t=228ms error what=1 extra=-38

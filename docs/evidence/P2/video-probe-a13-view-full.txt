@@ -1,0 +1,1122 @@
+--------- beginning of system
+10-06 02:53:09.348  1032  1584 D CompatibilityChangeReporter: Compat change id reported: 161252188; UID 10287; state: DISABLED
+10-06 02:53:09.348  1032  1584 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=org.ome.videoprobe/.MainActivity (has extras)} from uid 2000
+10-06 02:53:09.348  1032  1584 D CompatibilityChangeReporter: Compat change id reported: 265464455; UID 10287; state: DISABLED
+10-06 02:53:09.348  1032  1584 D CompatibilityChangeReporter: Compat change id reported: 265452344; UID 10287; state: DISABLED
+10-06 02:53:09.348  1032  1584 D CompatibilityChangeReporter: Compat change id reported: 266124927; UID 10287; state: DISABLED
+10-06 02:53:09.348  1032  1584 D CompatibilityChangeReporter: Compat change id reported: 265451093; UID 10287; state: DISABLED
+10-06 02:53:09.348  1032  1584 D CompatibilityChangeReporter: Compat change id reported: 265456536; UID 10287; state: DISABLED
+10-06 02:53:09.348  1032  1584 D CompatibilityChangeReporter: Compat change id reported: 255940284; UID 10287; state: DISABLED
+10-06 02:53:09.348  1032  1584 D CompatibilityChangeReporter: Compat change id reported: 236283604; UID 10287; state: DISABLED
+10-06 02:53:09.348  1032  1584 D CompatibilityChangeReporter: Compat change id reported: 263959004; UID 10287; state: DISABLED
+10-06 02:53:09.348  1032  1584 D CompatibilityChangeReporter: Compat change id reported: 264304459; UID 10287; state: DISABLED
+10-06 02:53:09.348  1032  1584 D CompatibilityChangeReporter: Compat change id reported: 264301586; UID 10287; state: DISABLED
+10-06 02:53:09.348  1032  1584 D CompatibilityChangeReporter: Compat change id reported: 254631730; UID 10287; state: DISABLED
+10-06 02:53:09.348  1032  1584 D CompatibilityChangeReporter: Compat change id reported: 273509367; UID 10287; state: DISABLED
+10-06 02:53:09.348  1032  1584 D CompatibilityChangeReporter: Compat change id reported: 263259275; UID 10287; state: DISABLED
+10-06 02:53:09.349  1032  1584 D CompatibilityChangeReporter: Compat change id reported: 194480991; UID 10287; state: ENABLED
+10-06 02:53:09.349  1032  1584 D CompatibilityChangeReporter: Compat change id reported: 174042980; UID 10287; state: DISABLED
+10-06 02:53:09.350  1032  1584 D CompatibilityChangeReporter: Compat change id reported: 184838306; UID 10287; state: DISABLED
+10-06 02:53:09.350  1032  1584 D CompatibilityChangeReporter: Compat change id reported: 185004937; UID 10287; state: DISABLED
+10-06 02:53:09.350  1032  1584 D CompatibilityChangeReporter: Compat change id reported: 181136395; UID 10287; state: DISABLED
+10-06 02:53:09.350  1032  1584 D CompatibilityChangeReporter: Compat change id reported: 174042936; UID 10287; state: DISABLED
+10-06 02:53:09.350  1032  1584 D CompatibilityChangeReporter: Compat change id reported: 197654537; UID 10287; state: ENABLED
+10-06 02:53:09.351  1032  1584 D CompatibilityChangeReporter: Compat change id reported: 205907456; UID 10287; state: ENABLED
+--------- beginning of main
+10-06 02:53:09.351  1032  1584 D ActivityTrigger: ActivityTrigger activityPauseTrigger 
+10-06 02:53:09.355  1032  1050 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 10287; state: DISABLED
+10-06 02:53:09.355  1032  1050 D CompatibilityChangeReporter: Compat change id reported: 177438394; UID 10287; state: DISABLED
+10-06 02:53:09.355  1032  1050 D CompatibilityChangeReporter: Compat change id reported: 135772972; UID 10287; state: DISABLED
+10-06 02:53:09.355  1032  1050 D CompatibilityChangeReporter: Compat change id reported: 135754954; UID 10287; state: ENABLED
+10-06 02:53:09.356  1032  1058 D CompatibilityChangeReporter: Compat change id reported: 143937733; UID 10287; state: ENABLED
+10-06 02:53:09.356  1310  1594 W Parcel  : Expecting binder but got null!
+10-06 02:53:09.360  1032  1584 D CompatibilityChangeReporter: Compat change id reported: 168419799; UID 10287; state: DISABLED
+10-06 02:53:09.360  1032  1584 D CompatibilityChangeReporter: Compat change id reported: 273564678; UID 10287; state: DISABLED
+10-06 02:53:09.360   839   839 D Zygote  : Forked child process 3211
+10-06 02:53:09.363  1032  1058 I ActivityManager: Start proc 3211:org.ome.videoprobe/u0a287 for next-top-activity {org.ome.videoprobe/org.ome.videoprobe.MainActivity}
+10-06 02:53:09.364  1032  1584 D CoreBackPreview: Window{d423c7d u0 Splash Screen org.ome.videoprobe}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@44db840, mPriority=0}
+10-06 02:53:09.375  1310  1594 E OpenGLRenderer: Unable to match the desired swap behavior.
+10-06 02:53:09.376  3211  3211 W .ome.videoprobe: Unexpected CPU variant for x86: generic.
+10-06 02:53:09.376  3211  3211 W .ome.videoprobe: Known variants: atom, sandybridge, silvermont, kabylake, default
+10-06 02:53:09.378  3211  3211 E .ome.videoprobe: Not starting debugger since process cannot load the jdwp agent.
+10-06 02:53:09.382  1032  3199 D CompatibilityInfo: mCompatibilityFlags - 4
+10-06 02:53:09.382  1032  3199 D CompatibilityInfo: applicationDensity - 160
+10-06 02:53:09.382  1032  3199 D CompatibilityInfo: applicationScale - 1.0
+10-06 02:53:09.383  1032  3199 D CompatibilityInfo: mCompatibilityFlags - 4
+10-06 02:53:09.383  3211  3225 E ashmem  : memfd: ro.vndk.version not defined or invalid (), this is mandated since P.
+10-06 02:53:09.383  1032  3199 D CompatibilityInfo: applicationDensity - 160
+10-06 02:53:09.383  1032  3199 D CompatibilityInfo: applicationScale - 1.0
+10-06 02:53:09.384  3211  3211 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10287; state: ENABLED
+10-06 02:53:09.390  1032  1045 D ConnectivityService: requestNetwork for uid/pid:10266/1310 asUid: 10287 activeRequest: null callbackRequest: 77 [NetworkRequest [ REQUEST id=78, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10287 RequestorUid: 10266 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647
+10-06 02:53:09.390  1032  1249 D ConnectivityService: NetReassign [78 : null → 100]
+10-06 02:53:09.390  1032  1248 D EthernetNetworkFactory: eth0: onNetworkUnneeded for request: NetworkRequest [ REQUEST id=76, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10256 RequestorUid: 10266 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-06 02:53:09.391  1032  1220 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=78, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10287 RequestorUid: 10266 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-06 02:53:09.391  1032  1220 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=78, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10287 RequestorUid: 10266 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-06 02:53:09.391  1032  1220 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=78, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10287 RequestorUid: 10266 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-06 02:53:09.391  1032  1248 D EthernetNetworkFactory: eth0: onNetworkNeeded for request: NetworkRequest [ REQUEST id=78, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10287 RequestorUid: 10266 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-06 02:53:09.391  1032  1248 D EthernetNetworkFactory: IpClient already started
+10-06 02:53:09.391  1430  1430 D PhoneSwitcherNetworkRequstListener: got request NetworkRequest [ REQUEST id=78, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10287 RequestorUid: 10266 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+10-06 02:53:09.391  3211  3211 V GraphicsEnvironment: ANGLE Developer option for 'org.ome.videoprobe' set to: 'default'
+10-06 02:53:09.391  3211  3211 V GraphicsEnvironment: ANGLE GameManagerService for org.ome.videoprobe: false
+10-06 02:53:09.391  3211  3211 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+10-06 02:53:09.392  3211  3211 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-06 02:53:09.392  3211  3211 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-06 02:53:09.396  3211  3211 I OMEVideo: t=2ms start mode=view
+10-06 02:53:09.423  3211  3211 D CompatibilityChangeReporter: Compat change id reported: 237531167; UID 10287; state: DISABLED
+10-06 02:53:09.426  3211  3229 W Parcel  : Expecting binder but got null!
+10-06 02:53:09.427  1032  1886 D CoreBackPreview: Window{f66749c u0 org.ome.videoprobe/org.ome.videoprobe.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@9bfc27a, mPriority=0}
+10-06 02:53:09.448  1032  3067 I MediaFocusControl: requestAudioFocus() from uid/pid 10287/3211 AA=USAGE_MEDIA/CONTENT_TYPE_MOVIE clientId=android.media.AudioManager@9fa110f callingPack=org.ome.videoprobe req=1 flags=0x0 sdk=35
+10-06 02:53:09.448  3211  3229 I MESA    : Using gralloc0 CrOS API
+10-06 02:53:09.447  3211  3211 I RenderThread: type=1400 audit(0.0:539): avc: denied { read } for name="uevent" dev="sysfs" ino=3872 scontext=u:r:untrusted_app:s0:c31,c257,c512,c768 tcontext=u:object_r:sysfs:s0 tclass=file permissive=1 app=org.ome.videoprobe
+10-06 02:53:09.447  3211  3211 I RenderThread: type=1400 audit(0.0:540): avc: denied { open } for path="/sys/devices/pci0000:00/0000:00:01.0/uevent" dev="sysfs" ino=3872 scontext=u:r:untrusted_app:s0:c31,c257,c512,c768 tcontext=u:object_r:sysfs:s0 tclass=file permissive=1 app=org.ome.videoprobe
+10-06 02:53:09.447  3211  3211 I RenderThread: type=1400 audit(0.0:541): avc: denied { getattr } for path="/sys/devices/pci0000:00/0000:00:01.0/uevent" dev="sysfs" ino=3872 scontext=u:r:untrusted_app:s0:c31,c257,c512,c768 tcontext=u:object_r:sysfs:s0 tclass=file permissive=1 app=org.ome.videoprobe
+10-06 02:53:09.449  1032  3067 I AudioService.FadeOutManager: unfadeOutUid() uid:10287
+10-06 02:53:09.454   885  3027 D NuPlayerDriver: NuPlayerDriver(0xe9001210) created, clientPid(3211)
+10-06 02:53:09.455   885   885 I binder:885_8: type=1400 audit(0.0:542): avc: denied { call } for scontext=u:r:mediaserver:s0 tcontext=u:r:init:s0 tclass=binder permissive=1
+10-06 02:53:09.455   851   851 I c2@1.2-ffmpeg-s: type=1400 audit(0.0:543): avc: denied { transfer } for scontext=u:r:init:s0 tcontext=u:r:mediaserver:s0 tclass=binder permissive=1
+10-06 02:53:09.456   885  3027 D SurfaceUtils: connecting to surface 0xe1040018, reason setVideoSurfaceTexture
+10-06 02:53:09.456   885  3235 D NuPlayer: onSetVideoSurface(0xe1043270, no video decoder)
+10-06 02:53:09.457  1310  1310 D CentralSurfaces: Received new disable state: Old: EnAiHBCRSo.qingr | New: EnAiHbCRSo.qingr (changed: b.)
+10-06 02:53:09.459  3211  3211 E SurfaceSyncer: Failed to find sync for id=0
+10-06 02:53:09.462   885  3238 D GenericSource: FileSource remote
+10-06 02:53:09.462  1032  1886 D CompatibilityChangeReporter: Compat change id reported: 161252188; UID 1000; state: DISABLED
+10-06 02:53:09.463   883  3200 I FFmpegExtractor: android-source:0x74930b096f90
+10-06 02:53:09.463  1032  1057 D CompatibilityChangeReporter: Compat change id reported: 168419799; UID 1000; state: DISABLED
+10-06 02:53:09.463  1032  1057 D CompatibilityChangeReporter: Compat change id reported: 273564678; UID 1000; state: DISABLED
+10-06 02:53:09.463  1032  1057 D CompatibilityInfo: mCompatibilityFlags - 4
+10-06 02:53:09.463  1032  1057 D CompatibilityInfo: applicationDensity - 160
+10-06 02:53:09.463  1032  1057 D CompatibilityInfo: applicationScale - 1.0
+10-06 02:53:09.463   883  3200 D FFmpegExtractor: supported codec(h264) by official Stagefright
+10-06 02:53:09.463   883  3200 D FFmpegExtractor: supported codec(aac) by official Stagefright
+10-06 02:53:09.463   883  3200 D FFmpegExtractor: ffmpeg detected media content as 'video/mp4' with confidence 0.08
+10-06 02:53:09.464   883  3200 I SampleTable: There are reordered frames present.
+10-06 02:53:09.464   883  1312 D MediaBufferGroup: creating MemoryDealer
+10-06 02:53:09.471  3211  3229 W EGL-MAIN: failed to get driver name for fd -1
+10-06 02:53:09.471  3211  3229 W EGL-MAIN: MESA-LOADER: failed to retrieve device information
+10-06 02:53:09.471  3211  3229 W EGL-MAIN: failed to get driver name for fd -1
+10-06 02:53:09.474  3211  3229 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_CREATE_GUEST_HANDLE
+10-06 02:53:09.476  3211  3229 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_RESOURCE_SYNC
+10-06 02:53:09.476  3211  3229 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_GUEST_VRAM
+10-06 02:53:09.476  3211  3229 I [minigbm:virgl_get_caps(556)]: Supported CAPSET IDs: 6.
+10-06 02:53:09.476  3211  3229 I [minigbm:virgl_add_combination(372)]: Skipping unsupported combination format:842094158
+10-06 02:53:09.476  3211  3229 I [minigbm:virgl_add_combination(372)]: Skipping unsupported combination format:808530000
+10-06 02:53:09.480  3211  3229 E OpenGLRenderer: Device claims wide gamut support, cannot find matching config, error = EGL_SUCCESS
+10-06 02:53:09.480  3211  3229 W OpenGLRenderer: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+10-06 02:53:09.481   859   946 D SurfaceFlinger: Native-Android-x86: display 1280 800 density 213.000000
+10-06 02:53:09.481   859   946 D SurfaceFlinger: Native-Android-x86: auto set density
+10-06 02:53:09.482  3211  3229 E OpenGLRenderer: Unable to match the desired swap behavior.
+10-06 02:53:09.495  1032  1047 I ActivityTaskManager: Displayed org.ome.videoprobe/.MainActivity: +147ms
+10-06 02:53:09.495  3211  3211 D MediaPlayerNative: getMetadata
+10-06 02:53:09.496  3211  3211 I OMEVideo: t=102ms prepared width=1600 height=1024 durationMs=10000
+10-06 02:53:09.508  1032  1261 D CompatibilityChangeReporter: Compat change id reported: 171306433; UID 1000; state: ENABLED
+10-06 02:53:09.508  1032  1261 D CompatibilityChangeReporter: Compat change id reported: 218533173; UID 1000; state: ENABLED
+10-06 02:53:09.510   885  3235 I GenericSource: start
+10-06 02:53:09.510  3211  3211 E SurfaceSyncer: Failed to find sync for id=0
+10-06 02:53:09.510  3211  3211 E SurfaceSyncer: Failed to find sync for id=1
+10-06 02:53:09.512   885  3244 D CCodec  : allocate(c2.android.avc.decoder)
+10-06 02:53:09.512   885  3244 E Codec2Client: createComponent(c2.android.avc.decoder) -- transaction failed.
+10-06 02:53:09.512   885  3244 W Codec2Client: "create:c2.android.avc.decoder" failed for service "android.componentStore.platform" due to transaction failure. (Service may have crashed.) Retrying...
+10-06 02:53:09.513   885  3246 D CCodec  : allocate(c2.android.aac.decoder)
+10-06 02:53:09.513  3154  3154 V C2Store : in init
+10-06 02:53:09.513  3154  3154 V C2Store : loading dll
+10-06 02:53:09.514  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.514  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.514  3154  3154 V C2Store : in init
+10-06 02:53:09.514  3154  3154 V C2Store : loading dll
+10-06 02:53:09.514  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.514  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.514  3154  3154 V C2Store : in init
+10-06 02:53:09.514  3154  3154 V C2Store : loading dll
+10-06 02:53:09.514  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.514  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.514  3154  3154 V C2Store : in init
+10-06 02:53:09.514  3154  3154 V C2Store : loading dll
+10-06 02:53:09.515  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.515  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.515  3154  3154 V C2Store : in init
+10-06 02:53:09.515  3154  3154 V C2Store : loading dll
+10-06 02:53:09.515  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.515  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.515  3154  3154 V C2Store : in init
+10-06 02:53:09.515  3154  3154 V C2Store : loading dll
+10-06 02:53:09.515  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.515  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.515  3154  3154 V C2Store : in init
+10-06 02:53:09.515  3154  3154 V C2Store : loading dll
+10-06 02:53:09.515  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.515  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.515  3154  3154 V C2Store : in init
+10-06 02:53:09.515  3154  3154 V C2Store : loading dll
+10-06 02:53:09.516  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.516  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.516  3154  3154 V C2Store : in init
+10-06 02:53:09.516  3154  3154 V C2Store : loading dll
+10-06 02:53:09.516  3154  3154 I mediaswcodec: missing struct descriptor #Param::CoreIndex(--004) for field values of struct #Param::CoreIndex(F-12004)
+10-06 02:53:09.516  3154  3154 I mediaswcodec: missing struct descriptor #Param::CoreIndex(--1812) for field values of struct #Param::CoreIndex(F-11812)
+10-06 02:53:09.516  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.516  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.516  3154  3154 V C2Store : in init
+10-06 02:53:09.516  3154  3154 V C2Store : loading dll
+10-06 02:53:09.517  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.517  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.517  3154  3154 V C2Store : in init
+10-06 02:53:09.517  3154  3154 V C2Store : loading dll
+10-06 02:53:09.517  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.517  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.517  3154  3154 V C2Store : in init
+10-06 02:53:09.517  3154  3154 V C2Store : loading dll
+10-06 02:53:09.517  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.517  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.517  3154  3154 V C2Store : in init
+10-06 02:53:09.517  3154  3154 V C2Store : loading dll
+10-06 02:53:09.517  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.517  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.517  3154  3154 V C2Store : in init
+10-06 02:53:09.517  3154  3154 V C2Store : loading dll
+10-06 02:53:09.518  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.518  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.518  3154  3154 V C2Store : in init
+10-06 02:53:09.518  3154  3154 V C2Store : loading dll
+10-06 02:53:09.518  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.518  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.518  3154  3154 V C2Store : in init
+10-06 02:53:09.518  3154  3154 V C2Store : loading dll
+10-06 02:53:09.518  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.518  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.518  3154  3154 V C2Store : in init
+10-06 02:53:09.518  3154  3154 V C2Store : loading dll
+10-06 02:53:09.519  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.519  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.519  3154  3154 V C2Store : in init
+10-06 02:53:09.519  3154  3154 V C2Store : loading dll
+10-06 02:53:09.519  3154  3154 I mediaswcodec: missing struct descriptor #Param::CoreIndex(--004) for field values of struct #Param::CoreIndex(F-12004)
+10-06 02:53:09.519  3154  3154 I mediaswcodec: missing struct descriptor #Param::CoreIndex(--1812) for field values of struct #Param::CoreIndex(F-11812)
+10-06 02:53:09.519  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.519  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.519  3154  3154 V C2Store : in init
+10-06 02:53:09.519  3154  3154 V C2Store : loading dll
+10-06 02:53:09.519  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.519  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.519  3154  3154 V C2Store : in init
+10-06 02:53:09.519  3154  3154 V C2Store : loading dll
+10-06 02:53:09.519  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.520  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.520  3154  3154 V C2Store : in init
+10-06 02:53:09.520  3154  3154 V C2Store : loading dll
+10-06 02:53:09.520  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.520  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.520  3154  3154 V C2Store : in init
+10-06 02:53:09.520  3154  3154 V C2Store : loading dll
+10-06 02:53:09.520  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.520  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.520  3154  3154 V C2Store : in init
+10-06 02:53:09.520  3154  3154 V C2Store : loading dll
+10-06 02:53:09.521  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.521  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.521  3154  3154 V C2Store : in init
+10-06 02:53:09.521  3154  3154 V C2Store : loading dll
+10-06 02:53:09.521  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.521  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.521  3154  3154 V C2Store : in init
+10-06 02:53:09.521  3154  3154 V C2Store : loading dll
+10-06 02:53:09.521  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.521  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.521  3154  3154 V C2Store : in init
+10-06 02:53:09.521  3154  3154 V C2Store : loading dll
+10-06 02:53:09.521  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.521  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.521  3154  3154 V C2Store : in init
+10-06 02:53:09.521  3154  3154 V C2Store : loading dll
+10-06 02:53:09.522  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.522  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.522  3154  3154 V C2Store : in init
+10-06 02:53:09.522  3154  3154 V C2Store : loading dll
+10-06 02:53:09.522  3154  3154 I C2SoftVpxEnc: setting temporal layering 0 + 0
+10-06 02:53:09.522  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.522  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.522  3154  3154 V C2Store : in init
+10-06 02:53:09.522  3154  3154 V C2Store : loading dll
+10-06 02:53:09.522  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.522  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.522  3154  3154 V C2Store : in init
+10-06 02:53:09.522  3154  3154 V C2Store : loading dll
+10-06 02:53:09.523  3154  3154 I C2SoftVpxEnc: setting temporal layering 0 + 0
+10-06 02:53:09.523  3154  3154 V C2Store : in ~ComponentModule
+10-06 02:53:09.523  3154  3154 V C2Store : unloading dll
+10-06 02:53:09.523  3154  3154 V C2Store : in init
+10-06 02:53:09.523  3154  3154 V C2Store : loading dll
+10-06 02:53:09.523  3154  3156 V C2Store : in init
+10-06 02:53:09.523  3154  3156 V C2Store : loading dll
+10-06 02:53:09.527  1032  1886 D CompatibilityChangeReporter: Compat change id reported: 214016041; UID 10287; state: ENABLED
+10-06 02:53:09.528   885  3244 I CCodec  : Created component [c2.android.avc.decoder]
+10-06 02:53:09.528   885  3244 D CCodecConfig: read media type: video/avc
+10-06 02:53:09.528   885  3246 I CCodec  : Created component [c2.android.aac.decoder]
+10-06 02:53:09.529   885  3246 D CCodecConfig: read media type: audio/mp4a-latm
+10-06 02:53:09.530   885  3244 D ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.max-count.values
+10-06 02:53:09.530   885  3244 D ReflectedParamUpdater: extent() != 1 for single value type: output.subscribed-indices.values
+10-06 02:53:09.530   885  3244 D ReflectedParamUpdater: extent() != 1 for single value type: input.buffers.allocator-ids.values
+10-06 02:53:09.530   885  3244 D ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.allocator-ids.values
+10-06 02:53:09.530   885  3244 D ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.allocator-ids.values
+10-06 02:53:09.530   885  3244 D ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.pool-ids.values
+10-06 02:53:09.530   885  3246 D ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.max-count.values
+10-06 02:53:09.530   885  3244 D ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.pool-ids.values
+10-06 02:53:09.530   885  3246 D ReflectedParamUpdater: extent() != 1 for single value type: output.subscribed-indices.values
+10-06 02:53:09.531   885  3246 D ReflectedParamUpdater: extent() != 1 for single value type: input.buffers.allocator-ids.values
+10-06 02:53:09.531   885  3246 D ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.allocator-ids.values
+10-06 02:53:09.531   885  3246 D ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.allocator-ids.values
+10-06 02:53:09.531   885  3246 D ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.pool-ids.values
+10-06 02:53:09.531   885  3244 D ReflectedParamUpdater: ignored struct field coded.color-format.locations
+10-06 02:53:09.531   885  3246 D ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.pool-ids.values
+10-06 02:53:09.531   885  3244 D CCodecConfig: ignoring local param raw.size (0xd2001800) as it is already supported
+10-06 02:53:09.531   885  3244 D CCodecConfig: ignoring local param default.color (0x5200180b) as it is already supported
+10-06 02:53:09.531   885  3244 D ReflectedParamUpdater: ignored struct field raw.hdr-static-info.mastering
+10-06 02:53:09.531   885  3244 I CCodecConfig: query failed after returning 12 values (BAD_INDEX)
+10-06 02:53:09.532   885  3244 D CCodecConfig: c2 config diff is Dict {
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::u32 coded.pl.level = 20496
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::u32 coded.pl.profile = 20481
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::u32 coded.vui.color.matrix = 0
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::u32 coded.vui.color.primaries = 0
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::u32 coded.vui.color.range = 2
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::u32 coded.vui.color.transfer = 0
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::u32 default.color.matrix = 0
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::u32 default.color.primaries = 0
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::u32 default.color.range = 0
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::u32 default.color.transfer = 0
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::u32 input.buffers.max-size.value = 2097152
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::u32 input.delay.value = 0
+10-06 02:53:09.532   885  3244 D CCodecConfig:   string input.media-type.value = "video/avc"
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::u32 output.delay.value = 8
+10-06 02:53:09.532   885  3244 D CCodecConfig:   string output.media-type.value = "video/raw"
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::u32 raw.color.matrix = 0
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::u32 raw.color.primaries = 0
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::u32 raw.color.range = 2
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::u32 raw.color.transfer = 0
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::u32 raw.max-size.height = 240
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::u32 raw.max-size.width = 320
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::u32 raw.pixel-format.value = 35
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::i32 raw.rotation.flip = 0
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::i32 raw.rotation.value = 0
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::u32 raw.sar.height = 1
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::u32 raw.sar.width = 1
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::u32 raw.size.height = 240
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2::u32 raw.size.width = 320
+10-06 02:53:09.532   885  3244 D CCodecConfig:   c2:
+10-06 02:53:09.532   885  3244 W ColorUtils: expected specified color aspects (2:0:0:0)
+10-06 02:53:09.532   885  3242 D SurfaceUtils: disconnecting from surface 0xe1043278, reason onConfigure
+10-06 02:53:09.532   885  3243 D MediaCodec: flushMediametrics
+10-06 02:53:09.532   885  3243 D SurfaceUtils: connecting to surface 0xe1043278, reason connectToSurface
+10-06 02:53:09.532   885  3243 I MediaCodec: [c2.android.avc.decoder] setting surface generation to 906242
+10-06 02:53:09.532   885  3243 D SurfaceUtils: disconnecting from surface 0xe1043278, reason connectToSurface(reconnect)
+10-06 02:53:09.532   885  3243 D SurfaceUtils: connecting to surface 0xe1043278, reason connectToSurface(reconnect)
+10-06 02:53:09.533   885  3244 D CCodec  : [c2.android.avc.decoder] buffers are bound to CCodec for this session
+10-06 02:53:09.533   885  3244 D CCodecConfig: no c2 equivalents for durationUs
+10-06 02:53:09.533   885  3244 D CCodecConfig: no c2 equivalents for frame-count
+10-06 02:53:09.533   885  3244 D CCodecConfig: no c2 equivalents for track-id
+10-06 02:53:09.533   885  3244 D CCodecConfig: no c2 equivalents for language
+10-06 02:53:09.533   885  3244 D CCodecConfig: no c2 equivalents for display-width
+10-06 02:53:09.533   885  3244 D CCodecConfig: no c2 equivalents for display-height
+10-06 02:53:09.533   885  3244 D CCodecConfig: no c2 equivalents for csd-1
+10-06 02:53:09.533   885  3244 D CCodecConfig: no c2 equivalents for native-window
+10-06 02:53:09.533   885  3244 D CCodecConfig: no c2 equivalents for flags
+10-06 02:53:09.533   885  3246 I CCodecConfig: query failed after returning 20 values (BAD_INDEX)
+10-06 02:53:09.533   885  3246 D CCodecConfig: c2 config diff is Dict {
+10-06 02:53:09.533   885  3246 D CCodecConfig:   c2::u32 coded.aac-packaging.value = 0
+10-06 02:53:09.533   885  3246 D CCodecConfig:   c2::u32 coded.bitrate.value = 64000
+10-06 02:53:09.533   885  3246 D CCodecConfig:   c2::u32 coded.pl.level = 0
+10-06 02:53:09.533   885  3246 D CCodecConfig:   c2::u32 coded.pl.profile = 8192
+10-06 02:53:09.533   885  3246 D CCodecConfig:   c2::i32 coding.drc.album-mode.value = 0
+10-06 02:53:09.533   885  3246 D CCodecConfig:   c2::float coding.drc.attenuation-factor.value = 1
+10-06 02:53:09.533   885  3246 D CCodecConfig:   c2::float coding.drc.boost-factor.value = 1
+10-06 02:53:09.533   885  3246 D CCodecConfig:   c2::i32 coding.drc.compression-mode.value = 3
+10-06 02:53:09.533   885  3246 D CCodecConfig:   c2::i32 coding.drc.effect-type.value = 3
+10-06 02:53:09.533   885  3246 D CCodecConfig:   c2::float coding.drc.encoded-level.value = 0.25
+10-06 02:53:09.533   885  3246 D CCodecConfig:   c2::float coding.drc.reference-level.value = -16
+10-06 02:53:09.533   885  3246 D CCodecConfig:   c2::u32 input.buffers.max-size.value = 8192
+10-06 02:53:09.533   885  3246 D CCodecConfig:   c2::u32 input.delay.value = 0
+10-06 02:53:09.533   885  3246 D CCodecConfig:   string input.media-type.value = "audio/mp4a-latm"
+10-06 02:53:09.533   885  3246 D CCodecConfig:   c2::u32 output.delay.value = 2
+10-06 02:53:09.533   885  3246 D CCodecConfig:   c2::float output.drc.output-loudness.value = 0.25
+10-06 02:53:09.533   885  3246 D CCodecConfig:   string output.media-type.value = "audio/raw"
+10-06 02:53:09.533   885  3246 D CCodecConfig:   c2::u32 raw.channel-count.value = 1
+10-06 02:53:09.533   885  3246 D CCodecConfig:   c2::u32 raw.channel-mask.value = 0
+10-06 02:53:09.533   885  3246 D CCodecConfig:   c2::u32 raw.max-channel-count.value = 8
+10-06 02:53:09.533   885  3246 D CCodecConfig:   c2::u32 raw.sample-rate.value = 44100
+10-06 02:53:09.533   885  3246 D CCodecConfig: }
+10-06 02:53:09.533   885  3244 D CCodecConfig: config failed => CORRUPTED
+10-06 02:53:09.533   885  3246 D MediaCodec: flushMediametrics
+10-06 02:53:09.533   885  3246 D CCodec  : [c2.android.aac.decoder] buffers are bound to CCodec for this session
+10-06 02:53:09.533   885  3246 D CCodecConfig: no c2 equivalents for durationUs
+10-06 02:53:09.533   885  3246 D CCodecConfig: no c2 equivalents for track-id
+10-06 02:53:09.533   885  3246 D CCodecConfig: no c2 equivalents for language
+10-06 02:53:09.533   885  3246 D CCodecConfig: no c2 equivalents for encoder-delay
+10-06 02:53:09.533   885  3246 D CCodecConfig: no c2 equivalents for encoder-padding
+10-06 02:53:09.533   885  3246 D CCodecConfig: no c2 equivalents for flags
+10-06 02:53:09.533   885  3244 D CCodecConfig: c2 config diff is   c2::u32 coded.pl.level = 20491
+10-06 02:53:09.533   885  3244 D CCodecConfig:   c2::u32 coded.pl.profile = 20484
+10-06 02:53:09.533   885  3244 D CCodecConfig:   c2::u32 raw.size.height = 1024
+10-06 02:53:09.533   885  3244 D CCodecConfig:   c2::u32 raw.size.width = 1600
+10-06 02:53:09.534   885  3244 W Codec2Client: query -- param skipped: index = 1107298332.
+10-06 02:53:09.534   885  3244 D CCodec  : client requested max input size 35792, which is smaller than what component recommended (2097152); overriding with component recommendation.
+10-06 02:53:09.534   885  3244 W CCodec  : This behavior is subject to change. It is recommended that app developers double check whether the requested max input size is in reasonable range.
+10-06 02:53:09.534   885  3244 D CCodec  : encoding statistics level = 0
+10-06 02:53:09.534   885  3244 D CCodec  : setup formats input: AMessage(what = 0x00000000) = {
+10-06 02:53:09.534   885  3244 D CCodec  :   int32_t height = 1024
+10-06 02:53:09.534   885  3244 D CCodec  :   int32_t level = 2048
+10-06 02:53:09.534   885  3244 D CCodec  :   int32_t max-input-size = 2097152
+10-06 02:53:09.534   885  3244 D CCodec  :   string mime = "video/avc"
+10-06 02:53:09.534   885  3244 D CCodec  :   int32_t profile = 8
+10-06 02:53:09.534   885  3244 D CCodec  :   int32_t width = 1600
+10-06 02:53:09.534   885  3244 D CCodec  :   Rect crop(0, 0, 1599, 1023)
+10-06 02:53:09.534   885  3244 D CCodec  : }
+10-06 02:53:09.534   885  3244 D CCodec  : setup formats output: AMessage(what = 0x00000000) = {
+10-06 02:53:09.534   885  3244 D CCodec  :   int32_t android._color-format = 2135033992
+10-06 02:53:09.534   885  3244 D CCodec  :   int32_t android._video-scaling = 1
+10-06 02:53:09.534   885  3244 D CCodec  :   int32_t rotation-degrees = 0
+10-06 02:53:09.534   885  3244 D CCodec  :   int32_t color-standard = 1
+10-06 02:53:09.534   885  3244 D CCodec  :   int32_t color-range = 2
+10-06 02:53:09.534   885  3244 D CCodec  :   int32_t color-transfer = 3
+10-06 02:53:09.534   885  3244 D CCodec  :   int32_t sar-height = 1
+10-06 02:53:09.534   885  3244 D CCodec  :   int32_t sar-width = 1
+10-06 02:53:09.534   885  3244 D CCodec  :   Rect crop(0, 0, 1599, 1023)
+10-06 02:53:09.534   885  3244 D CCodec  :   int32_t width = 1600
+10-06 02:53:09.534   885  3244 D CCodec  :   int32_t height = 1024
+10-06 02:53:09.534   885  3244 D CCodec  :   int32_t max-height = 240
+10-06 02:53:09.534   885  3244 D CCodec  :   int32_t max-width = 320
+10-06 02:53:09.534   885  3244 D CCodec  :   string mime = "video/raw"
+10-06 02:53:09.534   885  3244 D CCodec  :   int32_t android._dataspace = 260
+10-06 02:53:09.534   885  3244 D CCodec  :   int32_t color-format = 2130708361
+10-06 02:53:09.534   885  3244 D CCodec  : }
+10-06 02:53:09.534   885  3246 D CCodecConfig: config failed => CORRUPTED
+10-06 02:53:09.534   885  3244 I CCodecConfig: query failed after returning 12 values (BAD_INDEX)
+10-06 02:53:09.534   885  3244 D CCodecConfig: c2 config diff is   c2::u32 raw.max-size.height = 1024
+10-06 02:53:09.534   885  3244 D CCodecConfig:   c2::u32 raw.max-size.width = 1600
+10-06 02:53:09.534   885  3246 D CCodecConfig: c2 config diff is   c2::u32 coded.bitrate.value = 62331
+10-06 02:53:09.534   885  3246 D CCodecConfig:   c2::u32 raw.sample-rate.value = 48000
+10-06 02:53:09.534   885  3246 W Codec2Client: query -- param skipped: index = 1107298332.
+10-06 02:53:09.534   885  3246 D CCodec  : client requested max input size 600, which is smaller than what component recommended (8192); overriding with component recommendation.
+10-06 02:53:09.534   885  3246 W CCodec  : This behavior is subject to change. It is recommended that app developers double check whether the requested max input size is in reasonable range.
+10-06 02:53:09.534   885  3246 D CCodec  : encoding statistics level = 0
+10-06 02:53:09.534   885  3243 I MediaCodec: MediaCodec will operate in async mode
+10-06 02:53:09.534   885  3246 D CCodec  : setup formats input: AMessage(what = 0x00000000) = {
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t aac-drc-album-mode = 0
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t aac-drc-boost-level = 127
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t aac-drc-cut-level = 127
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t aac-drc-effect-type = 3
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t aac-encoded-target-level = -1
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t aac-max-output-channel_count = 8
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t aac-target-ref-level = 64
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t bitrate = 62331
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t channel-count = 1
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t channel-mask = 0
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t level = 0
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t max-input-size = 8192
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t max-output-channel-count = 8
+10-06 02:53:09.534   885  3246 D CCodec  :   string mime = "audio/mp4a-latm"
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t profile = 2
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t sample-rate = 48000
+10-06 02:53:09.534   885  3246 D CCodec  : }
+10-06 02:53:09.534   885  3242 D MediaCodec: keep callback message for reclaim
+10-06 02:53:09.534   885  3246 D CCodec  : setup formats output: AMessage(what = 0x00000000) = {
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t aac-drc-album-mode = 0
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t aac-drc-boost-level = 127
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t aac-drc-cut-level = 127
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t aac-drc-effect-type = 3
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t aac-drc-output-loudness = -1
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t aac-encoded-target-level = -1
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t aac-max-output-channel_count = 8
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t aac-target-ref-level = 64
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t channel-count = 1
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t channel-mask = 0
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t max-output-channel-count = 8
+10-06 02:53:09.534   885  3246 D CCodec  :   string mime = "audio/raw"
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t sample-rate = 48000
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t encoder-delay = 1024
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t encoder-padding = 0
+10-06 02:53:09.534   885  3246 D CCodec  :   int32_t android._config-pcm-encoding = 2
+10-06 02:53:09.534   885  3246 D CCodec  : }
+10-06 02:53:09.534   885  3246 I CCodecConfig: query failed after returning 20 values (BAD_INDEX)
+10-06 02:53:09.535   885  3244 W Codec2Client: query -- param skipped: index = 1342179345.
+10-06 02:53:09.535   885  3244 W Codec2Client: query -- param skipped: index = 2415921170.
+10-06 02:53:09.535   885  3244 W Codec2Client: query -- param skipped: index = 1610614798.
+10-06 02:53:09.535   885  3244 D CCodecBufferChannel: [c2.android.avc.decoder#783] Created input block pool with allocatorID 16 => poolID 19 - OK (0)
+10-06 02:53:09.535   885  3246 I MediaCodec: MediaCodec will operate in async mode
+10-06 02:53:09.535   885  3245 D MediaCodec: keep callback message for reclaim
+10-06 02:53:09.536   885  3244 D CCodecBufferChannel: [c2.android.avc.decoder#783] Query output surface allocator returned 0 params => BAD_INDEX (6)
+10-06 02:53:09.536   885  3246 W Codec2Client: query -- param skipped: index = 1342179345.
+10-06 02:53:09.536   885  3246 W Codec2Client: query -- param skipped: index = 2415921170.
+10-06 02:53:09.536   885  3246 W Codec2Client: query -- param skipped: index = 1610614798.
+10-06 02:53:09.536   885  3246 D CCodecBufferChannel: [c2.android.aac.decoder#532] Created input block pool with allocatorID 16 => poolID 20 - OK (0)
+10-06 02:53:09.536   885  3244 I CCodecBufferChannel: [c2.android.avc.decoder#783] Created output block pool with allocatorID 18 => poolID 17 - OK
+10-06 02:53:09.536   885  3244 D CCodecBufferChannel: [c2.android.avc.decoder#783] Configured output block pool ids 17 => OK
+10-06 02:53:09.536  3154  3250 D C2Store : Using DMABUF Heaps
+10-06 02:53:09.536  3154  3250 E ashmem  : memfd: ro.vndk.version not defined or invalid (), this is mandated since P.
+10-06 02:53:09.536   885  3244 D Codec2-OutputBufferQueue: C2SurfaceSyncMemory created 20(20)
+10-06 02:53:09.536   885  3244 D Codec2-OutputBufferQueue: remote graphic buffer migration 0/0
+10-06 02:53:09.537   885  3244 D Codec2Client: setOutputSurface -- failed to set consumer usage (6/BAD_INDEX)
+10-06 02:53:09.537   885  3244 D Codec2Client: setOutputSurface -- generation=906242 consumer usage=0x900 sync
+10-06 02:53:09.537  3154  3250 D C2BqBuffer: local generation change 906242 , bqId: 13791139987457 migrated buffers # 0
+10-06 02:53:09.537   885  3246 I CCodecBufferChannel: [c2.android.aac.decoder#532] Created output block pool with allocatorID 16 => poolID 18 - OK
+10-06 02:53:09.537   885  3244 D Codec2Client: Surface configure completed
+10-06 02:53:09.537   885  3246 D CCodecBufferChannel: [c2.android.aac.decoder#532] Configured output block pool ids 18 => OK
+10-06 02:53:09.537   885  3243 W ResourceManagerService: Ignoring request to add new resource entry with value <= 0
+10-06 02:53:09.538  3154  3249 D SimpleC2Component: Using output block pool with poolID 18 => got 18 - 0
+10-06 02:53:09.538  3154  3249 I C2SoftAacDec: Reconfiguring decoder: 0->48000 Hz, 0->1 channels
+10-06 02:53:09.539  3154  3247 D SimpleC2Component: Using output block pool with poolID 17 => got 17 - 0
+10-06 02:53:09.540  3154  3249 I DMABUFHEAPS: Using DMA-BUF heap named: system
+10-06 02:53:09.545  3154  3247 E vndksupport: Could not load /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl-2.1.so from sphal namespace: dlopen failed: "/system/lib64/arm64/libbase.so" is for EM_AARCH64 (183) instead of EM_X86_64 (62).
+10-06 02:53:09.545  3154  3247 E HidlServiceManagement: Failed to dlopen android.hardware.graphics.mapper@2.0-impl-2.1.so: unknown error
+10-06 02:53:09.545  3154  3247 W Gralloc2: mapper 2.x is not supported
+10-06 02:53:09.545  3154  3247 F GraphicBufferMapper: gralloc-mapper is missing
+10-06 02:53:09.545   807   807 I tombstoned: received crash request for pid 3154
+10-06 02:53:09.545   885  3246 D CCodecConfig: c2 config diff is   c2::u32 raw.channel-mask.value = 4
+10-06 02:53:09.546   885  3246 D CCodecBuffers: [c2.android.aac.decoder#532:Output[N]] popFromStashAndRegister: at -21333us, output format changed to AMessage(what = 0x00000000) = {
+10-06 02:53:09.546   885  3246 D CCodecBuffers:   int32_t aac-drc-album-mode = 0
+10-06 02:53:09.546   885  3246 D CCodecBuffers:   int32_t aac-drc-boost-level = 127
+10-06 02:53:09.546   885  3246 D CCodecBuffers:   int32_t aac-drc-cut-level = 127
+10-06 02:53:09.546   885  3246 D CCodecBuffers:   int32_t aac-drc-effect-type = 3
+10-06 02:53:09.546   885  3246 D CCodecBuffers:   int32_t aac-drc-output-loudness = -1
+10-06 02:53:09.546   885  3246 D CCodecBuffers:   int32_t aac-encoded-target-level = -1
+10-06 02:53:09.546   885  3246 D CCodecBuffers:   int32_t aac-max-output-channel_count = 8
+10-06 02:53:09.546   885  3246 D CCodecBuffers:   int32_t aac-target-ref-level = 64
+10-06 02:53:09.546   885  3246 D CCodecBuffers:   int32_t channel-count = 1
+10-06 02:53:09.546   885  3246 D CCodecBuffers:   int32_t channel-mask = 4
+10-06 02:53:09.546   885  3246 D CCodecBuffers:   int32_t max-output-channel-count = 8
+10-06 02:53:09.546   885  3246 D CCodecBuffers:   string mime = "audio/raw"
+10-06 02:53:09.546   885  3246 D CCodecBuffers:   int32_t sample-rate = 48000
+10-06 02:53:09.546   885  3246 D CCodecBuffers:   int32_t encoder-delay = 1024
+10-06 02:53:09.546   885  3246 D CCodecBuffers:   int32_t encoder-padding = 0
+10-06 02:53:09.546   885  3246 D CCodecBuffers:   int32_t android._config-pcm-encoding = 2
+10-06 02:53:09.546   885  3246 D CCodecBuffers: }
+10-06 02:53:09.548   856   856 W AudioFlinger: createTrack_l(): mismatch between requested flags (00000008) and output flags (00000006)
+10-06 02:53:09.548   856   856 D AudioFlinger: Client defaulted notificationFrames to 12288 for frameCount 24576
+10-06 02:53:09.549   856   856 D AF::TrackHandle: OpPlayAudio: track:56 usage:1 not muted
+10-06 02:53:09.552   843  3152 I audio_hw_primary: chose pcmC0D0p for 0 on cache slot 0
+--------- beginning of crash
+10-06 02:53:09.580  3154  3247 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+10-06 02:53:09.581  3154  3247 F DEBUG   : Build fingerprint: 'Android-x86/bliss_x86_64/x86_64:13/TQ3A.230901.001.C1/152:userdebug/test-keys'
+10-06 02:53:09.581  3154  3247 F DEBUG   : Revision: '0'
+10-06 02:53:09.581  3154  3247 F DEBUG   : ABI: 'x86_64'
+10-06 02:53:09.581  3154  3247 F DEBUG   : Timestamp: 2026-10-06 02:53:09.546995700+0900
+10-06 02:53:09.581  3154  3247 F DEBUG   : Process uptime: 21s
+10-06 02:53:09.581  3154  3247 F DEBUG   : Cmdline: media.swcodec oid.media.swcodec/bin/mediaswcodec
+10-06 02:53:09.581  3154  3247 F DEBUG   : pid: 3154, tid: 3247, name: oid.avc.decoder  >>> media.swcodec <<<
+10-06 02:53:09.581  3154  3247 F DEBUG   : uid: 1046
+10-06 02:53:09.581  3154  3247 F DEBUG   : signal 0 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+10-06 02:53:09.581  3154  3247 F DEBUG   : Abort message: 'gralloc-mapper is missing'
+10-06 02:53:09.581  3154  3247 F DEBUG   :     rax 0000000000000000  rbx 0000000000000c52  rcx 00007a056a12d69f  rdx 0000000000000006
+10-06 02:53:09.581  3154  3247 F DEBUG   :     r8  b125051a5c7600e7  r9  b125051a5c7600e7  r10 00007a02c4d08c20  r11 0000000000000203
+10-06 02:53:09.581  3154  3247 F DEBUG   :     r12 00007a03f0a64130  r13 00007a03f0a64070  r14 00007a02c4d08c18  r15 0000000000000caf
+10-06 02:53:09.581  3154  3247 F DEBUG   :     rdi 0000000000000c52  rsi 0000000000000caf
+10-06 02:53:09.581  3154  3247 F DEBUG   :     rbp 00007a02c4d093b0  rsp 00007a02c4d08c10  rip 00007a056a12d69f
+10-06 02:53:09.581  3154  3247 F DEBUG   : backtrace:
+10-06 02:53:09.581  3154  3247 F DEBUG   :       #00 pc 000000000005f69f  /apex/com.android.runtime/lib64/bionic/libc.so (abort+191) (BuildId: 1b2a39e43caba588eb8ce2a331dc4eef)
+10-06 02:53:09.581  3154  3247 F DEBUG   :       #01 pc 00000000000069aa  /system/lib64/liblog.so (__android_log_default_aborter+10) (BuildId: f0538d632eee5d6820b96914c8a1657c)
+10-06 02:53:09.581  3154  3247 F DEBUG   :       #02 pc 0000000000007562  /system/lib64/liblog.so (__android_log_assert+370) (BuildId: f0538d632eee5d6820b96914c8a1657c)
+10-06 02:53:09.581  3154  3247 F DEBUG   :       #03 pc 0000000000042164  /system/lib64/libui.so (android::GraphicBufferMapper::GraphicBufferMapper()+388) (BuildId: 935fd18f1b4d7962a8045574ebb96ebf)
+10-06 02:53:09.581  3154  3247 F DEBUG   :       #04 pc 000000000003e868  /system/lib64/libui.so (android::GraphicBuffer::GraphicBuffer()+136) (BuildId: 935fd18f1b4d7962a8045574ebb96ebf)
+10-06 02:53:09.581  3154  3247 F DEBUG   :       #05 pc 0000000000072b2c  /system/lib64/libcodec2_vndk.so (C2BufferQueueBlockPool::Impl::fetchFromIgbp_l(unsigned int, unsigned int, unsigned int, C2MemoryUsage, std::__1::shared_ptr<C2GraphicBlock>*, C2Fence*)+1628) (BuildId: 27e5d41c39499c71672755718c25f390)
+10-06 02:53:09.581  3154  3247 F DEBUG   :       #06 pc 0000000000072253  /system/lib64/libcodec2_vndk.so (C2BufferQueueBlockPool::Impl::fetchGraphicBlock(unsigned int, unsigned int, unsigned int, C2MemoryUsage, std::__1::shared_ptr<C2GraphicBlock>*, C2Fence*)+435) (BuildId: 27e5d41c39499c71672755718c25f390)
+10-06 02:53:09.581  3154  3247 F DEBUG   :       #07 pc 0000000000070cd6  /system/lib64/libcodec2_vndk.so (C2BufferQueueBlockPool::fetchGraphicBlock(unsigned int, unsigned int, unsigned int, C2MemoryUsage, std::__1::shared_ptr<C2GraphicBlock>*)+22) (BuildId: 27e5d41c39499c71672755718c25f390)
+10-06 02:53:09.581  3154  3247 F DEBUG   :       #08 pc 0000000000010d7b  /system/lib64/libcodec2_soft_common.so (android::SimpleC2Component::BlockingBlockPool::fetchGraphicBlock(unsigned int, unsigned int, unsigned int, C2MemoryUsage, std::__1::shared_ptr<C2GraphicBlock>*)+91) (BuildId: 734bcb27864061a28ead987fcd36947a)
+10-06 02:53:09.581  3154  3247 F DEBUG   :       #09 pc 000000000002b293  /system/lib64/libcodec2_soft_avcdec.so (android::C2SoftAvcDec::ensureDecoderState(std::__1::shared_ptr<C2BlockPool> const&)+211) (BuildId: c5266e2d31c7a9717a433b56eff88072)
+10-06 02:53:09.581  3154  3247 F DEBUG   :       #10 pc 0000000000029bd8  /system/lib64/libcodec2_soft_avcdec.so (android::C2SoftAvcDec::process(std::__1::unique_ptr<C2Work, std::__1::default_delete<C2Work> > const&, std::__1::shared_ptr<C2BlockPool> const&)+984) (BuildId: c5266e2d31c7a9717a433b56eff88072)
+10-06 02:53:09.581  3154  3247 F DEBUG   :       #11 pc 000000000000f362  /system/lib64/libcodec2_soft_common.so (android::SimpleC2Component::processQueue()+2962) (BuildId: 734bcb27864061a28ead987fcd36947a)
+10-06 02:53:09.581  3154  3247 F DEBUG   :       #12 pc 000000000000e2ad  /system/lib64/libcodec2_soft_common.so (android::SimpleC2Component::WorkHandler::onMessageReceived(android::sp<android::AMessage> const&)+173) (BuildId: 734bcb27864061a28ead987fcd36947a)
+10-06 02:53:09.581  3154  3247 F DEBUG   :       #13 pc 000000000001b4eb  /apex/com.android.media.swcodec/lib64/libstagefright_foundation.so (android::AHandler::deliverMessage(android::sp<android::AMessage> const&)+59) (BuildId: 801f77c75e7663391860535e32b8d2a3)
+10-06 02:53:09.581  3154  3247 F DEBUG   :       #14 pc 000000000002150e  /apex/com.android.media.swcodec/lib64/libstagefright_foundation.so (android::AMessage::deliver()+206) (BuildId: 801f77c75e7663391860535e32b8d2a3)
+10-06 02:53:09.581  3154  3247 F DEBUG   :       #15 pc 000000000001c88d  /apex/com.android.media.swcodec/lib64/libstagefright_foundation.so (android::ALooper::loop()+701) (BuildId: 801f77c75e7663391860535e32b8d2a3)
+10-06 02:53:09.581  3154  3247 F DEBUG   :       #16 pc 0000000000013e55  /system/lib64/libutils.so (android::Thread::_threadLoop(void*)+325) (BuildId: 20ad4edc59f23af991744a87e8f5ccf9)
+10-06 02:53:09.581  3154  3247 F DEBUG   :       #17 pc 00000000000ccd8a  /apex/com.android.runtime/lib64/bionic/libc.so (__pthread_start(void*)+58) (BuildId: 1b2a39e43caba588eb8ce2a331dc4eef)
+10-06 02:53:09.581  3154  3247 F DEBUG   :       #18 pc 0000000000060cd7  /apex/com.android.runtime/lib64/bionic/libc.so (__start_thread+55) (BuildId: 1b2a39e43caba588eb8ce2a331dc4eef)
+10-06 02:53:09.584   807   807 E tombstoned: Tombstone written to: tombstone_02
+10-06 02:53:09.585  1032  1103 E NativeTombstoneManager: Tombstone's UID (1046) not an app, ignoring
+10-06 02:53:09.585   885  3147 E CCodec  : Codec2 component "c2.android.avc.decoder" died.
+10-06 02:53:09.585   885  1499 E CCodec  : Codec2 component "c2.android.aac.decoder" died.
+10-06 02:53:09.585   885  1334 I MediaPlayerService: Codec2 service "software" died. Sending death notification.
+10-06 02:53:09.585   885  3243 E MediaCodec: Codec reported err 0xffffffe0/DEAD_OBJECT, actionCode 0, while in state 6/STARTED
+10-06 02:53:09.585   885  3243 D MediaCodec: flushMediametrics
+10-06 02:53:09.585  3211  3226 E MediaPlayerNative: error (100, 2)
+10-06 02:53:09.586   885  3242 E NuPlayerDecoder: Decoder (video) reported error : 0xffffffe0
+10-06 02:53:09.586   885  3246 E MediaCodec: Codec reported err 0xffffffe0/DEAD_OBJECT, actionCode 0, while in state 6/STARTED
+10-06 02:53:09.586   885  3246 D MediaCodec: flushMediametrics
+10-06 02:53:09.586   885  3235 E NuPlayer: received error(0xffffffe0) from video decoder, flushing(0), now shutting down
+10-06 02:53:09.586  3211  3211 V MediaPlayer: Error (100,2)
+10-06 02:53:09.586   885  3245 E NuPlayerDecoder: Decoder (audio) reported error : 0xffffffe0
+10-06 02:53:09.586  3211  3211 D VideoView: Error: 100,2
+10-06 02:53:09.586  3211  3211 I OMEVideo: t=192ms error what=100 extra=2
+10-06 02:53:09.586   885  3243 D SurfaceUtils: disconnecting from surface 0xe1043278, reason disconnectFromSurface
+10-06 02:53:09.586  3211  3226 W MediaPlayerNative: info/warning (805, -32)
+10-06 02:53:09.586  3211  3211 I OMEVideo: t=192ms info what=805 extra=-32
+10-06 02:53:09.586   885  3235 E NuPlayer: received error(0xffffffe0) from audio decoder, flushing(0), now shutting down
+10-06 02:53:09.586   885  3242 E NuPlayerDecoder: failed to flush [c2.android.avc.decoder] (err=-38)
+10-06 02:53:09.586   885  3235 E NuPlayer: received error(0xffffffda) from video decoder, flushing(2), now shutting down
+10-06 02:53:09.586  1032  1103 I BootReceiver: Copying /data/tombstones/tombstone_02 to DropBox (SYSTEM_TOMBSTONE)
+10-06 02:53:09.586  1032  1103 I DropBoxManagerService: add tag=SYSTEM_TOMBSTONE isTagEnabled=true flags=0x6
+10-06 02:53:09.587   885  3242 D SurfaceUtils: connecting to surface 0xe1043278, reason onShutdown
+10-06 02:53:09.587   885  3243 D MediaCodec: flushMediametrics
+10-06 02:53:09.587  3211  3227 E MediaPlayerNative: error (1, -32)
+10-06 02:53:09.587  3211  3227 E MediaPlayerNative: error (1, -38)
+10-06 02:53:09.588   885  3243 D BufferPoolAccessor2.0: Destruction - bufferpool2 0xe450ad58 cached: 0/0M, 0/0% in use; allocs: 4, 0% recycled; transfers: 4, 0% unfetched
+10-06 02:53:09.593  1032  1103 E NativeTombstoneManager: Tombstone's UID (1046) not an app, ignoring
+10-06 02:53:09.593  1032  1103 I DropBoxManagerService: add tag=SYSTEM_TOMBSTONE_PROTO isTagEnabled=true flags=0x4
+10-06 02:53:09.595  3211  3211 V MediaPlayer: Error (1,-32)
+10-06 02:53:09.595  3211  3211 D VideoView: Error: 1,-32
+10-06 02:53:09.595  3211  3211 I OMEVideo: t=201ms error what=1 extra=-32
+10-06 02:53:09.595  3211  3211 V MediaPlayer: Error (1,-38)
+10-06 02:53:09.595  3211  3211 D VideoView: Error: 1,-38
+10-06 02:53:09.595  3211  3211 I OMEVideo: t=201ms error what=1 extra=-38
+10-06 02:53:09.616  3255  3255 I mediaswcodec: media swcodec service starting
+10-06 02:53:09.616  3255  3255 W mediaswcodec: libminijail[3255]: failed to get path of fd 4: No such file or directory
+10-06 02:53:09.616  3255  3255 W mediaswcodec: libminijail[3255]: allowing syscall: socket
+10-06 02:53:09.616  3255  3255 W mediaswcodec: libminijail[3255]: allowing syscall: connect
+10-06 02:53:09.616  3255  3255 W mediaswcodec: libminijail[3255]: allowing syscall: fcntl
+10-06 02:53:09.616  3255  3255 W mediaswcodec: libminijail[3255]: allowing syscall: writev
+10-06 02:53:09.616  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(20): nonexistent syscall 'getuid32'
+10-06 02:53:09.616  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(26): nonexistent syscall 'mmap2'
+10-06 02:53:09.616  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(28): nonexistent syscall 'fstat64'
+10-06 02:53:09.616  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(31): nonexistent syscall 'stat64'
+10-06 02:53:09.616  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(32): nonexistent syscall 'statfs64'
+10-06 02:53:09.616  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(34): nonexistent syscall 'fstatat64'
+10-06 02:53:09.616  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(39): nonexistent syscall '_llseek'
+10-06 02:53:09.616  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(48): nonexistent syscall 'ugetrlimit'
+10-06 02:53:09.616  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(51): nonexistent syscall '_llseek'
+10-06 02:53:09.616  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(52): nonexistent syscall 'fstatfs64'
+10-06 02:53:09.616  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(64): nonexistent syscall 'ftruncate64'
+10-06 02:53:09.616  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(70): syscall gettid redefined here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(67): previous definition here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: /apex/com.android.media.swcodec/etc/seccomp_policy/crash_dump.x86_64.policy(1): syscall read redefined here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(15): previous definition here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: /apex/com.android.media.swcodec/etc/seccomp_policy/crash_dump.x86_64.policy(2): syscall write redefined here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(58): previous definition here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: /apex/com.android.media.swcodec/etc/seccomp_policy/crash_dump.x86_64.policy(3): syscall exit redefined here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(45): previous definition here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: /apex/com.android.media.swcodec/etc/seccomp_policy/crash_dump.x86_64.policy(4): syscall rt_sigreturn redefined here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(47): previous definition here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: /apex/com.android.media.swcodec/etc/seccomp_policy/crash_dump.x86_64.policy(5): syscall exit_group redefined here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(46): previous definition here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: /apex/com.android.media.swcodec/etc/seccomp_policy/crash_dump.x86_64.policy(8): syscall futex redefined here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(36): previous definition here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: /apex/com.android.media.swcodec/etc/seccomp_policy/crash_dump.x86_64.policy(10): syscall getpid redefined here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(69): previous definition here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: /apex/com.android.media.swcodec/etc/seccomp_policy/crash_dump.x86_64.policy(11): syscall gettid redefined here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(67): previous definition here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: /apex/com.android.media.swcodec/etc/seccomp_policy/crash_dump.x86_64.policy(14): syscall openat redefined here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(18): previous definition here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: /apex/com.android.media.swcodec/etc/seccomp_policy/crash_dump.x86_64.policy(15): syscall dup redefined here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(56): previous definition here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: /apex/com.android.media.swcodec/etc/seccomp_policy/crash_dump.x86_64.policy(16): syscall close redefined here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(25): previous definition here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: /apex/com.android.media.swcodec/etc/seccomp_policy/crash_dump.x86_64.policy(17): syscall lseek redefined here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(40): previous definition here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: /apex/com.android.media.swcodec/etc/seccomp_policy/crash_dump.x86_64.policy(19): syscall faccessat redefined here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(38): previous definition here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: /apex/com.android.media.swcodec/etc/seccomp_policy/crash_dump.x86_64.policy(22): syscall sysinfo redefined here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(75): previous definition here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: /apex/com.android.media.swcodec/etc/seccomp_policy/crash_dump.x86_64.policy(28): syscall prctl redefined here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(17): previous definition here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: /apex/com.android.media.swcodec/etc/seccomp_policy/crash_dump.x86_64.policy(29): syscall madvise redefined here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(33): previous definition here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: /apex/com.android.media.swcodec/etc/seccomp_policy/crash_dump.x86_64.policy(30): syscall mprotect redefined here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(16): previous definition here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: /apex/com.android.media.swcodec/etc/seccomp_policy/crash_dump.x86_64.policy(31): syscall munmap redefined here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(37): previous definition here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: /apex/com.android.media.swcodec/etc/seccomp_policy/crash_dump.x86_64.policy(32): syscall getuid redefined here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(21): previous definition here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: /apex/com.android.media.swcodec/etc/seccomp_policy/crash_dump.x86_64.policy(33): syscall fstat redefined here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(29): previous definition here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: /apex/com.android.media.swcodec/etc/seccomp_policy/crash_dump.x86_64.policy(34): syscall mmap redefined here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(27): previous definition here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(81): syscall sched_getaffinity redefined here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: compile_file: <fd>(74): previous definition here
+10-06 02:53:09.617  3255  3255 W mediaswcodec: libminijail[3255]: logging seccomp filter failures
+10-06 02:53:09.617  3255  3255 I CodecServiceRegistrant: Creating software Codec2 service...
+10-06 02:53:09.618  3255  3255 I HidlServiceManagement: Registered android.hardware.media.c2@1.2::IComponentStore/software
+10-06 02:53:09.618   673   673 I hwservicemanager: getTransport: Cannot find entry android.hardware.media.c2@1.0::IComponentStore/default in either framework or device VINTF manifest.
+10-06 02:53:09.618  3255  3255 I CodecServiceRegistrant: Preferred Codec2 store is defaulted to "software".
+10-06 02:53:09.618  3255  3255 I CodecServiceRegistrant: Software Codec2 service created and registered.
+10-06 02:53:09.622   885  3245 E NuPlayerDecoder: failed to flush [c2.android.aac.decoder] (err=-38)
+10-06 02:53:09.622   885  3235 E NuPlayer: received error(0xffffffda) from audio decoder, flushing(2), now shutting down
+10-06 02:53:09.622  3211  3226 E MediaPlayerNative: error (1, -38)
+10-06 02:53:09.622   885  3245 D MediaCodec: flushMediametrics
+10-06 02:53:09.622  3211  3211 V MediaPlayer: Error (1,-38)
+10-06 02:53:09.622  3211  3211 D VideoView: Error: 1,-38
+10-06 02:53:09.622  3211  3211 I OMEVideo: t=228ms error what=1 extra=-38
+10-06 02:53:09.622   885  3245 D BufferPoolAccessor2.0: Destruction - bufferpool2 0xe450ab38 cached: 0/0M, 0/0% in use; allocs: 40, 70% recycled; transfers: 36, 78% unfetched
+10-06 02:53:09.786  1032  3199 D CoreBackPreview: Window{d423c7d u0 Splash Screen org.ome.videoprobe EXITING}: Setting back callback null
+10-06 02:53:09.786  1032  1045 W InputManager-JNI: Input channel object 'd423c7d Splash Screen org.ome.videoprobe (client)' was disposed without first being removed with the input manager!
+10-06 02:53:10.186   856   974 I AudioFlinger: BUFFER TIMEOUT: remove(56) from active list on thread 0x7164700409a0
+10-06 02:53:10.196  2403  2403 E A       : onError
+10-06 02:53:10.196  2403  2403 E A       : com.google.android.apps.gsa.shared.speech.a.m: errorCode: 65561, engine: 2
+10-06 02:53:10.196  2403  2403 E A       : 	at com.google.android.apps.gsa.staticplugins.db.a.e.a(PG:3)
+10-06 02:53:10.196  2403  2403 E A       : 	at com.google.android.apps.gsa.s3.n.gO(PG:1)
+10-06 02:53:10.196  2403  2403 E A       : 	at com.google.cd.g.a.f.e(PG:2)
+10-06 02:53:10.196  2403  2403 E A       : 	at com.google.android.apps.gsa.speech.k.a.g.d(PG:22)
+10-06 02:53:10.196  2403  2403 E A       : 	at com.google.android.apps.gsa.speech.k.a.g.jS(PG:6)
+10-06 02:53:10.196  2403  2403 E A       : 	at com.google.android.apps.gsa.s3.o.c(PG:14)
+10-06 02:53:10.196  2403  2403 E A       : 	at com.google.android.apps.gsa.s3.p.run(PG:1)
+10-06 02:53:10.196  2403  2403 E A       : 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:463)
+10-06 02:53:10.196  2403  2403 E A       : 	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+10-06 02:53:10.196  2403  2403 E A       : 	at com.google.android.apps.gsa.shared.util.c.a.e.run(PG:2)
+10-06 02:53:10.196  2403  2403 E A       : 	at com.google.android.apps.gsa.shared.util.c.a.bi.run(PG:1)
+10-06 02:53:10.196  2403  2403 E A       : 	at com.google.android.apps.gsa.shared.util.c.a.bi.run(PG:1)
+10-06 02:53:10.196  2403  2403 E A       : 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1137)
+10-06 02:53:10.196  2403  2403 E A       : 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:637)
+10-06 02:53:10.196  2403  2403 E A       : 	at java.lang.Thread.run(Thread.java:1012)
+10-06 02:53:10.196  2403  2403 E A       : 	at com.google.android.apps.gsa.shared.util.c.a.l.run(PG:5)
+10-06 02:53:10.196  2403  2403 E A       : Caused by: com.google.android.apps.gsa.shared.speech.a.o: errorCode: 65586, engine: 2
+10-06 02:53:10.196  2403  2403 E A       : 	... 15 more
+10-06 02:53:10.196  2403  2403 E A       : Caused by: com.google.android.apps.gsa.shared.speech.a.k: errorCode: 401, engine: 2
+10-06 02:53:10.196  2403  2403 E A       : 	at com.google.android.apps.gsa.assistant.shared.n.h.a(PG:5)
+10-06 02:53:10.196  2403  2403 E A       : 	at com.google.android.apps.gsa.s3.producers.j.hh(PG:2)
+10-06 02:53:10.196  2403  2403 E A       : 	at com.google.android.apps.gsa.speech.k.a.g.d(PG:16)
+10-06 02:53:10.196  2403  2403 E A       : 	... 12 more
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: Exception in upload method
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: com.google.android.apps.gsa.shared.q.d: Error code: 262182
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.aa.bk.d(PG:5)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.gsa.c.a.ar.d(PG:1)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.gsa.c.a.bo.b(PG:5)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.gsa.c.a.e.a(PG:2)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.gsa.c.a.a.run(PG:2)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.bf.execute(PG:1)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.i(PG:1)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.l(PG:12)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.cancel(PG:8)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.m(PG:2)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.j.a(PG:1)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.l(PG:3)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.cancel(PG:8)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.m(PG:2)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.j.a(PG:1)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.l(PG:3)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.cancel(PG:8)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.m(PG:2)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.j.a(PG:1)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.l(PG:3)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.cancel(PG:8)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.m(PG:2)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.j.a(PG:1)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.l(PG:3)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.cancel(PG:8)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.m(PG:2)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.c.a(PG:1)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.l(PG:3)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.cancel(PG:8)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.bu.cancel(PG:1)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.cancel(PG:17)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.staticplugins.bj.b.h.run(PG:2)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.bf.execute(PG:1)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.i(PG:1)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.l(PG:12)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.cancel(PG:8)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.m(PG:2)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.j.a(PG:1)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.l(PG:3)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.cancel(PG:8)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.aj.a(PG:2)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.l(PG:3)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.cancel(PG:8)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.m(PG:2)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.c.a(PG:1)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.l(PG:3)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.cancel(PG:8)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.s3.o.a(PG:2)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.s3.r.a(PG:1)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.staticplugins.db.a.c.e(PG:2)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.staticplugins.db.a.c.c(PG:3)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.staticplugins.db.a.e.a(PG:5)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.s3.n.gO(PG:1)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.cd.g.a.f.e(PG:2)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.speech.k.a.g.d(PG:22)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.speech.k.a.g.jS(PG:6)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.s3.o.c(PG:14)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.s3.p.run(PG:1)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:463)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.a.e.run(PG:2)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.a.bi.run(PG:1)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.a.bi.run(PG:1)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1137)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:637)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at java.lang.Thread.run(Thread.java:1012)
+10-06 02:53:10.196  2403  2487 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.a.l.run(PG:5)
+10-06 02:53:10.197  2403  2547 I NetworkRecognitionRnr: Using pair HTTP connection
+10-06 02:53:10.197  2403  2549 I A       : [Upload] Connected
+10-06 02:53:10.198  2403  2403 W A       : Failed to sync device settings.
+10-06 02:53:10.198  2403  2403 I A       : Retrying to sync device settings.
+10-06 02:53:10.198  2403  2494 W A       : (REDACTED) Failed to get connectivityLock in %d ms
+10-06 02:53:10.198  2403  2494 W CronetNetworkRqstWrppr: Upload request without a content type.
+10-06 02:53:10.199  1032  1032 D CompatibilityInfo: mCompatibilityFlags - 4
+10-06 02:53:10.199  1032  1032 D CompatibilityInfo: applicationDensity - 160
+10-06 02:53:10.199  1032  1032 D CompatibilityInfo: applicationScale - 1.0
+10-06 02:53:10.201  1032  1584 W JobScheduler: Job didn't exist in JobStore: d62db6f #u0a234/-353 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService
+10-06 02:53:10.202  2592  2592 I Finsky  : [2] rrt.onStartJob(4): SCH: job service start with id 9026.
+10-06 02:53:10.214  2592  2630 I Finsky  : [46] rqi.a(92): SCH: Satisfied jobs for 9026 are: 12-1
+10-06 02:53:10.215  2592  2703 I Finsky  : [83] rhu.accept(27): SCH: Job 12-1 starting
+10-06 02:53:10.215  2592  2592 I Finsky  : [2] ContentSyncJob.v(3): [ContentSync] job started
+10-06 02:53:10.226   854   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 02:53:10.226   854   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 02:53:10.361  2592  3261 I Finsky  : [113] fop.i(1): Completed 0 account content syncs with 0 successful.
+10-06 02:53:10.361  2592  2592 I Finsky  : [2] ContentSyncJob.a(1): [ContentSync] Installation state replication succeeded.
+10-06 02:53:10.361  2592  2592 I Finsky  : [2] rqb.r(4): SCH: jobFinished: 12-1. TimeElapsed: 146ms.
+10-06 02:53:10.392  2592  2634 I Finsky  : [50] rpx.a(2): SCH: no pending jobs to schedule.
+10-06 02:53:10.392  2592  2703 I Finsky  : [83] rrt.a(16): SCH: job service finished with id 9026.
+10-06 02:53:11.226   854   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 02:53:11.226   854   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 02:53:12.227   854   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 02:53:12.227   854   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 02:53:12.376  3264  3264 W ProcessState: Extra binder thread started, but 0 threads requested. Do not use *startThreadPool when zero threads are requested.
+10-06 02:53:12.389  3264  3265 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_CREATE_GUEST_HANDLE
+10-06 02:53:12.389  3264  3265 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_RESOURCE_SYNC
+10-06 02:53:12.389  3264  3265 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_GUEST_VRAM
+10-06 02:53:12.389  3264  3265 I [minigbm:virgl_get_caps(556)]: Supported CAPSET IDs: 6.
+10-06 02:53:12.389  3264  3265 I [minigbm:virgl_add_combination(372)]: Skipping unsupported combination format:842094158
+10-06 02:53:12.389  3264  3265 I [minigbm:virgl_add_combination(372)]: Skipping unsupported combination format:808530000
+10-06 02:53:12.387  3264  3264 I binder:3264_1: type=1400 audit(0.0:553): avc: denied { open } for path="/dev/__properties__/u:object_r:vendor_default_prop:s0" dev="tmpfs" ino=257 scontext=u:r:shell:s0 tcontext=u:object_r:vendor_default_prop:s0 tclass=file permissive=1
+10-06 02:53:12.387  3264  3264 I binder:3264_1: type=1400 audit(0.0:554): avc: denied { getattr } for path="/dev/__properties__/u:object_r:vendor_default_prop:s0" dev="tmpfs" ino=257 scontext=u:r:shell:s0 tcontext=u:object_r:vendor_default_prop:s0 tclass=file permissive=1
+10-06 02:53:12.387  3264  3264 I binder:3264_1: type=1400 audit(0.0:555): avc: denied { map } for path="/dev/__properties__/u:object_r:vendor_default_prop:s0" dev="tmpfs" ino=257 scontext=u:r:shell:s0 tcontext=u:object_r:vendor_default_prop:s0 tclass=file permissive=1
+10-06 02:53:13.228   854   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 02:53:13.228   854   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 02:53:13.812  2403  2499 W A       : (REDACTED) [%s] response code: %d
+10-06 02:53:14.229   854   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 02:53:14.229   854   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 02:53:14.539   885  3139 D BufferPoolAccessor2.0: evictor expired: 2, evicted: 0
+10-06 02:53:14.572  1032  1032 D OomAdjuster: Not killing cached processes
+10-06 02:53:14.572  1032  1032 D CompatibilityInfo: mCompatibilityFlags - 4
+10-06 02:53:14.572  1032  1032 D CompatibilityInfo: applicationDensity - 160
+10-06 02:53:14.572  1032  1032 D CompatibilityInfo: applicationScale - 1.0
+10-06 02:53:14.575  2592  2592 I Finsky  : [2] rrt.onStartJob(4): SCH: job service start with id 9024.
+10-06 02:53:14.588  2592  2630 I Finsky  : [46] rqi.a(92): SCH: Satisfied jobs for 9024 are: 29-29
+10-06 02:53:14.589  2592  2703 I Finsky  : [83] rhu.accept(27): SCH: Job 29-29 starting
+10-06 02:53:14.590  2592  3267 I Finsky  : [114] wao.d(0): ProcessRecoveryLogsUtil: No files in recovery directory
+10-06 02:53:14.590  2592  3267 I Finsky  : [114] rqb.r(4): SCH: jobFinished: 29-29. TimeElapsed: 1ms.
+10-06 02:53:14.626  2592  2632 I Finsky  : [48] rjy.accept(45): SCH: Scheduling phonesky job Id: 1-1337, CT: 1791222765605, Constraints: [{ L: 60000, D: 60000, C: 1, I: 1, N: 0 }]
+10-06 02:53:14.634  2592  2623 I Finsky  : [39] rht.apply(84): SCH: Scheduling 1 system job(s)
+10-06 02:53:14.634  2592  2623 I Finsky  : [39] rht.apply(90): SCH: Scheduling system job Id: 9027, L: 30971, D: 30971, C: false, I: false, N: 0
+10-06 02:53:14.642  2592  2703 I Finsky  : [83] rrt.a(16): SCH: job service finished with id 9024.
+10-06 02:53:14.900  2403  2488 I j       : Resend all cards due to CCM failure.
+10-06 02:53:14.900  1032  1057 D CompatibilityInfo: mCompatibilityFlags - 4
+10-06 02:53:14.900  1032  1057 D CompatibilityInfo: applicationDensity - 160
+10-06 02:53:14.900  1032  1057 D CompatibilityInfo: applicationScale - 1.0
+10-06 02:53:14.901  2403  2537 I SSDataManagerImpl: #updateCurrentCard
+10-06 02:53:14.902  2403  2537 I PCP.ImplV0: getProactiveContent
+10-06 02:53:14.902  2403  2537 I PCP.ImplV0: PCP V1 flow is enabled.
+10-06 02:53:14.907  2403  2492 W LocationOracle: getBestLocation(): no location is available
+10-06 02:53:14.908  2403  2488 E WithoutZwieback.Filler: No battery percentage
+10-06 02:53:14.908  2403  2457 W GoogleApiManager: The service for com.google.android.gms.location.internal.aa is not available: ConnectionResult{statusCode=SERVICE_DISABLED, resolution=null, message=null}
+10-06 02:53:14.909  2403  2457 W GoogleApiAvailability: GMS core API Availability. ConnectionResult=3, tag=null
+10-06 02:53:14.909  2403  2457 W GoogleApiAvailability: java.lang.IllegalArgumentException
+10-06 02:53:14.909  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.g.h(PG:2)
+10-06 02:53:14.909  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bo.j(PG:2)
+10-06 02:53:14.909  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bk.j(PG:17)
+10-06 02:53:14.909  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bk.b(PG:6)
+10-06 02:53:14.909  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bo.k(PG:6)
+10-06 02:53:14.909  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bo.handleMessage(PG:82)
+10-06 02:53:14.909  2403  2457 W GoogleApiAvailability: 	at android.os.Handler.dispatchMessage(Handler.java:102)
+10-06 02:53:14.909  2403  2457 W GoogleApiAvailability: 	at android.os.Looper.loopOnce(Looper.java:201)
+10-06 02:53:14.909  2403  2457 W GoogleApiAvailability: 	at android.os.Looper.loop(Looper.java:288)
+10-06 02:53:14.909  2403  2457 W GoogleApiAvailability: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+10-06 02:53:14.910  2403  2457 W GoogleApiManager: The service for com.google.android.gms.location.internal.aa is not available: ConnectionResult{statusCode=SERVICE_DISABLED, resolution=null, message=null}
+10-06 02:53:14.910  2403  2457 W GoogleApiAvailability: GMS core API Availability. ConnectionResult=3, tag=null
+10-06 02:53:14.910  2403  2457 W GoogleApiAvailability: java.lang.IllegalArgumentException
+10-06 02:53:14.910  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.g.h(PG:2)
+10-06 02:53:14.910  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bo.j(PG:2)
+10-06 02:53:14.910  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bk.j(PG:17)
+10-06 02:53:14.910  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bk.b(PG:6)
+10-06 02:53:14.910  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bk.f(PG:7)
+10-06 02:53:14.910  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bo.handleMessage(PG:95)
+10-06 02:53:14.910  2403  2457 W GoogleApiAvailability: 	at android.os.Handler.dispatchMessage(Handler.java:102)
+10-06 02:53:14.910  2403  2457 W GoogleApiAvailability: 	at android.os.Looper.loopOnce(Looper.java:201)
+10-06 02:53:14.910  2403  2457 W GoogleApiAvailability: 	at android.os.Looper.loop(Looper.java:288)
+10-06 02:53:14.910  2403  2457 W GoogleApiAvailability: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+10-06 02:53:14.912  2403  2459 I DeviceCapHelper: (REDACTED) Adding surface identity to the device capabilities for surface %s.
+10-06 02:53:14.945  2403  2457 W GoogleApiManager: The service for com.google.android.gms.clearcut.internal.j is not available: ConnectionResult{statusCode=SERVICE_DISABLED, resolution=null, message=null}
+10-06 02:53:14.945  2403  2457 I ClearcutMetricXmitter: Transmission has failed: com.google.android.gms.common.api.n: 17: API: ClearcutLogger.API is not available on this device. Connection failed with: ConnectionResult{statusCode=SERVICE_DISABLED, resolution=null, message=null}
+10-06 02:53:15.230   854   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 02:53:15.230   854   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 02:53:15.561  1430  1443 W System  : A resource failed to call AbstractCursor.close. 
+10-06 02:53:15.561  1430  1443 W System  : A resource failed to call AbstractCursor.close. 
+10-06 02:53:15.561  1430  1443 W System  : A resource failed to call AbstractCursor.close. 
+10-06 02:53:15.561  1430  1443 W System  : A resource failed to call AbstractCursor.close. 
+10-06 02:53:15.561  1430  1443 W System  : A resource failed to call AbstractCursor.close. 
+10-06 02:53:15.561  1430  1443 W System  : A resource failed to call AbstractCursor.close. 
+10-06 02:53:15.561  1430  1443 W System  : A resource failed to call AbstractCursor.close. 
+10-06 02:53:15.561  1430  1443 W System  : A resource failed to call AbstractCursor.close. 
+10-06 02:53:15.561  1430  1443 W System  : A resource failed to call AbstractCursor.close. 
+10-06 02:53:15.561  1430  1443 W System  : A resource failed to call AbstractCursor.close. 
+10-06 02:53:15.561  1430  1443 W System  : A resource failed to call AbstractCursor.close. 
+10-06 02:53:15.561  1430  1443 W System  : A resource failed to call AbstractCursor.close. 
+10-06 02:53:15.573  1032  1047 W AlarmManager: Unrecognized alarm listener com.android.server.location.gnss.GnssLocationProvider$$ExternalSyntheticLambda10@bf8a1e
+10-06 02:53:15.573  1032  1047 W AlarmManager: Unrecognized alarm listener com.android.server.location.gnss.GnssLocationProvider$$ExternalSyntheticLambda9@ed722ff
+10-06 02:53:15.915  2403  2457 W GoogleApiManager: The service for com.google.android.gms.clearcut.internal.b is not available: ConnectionResult{statusCode=SERVICE_DISABLED, resolution=null, message=null}
+10-06 02:53:15.917  2403  2457 W GoogleApiAvailability: GMS core API Availability. ConnectionResult=3, tag=null
+10-06 02:53:15.917  2403  2457 W GoogleApiAvailability: java.lang.IllegalArgumentException
+10-06 02:53:15.917  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.g.h(PG:2)
+10-06 02:53:15.917  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bo.j(PG:2)
+10-06 02:53:15.917  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bk.j(PG:17)
+10-06 02:53:15.917  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bk.b(PG:6)
+10-06 02:53:15.917  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bo.k(PG:6)
+10-06 02:53:15.917  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bo.handleMessage(PG:82)
+10-06 02:53:15.917  2403  2457 W GoogleApiAvailability: 	at android.os.Handler.dispatchMessage(Handler.java:102)
+10-06 02:53:15.917  2403  2457 W GoogleApiAvailability: 	at android.os.Looper.loopOnce(Looper.java:201)
+10-06 02:53:15.917  2403  2457 W GoogleApiAvailability: 	at android.os.Looper.loop(Looper.java:288)
+10-06 02:53:15.917  2403  2457 W GoogleApiAvailability: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+10-06 02:53:15.917  2403  2492 I TNG.PcpDataQuery: (REDACTED) %s getProactiveContent: %s
+10-06 02:53:15.918  2403  2457 W GoogleApiManager: The service for com.google.android.gms.clearcut.internal.j is not available: ConnectionResult{statusCode=SERVICE_DISABLED, resolution=null, message=null}
+10-06 02:53:15.918  2403  2457 I ClearcutMetricXmitter: Transmission has failed: com.google.android.gms.common.api.n: 17: API: ClearcutLogger.API is not available on this device. Connection failed with: ConnectionResult{statusCode=SERVICE_DISABLED, resolution=null, message=null}
+10-06 02:53:15.918  2403  2487 I A       : (REDACTED) #getLastReturnedProactiveData for client type %s and proactive data type %s
+10-06 02:53:15.918  2403  2487 I PcpDatabaseOperator: (REDACTED) #getLastReturnedProactiveData for client type %s and proactive data type %s
+10-06 02:53:15.918  2403  2487 I PcpDatabaseOperator: (REDACTED) #getLastReturnedProactiveData for client type %s and proactive data type %s
+10-06 02:53:15.919  2403  2492 I PCPTNG.DataFetchUtils: #updateLastReturnedDatabase
+10-06 02:53:15.920  2403  2457 W GoogleApiManager: The service for com.google.android.gms.clearcut.internal.j is not available: ConnectionResult{statusCode=SERVICE_DISABLED, resolution=null, message=null}
+10-06 02:53:15.920  2403  2488 I A       : #putNewReturnedDataQuery
+10-06 02:53:15.920  2403  2457 I ClearcutMetricXmitter: Transmission has failed: com.google.android.gms.common.api.n: 17: API: ClearcutLogger.API is not available on this device. Connection failed with: ConnectionResult{statusCode=SERVICE_DISABLED, resolution=null, message=null}
+10-06 02:53:15.920  2403  2464 I SSPcpDataCtrl: #logProactiveDataReceived
+10-06 02:53:15.920  2403  2492 I PcpSingletonDatabaseHel: #putNewReturnedDataQuery
+10-06 02:53:15.920  2403  2492 I PcpDatabaseOperator: #putNewReturnedDataQuery
+10-06 02:53:15.920  2403  2464 I CPServiceMediator: CrossProfileServiceManagerMediator#updateCurrentCard
+10-06 02:53:15.920  2403  2488 I PcpDatabaseOperator: #putNewReturnedDataQuery
+10-06 02:53:15.922  2403  2464 W CPDataMediator: Missing weather card from content store
+10-06 02:53:15.922  2403  2464 I A       : updateCurrentCard
+10-06 02:53:15.922  2403  2464 W OpaSsSharedUtils: Error obtaining package info
+10-06 02:53:15.922  2403  2464 W OpaSsSharedUtils: android.content.pm.PackageManager$NameNotFoundException: com.google.android.as
+10-06 02:53:15.922  2403  2464 W OpaSsSharedUtils: 	at android.app.ApplicationPackageManager.getPackageInfoAsUser(ApplicationPackageManager.java:253)
+10-06 02:53:15.922  2403  2464 W OpaSsSharedUtils: 	at android.app.ApplicationPackageManager.getPackageInfo(ApplicationPackageManager.java:213)
+10-06 02:53:15.922  2403  2464 W OpaSsSharedUtils: 	at android.app.ApplicationPackageManager.getPackageInfo(ApplicationPackageManager.java:207)
+10-06 02:53:15.922  2403  2464 W OpaSsSharedUtils: 	at com.google.android.apps.gsa.opa.smartspace.j.m(PG:2)
+10-06 02:53:15.922  2403  2464 W OpaSsSharedUtils: 	at com.google.android.apps.gsa.staticplugins.opa.smartspace.l.ap.q(PG:2)
+10-06 02:53:15.922  2403  2464 W OpaSsSharedUtils: 	at com.google.android.apps.gsa.staticplugins.opa.smartspace.crossprofile.ao.a(PG:1)
+10-06 02:53:15.922  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.gsa.k.a.i.apply(PG:2)
+10-06 02:53:15.922  2403  2464 W OpaSsSharedUtils: 	at com.google.common.util.concurrent.h.e(PG:2)
+10-06 02:53:15.922  2403  2464 W OpaSsSharedUtils: 	at com.google.common.util.concurrent.j.run(PG:9)
+10-06 02:53:15.922  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.i.af.run(PG:1)
+10-06 02:53:15.922  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.i.an.run(PG:23)
+10-06 02:53:15.922  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.i.l.run(PG:2)
+10-06 02:53:15.922  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.i.q.run(PG:4)
+10-06 02:53:15.922  2403  2464 W OpaSsSharedUtils: 	at java.lang.Thread.run(Thread.java:1012)
+10-06 02:53:15.923  2403  2464 I A       : #sendEchoUpdates
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: Error obtaining package info
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: android.content.pm.PackageManager$NameNotFoundException: com.google.android.as
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at android.app.ApplicationPackageManager.getPackageInfoAsUser(ApplicationPackageManager.java:253)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at android.app.ApplicationPackageManager.getPackageInfo(ApplicationPackageManager.java:213)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at android.app.ApplicationPackageManager.getPackageInfo(ApplicationPackageManager.java:207)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at com.google.android.apps.gsa.opa.smartspace.j.m(PG:2)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at com.google.android.apps.gsa.staticplugins.opa.smartspace.l.ai.a(PG:1)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.gsa.k.a.i.apply(PG:2)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at com.google.common.util.concurrent.h.e(PG:2)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at com.google.common.util.concurrent.j.run(PG:9)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.i.af.run(PG:1)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.i.an.run(PG:23)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.i.l.run(PG:2)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.i.q.run(PG:4)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at java.lang.Thread.run(Thread.java:1012)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: Error obtaining package info
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: android.content.pm.PackageManager$NameNotFoundException: com.google.android.as
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at android.app.ApplicationPackageManager.getPackageInfoAsUser(ApplicationPackageManager.java:253)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at android.app.ApplicationPackageManager.getPackageInfo(ApplicationPackageManager.java:213)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at android.app.ApplicationPackageManager.getPackageInfo(ApplicationPackageManager.java:207)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at com.google.android.apps.gsa.opa.smartspace.j.m(PG:2)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at com.google.android.apps.gsa.staticplugins.opa.smartspace.l.ap.d(PG:1)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at com.google.android.apps.gsa.staticplugins.opa.smartspace.l.ai.a(PG:14)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.gsa.k.a.i.apply(PG:2)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at com.google.common.util.concurrent.h.e(PG:2)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at com.google.common.util.concurrent.j.run(PG:9)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.i.af.run(PG:1)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.i.an.run(PG:23)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.i.l.run(PG:2)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.i.q.run(PG:4)
+10-06 02:53:15.923  2403  2464 W OpaSsSharedUtils: 	at java.lang.Thread.run(Thread.java:1012)
+10-06 02:53:15.923  2403  2464 W A       : Weather card is missing from cache.
+10-06 02:53:15.923  2403  2464 W A       : Missing weather card
+10-06 02:53:15.924  2403  2464 W OpaSsSharedUtils: Error obtaining package info
+10-06 02:53:15.924  2403  2464 W OpaSsSharedUtils: android.content.pm.PackageManager$NameNotFoundException: com.google.android.as
+10-06 02:53:15.924  2403  2464 W OpaSsSharedUtils: 	at android.app.ApplicationPackageManager.getPackageInfoAsUser(ApplicationPackageManager.java:253)
+10-06 02:53:15.924  2403  2464 W OpaSsSharedUtils: 	at android.app.ApplicationPackageManager.getPackageInfo(ApplicationPackageManager.java:213)
+10-06 02:53:15.924  2403  2464 W OpaSsSharedUtils: 	at android.app.ApplicationPackageManager.getPackageInfo(ApplicationPackageManager.java:207)
+10-06 02:53:15.924  2403  2464 W OpaSsSharedUtils: 	at com.google.android.apps.gsa.opa.smartspace.j.m(PG:2)
+10-06 02:53:15.924  2403  2464 W OpaSsSharedUtils: 	at com.google.android.apps.gsa.staticplugins.opa.smartspace.l.ap.d(PG:1)
+10-06 02:53:15.924  2403  2464 W OpaSsSharedUtils: 	at com.google.android.apps.gsa.staticplugins.opa.smartspace.l.ap.t(PG:3)
+10-06 02:53:15.924  2403  2464 W OpaSsSharedUtils: 	at com.google.android.apps.gsa.staticplugins.opa.smartspace.l.ai.a(PG:67)
+10-06 02:53:15.924  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.gsa.k.a.i.apply(PG:2)
+10-06 02:53:15.924  2403  2464 W OpaSsSharedUtils: 	at com.google.common.util.concurrent.h.e(PG:2)
+10-06 02:53:15.924  2403  2464 W OpaSsSharedUtils: 	at com.google.common.util.concurrent.j.run(PG:9)
+10-06 02:53:15.924  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.i.af.run(PG:1)
+10-06 02:53:15.924  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.i.an.run(PG:23)
+10-06 02:53:15.924  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.i.l.run(PG:2)
+10-06 02:53:15.924  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.i.q.run(PG:4)
+10-06 02:53:15.924  2403  2464 W OpaSsSharedUtils: 	at java.lang.Thread.run(Thread.java:1012)
+10-06 02:53:15.924  2403  2464 W A       : Weather card is missing from cache.
+10-06 02:53:15.924  2403  2464 I expirationUtils: (REDACTED) Schedule expiration task for weather with delay ms = %d
+10-06 02:53:15.925  2403  2464 I A       : (REDACTED) Scheduled weather background task: weatherRefreshAttempts=%d, weatherRefreshFirstAttemptTimeMillis=%d, current time=%d
+10-06 02:53:15.925  2403  2464 I A       : transmitSmartspaceContent
+10-06 02:53:15.926  2403  2464 I A       : logCardsSentInAmbientLogs
+10-06 02:53:15.926  2403  2464 I A       : (REDACTED) sending card %s , pre event title : %s, during event title: %s, post event title: %s, event start time: %d, updated at time: %d, isTriggeringUpdate? %b, is from work profile? %b, expirationTimeMillis %d
+10-06 02:53:15.926  2403  2464 I OpaSsWdgtHdlr: (REDACTED) received card type %s 
+10-06 02:53:15.926  2403  2464 I OpaSsWdgtHdlr: no chips received
+10-06 02:53:15.927  2403  2464 I A       : Using proto config with mendel
+10-06 02:53:15.928  2403  2464 I A       : Using proto config with mendel
+10-06 02:53:15.928  2403  2464 I A       : Using proto config with mendel
+10-06 02:53:15.928  2403  2464 I A       : Merging legacy hotword config map with new proto.
+10-06 02:53:15.928  2403  2494 I AmbientWidgetRndr: height could not be determined
+10-06 02:53:15.928  2403  2464 I A       : (REDACTED) Adding from config to map. Locale: %s modelPrefix: %s Location:%s isSpeakerIdSupported: %b
+10-06 02:53:15.928  2403  2464 I A       : (REDACTED) Adding from config to map. Locale: %s modelPrefix: %s Location:%s isSpeakerIdSupported: %b
+10-06 02:53:15.928  2403  2464 I A       : (REDACTED) Adding from config to map. Locale: %s modelPrefix: %s Location:%s isSpeakerIdSupported: %b
+10-06 02:53:15.928  2403  2464 I A       : (REDACTED) Skipping. Expected model: %s Found: %s
+10-06 02:53:15.928  2403  2464 I A       : (REDACTED) Adding from config to map. Locale: %s modelPrefix: %s Location:%s isSpeakerIdSupported: %b
+10-06 02:53:15.928  2403  2494 I AmbientWidgetRndr: could not determine the widget height - date and weather
+10-06 02:53:15.928  2403  2464 I A       : (REDACTED) hasHotwordEverywhere-%b
+10-06 02:53:15.928  2403  2464 I A       : Using proto config with mendel
+10-06 02:53:15.929  2403  2464 I A       : Using proto config with mendel
+10-06 02:53:15.929  2403  2464 I A       : Using proto config with mendel
+10-06 02:53:15.929  2403  2464 I A       : Merging legacy hotword config map with new proto.
+10-06 02:53:15.929  2403  2464 I A       : (REDACTED) Adding from config to map. Locale: %s modelPrefix: %s Location:%s isSpeakerIdSupported: %b
+10-06 02:53:15.929  2403  2464 I A       : (REDACTED) Adding from config to map. Locale: %s modelPrefix: %s Location:%s isSpeakerIdSupported: %b
+10-06 02:53:15.929  2403  2464 I A       : (REDACTED) Adding from config to map. Locale: %s modelPrefix: %s Location:%s isSpeakerIdSupported: %b
+10-06 02:53:15.929  2403  2464 I A       : (REDACTED) Skipping. Expected model: %s Found: %s
+10-06 02:53:15.929  2403  2464 I A       : (REDACTED) Adding from config to map. Locale: %s modelPrefix: %s Location:%s isSpeakerIdSupported: %b
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: Error obtaining package info
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: android.content.pm.PackageManager$NameNotFoundException: com.google.android.as
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at android.app.ApplicationPackageManager.getPackageInfoAsUser(ApplicationPackageManager.java:253)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at android.app.ApplicationPackageManager.getPackageInfo(ApplicationPackageManager.java:213)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at android.app.ApplicationPackageManager.getPackageInfo(ApplicationPackageManager.java:207)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at com.google.android.apps.gsa.opa.smartspace.j.m(PG:2)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at com.google.android.apps.gsa.staticplugins.smartspace.q.accept(PG:16)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at j$.util.a.forEachRemaining(SourceFile:19)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at j$.util.stream.A1.forEach(Unknown Source:10)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at com.google.android.apps.gsa.staticplugins.smartspace.r.b(PG:5)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at com.google.android.apps.gsa.staticplugins.smartspace.r.a(PG:1)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at com.google.android.apps.gsa.staticplugins.opa.smartspace.l.aa.a(PG:28)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.gsa.k.a.i.apply(PG:2)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at com.google.common.util.concurrent.h.e(PG:2)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at com.google.common.util.concurrent.j.run(PG:9)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.i.af.run(PG:1)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.i.an.run(PG:23)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.i.l.run(PG:2)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.i.q.run(PG:4)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at java.lang.Thread.run(Thread.java:1012)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: Error obtaining package info
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: android.content.pm.PackageManager$NameNotFoundException: com.google.android.as
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at android.app.ApplicationPackageManager.getPackageInfoAsUser(ApplicationPackageManager.java:253)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at android.app.ApplicationPackageManager.getPackageInfo(ApplicationPackageManager.java:213)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at android.app.ApplicationPackageManager.getPackageInfo(ApplicationPackageManager.java:207)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at com.google.android.apps.gsa.opa.smartspace.j.m(PG:2)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at com.google.android.apps.gsa.staticplugins.smartspace.p.a(PG:1)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at com.google.android.apps.gsa.staticplugins.opa.smartspace.l.aa.a(PG:28)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.gsa.k.a.i.apply(PG:2)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at com.google.common.util.concurrent.h.e(PG:2)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at com.google.common.util.concurrent.j.run(PG:9)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.i.af.run(PG:1)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.i.an.run(PG:23)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.i.l.run(PG:2)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at com.google.android.libraries.i.q.run(PG:4)
+10-06 02:53:15.929  2403  2464 W OpaSsSharedUtils: 	at java.lang.Thread.run(Thread.java:1012)
+10-06 02:53:15.929  2403  2464 I A       : (REDACTED) received card type %s 
+10-06 02:53:15.930  2403  2488 I k       : Smartspace BC UI template is disabled. Skipping...
+10-06 02:53:15.930  2403  2488 I BCSsUpdateIntent: (REDACTED) Non-empty bluechip card list, size: %d
+10-06 02:53:15.930  2403  2488 I BCSsUpdateIntent: attempt to aiaiConnect
+10-06 02:53:15.931  2403  2492 E j       : ContentCaptureManager is null
+10-06 02:53:16.080  1790  1801 W System  : A resource failed to call release. 
+10-06 02:53:16.232   854   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 02:53:16.232   854   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 02:53:17.233   854   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 02:53:17.233   854   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 02:53:18.233   854   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 02:53:18.233   854   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 02:53:19.233   854   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 02:53:19.233   854   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 02:53:20.235   854   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 02:53:20.235   854   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 02:53:21.235   854   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 02:53:21.235   854   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 02:53:21.375  3271  3271 W ProcessState: Extra binder thread started, but 0 threads requested. Do not use *startThreadPool when zero threads are requested.
+10-06 02:53:21.389  3271  3272 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_CREATE_GUEST_HANDLE
+10-06 02:53:21.389  3271  3272 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_RESOURCE_SYNC
+10-06 02:53:21.389  3271  3272 I [minigbm:virtgpu_init(51)]: virtgpu backend not enabling VIRTGPU_PARAM_GUEST_VRAM
+10-06 02:53:21.389  3271  3272 I [minigbm:virgl_get_caps(556)]: Supported CAPSET IDs: 6.
+10-06 02:53:21.389  3271  3272 I [minigbm:virgl_add_combination(372)]: Skipping unsupported combination format:842094158
+10-06 02:53:21.389  3271  3272 I [minigbm:virgl_add_combination(372)]: Skipping unsupported combination format:808530000
+10-06 02:53:22.236   854   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 02:53:22.236   854   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 02:53:23.236   854   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 02:53:23.237   854   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 02:53:23.926  1032  1032 D OomAdjuster: Not killing cached processes
+10-06 02:53:23.926  1032  1032 D CompatibilityInfo: mCompatibilityFlags - 4
+10-06 02:53:23.926  1032  1032 D CompatibilityInfo: applicationDensity - 160
+10-06 02:53:23.926  1032  1032 D CompatibilityInfo: applicationScale - 1.0
+10-06 02:53:23.930  2403  2403 I BgTaskExecutorImpl: (REDACTED) Starting %s background task %s.
+10-06 02:53:23.932  2403  2459 I SmartspaceExpireTask: sending weather request query to Opa-Smartspace
+10-06 02:53:23.932  1032  1057 D CompatibilityInfo: mCompatibilityFlags - 4
+10-06 02:53:23.933  1032  1057 D CompatibilityInfo: applicationDensity - 160
+10-06 02:53:23.933  1032  1057 D CompatibilityInfo: applicationScale - 1.0
+10-06 02:53:23.934  2403  2487 I OpaSSRequestSender: processZerostateResponse handle WEATHER response by pcp
+10-06 02:53:23.934  1032  1584 W JobScheduler: Job didn't exist in JobStore: e7dc8cc #u0a234/-161 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService
+10-06 02:53:23.935  2403  2537 I NetworkRecognitionRnr: Using pair HTTP connection
+10-06 02:53:23.936  2403  2552 I A       : [Upload] Connected
+10-06 02:53:23.936  2403  2457 W GoogleApiManager: The service for com.google.android.gms.location.internal.aa is not available: ConnectionResult{statusCode=SERVICE_DISABLED, resolution=null, message=null}
+10-06 02:53:23.936  2403  2457 W GoogleApiAvailability: GMS core API Availability. ConnectionResult=3, tag=null
+10-06 02:53:23.936  2403  2457 W GoogleApiAvailability: java.lang.IllegalArgumentException
+10-06 02:53:23.936  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.g.h(PG:2)
+10-06 02:53:23.936  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bo.j(PG:2)
+10-06 02:53:23.936  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bk.j(PG:17)
+10-06 02:53:23.936  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bk.b(PG:6)
+10-06 02:53:23.936  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bo.k(PG:6)
+10-06 02:53:23.936  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bo.handleMessage(PG:82)
+10-06 02:53:23.936  2403  2457 W GoogleApiAvailability: 	at android.os.Handler.dispatchMessage(Handler.java:102)
+10-06 02:53:23.936  2403  2457 W GoogleApiAvailability: 	at android.os.Looper.loopOnce(Looper.java:201)
+10-06 02:53:23.936  2403  2457 W GoogleApiAvailability: 	at android.os.Looper.loop(Looper.java:288)
+10-06 02:53:23.936  2403  2457 W GoogleApiAvailability: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+10-06 02:53:23.939  2403  2457 W GoogleApiManager: The service for com.google.android.gms.location.internal.aa is not available: ConnectionResult{statusCode=SERVICE_DISABLED, resolution=null, message=null}
+10-06 02:53:23.939  2403  2492 W CronetNetworkRqstWrppr: Upload request without a content type.
+10-06 02:53:23.941  2403  2457 W GoogleApiAvailability: GMS core API Availability. ConnectionResult=3, tag=null
+10-06 02:53:23.941  2403  2457 W GoogleApiAvailability: java.lang.IllegalArgumentException
+10-06 02:53:23.941  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.g.h(PG:2)
+10-06 02:53:23.941  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bo.j(PG:2)
+10-06 02:53:23.941  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bk.j(PG:17)
+10-06 02:53:23.941  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bk.b(PG:6)
+10-06 02:53:23.941  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bk.f(PG:7)
+10-06 02:53:23.941  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bo.handleMessage(PG:95)
+10-06 02:53:23.941  2403  2457 W GoogleApiAvailability: 	at android.os.Handler.dispatchMessage(Handler.java:102)
+10-06 02:53:23.941  2403  2457 W GoogleApiAvailability: 	at android.os.Looper.loopOnce(Looper.java:201)
+10-06 02:53:23.941  2403  2457 W GoogleApiAvailability: 	at android.os.Looper.loop(Looper.java:288)
+10-06 02:53:23.941  2403  2457 W GoogleApiAvailability: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+10-06 02:53:23.944  2403  2468 W LocationOracle: getBestLocation(): no location is available
+10-06 02:53:23.945  2403  2457 W GoogleApiManager: The service for com.google.android.gms.location.internal.aa is not available: ConnectionResult{statusCode=SERVICE_DISABLED, resolution=null, message=null}
+10-06 02:53:23.945  2403  2492 E WithoutZwieback.Filler: No battery percentage
+10-06 02:53:23.946  2403  2457 W GoogleApiAvailability: GMS core API Availability. ConnectionResult=3, tag=null
+10-06 02:53:23.946  2403  2457 W GoogleApiAvailability: java.lang.IllegalArgumentException
+10-06 02:53:23.946  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.g.h(PG:2)
+10-06 02:53:23.946  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bo.j(PG:2)
+10-06 02:53:23.946  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bk.j(PG:17)
+10-06 02:53:23.946  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bk.b(PG:6)
+10-06 02:53:23.946  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bo.k(PG:6)
+10-06 02:53:23.946  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bo.handleMessage(PG:82)
+10-06 02:53:23.946  2403  2457 W GoogleApiAvailability: 	at android.os.Handler.dispatchMessage(Handler.java:102)
+10-06 02:53:23.946  2403  2457 W GoogleApiAvailability: 	at android.os.Looper.loopOnce(Looper.java:201)
+10-06 02:53:23.946  2403  2457 W GoogleApiAvailability: 	at android.os.Looper.loop(Looper.java:288)
+10-06 02:53:23.946  2403  2457 W GoogleApiAvailability: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+10-06 02:53:23.946  2403  2457 W GoogleApiManager: The service for com.google.android.gms.location.internal.aa is not available: ConnectionResult{statusCode=SERVICE_DISABLED, resolution=null, message=null}
+10-06 02:53:23.947  2403  2457 W GoogleApiAvailability: GMS core API Availability. ConnectionResult=3, tag=null
+10-06 02:53:23.947  2403  2457 W GoogleApiAvailability: java.lang.IllegalArgumentException
+10-06 02:53:23.947  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.g.h(PG:2)
+10-06 02:53:23.947  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bo.j(PG:2)
+10-06 02:53:23.947  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bk.j(PG:17)
+10-06 02:53:23.947  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bk.b(PG:6)
+10-06 02:53:23.947  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bk.f(PG:7)
+10-06 02:53:23.947  2403  2457 W GoogleApiAvailability: 	at com.google.android.gms.common.api.internal.bo.handleMessage(PG:95)
+10-06 02:53:23.947  2403  2457 W GoogleApiAvailability: 	at android.os.Handler.dispatchMessage(Handler.java:102)
+10-06 02:53:23.947  2403  2457 W GoogleApiAvailability: 	at android.os.Looper.loopOnce(Looper.java:201)
+10-06 02:53:23.947  2403  2457 W GoogleApiAvailability: 	at android.os.Looper.loop(Looper.java:288)
+10-06 02:53:23.947  2403  2457 W GoogleApiAvailability: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+10-06 02:53:23.950  2403  2571 I DeviceCapHelper: (REDACTED) Adding surface identity to the device capabilities for surface %s.
+10-06 02:53:24.237   854   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 02:53:24.237   854   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 02:53:25.013  2403  2547 I A       : [Download] starting read
+10-06 02:53:25.237   854   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 02:53:25.237   854   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 02:53:26.238   854   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 02:53:26.238   854   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 02:53:27.239   854   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 02:53:27.239   854   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 02:53:28.240   854   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 02:53:28.240   854   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
+10-06 02:53:29.241   854   866 E android.hardware.thermal@2.0-service.intel: get_soc_pkg_temperature: failed to open file: No such file or directory
+10-06 02:53:29.241   854   866 E android.hardware.thermal@2.0-service.intel: Can not get temperature of type 0
