@@ -42,3 +42,19 @@ E libsigchain: #05 pc 002e0bee /memfd:exec (deleted)
 
 M0 값은 `docs/evidence/M0/metrics.md`의 8 GiB, 60 Hz, 전투 1-3 행이다. API 세대가 달라 번역기만 바꾼 A/B는 아니다.
 원문: `game-*.txt`, `game-first-launch.png`.
+
+## 원인 확인 (같은 날)
+
+A15 `native_bridge_support`(`aa99591c`)의 `android_api/libandroid/proxy/trampolines_arm64_to_x86_64-inl.h`는 `AAssetManager_fromJava`를
+`auto(void*, void*) -> void*`로 선언한다. 상류는 2024-11-13 커밋 `e6c71f3874270863e410dea228b75461f2199462`("Regenerate proxy libraries to use
+JNIEnv explicitly")에서 생성 헤더 15개의 JNI 인자를 `JNIEnv*`로 바꿨고, Digitalis 본체는 `JNIEnv*` 인자에만 `ToHostJNIEnv` 변환을 건다
+(`guest_abi/include/berberis/guest_abi/function_wrappers.h`). A15 프록시와 A16 계열 본체를 합치면 게스트 JNIEnv가 그대로 호스트로 넘어간다.
+
+`tests/fixtures/arm64-probe`에 `AAssetManager_fromJava(env, getAssets())`만 부르는 단계를 더해 재현했다. 호출 직전 로그
+`OMEProbe: AAssetManager_fromJava BEGIN` 바로 뒤에 게임과 같은 스택(`GetLongField+88`, 프록시 `+293`)이 나왔다(`jni-*.txt`).
+안드로이드가 죽은 액티비티를 자동으로 다시 띄워 한 번의 실행에서 같은 충돌이 31번 기록되었고, 멈춤 기준에 따라 거기서 멈췄다.
+
+cpuinfo 경고: A15 `libnativebridge`가 `/system/etc/cpuinfo.<isa>.txt`를 찾지만 Digitalis는 정적 파일 대신
+`OpenatProcCpuinfoForGuest()`가 memfd로 ARM64 형식을 만들어 준다. 파일을 더하지 않았다.
+
+다음: `e6c71f3`의 JNI 타입 수정 가운데 A15에 있는 심볼만 옮겨 다시 빌드, 재현기, 게임 순으로 확인.

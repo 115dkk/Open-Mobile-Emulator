@@ -1,0 +1,68 @@
+ACTIVITY MANAGER PROCESS EXIT INFO (dumpsys activity exit-info)
+Last Timestamp of Persistence Into Persistent Storage: 1970-01-01 00:00:00.000
+  package: org.ome.arm64probe
+    Historical Process Exit for uid=10304
+        ApplicationExitInfo #0:
+          timestamp=2026-10-05 13:41:25.260 pid=3488 realUid=10304 packageUid=10304 definingUid=10304 user=0
+          process=org.ome.arm64probe reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=11
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null
+        ApplicationExitInfo #1:
+          timestamp=2026-10-05 13:41:25.073 pid=3472 realUid=10304 packageUid=10304 definingUid=10304 user=0
+          process=org.ome.arm64probe reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=11
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null
+        ApplicationExitInfo #2:
+          timestamp=2026-10-05 13:41:24.889 pid=3456 realUid=10304 packageUid=10304 definingUid=10304 user=0
+          process=org.ome.arm64probe reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=11
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null
+        ApplicationExitInfo #3:
+          timestamp=2026-10-05 13:41:24.720 pid=3440 realUid=10304 packageUid=10304 definingUid=10304 user=0
+          process=org.ome.arm64probe reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=11
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null
+        ApplicationExitInfo #4:
+          timestamp=2026-10-05 13:41:24.560 pid=3424 realUid=10304 packageUid=10304 definingUid=10304 user=0
+          process=org.ome.arm64probe reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=11
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null
+        ApplicationExitInfo #5:
+          timestamp=2026-10-05 13:41:24.408 pid=3408 realUid=10304 packageUid=10304 definingUid=10304 user=0
+          process=org.ome.arm64probe reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=11
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null
+        ApplicationExitInfo #6:
+          timestamp=2026-10-05 13:41:24.253 pid=3392 realUid=10304 packageUid=10304 definingUid=10304 user=0
+          process=org.ome.arm64probe reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=11
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null
+        ApplicationExitInfo #7:
+          timestamp=2026-10-05 13:41:24.088 pid=3376 realUid=10304 packageUid=10304 definingUid=10304 user=0
+          process=org.ome.arm64probe reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=11
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null
+        ApplicationExitInfo #8:
+          timestamp=2026-10-05 13:41:23.924 pid=3360 realUid=10304 packageUid=10304 definingUid=10304 user=0
+          process=org.ome.arm64probe reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=11
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null
+        ApplicationExitInfo #9:
+          timestamp=2026-10-05 13:41:23.732 pid=3344 realUid=10304 packageUid=10304 definingUid=10304 user=0
+          process=org.ome.arm64probe reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=11
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null
+        ApplicationExitInfo #10:
+          timestamp=2026-10-05 13:41:23.573 pid=3328 realUid=10304 packageUid=10304 definingUid=10304 user=0
+          process=org.ome.arm64probe reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=11
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null
+        ApplicationExitInfo #11:
+          timestamp=2026-10-05 13:41:23.391 pid=3312 realUid=10304 packageUid=10304 definingUid=10304 user=0
+          process=org.ome.arm64probe reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=11
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null
+        ApplicationExitInfo #12:
+          timestamp=2026-10-05 13:41:23.197 pid=3296 realUid=10304 packageUid=10304 definingUid=10304 user=0
+          process=org.ome.arm64probe reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=11
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null
+        ApplicationExitInfo #13:
+          timestamp=2026-10-05 13:41:23.038 pid=3280 realUid=10304 packageUid=10304 definingUid=10304 user=0
+          process=org.ome.arm64probe reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=11
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null
+        ApplicationExitInfo #14:
+          timestamp=2026-10-05 13:41:22.876 pid=3264 realUid=10304 packageUid=10304 definingUid=10304 user=0
+          process=org.ome.arm64probe reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=11
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null
+        ApplicationExitInfo #15:
+          timestamp=2026-10-05 13:41:22.715 pid=3247 realUid=10304 packageUid=10304 definingUid=10304 user=0
+          process=org.ome.arm64probe reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=11
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null

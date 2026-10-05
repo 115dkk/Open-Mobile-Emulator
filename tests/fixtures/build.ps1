@@ -224,6 +224,7 @@ try {
         $nativeLibrary = Join-Path $nativeRoot 'libprobe.so'
         Invoke-ExternalTool $arm64Api26Clang @(
             '-shared',
+            '-landroid',
             '-fPIC',
             '-O2',
             '-Wl,-soname,libprobe.so',

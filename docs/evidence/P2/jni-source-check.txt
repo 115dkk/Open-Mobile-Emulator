@@ -1,0 +1,52 @@
+A15 source revisions
+aa99591cb20cf7cd2eadab8d176abf7442c7b674
+9faad7d9f3b524fe500f147bc6ce20346a84e8cd
+b99460cb0b278127574ba7a9a6de97a636ce9e44
+
+A15 generated wrapper
+10:{"AAssetManager_fromJava", GetTrampolineFunc<auto(void*, void*) -> void*>(), reinterpret_cast<void*>(NULL)},
+
+A15 callee implementation
+// -------------------- Public native C API --------------------
+
+/**
+ * Asset Manager functionality
+ */
+AAssetManager* AAssetManager_fromJava(JNIEnv* env, jobject assetManager)
+{
+    return (AAssetManager*) env->GetLongField(assetManager, gAssetManagerOffsets.mObject);
+}
+
+
+CPU info mount contract
+#elif !defined(__ANDROID__)
+  // To be able to test on the host, we hardwire a relative path.
+  MountCpuinfo("./cpuinfo");
+
+#else  // __ANDROID__
+  char cpuinfo_path[1024];
+
+  // Bind-mount /system/etc/cpuinfo.<isa>.txt to /proc/cpuinfo.
+  snprintf(cpuinfo_path, sizeof(cpuinfo_path), "/system/etc/cpuinfo.%s.txt", instruction_set);
+  if (MountCpuinfo(cpuinfo_path)) {
+    return;
+  }
+
+  // Bind-mount /system/lib{,64}/<isa>/cpuinfo to /proc/cpuinfo.
+  // TODO(b/179753190): remove when all implementations migrate to system/etc!
+#ifdef __LP64__
+  snprintf(cpuinfo_path, sizeof(cpuinfo_path), "/system/lib64/%s/cpuinfo", instruction_set);
+#else
+  snprintf(cpuinfo_path, sizeof(cpuinfo_path), "/system/lib/%s/cpuinfo", instruction_set);
+#endif  // __LP64__
+  MountCpuinfo(cpuinfo_path);
+
+#endif
+
+Source state
+a24e6f0fba0515fbde6eded5237ae542044c2ba3
+866b096a447099b29a9703ae8867aceb3727ef55
+1df26ce886fce15a197b1d3496d93741b6b88aa5
+cf1446707cc8e12aa42c024026d42c95228dea38
+aa99591cb20cf7cd2eadab8d176abf7442c7b674
+BASELINE_CHECK=PASS

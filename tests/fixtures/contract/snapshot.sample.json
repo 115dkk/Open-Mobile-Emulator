@@ -1,5 +1,5 @@
 {
-  "contractVersion": 9,
+  "contractVersion": 10,
   "productVersion": "0.1.0",
   "phase": "main",
   "blocker": {
@@ -102,6 +102,10 @@
             {
               "id": "root",
               "state": "available"
+            },
+            {
+              "id": "textInput",
+              "state": "available"
             }
           ]
         }
@@ -169,6 +173,10 @@
         },
         {
           "id": "root",
+          "state": "available"
+        },
+        {
+          "id": "textInput",
           "state": "available"
         }
       ]
@@ -308,6 +316,11 @@
     "multitouch": "unavailable",
     "suspendHotkey": "F12",
     "overlayVisible": true
+  },
+  "textInput": {
+    "state": "active",
+    "inputType": 1,
+    "package": "com.example.app"
   },
   "display": {
     "presets": [

@@ -17,12 +17,17 @@ public final class MainActivity extends Activity {
     }
 
     private static native String nativeProbe();
+    private static native String nativeAssetProbe(android.content.res.AssetManager assets);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Log.i(TAG, "AAssetManager_fromJava BEGIN");
+        String assetReport = nativeAssetProbe(getAssets());
+        Log.i(TAG, assetReport);
         String report = nativeProbe()
+                + "\n" + assetReport
                 + "\nSUPPORTED_ABIS=" + String.join(",", Build.SUPPORTED_ABIS)
                 + "\nos.arch=" + System.getProperty("os.arch")
                 + "\nCPU_ABI=" + Build.CPU_ABI;

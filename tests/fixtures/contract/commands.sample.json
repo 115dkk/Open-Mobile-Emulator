@@ -252,6 +252,18 @@
     "code": "F12"
   },
   {
+    "kind": "textCompose",
+    "text": "한"
+  },
+  {
+    "kind": "textCommit",
+    "text": "한글"
+  },
+  {
+    "kind": "textKey",
+    "key": "backspace"
+  },
+  {
     "kind": "displayPresetApply",
     "id": "hd-720"
   },

@@ -1,0 +1,126 @@
+10-05 13:40:50.285  2854  2854 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3db300 host_rbp=0x7fff1b3db380
+10-05 13:40:50.295  2854  2854 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:40:50.295  2854  2854 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:20.090  2995  2995 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:20.091  2995  2995 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:20.103  2995  2995 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:20.103  2995  2995 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:20.117  1518  1518 I Zygote  : Process 2995 exited due to signal 11 (Segmentation fault)
+10-05 13:41:20.298  3015  3015 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:20.299  3015  3015 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:20.308  3015  3015 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:20.308  3015  3015 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:20.557  3034  3034 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:20.559  3034  3034 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:20.570  3034  3034 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:20.570  3034  3034 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:20.736  3054  3054 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:20.737  3054  3054 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:20.745  3054  3054 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:20.745  3054  3054 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:20.899  3071  3071 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:20.899  3071  3071 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:20.908  3071  3071 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:20.908  3071  3071 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:21.060  3087  3087 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:21.060  3087  3087 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:21.068  3087  3087 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:21.068  3087  3087 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:21.217  3103  3103 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:21.218  3103  3103 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:21.226  3103  3103 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:21.226  3103  3103 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:21.377  3119  3119 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:21.378  3119  3119 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:21.386  3119  3119 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:21.386  3119  3119 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:21.542  3135  3135 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:21.542  3135  3135 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:21.552  3135  3135 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:21.552  3135  3135 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:21.718  3151  3151 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:21.719  3151  3151 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:21.728  3151  3151 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:21.728  3151  3151 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:21.880  3167  3167 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:21.881  3167  3167 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:21.889  3167  3167 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:21.889  3167  3167 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:22.058  3183  3183 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:22.059  3183  3183 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:22.067  3183  3183 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:22.067  3183  3183 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:22.220  3199  3199 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:22.220  3199  3199 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:22.228  3199  3199 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:22.228  3199  3199 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:22.380  3215  3215 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:22.381  3215  3215 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:22.389  3215  3215 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:22.389  3215  3215 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:22.544  3231  3231 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:22.544  3231  3231 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:22.553  3231  3231 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:22.553  3231  3231 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:22.701  3247  3247 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:22.702  3247  3247 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:22.710  3247  3247 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:22.710  3247  3247 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:22.862  3264  3264 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:22.863  3264  3264 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:22.871  3264  3264 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:22.871  3264  3264 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:23.023  3280  3280 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:23.023  3280  3280 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:23.031  3280  3280 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:23.031  3280  3280 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:23.184  3296  3296 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:23.185  3296  3296 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:23.192  3296  3296 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:23.192  3296  3296 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:23.374  3312  3312 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:23.375  3312  3312 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:23.384  3312  3312 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:23.384  3312  3312 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:23.560  3328  3328 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:23.560  3328  3328 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:23.568  3328  3328 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:23.568  3328  3328 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:23.718  3344  3344 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:23.719  3344  3344 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:23.727  3344  3344 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:23.727  3344  3344 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:23.910  3360  3360 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:23.911  3360  3360 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:23.919  3360  3360 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:23.919  3360  3360 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:24.075  3376  3376 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:24.075  3376  3376 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:24.084  3376  3376 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:24.084  3376  3376 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:24.238  3392  3392 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:24.239  3392  3392 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:24.246  3392  3392 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:24.246  3392  3392 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:24.394  3408  3408 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:24.395  3408  3408 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:24.403  3408  3408 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:24.403  3408  3408 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:24.548  3424  3424 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:24.549  3424  3424 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:24.556  3424  3424 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:24.556  3424  3424 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:24.707  3440  3440 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:24.708  3440  3440 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:24.715  3440  3440 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:24.715  3440  3440 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:24.876  3456  3456 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:24.876  3456  3456 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:24.885  3456  3456 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:24.885  3456  3456 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:25.059  3472  3472 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:25.060  3472  3472 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
+10-05 13:41:25.069  3472  3472 E libsigchain:   #03 pc 00777378  /apex/com.android.art/lib64/libart.so (art::JNI<false>::GetLongField(_JNIEnv*, _jobject*, _jfieldID*)+88) (BuildId: 7f75efabe7ad4660f4dd0ec7e7e330a1)
+10-05 13:41:25.069  3472  3472 E libsigchain:   #04 pc 000086b5  /system/lib64/libberberis_proxy_libandroid.so (berberis::TrampolineFuncGenerator<void* (void*, void*), (berberis::GuestAbi::CallingConventionsVariant)0>::Func(void const*, berberis::ThreadState*)+293) (BuildId: 2092b811bd3d9c922c321318767212c8)
+10-05 13:41:25.245  3488  3488 I OMEProbe: AAssetManager_fromJava BEGIN
+10-05 13:41:25.245  3488  3488 E berberis: HandleFatalSignal: sig=11 si_addr=0x0 si_code=128 host_rip=0x7fa363b11379 host_rsp=0x7fff1b3daf50 host_rbp=0x7fff1b3dafd0
