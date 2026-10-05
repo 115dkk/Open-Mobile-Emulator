@@ -111,3 +111,16 @@ Crashlytics의 `TypeInitializationException`, `com.google.android.gms` 없음이
 GMS를 쓸 수 없으면 트릭컬은 초기화를 마치지 못한다. 흰 화면은 Digitalis의 결함이 아니다. 같은 API 35에서 GMS가 있을 때 그 뒤가 도는지는 아직 확인하지 않았다.
 서버는 10644에 업데이트를 요구한다("새로운 버전이 확인되었습니다. 안정적인 서비스 이용을 위하여 스토어로 이동하여 업데이트 해주세요.", `game-gms-on-prompt.png`).
 다음 게임 시험에는 최신 APK가 필요하다.
+
+## 사용자 PC 조립 시제품: GApps를 넣은 A15 + Digitalis (2026-10-06)
+
+`dl.google.com`의 `google_apis_playstore/x86_64-35_r09.zip`(색인 SHA-1 `2f0054868e6aab3c098acd3decba17a82aed4176`, 1,762,061,559바이트,
+`uses-license` `android-sdk-license`, 계산한 SHA-256 `1fb5e5fd…6dfe6`)에서 `guest/build/gapps/assemble.py`(개발 전용)가 GPT와 LP 메타데이터를 읽어
+product와 system_ext를 열고 GmsCore, Phonesky, GoogleServicesFramework와 그 패키지 항목만 남긴 권한·sysconfig XML 넷을 꺼내 debugfs로
+jni6 system.img에 넣었다(라벨 `system_file`, 다시 읽어 해시와 라벨 확인, `e2fsck -fn` 통과). 번역기, Widevine, 기기 속성, SELinux 정책은 넣지 않았다.
+꺼낸 파일과 조립한 이미지는 이 PC의 `%LOCALAPPDATA%\OpenMobileEmulator\p2\gapps\`에만 있다(R3).
+
+- 부팅 뒤 GMS `24.23.35`가 x86_64로 돌고(`gms`, `.persistent`, `.unstable`), 네이티브 브리지는 그대로 `libberberis_arm64.so`.
+- 게임: Firebase messaging 의존성 오류가 사라졌다. 권한 화면 뒤 인트로 단계에서 검은 화면으로 머물렀고(프로세스 살아 있음, 치명 오류 없음)
+  업데이트 필수 알림에는 가지 못했다. logcat에 `AndroidVideoMedia`, `Cannot Prepare a disabled VideoPlayer`. A13 기준선에서는 인트로가 검은 채로 나와도
+  탭 한 번에 넘어갔다.

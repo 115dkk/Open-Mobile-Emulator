@@ -1,0 +1,1 @@
+{"files": 7, "output_sha256": "5d5357e09300f79b61a28fbb9c177a01865db7635ab1425df4add84161c5325c", "output": "/mnt/c/Users/32170336/AppData/Local/OpenMobileEmulator/p2/gapps/system-gapps.img"}

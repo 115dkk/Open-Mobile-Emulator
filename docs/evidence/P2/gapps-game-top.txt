@@ -1,0 +1,15 @@
+Tasks: 256 total,   1 running, 255 sleeping,   0 stopped,   0 zombie
+  Mem:  8128132K total,  7747628K used,   380504K free,    96716K buffers
+ Swap:  4194300K total,   208740K used,  3985560K free,  6002388K cached
+400%cpu  36%user   0%nice  24%sys 340%idle   0%iow   0%irq   0%sirq   0%host
+  PID USER         PR  NI VIRT  RES  SHR S[%CPU] %MEM     TIME+ ARGS
+ 4337 u0_a299      10 -10  36G 1.0G 557M S 56.0  13.6   2:36.99 com.epidgames.trickcalrevive
+ 1547 root         -3  -8  11G 188M  56M S  8.0   2.3   0:21.63 surfaceflinger
+ 1541 audioserver  20   0  11G  28M  23M S  4.0   0.3   0:04.31 audioserver
+ 5636 shell        20   0  10G 4.8M 4.2M R  0.0   0.0   0:00.01 top -b -m 10 -n 1
+ 5399 u0_a306      20   0  14G 320M 215M S  0.0   4.0   0:03.23 com.google.android.gms
+ 5105 u0_a306      20   0  14G 217M 167M S  0.0   2.7   0:00.87 com.google.android.gms.unstable
+ 4997 u0_a305      20   0  14G 209M 136M S  0.0   2.6   0:00.93 com.android.vending
+ 4416 u0_a299      20   0  30G  83M 8.3M S  0.0   1.0   0:00.01 com.epidgames.trickcalrevive
+ 4291 u0_a198      20   0  14G 120M  70M S  0.0   1.5   0:00.04 com.android.documentsui
+ 4047 u0_a305      20   0  14G 140M  90M S  0.0   1.7   0:00.11 com.android.vending:instant_app_installer

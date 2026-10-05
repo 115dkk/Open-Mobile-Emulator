@@ -1,0 +1,5 @@
+DELETE C:\Users\32170336\AppData\Local\OpenMobileEmulator\p2\OME-api35-20261005-digitalis.iso 2961014784
+DELETE C:\Users\32170336\AppData\Local\OpenMobileEmulator\p2\OME-api35-20261005-jni3-digitalis.iso 2961022976
+
+[32;1mFree : [0m37944565760
+

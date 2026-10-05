@@ -1,0 +1,15 @@
+{
+  "name": "google-api35-playstore-x86_64-development-gapps-source",
+  "version": "35-r09",
+  "url": "https://dl.google.com/android/repository/sys-img/google_apis_playstore/x86_64-35_r09.zip",
+  "size_bytes": 1762061559,
+  "sha1": "2f0054868e6aab3c098acd3decba17a82aed4176",
+  "sha256": "1fb5e5fd1c4b1b54bfe5558f6f361d6c10e13786acff630153e0542df356dfe6",
+  "license": "android-sdk-license",
+  "license_source": "https://dl.google.com/android/repository/sys-img/google_apis_playstore/sys-img2-5.xml",
+  "license_element": "license[id=android-sdk-license]",
+  "fetched_by": "builder",
+  "provenance_note": "Development-only local assembly. SHA-1 and size checked against Google's API35 x86_64 revision 9 index; SHA-256 computed locally. Never redistribute extracted files or assembled images. Not yet registered for product installation in manifests/artifacts.json.",
+  "packages": ["com.google.android.gms", "com.google.android.gsf", "com.android.vending"],
+  "excluded": ["native bridges", "Widevine", "odex", "vdex", "device identity properties", "SELinux policy", "Google signing keys"]
+}
