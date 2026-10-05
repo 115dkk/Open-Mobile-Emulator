@@ -1,97 +1,118 @@
 From 4a0c9d7e1b2f3a4c5d6e7f8091a2b3c4d5e6f708 Mon Sep 17 00:00:00 2001
 From: Open Mobile Emulator contributors <noreply@example.invalid>
-Date: Thu, 1 Oct 2026 00:00:00 +0000
+Date: Mon, 5 Oct 2026 00:00:00 +0000
 Subject: [PATCH] ui/sdl2: treat the owned window as a viewport of the guest
 
 The stock SDL2 display forwards every window resize to the guest as the
-preferred display mode (qemu_console_set_ui_info), and it scales mouse
-coordinates by the surface size on the assumption that the window and the
-guest surface are the same size.  For the owned window of patch 0005 the
-host sizes the window to its stage and the guest resolution is a setting
-of its own (the product applies it with wm size and the kernel video=
-argument), so that coupling made the guest fall back to the stage size
-whenever the window was placed again, and once the sizes differ the guest
-pointer drifts away from the host cursor.
+preferred display mode (qemu_console_set_ui_info).  For the owned window
+of patch 0005 the host sizes the window to its stage and the guest
+resolution is a setting of its own, so that coupling made the guest fall
+back to the stage size whenever the window was placed again.  With an
+owner window set, the window size is no longer reported as UI info.
 
-With an owner window set, keep the window a plain viewport: do not report
-its size as UI info, and map window coordinates through the renderer's
-own placement of the surface (letterboxed and centred for GL as in
-surface_gl_setup_viewport, stretched for the 2D renderer) before scaling
-them to the surface.  Without an owner window QEMU behaves as before.
+Mouse coordinates go through one mapping, sdl2_window_to_surface, which
+handle_mousemotion and handle_mousebutton call on the raw SDL window
+coordinates in place of their own proportional scaling.  A GL scanout
+(virgl) is blitted over the whole window and the 2D renderer stretches
+the surface, so those keep the proportional mapping; a GL-rendered
+surface outside scanout mode is letterboxed and centred as in
+surface_gl_setup_viewport, and an owner window maps through that
+placement.  The first version of this patch mapped the value that
+handle_mousemotion had already scaled to the surface a second time and
+assumed letterboxing for the virgl scanout as well, which put the guest
+pointer at about 0.6 of the host cursor position (user report
+2026-10-05).  Without an owner window QEMU behaves as before.
 
 The ui/sdl2.c header carries the MIT license text.
 
 Signed-off-by: Open Mobile Emulator contributors <noreply@example.invalid>
 ---
- ui/sdl2.c | 55 +++++++++++---
- 1 file changed, 54 insertions(+), 1 deletions(-)
-
 diff --git a/ui/sdl2.c b/ui/sdl2.c
-index 3c46fc2..9a5283f 100644
+index 3c46fc2..b9dd429 100644
 --- a/ui/sdl2.c
 +++ b/ui/sdl2.c
-@@ -484,6 +484,52 @@ static void sdl_mouse_mode_change(Notifier *notify, void *data)
+@@ -484,6 +484,59 @@ static void sdl_mouse_mode_change(Notifier *notify, void *data)
      }
  }
  
 +/*
-+ * Open Mobile Emulator: an owned window (patch 0005) is a viewport that the
-+ * host sizes independently of the guest resolution.  The GL renderer draws
-+ * the guest surface letterboxed and centred (surface_gl_setup_viewport in
-+ * console-gl.c) and the 2D renderer stretches it over the whole window, so a
-+ * window coordinate has to go through that same mapping before it is scaled
-+ * to the surface; otherwise the guest pointer drifts away from the host
-+ * cursor.  Without an owner window the window and the surface stay the same
-+ * size and this is the identity.
++ * Open Mobile Emulator: map a window coordinate to the guest surface the way
++ * the renderer places the surface in the window.  An owned window (patch
++ * 0005) is a viewport that the host sizes independently of the guest
++ * resolution.  A GL scanout (virgl) is blitted over the whole window
++ * (sdl2_gl_scanout_flush) and the 2D renderer stretches the surface too, so
++ * those keep the stock proportional mapping; only a GL-rendered surface
++ * outside scanout mode is letterboxed and centred
++ * (surface_gl_setup_viewport in console-gl.c).  The coordinates passed in
++ * are raw SDL window coordinates: handle_mousemotion and handle_mousebutton
++ * call this in place of their own proportional scaling, never on a value
++ * that is already scaled.
 + */
-+static void sdl2_owner_window_map_point(struct sdl2_console *scon,
-+                                        int *x, int *y)
++static void sdl2_window_to_surface(struct sdl2_console *scon,
++                                   int wx, int wy, int scr_w, int scr_h,
++                                   int *x, int *y)
 +{
-+    int ww, wh, gw, gh, vx = 0, vy = 0, vw, vh;
++    int gw = surface_width(scon->surface);
++    int gh = surface_height(scon->surface);
++    int vx = 0, vy = 0, vw = scr_w, vh = scr_h;
 +
-+    if (!sdl2_has_owner_window(scon) || !scon->real_window ||
-+        !scon->surface) {
++    if (scr_w <= 0 || scr_h <= 0) {
++        *x = 0;
++        *y = 0;
 +        return;
 +    }
-+    SDL_GetWindowSize(scon->real_window, &ww, &wh);
-+    gw = surface_width(scon->surface);
-+    gh = surface_height(scon->surface);
-+    if (ww <= 0 || wh <= 0 || gw <= 0 || gh <= 0) {
-+        return;
-+    }
-+    vw = ww;
-+    vh = wh;
-+    if (scon->opengl) {
-+        if ((int64_t)ww * gh < (int64_t)wh * gw) {
++#ifdef CONFIG_OPENGL
++    if (sdl2_has_owner_window(scon) && scon->opengl && !scon->scanout_mode &&
++        gw > 0 && gh > 0) {
++        if ((int64_t)scr_w * gh < (int64_t)scr_h * gw) {
 +            /* narrower than the guest: stripes above and below */
-+            vh = (int)((int64_t)ww * gh / gw);
-+            vy = (wh - vh) / 2;
++            vh = (int)((int64_t)scr_w * gh / gw);
++            vy = (scr_h - vh) / 2;
 +        } else {
-+            vw = (int)((int64_t)wh * gw / gh);
-+            vx = (ww - vw) / 2;
++            vw = (int)((int64_t)scr_h * gw / gh);
++            vx = (scr_w - vw) / 2;
 +        }
 +        if (vw <= 0 || vh <= 0) {
-+            return;
++            vx = 0;
++            vy = 0;
++            vw = scr_w;
++            vh = scr_h;
 +        }
 +    }
-+    *x = (int)((int64_t)(*x - vx) * gw / vw);
-+    *y = (int)((int64_t)(*y - vy) * gh / vh);
-+    *x = MIN(MAX(*x, 0), gw - 1);
-+    *y = MIN(MAX(*y, 0), gh - 1);
++#endif
++    *x = (int)((int64_t)(wx - vx) * gw / vw);
++    *y = (int)((int64_t)(wy - vy) * gh / vh);
++    if (vw != scr_w || vh != scr_h) {
++        *x = MIN(MAX(*x, 0), gw - 1);
++        *y = MIN(MAX(*y, 0), gh - 1);
++    }
 +}
 +
  static void sdl_send_mouse_event(struct sdl2_console *scon, int dx, int dy,
                                   int x, int y, int state)
  {
-@@ -502,6 +548,7 @@ static void sdl_send_mouse_event(struct sdl2_console *scon, int dx, int dy,
+@@ -694,8 +747,8 @@ static void handle_mousemotion(SDL_Event *ev)
      }
+     surf_w = surface_width(scon->surface);
+     surf_h = surface_height(scon->surface);
+-    x = (int64_t)ev->motion.x * surf_w / scr_w;
+-    y = (int64_t)ev->motion.y * surf_h / scr_h;
++    sdl2_window_to_surface(scon, ev->motion.x, ev->motion.y, scr_w, scr_h,
++                           &x, &y);
+     dx = (int64_t)ev->motion.xrel * surf_w / scr_w;
+     dy = (int64_t)ev->motion.yrel * surf_h / scr_h;
+     if (gui_grab || qemu_input_is_absolute(scon->dcl.con) || absolute_enabled) {
+@@ -716,8 +769,7 @@ static void handle_mousebutton(SDL_Event *ev)
  
-     if (qemu_input_is_absolute(scon->dcl.con)) {
-+        sdl2_owner_window_map_point(scon, &x, &y);
-         qemu_input_queue_abs(scon->dcl.con, INPUT_AXIS_X,
-                              x, 0, surface_width(scon->surface));
-         qemu_input_queue_abs(scon->dcl.con, INPUT_AXIS_Y,
-@@ -773,7 +820,13 @@ static void handle_windowevent(SDL_Event *ev)
+     bev = &ev->button;
+     SDL_GetWindowSize(scon->real_window, &scr_w, &scr_h);
+-    x = (int64_t)bev->x * surface_width(scon->surface) / scr_w;
+-    y = (int64_t)bev->y * surface_height(scon->surface) / scr_h;
++    sdl2_window_to_surface(scon, bev->x, bev->y, scr_w, scr_h, &x, &y);
+ 
+     if (!gui_grab && !qemu_input_is_absolute(scon->dcl.con)) {
+         if (ev->type == SDL_MOUSEBUTTONUP && bev->button == SDL_BUTTON_LEFT) {
+@@ -773,7 +825,13 @@ static void handle_windowevent(SDL_Event *ev)
  
      switch (ev->window.event) {
      case SDL_WINDOWEVENT_RESIZED:
@@ -108,4 +129,3 @@ index 3c46fc2..9a5283f 100644
                  .height = ev->window.data2,
 -- 
 2.47.0
-

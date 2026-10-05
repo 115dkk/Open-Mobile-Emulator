@@ -242,8 +242,17 @@ only when a release fixes them.
   `x-ome-display-window`; the window never follows the guest resolution on its
   own. Since 0.1.1 (patch 0006) the window's size is also never reported to the
   guest as its display size, so the resolution comes from the display settings
-  alone, and mouse coordinates are mapped through the letterboxed placement of
-  the guest image inside the window. A QEMU without these patches, such as a
+  alone. Mouse coordinates follow the way QEMU draws the guest: the virgl
+  scanout fills the whole window, so a window position maps proportionally.
+  0.1.1 to 0.1.3 mapped the already scaled coordinate a second time through a
+  letterbox that the virgl scanout does not have, which put the guest pointer
+  at about 0.6 of the host cursor position (fixed in the QEMU release
+  `qemu-v11.1.1-ome6`, `docs/evidence/M3/pointer-alignment.md`). The guest's
+  physical display takes the chosen resolution at start (`xres`, `yres` on the
+  virtio-gpu device); a resolution with a different aspect ratio applied while
+  the guest runs (landscape to portrait) is letterboxed inside the old physical
+  display until the next start, and the pointer is off by the stripes until
+  then. A QEMU without these patches, such as a
   distribution build, is not usable for hosting: the guest window would activate
   on click and freeze.
 - The product draws its own title bar (0.1.1). Windows 11's snap layout menu,

@@ -560,7 +560,20 @@ impl QemuInvocation {
                             None => format!("virtio-vga-gl,edid=on,refresh_rate={mhz}"),
                         }
                     }
-                    None => "virtio-vga-gl,edid=off".to_owned(),
+                    // Without a refresh rate the EDID stays off, but the chosen
+                    // resolution still becomes the guest's preferred mode (xres
+                    // and yres are the virtio-gpu display info, not EDID). The
+                    // guest's physical display then has the size of its logical
+                    // one, which the tablet's range is mapped to; a 1280x800
+                    // default under a `wm size 1920x1080` override letterboxed
+                    // the logical display and moved the guest pointer away from
+                    // the host cursor (docs/evidence/M3/pointer-alignment.md).
+                    None => match config.display_size() {
+                        Some((width, height)) => {
+                            format!("virtio-vga-gl,edid=off,xres={width},yres={height}")
+                        }
+                        None => "virtio-vga-gl,edid=off".to_owned(),
+                    },
                 },
             },
         );
@@ -1193,6 +1206,30 @@ mod tests {
                 ));
             }
         }
+    }
+
+    #[test]
+    fn display_size_without_refresh_sets_the_preferred_mode_with_edid_off() {
+        let config = GuestConfig::validate(RawGuestConfig {
+            display_size: Some((1920, 1080)),
+            ..RawGuestConfig::default()
+        })
+        .expect("display size config");
+        let paths = GuestPaths {
+            disk: "disk.qcow2".into(),
+            firmware_code: "code.fd".into(),
+            firmware_vars: "vars.fd".into(),
+            boot: BootMode::Disk,
+        };
+        let install = QemuInstall {
+            system_exe: "qemu-system-x86_64.exe".into(),
+        };
+        let args = QemuInvocation::for_boot(&config, &paths, &install)
+            .args()
+            .iter()
+            .map(|value| value.to_string_lossy().into_owned())
+            .collect::<Vec<_>>();
+        assert!(args.contains(&"virtio-vga-gl,edid=off,xres=1920,yres=1080".to_owned()));
     }
 
     #[test]
