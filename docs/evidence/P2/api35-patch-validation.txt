@@ -1,0 +1,7 @@
+All experiment patches reverse-applied
+CLEAN bionic a24e6f0fba0515fbde6eded5237ae542044c2ba3
+CLEAN device/generic/x86_64 866b096a447099b29a9703ae8867aceb3727ef55
+CLEAN external/arm-optimized-routines 1df26ce886fce15a197b1d3496d93741b6b88aa5
+CLEAN frameworks/libs/binary_translation f5f1c90b17d0c1df9e9be41534c653a3e74bfc64
+CLEAN frameworks/libs/native_bridge_support aa99591cb20cf7cd2eadab8d176abf7442c7b674
+FINAL_PATCH_SERIES_APPLY_REVERSE_IDEMPOTENCE=PASS

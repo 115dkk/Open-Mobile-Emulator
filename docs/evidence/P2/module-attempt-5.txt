@@ -1,0 +1,536 @@
+==> patch already applied: device/generic/x86_64/0001-skip-installer-download-for-module-probe.patch  (20:50:03)
+==> patch already applied: frameworks/libs/binary_translation/0001-api35-native-bridge-phony-dependencies.patch  (20:50:03)
+==> patch applied: frameworks/libs/binary_translation/0002-python311-generator-syntax.patch  (20:50:03)
+==> patch already applied: frameworks/libs/native_bridge_support/0001-api35-libm-proxy-and-guest.patch  (20:50:03)
+your 131072x1 screen size is bogus. expect trouble
+including device/generic/x86_64/vendorsetup.sh
+
+============================================
+PLATFORM_VERSION_CODENAME=REL
+PLATFORM_VERSION=15
+BLISS_BUILD_VERSION=Bliss-v18.4-x86_64-UNOFFICIAL-vanilla-20261005
+BLISS_CODENAME=Voyager
+BLISS_VERSION=18.4
+BLISS_DEVICE=x86_64
+BLISS_BUILDTYPE=UNOFFICIAL
+BLISS_BUILD_VARIANT=vanilla
+TARGET_PRODUCT=bliss_x86_64
+TARGET_BUILD_VARIANT=userdebug
+TARGET_ARCH=x86_64
+TARGET_ARCH_VARIANT=sandybridge
+TARGET_CPU_VARIANT=generic
+TARGET_2ND_ARCH=x86
+TARGET_2ND_ARCH_VARIANT=sandybridge
+TARGET_2ND_CPU_VARIANT=generic
+HOST_OS=linux
+HOST_OS_EXTRA=Linux-6.6.87.1-microsoft-standard-WSL2-x86_64-Ubuntu-22.04.5-LTS
+HOST_CROSS_OS=windows
+BUILD_ID=AP4A.250205.002
+OUT_DIR=out
+PRODUCT_SOONG_NAMESPACES=hardware/google/camera hardware/google/camera/devices/EmulatedCamera vendor/SystemUIClocks hardware/nxp
+============================================
+Running product configuration...
+============================================
+PLATFORM_VERSION_CODENAME=REL
+PLATFORM_VERSION=15
+BLISS_BUILD_VERSION=Bliss-v18.4-x86_64-UNOFFICIAL-vanilla-20261005
+BLISS_CODENAME=Voyager
+BLISS_VERSION=18.4
+BLISS_DEVICE=x86_64
+BLISS_BUILDTYPE=UNOFFICIAL
+BLISS_BUILD_VARIANT=vanilla
+TARGET_PRODUCT=bliss_x86_64
+TARGET_BUILD_VARIANT=userdebug
+TARGET_ARCH=x86_64
+TARGET_ARCH_VARIANT=sandybridge
+TARGET_CPU_VARIANT=generic
+TARGET_2ND_ARCH=x86
+TARGET_2ND_ARCH_VARIANT=sandybridge
+TARGET_2ND_CPU_VARIANT=generic
+HOST_OS=linux
+HOST_OS_EXTRA=Linux-6.6.87.1-microsoft-standard-WSL2-x86_64-Ubuntu-22.04.5-LTS
+HOST_CROSS_OS=windows
+BUILD_ID=AP4A.250205.002
+OUT_DIR=out
+PRODUCT_SOONG_NAMESPACES=hardware/google/camera hardware/google/camera/devices/EmulatedCamera vendor/SystemUIClocks hardware/nxp
+============================================
+Running globs...
+ninja: no work to do.
+$(shell date +%Y%m%d%H%M) was changed, regenerating...
+$(shell date +%Y%m%d%H%M) was changed, regenerating...
+[100% 1/1] initializing legacy Make module parser ...
+[  1% 2/119] including out/soong/installs-bliss_x86_64.mk ...
+[  2% 3/119] including out/soong/Android-bliss_x86_64.mk ...
+[  3% 4/119] including art/Android.mk ...
+[  4% 5/119] including bootable/aaropa/Android.mk ...
+[  5% 6/119] including bootable/deprecated-ota/updater/Android.mk ...
+[  5% 7/119] including bootable/recovery/Android.mk ...
+[  6% 8/119] including build/make/target/board/Android.mk ...
+[  7% 9/119] including build/make/target/product/gsi/Android.mk ...
+[  8% 10/119] including build/make/target/product/security/Android.mk ...
+[  9% 11/119] including build/make/tools/fs_config/Android.mk ...
+[ 10% 12/119] including device/generic/common/Android.mk ...
+[ 10% 13/119] including device/generic/goldfish/Android.mk ...
+[ 11% 14/119] including external/alsa-lib/android/Android.mk ...
+[ 12% 15/119] including external/alsa-utils/android/Android.mk ...
+[ 13% 16/119] including external/ant-wireless/ant_native/Android.mk ...
+[ 14% 17/119] including external/ant-wireless/ant_service/Android.mk ...
+[ 15% 18/119] including external/ant-wireless/antradio-library/Android.mk ...
+[ 15% 19/119] including external/chromium-webview/Android.mk ...
+[ 16% 20/119] including external/dmidecode/Android.mk ...
+[ 17% 21/119] including external/drm_gralloc/Android.mk ...
+[ 18% 22/119] including external/drmfb-composer/Android.mk ...
+[ 19% 23/119] including external/efibootmgr/src/Android.mk ...
+[ 20% 24/119] including external/efivar/src/Android.mk ...
+external/efivar/src/Android.mk:20: warning: BUILD_HOST_EXECUTABLE has been deprecated. Please convert to Soong.
+[ 21% 25/119] including external/evtest/Android.mk ...
+[ 21% 26/119] including external/ffmpeg/Android.mk ...
+[ 22% 27/119] including external/fmtlib/support/Android.mk ...
+[ 23% 28/119] including external/fmtlib11/support/Android.mk ...
+[ 24% 29/119] including external/gbm_gralloc/Android.mk ...
+[ 25% 30/119] including external/google-breakpad/Android.mk ...
+[ 26% 31/119] including external/googletest/googletest/Android.mk ...
+[ 26% 32/119] including external/hcitools/Android.mk ...
+[ 27% 33/119] including external/kernel-drivers-zenith/Android.mk ...
+[ 28% 34/119] including external/kernel-drivers/Android.mk ...
+[ 29% 35/119] including external/libaom/third_party/libwebm/Android.mk ...
+[ 30% 36/119] including external/libusb/Android.mk ...
+[ 31% 37/119] including external/libvpx/build/make/Android.mk ...
+[ 31% 38/119] including external/libvpx/test/android/Android.mk ...
+[ 32% 39/119] including external/libvpx/third_party/libwebm/Android.mk ...
+[ 33% 40/119] including external/libwebm/Android.mk ...
+[ 34% 41/119] including external/libwebsockets/Android.mk ...
+[ 35% 42/119] including external/mesa/android/Android.mk ...
+[ 36% 43/119] including external/minigbm/gbm_mesa_driver/Android.mk ...
+[ 36% 44/119] including external/s2tc/Android.mk ...
+[ 37% 45/119] including external/stagefright-plugins/Android.mk ...
+[ 38% 46/119] including external/thermal_daemon/Android.mk ...
+[ 39% 47/119] including external/tree/Android.mk ...
+[ 40% 48/119] including external/v86d/Android.mk ...
+[ 41% 49/119] including external/vulkan-validation-layers/Android.mk ...
+[ 42% 50/119] including external/walt/android/WALT/app/src/main/jni/Android.mk ...
+[ 42% 51/119] including external/webp/Android.mk ...
+[ 43% 52/119] including external/wpa_supplicant_8/Android.mk ...
+[ 44% 53/119] including glodroid/aospext/Android.mk ...
+[ 45% 54/119] including hardware/broadcom/libbt/Android.mk ...
+[ 46% 55/119] including hardware/broadcom/wlan/bcmdhd/Android.mk ...
+[ 47% 56/119] including hardware/google/graphics/common/Android.mk ...
+[ 47% 57/119] including hardware/google/graphics/gs101/libhwc2.1/Android.mk ...
+[ 48% 58/119] including hardware/google/graphics/gs201/libhwc2.1/Android.mk ...
+[ 49% 59/119] including hardware/google/graphics/zuma/libhwc2.1/Android.mk ...
+[ 50% 60/119] including hardware/google/graphics/zumapro/libhwc2.1/Android.mk ...
+[ 51% 61/119] including hardware/gps/Android.mk ...
+[ 52% 62/119] including hardware/intel/audio/Android.mk ...
+[ 52% 63/119] including hardware/intel/common/vaapi/Android.mk ...
+[ 53% 64/119] including hardware/intel/libsensors/Android.mk ...
+[ 54% 65/119] including hardware/interfaces/configstore/1.1/default/Android.mk ...
+[ 55% 66/119] including hardware/interfaces/graphics/composer/2.2/default/Android.mk ...
+[ 56% 67/119] including hardware/interfaces/soundtrigger/2.0/default/Android.mk ...
+[ 57% 68/119] including hardware/interfaces/soundtrigger/2.1/default/Android.mk ...
+[ 57% 69/119] including hardware/invensense/Android.mk ...
+[ 58% 70/119] including hardware/libaudio/Android.mk ...
+[ 59% 71/119] including hardware/libbt-vendor-intel/Android.mk ...
+[ 60% 72/119] including hardware/lineage/compat/interfaces/_backend/radio/config/Android.mk ...
+[ 61% 73/119] including hardware/qcom-caf/bt/Android.mk ...
+[ 62% 74/119] including hardware/qcom-caf/msm8953/Android.mk ...
+[ 63% 75/119] including hardware/qcom-caf/msm8996/Android.mk ...
+[ 63% 76/119] including hardware/qcom-caf/msm8998/Android.mk ...
+[ 64% 77/119] including hardware/qcom-caf/sdm660/Android.mk ...
+[ 65% 78/119] including hardware/qcom-caf/sdm845/Android.mk ...
+[ 66% 79/119] including hardware/qcom-caf/sm8150/Android.mk ...
+[ 67% 80/119] including hardware/qcom-caf/sm8250/Android.mk ...
+[ 68% 81/119] including hardware/qcom-caf/sm8350/Android.mk ...
+[ 68% 82/119] including hardware/qcom-caf/sm8450/Android.mk ...
+[ 69% 83/119] including hardware/qcom-caf/sm8550/Android.mk ...
+[ 70% 84/119] including hardware/qcom-caf/wlan/Android.mk ...
+[ 71% 85/119] including hardware/qcom/Android.mk ...
+[ 72% 86/119] including hardware/synaptics/wlan/synadhd/Android.mk ...
+[ 73% 87/119] including hardware/x86power/Android.mk ...
+[ 73% 88/119] including kernel/x86/common/Android.mk ...
+[ 74% 89/119] including kernel/x86/surface/Android.mk ...
+[ 75% 90/119] including kernel/x86/zenith/Android.mk ...
+[ 76% 91/119] including system/libhidl/vintfdata/Android.mk ...
+[ 77% 92/119] including system/sepolicy/Android.mk ...
+[ 78% 93/119] including tools/tradefederation/prebuilts/test_harness/Android.mk ...
+[ 78% 94/119] including vendor/agp-apps/Android.mk ...
+[ 79% 95/119] including vendor/bliss/charger/Android.mk ...
+[ 80% 96/119] including vendor/bliss/prebuilt/common/Android.mk ...
+[ 81% 97/119] including vendor/gms/Android.mk ...
+[ 82% 98/119] including vendor/overlays/accents/Android.mk ...
+[ 83% 99/119] including vendor/overlays/fonts/FontGoogleSansMediumOverlay/Android.mk ...
+[ 84% 100/119] including vendor/overlays/fonts/FontSimpleDaySourceOverlay/Android.mk ...
+[ 84% 101/119] including vendor/overlays/icons/Android.mk ...
+[ 85% 102/119] including vendor/overlays/primary/Android.mk ...
+[ 86% 103/119] including vendor/overlays/themes/qs/A11QSUI/Android.mk ...
+[ 87% 104/119] including vendor/overlays/themes/qs/QSCyberPunk/Android.mk ...
+[ 88% 105/119] including vendor/overlays/themes/qs/QSNeumorph/Android.mk ...
+[ 89% 106/119] including vendor/overlays/themes/qs/QSOutline/Android.mk ...
+[ 89% 107/119] including vendor/overlays/themes/qs/QSReflected/Android.mk ...
+[ 90% 108/119] including vendor/overlays/themes/qs/QSShaded/Android.mk ...
+[ 91% 109/119] including vendor/overlays/themes/qs/QSSurround/Android.mk ...
+[ 92% 110/119] including vendor/overlays/themes/qs/QSThin/Android.mk ...
+[ 93% 111/119] including vendor/overlays/themes/qs/QSTwoToneAccent/Android.mk ...
+[ 94% 112/119] including vendor/overlays/themes/qs/QSTwoToneAccentTrans/Android.mk ...
+[ 94% 113/119] including vendor/prebuilts/Android.mk ...
+[ 95% 114/119] including vendor/qcom/opensource/audio-hal/st-hal-ar/Android.mk ...
+[ 96% 115/119] including vendor/qcom/opensource/audio-hal/st-hal/Android.mk ...
+[ 97% 116/119] including vendor/qcom/opensource/power/Android.mk ...
+[ 98% 117/119] including out/soong/late-bliss_x86_64.mk ...
+[ 99% 118/119] finishing legacy Make module parsing ...
+[100% 119/119] writing legacy Make module rules ...
+out/soong/installs-bliss_x86_64.mk:226720: warning: overriding commands for target `out/target/product/x86_64/recovery/root/system/lib64/libncurses_recovery.so'
+out/soong/installs-bliss_x86_64.mk:226716: warning: ignoring old commands for target `out/target/product/x86_64/recovery/root/system/lib64/libncurses_recovery.so'
+out/soong/installs-bliss_x86_64.mk:388670: warning: overriding commands for target `out/target/product/x86_64/system/vendor/etc/init/android.hardware.graphics.composer@2.1-service.rc'
+out/soong/installs-bliss_x86_64.mk:388666: warning: ignoring old commands for target `out/target/product/x86_64/system/vendor/etc/init/android.hardware.graphics.composer@2.1-service.rc'
+build/make/core/soong_cc_rust_prebuilt.mk:193: warning: overriding commands for target `out/target/product/x86_64/symbols/recovery/root/system/lib64/libncurses_recovery.so'
+build/make/core/soong_cc_rust_prebuilt.mk:193: warning: ignoring old commands for target `out/target/product/x86_64/symbols/recovery/root/system/lib64/libncurses_recovery.so'
+No need to regenerate ninja file
+Starting ninja...
+20:52:14 AllowBuildBrokenUsesNetwork: true
+20:52:14 BuildBrokenUsesNetwork: true
+[ 26% 120/461] //frameworks/libs/binary_translation/device_arch_info:gen_reg_class_lib python library archive [linux_glibc]
+[ 26% 121/461] //frameworks/libs/binary_translation/device_arch_info:gen_reg_class_lib Precompile the python sources of gen_reg_class_lib [linux_glibc]
+[ 26% 122/461] //frameworks/libs/binary_translation/device_arch_info:gen_reg_class embedded python archive [linux_glibc]
+[ 26% 123/461] //frameworks/libs/binary_translation/assembler:libberberis_assembler_gen_public_headers_riscv64 generate
+[ 26% 124/461] //frameworks/libs/binary_translation/assembler:libberberis_assembler_gen_public_headers_using_riscv generate gen_assembler_riscv-using-inl.h
+[ 27% 125/461] //frameworks/libs/binary_translation/assembler:libberberis_assembler_gen_public_headers_using_riscv64 generate gen_assembler_riscv64-using-inl.h
+[ 27% 126/461] //frameworks/libs/binary_translation/assembler:libberberis_assembler_gen_public_headers_riscv32 generate
+[ 27% 127/461] //frameworks/libs/binary_translation/assembler:libberberis_assembler_gen_public_headers_using_riscv32 generate gen_assembler_riscv32-using-inl.h
+[ 27% 128/461] //frameworks/libs/binary_translation/intrinsics:libberberis_macro_assembler_gen_headers_riscv64_to_x86_64 generate
+[ 27% 129/461] //frameworks/libs/binary_translation/assembler:libberberis_assembler_gen_public_headers_using_x86_32 generate gen_assembler_x86_32-using-inl.h
+[ 28% 130/461] //frameworks/libs/binary_translation/assembler:libberberis_assembler_gen_public_headers_using_x86_common generate gen_assembler_x86_common-using-inl.h
+[ 28% 131/461] //frameworks/libs/binary_translation/assembler:libberberis_assembler_gen_public_headers_using_x86_64 generate gen_assembler_x86_64-using-inl.h
+[ 28% 132/461] //frameworks/libs/binary_translation/intrinsics:libberberis_verifier_assembler_gen_headers_x86_32 generate
+[ 28% 133/461] //frameworks/libs/binary_translation/device_arch_info:libberberis_device_arch_info_reg_class_gen_headers_riscv64 generate machine_reg_class-inl.h
+[ 29% 134/461] //frameworks/libs/binary_translation/device_arch_info:libberberis_device_arch_info_reg_class_gen_headers_x86_32 generate machine_reg_class-inl.h
+[ 29% 135/461] //frameworks/libs/binary_translation/device_arch_info:libberberis_device_arch_info_reg_class_gen_headers_x86_64 generate machine_reg_class-inl.h
+[ 29% 136/461] //frameworks/libs/binary_translation/assembler:libberberis_assembler_gen_public_headers_x86_32 generate
+[ 29% 137/461] //frameworks/libs/binary_translation/assembler:libberberis_assembler_gen_public_headers_x86_64 generate
+[ 29% 138/461] //frameworks/libs/binary_translation/intrinsics:libberberis_verifier_assembler_gen_headers_x86_64 generate
+[ 30% 139/461] //frameworks/libs/binary_translation/device_arch_info:libberberis_device_arch_info_device_insn_info_gen_headers_x86_64 generate
+[ 30% 140/461] //frameworks/libs/binary_translation/device_arch_info:libberberis_device_arch_info_device_insn_info_gen_headers_x86_32 generate
+[ 30% 141/461] //frameworks/libs/binary_translation/intrinsics:libberberis_intrinsics_gen_public_headers_riscv64_to_x86_64 generate
+[ 30% 142/461] //frameworks/libs/binary_translation/intrinsics:libberberis_macro_assembler_gen_intrinsics_headers_riscv64_to_x86_64 generate text_asm_intrinsics_process_bindings-inl.h
+[ 31% 143/461] //frameworks/libs/binary_translation/intrinsics:libberberis_text_assembler_gen_headers_x86_64 generate
+[ 31% 144/461] //frameworks/libs/binary_translation/base:libberberis_base clang++ large_mmap.cc [linux_glibc]
+[ 31% 145/461] //frameworks/libs/binary_translation/base:libberberis_base clang++ prctl_helpers.cc [linux_glibc]
+[ 31% 146/461] //frameworks/libs/binary_translation/base:libberberis_base clang++ mapped_file_fragment.cc [linux_glibc]
+[ 31% 147/461] //frameworks/libs/binary_translation/base:libberberis_base clang raw_syscall_x86_64.S [linux_glibc]
+[ 32% 148/461] //frameworks/libs/binary_translation/base:libberberis_base clang++ format_buffer.cc [linux_glibc]
+[ 32% 149/461] //frameworks/libs/binary_translation/base:libberberis_base clang++ memfd_backed_mmap.cc [linux_glibc]
+[ 32% 150/461] //frameworks/libs/binary_translation/backend:berberis_gen_lir Precompile the python sources of berberis_gen_lir [linux_glibc]
+[ 32% 151/461] //frameworks/libs/binary_translation/backend:gen_lir_lib Precompile the python sources of gen_lir_lib [linux_glibc]
+[ 32% 152/461] //frameworks/libs/binary_translation/jni:gen_jni_trampolines Precompile the python sources of gen_jni_trampolines [linux_glibc]
+[ 33% 153/461] //frameworks/libs/binary_translation/backend:berberis_gen_lir embedded python archive [linux_glibc]
+[ 33% 154/461] //frameworks/libs/binary_translation/jni:gen_jni_trampolines embedded python archive [linux_glibc]
+[ 33% 155/461] //frameworks/libs/binary_translation/backend:libberberis_backend_machine_ir_gen_headers_arm64_to_x86_64 raw genrule.sbox.textproto
+[ 33% 156/461] //frameworks/libs/binary_translation/intrinsics:libberberis_intrinsics_gen_inline_headers_riscv64_to_x86_64 raw genrule.sbox.textproto
+[ 34% 157/461] //frameworks/libs/binary_translation/jni:libberberis_jni_gen_headers raw genrule.sbox.textproto
+[ 34% 158/461] //frameworks/libs/binary_translation/base:libberberis_base clang++ mmap_posix.cc [linux_glibc]
+[ 34% 159/461] //frameworks/libs/binary_translation/base:libberberis_base clang++ maps_snapshot.cc [linux_glibc]
+[ 34% 160/461] //frameworks/libs/binary_translation/base:libberberis_base clang++ tracing.cc [linux_glibc]
+[ 34% 161/461] //frameworks/libs/binary_translation/base:libberberis_base static link libberberis_base.a [linux_glibc]
+[ 35% 162/461] //frameworks/libs/binary_translation/intrinsics:libberberis_macro_assembler_riscv64_to_x86_64 clang++ riscv64_to_x86_64/constants_pool.cc [linux_glibc]
+[ 35% 163/461] //frameworks/libs/binary_translation/intrinsics:libberberis_macro_assembler_riscv64_to_x86_64 static link libberberis_macro_assembler_riscv64_to_x86_64.a [linux_glibc]
+[ 35% 164/461] //frameworks/libs/binary_translation/jni:libberberis_jni_gen_headers generate jni_trampolines-inl.h
+[ 35% 165/461] //frameworks/libs/binary_translation/base:libberberis_base clang++ exec_region.cc
+[ 36% 166/461] //frameworks/libs/binary_translation/base:libberberis_base clang++ format_buffer.cc
+[ 36% 167/461] //frameworks/libs/binary_translation/backend:libberberis_backend_machine_ir_gen_headers_arm64_to_x86_64 generate
+[ 36% 168/461] //frameworks/libs/binary_translation/base:libberberis_base clang++ large_mmap.cc
+[ 36% 169/461] //frameworks/libs/binary_translation/base:libberberis_base clang++ config_globals.cc
+[ 36% 170/461] //frameworks/libs/binary_translation/assembler:libberberis_assembler clang++ machine_code.cc
+[ 37% 171/461] //frameworks/libs/binary_translation/base:libberberis_base clang++ maps_snapshot.cc
+[ 37% 172/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ common/lifetime_analysis.cc
+[ 37% 173/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ common/machine_ir_debug.cc
+[ 37% 174/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ common/machine_ir_opt.cc
+[ 37% 175/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ common/reg_alloc.cc
+[ 38% 176/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/code.cc
+[ 38% 177/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/code_debug.cc
+[ 38% 178/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/code_emit.cc
+[ 38% 179/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/code_gen.cc
+[ 39% 180/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/context_liveness_analyzer.cc
+[ 39% 181/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/liveness_analyzer.cc
+[ 39% 182/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/local_guest_context_optimizer.cc
+[ 39% 183/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/machine_ir_analysis.cc
+[ 39% 184/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/loop_guest_context_optimizer.cc
+[ 40% 185/461] //frameworks/libs/binary_translation/intrinsics:gen_riscv64_to_x86_64_intrinsics clang++ gen_text_asm_intrinsics.cc [linux_glibc]
+[ 40% 186/461] //frameworks/libs/binary_translation/intrinsics:gen_riscv64_to_x86_64_intrinsics link gen_riscv64_to_x86_64_intrinsics [linux_glibc]
+[ 40% 187/461] //frameworks/libs/binary_translation/intrinsics:libberberis_intrinsics_gen_inline_headers_riscv64_to_x86_64 generate intrinsics.h
+[ 40% 188/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/machine_ir_check.cc
+[ 40% 189/461] //frameworks/libs/binary_translation/base:libberberis_base clang++ mapped_file_fragment.cc
+[ 41% 190/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/insn_folding.cc
+[ 41% 191/461] //frameworks/libs/binary_translation/base:libberberis_base clang++ memfd_backed_mmap.cc
+[ 41% 192/461] //frameworks/libs/binary_translation/base:libberberis_base clang++ prctl_helpers.cc
+[ 41% 193/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/machine_ir_opt.cc
+[ 42% 194/461] //frameworks/libs/binary_translation/base:libberberis_base clang raw_syscall_x86_64.S
+[ 42% 195/461] //frameworks/libs/binary_translation/base:libberberis_base clang++ tracing.cc
+[ 42% 196/461] //frameworks/libs/binary_translation/base:libberberis_base clang++ mmap_posix.cc
+[ 42% 197/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/read_flags_optimizer.cc
+[ 42% 198/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/rename_copy_uses.cc
+[ 43% 199/461] //frameworks/libs/binary_translation/android_api/digitalis_extra_proxy:libberberis_digitalis_extra_proxy_arm64 clang++ named_trampoline_override.cc
+[ 43% 200/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/rename_vregs.cc
+[ 43% 201/461] //frameworks/libs/binary_translation/android_api/digitalis_extra_proxy:libberberis_digitalis_extra_proxy_arm64 clang++ digitalis_extra_libc_trampolines.cc
+[ 43% 202/461] //frameworks/libs/binary_translation/android_api/digitalis_extra_proxy:libberberis_digitalis_extra_proxy_arm64 clang++ digitalis_extra_libm_trampolines.cc
+[ 44% 203/461] //frameworks/libs/binary_translation/android_api/digitalis_extra_proxy:libberberis_digitalis_extra_proxy_arm64 clang++ digitalis_extra_libnativehelper_trampolines.cc
+[ 44% 204/461] //frameworks/libs/binary_translation/android_api/digitalis_extra_proxy:libberberis_digitalis_extra_proxy_arm64 clang++ digitalis_extra_libcamera2ndk_trampolines.cc
+[ 44% 205/461] //frameworks/libs/binary_translation/android_api/digitalis_extra_proxy:libberberis_digitalis_extra_proxy_arm64 clang++ digitalis_extra_libbinder_ndk_trampolines.cc
+[ 44% 206/461] //frameworks/libs/binary_translation/code_gen_lib:libberberis_code_gen_lib_arm64 clang++ arm64_to_x86_64/gen_wrapper.cc
+[ 44% 207/461] //frameworks/libs/binary_translation/code_gen_lib:libberberis_code_gen_lib_arm64 clang++ all_to_x86_64/code_gen_lib.cc
+[ 45% 208/461] //frameworks/libs/binary_translation/android_api/digitalis_extra_proxy:libberberis_digitalis_extra_proxy_arm64 clang++ digitalis_extra_libglesv2_trampolines.cc
+[ 45% 209/461] //frameworks/libs/binary_translation/android_api/digitalis_extra_proxy:libberberis_digitalis_extra_proxy_arm64 clang++ digitalis_extra_libnativewindow_trampolines.cc
+[ 45% 210/461] //frameworks/libs/binary_translation/android_api/digitalis_extra_proxy:libberberis_digitalis_extra_proxy_arm64 clang++ digitalis_extra_libegl_trampolines.cc
+[ 45% 211/461] //frameworks/libs/binary_translation/android_api/digitalis_extra_proxy:libberberis_digitalis_extra_proxy_arm64 clang++ digitalis_extra_libvulkan_trampolines.cc
+[ 45% 212/461] //frameworks/libs/binary_translation/android_api/digitalis_extra_proxy:libberberis_digitalis_extra_proxy_arm64 clang++ digitalis_extra_libwebviewchromium_plat_support_trampolines.cc
+[ 46% 213/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_elf_backed_exec_region clang++ exec_region_elf_backed.cc
+[ 46% 214/461] //frameworks/libs/binary_translation/guest_abi/arm64:libberberis_guest_abi_arm64 clang++ guest_call.cc
+[ 46% 215/461] //frameworks/libs/binary_translation/android_api/digitalis_extra_proxy:libberberis_digitalis_extra_proxy_arm64 clang++ digitalis_host_call_redirect.cc
+[ 46% 216/461] //frameworks/libs/binary_translation/guest_loader:libberberis_guest_loader_arm64 clang++ app_process.cc
+[ 47% 217/461] //frameworks/libs/binary_translation/guest_loader:libberberis_guest_loader_arm64 clang++ arm64/guest_loader_arch.cc
+[ 47% 218/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ guest_signal_action_arch.cc
+[ 47% 219/461] //frameworks/libs/binary_translation/guest_loader:libberberis_guest_loader_arm64 clang++ linker_debug.cc
+[ 47% 220/461] //frameworks/libs/binary_translation/guest_loader:libberberis_guest_loader_arm64 clang++ arm64/linker_callbacks_arch.cc
+[ 47% 221/461] //frameworks/libs/binary_translation/guest_loader:libberberis_guest_loader_arm64 clang++ linker_callbacks.cc
+[ 48% 222/461] //frameworks/libs/binary_translation/guest_loader:libberberis_guest_loader_arm64 clang++ guest_loader.cc
+[ 48% 223/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ guest_thread_pthread_create_arch.cc
+[ 48% 224/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ guest_signal_handling_arch.cc
+[ 48% 225/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ guest_signal_action.cc
+[ 49% 226/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ guest_signal_handling.cc
+[ 49% 227/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ guest_map_shadow.cc
+[ 49% 228/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ guest_thread.cc
+[ 49% 229/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ guest_thread_clone.cc
+[ 49% 230/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ guest_thread_key.cc
+[ 50% 231/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang unmap_and_exit_x86_64.S
+[ 50% 232/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ guest_thread_pthread_create.cc
+[ 50% 233/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ arm64/gen_syscall_numbers_x86_64.cc
+[ 50% 234/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ arm64/guest_setjmp.cc
+[ 50% 235/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ arm64/guest_signal.cc
+[ 51% 236/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ guest_thread_map.cc
+[ 51% 237/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ guest_thread_manager.cc
+[ 51% 238/461] //frameworks/libs/binary_translation/guest_state:libberberis_guest_state_arm64 clang++ guest_state.cc
+[ 51% 239/461] //frameworks/libs/binary_translation/guest_state:libberberis_guest_state_arm64 clang++ arm64/guest_state_arch.cc
+[ 52% 240/461] //frameworks/libs/binary_translation/guest_state:libberberis_guest_state_arm64 clang++ arm64/get_cpu_state.cc
+[ 52% 241/461] //frameworks/libs/binary_translation/interpreter:libberberis_interpreter_arm64 clang++ arm64/faulty_memory_accesses_x86_64.cc
+[ 52% 242/461] //frameworks/libs/binary_translation/intrinsics:libberberis_intrinsics_arm64 clang++ arm64_to_all/intrinsics.cc
+[ 52% 243/461] //frameworks/libs/binary_translation/instrument:libberberis_instrument clang++ instrument.cc
+[ 52% 244/461] //frameworks/libs/binary_translation/jni:libberberis_jni_arm64 clang++ guest_jni_trampolines.cc
+[ 53% 245/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ exec_emulation.cc
+[ 53% 246/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ fcntl_emulation.cc
+[ 53% 247/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ main_executable_real_path_emulation.cc
+[ 53% 248/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ unistd_emulation.cc
+[ 54% 249/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ sys_ptrace_emulation.cc
+[ 54% 250/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ arm64/syscall_emulation_arch.cc
+[ 54% 251/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ arm64/epoll_emulation.cc
+[ 54% 252/461] //frameworks/libs/binary_translation/interpreter:libberberis_interpreter_arm64 clang++ arm64/interpreter-main.cc
+[ 54% 253/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ arm64/open_emulation.cc
+[ 55% 254/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ arm64/syscall_emulation.cc
+[ 55% 255/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ sigevent_emulation.cc
+[ 55% 256/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ open_emulation.cc
+[ 55% 257/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ runtime_bridge.cc
+[ 55% 258/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ sys_prctl_emulation.cc
+[ 56% 259/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ sys_mman_emulation.cc
+[ 56% 260/461] //frameworks/libs/binary_translation/jni:libberberis_jni_arm64 clang++ jni_trampolines.cc
+[ 56% 261/461] //frameworks/libs/binary_translation/heavy_optimizer/arm64:libberberis_heavy_optimizer_arm64 clang++ heavy_optimize_region.cc
+[ 56% 262/461] //frameworks/libs/binary_translation/intrinsics:libberberis_macro_assembler_riscv64_to_x86_64 clang++ riscv64_to_x86_64/constants_pool.cc
+[ 57% 263/461] //frameworks/libs/binary_translation/native_bridge:libberberis_native_bridge_arm64 clang++ arm64/native_bridge.cc
+[ 57% 264/461] //frameworks/libs/binary_translation/native_activity:libberberis_native_activity_arm64 clang++ native_activity_wrapper.cc
+[ 57% 265/461] //frameworks/libs/binary_translation/native_bridge:libberberis_native_bridge_arm64 clang++ arm64/digitalis_app_support.cc
+[ 57% 266/461] //frameworks/libs/binary_translation/proxy_loader:libberberis_proxy_loader_arm64 clang++ proxy_loader.cc
+[ 57% 267/461] //frameworks/libs/binary_translation/native_bridge:libberberis_native_bridge_arm64 clang++ native_bridge.cc
+[ 58% 268/461] //frameworks/libs/binary_translation/proxy_loader:libberberis_proxy_loader_arm64 clang++ proxy_library_builder.cc
+[ 58% 269/461] //frameworks/libs/binary_translation/lite_translator:libberberis_lite_translator_arm64_to_x86_64 clang++ arm64_to_x86_64/lite_translator.cc
+[ 58% 270/461] //frameworks/libs/binary_translation/runtime:libberberis_runtime clang++ berberis.cc
+[ 58% 271/461] //frameworks/libs/binary_translation/runtime:libberberis_runtime clang++ execute_guest_call.cc
+[ 59% 272/461] //frameworks/libs/binary_translation/runtime/arm64:libberberis_runtime_arm64 clang++ init_guest_arch.cc
+[ 59% 273/461] //frameworks/libs/binary_translation/runtime:libberberis_runtime clang++ execute_guest.cc
+[ 59% 274/461] //frameworks/libs/binary_translation/runtime:libberberis_runtime clang++ runtime_library.cc
+[ 59% 275/461] //frameworks/libs/binary_translation/runtime/arm64:libberberis_runtime_arm64 clang++ run_guest_call.cc
+[ 59% 276/461] //frameworks/libs/binary_translation/runtime/arm64:libberberis_runtime_arm64 clang++ runtime_library_x86_64.cc
+[ 60% 277/461] //frameworks/libs/binary_translation/runtime:libberberis_runtime clang++ translator.cc
+[ 60% 278/461] //frameworks/libs/binary_translation/runtime/arm64:libberberis_runtime_arm64 clang++ translator.cc
+[ 60% 279/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ crash_reporter.cc
+[ 60% 280/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ code_pool.cc
+[ 60% 281/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ exec_region_anonymous.cc
+[ 61% 282/461] //frameworks/libs/binary_translation/runtime/arm64:libberberis_runtime_arm64 clang++ translator_x86_64.cc
+[ 61% 283/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ host_function_wrapper_impl.cc
+[ 61% 284/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ guest_function_wrapper_impl.cc
+[ 61% 285/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ guest_code_region.cc
+[ 62% 286/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ platform.cc
+[ 62% 287/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ host_entries.cc
+[ 62% 288/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ known_guest_function_wrapper.cc
+[ 62% 289/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ profiler_interface.cc
+[ 62% 290/461] //frameworks/libs/binary_translation/lite_translator:libberberis_lite_translator_arm64_to_x86_64 clang++ arm64_to_x86_64/lite_translate_region.cc
+[ 63% 291/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ signal_queue.cc
+[ 63% 292/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives_arm64 clang++ checks_arm64.cc
+[ 63% 293/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives_arm64 clang++ memory_region_reservation.cc
+[ 63% 294/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ recovery_code.cc
+[ 63% 295/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives_arm64 clang++ interpret_helpers_arm64.cc
+[ 64% 296/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives_arm64 clang++ virtual_guest_call_frame_arm64.cc
+[ 64% 297/461] //frameworks/libs/binary_translation/assembler:libberberis_assembler static link libberberis_assembler.a
+[ 64% 298/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ virtual_guest_call_frame.cc
+[ 64% 299/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 static link libberberis_backend_arm64_to_x86_64.a
+[ 65% 300/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ translation_cache.cc
+[ 65% 301/461] //frameworks/libs/binary_translation/tiny_loader:libberberis_tinyloader clang++ tiny_loader.cc
+[ 65% 302/461] //frameworks/libs/binary_translation/tiny_loader:libberberis_tinyloader clang++ tiny_symbol_table.cc
+[ 65% 303/461] //frameworks/libs/binary_translation/assembler:libberberis_assembler clang++ machine_code.cc [linux_glibc]
+[ 65% 304/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ common/machine_ir_debug.cc [linux_glibc]
+[ 66% 305/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ common/lifetime_analysis.cc [linux_glibc]
+[ 66% 306/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ common/machine_ir_opt.cc [linux_glibc]
+[ 66% 307/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ common/reg_alloc.cc [linux_glibc]
+[ 66% 308/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/code.cc [linux_glibc]
+[ 67% 309/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/code_debug.cc [linux_glibc]
+[ 67% 310/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/code_emit.cc [linux_glibc]
+[ 67% 311/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/code_gen.cc [linux_glibc]
+[ 67% 312/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/context_liveness_analyzer.cc [linux_glibc]
+[ 67% 313/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/liveness_analyzer.cc [linux_glibc]
+[ 68% 314/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/local_guest_context_optimizer.cc [linux_glibc]
+[ 68% 315/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/machine_ir_analysis.cc [linux_glibc]
+[ 68% 316/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/loop_guest_context_optimizer.cc [linux_glibc]
+[ 68% 317/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/machine_ir_check.cc [linux_glibc]
+[ 68% 318/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/machine_ir_opt.cc [linux_glibc]
+[ 69% 319/461] //frameworks/libs/binary_translation/base:libberberis_base static link libberberis_base.a
+[ 69% 320/461] //frameworks/libs/binary_translation/code_gen_lib:libberberis_code_gen_lib_arm64 static link libberberis_code_gen_lib_arm64.a
+[ 69% 321/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/read_flags_optimizer.cc [linux_glibc]
+[ 69% 322/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/rename_copy_uses.cc [linux_glibc]
+[ 70% 323/461] //frameworks/libs/binary_translation/android_api/digitalis_extra_proxy:libberberis_digitalis_extra_proxy_arm64 static link libberberis_digitalis_extra_proxy_arm64.a
+[ 70% 324/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_elf_backed_exec_region static link libberberis_elf_backed_exec_region.a
+[ 70% 325/461] //frameworks/libs/binary_translation/guest_abi/arm64:libberberis_guest_abi_arm64 static link libberberis_guest_abi_arm64.a
+[ 70% 326/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/insn_folding.cc [linux_glibc]
+[ 70% 327/461] //frameworks/libs/binary_translation/guest_loader:libberberis_guest_loader_arm64 static link libberberis_guest_loader_arm64.a
+[ 71% 328/461] //frameworks/libs/binary_translation/guest_abi/arm64:libberberis_guest_abi_arm64 clang++ guest_call.cc [linux_glibc]
+[ 71% 329/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 clang++ x86_64/rename_vregs.cc [linux_glibc]
+[ 71% 330/461] //frameworks/libs/binary_translation/guest_loader:libberberis_guest_loader_arm64 clang++ app_process.cc [linux_glibc]
+[ 71% 331/461] //frameworks/libs/binary_translation/code_gen_lib:libberberis_code_gen_lib_arm64 clang++ all_to_x86_64/code_gen_lib.cc [linux_glibc]
+[ 72% 332/461] //frameworks/libs/binary_translation/guest_loader:libberberis_guest_loader_arm64 clang++ linker_debug.cc [linux_glibc]
+[ 72% 333/461] //frameworks/libs/binary_translation/code_gen_lib:libberberis_code_gen_lib_arm64 clang++ arm64_to_x86_64/gen_wrapper.cc [linux_glibc]
+[ 72% 334/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 static link libberberis_guest_os_primitives_arm64.a
+[ 72% 335/461] //frameworks/libs/binary_translation/guest_loader:libberberis_guest_loader_arm64 clang++ linker_callbacks.cc [linux_glibc]
+[ 72% 336/461] //frameworks/libs/binary_translation/guest_loader:libberberis_guest_loader_arm64 clang++ guest_loader.cc [linux_glibc]
+[ 73% 337/461] //frameworks/libs/binary_translation/heavy_optimizer/arm64:libberberis_heavy_optimizer_arm64 clang++ frontend.cc
+[ 73% 338/461] //frameworks/libs/binary_translation/guest_loader:libberberis_guest_loader_arm64 clang++ arm64/guest_loader_arch.cc [linux_glibc]
+[ 73% 339/461] //frameworks/libs/binary_translation/guest_loader:libberberis_guest_loader_arm64 clang++ arm64/linker_callbacks_arch.cc [linux_glibc]
+[ 73% 340/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ guest_signal_action_arch.cc [linux_glibc]
+[ 73% 341/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ guest_thread_pthread_create_arch.cc [linux_glibc]
+[ 74% 342/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ guest_signal_handling_arch.cc [linux_glibc]
+[ 74% 343/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ guest_signal_action.cc [linux_glibc]
+[ 74% 344/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ guest_map_shadow.cc [linux_glibc]
+[ 74% 345/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ guest_thread.cc [linux_glibc]
+[ 75% 346/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ guest_signal_handling.cc [linux_glibc]
+[ 75% 347/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ guest_thread_clone.cc [linux_glibc]
+[ 75% 348/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ guest_thread_key.cc [linux_glibc]
+[ 75% 349/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang unmap_and_exit_x86_64.S [linux_glibc]
+[ 75% 350/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ arm64/gen_syscall_numbers_x86_64.cc [linux_glibc]
+[ 76% 351/461] //frameworks/libs/binary_translation/guest_state:libberberis_guest_state_arm64 static link libberberis_guest_state_arm64.a
+[ 76% 352/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ guest_thread_pthread_create.cc [linux_glibc]
+[ 76% 353/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ arm64/guest_setjmp.cc [linux_glibc]
+[ 76% 354/461] //frameworks/libs/binary_translation/guest_state:libberberis_guest_state_arm64 clang++ guest_state.cc [linux_glibc]
+[ 77% 355/461] //frameworks/libs/binary_translation/heavy_optimizer/arm64:libberberis_heavy_optimizer_arm64 static link libberberis_heavy_optimizer_arm64.a
+[ 77% 356/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ arm64/guest_signal.cc [linux_glibc]
+[ 77% 357/461] //frameworks/libs/binary_translation/guest_state:libberberis_guest_state_arm64 clang++ arm64/guest_state_arch.cc [linux_glibc]
+[ 77% 358/461] //frameworks/libs/binary_translation/instrument:libberberis_instrument static link libberberis_instrument.a
+[ 77% 359/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ guest_thread_manager.cc [linux_glibc]
+[ 78% 360/461] //frameworks/libs/binary_translation/interpreter:libberberis_interpreter_arm64 static link libberberis_interpreter_arm64.a
+[ 78% 361/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 clang++ guest_thread_map.cc [linux_glibc]
+[ 78% 362/461] //frameworks/libs/binary_translation/guest_state:libberberis_guest_state_arm64 clang++ arm64/get_cpu_state.cc [linux_glibc]
+[ 78% 363/461] //frameworks/libs/binary_translation/intrinsics:libberberis_intrinsics static link libberberis_intrinsics.a
+[ 78% 364/461] //frameworks/libs/binary_translation/intrinsics:libberberis_intrinsics_arm64 static link libberberis_intrinsics_arm64.a
+[ 79% 365/461] //frameworks/libs/binary_translation/interpreter:libberberis_interpreter_arm64 clang++ arm64/faulty_memory_accesses_x86_64.cc [linux_glibc]
+[ 79% 366/461] //frameworks/libs/binary_translation/jni:libberberis_jni_arm64 static link libberberis_jni_arm64.a
+[ 79% 367/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 static link libberberis_kernel_api_arm64.a
+[ 79% 368/461] //frameworks/libs/binary_translation/intrinsics:libberberis_intrinsics_arm64 clang++ arm64_to_all/intrinsics.cc [linux_glibc]
+[ 80% 369/461] //frameworks/libs/binary_translation/instrument:libberberis_instrument clang++ instrument.cc [linux_glibc]
+[ 80% 370/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ main_executable_real_path_emulation.cc [linux_glibc]
+[ 80% 371/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ exec_emulation.cc [linux_glibc]
+[ 80% 372/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ fcntl_emulation.cc [linux_glibc]
+[ 80% 373/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ unistd_emulation.cc [linux_glibc]
+[ 81% 374/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ arm64/syscall_emulation_arch.cc [linux_glibc]
+[ 81% 375/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ sys_ptrace_emulation.cc [linux_glibc]
+[ 81% 376/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ arm64/epoll_emulation.cc [linux_glibc]
+[ 81% 377/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ arm64/syscall_emulation.cc [linux_glibc]
+[ 81% 378/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ arm64/open_emulation.cc [linux_glibc]
+[ 82% 379/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ sigevent_emulation.cc [linux_glibc]
+[ 82% 380/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ runtime_bridge.cc [linux_glibc]
+[ 82% 381/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ open_emulation.cc [linux_glibc]
+[ 82% 382/461] //frameworks/libs/binary_translation/lite_translator:libberberis_lite_translator_arm64_to_x86_64 static link libberberis_lite_translator_arm64_to_x86_64.a
+[ 83% 383/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ sys_prctl_emulation.cc [linux_glibc]
+[ 83% 384/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 clang++ sys_mman_emulation.cc [linux_glibc]
+[ 83% 385/461] //frameworks/libs/binary_translation/intrinsics:libberberis_macro_assembler_riscv64_to_x86_64 static link libberberis_macro_assembler_riscv64_to_x86_64.a
+[ 83% 386/461] //frameworks/libs/binary_translation/native_activity:libberberis_native_activity_arm64 static link libberberis_native_activity_arm64.a
+[ 83% 387/461] //frameworks/libs/binary_translation/native_bridge:libberberis_native_bridge_arm64 static link libberberis_native_bridge_arm64.a
+[ 84% 388/461] //frameworks/libs/binary_translation/proxy_loader:libberberis_proxy_loader_arm64 static link libberberis_proxy_loader_arm64.a
+[ 84% 389/461] //frameworks/libs/binary_translation/interpreter:libberberis_interpreter_arm64 clang++ arm64/interpreter-main.cc [linux_glibc]
+[ 84% 390/461] //frameworks/libs/binary_translation/proxy_loader:libberberis_proxy_loader_arm64 clang++ proxy_loader.cc [linux_glibc]
+[ 84% 391/461] //frameworks/libs/binary_translation/proxy_loader:libberberis_proxy_loader_arm64 clang++ proxy_library_builder.cc [linux_glibc]
+[ 85% 392/461] //frameworks/libs/binary_translation/heavy_optimizer/arm64:libberberis_heavy_optimizer_arm64 clang++ heavy_optimize_region.cc [linux_glibc]
+[ 85% 393/461] //frameworks/libs/binary_translation/runtime:libberberis_runtime clang++ berberis.cc [linux_glibc]
+[ 85% 394/461] //frameworks/libs/binary_translation/runtime:libberberis_runtime clang++ execute_guest_call.cc [linux_glibc]
+[ 85% 395/461] //frameworks/libs/binary_translation/runtime:libberberis_runtime clang++ execute_guest.cc [linux_glibc]
+[ 85% 396/461] //frameworks/libs/binary_translation/runtime/arm64:libberberis_runtime_arm64 static link libberberis_runtime_arm64.a
+[ 86% 397/461] //frameworks/libs/binary_translation/runtime/arm64:libberberis_runtime_arm64 clang++ init_guest_arch.cc [linux_glibc]
+[ 86% 398/461] //frameworks/libs/binary_translation/lite_translator:libberberis_lite_translator_arm64_to_x86_64 clang++ arm64_to_x86_64/lite_translator.cc [linux_glibc]
+[ 86% 399/461] //frameworks/libs/binary_translation/runtime:libberberis_runtime clang++ runtime_library.cc [linux_glibc]
+[ 86% 400/461] //frameworks/libs/binary_translation/runtime/arm64:libberberis_runtime_arm64 clang++ run_guest_call.cc [linux_glibc]
+[ 86% 401/461] //frameworks/libs/binary_translation/runtime:libberberis_runtime clang++ translator.cc [linux_glibc]
+[ 87% 402/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives static link libberberis_runtime_primitives.a
+[ 87% 403/461] //frameworks/libs/binary_translation/runtime/arm64:libberberis_runtime_arm64 clang++ runtime_library_x86_64.cc [linux_glibc]
+[ 87% 404/461] //frameworks/libs/binary_translation/runtime/arm64:libberberis_runtime_arm64 clang++ translator.cc [linux_glibc]
+[ 87% 405/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ crash_reporter.cc [linux_glibc]
+[ 88% 406/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ code_pool.cc [linux_glibc]
+[ 88% 407/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ exec_region_anonymous.cc [linux_glibc]
+[ 88% 408/461] //frameworks/libs/binary_translation/runtime/arm64:libberberis_runtime_arm64 clang++ translator_x86_64.cc [linux_glibc]
+[ 88% 409/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ guest_code_region.cc [linux_glibc]
+[ 88% 410/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ host_function_wrapper_impl.cc [linux_glibc]
+[ 89% 411/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ guest_function_wrapper_impl.cc [linux_glibc]
+[ 89% 412/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ platform.cc [linux_glibc]
+[ 89% 413/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ host_entries.cc [linux_glibc]
+[ 89% 414/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ known_guest_function_wrapper.cc [linux_glibc]
+[ 90% 415/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ signal_queue.cc [linux_glibc]
+[ 90% 416/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ profiler_interface.cc [linux_glibc]
+[ 90% 417/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives_arm64 static link libberberis_runtime_primitives_arm64.a
+[ 90% 418/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives_arm64 clang++ memory_region_reservation.cc [linux_glibc]
+[ 90% 419/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives_arm64 clang++ checks_arm64.cc [linux_glibc]
+[ 91% 420/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ recovery_code.cc [linux_glibc]
+[ 91% 421/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives_arm64 clang++ virtual_guest_call_frame_arm64.cc [linux_glibc]
+[ 91% 422/461] //frameworks/libs/binary_translation/tiny_loader:libberberis_tinyloader static link libberberis_tinyloader.a
+[ 91% 423/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ virtual_guest_call_frame.cc [linux_glibc]
+[ 91% 424/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives_arm64 clang++ interpret_helpers_arm64.cc [linux_glibc]
+[ 92% 425/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives clang++ translation_cache.cc [linux_glibc]
+[ 92% 426/461] //frameworks/libs/binary_translation/assembler:libberberis_assembler static link libberberis_assembler.a [linux_glibc]
+[ 92% 427/461] //frameworks/libs/binary_translation/backend:libberberis_backend_arm64_to_x86_64 static link libberberis_backend_arm64_to_x86_64.a [linux_glibc]
+[ 92% 428/461] //frameworks/libs/binary_translation/code_gen_lib:libberberis_code_gen_lib_arm64 static link libberberis_code_gen_lib_arm64.a [linux_glibc]
+[ 93% 429/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_elf_backed_exec_region static link libberberis_elf_backed_exec_region.a [linux_glibc]
+[ 93% 430/461] //frameworks/libs/binary_translation/guest_abi/arm64:libberberis_guest_abi_arm64 static link libberberis_guest_abi_arm64.a [linux_glibc]
+[ 93% 431/461] //frameworks/libs/binary_translation/guest_loader:libberberis_guest_loader_arm64 static link libberberis_guest_loader_arm64.a [linux_glibc]
+[ 93% 432/461] //frameworks/libs/binary_translation/guest_os_primitives:libberberis_guest_os_primitives_arm64 static link libberberis_guest_os_primitives_arm64.a [linux_glibc]
+[ 93% 433/461] //frameworks/libs/binary_translation/guest_state:libberberis_guest_state_arm64 static link libberberis_guest_state_arm64.a [linux_glibc]
+[ 94% 434/461] //frameworks/libs/binary_translation/instrument:libberberis_instrument static link libberberis_instrument.a [linux_glibc]
+[ 94% 435/461] //frameworks/libs/binary_translation/interpreter:libberberis_interpreter_arm64 static link libberberis_interpreter_arm64.a [linux_glibc]
+[ 94% 436/461] //frameworks/libs/binary_translation/intrinsics:libberberis_intrinsics static link libberberis_intrinsics.a [linux_glibc]
+[ 94% 437/461] //frameworks/libs/binary_translation/intrinsics:libberberis_intrinsics_arm64 static link libberberis_intrinsics_arm64.a [linux_glibc]
+[ 95% 438/461] //frameworks/libs/binary_translation/kernel_api:libberberis_kernel_api_arm64 static link libberberis_kernel_api_arm64.a [linux_glibc]
+[ 95% 439/461] //frameworks/libs/binary_translation/proxy_loader:libberberis_proxy_loader_arm64 static link libberberis_proxy_loader_arm64.a [linux_glibc]
+[ 95% 440/461] //frameworks/libs/binary_translation/runtime/arm64:libberberis_runtime_arm64 static link libberberis_runtime_arm64.a [linux_glibc]
+[ 95% 441/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives static link libberberis_runtime_primitives.a [linux_glibc]
+[ 95% 442/461] //frameworks/libs/binary_translation/runtime_primitives:libberberis_runtime_primitives_arm64 static link libberberis_runtime_primitives_arm64.a [linux_glibc]
+[ 96% 443/461] //frameworks/libs/binary_translation/tiny_loader:libberberis_tinyloader clang++ tiny_symbol_table.cc [linux_glibc]
+[ 96% 444/461] //frameworks/libs/binary_translation/tiny_loader:libberberis_tinyloader clang++ tiny_loader.cc [linux_glibc]
+[ 96% 445/461] //frameworks/libs/binary_translation/tiny_loader:libberberis_tinyloader static link libberberis_tinyloader.a [linux_glibc]
+[ 96% 446/461] //frameworks/libs/binary_translation/lite_translator:libberberis_lite_translator_arm64_to_x86_64 clang++ arm64_to_x86_64/lite_translate_region.cc [linux_glibc]
+[ 96% 447/461] //frameworks/libs/binary_translation/lite_translator:libberberis_lite_translator_arm64_to_x86_64 static link libberberis_lite_translator_arm64_to_x86_64.a [linux_glibc]
+[ 97% 448/461] //frameworks/libs/binary_translation:libberberis_arm64 link libberberis_arm64.so
+[ 97% 449/461] Copy symbols with mapping: out/target/product/x86_64/symbols/system/lib64/libberberis_arm64.so
+[ 97% 450/461] //frameworks/libs/binary_translation:libberberis_arm64 strip libberberis_arm64.so
+[ 97% 451/461] target Prebuilt: libberberis_arm64 (out/target/product/x86_64/obj/SHARED_LIBRARIES/libberberis_arm64_intermediates/libberberis_arm64.so)
+[ 98% 452/461] Install: out/target/product/x86_64/system/lib64/libberberis_arm64.so
+[ 98% 453/461] //frameworks/libs/binary_translation:libberberis_arm64 generate toc libberberis_arm64.so
+[ 98% 454/461] Copy: out/target/product/x86_64/obj/SHARED_LIBRARIES/libberberis_arm64_intermediates/libberberis_arm64.so.toc
+[ 98% 455/461] //frameworks/libs/binary_translation/heavy_optimizer/arm64:libberberis_heavy_optimizer_arm64 clang++ frontend.cc [linux_glibc]
+[ 98% 456/461] //frameworks/libs/binary_translation/heavy_optimizer/arm64:libberberis_heavy_optimizer_arm64 static link libberberis_heavy_optimizer_arm64.a [linux_glibc]
+[ 99% 457/461] //frameworks/libs/binary_translation:libberberis_arm64 link libberberis_arm64.so [linux_glibc]
+[ 99% 458/461] host Prebuilt: libberberis_arm64 (out/host/linux-x86/obj/SHARED_LIBRARIES/libberberis_arm64_intermediates/libberberis_arm64.so)
+[ 99% 459/461] Install: out/host/linux-x86/lib64/libberberis_arm64.so
+[ 99% 460/461] //frameworks/libs/binary_translation:libberberis_arm64 generate toc libberberis_arm64.so [linux_glibc]
+[100% 461/461] Copy: out/host/linux-x86/obj/SHARED_LIBRARIES/libberberis_arm64_intermediates/libberberis_arm64.so.toc
+
+[0;32m#### build completed successfully (03:20 (mm:ss)) ####[00m
+
+OME_EXIT=0 ELAPSED_SECONDS=206

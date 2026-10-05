@@ -9,6 +9,7 @@
 #   build-image.sh sync       repo sync
 #   build-image.sh snapshot   write guest/build/manifest/ome.xml (every project at its commit)
 #   build-image.sh aaropa     fetch the pinned installer-environment assets and check their sums
+#   build-image.sh modules    experimental Digitalis bridge-only build (OME_TRANSLATOR=digitalis)
 #   build-image.sh build      lunch + make iso_img with the blob flags unset
 #   build-image.sh collect    copy the ISO, its sha256, build.prop and logs to $OME_BUILD_ROOT/dist
 #   build-image.sh all        init sync snapshot aaropa build collect
@@ -23,6 +24,12 @@ OME_REPO_ROOT=${OME_REPO_ROOT:-$(cd "$HERE/../.." && pwd)}
 OME_BUILD_ROOT=${OME_BUILD_ROOT:-$HOME/bliss}
 # GitHub answers HTTP 429 to a 16-way sync; 6 jobs with retries stayed under its limit on 2026-10-01.
 OME_JOBS=${OME_JOBS:-6}
+# Digitalis remains an opt-in module probe until the API 35 port passes.
+OME_TRANSLATOR=${OME_TRANSLATOR:-none}
+case "$OME_TRANSLATOR" in
+    none|digitalis) ;;
+    *) echo "unsupported OME_TRANSLATOR: $OME_TRANSLATOR" >&2; exit 2 ;;
+esac
 # shellcheck source=pins.env
 source "$HERE/pins.env"
 
@@ -138,6 +145,9 @@ write_vendor_extra() {
     cat > "$mk" <<EOF
 $marker
 PRODUCT_SYSTEM_PROPERTIES += persist.sys.usb.config=adb
+ifeq (\$(OME_TRANSLATOR),digitalis)
+\$(call inherit-product, frameworks/libs/binary_translation/enable_arm64_to_x86_64.mk)
+endif
 EOF
 }
 
@@ -148,9 +158,10 @@ EOF
 # a locked retail device's values at every boot (CLAUDE.md D8, R7;
 # docs/evidence/P3/dod-a15-20261003.md section 6).
 apply_ome_patches() {
+    local patch_root=${1:-$HERE/patches}
     local patch project
     while IFS= read -r patch; do
-        project=$(dirname "${patch#"$HERE/patches/"}")
+        project=$(dirname "${patch#"$patch_root/"}")
         if git -C "$OME_BUILD_ROOT/$project" apply --reverse --check "$patch" 2>/dev/null; then
             say "patch already applied: $project/$(basename "$patch")"
         elif git -C "$OME_BUILD_ROOT/$project" apply --check "$patch"; then
@@ -160,7 +171,13 @@ apply_ome_patches() {
             echo "patch does not apply: $patch" >&2
             exit 2
         fi
-    done < <(find "$HERE/patches" -name '*.patch' | sort)
+    done < <(find "$patch_root" -name '*.patch' -print | {
+        if [ "$patch_root" = "$HERE/patches" ]; then
+            grep -v -F "$HERE/patches/digitalis/"
+        else
+            cat
+        fi
+    } | sort)
 }
 
 # The kernel rule (device/generic/common/build/tasks/kernel.mk) runs copy-firmware.sh into
@@ -176,7 +193,51 @@ reset_kernel_firmware() {
     fi
 }
 
+# A local manifest affects every build in the shared tree. Never silently build a
+# default image from the experimental checkout, nor collect it as the normal ISO.
+refuse_experimental_image() {
+    if [ "$OME_TRANSLATOR" != none ] || [ -f "$OME_BUILD_ROOT/.repo/local_manifests/ome-digitalis.xml" ] ||
+        [ -f "$OME_BUILD_ROOT/out/target/product/x86_64/system/lib64/libberberis_arm64.so" ]; then
+        echo "Digitalis API 35 is a module probe only; restore the base manifest and use clean product output before image operations" >&2
+        exit 2
+    fi
+}
+
+do_modules() {
+    refuse_blob_flags
+    [ "$OME_TRANSLATOR" = digitalis ] || { echo "modules requires OME_TRANSLATOR=digitalis" >&2; exit 2; }
+    local project="$OME_BUILD_ROOT/frameworks/libs/binary_translation"
+    local revision=f5f1c90b17d0c1df9e9be41534c653a3e74bfc64
+    [ "$(git -C "$project" rev-parse HEAD)" = "$revision" ] || {
+        echo "install manifest/ome-digitalis.xml and sync the pinned translator first" >&2; exit 2;
+    }
+    apply_ome_patches "$HERE/patches/digitalis"
+    cd "$OME_BUILD_ROOT"
+    write_vendor_extra
+    export OME_TRANSLATOR BLISS_BUILD_VARIANT LC_ALL=C.UTF-8
+    # Module builds need no ISO installer environment. The opt-in vendor-hook
+    # patch prevents envsetup from downloading releases/latest behind our back.
+    export OME_SKIP_INSTALLER_DOWNLOAD=1
+    local log="$LOG_DIR/digitalis-modules-$(date +%Y%m%d-%H%M%S).log"
+    (
+        set +u +e
+        source build/envsetup.sh
+        lunch "$BLISS_LUNCH" || exit 2
+        if [ "${OME_DIGITALIS_MODULES:-bridge}" = all ]; then
+            local modules
+            modules=$(get_build_var BERBERIS_PRODUCT_PACKAGES_ARM64_TO_X86_64) || exit 2
+            [ -n "$modules" ] || { echo "empty Digitalis product package list" >&2; exit 2; }
+            echo "Digitalis product modules: $modules"
+            m -j"$OME_JOBS" $modules
+        else
+            m -j"$OME_JOBS" libberberis_arm64
+        fi
+        exit $?
+    ) 2>&1 | tee "$log"
+}
+
 do_build() {
+    refuse_experimental_image
     refuse_blob_flags
     say "build $BLISS_LUNCH variant=$BLISS_BUILD_VARIANT -j$OME_JOBS"
     cd "$OME_BUILD_ROOT"
@@ -202,6 +263,7 @@ do_build() {
 }
 
 do_collect() {
+    refuse_experimental_image
     say "collect"
     cd "$OME_BUILD_ROOT"
     local product="out/target/product/x86_64"
@@ -220,10 +282,15 @@ do_collect() {
 }
 
 case "${1:-}" in
+    init|sync|snapshot|all) refuse_experimental_image ;;
+esac
+
+case "${1:-}" in
     init) do_init ;;
     sync) do_sync ;;
     snapshot) do_snapshot ;;
     aaropa) do_aaropa ;;
+    modules) do_modules ;;
     build) do_build ;;
     collect) do_collect ;;
     all) do_init; do_sync; do_snapshot; do_aaropa; do_build; do_collect ;;

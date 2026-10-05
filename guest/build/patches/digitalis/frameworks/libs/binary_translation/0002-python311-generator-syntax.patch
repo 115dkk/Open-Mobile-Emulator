@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# A15's embedded build interpreter is Python 3.11, before PEP 701.
+--- a/device_arch_info/gen_reg_class_lib.py
++++ b/device_arch_info/gen_reg_class_lib.py
+@@ -17,8 +17,9 @@
+ """Generate machine IR register class definitions from data file."""
+
++# Modified by Open Mobile Emulator for the API 35 Python 3.11 build interpreter.
+ def gen_machine_reg_class_inc(f, reg_classes):
+   for reg_class in reg_classes:
+-    print(f'class {reg_class.get('name')};', file=f)
++    print(f"class {reg_class.get('name')};", file=f)
+   for reg_class in reg_classes:
+     name = reg_class.get('name')
+     regs = reg_class.get('regs')

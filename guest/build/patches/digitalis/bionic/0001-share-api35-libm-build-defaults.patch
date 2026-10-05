@@ -1,0 +1,66 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+diff --git a/libm/Android.bp b/libm/Android.bp
+index ee86959..0fe4afa 100644
+--- a/libm/Android.bp
++++ b/libm/Android.bp
+@@ -19,8 +19,9 @@ license {
+     ],
+ }
+ 
+-cc_library {
+-    name: "libm",
++// Modified by OME: share A15 sources with optional native-bridge libm.
++cc_defaults {
++    name: "ome_api35_libm_defaults",
+     defaults: [
+         "linux_bionic_supported",
+         "bug_24465209_workaround",
+@@ -422,6 +423,28 @@ cc_library {
+     stl: "none",
+     native_bridge_supported: true,
+ 
++    apex_available: [
++        "com.android.runtime",
++    ],
++
++    lto: {
++        never: true,
++    },
++}
++
++cc_library {
++    name: "libm",
++    defaults: ["ome_api35_libm_defaults"],
++    // Modified by OME: avoid two writers for system/lib64/arm64/libm.so.
++    // The original implementation still builds as a dependency; the native
++    // bridge variant with expf/powf stubs owns the installed guest library.
++    target: {
++        native_bridge: {
++            shared: {
++                installable: false,
++            },
++        },
++    },
+     stubs: {
+         symbol_file: "libm.map.txt",
+         versions: [
+@@ -434,13 +457,13 @@ cc_library {
+         symbol_file: "libm.map.txt",
+     },
+ 
+-    apex_available: [
+-        "com.android.runtime",
+-    ],
++}
+ 
+-    lto: {
+-        never: true,
+-    },
++cc_library_static {
++    name: "ome_api35_libm_for_native_bridge",
++    defaults: ["ome_api35_libm_defaults"],
++    exclude_static_libs: ["libarm-optimized-routines-math"],
++    whole_static_libs: ["ome_api35_libarm-native-bridge-math"],
+ }
+ 
+ ndk_library {

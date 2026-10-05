@@ -1,0 +1,59 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+--- a/Android.bp
++++ b/Android.bp
+@@ -276,3 +276,55 @@
+         "ulp",
+     ],
+ }
++
++// Modified by OME: expf/powf are supplied by native-bridge stubs instead.
++cc_library_static {
++    name: "ome_api35_libarm-native-bridge-math",
++    defaults: ["libarm-optimized-routines-defaults"],
++    srcs: [
++        "math/cosf.c",
++        "math/exp.c",
++        "math/exp2.c",
++        "math/exp2f.c",
++        "math/exp2f_data.c",
++        "math/exp_data.c",
++        "math/log.c",
++        "math/log2.c",
++        "math/log2_data.c",
++        "math/log2f.c",
++        "math/log2f_data.c",
++        "math/log_data.c",
++        "math/logf.c",
++        "math/logf_data.c",
++        "math/math_err.c",
++        "math/math_errf.c",
++        "math/pow.c",
++        "math/pow_log_data.c",
++        "math/powf_log2_data.c",
++        "math/sincosf.c",
++        "math/sincosf_data.c",
++        "math/sinf.c",
++    ],
++
++    arch: {
++        arm64: {
++            cflags: [
++                "-DHAVE_FAST_FMA=1",
++            ],
++        },
++        riscv64: {
++            cflags: [
++                "-DHAVE_FAST_FMA=1",
++            ],
++        },
++    },
++
++    target: {
++        darwin: {
++            enabled: false,
++        },
++        linux_bionic: {
++            enabled: true,
++        },
++    },
++}

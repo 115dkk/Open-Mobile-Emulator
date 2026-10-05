@@ -1,0 +1,282 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# AOSP ffd3f17e proxy code; implementation and version maps are API 35 bionic.
+--- a/native_bridge_support.mk
++++ b/native_bridge_support.mk
+@@ -1,3 +1,4 @@
++# Modified by Open Mobile Emulator: build the API 35 libm bridge variant.
+ #
+ # Copyright 2020 The Android Open-Source Project
+ #
+@@ -69,7 +70,6 @@
+     libdl_android.bootstrap \
+     libicu.bootstrap \
+     liblog \
+-    libm.bootstrap \
+     libsqlite \
+     libssl \
+     libstdc++ \
+@@ -93,6 +93,7 @@
+     libGLESv2 \
+     libGLESv3 \
+     libjnigraphics \
++    libm \
+     libmediandk \
+     libnativehelper \
+     libnativewindow \
+--- /dev/null
++++ b/android_api/libm/stubs_riscv64.cpp
+@@ -0,0 +1,28 @@
++// Modified by Open Mobile Emulator: API 35 platform port from AOSP ffd3f17e.
++//
++// Copyright (C) 2024 The Android Open Source Project
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//      http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++
++// clang-format off
++#include "native_bridge_support/vdso/interceptable_functions.h"
++
++DEFINE_INTERCEPTABLE_STUB_FUNCTION(expf);
++DEFINE_INTERCEPTABLE_STUB_FUNCTION(powf);
++
++static void __attribute__((constructor(0))) init_stub_library() {
++  INIT_INTERCEPTABLE_STUB_FUNCTION("libm.so", expf);
++  INIT_INTERCEPTABLE_STUB_FUNCTION("libm.so", powf);
++}
++// clang-format on
+--- /dev/null
++++ b/android_api/libm/stubs_arm.cpp
+@@ -0,0 +1,28 @@
++// Modified by Open Mobile Emulator: API 35 platform port from AOSP ffd3f17e.
++//
++// Copyright (C) 2024 The Android Open Source Project
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//      http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++
++// clang-format off
++#include "native_bridge_support/vdso/interceptable_functions.h"
++
++DEFINE_INTERCEPTABLE_STUB_FUNCTION(expf);
++DEFINE_INTERCEPTABLE_STUB_FUNCTION(powf);
++
++static void __attribute__((constructor(0))) init_stub_library() {
++  INIT_INTERCEPTABLE_STUB_FUNCTION("libm.so", expf);
++  INIT_INTERCEPTABLE_STUB_FUNCTION("libm.so", powf);
++}
++// clang-format on
+--- /dev/null
++++ b/android_api/libm/Android.bp
+@@ -0,0 +1,69 @@
++// Modified by Open Mobile Emulator: API 35 platform port from AOSP ffd3f17e.
++//
++// Copyright (C) 2020 The Android Open Source Project
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//      http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++
++// We introduce this namespace so that native bridge guest libraries are built
++// only for targets that explicitly use this namespace via PRODUCT_SOONG_NAMESPACES
++// and checkbuild.
++
++package {
++    default_applicable_licenses: ["Android-Apache-2.0"],
++}
++
++cc_library {
++    name: "libnative_bridge_guest_libm",
++    defaults: [
++        "native_bridge_stub_library_defaults",
++    ],
++
++    whole_static_libs: ["ome_api35_libm_for_native_bridge"],
++    stl: "none",
++    system_shared_libs: ["libc"],
++
++    arch: {
++        arm: {
++            srcs: ["stubs_arm.cpp"],
++            version_script: ":libm.arm.map",
++        },
++        arm64: {
++            srcs: ["stubs_arm64.cpp"],
++            version_script: ":libm.arm64.map",
++        },
++        riscv64: {
++            srcs: ["stubs_riscv64.cpp"],
++            version_script: ":libm.riscv64.map",
++        },
++    },
++
++    overrides: ["libm"],
++    stem: "libm",
++}
++
++filegroup {
++    name: "native_bridge_proxy_libm_files",
++    srcs: [
++        "proxy/libm_trampolines.cc",
++    ],
++}
++
++cc_defaults {
++    name: "native_bridge_proxy_libm_defaults",
++    srcs: [":native_bridge_proxy_libm_files"],
++    header_libs: [
++        "libberberis_guest_abi_headers",
++        "libberberis_proxy_loader_headers",
++    ],
++}
+--- /dev/null
++++ b/android_api/libm/stubs_arm64.cpp
+@@ -0,0 +1,28 @@
++// Modified by Open Mobile Emulator: API 35 platform port from AOSP ffd3f17e.
++//
++// Copyright (C) 2024 The Android Open Source Project
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//      http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++
++// clang-format off
++#include "native_bridge_support/vdso/interceptable_functions.h"
++
++DEFINE_INTERCEPTABLE_STUB_FUNCTION(expf);
++DEFINE_INTERCEPTABLE_STUB_FUNCTION(powf);
++
++static void __attribute__((constructor(0))) init_stub_library() {
++  INIT_INTERCEPTABLE_STUB_FUNCTION("libm.so", expf);
++  INIT_INTERCEPTABLE_STUB_FUNCTION("libm.so", powf);
++}
++// clang-format on
+--- /dev/null
++++ b/android_api/libm/proxy/libm_trampolines.cc
+@@ -0,0 +1,47 @@
++// Modified by Open Mobile Emulator: API 35 platform port from AOSP ffd3f17e.
++/*
++ * Copyright (C) 2025 The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++#include "berberis/guest_abi/function_wrappers.h"
++#include "berberis/proxy_loader/proxy_library_builder.h"
++
++namespace berberis {
++
++namespace {
++
++#if defined(NATIVE_BRIDGE_GUEST_ARCH_ARM) && defined(__i386__)
++
++#include "trampolines_arm_to_x86-inl.h"  // generated file NOLINT [build/include]
++
++#elif defined(NATIVE_BRIDGE_GUEST_ARCH_ARM64) && defined(__x86_64__)
++
++#include "trampolines_arm64_to_x86_64-inl.h"  // generated file NOLINT [build/include]
++
++#elif defined(NATIVE_BRIDGE_GUEST_ARCH_RISCV64) && defined(__x86_64__)
++
++#include "trampolines_riscv64_to_x86_64-inl.h"  // generated file NOLINT [build/include]
++
++#else
++
++#error "Unknown guest/host arch combination"
++
++#endif
++
++DEFINE_INIT_PROXY_LIBRARY("libm.so")
++
++}  // namespace
++
++}  // namespace berberis
+--- /dev/null
++++ b/android_api/libm/proxy/trampolines_arm64_to_x86_64-inl.h
+@@ -0,0 +1,11 @@
++// SPDX-License-Identifier: Apache-2.0
++// Copyright (C) 2025 The Android Open Source Project
++// Modified by Open Mobile Emulator: API 35 platform port from AOSP ffd3f17e.
++// clang-format off
++const KnownTrampoline kKnownTrampolines[] = {
++{"expf", GetTrampolineFunc<auto(float) -> float>(), reinterpret_cast<void*>(NULL)},
++{"powf", GetTrampolineFunc<auto(float, float) -> float>(), reinterpret_cast<void*>(NULL)},
++};  // kKnownTrampolines
++const KnownVariable kKnownVariables[] = {
++};  // kKnownVariables
++// clang-format on
+--- /dev/null
++++ b/android_api/libm/proxy/trampolines_arm_to_x86-inl.h
+@@ -0,0 +1,11 @@
++// SPDX-License-Identifier: Apache-2.0
++// Copyright (C) 2025 The Android Open Source Project
++// Modified by Open Mobile Emulator: API 35 platform port from AOSP ffd3f17e.
++// clang-format off
++const KnownTrampoline kKnownTrampolines[] = {
++{"expf", GetTrampolineFunc<auto(float) -> float>(), reinterpret_cast<void*>(NULL)},
++{"powf", GetTrampolineFunc<auto(float, float) -> float>(), reinterpret_cast<void*>(NULL)},
++};  // kKnownTrampolines
++const KnownVariable kKnownVariables[] = {
++};  // kKnownVariables
++// clang-format on
+--- /dev/null
++++ b/android_api/libm/proxy/trampolines_riscv64_to_x86_64-inl.h
+@@ -0,0 +1,11 @@
++// SPDX-License-Identifier: Apache-2.0
++// Copyright (C) 2025 The Android Open Source Project
++// Modified by Open Mobile Emulator: API 35 platform port from AOSP ffd3f17e.
++// clang-format off
++const KnownTrampoline kKnownTrampolines[] = {
++{"expf", GetTrampolineFunc<auto(float) -> float>(), reinterpret_cast<void*>(NULL)},
++{"powf", GetTrampolineFunc<auto(float, float) -> float>(), reinterpret_cast<void*>(NULL)},
++};  // kKnownTrampolines
++const KnownVariable kKnownVariables[] = {
++};  // kKnownVariables
++// clang-format on

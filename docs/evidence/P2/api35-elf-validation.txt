@@ -1,0 +1,749 @@
+ELF validation: actual API35 build outputs; full ISO not built
+
+FILE system/bin/arm64/app_process64 SHA256 197729049f6841d16df53f1378e8ea65a5e28d4bb110604796fa8a65338c55f2
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)     Shared library: [linux-vdso.so.1]
+  0x0000000000000001 (NEEDED)     Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)     Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)     Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)     Shared library: [libdl.so]
+
+FILE system/bin/arm64/linker64 SHA256 b6047563d08dc059b2ec1ccc5e46e4431fb4c4bef51cca782c1b1c727a80f8bf
+Machine:                           AArch64
+  0x000000000000000e (SONAME)       Library soname: [ld-android.so]
+
+FILE system/bin/berberis_program_runner_binfmt_misc_arm64 SHA256 2e0899e93520dddb678303d437f3f0ca4b190dbb6587f6f4711442be7ab976b3
+Machine:                           Advanced Micro Devices X86-64
+  0x0000000000000001 (NEEDED)         Shared library: [libbase.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libberberis_arm64.so]
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+
+FILE system/bin/berberis_program_runner_arm64 SHA256 8277ae60f065ea98ecbb28c867ca4c2c2d190689d372ae96a219430208e11e54
+Machine:                           Advanced Micro Devices X86-64
+  0x0000000000000001 (NEEDED)         Shared library: [libbase.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libberberis_arm64.so]
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+
+FILE system/etc/binfmt_misc/arm64_dyn SHA256 66113ce12ae52c40e4ada8ece51453b0b4b6b818389762880dc18b325aabce10
+
+FILE system/etc/binfmt_misc/arm64_exe SHA256 b6ad38131060870bbb010ba09ad19ce6b74a1ccec5b18bbceb72d22aa5d4247f
+
+FILE system/etc/init/berberis.rc SHA256 f180bb4d739c5fc21d7020de7d88565c0b324a554ad3e964026428d1ea72fc87
+
+FILE system/etc/ld.config.arm64.txt SHA256 626a269bbd708a59c302d035116571655f41077df3434546a1823bc93bde4f82
+
+FILE system/lib64/libberberis_arm64.so SHA256 e9e8052a0d711bc152565c2d824c5bf6cdcb01636f1db833416b21371c506f25
+Machine:                           Advanced Micro Devices X86-64
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libandroid.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl_android.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libberberis_arm64.so]
+
+FILE system/lib64/libberberis_exec_region.so SHA256 5d799728f8c0979e9084b8496b9b5230e77a00be3e859ae63b3b34f2a31783fd
+Machine:                           Advanced Micro Devices X86-64
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libberberis_exec_region.so]
+
+FILE system/lib64/libberberis_proxy_libEGL.so SHA256 f2671b4aabe9322ba6504d58ceeb4d0c379ab8d63f802d02dbb50c61a5f92227
+Machine:                           Advanced Micro Devices X86-64
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libberberis_arm64.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libEGL.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libberberis_proxy_libEGL.so]
+
+FILE system/lib64/libberberis_proxy_libGLESv1_CM.so SHA256 91a5ef4c726302865ac26635770137609c7fd099fef7eeb915240d899d71aa35
+Machine:                           Advanced Micro Devices X86-64
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libberberis_arm64.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libberberis_proxy_libGLESv1_CM.so]
+
+FILE system/lib64/libberberis_proxy_libGLESv2.so SHA256 ebe7248a1187dba9289a5c12f07d4fdf783774c105102a63be49f198cd0a2089
+Machine:                           Advanced Micro Devices X86-64
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libberberis_arm64.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libGLESv2.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libberberis_proxy_libGLESv2.so]
+
+FILE system/lib64/libberberis_proxy_libGLESv3.so SHA256 60e51b0a054b471650da64135c4d0a844342eaab16043bba466f78c479d442e3
+Machine:                           Advanced Micro Devices X86-64
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libberberis_arm64.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libGLESv3.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libberberis_proxy_libGLESv3.so]
+
+FILE system/lib64/libberberis_proxy_libOpenMAXAL.so SHA256 63ac6868a7290fd60ae290bd1cbdc189214e0061bc48bc38c457c86a6d1ae6c6
+Machine:                           Advanced Micro Devices X86-64
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libberberis_arm64.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libOpenMAXAL.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libberberis_proxy_libOpenMAXAL.so]
+
+FILE system/lib64/libberberis_proxy_libOpenSLES.so SHA256 13d717e29840a747581180c6cedf31348edec3fa4a94e1600e0b67c5a088d6a9
+Machine:                           Advanced Micro Devices X86-64
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libberberis_arm64.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libOpenSLES.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libberberis_proxy_libOpenSLES.so]
+
+FILE system/lib64/libberberis_proxy_libaaudio.so SHA256 194c0f3e1ae989f648576b11f98600b4a9feedf78fb26b097cecbe9f6f1715e5
+Machine:                           Advanced Micro Devices X86-64
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libberberis_arm64.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libaaudio.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libberberis_proxy_libaaudio.so]
+
+FILE system/lib64/libberberis_proxy_libamidi.so SHA256 f6ccc0aea1c7af0a3a07999da32a2a9cb623c58037afb179d6c42bd6d6feeb08
+Machine:                           Advanced Micro Devices X86-64
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libberberis_arm64.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libamidi.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libmediandk.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libberberis_proxy_libamidi.so]
+
+FILE system/lib64/libberberis_proxy_libandroid.so SHA256 2376c5d0fdd99fa1be8501bd48c02b8b5459e0ae0259971e058687f0d65ece2a
+Machine:                           Advanced Micro Devices X86-64
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libberberis_arm64.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libandroid.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libberberis_proxy_libandroid.so]
+
+FILE system/lib64/libberberis_proxy_libandroid_runtime.so SHA256 76598426424f4dbe052a44104a480501f852a95d7d58b7e7e510b2bda1eb6a7e
+Machine:                           Advanced Micro Devices X86-64
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libberberis_arm64.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libandroid_runtime.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libberberis_proxy_libandroid_runtime.so]
+
+FILE system/lib64/libberberis_proxy_libbinder_ndk.so SHA256 8c9bf1db3901df1ac78b787ffda35c403b3a31a11ee6dfa51f1df8ce3608fe0e
+Machine:                           Advanced Micro Devices X86-64
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libberberis_arm64.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libbinder_ndk.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libmediandk.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libberberis_proxy_libbinder_ndk.so]
+
+FILE system/lib64/libberberis_proxy_libc.so SHA256 4969cfcc88d3ea526e9b14f222467075525e32041dca29c6994d0eb18e8d77c7
+Machine:                           Advanced Micro Devices X86-64
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libberberis_arm64.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libberberis_proxy_libc.so]
+
+FILE system/lib64/libberberis_proxy_libcamera2ndk.so SHA256 9f57a496c971de46bc3ddfc58707ed6818c805cecc78687eb12e29ebb34f4693
+Machine:                           Advanced Micro Devices X86-64
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libberberis_arm64.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libcamera2ndk.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libberberis_proxy_libcamera2ndk.so]
+
+FILE system/lib64/libberberis_proxy_libjnigraphics.so SHA256 e0856e1eef12ac3654a90c93abaffb92c9edd33f03aa9f4e8c9f71649983daeb
+Machine:                           Advanced Micro Devices X86-64
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libberberis_arm64.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libandroid.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libjnigraphics.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libberberis_proxy_libjnigraphics.so]
+
+FILE system/lib64/libberberis_proxy_libm.so SHA256 c73352760d2b21629dae2b4175dbd6c7af380f3bec9b0704fe93eb9184861412
+Machine:                           Advanced Micro Devices X86-64
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libberberis_arm64.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libberberis_proxy_libm.so]
+
+FILE system/lib64/libberberis_proxy_libmediandk.so SHA256 0d2668fba0357e495ee17c839413651f0df6851cbb3018c6c3c9f1314f61561e
+Machine:                           Advanced Micro Devices X86-64
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libberberis_arm64.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libandroid.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libmediandk.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libberberis_proxy_libmediandk.so]
+
+FILE system/lib64/libberberis_proxy_libnativehelper.so SHA256 0f58cd743dfb604c7f6d749a795fec3d477fa01693a31895b0dad0d10db609c7
+Machine:                           Advanced Micro Devices X86-64
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libberberis_arm64.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libnativehelper.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libberberis_proxy_libnativehelper.so]
+
+FILE system/lib64/libberberis_proxy_libnativewindow.so SHA256 2402e34f28e9df41723634cd0d33c914739a22e3772fadfed7c6e4b0fd5d1b41
+Machine:                           Advanced Micro Devices X86-64
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libberberis_arm64.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libnativewindow.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libberberis_proxy_libnativewindow.so]
+
+FILE system/lib64/libberberis_proxy_libneuralnetworks.so SHA256 964bdd5da282efd006615b7c33c73cd925df9c8c85749b04167d19688d3f27a8
+Machine:                           Advanced Micro Devices X86-64
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libberberis_arm64.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libneuralnetworks.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libberberis_proxy_libneuralnetworks.so]
+
+FILE system/lib64/libberberis_proxy_libvulkan.so SHA256 6637a6070826eff680bf89453a0a9e36cb3a0e51bd2abe83fa6ed78d89299340
+Machine:                           Advanced Micro Devices X86-64
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libberberis_arm64.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libvulkan.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libberberis_proxy_libvulkan.so]
+
+FILE system/lib64/libberberis_proxy_libwebviewchromium_plat_support.so SHA256 130039d9e2da2b3623eb022ecdf0c9a11dc335861a68e7e4995e07802b6ebcb2
+Machine:                           Advanced Micro Devices X86-64
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libberberis_arm64.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libwebviewchromium_plat_support.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libberberis_proxy_libwebviewchromium_plat_support.so]
+
+FILE system/lib64/arm64/ld-android.so SHA256 e2eb6a0bdc13d92f8c76a80f895743dd55fa29821c6a09b1c4f8fed490b4614c
+Machine:                           AArch64
+  0x000000000000000e (SONAME)   Library soname: [ld-android.so]
+
+FILE system/lib64/arm64/libEGL.so SHA256 d417f07f75e5567c4d99eb8866aa6ce0299c963ed37eb92cd8c5d00d985339f0
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [linux-vdso.so.1]
+  0x0000000000000001 (NEEDED)       Shared library: [libcutils.so]
+  0x0000000000000001 (NEEDED)       Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libnativewindow.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libutils.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libEGL.so]
+
+FILE system/lib64/arm64/libGLESv1_CM.so SHA256 f44c990598a352ff2ef6bbd634cfc20a704865e291da6b7719fea816b2f90d64
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [linux-vdso.so.1]
+  0x0000000000000001 (NEEDED)       Shared library: [libcutils.so]
+  0x0000000000000001 (NEEDED)       Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libEGL.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libGLESv1_CM.so]
+
+FILE system/lib64/arm64/libGLESv2.so SHA256 f5904d31b64c37022fb3f87b18297f99d4ee885615c1d0e1bb45c623710235db
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [linux-vdso.so.1]
+  0x0000000000000001 (NEEDED)       Shared library: [libcutils.so]
+  0x0000000000000001 (NEEDED)       Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libEGL.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libGLESv2.so]
+
+FILE system/lib64/arm64/libGLESv3.so SHA256 6064db5ad11380fcc3cf7747b30be3989a35e12cbc03c19aa7f79f226fffbf0d
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [linux-vdso.so.1]
+  0x0000000000000001 (NEEDED)       Shared library: [libcutils.so]
+  0x0000000000000001 (NEEDED)       Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libEGL.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libGLESv3.so]
+
+FILE system/lib64/arm64/libOpenMAXAL.so SHA256 45e27093a3d5d9685c95b1ee42b7a966a1ce8d1057aacc8b37c108931ecb4f89
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [linux-vdso.so.1]
+  0x0000000000000001 (NEEDED)       Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libnativewindow.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libOpenMAXAL.so]
+
+FILE system/lib64/arm64/libOpenSLES.so SHA256 5c3d83083d8fa701d1f84536a7c809ae7d43738d1465f5337f17c14dc095643e
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [linux-vdso.so.1]
+  0x0000000000000001 (NEEDED)       Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libnativewindow.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libOpenSLES.so]
+
+FILE system/lib64/arm64/libaaudio.so SHA256 05dd54ef251cdc63ca929b532310d8962d3e971b77ea01a06171de0f23ea735e
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [linux-vdso.so.1]
+  0x0000000000000001 (NEEDED)       Shared library: [libcutils.so]
+  0x0000000000000001 (NEEDED)       Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libutils.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libaaudio.so]
+
+FILE system/lib64/arm64/libamidi.so SHA256 1e63259f094e456eab40f5c0036baebd1722f9085cd5a4deb72250e46ad1d212
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [linux-vdso.so.1]
+  0x0000000000000001 (NEEDED)       Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libandroid_runtime.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libmediandk.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libutils.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libamidi.so]
+
+FILE system/lib64/arm64/libandroid.so SHA256 2aeceff05aff7204432582e4b45843f8284e0c5e137d6fe5ed62a5885301836f
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [linux-vdso.so.1]
+  0x0000000000000001 (NEEDED)       Shared library: [libandroid_runtime.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libcutils.so]
+  0x0000000000000001 (NEEDED)       Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libutils.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libandroid.so]
+
+FILE system/lib64/arm64/libandroid_runtime.so SHA256 de3780baab4b4f25cac96972c11184cbe952fa1ef42dc9d7fa59fd239f95cdce
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [linux-vdso.so.1]
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libandroid_runtime.so]
+
+FILE system/lib64/arm64/libandroidicu.so SHA256 1966b4b9439cbf21229b01a955acc4704f1b6fda068ef5e24bd51642fb02a4ce
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [libbase.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libicuuc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libicui18n.so]
+  0x0000000000000001 (NEEDED)       Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libandroidicu.so]
+
+FILE system/lib64/arm64/libbase.so SHA256 b9f993d6165db6d89b940afb281a3b0ed60237dfdab57dd6089818d886daf842
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)          Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libdl.so]
+  0x000000000000000e (SONAME)          Library soname: [libbase.so]
+
+FILE system/lib64/arm64/libbinder_ndk.so SHA256 2a75aee768f372f0e694d73b80f5064fdef5bb34b4685b84ce677f3162dd1679
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [linux-vdso.so.1]
+  0x0000000000000001 (NEEDED)       Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libandroid_runtime.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libmediandk.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libutils.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libbinder_ndk.so]
+
+FILE system/lib64/arm64/libc++.so SHA256 1cae598ca13f8c6081edfeb7d112991dd00c4dc9cd553ea55e464d5625039f7e
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)          Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libdl.so]
+  0x000000000000000e (SONAME)          Library soname: [libc++.so]
+
+FILE system/lib64/arm64/libc.so SHA256 b21cb751441e8507998ba2f2107c31818ee9a0fea6446de2a9d590dfafa21a42
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [linux-vdso.so.1]
+  0x0000000000000001 (NEEDED)       Shared library: [ld-android.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libc.so]
+
+FILE system/lib64/arm64/libcamera2ndk.so SHA256 444ff29ee605288c5e8caf41b48f19b9960b4196a2ab7667123b75f9d1a3fc91
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [linux-vdso.so.1]
+  0x0000000000000001 (NEEDED)       Shared library: [libandroid_runtime.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libcutils.so]
+  0x0000000000000001 (NEEDED)       Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libmediandk.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libnativewindow.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libutils.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libcamera2ndk.so]
+
+FILE system/lib64/arm64/libcompiler_rt.so SHA256 0a367e79ede127fedbc64a236ecda3fd6cfe3af21c05a01ae3f7c59c7fadd93b
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libcompiler_rt.so]
+
+FILE system/lib64/arm64/libcrypto.so SHA256 c3e29b9aa7c087ecb8881a7e748d3aced69e1641fe390d3c412878c84e79d19b
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)          Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libdl.so]
+  0x000000000000000e (SONAME)          Library soname: [libcrypto.so]
+
+FILE system/lib64/arm64/libcutils.so SHA256 7225dcd33896a68c988950bdbd8de65168d145155c7e5856cefeb7288e090e45
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)          Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libbase.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libdl.so]
+  0x000000000000000e (SONAME)          Library soname: [libcutils.so]
+
+FILE system/lib64/arm64/libdl.so SHA256 7188878b80ceb21aa546b75abd01f8d67d766d0be4edd881c0f880d172ab9a4b
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)    Shared library: [ld-android.so]
+  0x000000000000000e (SONAME)    Library soname: [libdl.so]
+
+FILE system/lib64/arm64/libdl_android.so SHA256 1052fd3da39a088b681b6493280fd0ca0ec42efda74afdcf5898f4f6ff044f52
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)    Shared library: [ld-android.so]
+  0x000000000000000e (SONAME)    Library soname: [libdl_android.so]
+
+FILE system/lib64/arm64/libgui.so SHA256 b621fe0ff32513cb6b5a46276ee3fc69d658aa89181bfe1dba9a8e6c658db5fb
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [linux-vdso.so.1]
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libgui.so]
+
+FILE system/lib64/arm64/libicu.so SHA256 eafe2ea64a0f4b641a67ea9c57ab627ce1bdfba73d6926b51c469c3371d57c6f
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [libicuuc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libicui18n.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libicu.so]
+
+FILE system/lib64/arm64/libicui18n.so SHA256 19ab58a940bfbfa848abbe4389d09d51d67e63d461db939ad6d3511ed1b492cb
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)         Shared library: [libicuuc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libicui18n.so]
+
+FILE system/lib64/arm64/libicuuc.so SHA256 c29937ab480717ddfff66d65fec14b541c659a7aab207637ebdbfe8c9b541a2c
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)         Shared library: [libbase.so]
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libicuuc.so]
+
+FILE system/lib64/arm64/libjnigraphics.so SHA256 c66d82efd9a9bd46681c645372cfb5928d05213f9e9e93981e752c0a73711b8e
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [linux-vdso.so.1]
+  0x0000000000000001 (NEEDED)       Shared library: [libandroid_runtime.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libjnigraphics.so]
+
+FILE system/lib64/arm64/liblog.so SHA256 e039a9d69b3615c2da8bf23502fec361c0a86dc1477e018e470b7d8d1ec298e1
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [liblog.so]
+
+FILE system/lib64/arm64/libm.so SHA256 7fc845b6f756071b442afc1d29e7d75b6f5d15c2aa66e9efcbecab5f0a7e3a71
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [linux-vdso.so.1]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x000000000000000e (SONAME)       Library soname: [libm.so]
+
+FILE system/lib64/arm64/libmediandk.so SHA256 2e5148e18642810d2cc4b0b5f9671808554fcb7554d29d12e585894ccb71abb4
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [linux-vdso.so.1]
+  0x0000000000000001 (NEEDED)       Shared library: [libcutils.so]
+  0x0000000000000001 (NEEDED)       Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libnativewindow.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libutils.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libmediandk.so]
+
+FILE system/lib64/arm64/libnative_bridge_vdso.so SHA256 6784a49fe1ff3aba999eb80509aa1483c74622165f578f5d6b99e6be94afd9bb
+Machine:                           AArch64
+  0x000000000000000e (SONAME)   Library soname: [linux-vdso.so.1]
+
+FILE system/lib64/arm64/libnativehelper.so SHA256 7b52669002e2daf341eb65fca57488f6fecaf21a096af601c9e0f3c95be6b55f
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [linux-vdso.so.1]
+  0x0000000000000001 (NEEDED)       Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libnativehelper.so]
+
+FILE system/lib64/arm64/libnativewindow.so SHA256 db1c300dff2c976222f7c7d6466b505d7423a397f18054a6a6d12372e8012fce
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [linux-vdso.so.1]
+  0x0000000000000001 (NEEDED)       Shared library: [libcutils.so]
+  0x0000000000000001 (NEEDED)       Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libutils.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libnativewindow.so]
+
+FILE system/lib64/arm64/libneuralnetworks.so SHA256 ceca645c4c51b48be12e2d1565517fc7ad10aed63894cd682ab98b837108b2ec
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [linux-vdso.so.1]
+  0x0000000000000001 (NEEDED)       Shared library: [libcutils.so]
+  0x0000000000000001 (NEEDED)       Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libnativewindow.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libutils.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libneuralnetworks.so]
+
+FILE system/lib64/arm64/libsqlite.so SHA256 a05d8dd0ae778bc5b6a0496dd9368f61aec7020c0f5ec0b053288ad9270508fc
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libandroidicu.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libsqlite.so]
+
+FILE system/lib64/arm64/libssl.so SHA256 7feb00f09b6a16da609ed0ce171dca36fd6c880df1f5fc6636c26da455e65cd1
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)          Shared library: [libcrypto.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libdl.so]
+  0x000000000000000e (SONAME)          Library soname: [libssl.so]
+
+FILE system/lib64/arm64/libstdc++.so SHA256 35f5794e5e9c661877967c49c5cf075828950060a06d45660365643ac840c4b0
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x000000000000000e (SONAME)       Library soname: [libstdc++.so]
+
+FILE system/lib64/arm64/libsync.so SHA256 78adb6bd422d3c29cbf9c602e194c450b25d71bc83220ec94e1d6d2ef2bbd012
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libsync.so]
+
+FILE system/lib64/arm64/libutils.so SHA256 3f9ef0736aff207354179266fa8bcd1360c33ce6a94022804b4a03986d0ee69e
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)         Shared library: [libcutils.so]
+  0x0000000000000001 (NEEDED)         Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libvndksupport.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libutils.so]
+
+FILE system/lib64/arm64/libvndksupport.so SHA256 77488383587628bbf854401db5623e97c8da1af7035612fbc6a1545ef6cced60
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [libdl_android.so]
+  0x0000000000000001 (NEEDED)       Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libvndksupport.so]
+
+FILE system/lib64/arm64/libvulkan.so SHA256 226f6307f1b040712e230b68e5d0d3dd73b57c2492441adb29032c0ff286e6a0
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [linux-vdso.so.1]
+  0x0000000000000001 (NEEDED)       Shared library: [libcutils.so]
+  0x0000000000000001 (NEEDED)       Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libnativewindow.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libutils.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libvulkan.so]
+
+FILE system/lib64/arm64/libwebviewchromium_plat_support.so SHA256 c2c426b2d54fc208ea5d3f15c817b13b4744144ac53bbd0240b5ea42090372cc
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [linux-vdso.so.1]
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libwebviewchromium_plat_support.so]
+
+FILE system/lib64/arm64/libz.so SHA256 b33d2bf3a404cc5e4d950eb04c654aeda047682b54f7345da1005575dacd7488
+Machine:                           AArch64
+  0x0000000000000001 (NEEDED)         Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)         Shared library: [libdl.so]
+  0x000000000000000e (SONAME)         Library soname: [libz.so]
+
+BRIDGE EXPORT
+  1227: 0000000000288098   168 OBJECT  GLOBAL DEFAULT    25 NativeBridgeItf
+
+GUEST LIBM SYMBOLS
+   259: 0000000000036e24     8 FUNC    GLOBAL DEFAULT    16 expf@@LIBC
+   230: 0000000000036e2c     8 FUNC    GLOBAL DEFAULT    16 powf@@LIBC
+   266: 0000000000024fb4   976 FUNC    GLOBAL DEFAULT    16 sin@@LIBC
+   110: 00000000000203d8   992 FUNC    GLOBAL DEFAULT    16 cos@@LIBC
+   238: 0000000000027288     8 FUNC    GLOBAL DEFAULT    16 sqrt@@LIBC
+   274: 000000000000c06c     8 OBJECT  GLOBAL DEFAULT    13 __fe_dfl_env@@LIBC
+
+BUILD PROPERTIES (generated module build metadata, not a booted image)
+system/build.prop # use ro.product.cpu.abilist instead.
+system/build.prop ro.dalvik.vm.native.bridge=0
+
+R1 name scan of the 74 source-built artifacts: expected source-built libberberis matches are NOT waived
+MATCH libberberis* system/lib64/libberberis_arm64.so
+MATCH libberberis* system/lib64/libberberis_exec_region.so
+MATCH libberberis* system/lib64/libberberis_proxy_libEGL.so
+MATCH libberberis* system/lib64/libberberis_proxy_libGLESv1_CM.so
+MATCH libberberis* system/lib64/libberberis_proxy_libGLESv2.so
+MATCH libberberis* system/lib64/libberberis_proxy_libGLESv3.so
+MATCH libberberis* system/lib64/libberberis_proxy_libOpenMAXAL.so
+MATCH libberberis* system/lib64/libberberis_proxy_libOpenSLES.so
+MATCH libberberis* system/lib64/libberberis_proxy_libaaudio.so
+MATCH libberberis* system/lib64/libberberis_proxy_libamidi.so
+MATCH libberberis* system/lib64/libberberis_proxy_libandroid.so
+MATCH libberberis* system/lib64/libberberis_proxy_libandroid_runtime.so
+MATCH libberberis* system/lib64/libberberis_proxy_libbinder_ndk.so
+MATCH libberberis* system/lib64/libberberis_proxy_libc.so
+MATCH libberberis* system/lib64/libberberis_proxy_libcamera2ndk.so
+MATCH libberberis* system/lib64/libberberis_proxy_libjnigraphics.so
+MATCH libberberis* system/lib64/libberberis_proxy_libm.so
+MATCH libberberis* system/lib64/libberberis_proxy_libmediandk.so
+MATCH libberberis* system/lib64/libberberis_proxy_libnativehelper.so
+MATCH libberberis* system/lib64/libberberis_proxy_libnativewindow.so
+MATCH libberberis* system/lib64/libberberis_proxy_libneuralnetworks.so
+MATCH libberberis* system/lib64/libberberis_proxy_libvulkan.so
+MATCH libberberis* system/lib64/libberberis_proxy_libwebviewchromium_plat_support.so
+
+ELF_VALIDATION_FAILURES []

@@ -1,0 +1,4 @@
+==> patch already applied: bionic/0001-share-api35-libm-build-defaults.patch  (21:25:41)
+error: corrupt patch at line 22
+patch does not apply: /mnt/c/Open Mobile Emulator/guest/build/patches/digitalis/bionic/0002-install-only-proxy-aware-guest-libm.patch
+OME_EXIT=2 ELAPSED_SECONDS=0

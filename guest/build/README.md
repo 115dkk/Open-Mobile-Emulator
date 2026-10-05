@@ -62,6 +62,61 @@ The BlissOS utility classes stay in the tree; nothing calls them.
 An incremental rebuild in the same tree removes `system/vendor/firmware` and the kernel image
 first: the kernel rule's `copy-firmware.sh` stops at links an earlier build left there.
 
+## Experimental Digitalis module probe (API 35)
+
+This does **not** build a Digitalis image. The default remains `OME_TRANSLATOR=none`.
+`manifest/ome-digitalis.xml` pins only the translator fork. API 35 `native_bridge_support`
+and bionic keep their base commits with the optional compatibility patches applied during
+the probe; the goldfish product and GPU configuration stay unchanged. Do not import the upstream
+manifest's agent configuration/linkfiles or sample applications.
+
+On a clean translator checkout, save its revision and git metadata, copy the optional manifest
+to `<tree>/.repo/local_manifests/ome-digitalis.xml`, then sync only
+`frameworks/libs/binary_translation`. Changing the project's remote identity requires repo's
+`--force-sync`; do not run it on an uncommitted checkout. The original object database must remain.
+
+```sh
+OME_TRANSLATOR=digitalis OME_BUILD_ROOT=/home/ome/bliss OME_JOBS=6 \
+    bash '/mnt/c/Open Mobile Emulator/guest/build/build-image.sh' modules
+```
+
+The probe applies only `patches/digitalis/<project path>/*.patch`, suppresses the Bliss
+vendorsetup installer's `releases/latest` download, and runs `m libberberis_arm64`. Logs go to
+`<tree>/ome-logs/digitalis-modules-*.log`. The regular patch pass excludes this directory.
+The compatibility patch replaces the A16-only `ndk_translation_package` dependency aggregators
+with A15's `phony_rule` and `.native_bridge` dependency names; it does not change runtime code.
+
+The API 35 bridge and the complete `BERBERIS_PRODUCT_PACKAGES_ARM64_TO_X86_64` module list
+**built successfully on 2026-10-05**. Set `OME_DIGITALIS_MODULES=all` alongside
+`OME_TRANSLATOR=digitalis` to build that list. The probe uses the upstream enable makefile,
+adds the ARM64 guest board target, and leaves the GPU configuration unchanged. The libm patch
+uses AOSP's `expf`/`powf` proxy stubs, API 35 bionic sources and version maps, and a separate
+API 35 optimized-math archive whose two proxied entry points come from the stubs instead.
+The normal host libm keeps its original implementation. A Python generator patch accommodates
+A15's embedded Python 3.11. No API 36 bionic binaries are used.
+
+All 74 upstream distribution paths exist. ELF machine types, `NativeBridgeItf`, libm exports,
+and DT_NEEDED were checked (`docs/evidence/P2/api35-elf-validation.txt`). This is not a boot or
+runtime test. No Digitalis ISO has been built; module builds leave the old image `build.prop`
+unchanged. The latest full-module build is `docs/evidence/P2/module-attempt-12.txt`.
+
+In the existing incremental tree, the generated Soong graph once stayed older than the changed
+product variables, causing false missing-module errors. Moving only the generated
+`out/soong/build.bliss_x86_64.ninja` aside forced its regeneration and resolved that failure.
+Do not remove product modules to hide it.
+
+`init`, `sync`, `snapshot`, `all`, `build`, and `collect` refuse the experimental translator
+setting, its installed local manifest, or an installed Digitalis bridge in the shared product
+output. To return to baseline sources, reverse only this probe's patches in reverse order,
+restore the saved `vendor/extra/product.mk`, move its local manifest out of
+`.repo/local_manifests`, and sync only the translator back to `ome.xml`'s revision. Keep the
+previous `dist/` intact. The 2026-10-05 probe was restored this way.
+
+The successful module binaries remain under `out/` for inspection. **Source restoration does
+not clean the product output.** Before a normal ISO build, use a fresh product output or arrange
+a reviewed cleanup; the script refuses image operations while that output contains Digitalis.
+R1 still matches the 23 source-built `libberberis*` files. No filename exceptions were added.
+
 ## Release assets (ADR-0012)
 
 `make-notice-guest.sh <tree> <dist> <out>` mounts the ISO, its `system.efs` and the `system.img`

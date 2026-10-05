@@ -1,0 +1,11 @@
+error: hooks is different in /home/ome/bliss/.repo/projects/frameworks/libs/binary_translation.git vs /home/ome/bliss/.repo/project-objects/platform_frameworks_libs_binary_translation.git
+error.GitError: Cannot fetch --force-sync not enabled; cannot overwrite a local work tree. If you're comfortable with the possibility of losing the work tree's git metadata, use `repo sync --force-sync frameworks/libs/binary_translation` to proceed.
+error: Unable to fully sync the tree
+error: Downloading network changes failed.
+Failing repos (network):
+frameworks/libs/binary_translation
+Try re-running with "-j1 --fail-fast" to exit at the first error.
+================================================================================
+Repo command failed due to the following `SyncError` errors:
+--force-sync not enabled; cannot overwrite a local work tree. If you're comfortable with the possibility of losing the work tree's git metadata, use `repo sync --force-sync frameworks/libs/binary_translation` to proceed.
+OME_EXIT=1 ELAPSED_SECONDS=5

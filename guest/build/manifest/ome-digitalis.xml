@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: GPL-2.0-or-later -->
+<!-- Experimental API 35 module-build input, not the default image manifest.
+     Install as .repo/local_manifests/ome-digitalis.xml. Keep native_bridge_support
+     at the API 35 revision in ome.xml; do not import the A16 goldfish product,
+     sample APKs, or upstream agent configuration/linkfiles. -->
+<manifest>
+  <remote name="ome-digitalis" fetch="https://github.com/DigitalisX64/" />
+  <remove-project name="platform/frameworks/libs/binary_translation" path="frameworks/libs/binary_translation" />
+  <project name="platform_frameworks_libs_binary_translation"
+           path="frameworks/libs/binary_translation"
+           remote="ome-digitalis"
+           revision="f5f1c90b17d0c1df9e9be41534c653a3e74bfc64" />
+</manifest>

@@ -1,0 +1,67 @@
+==> patch applied: device/generic/x86_64/0001-skip-installer-download-for-module-probe.patch  (20:32:22)
+==> patch applied: frameworks/libs/binary_translation/0001-api35-native-bridge-phony-dependencies.patch  (20:32:22)
+your 131072x1 screen size is bogus. expect trouble
+including device/generic/x86_64/vendorsetup.sh
+
+============================================
+PLATFORM_VERSION_CODENAME=REL
+PLATFORM_VERSION=15
+BLISS_BUILD_VERSION=Bliss-v18.4-x86_64-UNOFFICIAL-vanilla-20261005
+BLISS_CODENAME=Voyager
+BLISS_VERSION=18.4
+BLISS_DEVICE=x86_64
+BLISS_BUILDTYPE=UNOFFICIAL
+BLISS_BUILD_VARIANT=vanilla
+TARGET_PRODUCT=bliss_x86_64
+TARGET_BUILD_VARIANT=userdebug
+TARGET_ARCH=x86_64
+TARGET_ARCH_VARIANT=sandybridge
+TARGET_CPU_VARIANT=generic
+TARGET_2ND_ARCH=x86
+TARGET_2ND_ARCH_VARIANT=sandybridge
+TARGET_2ND_CPU_VARIANT=generic
+HOST_OS=linux
+HOST_OS_EXTRA=Linux-6.6.87.1-microsoft-standard-WSL2-x86_64-Ubuntu-22.04.5-LTS
+HOST_CROSS_OS=windows
+BUILD_ID=AP4A.250205.002
+OUT_DIR=out
+PRODUCT_SOONG_NAMESPACES=hardware/google/camera hardware/google/camera/devices/EmulatedCamera vendor/SystemUIClocks hardware/nxp
+============================================
+Running product configuration...
+============================================
+PLATFORM_VERSION_CODENAME=REL
+PLATFORM_VERSION=15
+BLISS_BUILD_VERSION=Bliss-v18.4-x86_64-UNOFFICIAL-vanilla-20261005
+BLISS_CODENAME=Voyager
+BLISS_VERSION=18.4
+BLISS_DEVICE=x86_64
+BLISS_BUILDTYPE=UNOFFICIAL
+BLISS_BUILD_VARIANT=vanilla
+TARGET_PRODUCT=bliss_x86_64
+TARGET_BUILD_VARIANT=userdebug
+TARGET_ARCH=x86_64
+TARGET_ARCH_VARIANT=sandybridge
+TARGET_CPU_VARIANT=generic
+TARGET_2ND_ARCH=x86
+TARGET_2ND_ARCH_VARIANT=sandybridge
+TARGET_2ND_CPU_VARIANT=generic
+HOST_OS=linux
+HOST_OS_EXTRA=Linux-6.6.87.1-microsoft-standard-WSL2-x86_64-Ubuntu-22.04.5-LTS
+HOST_CROSS_OS=windows
+BUILD_ID=AP4A.250205.002
+OUT_DIR=out
+PRODUCT_SOONG_NAMESPACES=hardware/google/camera hardware/google/camera/devices/EmulatedCamera vendor/SystemUIClocks hardware/nxp
+============================================
+Running globs...
+[100% 1/1] analyzing Android.bp files and generating ninja file at out/soong/build.bliss_x86_64.ninja
+FAILED: out/soong/build.bliss_x86_64.ninja
+cd "$(dirname "out/host/linux-x86/bin/soong_build")" && BUILDER="$PWD/$(basename "out/host/linux-x86/bin/soong_build")" && cd / && env -i  "$BUILDER"     --top "$TOP"     --soong_out "out/soong"     --out "out"     --soong_variables out/soong/soong.bliss_x86_64.variables -o out/soong/build.bliss_x86_64.ninja -l out/.module_paths/Android.bp.list --available_env out/soong/soong.environment.available --used_env out/soong/soong.environment.used.bliss_x86_64.build Android.bp
+error: frameworks/libs/binary_translation/android_api/libm/Android.bp:36:1: "libberberis_proxy_libm" depends on undefined module "native_bridge_proxy_libm_defaults".
+Or did you mean ["native_bridge_proxy_libc_defaults"]?
+fatal errors encountered
+ninja: build stopped: subcommand failed.
+20:32:35 soong bootstrap failed with: exit status 1
+
+#### failed to build some targets (7 seconds) ####
+
+OME_EXIT=1 ELAPSED_SECONDS=13

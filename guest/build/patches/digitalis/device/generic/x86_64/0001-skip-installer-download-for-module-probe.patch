@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Module probes do not consume the installer environment or fetch releases/latest.
+--- a/vendorsetup.sh
++++ b/vendorsetup.sh
+@@ -15,1 +15,4 @@
+-bash bootable/aaropa/download.sh
++# Modified by Open Mobile Emulator: module-only probes need no installer assets.
++if [ "${OME_SKIP_INSTALLER_DOWNLOAD:-0}" != 1 ]; then
++    bash bootable/aaropa/download.sh
++fi

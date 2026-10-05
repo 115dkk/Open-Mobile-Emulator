@@ -1,0 +1,233 @@
+error: hooks is different in /home/ome/bliss/.repo/projects/frameworks/libs/binary_translation.git vs /home/ome/bliss/.repo/project-objects/platform_frameworks_libs_binary_translation.git
+Finalizing sync state...
+repo sync has finished successfully.
+your 131072x1 screen size is bogus. expect trouble
+including device/generic/x86_64/vendorsetup.sh
+Removing existing file: boot_hybrid.img
+Removing existing directory: initrd_lib
+Removing existing directory: iso
+aria2c found, using aria2c for download.
+Downloading install.sfs using aria2c...
+
+10/05 20:27:05 [NOTICE] Downloading 1 item(s)
+
+10/05 20:27:06 [NOTICE] CUID#7 - Redirecting to https://github.com/BlissOS/aaropa_rootfs/releases/download/r101/install.sfs
+
+10/05 20:27:06 [NOTICE] CUID#7 - Redirecting to https://release-assets.githubusercontent.com/[temporary-download-url]
+
+10/05 20:27:06 [NOTICE] CUID#9 - Redirecting to https://github.com/BlissOS/aaropa_rootfs/releases/download/r101/install.sfs
+
+10/05 20:27:06 [NOTICE] CUID#12 - Redirecting to https://github.com/BlissOS/aaropa_rootfs/releases/download/r101/install.sfs
+
+10/05 20:27:06 [NOTICE] CUID#11 - Redirecting to https://github.com/BlissOS/aaropa_rootfs/releases/download/r101/install.sfs
+
+10/05 20:27:06 [NOTICE] CUID#14 - Redirecting to https://github.com/BlissOS/aaropa_rootfs/releases/download/r101/install.sfs
+
+10/05 20:27:06 [NOTICE] CUID#13 - Redirecting to https://github.com/BlissOS/aaropa_rootfs/releases/download/r101/install.sfs
+
+10/05 20:27:06 [NOTICE] CUID#10 - Redirecting to https://github.com/BlissOS/aaropa_rootfs/releases/download/r101/install.sfs
+
+10/05 20:27:06 [NOTICE] CUID#15 - Redirecting to https://github.com/BlissOS/aaropa_rootfs/releases/download/r101/install.sfs
+[#b93a24 6.6MiB/237MiB(2%) CN:8 DL:32MiB ETA:7s]
+
+10/05 20:27:06 [NOTICE] CUID#9 - Redirecting to https://release-assets.githubusercontent.com/[temporary-download-url]
+
+10/05 20:27:06 [NOTICE] CUID#12 - Redirecting to https://release-assets.githubusercontent.com/[temporary-download-url]
+
+10/05 20:27:06 [NOTICE] CUID#10 - Redirecting to https://release-assets.githubusercontent.com/[temporary-download-url]
+
+10/05 20:27:06 [NOTICE] CUID#11 - Redirecting to https://release-assets.githubusercontent.com/[temporary-download-url]
+
+10/05 20:27:06 [NOTICE] CUID#13 - Redirecting to https://release-assets.githubusercontent.com/[temporary-download-url]
+
+10/05 20:27:06 [NOTICE] CUID#14 - Redirecting to https://release-assets.githubusercontent.com/[temporary-download-url]
+
+10/05 20:27:06 [NOTICE] CUID#15 - Redirecting to https://release-assets.githubusercontent.com/[temporary-download-url]
+
+10/05 20:27:06 [NOTICE] CUID#11 - Redirecting to https://github.com/BlissOS/aaropa_rootfs/releases/download/r101/install.sfs
+
+10/05 20:27:06 [NOTICE] CUID#15 - Redirecting to https://github.com/BlissOS/aaropa_rootfs/releases/download/r101/install.sfs
+
+10/05 20:27:06 [NOTICE] CUID#13 - Redirecting to https://github.com/BlissOS/aaropa_rootfs/releases/download/r101/install.sfs
+
+10/05 20:27:06 [NOTICE] CUID#14 - Redirecting to https://github.com/BlissOS/aaropa_rootfs/releases/download/r101/install.sfs
+
+10/05 20:27:06 [NOTICE] CUID#15 - Redirecting to https://release-assets.githubusercontent.com/[temporary-download-url]
+
+10/05 20:27:06 [NOTICE] CUID#11 - Redirecting to https://release-assets.githubusercontent.com/[temporary-download-url]
+
+10/05 20:27:06 [NOTICE] CUID#14 - Redirecting to https://release-assets.githubusercontent.com/[temporary-download-url]
+
+10/05 20:27:06 [NOTICE] CUID#13 - Redirecting to https://release-assets.githubusercontent.com/[temporary-download-url]
+[#b93a24 44MiB/237MiB(18%) CN:8 DL:36MiB ETA:5s]
+[#b93a24 88MiB/237MiB(37%) CN:7 DL:40MiB ETA:3s]
+[#b93a24 124MiB/237MiB(52%) CN:6 DL:39MiB ETA:2s]
+[#b93a24 163MiB/237MiB(68%) CN:5 DL:39MiB ETA:1s]
+[#b93a24 203MiB/237MiB(85%) CN:4 DL:39MiB]
+[#b93a24 234MiB/237MiB(98%) CN:1 DL:38MiB]
+
+10/05 20:27:12 [NOTICE] Download complete: /home/ome/bliss/bootable/aaropa/install.sfs
+
+Download Results:
+gid   |stat|avg speed  |path/URI
+======+====+===========+=======================================================
+b93a24|OK  |    37MiB/s|/home/ome/bliss/bootable/aaropa/install.sfs
+
+Status Legend:
+(OK):download completed.
+Downloading initrd_lib.tar.gz using aria2c...
+
+10/05 20:27:12 [NOTICE] Downloading 1 item(s)
+
+10/05 20:27:13 [NOTICE] CUID#7 - Redirecting to https://github.com/BlissOS/aaropa_rootfs/releases/download/r101/initrd_lib.tar.gz
+
+10/05 20:27:13 [NOTICE] CUID#7 - Redirecting to https://release-assets.githubusercontent.com/[temporary-download-url]
+[#4d9b3c 0B/0B CN:1 DL:0B]
+
+10/05 20:27:14 [NOTICE] Download complete: /home/ome/bliss/bootable/aaropa/initrd_lib.tar.gz
+
+Download Results:
+gid   |stat|avg speed  |path/URI
+======+====+===========+=======================================================
+4d9b3c|OK  |    18MiB/s|/home/ome/bliss/bootable/aaropa/initrd_lib.tar.gz
+
+Status Legend:
+(OK):download completed.
+Downloading grub-rescue.iso using aria2c...
+
+10/05 20:27:14 [NOTICE] Downloading 1 item(s)
+
+10/05 20:27:14 [NOTICE] CUID#7 - Redirecting to https://github.com/BlissOS/aaropa_rootfs/releases/download/r101/grub-rescue.iso
+
+10/05 20:27:14 [NOTICE] CUID#7 - Redirecting to https://release-assets.githubusercontent.com/[temporary-download-url]
+[#93f12f 6.7MiB/27MiB(24%) CN:1 DL:35MiB]
+[#93f12f 20MiB/27MiB(71%) CN:1 DL:16MiB]
+
+10/05 20:27:16 [NOTICE] Download complete: /home/ome/bliss/bootable/aaropa/grub-rescue.iso
+
+Download Results:
+gid   |stat|avg speed  |path/URI
+======+====+===========+=======================================================
+93f12f|OK  |    19MiB/s|/home/ome/bliss/bootable/aaropa/grub-rescue.iso
+
+Status Legend:
+(OK):download completed.
+Downloading boot_hybrid.img using aria2c...
+
+10/05 20:27:16 [NOTICE] Downloading 1 item(s)
+
+10/05 20:27:16 [NOTICE] CUID#7 - Redirecting to https://github.com/BlissOS/aaropa_rootfs/releases/download/r101/boot_hybrid.img
+
+10/05 20:27:17 [NOTICE] CUID#7 - Redirecting to https://release-assets.githubusercontent.com/[temporary-download-url]
+
+10/05 20:27:17 [NOTICE] Download complete: /home/ome/bliss/bootable/aaropa/boot_hybrid.img
+
+Download Results:
+gid   |stat|avg speed  |path/URI
+======+====+===========+=======================================================
+72d266|OK  |    45KiB/s|/home/ome/bliss/bootable/aaropa/boot_hybrid.img
+
+Status Legend:
+(OK):download completed.
+Extracting grub-rescue.iso to iso directory...
+
+7-Zip [64] 16.02 : Copyright (c) 1999-2016 Igor Pavlov : 2016-05-21
+p7zip Version 16.02 (locale=C.UTF-8,Utf16=on,HugeFiles=on,64 bits,16 CPUs 12th Gen Intel(R) Core(TM) i5-12600KF (90672),ASM,AES-NI)
+
+Scanning the drive for archives:
+1 file, 29143040 bytes (28 MiB)
+
+Extracting archive: grub-rescue.iso
+
+WARNINGS:
+There are data after the end of archive
+
+--
+Path = grub-rescue.iso
+Type = Iso
+WARNINGS:
+There are data after the end of archive
+Physical Size = 28807168
+Tail Size = 335872
+Comment = 
+Volume: ISOIMAGE
+Preparer: XORRISO-1.5.6 2023.06.07.180001, LIBISOBURN-1.5.6, LIBISOFS-1.5.6, LIBBURN-1.5.6
+Created = 2025-07-15 11:11:56
+Modified = 2025-07-15 11:11:56
+
+Everything is Ok
+
+Archives with Warnings: 1
+
+Warnings: 1
+Folders: 17
+Files: 951
+Size:       30206035
+Compressed: 29143040
+Moving install.sfs to iso directory...
+Extracting initrd_lib.tar.gz...
+Setting permissions for initrd_lib...
+Script execution complete!
+
+============================================
+PLATFORM_VERSION_CODENAME=REL
+PLATFORM_VERSION=15
+BLISS_BUILD_VERSION=Bliss-v18.4-x86_64-UNOFFICIAL-vanilla-20261005
+BLISS_CODENAME=Voyager
+BLISS_VERSION=18.4
+BLISS_DEVICE=x86_64
+BLISS_BUILDTYPE=UNOFFICIAL
+BLISS_BUILD_VARIANT=vanilla
+TARGET_PRODUCT=bliss_x86_64
+TARGET_BUILD_VARIANT=userdebug
+TARGET_ARCH=x86_64
+TARGET_ARCH_VARIANT=sandybridge
+TARGET_CPU_VARIANT=generic
+TARGET_2ND_ARCH=x86
+TARGET_2ND_ARCH_VARIANT=sandybridge
+TARGET_2ND_CPU_VARIANT=generic
+HOST_OS=linux
+HOST_OS_EXTRA=Linux-6.6.87.1-microsoft-standard-WSL2-x86_64-Ubuntu-22.04.5-LTS
+HOST_CROSS_OS=windows
+BUILD_ID=AP4A.250205.002
+OUT_DIR=out
+PRODUCT_SOONG_NAMESPACES=hardware/google/camera hardware/google/camera/devices/EmulatedCamera vendor/SystemUIClocks hardware/nxp
+============================================
+Running product configuration...
+============================================
+PLATFORM_VERSION_CODENAME=REL
+PLATFORM_VERSION=15
+BLISS_BUILD_VERSION=Bliss-v18.4-x86_64-UNOFFICIAL-vanilla-20261005
+BLISS_CODENAME=Voyager
+BLISS_VERSION=18.4
+BLISS_DEVICE=x86_64
+BLISS_BUILDTYPE=UNOFFICIAL
+BLISS_BUILD_VARIANT=vanilla
+TARGET_PRODUCT=bliss_x86_64
+TARGET_BUILD_VARIANT=userdebug
+TARGET_ARCH=x86_64
+TARGET_ARCH_VARIANT=sandybridge
+TARGET_CPU_VARIANT=generic
+TARGET_2ND_ARCH=x86
+TARGET_2ND_ARCH_VARIANT=sandybridge
+TARGET_2ND_CPU_VARIANT=generic
+HOST_OS=linux
+HOST_OS_EXTRA=Linux-6.6.87.1-microsoft-standard-WSL2-x86_64-Ubuntu-22.04.5-LTS
+HOST_CROSS_OS=windows
+BUILD_ID=AP4A.250205.002
+OUT_DIR=out
+PRODUCT_SOONG_NAMESPACES=hardware/google/camera hardware/google/camera/devices/EmulatedCamera vendor/SystemUIClocks hardware/nxp
+============================================
+Running globs...
+[100% 1/1] analyzing Android.bp files and generating ninja file at out/soong/build.bliss_x86_64.ninja
+FAILED: out/soong/build.bliss_x86_64.ninja
+cd "$(dirname "out/host/linux-x86/bin/soong_build")" && BUILDER="$PWD/$(basename "out/host/linux-x86/bin/soong_build")" && cd / && env -i  "$BUILDER"     --top "$TOP"     --soong_out "out/soong"     --out "out"     --soong_variables out/soong/soong.bliss_x86_64.variables -o out/soong/build.bliss_x86_64.ninja -l out/.module_paths/Android.bp.list --available_env out/soong/soong.environment.available --used_env out/soong/soong.environment.used.bliss_x86_64.build Android.bp
+error: frameworks/libs/binary_translation/Android.bp:368:1: unrecognized module type "ndk_translation_package"
+error: frameworks/libs/binary_translation/Android.bp:470:1: unrecognized module type "ndk_translation_package"
+fatal errors encountered
+ninja: build stopped: subcommand failed.
+20:27:29 soong bootstrap failed with: exit status 1
+
+#### failed to build some targets (4 seconds) ####
+
+OME_EXIT=1 ELAPSED_SECONDS=27

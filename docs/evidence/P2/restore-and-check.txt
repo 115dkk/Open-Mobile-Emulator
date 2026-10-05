@@ -1,0 +1,31 @@
+
+=== syntax and guards ===
+Digitalis API 35 is a module probe only; restore the base manifest before image operations
+Digitalis API 35 is a module probe only; restore the base manifest before image operations
+Digitalis API 35 is a module probe only; restore the base manifest before image operations
+Digitalis API 35 is a module probe only; restore the base manifest before image operations
+
+=== patch idempotence ===
+
+=== restore manifest and original checkout ===
+error: hooks is different in /home/ome/bliss/.repo/projects/frameworks/libs/binary_translation.git vs /home/ome/bliss/.repo/project-objects/platform/frameworks/libs/binary_translation.git
+error: hooks is different in /home/ome/bliss/.repo/projects/frameworks/libs/binary_translation.git vs /home/ome/bliss/.repo/project-objects/platform/frameworks/libs/binary_translation.git
+Finalizing sync state...
+repo sync has finished successfully.
+
+=== restore verified installer cache ===
+install.sfs: OK
+initrd_lib.tar.gz: OK
+grub-rescue.iso: OK
+boot_hybrid.img: OK
+initrd_lib extracted files match pinned archive: 8
+install.sfs matches pinned cache
+boot_hybrid.img matches pinned cache
+
+=== final resources and release inventory ===
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sde       1007G  300G  657G  32% /
+C:\             932G  834G   99G  90% /mnt/c
+dist/20261003-db973c9/Bliss-v18.4-x86_64-UNOFFICIAL-vanilla-20261003.iso 2946426880 bytes
+
+OME_RESTORE_EXIT=0
