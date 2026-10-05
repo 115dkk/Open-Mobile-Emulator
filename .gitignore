@@ -32,6 +32,7 @@ qemu-build/dist/
 qemu-build/src/
 qemu-build/*.lock.txt
 tests/fixtures/**/build/
+guest/ime/out/
 *.o
 *.obj
 *.exe

@@ -113,6 +113,46 @@ Describe 'Check-SpdxHeaders.ps1' {
         $result.Text | Should -Not -Match 'SPDX src/correct\.ps1'
     }
 
+    It 'checks Java sources and IME XML including nested resources' {
+        $imeRoot = Join-Path $script:TempRepository 'guest/ime'
+        [void][System.IO.Directory]::CreateDirectory((Join-Path $imeRoot 'res/xml'))
+        Set-Content -LiteralPath (Join-Path $imeRoot 'Service.java') -Encoding utf8NoBOM -Value @(
+            '// SPDX-License-Identifier: GPL-2.0-or-later', 'class Service {}'
+        )
+        Set-Content -LiteralPath (Join-Path $imeRoot 'AndroidManifest.xml') -Encoding utf8NoBOM -Value @(
+            '<?xml version="1.0" encoding="utf-8"?>',
+            '<!-- SPDX-License-Identifier: GPL-2.0-or-later -->', '<manifest />'
+        )
+        Set-Content -LiteralPath (Join-Path $imeRoot 'res/xml/method.xml') -Encoding utf8NoBOM -Value @(
+            '<!-- SPDX-License-Identifier: GPL-2.0-or-later -->', '<input-method />'
+        )
+        $result = Invoke-SpdxCheck $script:TempRepository @(
+            'guest/ime/Service.java', 'guest/ime/AndroidManifest.xml', 'guest/ime/res/xml/method.xml'
+        )
+        $result.ExitCode | Should -Be 0
+        $result.Text | Should -Match 'SUMMARY spdx findings=0 checked=3'
+    }
+
+    It 'rejects unlicensed Java and missing or non-GPL IME XML headers' {
+        $imeRoot = Join-Path $script:TempRepository 'guest/ime'
+        [void][System.IO.Directory]::CreateDirectory((Join-Path $imeRoot 'res/xml'))
+        Set-Content -LiteralPath (Join-Path $imeRoot 'Service.java') -Value 'class Service {}'
+        Set-Content -LiteralPath (Join-Path $imeRoot 'AndroidManifest.xml') -Value '<manifest />'
+        Set-Content -LiteralPath (Join-Path $imeRoot 'res/xml/method.xml') -Value @(
+            '<!-- SPDX-License-Identifier: Apache-2.0 -->', '<input-method />'
+        )
+        Set-Content -LiteralPath (Join-Path $script:TempRepository 'src/unrelated.xml') -Value '<root />'
+        $result = Invoke-SpdxCheck $script:TempRepository @(
+            'guest/ime/Service.java', 'guest/ime/AndroidManifest.xml',
+            'guest/ime/res/xml/method.xml', 'src/unrelated.xml'
+        )
+        $result.ExitCode | Should -Be 1
+        $result.Text | Should -Match 'SPDX guest/ime/Service\.java missing'
+        $result.Text | Should -Match 'SPDX guest/ime/AndroidManifest\.xml missing'
+        $result.Text | Should -Match 'SPDX guest/ime/res/xml/method\.xml wrong-license'
+        $result.Text | Should -Match 'SUMMARY spdx findings=3 checked=3'
+    }
+
     It 'reads file content from the index with -Staged' {
         $stagedPath = Join-Path $script:TempRepository 'src/staged.ps1'
         Set-Content -LiteralPath $stagedPath -Encoding utf8NoBOM -Value '# missing in index'

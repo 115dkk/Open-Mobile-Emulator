@@ -169,7 +169,9 @@ try {
         ) {
             continue
         }
-        if (-not $checkedExtensions.Contains([System.IO.Path]::GetExtension($candidate))) {
+        $isImeXml = $candidate.StartsWith('guest/ime/', [System.StringComparison]::OrdinalIgnoreCase) -and
+            [System.IO.Path]::GetExtension($candidate) -ieq '.xml'
+        if (-not $isImeXml -and -not $checkedExtensions.Contains([System.IO.Path]::GetExtension($candidate))) {
             continue
         }
 
@@ -207,10 +209,10 @@ try {
             $candidate.StartsWith('guest/overlay/', [System.StringComparison]::OrdinalIgnoreCase) -or
             $candidate.StartsWith('translator/bundle-template/', [System.StringComparison]::OrdinalIgnoreCase)
         $hasGpl = @($firstLines | Where-Object {
-                $_ -match 'SPDX-License-Identifier:\s*GPL-2\.0-or-later\s*(?:\*/)?\s*$'
+                $_ -match 'SPDX-License-Identifier:\s*GPL-2\.0-or-later\s*(?:\*/|-->)?\s*$'
             }).Count -gt 0
         $hasApache = @($firstLines | Where-Object {
-                $_ -match 'SPDX-License-Identifier:\s*Apache-2\.0\s*(?:\*/)?\s*$'
+                $_ -match 'SPDX-License-Identifier:\s*Apache-2\.0\s*(?:\*/|-->)?\s*$'
             }).Count -gt 0
 
         $checked++
