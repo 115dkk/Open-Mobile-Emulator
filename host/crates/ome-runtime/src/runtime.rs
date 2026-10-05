@@ -18,6 +18,7 @@ use ome_guest_image::{
     ImageStatus as ProfileStatus, InstallMethod, ProbeItem, ProbeOutcome, ProbeState, ShellRunner,
     Translator, adapter_for, recommended_index, sort_newest_first,
 };
+use ome_guest_ime::{FocusInfo, HostMessage, ImeLink, ImeLinkEvent};
 use ome_guest_install::helper::{DEFAULT_SRC, boot_cmdline, install_cmdline, write_install_initrd};
 use ome_guest_install::iso9660::IsoImage;
 use ome_guest_install::progress::{InstallReport, InstallStage, parse_serial_log};
@@ -54,6 +55,9 @@ use crate::settings::{Settings, SettingsError, SettingsStore};
 const INSTALL_DEADLINE: Duration = Duration::from_secs(20 * 60);
 const INSTALL_DEADLINE_FAILURE: &str = "설치가 20분 안에 끝나지 않았습니다.";
 const INSTALL_STOPPED_FAILURE: &str = "설치 도우미가 끝나기 전에 멈췄습니다.";
+const IME_PACKAGE: &str = "org.openmobileemulator.ime";
+const IME_SERVICE: &str = "org.openmobileemulator.ime/.OmeInputMethodService";
+const IME_SOCKET: &str = "ome-ime";
 use crate::{
     AppIssue, AppItem, AppPhase, AppSnapshot, AppsView, Blocker, BlockerKind, CONTRACT_VERSION,
     Capability, CapabilityId, CapabilityReport, ClipboardItem, Command, CustomDisplay,
@@ -61,8 +65,8 @@ use crate::{
     GuestSummary, GuestView, HelpTopic, HostCheckId, HostReport, HostRow, HostStatus, HostingMode,
     ImageDistribution, ImageStatus, ImageTranslator, ImagesView, InputView, InstallProgress,
     LastExit, Notice, NoticeLevel, Orientation, Rect, SettingsView, Size, StageFit, StageRect,
-    TransferProgress, TransferStage, UpdateAsset, UpdateState, UpdateView, VsyncMode, WizardStep,
-    WizardView,
+    TextInputState, TextInputView, TransferProgress, TransferStage, UpdateAsset, UpdateState,
+    UpdateView, VsyncMode, WizardStep, WizardView,
 };
 
 /// Process lifecycle seam owned by the runtime.
@@ -253,6 +257,8 @@ pub struct RuntimeDeps {
     pub adb: Option<AdbSession>,
     /// Host adb public-key path supplied by the native shell or a deterministic test.
     pub adb_host_key_path: Option<PathBuf>,
+    /// Bundled OME input-method APK; its sibling `ome-ime.json` declares `versionCode`.
+    pub ime_apk: Option<PathBuf>,
     /// QEMU lifecycle supervisor.
     pub supervisor: Option<Box<dyn GuestProcess>>,
     /// Trusted native desktop operations.
@@ -277,6 +283,7 @@ impl std::fmt::Debug for RuntimeDeps {
             .debug_struct("RuntimeDeps")
             .field("artifacts", &self.artifacts.is_some())
             .field("adb", &self.adb.is_some())
+            .field("ime_apk", &self.ime_apk)
             .field("supervisor", &self.supervisor.is_some())
             .field("install_dir", &self.install_dir)
             .field("images_dir", &self.images_dir)
@@ -287,6 +294,12 @@ impl std::fmt::Debug for RuntimeDeps {
 }
 
 #[derive(Debug)]
+struct ImePrepareResult {
+    port: u16,
+    installed_version: u64,
+}
+
+#[derive(Debug)]
 enum WorkerEvent {
     ArtifactProgress(TransferProgress),
     ArtifactFinished(Result<(), AppIssue>),
@@ -294,7 +307,14 @@ enum WorkerEvent {
     InstallFinished(Result<Vec<AppItem>, AppIssue>),
     SharedProgress(InstallProgress),
     SharedFinished(Result<u64, AppIssue>),
-    BootPolled { generation: u64, completed: bool },
+    BootPolled {
+        generation: u64,
+        completed: bool,
+    },
+    ImePrepared {
+        generation: u64,
+        result: Result<ImePrepareResult, String>,
+    },
     UpdateChecked(Result<UpdateRelease, AppIssue>),
     UpdateProgress(TransferProgress),
     UpdateDownloaded(Result<DownloadedUpdate, AppIssue>),
@@ -312,6 +332,12 @@ struct UpdateRelease {
 struct DownloadedUpdate {
     version: String,
     path: PathBuf,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ImeBundleMetadata {
+    version_code: u64,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -362,6 +388,14 @@ pub struct AppRuntime {
     dropped_touch_operations: u64,
     suspend_hotkey_down: bool,
     interpreted_keys: std::collections::BTreeSet<(u16, bool)>,
+    text_input: TextInputView,
+    ime_link: Option<ImeLink>,
+    ime_forward_port: Option<u16>,
+    ime_prepare_pending: bool,
+    ime_prepare_attempted: bool,
+    ime_expected_version: Option<u64>,
+    ime_hello_valid: bool,
+    ime_warning_shown: bool,
     display_fit: StageFit,
     active_display: Option<String>,
     custom_display: Option<CustomDisplay>,
@@ -609,6 +643,14 @@ impl AppRuntime {
             dropped_touch_operations: 0,
             suspend_hotkey_down: false,
             interpreted_keys: std::collections::BTreeSet::new(),
+            text_input: TextInputView::default(),
+            ime_link: None,
+            ime_forward_port: None,
+            ime_prepare_pending: false,
+            ime_prepare_attempted: false,
+            ime_expected_version: None,
+            ime_hello_valid: false,
+            ime_warning_shown: false,
             display_fit: StageFit::FitWindow,
             active_display: Some("hd-720".to_owned()),
             custom_display: None,
@@ -730,6 +772,7 @@ impl AppRuntime {
                 suspend_hotkey: self.suspend_hotkey.clone(),
                 overlay_visible: self.input_overlay_visible,
             },
+            text_input: self.text_input.clone(),
             display: DisplayView {
                 presets: self.display_presets(),
                 active_id: self.active_display.clone(),
@@ -881,6 +924,9 @@ impl AppRuntime {
                 self.suspend_hotkey = code;
                 Ok(())
             }
+            Command::TextCompose { text } => self.send_text_message(HostMessage::Compose { text }),
+            Command::TextCommit { text } => self.send_text_message(HostMessage::Commit { text }),
+            Command::TextKey { key } => self.send_text_message(HostMessage::Key { key }),
             Command::DisplayPresetApply { id } => self.apply_display_preset(id),
             Command::DisplayCustomApply { size, density_dpi } => {
                 self.apply_custom_display(size, density_dpi)
@@ -1671,6 +1717,39 @@ impl AppRuntime {
                             self.mark_migrated_direct_boot_verified();
                             self.run_capability_probe();
                             self.last_account_poll = Some(Instant::now());
+                        }
+                    }
+                }
+                WorkerEvent::ImePrepared { generation, result } => {
+                    if generation != self.boot_generation {
+                        if let Ok(prepared) = result
+                            && let Some(adb) = self.deps.adb.as_ref()
+                        {
+                            let _ = adb.forward_remove(prepared.port);
+                        }
+                        continue;
+                    }
+                    if self.guest_state != GuestState::Running || !self.boot_completed {
+                        if let Ok(prepared) = result
+                            && let Some(adb) = self.deps.adb.as_ref()
+                        {
+                            let _ = adb.forward_remove(prepared.port);
+                        }
+                        self.ime_prepare_pending = false;
+                        continue;
+                    }
+                    self.ime_prepare_pending = false;
+                    match result {
+                        Ok(prepared) => {
+                            self.ime_expected_version = Some(prepared.installed_version);
+                            self.ime_hello_valid = false;
+                            self.ime_forward_port = Some(prepared.port);
+                            self.ime_link = Some(ImeLink::tcp(prepared.port));
+                        }
+                        Err(error) => {
+                            eprintln!("[ime] input method preparation failed: {error}");
+                            self.mark_text_input_unavailable();
+                            self.push_ime_warning();
                         }
                     }
                 }
@@ -2475,6 +2554,20 @@ impl AppRuntime {
     /// QMP work occurs on the supervisor thread; this method only submits to its channel.
     pub fn ingest_host_key(&mut self, key: HostKey, app_foreground: bool) {
         let browser_code = key.browser_code();
+        if browser_code == Some(self.suspend_hotkey.as_str()) {
+            if key.pressed {
+                if !self.suspend_hotkey_down {
+                    self.suspend_hotkey_down = true;
+                    self.input_suspended = !self.input_suspended;
+                }
+            } else {
+                self.suspend_hotkey_down = false;
+            }
+            return;
+        }
+        if self.text_input.state == TextInputState::Active {
+            return;
+        }
         let active_profile = self
             .active_input
             .as_deref()
@@ -2589,6 +2682,22 @@ impl AppRuntime {
                 }
             }
         }
+    }
+
+    fn send_text_message(&mut self, message: HostMessage) -> Result<(), AppIssue> {
+        if self.text_input.state != TextInputState::Active {
+            return Err(issues::text_input_not_active());
+        }
+        let result = self
+            .ime_link
+            .as_mut()
+            .ok_or_else(issues::text_input_not_active)?
+            .send(&message);
+        if result.is_err() {
+            self.mark_text_input_unavailable();
+            return Err(issues::text_input_not_active());
+        }
+        Ok(())
     }
 
     fn submit_input(&mut self, events: Vec<serde_json::Value>) {
@@ -2743,6 +2852,8 @@ impl AppRuntime {
         }
         match event.state {
             ome_supervisor::GuestState::Starting => {
+                self.cleanup_ime();
+                self.ime_warning_shown = false;
                 self.key_synth.reset();
                 self.interpreted_keys.clear();
                 self.suspend_hotkey_down = false;
@@ -2772,6 +2883,7 @@ impl AppRuntime {
                 self.try_place_guest_window();
             }
             ome_supervisor::GuestState::Restarting => {
+                self.cleanup_ime();
                 self.key_synth.reset();
                 self.interpreted_keys.clear();
                 self.suspend_hotkey_down = false;
@@ -2794,6 +2906,7 @@ impl AppRuntime {
                 let _ = self.deps.window_host.detach();
             }
             ome_supervisor::GuestState::Stopped => {
+                self.cleanup_ime();
                 self.key_synth.reset();
                 self.interpreted_keys.clear();
                 self.suspend_hotkey_down = false;
@@ -2822,6 +2935,7 @@ impl AppRuntime {
                 }
             }
             ome_supervisor::GuestState::Failed => {
+                self.cleanup_ime();
                 self.key_synth.reset();
                 self.interpreted_keys.clear();
                 self.suspend_hotkey_down = false;
@@ -2855,6 +2969,7 @@ impl AppRuntime {
         self.refresh_install_report();
         self.guest_state = convert_guest_state(state);
         self.sync_display_keep_awake();
+        self.cleanup_ime();
         self.key_synth.reset();
         self.interpreted_keys.clear();
         self.suspend_hotkey_down = false;
@@ -2996,6 +3111,10 @@ impl AppRuntime {
         if self.guest_state != GuestState::Running {
             return;
         }
+        if self.boot_completed {
+            self.start_ime_prepare();
+            self.tick_ime_link();
+        }
         if self.hosting == HostingMode::Embedded
             && let Ok(Some(geometry)) = self.deps.window_host.resync()
         {
@@ -3049,6 +3168,214 @@ impl AppRuntime {
         }
     }
 
+    fn start_ime_prepare(&mut self) {
+        if self.ime_prepare_attempted || self.ime_prepare_pending || self.ime_link.is_some() {
+            return;
+        }
+        self.ime_prepare_attempted = true;
+        let Some(adb) = self.deps.adb.as_ref().cloned() else {
+            self.mark_text_input_unavailable();
+            self.push_ime_warning();
+            return;
+        };
+        let Some(apk) = self.deps.ime_apk.clone() else {
+            self.mark_text_input_unavailable();
+            self.push_ime_warning();
+            return;
+        };
+        let generation = self.boot_generation;
+        let sender = self.worker_tx.clone();
+        self.ime_prepare_pending = true;
+        let spawn = thread::Builder::new()
+            .name("ome-ime-prepare".to_owned())
+            .spawn(move || {
+                let result = prepare_ime(&adb, &apk).map_err(|error| error.to_string());
+                let _ = sender.send(WorkerEvent::ImePrepared { generation, result });
+            });
+        if spawn.is_err() {
+            self.ime_prepare_pending = false;
+            self.mark_text_input_unavailable();
+            self.push_ime_warning();
+        }
+    }
+
+    fn tick_ime_link(&mut self) {
+        let Some(link) = self.ime_link.as_mut() else {
+            return;
+        };
+        let events = link.tick();
+        for event in events {
+            match event {
+                ImeLinkEvent::Hello {
+                    version,
+                    package,
+                    version_code,
+                } if version == ome_guest_ime::protocol::PROTOCOL_VERSION
+                    && package == IME_PACKAGE
+                    && self.ime_expected_version == Some(version_code) =>
+                {
+                    self.ime_hello_valid = true;
+                    if self.text_input.state == TextInputState::Unavailable {
+                        self.text_input = TextInputView {
+                            state: TextInputState::Idle,
+                            input_type: None,
+                            package: None,
+                        };
+                    }
+                    self.set_text_input_capability(Capability::Available);
+                }
+                ImeLinkEvent::Hello { .. } => {
+                    self.ime_hello_valid = false;
+                    self.mark_text_input_unavailable();
+                    self.push_ime_warning();
+                }
+                ImeLinkEvent::Focus(focus) if self.ime_hello_valid => {
+                    self.activate_text_input(focus);
+                }
+                ImeLinkEvent::Focus(_) => {}
+                ImeLinkEvent::Blur => {
+                    if self.text_input.state != TextInputState::Unavailable {
+                        self.text_input = TextInputView {
+                            state: TextInputState::Idle,
+                            input_type: None,
+                            package: None,
+                        };
+                    }
+                }
+                ImeLinkEvent::Unknown { .. } => {}
+                ImeLinkEvent::Disconnected => {
+                    self.ime_hello_valid = false;
+                    self.mark_text_input_unavailable();
+                }
+            }
+        }
+    }
+
+    fn activate_text_input(&mut self, focus: FocusInfo) {
+        if self.text_input.state != TextInputState::Active {
+            let releases = self.key_synth.release_all();
+            if !releases.is_empty() {
+                self.submit_input(releases);
+            }
+            self.release_interpreted_keys();
+        }
+        self.text_input = TextInputView {
+            state: TextInputState::Active,
+            input_type: Some(focus.input_type),
+            package: Some(focus.package),
+        };
+    }
+
+    fn release_interpreted_keys(&mut self) {
+        let Some(profile) = self
+            .active_input
+            .as_deref()
+            .and_then(|id| self.input_profiles.iter().find(|profile| profile.id == id))
+            .cloned()
+        else {
+            self.interpreted_keys.clear();
+            return;
+        };
+        let pressed = std::mem::take(&mut self.interpreted_keys);
+        for (scan, extended) in pressed {
+            let key = HostKey {
+                scan,
+                extended,
+                pressed: false,
+            };
+            let Some(code) = key.browser_code() else {
+                continue;
+            };
+            let operations = Mapper::translate(
+                &profile,
+                MappedKeyEvent {
+                    code: code.to_owned(),
+                    pressed: false,
+                },
+            );
+            if !operations.is_empty() {
+                let count = u64::try_from(operations.len()).unwrap_or(u64::MAX);
+                self.dropped_touch_operations = self.dropped_touch_operations.saturating_add(count);
+            }
+        }
+    }
+
+    fn set_text_input_capability(&mut self, state: Capability) {
+        if let Some(item) = self
+            .capabilities
+            .items
+            .iter_mut()
+            .find(|item| item.id == CapabilityId::TextInput)
+        {
+            item.state = state;
+        } else {
+            self.capabilities.items.push(crate::CapabilityItem {
+                id: CapabilityId::TextInput,
+                state,
+            });
+        }
+        if let Some(position) = self.selected_guest_index() {
+            let stored_state = match state {
+                Capability::Available => StoredProbeState::Available,
+                Capability::Unavailable => StoredProbeState::Unavailable,
+                Capability::Unknown => StoredProbeState::Unknown,
+            };
+            if let Some(item) = self.guests[position]
+                .capabilities
+                .items
+                .iter_mut()
+                .find(|item| item.id == StoredProbeItem::TextInput)
+            {
+                item.state = stored_state;
+            } else {
+                self.guests[position].capabilities.items.push(
+                    crate::guest_store::StoredCapabilityItem {
+                        id: StoredProbeItem::TextInput,
+                        state: stored_state,
+                    },
+                );
+            }
+            if let Err(error) = self.guest_store.save(&self.guests[position]) {
+                eprintln!("[ime] text-input capability could not be saved: {error}");
+            }
+        }
+    }
+
+    fn push_ime_warning(&mut self) {
+        if self.ime_warning_shown {
+            return;
+        }
+        self.ime_warning_shown = true;
+        self.push_notice(Notice {
+            at: local_rfc3339(),
+            level: NoticeLevel::Warning,
+            message: "OME 입력기를 준비하지 못해 글 입력을 사용할 수 없습니다. 운영체제를 다시 시작하십시오."
+                .to_owned(),
+        });
+    }
+
+    fn cleanup_ime(&mut self) {
+        if let Some(link) = self.ime_link.as_mut() {
+            link.disconnect();
+        }
+        self.ime_link = None;
+        if let Some(port) = self.ime_forward_port.take()
+            && let Some(adb) = self.deps.adb.as_ref()
+        {
+            let _ = adb.forward_remove(port);
+        }
+        self.ime_prepare_pending = false;
+        self.ime_prepare_attempted = false;
+        self.ime_expected_version = None;
+        self.ime_hello_valid = false;
+        self.text_input = TextInputView::default();
+    }
+
+    fn mark_text_input_unavailable(&mut self) {
+        self.text_input = TextInputView::default();
+        self.set_text_input_capability(Capability::Unavailable);
+    }
+
     fn run_capability_probe(&mut self) {
         let Some(adb) = self.deps.adb.as_ref() else {
             return;
@@ -3075,12 +3402,19 @@ impl AppRuntime {
 
     fn apply_probe_outcome(&mut self, outcome: ProbeOutcome, add_account_supported: bool) {
         let probed_at = local_rfc3339();
+        let text_input = self
+            .capabilities
+            .items
+            .iter()
+            .find(|item| item.id == CapabilityId::TextInput)
+            .copied();
         self.capabilities = CapabilityReport {
             probed_at: Some(probed_at.clone()),
             items: outcome
                 .items
                 .iter()
                 .map(|(item, state)| capability_item(*item, *state))
+                .chain(text_input)
                 .collect(),
         };
         self.device_id = outcome.device_id.as_ref().map(|id| id.hex.clone());
@@ -3665,6 +3999,34 @@ impl AppRuntime {
     }
 }
 
+fn prepare_ime(
+    adb: &AdbSession,
+    apk: &Path,
+) -> Result<ImePrepareResult, Box<dyn std::error::Error + Send + Sync>> {
+    let metadata_path = apk
+        .parent()
+        .ok_or("IME APK has no parent directory")?
+        .join("ome-ime.json");
+    let metadata: ImeBundleMetadata = serde_json::from_slice(&fs::read(metadata_path)?)?;
+    if adb.package_version_code(IME_PACKAGE)? != Some(metadata.version_code) {
+        let package = ome_adb::AppPackage::open(apk)?;
+        if let Err(first_error) = adb.install(&package) {
+            if !first_error.is_update_incompatible() {
+                return Err(Box::new(first_error));
+            }
+            eprintln!("[ime] input method signer changed; uninstalling before one retry");
+            adb.uninstall(IME_PACKAGE)?;
+            adb.install(&package)?;
+        }
+    }
+    adb.ime_enable(IME_SERVICE)?;
+    adb.ime_set(IME_SERVICE)?;
+    Ok(ImePrepareResult {
+        port: adb.forward_localabstract(IME_SOCKET)?,
+        installed_version: metadata.version_code,
+    })
+}
+
 fn failed_install_report(path: Option<&Path>, stored_failure: Option<String>) -> InstallReport {
     let mut report = path
         .and_then(|path| fs::read_to_string(path).ok())
@@ -4167,6 +4529,7 @@ fn capability_report(stored: &crate::guest_store::StoredCapabilities) -> Capabil
                     StoredProbeItem::Multitouch => CapabilityId::Multitouch,
                     StoredProbeItem::NativeBridge => CapabilityId::NativeBridge,
                     StoredProbeItem::Root => CapabilityId::Root,
+                    StoredProbeItem::TextInput => CapabilityId::TextInput,
                 },
                 state: match item.state {
                     StoredProbeState::Available => Capability::Available,
@@ -4696,6 +5059,17 @@ mod tests {
         runtime.poll_workers();
     }
 
+    fn ime_bundle(directory: &Path, version_code: u64) -> PathBuf {
+        let apk = directory.join("ome-ime.apk");
+        fs::write(&apk, b"test apk").expect("IME APK fixture");
+        fs::write(
+            directory.join("ome-ime.json"),
+            serde_json::json!({ "versionCode": version_code }).to_string(),
+        )
+        .expect("IME metadata fixture");
+        apk
+    }
+
     #[derive(Clone, Debug)]
     struct RecordingWindow {
         attach_result: Result<(), HostingIssue>,
@@ -5019,6 +5393,7 @@ mod tests {
                 artifacts: None,
                 adb: Some(session),
                 adb_host_key_path: None,
+                ime_apk: None,
                 supervisor: Some(Box::new(supervisor)),
                 desktop: Box::new(desktop),
                 install_dir: None,
@@ -5119,6 +5494,7 @@ mod tests {
                 artifacts: None,
                 adb: None,
                 adb_host_key_path: None,
+                ime_apk: None,
                 supervisor: None,
                 desktop: Box::new(crate::UnavailableDesktop),
                 install_dir: None,
@@ -5178,6 +5554,7 @@ mod tests {
                 artifacts: None,
                 adb: None,
                 adb_host_key_path: None,
+                ime_apk: None,
                 supervisor: None,
                 desktop: Box::new(crate::UnavailableDesktop),
                 install_dir: None,
@@ -5279,6 +5656,7 @@ mod tests {
                 artifacts: None,
                 adb: None,
                 adb_host_key_path: None,
+                ime_apk: None,
                 supervisor: None,
                 desktop: Box::new(crate::UnavailableDesktop),
                 install_dir: None,
@@ -5395,6 +5773,177 @@ mod tests {
         runtime.ingest_host_key(event(0x58, false), true);
         assert!(runtime.snapshot().input.suspended);
         assert_eq!(supervisor.inputs.lock().expect("input lock").len(), 2);
+    }
+
+    #[test]
+    fn ime_prepare_skips_install_when_version_matches_and_creates_forward() {
+        let directory = tempfile::tempdir().expect("temp directory");
+        let apk = ime_bundle(directory.path(), 17);
+        let runner = RecordedRunner::new([
+            output("package:org.openmobileemulator.ime versionCode:17\n"),
+            output("enabled"),
+            output("selected"),
+            output("43219\n"),
+        ]);
+        let calls = runner.clone();
+        let adb =
+            AdbSession::new("adb.exe", "serial".to_owned(), Box::new(runner)).expect("adb session");
+
+        let prepared = prepare_ime(&adb, &apk).expect("prepare IME");
+
+        assert_eq!(prepared.port, 43219);
+        assert_eq!(prepared.installed_version, 17);
+        let calls = calls.calls();
+        assert_eq!(calls.len(), 4);
+        assert_eq!(
+            calls[0].args[2..],
+            [
+                "shell",
+                "pm",
+                "list",
+                "packages",
+                "--show-versioncode",
+                "org.openmobileemulator.ime"
+            ]
+        );
+        assert_eq!(
+            calls[3].args[2..],
+            ["forward", "tcp:0", "localabstract:ome-ime"]
+        );
+    }
+
+    #[test]
+    fn ime_prepare_reinstalls_only_after_signature_mismatch() {
+        let directory = tempfile::tempdir().expect("temp directory");
+        let apk = ime_bundle(directory.path(), 18);
+        let incompatible = Ok(Output {
+            exit_code: 1,
+            stdout: b"Failure [INSTALL_FAILED_UPDATE_INCOMPATIBLE: signatures differ]".to_vec(),
+            stderr: Vec::new(),
+        });
+        let runner = RecordedRunner::new([
+            output("package:org.openmobileemulator.ime versionCode:17\n"),
+            incompatible,
+            output("Success"),
+            output("Success"),
+            output("enabled"),
+            output("selected"),
+            output("43220\n"),
+        ]);
+        let calls = runner.clone();
+        let adb =
+            AdbSession::new("adb.exe", "serial".to_owned(), Box::new(runner)).expect("adb session");
+
+        let prepared = prepare_ime(&adb, &apk).expect("prepare IME after signer mismatch");
+
+        assert_eq!(prepared.port, 43220);
+        let calls = calls.calls();
+        assert_eq!(calls[1].args[2..4], ["install", "-r"]);
+        assert_eq!(calls[2].args[2..], ["uninstall", IME_PACKAGE]);
+        assert_eq!(calls[3].args[2..4], ["install", "-r"]);
+    }
+
+    #[test]
+    fn ime_prepare_does_not_uninstall_after_an_unrelated_install_failure() {
+        let directory = tempfile::tempdir().expect("temp directory");
+        let apk = ime_bundle(directory.path(), 18);
+        let runner = RecordedRunner::new([
+            output("package:org.openmobileemulator.ime versionCode:17\n"),
+            Ok(Output {
+                exit_code: 1,
+                stdout: b"Failure [INSTALL_FAILED_INSUFFICIENT_STORAGE]".to_vec(),
+                stderr: Vec::new(),
+            }),
+        ]);
+        let calls = runner.clone();
+        let adb =
+            AdbSession::new("adb.exe", "serial".to_owned(), Box::new(runner)).expect("adb session");
+
+        assert!(prepare_ime(&adb, &apk).is_err());
+        assert_eq!(calls.calls().len(), 2);
+    }
+
+    #[test]
+    fn text_mode_releases_pressed_qmp_keys_and_blocks_binding_and_raw_routes() {
+        let (_home, mut runtime, supervisor, _runner) =
+            lifecycle_runtime([], RecordingDesktop::default(), RecordingWindow::embedded());
+        runtime.guest_state = GuestState::Running;
+        runtime.stage_visible = true;
+        runtime.boot_completed = true;
+        runtime.active_input = None;
+
+        runtime.ingest_browser_key("KeyA", true, true);
+        runtime.activate_text_input(FocusInfo {
+            input_type: 1,
+            ime_action: 6,
+            package: "com.example.editor".to_owned(),
+        });
+        runtime.ingest_browser_key("KeyB", true, true);
+        runtime.ingest_browser_key("KeyB", false, true);
+
+        let inputs = supervisor.inputs.lock().expect("input lock");
+        assert_eq!(inputs.len(), 2, "one down and its forced release are sent");
+        assert_eq!(inputs[0][0]["data"]["down"], true);
+        assert_eq!(inputs[1][0]["data"]["down"], false);
+        assert_eq!(runtime.snapshot().text_input.state, TextInputState::Active);
+    }
+
+    #[test]
+    fn text_mode_releases_interpreted_hold_before_blocking_bindings() {
+        let (_home, mut runtime, supervisor, _runner) =
+            lifecycle_runtime([], RecordingDesktop::default(), RecordingWindow::embedded());
+        runtime.guest_state = GuestState::Running;
+        runtime.stage_visible = true;
+        runtime.boot_completed = true;
+        runtime.input_profiles[0].bindings.push(ome_input::Binding {
+            id: "hold".to_owned(),
+            trigger: ome_input::Trigger::Key {
+                code: "Space".to_owned(),
+            },
+            action: ome_input::BindingAction::Tap {
+                at: ome_input::LogicalPoint { x: 0.5, y: 0.5 },
+                hold: true,
+            },
+        });
+        runtime.ingest_browser_key("Space", true, true);
+        assert_eq!(runtime.interpreted_keys.len(), 1);
+
+        runtime.activate_text_input(FocusInfo {
+            input_type: 1,
+            ime_action: 6,
+            package: "com.example.editor".to_owned(),
+        });
+
+        assert!(runtime.interpreted_keys.is_empty());
+        assert!(supervisor.inputs.lock().expect("input lock").is_empty());
+        assert_eq!(runtime.dropped_touch_operations, 4);
+    }
+
+    #[test]
+    fn text_mode_keeps_suspend_hotkey_and_rejects_text_commands_without_focus() {
+        let (_home, mut runtime, supervisor, _runner) =
+            lifecycle_runtime([], RecordingDesktop::default(), RecordingWindow::embedded());
+        runtime.guest_state = GuestState::Running;
+        runtime.stage_visible = true;
+        runtime.boot_completed = true;
+        runtime.text_input = TextInputView {
+            state: TextInputState::Active,
+            input_type: Some(1),
+            package: Some("com.example.editor".to_owned()),
+        };
+
+        runtime.ingest_browser_key("F12", true, true);
+        runtime.ingest_browser_key("F12", false, true);
+        assert!(runtime.snapshot().input.suspended);
+        assert!(supervisor.inputs.lock().expect("input lock").is_empty());
+
+        runtime.text_input = TextInputView::default();
+        let issue = runtime
+            .apply(Command::TextCommit {
+                text: "한글".to_owned(),
+            })
+            .expect_err("inactive text input must reject commit");
+        assert_eq!(issue.code, "text_input_not_active");
     }
 
     #[test]

@@ -275,6 +275,7 @@ fn run_check() {
             artifacts: None,
             adb: Some(adb),
             adb_host_key_path: None,
+            ime_apk: None,
             supervisor: Some(Box::new(RecordingSupervisor {
                 inner: supervisor,
                 sent: Arc::clone(&sent),

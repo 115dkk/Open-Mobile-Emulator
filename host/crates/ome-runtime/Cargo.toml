@@ -18,6 +18,7 @@ ome-artifacts = { path = "../ome-artifacts" }
 ome-host-check = { path = "../ome-host-check" }
 ome-window-host = { path = "../ome-window-host" }
 ome-adb = { path = "../ome-adb" }
+ome-guest-ime = { path = "../ome-guest-ime" }
 ome-input = { path = "../ome-input" }
 ome-platform-win = { path = "../ome-platform-win" }
 ome-guest-image = { path = "../ome-guest-image" }

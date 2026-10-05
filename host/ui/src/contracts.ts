@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Open Mobile Emulator contributors
 // Read-only presentation contracts mirroring ome-runtime contract.rs field for field.
 
-export const CONTRACT_VERSION = 9;
+export const CONTRACT_VERSION = 10;
 
 export type AppPhase = 'wizard' | 'main';
 export type BlockerKind = 'virtualizationOff' | 'qemuMissing' | 'hypervisorPlatformOff';
@@ -63,7 +63,7 @@ export type ImageStatus = 'verified' | 'candidate' | 'deprecated';
 export type Capability = 'available' | 'unavailable' | 'unknown';
 export type CapabilityId =
   | 'bootMarker' | 'appList' | 'displaySize' | 'mediaVolume' | 'deviceId' | 'screenshot'
-  | 'foregroundApp' | 'multitouch' | 'nativeBridge' | 'root';
+  | 'foregroundApp' | 'multitouch' | 'nativeBridge' | 'root' | 'textInput';
 export interface CapabilityItem { readonly id: CapabilityId; readonly state: Capability }
 export interface CapabilityReport { readonly probedAt: string | null; readonly items: readonly CapabilityItem[] }
 export interface GuestImageSummary {
@@ -172,6 +172,16 @@ export interface InputView {
   readonly overlayVisible: boolean;
 }
 
+export type TextInputState = 'unavailable' | 'idle' | 'active';
+export interface TextInputView {
+  readonly state: TextInputState;
+  readonly inputType: number | null;
+  readonly package: string | null;
+}
+export type TextKey =
+  | 'enter' | 'backspace' | 'delete' | 'tab' | 'escape'
+  | 'left' | 'right' | 'up' | 'down' | 'home' | 'end';
+
 export type Orientation = 'landscape' | 'portrait';
 export type StageFit = 'fitWindow' | 'oneToOne';
 export type VsyncMode = 'off' | 'on' | 'adaptive';
@@ -250,6 +260,7 @@ export interface AppSnapshot {
   readonly guest: GuestView;
   readonly apps: AppsView;
   readonly input: InputView;
+  readonly textInput: TextInputView;
   readonly display: DisplayView;
   readonly settings: SettingsView;
   readonly update: UpdateView;
@@ -310,6 +321,9 @@ export interface ControllerBridge {
   inputEditorToggle(): Promise<AppSnapshot>;
   inputAutoApplySet(enabled: boolean): Promise<AppSnapshot>;
   inputSuspendHotkeySet(code: string): Promise<AppSnapshot>;
+  textCompose(text: string): Promise<void>;
+  textCommit(text: string): Promise<void>;
+  textKey(key: TextKey): Promise<void>;
   displayPresetApply(id: string): Promise<AppSnapshot>;
   displayCustomApply(size: Size, densityDpi: number): Promise<AppSnapshot>;
   displayRefreshSet(hz: number | null): Promise<AppSnapshot>;

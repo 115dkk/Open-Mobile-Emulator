@@ -108,6 +108,15 @@ pub fn invalid_suspend_hotkey() -> AppIssue {
     }
 }
 
+/// Returns an issue when text input is sent without an active guest editor.
+pub fn text_input_not_active() -> AppIssue {
+    AppIssue {
+        code: "text_input_not_active".to_owned(),
+        message: "글을 입력할 칸이 선택되지 않아 보내지 않았습니다.".to_owned(),
+        next_action: Some("운영체제의 입력 칸을 선택한 뒤 다시 입력하십시오.".to_owned()),
+    }
+}
+
 /// Returns an issue when a requested display preset does not exist.
 pub fn display_preset_not_found() -> AppIssue {
     AppIssue {

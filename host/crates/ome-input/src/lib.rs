@@ -608,6 +608,24 @@ impl KeySynth {
         }
     }
 
+    /// Builds key-up events for every forwarded key that is still down, then clears the history.
+    pub fn release_all(&mut self) -> Vec<serde_json::Value> {
+        let pressed = std::mem::take(&mut self.pressed);
+        pressed
+            .into_iter()
+            .filter_map(|(scan, extended)| {
+                let qcode = keycodes::scan_to_qcode(scan, extended)?;
+                Some(serde_json::json!({
+                    "type": "key",
+                    "data": {
+                        "down": false,
+                        "key": { "type": "qcode", "data": qcode }
+                    }
+                }))
+            })
+            .collect()
+    }
+
     /// Forgets pressed-key history when guest ownership changes.
     pub fn reset(&mut self) {
         self.pressed.clear();
@@ -1128,6 +1146,31 @@ mod tests {
             }))
         );
         assert_eq!(synth.apply(up), None, "stale release is suppressed");
+    }
+
+    #[test]
+    fn key_synth_releases_every_pressed_key_before_reset() {
+        let mut synth = KeySynth::default();
+        for (scan, extended) in [(0x1e, false), (0x1c, true)] {
+            assert!(
+                synth
+                    .apply(HostKey {
+                        scan,
+                        extended,
+                        pressed: true,
+                    })
+                    .is_some()
+            );
+        }
+        let releases = synth.release_all();
+        assert_eq!(releases.len(), 2);
+        let qcodes = releases
+            .iter()
+            .map(|event| event["data"]["key"]["data"].as_str().expect("qcode"))
+            .collect::<std::collections::BTreeSet<_>>();
+        assert_eq!(qcodes, std::collections::BTreeSet::from(["a", "kp_enter"]));
+        assert!(releases.iter().all(|event| event["data"]["down"] == false));
+        assert!(synth.release_all().is_empty());
     }
 
     #[test]

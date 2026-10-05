@@ -84,6 +84,7 @@ export const CAPABILITY_LABEL: Readonly<Record<CapabilityId, string>> = {
   multitouch: '멀티터치',
   nativeBridge: 'ARM 앱 실행',
   root: '루트 권한',
+  textInput: '글 입력',
 };
 
 /**

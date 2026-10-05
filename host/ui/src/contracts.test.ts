@@ -7,8 +7,8 @@ import type {
   AppIssue, AppSnapshot, AppsView, Binding, BindingAction, CapabilityItem, CapabilityReport,
   CustomDisplay, DisplayPreset, DisplayView, GuestImageSummary, GuestSummary, GuestView,
   HostReport, HostRow, ImagesView, InputProfile, InputView, InstallProgress, LastExit, LogicalPoint, Notice,
-  SettingsInput, SettingsView, Size, StageRect, TransferProgress, Trigger, UpdateState,
-  UpdateView, WizardView,
+  SettingsInput, SettingsView, Size, StageRect, TextInputView, TransferProgress, Trigger,
+  UpdateState, UpdateView, WizardView,
 } from './contracts';
 
 type Check = (value: unknown, path: string) => void;
@@ -49,7 +49,7 @@ const install = object<InstallProgress>({
 });
 const capability = enumeration('available', 'unavailable', 'unknown');
 const capabilityItem = object<CapabilityItem>({
-  id: enumeration('bootMarker', 'appList', 'displaySize', 'mediaVolume', 'deviceId', 'screenshot', 'foregroundApp', 'multitouch', 'nativeBridge', 'root'),
+  id: enumeration('bootMarker', 'appList', 'displaySize', 'mediaVolume', 'deviceId', 'screenshot', 'foregroundApp', 'multitouch', 'nativeBridge', 'root', 'textInput'),
   state: capability,
 });
 const capabilityReport = object<CapabilityReport>({ probedAt: nullable(string), items: array(capabilityItem) });
@@ -119,7 +119,7 @@ const guestSummary = object<GuestSummary>({
   lastStartedAt: nullable(string), capabilities: capabilityReport,
 });
 const snapshot = object<AppSnapshot>({
-  contractVersion: (value, path) => { if (value !== 9) fail(path, 'contract version 9'); },
+  contractVersion: (value, path) => { if (value !== 10) fail(path, 'contract version 10'); },
   productVersion: string, phase: enumeration('wizard', 'main'),
   blocker: nullable(object({ kind: enumeration('virtualizationOff', 'qemuMissing', 'hypervisorPlatformOff') })),
   host: object<HostReport>({
@@ -160,6 +160,9 @@ const snapshot = object<AppSnapshot>({
     autoApply: boolean, foregroundPackage: nullable(string), multitouch: capability, suspendHotkey: string,
     overlayVisible: boolean,
   }),
+  textInput: object<TextInputView>({
+    state: enumeration('unavailable', 'idle', 'active'), inputType: nullable(number), package: nullable(string),
+  }),
   display: object<DisplayView>({
     activeId: nullable(string), custom: nullable(object<CustomDisplay>({ size, densityDpi: number })),
     fit: enumeration('fitWindow', 'oneToOne'), refreshRateHz: nullable(number), refreshRates: array(number),
@@ -198,6 +201,8 @@ const commandShapes: Record<string, Record<string, Check>> = {
   inputProfileSave: { profile }, inputBindingUpsert: { profileId: string, binding },
   inputBindingRemove: { profileId: string, id: string }, inputEditorToggle: {},
   inputAutoApplySet: { enabled: boolean }, inputSuspendHotkeySet: { code: string },
+  textCompose: { text: string }, textCommit: { text: string },
+  textKey: { key: enumeration('enter', 'backspace', 'delete', 'tab', 'escape', 'left', 'right', 'up', 'down', 'home', 'end') },
   displayPresetApply: { id: string }, displayCustomApply: { size, densityDpi: number },
   displayRefreshSet: { hz: nullable(number) }, displayVsyncSet: { mode: enumeration('off', 'on', 'adaptive') },
   stageFitSet: { fit: enumeration('fitWindow', 'oneToOne') },

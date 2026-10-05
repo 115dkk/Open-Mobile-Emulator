@@ -400,6 +400,21 @@ Pie(API 28)는 ADR-0008로 2026-09-28에 뺐다), 그 뒤로 새 안드로이드
   R1), 손으로 계산한 newc 바이트, 스파이크의 실제 시리얼 로그. `OME_TEST_ISO`가 있으면 실제 Bliss ISO의
   `/kernel`과 `/initrd.img` 크기를 대조하는 무시된 시험이 돈다.
 
+### 3.19 ome-guest-ime (2026-10-05, ADR-0013)
+
+호스트가 조합한 글자를 게스트의 OME 입력기로 보내는 부품이다. 화면과 adb 명령, 런타임 상태는 모른다.
+
+- 인터페이스: `HostMessage::{Hello, Compose, Commit, Key}`, `GuestMessage::{Hello, Focus, Blur,
+  Unknown}`, `TextKey` 열한 가지와 64 KiB 상한의 줄 단위 UTF-8 JSON 프레임. 모르는 `op`은
+  `Unknown`으로 남기고 무시한다.
+- `ImeTransport`는 연결, 줄 쓰기, 제한 시간이 있는 줄 읽기, 닫기를 제공한다. 실제 어댑터
+  `TcpImeTransport`는 adb가 전달한 루프백 TCP 포트에 붙는다.
+- `ImeLink`는 `Disconnected`, `Connecting`, `Ready { guest_version, focus }` 상태를 갖는다. 읽기
+  스레드가 프레임을 채널로 넘기고 런타임 틱은 기다리지 않고 상태만 반영한다. 연결이 끊기거나 쓰기에
+  실패하면 1초부터 5초까지 늘어나는 간격으로 다시 붙는다.
+- 테스트 표면: 프레임 왕복, 긴 줄 거절, 모르는 동작, 가짜 전송기로 연결과 포커스 전이 및 재연결을
+  검사한다. 실제 게스트 연결 시험은 무시된 시험과 스파이크에서만 한다.
+
 ## 4. 데이터 흐름 두 가지
 
 **게스트 시작.** 웹뷰 `guest_start` → 껍데기 입장 검사 → `AppRuntime::apply(GuestStart)` →
@@ -683,3 +698,19 @@ CloseAction = StopGuest | MinimizeToTray      // 기본값 StopGuest (사용자 
   S2의 실패 문장을 원인별로 나눈다(`unexpected`는 `crash`로 바뀐다).
 - `AppIssue`의 문장은 `DESIGN.md` 9절의 어휘를 따른다. 화면에 `게스트`라는 말은 없고 `운영체제`와
   `가상 머신`만 있다.
+
+### 8.10 계약 열 번째 판: 글 입력 (2026-10-05, ADR-0013)
+
+- `CONTRACT_VERSION`은 10이다.
+- `AppSnapshot.text_input`은 `TextInputView { state, input_type, package }`다. 상태는
+  `unavailable`, `idle`, `active`이며 와이어 필드 이름은 camelCase다.
+- 명령은 `text_compose { text }`, `text_commit { text }`, `text_key { key }`다. `key`는
+  `enter`, `backspace`, `delete`, `tab`, `escape`, `left`, `right`, `up`, `down`, `home`, `end`
+  가운데 하나다. `active`가 아니면 `text_input_not_active` 문제를 돌려준다. Tauri 호출의 반환형은
+  세 명령 모두 `Promise<void>`다.
+- 입력기가 설치되고 기본 입력기로 선택되었으며 소켓의 `hello`를 받으면 능력 조사 목록의
+  `textInput`이 `available`이다. 링크가 끊기면 `TextInputView.state`는 `unavailable`이다.
+- 껍데기 이벤트 펌프는 50 ms마다 런타임을 틱하고, 전후 스냅숏이 다르면 기존 `snapshot` 이벤트를
+  내보낸다. 따라서 `focus`와 `blur`도 별도 이벤트 없이 50 ms 안에 스냅숏으로 웹뷰에 간다.
+  세 글 명령은 조합 이벤트 순서를 지키도록 입장 대기열을 거치지 않고 런타임 잠금을 잠깐 얻어
+  소켓 쓰기만 한 뒤 `void`를 돌려준다.

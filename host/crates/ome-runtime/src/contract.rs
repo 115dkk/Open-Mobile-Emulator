@@ -14,7 +14,7 @@ pub use ome_input::{
 };
 
 /// Current Rust-to-webview contract version.
-pub const CONTRACT_VERSION: u32 = 9;
+pub const CONTRACT_VERSION: u32 = 10;
 
 /// The one read-only projection the webview renders.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -40,6 +40,8 @@ pub struct AppSnapshot {
     pub apps: AppsView,
     /// Input profiles and input-pipeline state.
     pub input: InputView,
+    /// Host-composed text input state.
+    pub text_input: TextInputView,
     /// Display settings and capabilities.
     pub display: DisplayView,
     /// Product settings and host-derived limits.
@@ -392,6 +394,8 @@ pub enum CapabilityId {
     NativeBridge,
     /// Root permission control.
     Root,
+    /// OME input method installed, selected, and connected through its socket.
+    TextInput,
 }
 
 /// Availability of an optional operating-system capability.
@@ -602,6 +606,37 @@ pub struct InputView {
     pub suspend_hotkey: String,
     /// Whether input bindings are visible over the operating-system window.
     pub overlay_visible: bool,
+}
+
+/// Host-composed text input projected from the OME input method.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TextInputView {
+    /// Whether the input method is absent, connected without editor focus, or active.
+    pub state: TextInputState,
+    /// Android `EditorInfo.inputType` while active.
+    pub input_type: Option<u32>,
+    /// Package whose editor owns input focus while active.
+    pub package: Option<String>,
+}
+
+impl Default for TextInputView {
+    fn default() -> Self {
+        Self {
+            state: TextInputState::Unavailable,
+            input_type: None,
+            package: None,
+        }
+    }
+}
+
+/// Stable text-input availability states.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum TextInputState {
+    Unavailable,
+    Idle,
+    Active,
 }
 
 /// Display projection.
@@ -1047,6 +1082,21 @@ pub enum Command {
         /// W3C `KeyboardEvent.code` value.
         code: String,
     },
+    /// Replace the current guest composing text.
+    TextCompose {
+        /// Complete composing string, or empty to clear it.
+        text: String,
+    },
+    /// Commit text to the focused guest editor.
+    TextCommit {
+        /// Text to append after committing any active composition.
+        text: String,
+    },
+    /// Send one non-text editing key through the input method.
+    TextKey {
+        /// Editing key from the fixed protocol enumeration.
+        key: ome_guest_ime::TextKey,
+    },
     /// Apply one fixed display preset.
     DisplayPresetApply {
         /// Preset ID.
@@ -1151,6 +1201,9 @@ impl Command {
             Self::InputEditorToggle => "input_editor_toggle",
             Self::InputAutoApplySet { .. } => "input_auto_apply_set",
             Self::InputSuspendHotkeySet { .. } => "input_suspend_hotkey_set",
+            Self::TextCompose { .. } => "text_compose",
+            Self::TextCommit { .. } => "text_commit",
+            Self::TextKey { .. } => "text_key",
             Self::DisplayPresetApply { .. } => "display_preset_apply",
             Self::DisplayCustomApply { .. } => "display_custom_apply",
             Self::DisplayRefreshSet { .. } => "display_refresh_set",
@@ -1215,6 +1268,9 @@ pub const TAURI_COMMANDS: &[&str] = &[
     "input_editor_toggle",
     "input_auto_apply_set",
     "input_suspend_hotkey_set",
+    "text_compose",
+    "text_commit",
+    "text_key",
     "display_preset_apply",
     "display_custom_apply",
     "display_refresh_set",

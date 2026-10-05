@@ -32,7 +32,7 @@ const GUEST_ID: &str = "default";
 const BOOT_DEADLINE: Duration = Duration::from_secs(180);
 const STOP_OBSERVATION_DEADLINE: Duration = Duration::from_secs(40);
 const PROCESS_EXIT_DEADLINE: Duration = Duration::from_secs(5);
-const CAPABILITY_IDS: [CapabilityId; 10] = [
+const CAPABILITY_IDS: [CapabilityId; 11] = [
     CapabilityId::BootMarker,
     CapabilityId::AppList,
     CapabilityId::DisplaySize,
@@ -43,6 +43,7 @@ const CAPABILITY_IDS: [CapabilityId; 10] = [
     CapabilityId::Multitouch,
     CapabilityId::NativeBridge,
     CapabilityId::Root,
+    CapabilityId::TextInput,
 ];
 
 #[derive(Debug, Default)]
@@ -217,6 +218,7 @@ fn measures_real_guest_through_product_runtime() {
             artifacts: None,
             adb,
             adb_host_key_path: None,
+            ime_apk: None,
             supervisor: Some(Box::new(supervisor)),
             desktop: Box::new(ClosedDesktop),
             window_host: Box::new(GuestWindowHost::default()),
@@ -690,6 +692,7 @@ fn capability_value(
             .and_then(|value| value.get("nativeBridge"))
             .map_or_else(|| "unknown".to_owned(), compact_json),
         CapabilityId::Root => optional(snapshot.guest.root_enabled),
+        CapabilityId::TextInput => format!("state={:?}", snapshot.text_input.state),
     }
 }
 
@@ -960,6 +963,7 @@ fn capability_key(value: CapabilityId) -> &'static str {
         CapabilityId::Multitouch => "multitouch",
         CapabilityId::NativeBridge => "nativeBridge",
         CapabilityId::Root => "root",
+        CapabilityId::TextInput => "textInput",
     }
 }
 

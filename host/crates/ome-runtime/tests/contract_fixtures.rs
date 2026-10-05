@@ -168,6 +168,10 @@ fn capabilities() -> CapabilityReport {
                 id: CapabilityId::Root,
                 state: Capability::Available,
             },
+            CapabilityItem {
+                id: CapabilityId::TextInput,
+                state: Capability::Available,
+            },
         ],
     }
 }
@@ -285,6 +289,11 @@ fn representative_snapshot() -> AppSnapshot {
             multitouch: Capability::Unavailable,
             suspend_hotkey: "F12".to_owned(),
             overlay_visible: true,
+        },
+        text_input: TextInputView {
+            state: TextInputState::Active,
+            input_type: Some(1),
+            package: Some("com.example.app".to_owned()),
         },
         display: DisplayView {
             presets: display_presets(),
@@ -433,6 +442,15 @@ fn every_command() -> Vec<Command> {
         Command::InputAutoApplySet { enabled: true },
         Command::InputSuspendHotkeySet {
             code: "F12".to_owned(),
+        },
+        Command::TextCompose {
+            text: "한".to_owned(),
+        },
+        Command::TextCommit {
+            text: "한글".to_owned(),
+        },
+        Command::TextKey {
+            key: TextKey::Backspace,
         },
         Command::DisplayPresetApply {
             id: "hd-720".to_owned(),

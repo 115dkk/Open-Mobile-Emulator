@@ -17,6 +17,7 @@ members = [
     "crates/ome-artifacts",
     "crates/ome-host-check",
     "crates/ome-adb",
+    "crates/ome-guest-ime",
     "crates/ome-window-host",
     "crates/ome-overlay",
     "crates/ome-input",

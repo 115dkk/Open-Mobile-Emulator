@@ -522,6 +522,76 @@ impl AdbSession {
         Ok(parse_package_paths(&text(&output.stdout)))
     }
 
+    /// Returns the installed package version code, or `None` when the package is absent.
+    pub fn package_version_code(&self, package: &str) -> Result<Option<u64>, AdbError> {
+        validate_package_name(package)?;
+        let output = self.expect_success(
+            &self.serial_args([
+                "shell",
+                "pm",
+                "list",
+                "packages",
+                "--show-versioncode",
+                package,
+            ]),
+            COMMAND_TIMEOUT,
+        )?;
+        Ok(parse_package_list(&text(&output.stdout))
+            .into_iter()
+            .find(|installed| installed.package == package)
+            .and_then(|installed| installed.version_code))
+    }
+
+    /// Creates an ephemeral localhost forward to one validated Android abstract socket.
+    pub fn forward_localabstract(&self, name: &str) -> Result<u16, AdbError> {
+        validate_localabstract_name(name)?;
+        let remote = format!("localabstract:{name}");
+        let output = self.expect_success(
+            &self.serial_args(["forward", "tcp:0", remote.as_str()]),
+            COMMAND_TIMEOUT,
+        )?;
+        let port = text(&output.stdout)
+            .trim()
+            .parse::<u16>()
+            .ok()
+            .filter(|port| *port != 0)
+            .ok_or(AdbError::InvalidForwardPort)?;
+        Ok(port)
+    }
+
+    /// Removes one previously allocated localhost forward.
+    pub fn forward_remove(&self, port: u16) -> Result<(), AdbError> {
+        if port == 0 {
+            return Err(AdbError::InvalidArgument);
+        }
+        let local = format!("tcp:{port}");
+        self.expect_success(
+            &self.serial_args(["forward", "--remove", local.as_str()]),
+            COMMAND_TIMEOUT,
+        )?;
+        Ok(())
+    }
+
+    /// Enables one validated Android input-method service.
+    pub fn ime_enable(&self, id: &str) -> Result<(), AdbError> {
+        validate_ime_id(id)?;
+        self.expect_success(
+            &self.serial_args(["shell", "ime", "enable", id]),
+            COMMAND_TIMEOUT,
+        )?;
+        Ok(())
+    }
+
+    /// Selects one validated Android input-method service.
+    pub fn ime_set(&self, id: &str) -> Result<(), AdbError> {
+        validate_ime_id(id)?;
+        self.expect_success(
+            &self.serial_args(["shell", "ime", "set", id]),
+            COMMAND_TIMEOUT,
+        )?;
+        Ok(())
+    }
+
     /// Waits until this serial appears to adb without polling boot properties.
     pub fn wait_for_device(&self, timeout: Duration) -> Result<(), AdbError> {
         self.expect_success(&self.serial_args(["wait-for-device"]), timeout)?;
@@ -640,9 +710,11 @@ pub fn default_host_public_key_path() -> Option<PathBuf> {
 }
 
 fn command_failed(output: Output) -> AdbError {
+    let stderr = text(&output.stderr).trim().to_owned();
+    let stdout = text(&output.stdout).trim().to_owned();
     AdbError::CommandFailed {
         exit_code: output.exit_code,
-        stderr: text(&output.stderr).trim().to_owned(),
+        detail: if stderr.is_empty() { stdout } else { stderr },
     }
 }
 
@@ -679,6 +751,39 @@ fn validate_package_name(package: &str) -> Result<(), AdbError> {
     }
 }
 
+fn validate_localabstract_name(name: &str) -> Result<(), AdbError> {
+    if !name.is_empty()
+        && name.len() <= 108
+        && name
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'_' | b'-'))
+    {
+        Ok(())
+    } else {
+        Err(AdbError::InvalidArgument)
+    }
+}
+
+fn validate_ime_id(id: &str) -> Result<(), AdbError> {
+    let Some((package, service)) = id.split_once('/') else {
+        return Err(AdbError::InvalidArgument);
+    };
+    validate_package_name(package)?;
+    let service = service.strip_prefix('.').unwrap_or(service);
+    if service.is_empty()
+        || !service.split('.').all(|segment| {
+            let mut chars = segment.chars();
+            chars
+                .next()
+                .is_some_and(|first| first.is_ascii_alphabetic())
+                && chars.all(|character| character.is_ascii_alphanumeric() || character == '_')
+        })
+    {
+        return Err(AdbError::InvalidArgument);
+    }
+    Ok(())
+}
+
 /// Errors from a session command or package preparation.
 #[derive(Debug, Error)]
 pub enum AdbError {
@@ -692,12 +797,12 @@ pub enum AdbError {
     #[error("adb runner failed")]
     Run(#[source] RunError),
     /// adb returned a nonzero exit code or a textual connection failure.
-    #[error("adb command failed with exit code {exit_code}: {stderr}")]
+    #[error("adb command failed with exit code {exit_code}: {detail}")]
     CommandFailed {
         /// Native adb exit code.
         exit_code: i32,
-        /// Standard error emitted by adb.
-        stderr: String,
+        /// Trimmed stderr, or stdout when stderr was empty.
+        detail: String,
     },
     /// Guest boot did not complete before the overall deadline.
     #[error("guest boot timed out")]
@@ -705,12 +810,27 @@ pub enum AdbError {
     /// A binary command unexpectedly returned no bytes.
     #[error("adb returned empty output")]
     EmptyOutput,
+    /// `adb forward tcp:0` did not return one nonzero TCP port.
+    #[error("adb returned an invalid forward port")]
+    InvalidForwardPort,
     /// The host adb public key is missing or malformed.
     #[error("adb host public key is unavailable")]
     HostKeyUnavailable,
     /// A package archive could not be safely prepared.
     #[error("app package could not be prepared")]
     Package(#[from] PackageError),
+}
+
+impl AdbError {
+    /// Returns true when package installation failed because the installed package uses another signer.
+    #[must_use]
+    pub fn is_update_incompatible(&self) -> bool {
+        matches!(
+            self,
+            Self::CommandFailed { detail, .. }
+                if detail.contains("INSTALL_FAILED_UPDATE_INCOMPATIBLE")
+        )
+    }
 }
 
 /// One parsed third-party package entry.
@@ -1270,8 +1390,8 @@ mod tests {
             session.connect(),
             Err(AdbError::CommandFailed {
                 exit_code: 0,
-                stderr
-            }) if stderr.is_empty()
+                detail
+            }) if detail == "failed to connect to 127.0.0.1:5555"
         ));
     }
 
@@ -1299,6 +1419,123 @@ mod tests {
                 },
             ]
         );
+    }
+
+    #[test]
+    fn update_incompatible_is_recognized_without_accepting_other_install_failures() {
+        let incompatible = command_failed(Output {
+            exit_code: 1,
+            stdout: b"Failure [INSTALL_FAILED_UPDATE_INCOMPATIBLE: signatures differ]".to_vec(),
+            stderr: Vec::new(),
+        });
+        assert!(incompatible.is_update_incompatible());
+        let storage = command_failed(Output {
+            exit_code: 1,
+            stdout: b"Failure [INSTALL_FAILED_INSUFFICIENT_STORAGE]".to_vec(),
+            stderr: Vec::new(),
+        });
+        assert!(!storage.is_update_incompatible());
+    }
+
+    #[test]
+    fn ime_and_forward_commands_validate_and_keep_arguments_separate() {
+        let runner = RecordedRunner::new([
+            success("43219\n"),
+            success(""),
+            success("Input method org.openmobileemulator.ime/.OmeInputMethodService: now enabled"),
+            success("Input method org.openmobileemulator.ime/.OmeInputMethodService selected"),
+            success("package:org.openmobileemulator.ime versionCode:17\n"),
+        ]);
+        let calls = runner.clone();
+        let session =
+            AdbSession::new("adb.exe", "serial".to_owned(), Box::new(runner)).expect("session");
+        assert_eq!(
+            session.forward_localabstract("ome-ime").expect("forward"),
+            43219
+        );
+        session.forward_remove(43219).expect("remove forward");
+        session
+            .ime_enable("org.openmobileemulator.ime/.OmeInputMethodService")
+            .expect("enable IME");
+        session
+            .ime_set("org.openmobileemulator.ime/.OmeInputMethodService")
+            .expect("set IME");
+        assert_eq!(
+            session
+                .package_version_code("org.openmobileemulator.ime")
+                .expect("package version query"),
+            Some(17)
+        );
+        let calls = calls.calls();
+        assert_eq!(
+            calls[0].args,
+            ["-s", "serial", "forward", "tcp:0", "localabstract:ome-ime"]
+        );
+        assert_eq!(
+            calls[1].args,
+            ["-s", "serial", "forward", "--remove", "tcp:43219"]
+        );
+        assert_eq!(
+            calls[2].args,
+            [
+                "-s",
+                "serial",
+                "shell",
+                "ime",
+                "enable",
+                "org.openmobileemulator.ime/.OmeInputMethodService"
+            ]
+        );
+        assert_eq!(
+            calls[3].args,
+            [
+                "-s",
+                "serial",
+                "shell",
+                "ime",
+                "set",
+                "org.openmobileemulator.ime/.OmeInputMethodService"
+            ]
+        );
+    }
+
+    #[test]
+    fn ime_and_forward_commands_reject_untrusted_arguments() {
+        let runner = RecordedRunner::default();
+        let calls = runner.clone();
+        let session =
+            AdbSession::new("adb.exe", "serial".to_owned(), Box::new(runner)).expect("session");
+        assert!(matches!(
+            session.forward_localabstract("ome-ime shell"),
+            Err(AdbError::InvalidArgument)
+        ));
+        assert!(matches!(
+            session.forward_remove(0),
+            Err(AdbError::InvalidArgument)
+        ));
+        assert!(matches!(
+            session.ime_enable("org.openmobileemulator.ime"),
+            Err(AdbError::InvalidArgument)
+        ));
+        assert!(matches!(
+            session.ime_set("org.example/app;stop"),
+            Err(AdbError::InvalidArgument)
+        ));
+        assert!(calls.calls().is_empty());
+    }
+
+    #[test]
+    fn invalid_forward_output_is_rejected() {
+        let session = AdbSession::new(
+            "adb.exe",
+            "serial".to_owned(),
+            Box::new(RecordedRunner::new([success("not-a-port\n")])),
+        )
+        .expect("session");
+        assert!(matches!(
+            session.forward_localabstract("ome-ime"),
+            Err(AdbError::InvalidForwardPort)
+        ));
     }
 
     #[test]

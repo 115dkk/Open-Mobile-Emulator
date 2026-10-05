@@ -152,6 +152,9 @@ jobs:
           }
           "unpacked $(@(Get-ChildItem host/qemu-dist -Recurse -File).Count) files"
 
+      - name: Build the OME input method
+        run: pwsh -NoProfile -File guest/ime/build.ps1
+
       - name: Build the product and the installer
         working-directory: host
         run: |

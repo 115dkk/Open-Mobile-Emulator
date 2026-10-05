@@ -5,7 +5,7 @@ use std::time::Instant;
 
 use ome_runtime::{
     AppIssue, AppRuntime, AppSnapshot, Binding, ClipboardItem, Command, HelpTopic, InputProfile,
-    SettingsInput, Size, StageFit, StageRect, VsyncMode,
+    SettingsInput, Size, StageFit, StageRect, TextKey, VsyncMode,
 };
 use tauri::{AppHandle, State};
 
@@ -86,6 +86,22 @@ pub(crate) async fn apply(
     .await
     .map_err(|error| {
         eprintln!("native command task failed: {error}");
+        worker_issue()
+    })?
+}
+
+async fn apply_immediate(state: &ShellState, command: Command) -> Result<(), AppIssue> {
+    let runtime = Arc::clone(&state.runtime);
+    tauri::async_runtime::spawn_blocking(move || {
+        let mut guard = runtime.lock().map_err(|_| worker_issue())?;
+        match &mut *guard {
+            Ok(runtime) => runtime.apply(command).map(|_| ()),
+            Err(issue) => Err(issue.clone()),
+        }
+    })
+    .await
+    .map_err(|error| {
+        eprintln!("immediate command task failed: {error}");
         worker_issue()
     })?
 }
@@ -469,6 +485,24 @@ pub(crate) async fn input_suspend_hotkey_set(
     code: String,
 ) -> Result<AppSnapshot, AppIssue> {
     apply(app, &state, Command::InputSuspendHotkeySet { code }).await
+}
+#[tauri::command]
+pub(crate) async fn text_compose(
+    state: State<'_, ShellState>,
+    text: String,
+) -> Result<(), AppIssue> {
+    apply_immediate(&state, Command::TextCompose { text }).await
+}
+#[tauri::command]
+pub(crate) async fn text_commit(
+    state: State<'_, ShellState>,
+    text: String,
+) -> Result<(), AppIssue> {
+    apply_immediate(&state, Command::TextCommit { text }).await
+}
+#[tauri::command]
+pub(crate) async fn text_key(state: State<'_, ShellState>, key: TextKey) -> Result<(), AppIssue> {
+    apply_immediate(&state, Command::TextKey { key }).await
 }
 #[tauri::command]
 pub(crate) async fn display_preset_apply(

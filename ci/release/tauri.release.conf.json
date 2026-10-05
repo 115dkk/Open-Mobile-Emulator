@@ -5,7 +5,9 @@
       "../../manifests/artifacts.json": "manifests/artifacts.json",
       "../../manifests/images/*.json": "manifests/images/",
       "../qemu-dist": "qemu/",
-      "../target/release/ome-setup.exe": "ome-setup.exe"
+      "../target/release/ome-setup.exe": "ome-setup.exe",
+      "../../guest/ime/out/ome-ime.apk": "ime/ome-ime.apk",
+      "../../guest/ime/out/ome-ime.json": "ime/ome-ime.json"
     }
   }
 }

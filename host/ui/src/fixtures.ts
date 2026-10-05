@@ -7,7 +7,7 @@ import type {
 import type { OverlaySeed } from './overlay/model';
 
 export const sampleSnapshot: AppSnapshot = {
-  contractVersion: 8, productVersion: '0.1.0', phase: 'wizard', blocker: null,
+  contractVersion: 10, productVersion: '0.1.0', phase: 'wizard', blocker: null,
   host: { rows: [], ready: false, inspectedAt: null },
   wizard: {
     step: 'hostCheck', canContinue: false, canSkip: false, download: null,
@@ -26,6 +26,7 @@ export const sampleSnapshot: AppSnapshot = {
     profiles: [], activeId: null, suspended: false, editing: false, autoApply: true,
     foregroundPackage: null, multitouch: 'unknown', suspendHotkey: 'F12', overlayVisible: true,
   },
+  textInput: { state: 'unavailable', inputType: null, package: null },
   display: {
     presets: [], activeId: null, custom: null, fit: 'fitWindow', refreshRateHz: null,
     refreshRates: [60, 75, 90, 120, 144], refreshSupported: false, vsync: 'off',
@@ -90,6 +91,9 @@ export function fixtureBridge(
     inputEditorToggle: apply,
     inputAutoApplySet: apply,
     inputSuspendHotkeySet: apply,
+    textCompose: () => Promise.resolve(),
+    textCommit: () => Promise.resolve(),
+    textKey: () => Promise.resolve(),
     displayPresetApply: apply,
     displayCustomApply: apply,
     displayRefreshSet: apply,

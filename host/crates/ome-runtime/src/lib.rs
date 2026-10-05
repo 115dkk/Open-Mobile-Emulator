@@ -24,6 +24,7 @@ pub use guest_store::{
     StoredInstallState,
 };
 pub use home::{HomeError, OmeHome};
+pub use ome_guest_ime::TextKey;
 pub use ome_host_check::TableProbe;
 #[cfg(windows)]
 pub use ome_host_check::WindowsProbe;

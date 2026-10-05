@@ -2411,6 +2411,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ome-guest-ime"
+version = "0.1.4"
+dependencies = [
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+]
+
+[[package]]
 name = "ome-guest-install"
 version = "0.1.4"
 dependencies = [
@@ -2471,6 +2480,7 @@ dependencies = [
  "ome-diagnostics",
  "ome-guest-config",
  "ome-guest-image",
+ "ome-guest-ime",
  "ome-guest-install",
  "ome-host-check",
  "ome-input",

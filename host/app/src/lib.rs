@@ -15,6 +15,7 @@ mod window;
 
 use std::sync::Arc;
 use std::time::Duration;
+const RUNTIME_TICK: Duration = Duration::from_millis(50);
 
 use ome_adb::{AdbSession, ProcessRunner};
 use ome_artifacts::{ArtifactStore, Manifest, UreqFetch};
@@ -27,7 +28,10 @@ use tauri::Manager;
 use crate::desktop::WindowsDesktop;
 use crate::setup::WindowsElevation;
 
-fn initialize_runtime(manifest_root: &std::path::Path) -> Result<AppRuntime, AppIssue> {
+fn initialize_runtime(
+    manifest_root: &std::path::Path,
+    ime_apk: Option<std::path::PathBuf>,
+) -> Result<AppRuntime, AppIssue> {
     let home = OmeHome::from_path(OmeHome::resolve()).map_err(|error| {
         eprintln!("OME home resolution failed: {error}");
         commands::storage_issue()
@@ -76,6 +80,7 @@ fn initialize_runtime(manifest_root: &std::path::Path) -> Result<AppRuntime, App
             )),
             adb,
             adb_host_key_path: ome_adb::default_host_public_key_path(),
+            ime_apk,
             supervisor,
             desktop,
             install_dir: std::env::current_exe()
@@ -124,7 +129,7 @@ fn start_event_pump(app: tauri::AppHandle, shell: commands::ShellState) {
         .name("ome-runtime-events".to_owned())
         .spawn(move || {
             loop {
-                let event = receiver.recv_timeout(Duration::from_secs(1));
+                let event = receiver.recv_timeout(RUNTIME_TICK);
                 let Ok(mut guard) = shell.runtime.lock() else {
                     break;
                 };
@@ -181,12 +186,30 @@ pub fn run() {
             #[cfg(windows)]
             let dpi_guard = ome_platform_win::set_thread_dpi_hosting_mixed()
                 .map_err(|error| tauri::Error::Io(std::io::Error::other(error)))?;
+            let resource_dir = (!cfg!(debug_assertions))
+                .then(|| app.path().resource_dir())
+                .transpose()?;
             let manifest_root = if cfg!(debug_assertions) {
                 std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../manifests")
             } else {
-                app.path().resource_dir()?.join("manifests")
+                resource_dir
+                    .as_ref()
+                    .expect("release resource directory")
+                    .join("manifests")
             };
-            let shell = commands::ShellState::new(initialize_runtime(&manifest_root));
+            let ime_apk = if cfg!(debug_assertions) {
+                std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                    .join("../../guest/ime/out/ome-ime.apk")
+            } else {
+                resource_dir
+                    .as_ref()
+                    .expect("release resource directory")
+                    .join("ime/ome-ime.apk")
+            };
+            let shell = commands::ShellState::new(initialize_runtime(
+                &manifest_root,
+                ime_apk.is_file().then_some(ime_apk),
+            ));
             app.manage(shell.clone());
             window::install(app)?;
             overlay::install(app)?;
@@ -253,6 +276,9 @@ pub fn run() {
             commands::input_editor_toggle,
             commands::input_auto_apply_set,
             commands::input_suspend_hotkey_set,
+            commands::text_compose,
+            commands::text_commit,
+            commands::text_key,
             commands::display_preset_apply,
             commands::display_custom_apply,
             commands::display_refresh_set,

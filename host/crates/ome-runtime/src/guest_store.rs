@@ -67,6 +67,13 @@ impl GuestRecord {
                     id: StoredProbeItem::from(*item),
                     state: StoredProbeState::from(*state),
                 })
+                .chain(
+                    self.capabilities
+                        .items
+                        .iter()
+                        .copied()
+                        .filter(|item| item.id == StoredProbeItem::TextInput),
+                )
                 .collect(),
             native_bridge: outcome.native_bridge.clone(),
             media_volume: outcome.media_volume,
@@ -185,6 +192,7 @@ pub enum StoredProbeItem {
     Multitouch,
     NativeBridge,
     Root,
+    TextInput,
 }
 
 impl From<ProbeItem> for StoredProbeItem {

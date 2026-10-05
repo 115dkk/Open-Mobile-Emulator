@@ -219,6 +219,7 @@ fn run_check() {
             artifacts: None,
             adb: Some(adb),
             adb_host_key_path: None,
+            ime_apk: None,
             supervisor: Some(Box::new(supervisor)),
             desktop: Box::new(ClosedDesktop),
             window_host: Box::new(GuestWindowHost::default()),

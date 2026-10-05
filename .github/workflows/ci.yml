@@ -59,6 +59,9 @@ jobs:
         run: rustup show active-toolchain
       - name: Install webview dependencies
         run: npm ci
+      - name: Build the OME input method
+        working-directory: ${{ github.workspace }}
+        run: pwsh -NoProfile -File guest/ime/build.ps1
       - name: Check host and webview
         run: node tools/quality.mjs
 
