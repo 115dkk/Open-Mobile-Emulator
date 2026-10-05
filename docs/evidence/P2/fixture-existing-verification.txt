@@ -1,0 +1,46 @@
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): true
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+Signer #1 certificate DN: CN=Android Debug, O=Android, C=US
+Signer #1 certificate SHA-256 digest: 34ae8d120f979f28e21f6b7f242e486acfc4974ec2652b92fd4272a11fbf4c14
+Signer #1 certificate SHA-1 digest: b0c67c1b6e6d9b984bd5c36fbad796683a6d39c3
+Signer #1 certificate MD5 digest: ba31f1bb8d20f848c74d266bccfd58ad
+Signer #1 key algorithm: RSA
+Signer #1 key size (bits): 2048
+Signer #1 public key SHA-256 digest: 6a5b03dded159e76a6656538cd8c41e0c6f9ea34409158ecc740509dfbbe87bb
+Signer #1 public key SHA-1 digest: 5f820bfda187db7e0a81c6ca0bfb3219d852b5d7
+Signer #1 public key MD5 digest: 6b4fff755bc9335888caa76f2f7fe7b8
+package: name='org.ome.arm64probe' versionCode='1' versionName='1.0' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'
+minSdkVersion:'26'
+targetSdkVersion:'36'
+application-label:'OME arm64 probe'
+application: label='OME arm64 probe' icon=''
+launchable-activity: name='org.ome.arm64probe.MainActivity'  label='' icon=''
+feature-group: label=''
+  uses-feature: name='android.hardware.faketouch'
+  uses-implied-feature: name='android.hardware.faketouch' reason='default feature for all apps'
+main
+supports-screens: 'small' 'normal' 'large' 'xlarge'
+supports-any-density: 'true'
+locales: '--_--'
+densities: '160'
+native-code: 'arm64-v8a'
+
+[32;1mAlgorithm : [0mSHA256
+[32;1mHash      : [0m216339D59C6118B3E3709898E7A9BFE358D7DFE5AC627F1BDA64117E1C3041B8
+[32;1mPath      : [0mC:\Open Mobile Emulator\tests\fixtures\build\hello_arm64
+
+[32;1mAlgorithm : [0mSHA256
+[32;1mHash      : [0m484C8A2EB2535DF73486F6A65C9E3E656DC9337746D9BE844175D6C1DA1C1A76
+[32;1mPath      : [0mC:\Open Mobile Emulator\tests\fixtures\build\arm64-probe.apk
+
+
+[32;1mFullName                 [0m[32;1m Length[0m
+[32;1m--------                 [0m [32;1m------[0m
+lib/arm64-v8a/libprobe.so   5400
+

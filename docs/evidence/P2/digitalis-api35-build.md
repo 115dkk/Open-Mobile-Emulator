@@ -74,3 +74,20 @@ ELF 검사(`api35-elf-validation.txt`): 상류 배치 경로 74개 모두 있음
 게스트 libm의 `expf@@LIBC`, `powf@@LIBC` 등, 실패 0. 브리지 SHA-256 `e9e8052a0d711bc152565c2d824c5bf6cdcb01636f1db833416b21371c506f25`.
 패치는 `guest/build/patches/digitalis/` 아래 일곱 개. 트리 소스는 원래 커밋으로 되돌렸지만 `out/` 안의 실험 산출물은 남아 있어,
 `build-image.sh`가 그 상태에서 기본 이미지 작업을 거부한다. 부팅, 스모크, 게임은 아직이다.
+
+## 세 번째 시도: 실험 ISO, 라이브 부팅, ARM64 스모크 통과 (2026-10-05 밤)
+
+- `build-image.sh digitalis-iso`로 `OME-api35-20261005-digitalis.iso`(2,961,014,784바이트, SHA-256
+  `2e57ebdd013f77b8149aeee5246c7c960a9a502fe9c1e664d0cb526f31226bf0`)를 만들어 `~/bliss/dist/20261005-db973c9-digitalis/`에 따로 모았다.
+  첫 시도는 Soong의 make 래퍼가 `BLISS_BUILD_ZIP` 덮어쓰기를 반영하지 않아 수집에서 멈췄고, 실제 이름을 `get_build_var`로 읽게 고쳤다.
+- ISO 안의 `system.img`: `ro.dalvik.vm.native.bridge=libberberis_arm64.so`, `ro.dalvik.vm.isa.arm64=x86_64`, `ro.enable.native.bridge.exec=1`,
+  ABI 목록에 `arm64-v8a`, 브리지와 게스트 libm 해시가 모듈 산출물과 같다(`api35-iso-inspection.txt`).
+- 제품 QEMU(WHPX, virgl, `Skylake-Client-v4`, 8 GiB, 4 vCPU)로 라이브 부팅, `sys.boot_completed=1`, `ro.product.cpu.abilist=x86_64,arm64-v8a,x86`,
+  binfmt `arm64_exe`와 `arm64_dyn` 등록(`api35-live-smoke.txt`).
+- 6절 스모크: `hello_arm64`가 `OME hello from arm64 __aarch64__=1`과 종료 코드 0, `arm64-probe` APK 설치와 실행, 화면에
+  `native arm64-v8a lib loaded`, `os.arch=aarch64`(`api35-probe-unlocked.png`). logcat에 `Initialized Berberis (aarch64)`, 치명 오류 없음.
+  NDK가 없어 픽스처는 다시 빌드하지 않고 기존 자체 픽스처(해시 확인)를 썼다. 32비트 단계는 Digitalis에 해당 없음(ADR-0008).
+- ISO의 `libberberis*` 이름 일치 24개는 전부 이 소스 빌드의 산출물이다. 이미지 검사에서 이것을 독점 파일과 구별하는 규칙은 아직 없다.
+- 실험 뒤 트리를 되돌리고 `build-image.sh installclean`, `baseline-check` 통과.
+
+다음: 디스크에 설치해 트릭컬 시나리오와 측정(안드로이드 13 libndk와 A/B).

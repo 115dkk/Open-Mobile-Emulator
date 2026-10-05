@@ -1,0 +1,1 @@
+ERROR fixture build: Android SDK not found. Set ANDROID_SDK_ROOT or ANDROID_HOME, or install it under LOCALAPPDATA/Android/Sdk.

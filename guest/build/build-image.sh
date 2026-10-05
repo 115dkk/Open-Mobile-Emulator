@@ -10,6 +10,9 @@
 #   build-image.sh snapshot   write guest/build/manifest/ome.xml (every project at its commit)
 #   build-image.sh aaropa     fetch the pinned installer-environment assets and check their sums
 #   build-image.sh modules    experimental Digitalis bridge-only build (OME_TRANSLATOR=digitalis)
+#   build-image.sh digitalis-iso  build and collect an opt-in experimental ISO
+#   build-image.sh installclean  clean installed output after restoring baseline sources
+#   build-image.sh baseline-check  verify no experimental inputs/output remain
 #   build-image.sh build      lunch + make iso_img with the blob flags unset
 #   build-image.sh collect    copy the ISO, its sha256, build.prop and logs to $OME_BUILD_ROOT/dist
 #   build-image.sh all        init sync snapshot aaropa build collect
@@ -24,7 +27,7 @@ OME_REPO_ROOT=${OME_REPO_ROOT:-$(cd "$HERE/../.." && pwd)}
 OME_BUILD_ROOT=${OME_BUILD_ROOT:-$HOME/bliss}
 # GitHub answers HTTP 429 to a 16-way sync; 6 jobs with retries stayed under its limit on 2026-10-01.
 OME_JOBS=${OME_JOBS:-6}
-# Digitalis remains an opt-in module probe until the API 35 port passes.
+# Digitalis remains opt-in; experimental ISO collection is separate from baseline.
 OME_TRANSLATOR=${OME_TRANSLATOR:-none}
 case "$OME_TRANSLATOR" in
     none|digitalis) ;;
@@ -198,7 +201,7 @@ reset_kernel_firmware() {
 refuse_experimental_image() {
     if [ "$OME_TRANSLATOR" != none ] || [ -f "$OME_BUILD_ROOT/.repo/local_manifests/ome-digitalis.xml" ] ||
         [ -f "$OME_BUILD_ROOT/out/target/product/x86_64/system/lib64/libberberis_arm64.so" ]; then
-        echo "Digitalis API 35 is a module probe only; restore the base manifest and use clean product output before image operations" >&2
+        echo "baseline image operations require restored sources and installclean; use digitalis-iso for the opt-in experiment" >&2
         exit 2
     fi
 }
@@ -236,6 +239,63 @@ do_modules() {
     ) 2>&1 | tee "$log"
 }
 
+do_digitalis_iso() {
+    refuse_blob_flags
+    [ "$OME_TRANSLATOR" = digitalis ] || { echo "digitalis-iso requires OME_TRANSLATOR=digitalis" >&2; exit 2; }
+    [ "$(git -C "$OME_BUILD_ROOT/frameworks/libs/binary_translation" rev-parse HEAD)" = f5f1c90b17d0c1df9e9be41534c653a3e74bfc64 ] || exit 2
+    cd "$OME_BUILD_ROOT"
+    local name="OME-api35-$(date +%Y%m%d)-digitalis"
+    local dist="$OME_BUILD_ROOT/dist/$(date +%Y%m%d)-$(git -C .repo/manifests rev-parse --short HEAD)-digitalis"
+    [ ! -e "$dist" ] || { echo "refusing to overwrite experimental dist: $dist" >&2; exit 2; }
+    apply_ome_patches
+    apply_ome_patches "$HERE/patches/digitalis"
+    write_vendor_extra
+    # The pinned installer inputs already exist; verify rather than run latest-download hooks.
+    (cd ome-cache/aaropa-"$AAROPA_ROOTFS_RELEASE" && sha256sum -c "$AAROPA_SUMS")
+    reset_kernel_firmware
+    export OME_TRANSLATOR BLISS_BUILD_VARIANT LC_ALL=C.UTF-8 OME_SKIP_INSTALLER_DOWNLOAD=1
+    export PATH="$HOME/.cargo/bin:$PATH"
+    local log="$LOG_DIR/digitalis-iso-$(date +%Y%m%d-%H%M%S).log"
+    (
+        set +u +e
+        source build/envsetup.sh
+        lunch "$BLISS_LUNCH" || exit 2
+        local upstream_name
+        upstream_name=$(get_build_var BLISS_BUILD_ZIP) || exit 2
+        printf '%s\n' "$upstream_name" > "$LOG_DIR/digitalis-upstream-iso-name.txt"
+        make -j"$OME_JOBS" iso_img
+        exit $?
+    ) 2>&1 | tee "$log"
+    # Soong's make wrapper does not forward a BLISS_BUILD_ZIP command-line override.
+    # Rename the successful build output explicitly before collecting it.
+    local upstream_name
+    upstream_name=$(cat "$LOG_DIR/digitalis-upstream-iso-name.txt")
+    local iso="$OME_BUILD_ROOT/out/target/product/x86_64/$name.iso"
+    [ ! -e "$iso" ] || { echo "refusing to overwrite $iso" >&2; exit 2; }
+    mv "$OME_BUILD_ROOT/out/target/product/x86_64/$upstream_name.iso" "$iso"
+    mkdir -p "$dist"
+    cp "$iso" "$dist/"
+    (cd "$dist" && sha256sum "$name.iso" > "$name.iso.sha256")
+    repo manifest -r -o "$dist/ome.xml"
+    cp out/target/product/x86_64/system/build.prop "$dist/build.prop"
+    cp "$HERE/pins.env" "$log" "$dist/"
+    cp -R "$HERE/patches" "$dist/patches"
+    printf '%s\n' "$dist" > "$LOG_DIR/digitalis-last-dist.txt"
+    say "experimental ISO: $dist"
+}
+
+do_installclean() {
+    [ "$OME_TRANSLATOR" = none ] || { echo "restore baseline before installclean" >&2; exit 2; }
+    [ ! -f "$OME_BUILD_ROOT/.repo/local_manifests/ome-digitalis.xml" ] || exit 2
+    [ "$(git -C "$OME_BUILD_ROOT/frameworks/libs/binary_translation" rev-parse HEAD)" = cf1446707cc8e12aa42c024026d42c95228dea38 ] || exit 2
+    cd "$OME_BUILD_ROOT"
+    # Use the source-defined Soong clean target without envsetup's vendor download hooks.
+    # installClean removes product system/root/images and packaging, not dist/ or object caches.
+    TARGET_PRODUCT=bliss_x86_64 TARGET_RELEASE=ap4a TARGET_BUILD_VARIANT=userdebug \
+        build/soong/soong_ui.bash --make-mode installclean 2>&1 | tee "$LOG_DIR/digitalis-installclean-$(date +%Y%m%d-%H%M%S).log"
+    refuse_experimental_image
+}
+
 do_build() {
     refuse_experimental_image
     refuse_blob_flags
@@ -268,7 +328,7 @@ do_collect() {
     cd "$OME_BUILD_ROOT"
     local product="out/target/product/x86_64"
     local iso
-    iso=$(ls -t "$product"/*.iso 2>/dev/null | head -1 || true)
+    iso=$(ls -t "$product"/*.iso 2>/dev/null | grep -v -- '-digitalis.iso$' | head -1 || true)
     [ -n "$iso" ] || { echo "no ISO under $product" >&2; exit 1; }
     local dist="$OME_BUILD_ROOT/dist/$(date +%Y%m%d)-$(git -C .repo/manifests rev-parse --short HEAD)"
     mkdir -p "$dist"
@@ -291,6 +351,9 @@ case "${1:-}" in
     snapshot) do_snapshot ;;
     aaropa) do_aaropa ;;
     modules) do_modules ;;
+    digitalis-iso) do_digitalis_iso ;;
+    installclean) do_installclean ;;
+    baseline-check) refuse_experimental_image ;;
     build) do_build ;;
     collect) do_collect ;;
     all) do_init; do_sync; do_snapshot; do_aaropa; do_build; do_collect ;;

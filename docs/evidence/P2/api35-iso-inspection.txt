@@ -1,0 +1,58 @@
+ro.dalvik.vm.native.bridge=libberberis_arm64.so
+ro.dalvik.vm.isa.arm64=x86_64
+ro.enable.native.bridge.exec=1
+/mnt/ome-p2/system/system/vendor/build.prop:ro.vendor.product.cpu.abilist=x86_64,x86,arm64-v8a
+/mnt/ome-p2/system/system/vendor/build.prop:ro.vendor.product.cpu.abilist64=x86_64,arm64-v8a
+/mnt/ome-p2/system/system/vendor/odm/etc/build.prop:ro.odm.product.cpu.abilist=x86_64,x86,arm64-v8a
+/mnt/ome-p2/system/system/vendor/odm/etc/build.prop:ro.odm.product.cpu.abilist64=x86_64,arm64-v8a
+/mnt/ome-p2/system/system/build.prop:ro.system.product.cpu.abilist=x86_64,x86,arm64-v8a
+/mnt/ome-p2/system/system/build.prop:ro.system.product.cpu.abilist64=x86_64,arm64-v8a
+# Enable native bridge for target executables
+on early-init && property:ro.enable.native.bridge.exec=1
+    mount binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc
+
+on property:ro.enable.native.bridge.exec=1 && property:ro.dalvik.vm.isa.riscv64=x86_64
+    copy /system/etc/binfmt_misc/riscv64_exe /proc/sys/fs/binfmt_misc/register
+    copy /system/etc/binfmt_misc/riscv64_dyn /proc/sys/fs/binfmt_misc/register
+
+# region digitalis - ARM64 binfmt_misc registration
+on property:ro.enable.native.bridge.exec=1 && property:ro.dalvik.vm.isa.arm64=x86_64
+    copy /system/etc/binfmt_misc/arm64_exe /proc/sys/fs/binfmt_misc/register
+    copy /system/etc/binfmt_misc/arm64_dyn /proc/sys/fs/binfmt_misc/register
+# endregion:arm64_exe:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xb7::/system/bin/berberis_program_runner_binfmt_misc_arm64:P
+:arm64_dyn:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00\xb7::/system/bin/berberis_program_runner_binfmt_misc_arm64:P
+e9e8052a0d711bc152565c2d824c5bf6cdcb01636f1db833416b21371c506f25  /mnt/ome-p2/system/system/lib64/libberberis_arm64.so
+7fc845b6f756071b442afc1d29e7d75b6f5d15c2aa66e9efcbecab5f0a7e3a71  /mnt/ome-p2/system/system/lib64/arm64/libm.so
+    57: 00000000000236ec    96 FUNC    GLOBAL DEFAULT    16 frexpf@@LIBC
+   219: 0000000000024ed4   136 FUNC    GLOBAL DEFAULT    16 ldexpf@@LIBC
+   227: 0000000000020ca4   220 FUNC    GLOBAL DEFAULT    16 cpowf@@LIBC_O
+   230: 0000000000036e2c     8 FUNC    GLOBAL DEFAULT    16 powf@@LIBC
+   255: 000000000001fc3c   332 FUNC    GLOBAL DEFAULT    16 cexpf@@LIBC
+   259: 0000000000036e24     8 FUNC    GLOBAL DEFAULT    16 expf@@LIBC
+NAME_MATCH system/lib/libberberis_exec_region.so
+NAME_MATCH system/lib64/libberberis_arm64.so
+NAME_MATCH system/lib64/libberberis_exec_region.so
+NAME_MATCH system/lib64/libberberis_proxy_libEGL.so
+NAME_MATCH system/lib64/libberberis_proxy_libGLESv1_CM.so
+NAME_MATCH system/lib64/libberberis_proxy_libGLESv2.so
+NAME_MATCH system/lib64/libberberis_proxy_libGLESv3.so
+NAME_MATCH system/lib64/libberberis_proxy_libOpenMAXAL.so
+NAME_MATCH system/lib64/libberberis_proxy_libOpenSLES.so
+NAME_MATCH system/lib64/libberberis_proxy_libaaudio.so
+NAME_MATCH system/lib64/libberberis_proxy_libamidi.so
+NAME_MATCH system/lib64/libberberis_proxy_libandroid.so
+NAME_MATCH system/lib64/libberberis_proxy_libandroid_runtime.so
+NAME_MATCH system/lib64/libberberis_proxy_libbinder_ndk.so
+NAME_MATCH system/lib64/libberberis_proxy_libc.so
+NAME_MATCH system/lib64/libberberis_proxy_libcamera2ndk.so
+NAME_MATCH system/lib64/libberberis_proxy_libjnigraphics.so
+NAME_MATCH system/lib64/libberberis_proxy_libm.so
+NAME_MATCH system/lib64/libberberis_proxy_libmediandk.so
+NAME_MATCH system/lib64/libberberis_proxy_libnativehelper.so
+NAME_MATCH system/lib64/libberberis_proxy_libnativewindow.so
+NAME_MATCH system/lib64/libberberis_proxy_libneuralnetworks.so
+NAME_MATCH system/lib64/libberberis_proxy_libvulkan.so
+NAME_MATCH system/lib64/libberberis_proxy_libwebviewchromium_plat_support.so
+/home/ome/bliss/dist/20261005-db973c9-digitalis/OME-api35-20261005-digitalis.iso: BLOCK_SIZE="2048" DATA_PREPARER_ID="XORRISO-1.5.4 2021.01.30.150001, LIBISOBURN-1.5.4, LIBISOFS-1.5.4, LIBBURN-1.5.4" UUID="2026-10-05-22-03-07-00" BOOT_SYSTEM_ID="EL TORITO SPECIFICATION" LABEL="BlissOS_20261005" TYPE="iso9660" USAGE="filesystem" PTUUID="f40ac82c-26cc-4709-9911-cbce65ff308c" PTTYPE="gpt"
+/home/ome/bliss/dist/20261005-db973c9-digitalis/OME-api35-20261005-digitalis.iso
+ISO_INSPECTION=PASS

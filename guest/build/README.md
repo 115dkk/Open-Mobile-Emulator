@@ -64,7 +64,8 @@ first: the kernel rule's `copy-firmware.sh` stops at links an earlier build left
 
 ## Experimental Digitalis module probe (API 35)
 
-This does **not** build a Digitalis image. The default remains `OME_TRANSLATOR=none`.
+The default remains `OME_TRANSLATOR=none`. `modules` builds only the translator modules;
+`digitalis-iso` explicitly builds and collects an experimental image as described below.
 `manifest/ome-digitalis.xml` pins only the translator fork. API 35 `native_bridge_support`
 and bionic keep their base commits with the optional compatibility patches applied during
 the probe; the goldfish product and GPU configuration stay unchanged. Do not import the upstream
@@ -97,8 +98,9 @@ A15's embedded Python 3.11. No API 36 bionic binaries are used.
 
 All 74 upstream distribution paths exist. ELF machine types, `NativeBridgeItf`, libm exports,
 and DT_NEEDED were checked (`docs/evidence/P2/api35-elf-validation.txt`). This is not a boot or
-runtime test. No Digitalis ISO has been built; module builds leave the old image `build.prop`
-unchanged. The latest full-module build is `docs/evidence/P2/module-attempt-12.txt`.
+runtime test. Module builds leave the old image `build.prop` unchanged. The latest full-module
+build is `docs/evidence/P2/module-attempt-12.txt`. A separate experimental ISO build and live
+ARM64 smoke test subsequently passed on 2026-10-05 (see below).
 
 In the existing incremental tree, the generated Soong graph once stayed older than the changed
 product variables, causing false missing-module errors. Moving only the generated
@@ -112,10 +114,38 @@ restore the saved `vendor/extra/product.mk`, move its local manifest out of
 `.repo/local_manifests`, and sync only the translator back to `ome.xml`'s revision. Keep the
 previous `dist/` intact. The 2026-10-05 probe was restored this way.
 
-The successful module binaries remain under `out/` for inspection. **Source restoration does
-not clean the product output.** Before a normal ISO build, use a fresh product output or arrange
-a reviewed cleanup; the script refuses image operations while that output contains Digitalis.
-R1 still matches the 23 source-built `libberberis*` files. No filename exceptions were added.
+**Source restoration does not clean the product output.** After saving the experimental image
+and restoring the baseline sources, run `build-image.sh installclean`, then
+`build-image.sh baseline-check`. The clean stage calls Soong's existing `installclean` target
+without envsetup's download hook: installed system/root/images and packaging are removed, but
+object caches and `dist/` remain. This procedure passed after the 2026-10-05 live smoke test;
+a full baseline ISO rebuild was not run.
+
+### Experimental ISO and live smoke
+
+With the optional manifest synced and `OME_TRANSLATOR=digitalis`, run:
+
+```sh
+OME_TRANSLATOR=digitalis OME_BUILD_ROOT=/home/ome/bliss OME_JOBS=8 \
+    bash '/mnt/c/Open Mobile Emulator/guest/build/build-image.sh' digitalis-iso
+```
+
+The command applies normal OME identity patches and Digitalis compatibility patches, verifies
+the pinned installer cache, builds `iso_img`, renames the successful output to
+`OME-api35-<date>-digitalis.iso`, and collects it in
+`dist/<date>-<manifest commit>-digitalis/`. It refuses an existing collection directory and
+copies the exact repo manifest, compatibility patches, pins, build properties, and build log.
+Neither the baseline manifest snapshot nor existing release assets are overwritten.
+
+The 2026-10-05 ISO contains the enabled bridge, ARM64 ABI properties, binfmt handlers and the
+stub-bearing API 35 libm. Product QEMU live boot on separate adb/QMP ports passed static ARM64
+hello and the ARM64 probe APK. Evidence is `docs/evidence/P2/api35-iso-inspection.txt`,
+`api35-live-smoke.txt`, `api35-probe-ui-unlocked.txt`, and `api35-probe-unlocked.png`.
+The test VM was shut down normally. No game test was performed.
+
+R1 name scanning finds 24 `libberberis*` files in the ISO (the 23 canonical x86-64 files plus
+32-bit `libberberis_exec_region.so`). These were source-built; no filename exceptions or
+release approval were added. The experimental image is not a published release.
 
 ## Release assets (ADR-0012)
 

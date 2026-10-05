@@ -1,0 +1,47 @@
+**********************
+PowerShell 기록 시작
+시작 시간: 20261005221546
+사용자 이름: AzureAD\김광호
+실행 사용자: AzureAD\김광호
+구성 이름: 
+컴퓨터: DESKTOP-13L73SH (Microsoft Windows NT 10.0.22621.0)
+호스트 애플리케이션: C:\Program Files\WindowsApps\Microsoft.PowerShell_7.6.6.0_x64__8wekyb3d8bbwe\pwsh.dll -NoProfile -File C:/Users/32170336/AppData/Local/Temp/claude/C--Open-Mobile-Emulator/89a0289f-c0ca-4b9d-90f3-8e1a652c6db9/scratchpad/p2/smoke.ps1
+프로세스 ID: 11904
+PSVersion: 7.6.6
+PSEdition: Core
+GitCommitId: 7.6.6
+OS: Microsoft Windows 10.0.22621
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.4
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+대화 내용 기록이 시작되었습니다. 출력 파일은 C:/Open Mobile Emulator/docs/evidence/P2/api35-live-smoke.txt입니다.
+
+
+
+
+
+
+
+
+
+
+HELLO_EXIT=0
+
+INSTALL_EXIT=0
+
+LAUNCH_EXIT=0
+
+    primaryCpuAbi=arm64-v8a
+    secondaryCpuAbi=null
+
+
+
+
+
+**********************
+PowerShell 기록 끝
+종료 시간: 20261005221552
+**********************

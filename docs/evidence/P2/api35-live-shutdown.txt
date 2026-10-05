@@ -1,0 +1,14 @@
+Done
+QEMU_NORMAL_SHUTDOWN=PASS PID=36176
+
+[32;1mName                            [0m[32;1m     Length[0m
+[32;1m----                            [0m [32;1m    ------[0m
+disk.qcow2                           197120
+efivars.fd                           540672
+initrd.img                          1829185
+kernel                             18703360
+OME-api35-20261005-digitalis.iso 2961014784
+qemu-args.txt                          1327
+qemu.pid                                  7
+                                          1
+

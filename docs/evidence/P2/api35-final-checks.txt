@@ -1,0 +1,10 @@
+
+[32;1mAlgorithm : [0mSHA256
+[32;1mHash      : [0m2E57EBDD013F77B8149AEEE5246C7C960A9A502FE9C1E664D0CB526F31226BF0
+[32;1mPath      : [0mC:\Users\32170336\AppData\Local\OpenMobileEmulator\p2\OME-api35-20261005-digitalis.iso
+
+10-05 13:16:26.510  3812  3812 D nativeloader: Load libjni_latinimegoogle.so using ns product-clns-7 from class loader (caller=/system/product/app/LatinIME/LatinIME.apk): dlopen failed: library "libjni_latinimegoogle.so" not found
+10-05 13:16:26.511  3812  3812 E JniUtils: java.lang.UnsatisfiedLinkError: dlopen failed: library "libjni_latinimegoogle.so" not found
+line 242 do_digitalis_iso() {
+line 287 do_installclean() {
+line 331     iso=$(ls -t "$product"/*.iso 2>/dev/null | grep -v -- '-digitalis.iso$' | head -1 || true)
