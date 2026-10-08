@@ -23,5 +23,7 @@
   ],
   "nativeRegistrationSectionAbsent": true,
   "backupExe": "ome.exe.before-registration-removal-20261009",
-  "backupMetadata": "guest.json.before-registration-removal-20261009"
+  "backupMetadata": "guest.json.before-registration-removal-20261009",
+  "postRemovalLobbyConfirmed": true,
+  "postRemovalLobbyEvidence": "05-lobby-after-registration-removal.png"
 }

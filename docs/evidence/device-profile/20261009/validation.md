@@ -51,7 +51,8 @@ Tauri 생산 빌드(`build --no-bundle`)를 설치된 `ome.exe`에 반영했다.
 `b8e604db3d5abe4fd924749127e7abd1f8ba586c890bb2bcd96471e046f90179`다.
 기존 실행 파일과 메타데이터는 각각 `*.before-registration-removal-20261009`로 백업했다.
 새 설치본에서 기존 게스트 부팅·앱 목록을 확인했고, 실행 중인 설정 화면의 여덟 섹션에
-등록 안내가 없는 것을 컴퓨터 유즈로 확인했다. 실제 메타데이터도 스키마 2로 저장되며
+등록 안내가 없는 것을 컴퓨터 유즈로 확인했다. 이어 같은 설치본에서 저장된 Google 로그인 세션으로
+[로비에 다시 진입](05-lobby-after-registration-removal.png)했다. 실제 메타데이터도 스키마 2로 저장되며
 폐기한 필드가 없다. [설치본 검증 기록](native-acceptance.json)에 결과를 남겼다.
 
 검사: Rust 전체 워크스페이스 테스트와 Clippy(`-D warnings`), 프런트 테스트 291개,
