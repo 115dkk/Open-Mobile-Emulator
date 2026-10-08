@@ -303,24 +303,6 @@ pub fn clipboard_unavailable() -> AppIssue {
     }
 }
 
-/// Returns an issue when a snapshot-owned value is not available yet.
-pub fn value_unknown() -> AppIssue {
-    AppIssue {
-        code: "value_unknown".to_owned(),
-        message: "복사할 값을 아직 확인하지 못했습니다.".to_owned(),
-        next_action: Some("운영체제 부팅이 끝난 뒤 다시 시도하십시오.".to_owned()),
-    }
-}
-
-/// Returns an issue when the GSF ID has not been probed.
-pub fn device_id_unknown() -> AppIssue {
-    AppIssue {
-        code: "device_id_unknown".to_owned(),
-        message: "기기 ID를 아직 확인하지 못했습니다.".to_owned(),
-        next_action: Some("운영체제 부팅이 끝난 뒤 다시 시도하십시오.".to_owned()),
-    }
-}
-
 /// Returns an issue when the separate native window cannot be activated.
 pub fn window_unavailable() -> AppIssue {
     AppIssue {

@@ -78,7 +78,6 @@ export const CAPABILITY_LABEL: Readonly<Record<CapabilityId, string>> = {
   appList: '앱 목록',
   displaySize: '화면 크기와 밀도',
   mediaVolume: '미디어 볼륨',
-  deviceId: '기기 ID',
   screenshot: '스크린샷',
   foregroundApp: '전경 앱',
   multitouch: '멀티터치',
@@ -152,21 +151,4 @@ function failedStepState(index: number, failedIndex: number): StepState {
   if (index < failedIndex) return 'done';
   if (index === failedIndex) return 'failed';
   return 'pending';
-}
-
-/** Google 계정 section states (M2-SCREENS.md 6), picked from the snapshot in this order. */
-export type GoogleAccountState = 'account' | 'registered' | 'id' | 'reading';
-
-export function googleAccountState(guest: GuestView): GoogleAccountState {
-  if ((guest.googleAccounts ?? 0) >= 1) return 'account';
-  if (guest.registrationOpenedAt !== null) return 'registered';
-  if (guest.deviceId !== null) return 'id';
-  return 'reading';
-}
-
-/** Local hour and minute of a timestamp: `20:14`. Unparseable input is shown as given. */
-export function clockTime(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 }

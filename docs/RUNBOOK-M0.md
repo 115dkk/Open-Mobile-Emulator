@@ -139,7 +139,9 @@ for example through pycaw; the script used on 2026-09-26 is
 
 ## 6. Google sign-in path (M0 step 8)
 
-Follow `docs/GOOGLE_ACCOUNT.md`; record the result there and in the evidence folder.
+Sign in inside the guest Play Store and game. Record actual installation/update and
+game launch results in the evidence folder. The old registration assistance was retired
+on 2026-10-09; see `docs/DEVICE_PROFILE.md`.
 
 ## 7. Wrap up
 

@@ -1428,35 +1428,9 @@
   margin-top: var(--space-1);
 }
 
-.ome-settings-lead {
-  padding: var(--space-3) 0 var(--space-1);
-}
-
-.ome-settings-note {
-  padding-top: var(--space-3);
-  color: var(--muted);
-}
-
 .ome-settings-value {
   color: var(--text);
   user-select: all;
-}
-
-/* Google 계정: a lamp beside the state sentence; the lamp sits on the first line. */
-
-.ome-settings-status {
-  display: flex;
-  flex: 1;
-  align-items: flex-start;
-  gap: var(--space-3);
-  min-width: 0;
-}
-
-.ome-settings-lamp {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  height: 1.5em;
 }
 
 .ome-settings-hotkey {

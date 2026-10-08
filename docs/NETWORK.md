@@ -18,12 +18,11 @@ Windows 11 ships with, and the installer says so instead of downloading it.
 
 Opened in the user's default browser by the product (the product itself sends no
 request to these hosts; they are listed so reviewers can match `HelpTopic` and the
-registration command against this file):
+help commands against this file):
 
 | Purpose | Host | Opened by |
 |---|---|---|
 | Help pages, third-party notices, release notes, QEMU source offer | `github.com` | `open_help` |
-| Uncertified-device registration (R8) | `www.google.com` (`/android/uncertified/`) | `open_registration_page` |
 
 Local-only sockets (not network endpoints):
 

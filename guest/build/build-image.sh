@@ -145,9 +145,12 @@ write_vendor_extra() {
         exit 2
     fi
     mkdir -p "$(dirname "$mk")"
+    python3 "$HERE/device_profile.py" "$OME_REPO_ROOT/manifests/device-profile.prop"
+    cp "$OME_REPO_ROOT/manifests/device-profile.prop" "$OME_BUILD_ROOT/vendor/extra/ome-device-profile.prop"
     cat > "$mk" <<EOF
 $marker
 PRODUCT_SYSTEM_PROPERTIES += persist.sys.usb.config=adb
+PRODUCT_COPY_FILES += vendor/extra/ome-device-profile.prop:system/etc/ome-device-profile.prop
 ifeq (\$(OME_TRANSLATOR),digitalis)
 \$(call inherit-product, frameworks/libs/binary_translation/enable_arm64_to_x86_64.mk)
 endif
@@ -156,10 +159,9 @@ EOF
 
 # guest/build/patches/<project path>/*.patch are applied to the synced tree in name order.
 # A patch that already applies in reverse is left alone, so a rebuild does not apply it twice;
-# one that applies neither way stops the build. 0001 in system/core removes BlissOS's
-# workaround_snet_properties, which rewrites build type, debuggable and verified-boot state to
-# a locked retail device's values at every boot (CLAUDE.md D8, R7;
-# docs/evidence/P3/dod-a15-20261003.md section 6).
+# one that applies neither way stops the build. The init profile loader owns the published
+# identity. The earlier patches prevent unrelated Bliss hooks from overriding that identity
+# or changing runtime capabilities and security settings as a side effect.
 apply_ome_patches() {
     local patch_root=${1:-$HERE/patches}
     local patch project

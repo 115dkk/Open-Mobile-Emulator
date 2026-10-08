@@ -47,8 +47,12 @@ log land in `~/bliss/dist/<date>-<manifest commit>/`.
 Before `lunch`, the build stage writes `vendor/extra/product.mk` (BlissOS's property override hook;
 it turns adb on with `persist.sys.usb.config=adb`) and applies `patches/<project path>/*.patch` to
 the synced tree. A patch that already applies in reverse is skipped, and one that applies neither
-way stops the build. The patches take out the device disguise BlissOS carries, which the product
-must not ship (CLAUDE.md D8, R7, R8; `docs/evidence/P3/dod-a15-20261003.md` sections 6 and 7):
+way stops the build. Since the 2026-10-08 user decision, the published S26 Ultra identity
+in `manifests/device-profile.prop` is validated and copied into `/system/etc/ome-device-profile.prop`.
+`system/core/0002-load-ome-device-profile.patch` applies its model and fingerprint after vendor overrides.
+The donor brand/product/device remain provenance metadata; native partition identities are kept. It leaves SDK, ABI, security patch level and boot settings intact.
+The earlier patches keep competing Bliss hooks from substituting other device identities or
+changing unrelated behavior. They are implementation choices, not a ban on compatibility profiles:
 
 | Patch | What it restores |
 |---|---|
@@ -57,7 +61,8 @@ must not ship (CLAUDE.md D8, R7, R8; `docs/evidence/P3/dod-a15-20261003.md` sect
 | `frameworks/base/0001-keep-real-device-identity.patch` | upstream AOSP at every call into `PixelPropsUtils`, `AttestationHooks`, `GamesPropsUtils` and `HideDeveloperStatusUtils`, and upstream `hasSystemFeature`, `getInstallerPackageName` and `RuntimeInit`: apps see the real build and device values, Pixel features are not claimed, key attestation is not blocked |
 | `packages/apps/Settings/0001-drop-hide-developer-status-entry.patch` | drops the Settings entry for hiding developer status, which does nothing once the framework hook is gone |
 
-The BlissOS utility classes stay in the tree; nothing calls them.
+The BlissOS utility classes stay in the tree; nothing calls them. See
+`docs/DEVICE_PROFILE.md` for profile provenance, existing-guest migration and live test status.
 
 An incremental rebuild in the same tree removes `system/vendor/firmware` and the kernel image
 first: the kernel rule's `copy-firmware.sh` stops at links an earlier build left there.

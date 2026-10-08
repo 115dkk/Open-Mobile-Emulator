@@ -9,7 +9,8 @@
   "boot_args": [
     "quiet",
     "HWC=drm_minigbm",
-    "GRALLOC=minigbm_arcvm"
+    "GRALLOC=minigbm_arcvm",
+    "FORCE_GLES=3.2"
   ],
   "boot_files": {
     "kernel": "/kernel",

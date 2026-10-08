@@ -410,7 +410,6 @@ pub struct AppRuntime {
     boot_poll_pending: bool,
     boot_generation: u64,
     boot_started: Option<Instant>,
-    last_account_poll: Option<Instant>,
     apps: Vec<AppItem>,
     install_progress: Option<InstallProgress>,
     install_cancel: Option<Arc<AtomicBool>>,
@@ -437,11 +436,6 @@ pub struct AppRuntime {
     last_exit: Option<LastExit>,
     started_at: Option<String>,
     capabilities: CapabilityReport,
-    device_id: Option<String>,
-    device_id_decimal: Option<String>,
-    google_accounts: Option<u32>,
-    registration_opened_at: Option<String>,
-    add_account_supported: bool,
     root_enabled: Option<bool>,
     media_volume: Option<u32>,
     restart_pending: bool,
@@ -559,16 +553,7 @@ impl AppRuntime {
         let capabilities = active_record
             .map(|guest| capability_report(&guest.capabilities))
             .unwrap_or_default();
-        let device_id = active_record
-            .and_then(|guest| guest.device_id.as_ref())
-            .map(|id| id.hex.clone());
-        let device_id_decimal = active_record
-            .and_then(|guest| guest.device_id.as_ref())
-            .map(|id| id.decimal.clone());
-        let registration_opened_at =
-            active_record.and_then(|guest| guest.registration_opened_at.clone());
         let root_enabled = active_record.and_then(|guest| guest.root_enabled);
-        let google_accounts = active_record.and_then(|guest| guest.capabilities.google_accounts);
         let media_volume = active_record.and_then(|guest| guest.capabilities.media_volume);
         let display_info = active_record.and_then(|guest| {
             guest.capabilities.display.map(|display| DisplayInfo {
@@ -576,11 +561,6 @@ impl AppRuntime {
                 height: display.height,
                 density_dpi: display.density_dpi,
             })
-        });
-        let add_account_supported = active_record.is_some_and(|guest| {
-            adapter_for(guest.api_level)
-                .add_google_account_command()
-                .is_some()
         });
         let mut input_profiles = bundled_profiles();
         let directory =
@@ -665,7 +645,6 @@ impl AppRuntime {
             boot_poll_pending: false,
             boot_generation: 0,
             boot_started: None,
-            last_account_poll: None,
             apps,
             install_progress: None,
             install_cancel: None,
@@ -692,11 +671,6 @@ impl AppRuntime {
             last_exit: None,
             started_at: None,
             capabilities,
-            device_id,
-            device_id_decimal,
-            google_accounts,
-            registration_opened_at,
-            add_account_supported,
             root_enabled,
             media_volume,
             restart_pending: false,
@@ -746,11 +720,6 @@ impl AppRuntime {
                     .map(|guest| guest.api_level)
                     .or_else(|| selected_profile.map(|profile| profile.api_level)),
                 capabilities: self.capabilities.clone(),
-                device_id: self.device_id.clone(),
-                device_id_decimal: self.device_id_decimal.clone(),
-                google_accounts: self.google_accounts,
-                registration_opened_at: self.registration_opened_at.clone(),
-                add_account_supported: self.add_account_supported,
                 pid: self.pid,
                 adb_address: Some(self.adb_address()),
                 root_enabled: self.root_enabled,
@@ -886,8 +855,6 @@ impl AppRuntime {
             Command::OpenLogsFolder => self.open_fixed_directory(Some("logs")),
             Command::OpenScreenshotsFolder => self.open_fixed_directory(Some("screenshots")),
             Command::CopyToClipboard { item } => self.copy_to_clipboard(item),
-            Command::OpenRegistrationPage => self.open_registration_page(),
-            Command::GoogleAccountAddOpen => self.open_google_account_add(),
             Command::GuestWindowToFront => self
                 .deps
                 .window_host
@@ -1350,8 +1317,6 @@ impl AppRuntime {
                 created_at: Some(local_rfc3339()),
                 last_started_at: None,
                 capabilities: Default::default(),
-                device_id: None,
-                registration_opened_at: None,
                 root_enabled: None,
                 boot: None,
                 direct_boot_migration_attempted: false,
@@ -1716,7 +1681,6 @@ impl AppRuntime {
                             self.reveal_booted_guest_window();
                             self.mark_migrated_direct_boot_verified();
                             self.run_capability_probe();
-                            self.last_account_poll = Some(Instant::now());
                         }
                     }
                 }
@@ -2259,9 +2223,6 @@ impl AppRuntime {
             HelpTopic::HypervisorPlatform => {
                 "https://github.com/115dkk/Open-Mobile-Emulator/blob/main/docs/help/hypervisor-platform.md"
             }
-            HelpTopic::GoogleAccount => {
-                "https://github.com/115dkk/Open-Mobile-Emulator/blob/main/docs/help/google-account.md"
-            }
             HelpTopic::AdbSecurity => {
                 "https://github.com/115dkk/Open-Mobile-Emulator/blob/main/docs/help/adb-security.md"
             }
@@ -2362,51 +2323,12 @@ impl AppRuntime {
     fn copy_to_clipboard(&self, item: ClipboardItem) -> Result<(), AppIssue> {
         let adb_address = self.adb_address();
         let value = match item {
-            ClipboardItem::DeviceId => self
-                .device_id
-                .as_deref()
-                .ok_or_else(issues::value_unknown)?,
             ClipboardItem::AdbAddress => adb_address.as_str(),
         };
         self.deps
             .desktop
             .copy_text(value)
             .map_err(|_| issues::clipboard_unavailable())
-    }
-
-    fn open_registration_page(&mut self) -> Result<(), AppIssue> {
-        const URL: &str = "https://www.google.com/android/uncertified/";
-        let device_id = self
-            .device_id
-            .clone()
-            .ok_or_else(issues::device_id_unknown)?;
-        self.deps
-            .desktop
-            .copy_text(&device_id)
-            .map_err(|_| issues::clipboard_unavailable())?;
-        self.deps
-            .desktop
-            .open_url(URL)
-            .map_err(|_| issues::desktop_unavailable())?;
-        let opened_at = local_rfc3339();
-        self.registration_opened_at = Some(opened_at.clone());
-        if let Some(position) = self.selected_guest_index() {
-            self.guests[position].registration_opened_at = Some(opened_at);
-            self.guest_store
-                .save(&self.guests[position])
-                .map_err(guest_store_issue)?;
-        }
-        Ok(())
-    }
-
-    fn open_google_account_add(&self) -> Result<(), AppIssue> {
-        if self.guest_state != GuestState::Running || !self.boot_completed {
-            return Err(issues::operating_system_not_running());
-        }
-        let command = self
-            .with_family_adapter(|adapter| adapter.add_google_account_command())
-            .ok_or_else(issues::operating_system_unsupported)?;
-        self.run_shell(&command)
     }
 
     fn place_guest_window(&mut self, rect: StageRect) -> Result<(), AppIssue> {
@@ -2915,7 +2837,6 @@ impl AppRuntime {
                 self.boot_generation = self.boot_generation.wrapping_add(1);
                 self.boot_poll_pending = false;
                 self.boot_started = None;
-                self.last_account_poll = None;
                 self.hosting = HostingMode::None;
                 self.pid = None;
                 self.started_at = None;
@@ -2944,7 +2865,6 @@ impl AppRuntime {
                 self.boot_generation = self.boot_generation.wrapping_add(1);
                 self.boot_poll_pending = false;
                 self.boot_started = None;
-                self.last_account_poll = None;
                 self.hosting = HostingMode::None;
                 self.pid = None;
                 self.started_at = None;
@@ -2977,7 +2897,6 @@ impl AppRuntime {
         self.adb_connected = false;
         self.boot_generation = self.boot_generation.wrapping_add(1);
         self.boot_poll_pending = false;
-        self.last_account_poll = None;
         self.hosting = HostingMode::None;
         self.pid = None;
         self.started_at = None;
@@ -3157,14 +3076,6 @@ impl AppRuntime {
                     self.boot_poll_pending = true;
                 }
             }
-            return;
-        }
-        if self
-            .last_account_poll
-            .is_none_or(|last| last.elapsed() >= Duration::from_secs(15))
-        {
-            self.last_account_poll = Some(Instant::now());
-            self.poll_google_accounts();
         }
     }
 
@@ -3384,23 +3295,16 @@ impl AppRuntime {
             return;
         };
         let runner = AdbShellRunner(adb);
-        let (outcome, add_account_supported) =
-            if let Some(adapter) = self.deps.family_adapter.as_deref() {
-                (
-                    CapabilityProbe.run(&runner, adapter),
-                    adapter.add_google_account_command().is_some(),
-                )
-            } else {
-                let adapter = adapter_for(api_level);
-                (
-                    CapabilityProbe.run(&runner, adapter.as_ref()),
-                    adapter.add_google_account_command().is_some(),
-                )
-            };
-        self.apply_probe_outcome(outcome, add_account_supported);
+        let outcome = if let Some(adapter) = self.deps.family_adapter.as_deref() {
+            CapabilityProbe.run(&runner, adapter)
+        } else {
+            let adapter = adapter_for(api_level);
+            CapabilityProbe.run(&runner, adapter.as_ref())
+        };
+        self.apply_probe_outcome(outcome);
     }
 
-    fn apply_probe_outcome(&mut self, outcome: ProbeOutcome, add_account_supported: bool) {
+    fn apply_probe_outcome(&mut self, outcome: ProbeOutcome) {
         let probed_at = local_rfc3339();
         let text_input = self
             .capabilities
@@ -3417,13 +3321,9 @@ impl AppRuntime {
                 .chain(text_input)
                 .collect(),
         };
-        self.device_id = outcome.device_id.as_ref().map(|id| id.hex.clone());
-        self.device_id_decimal = outcome.device_id.as_ref().map(|id| id.decimal.clone());
-        self.google_accounts = outcome.google_accounts;
         self.media_volume = outcome.media_volume;
         self.root_enabled = outcome.root_enabled;
         self.display_state_from(outcome.display);
-        self.add_account_supported = add_account_supported;
         self.apps = package_items(
             outcome
                 .packages
@@ -3444,21 +3344,6 @@ impl AppRuntime {
                         .to_owned(),
                 });
             }
-        }
-    }
-
-    fn poll_google_accounts(&mut self) {
-        let Some(adb) = self.deps.adb.as_ref() else {
-            return;
-        };
-        let Some(command) = self.with_family_adapter(|adapter| adapter.google_accounts_command())
-        else {
-            return;
-        };
-        let runner = AdbShellRunner(adb);
-        if let Ok(output) = runner.shell(&command) {
-            self.google_accounts =
-                self.with_family_adapter(|adapter| adapter.parse_google_accounts(&output.stdout));
         }
     }
 
@@ -3517,20 +3402,13 @@ impl AppRuntime {
     fn load_guest_projection(&mut self, position: usize) {
         let guest = &self.guests[position];
         self.capabilities = capability_report(&guest.capabilities);
-        self.device_id = guest.device_id.as_ref().map(|id| id.hex.clone());
-        self.device_id_decimal = guest.device_id.as_ref().map(|id| id.decimal.clone());
-        self.registration_opened_at = guest.registration_opened_at.clone();
         self.root_enabled = guest.root_enabled;
-        self.google_accounts = guest.capabilities.google_accounts;
         self.media_volume = guest.capabilities.media_volume;
         let display = guest.capabilities.display.map(|display| DisplayInfo {
             width: display.width,
             height: display.height,
             density_dpi: display.density_dpi,
         });
-        self.add_account_supported = adapter_for(guest.api_level)
-            .add_google_account_command()
-            .is_some();
         self.apps = stored_apps(guest);
         self.display_state_from(display);
     }
@@ -3555,14 +3433,9 @@ impl AppRuntime {
 
     fn clear_guest_projection(&mut self) {
         self.capabilities = CapabilityReport::default();
-        self.device_id = None;
-        self.device_id_decimal = None;
-        self.registration_opened_at = None;
         self.root_enabled = None;
-        self.google_accounts = None;
         self.media_volume = None;
         self.display_state_from(None);
-        self.add_account_supported = false;
         self.apps.clear();
         self.install_report = InstallReport::default();
         self.install_log = None;
@@ -4496,7 +4369,6 @@ fn capability_item(item: ProbeItem, state: ProbeState) -> crate::CapabilityItem 
             ProbeItem::AppList => CapabilityId::AppList,
             ProbeItem::DisplaySize => CapabilityId::DisplaySize,
             ProbeItem::MediaVolume => CapabilityId::MediaVolume,
-            ProbeItem::DeviceId => CapabilityId::DeviceId,
             ProbeItem::Screenshot => CapabilityId::Screenshot,
             ProbeItem::ForegroundApp => CapabilityId::ForegroundApp,
             ProbeItem::Multitouch => CapabilityId::Multitouch,
@@ -4523,7 +4395,6 @@ fn capability_report(stored: &crate::guest_store::StoredCapabilities) -> Capabil
                     StoredProbeItem::AppList => CapabilityId::AppList,
                     StoredProbeItem::DisplaySize => CapabilityId::DisplaySize,
                     StoredProbeItem::MediaVolume => CapabilityId::MediaVolume,
-                    StoredProbeItem::DeviceId => CapabilityId::DeviceId,
                     StoredProbeItem::Screenshot => CapabilityId::Screenshot,
                     StoredProbeItem::ForegroundApp => CapabilityId::ForegroundApp,
                     StoredProbeItem::Multitouch => CapabilityId::Multitouch,
@@ -4840,9 +4711,7 @@ mod tests {
     use crate::{ElevationLauncher, NativeProcessRunner};
     use ome_adb::{Output, RecordedRunner};
     use ome_artifacts::{FetchError, FetchOutcome, HttpFetch};
-    use ome_guest_image::{
-        Attempt, DeviceId, DisplayInfo, GuestFamily, PackageEntry, ShellCommand,
-    };
+    use ome_guest_image::{DisplayInfo, GuestFamily, PackageEntry, ShellCommand};
     use ome_host_check::{
         AdbFound, HostCheckId as ProbeId, OpenGlCapability, ProbeValue, QemuFound, TableProbe,
     };
@@ -5283,24 +5152,6 @@ mod tests {
             } else {
                 adapter_for(33).parse_display(size, density)
             }
-        }
-        fn device_id_attempts(&self) -> Vec<Attempt> {
-            vec![Attempt {
-                push: None,
-                command: ShellCommand::new(["probe-device-id"]),
-            }]
-        }
-        fn parse_device_id(&self, output: &str) -> Option<DeviceId> {
-            DeviceId::from_decimal(output)
-        }
-        fn google_accounts_command(&self) -> Option<ShellCommand> {
-            Some(ShellCommand::new(["probe-accounts"]))
-        }
-        fn parse_google_accounts(&self, output: &str) -> Option<u32> {
-            output.trim().parse().ok()
-        }
-        fn add_google_account_command(&self) -> Option<ShellCommand> {
-            Some(ShellCommand::new(["open-add-account"]))
         }
         fn root_state_command(&self) -> Option<ShellCommand> {
             Some(ShellCommand::new(["probe-root"]))
@@ -6374,7 +6225,7 @@ Override density: 240
     }
 
     #[test]
-    fn lifecycle_boot_probe_persists_values_and_google_account_command() {
+    fn lifecycle_boot_probe_persists_values_without_registration_metadata() {
         let desktop = RecordingDesktop::default();
         let window = RecordingWindow::embedded();
         let outputs = [
@@ -6385,17 +6236,14 @@ Override density: 240
             output("1280x720"),
             output("160"),
             output("8"),
-            output("1234567890"),
             output("captured"),
             output("removed"),
             output("foreground"),
             output("yes"),
             output("bridge.so"),
             output("no"),
-            output("1"),
-            output("opened"),
         ];
-        let (directory, mut runtime, supervisor, runner) =
+        let (directory, mut runtime, supervisor, _runner) =
             lifecycle_runtime(outputs, desktop, window);
         runtime.apply(Command::GuestStart).expect("start request");
         assert_eq!(supervisor.starts.lock().expect("starts lock").len(), 1);
@@ -6425,15 +6273,8 @@ Override density: 240
         let snapshot = runtime.snapshot();
         assert!(snapshot.guest.boot_completed);
         assert_eq!(snapshot.guest.pid, Some(4242));
-        assert_eq!(snapshot.guest.device_id.as_deref(), Some("499602d2"));
-        assert_eq!(
-            snapshot.guest.device_id_decimal.as_deref(),
-            Some("1234567890")
-        );
-        assert_eq!(snapshot.guest.google_accounts, Some(1));
         assert_eq!(snapshot.guest.media_volume, Some(8));
         assert_eq!(snapshot.guest.root_enabled, Some(false));
-        assert!(snapshot.guest.add_account_supported);
         assert_eq!(
             snapshot.guest.resolution,
             Some(Size {
@@ -6441,22 +6282,14 @@ Override density: 240
                 height: 720
             })
         );
-        runtime
-            .apply(Command::GoogleAccountAddOpen)
-            .expect("open account setup");
-        let calls = runner.calls();
-        let last = calls.last().expect("account call");
-        assert_eq!(
-            last.args,
-            ["-s", "127.0.0.1:5555", "shell", "open-add-account"].map(OsString::from)
-        );
         let metadata: serde_json::Value = serde_json::from_slice(
             &fs::read(directory.path().join("home/vm/default/guest.json")).expect("guest metadata"),
         )
         .expect("guest metadata JSON");
-        assert_eq!(metadata["deviceId"]["hex"], "499602d2");
-        assert_eq!(metadata["capabilities"]["googleAccounts"], 1);
         assert_eq!(metadata["capabilities"]["mediaVolume"], 8);
+        assert!(metadata.get("deviceId").is_none());
+        assert!(metadata.get("registrationOpenedAt").is_none());
+        assert!(metadata["capabilities"].get("googleAccounts").is_none());
     }
 
     #[test]
@@ -7347,29 +7180,6 @@ Override density: 240
 
         assert_eq!(issue.code, "desktop_open_failed");
         assert!(observed.paths().is_empty());
-    }
-
-    #[test]
-    fn registration_copies_hex_opens_url_and_persists_time() {
-        let desktop = RecordingDesktop::default();
-        let observed = desktop.clone();
-        let (directory, mut runtime, _supervisor, _runner) =
-            lifecycle_runtime(std::iter::empty(), desktop, RecordingWindow::embedded());
-        runtime.device_id = Some("499602d2".to_owned());
-        runtime
-            .apply(Command::OpenRegistrationPage)
-            .expect("registration page");
-        assert_eq!(observed.texts(), ["499602d2"]);
-        assert_eq!(
-            observed.urls(),
-            ["https://www.google.com/android/uncertified/"]
-        );
-        assert!(runtime.snapshot().guest.registration_opened_at.is_some());
-        let metadata: serde_json::Value = serde_json::from_slice(
-            &fs::read(directory.path().join("home/vm/default/guest.json")).expect("metadata"),
-        )
-        .expect("metadata JSON");
-        assert!(metadata["registrationOpenedAt"].as_str().is_some());
     }
 
     #[test]
@@ -8395,7 +8205,6 @@ package:dev.ome.two versionCode:8",
         for topic in [
             HelpTopic::VirtualizationBios,
             HelpTopic::HypervisorPlatform,
-            HelpTopic::GoogleAccount,
             HelpTopic::AdbSecurity,
             HelpTopic::QemuSource,
             HelpTopic::ThirdPartyNotices,
@@ -8405,10 +8214,6 @@ package:dev.ome.two versionCode:8",
                 .apply(Command::OpenHelp { topic })
                 .expect("open help URL");
         }
-        runtime.device_id = Some("499602d2".to_owned());
-        runtime
-            .apply(Command::OpenRegistrationPage)
-            .expect("registration URL");
         let network = fs::read_to_string(
             Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../docs/NETWORK.md"),
         )
@@ -8425,5 +8230,19 @@ package:dev.ome.two versionCode:8",
                 "NETWORK.md is missing {authority}"
             );
         }
+    }
+
+    #[test]
+    fn adb_address_copy_remains_available_without_registration() {
+        let desktop = RecordingDesktop::default();
+        let observed = desktop.clone();
+        let (_directory, mut runtime, _supervisor, _runner) =
+            lifecycle_runtime(std::iter::empty(), desktop, RecordingWindow::embedded());
+        runtime
+            .apply(Command::CopyToClipboard {
+                item: ClipboardItem::AdbAddress,
+            })
+            .expect("copy adb address");
+        assert_eq!(observed.texts(), ["127.0.0.1:5555"]);
     }
 }

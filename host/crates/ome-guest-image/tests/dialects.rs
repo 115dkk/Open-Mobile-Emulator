@@ -22,11 +22,9 @@ fn fixture(name: &str) -> String {
 struct FakeRunner {
     outputs: HashMap<Vec<String>, ShellOutput>,
     calls: RefCell<Vec<Vec<String>>>,
-    pushes: RefCell<Vec<PushFile>>,
     roots: Cell<u32>,
     dead: bool,
     refuse_root: bool,
-    refuse_push: bool,
 }
 
 fn error() -> RunnerError {
@@ -46,14 +44,6 @@ impl ShellRunner for FakeRunner {
     fn root(&self) -> Result<(), RunnerError> {
         self.roots.set(self.roots.get() + 1);
         if self.dead || self.refuse_root {
-            Err(error())
-        } else {
-            Ok(())
-        }
-    }
-    fn push(&self, file: &PushFile) -> Result<(), RunnerError> {
-        self.pushes.borrow_mut().push(file.clone());
-        if self.dead || self.refuse_push {
             Err(error())
         } else {
             Ok(())
@@ -84,20 +74,12 @@ impl FakeRunner {
                 adapter.display_density_query_command(),
                 "density-override.txt",
             ),
-            (adapter.google_accounts_command(), "accounts.txt"),
             (adapter.root_state_command(), "root-enabled.txt"),
             (adapter.input_devices_command(), "input-multi.txt"),
         ] {
             if let Some(command) = command {
                 runner.output(command, &fixture(name), 0);
             }
-        }
-        for (attempt, name) in adapter
-            .device_id_attempts()
-            .into_iter()
-            .zip(["gsf-content.txt", "gsf-sqlite.txt"])
-        {
-            runner.output(attempt.command, &fixture(name), 0);
         }
         runner.output(
             adapter
@@ -160,23 +142,6 @@ fn parsers_cover_recorded_and_synthetic_output_for_every_generation() {
                 density_dpi: 240
             })
         );
-        for name in ["gsf-content.txt", "gsf-sqlite.txt"] {
-            assert_eq!(
-                a.parse_device_id(&fixture(name)),
-                DeviceId::from_decimal("1311768467463790320")
-            );
-        }
-        assert_eq!(a.parse_device_id(&fixture("permission-denied.txt")), None);
-        assert_eq!(a.parse_google_accounts(&fixture("accounts.txt")), Some(1));
-        assert_eq!(
-            a.parse_google_accounts(&fixture("accounts-multiple.txt")),
-            Some(3)
-        );
-        assert_eq!(a.parse_google_accounts("Accounts: 0"), Some(0));
-        assert_eq!(
-            a.parse_google_accounts("Account {name=x, type=com.google}"),
-            None
-        );
         assert_eq!(a.parse_root_state(&fixture("root-enabled.txt")), Some(true));
         assert_eq!(a.parse_root_state(&fixture("root-absent.txt")), Some(false));
         assert_eq!(a.parse_root_state(&fixture("root-denied.txt")), None);
@@ -194,8 +159,6 @@ fn parsers_cover_recorded_and_synthetic_output_for_every_generation() {
             assert_eq!(a.parse_foreground(&text), None);
             assert_eq!(a.parse_media_volume(&text), None);
             assert_eq!(a.parse_display(&text, &text), None);
-            assert_eq!(a.parse_device_id(&text), None);
-            assert_eq!(a.parse_google_accounts(&text), None);
             assert_eq!(a.parse_root_state(&text), None);
             assert_eq!(a.parse_multitouch(&text), None);
         }
@@ -221,14 +184,7 @@ fn malformed_values_do_not_become_capabilities() {
         a.parse_display("Physical size: 0x100", "Physical density: 160"),
         None
     );
-    assert_eq!(a.parse_device_id("android_id|18446744073709551616"), None);
-    assert_eq!(a.parse_device_id("android_id|-1"), None);
-    assert_eq!(a.parse_device_id("android_id|+1"), None);
     assert_eq!(a.parse_root_state("uid=01(root)"), None);
-    assert_eq!(
-        a.parse_google_accounts("Accounts: 2\nAccount {name=x, type=com.google}"),
-        None
-    );
     assert_eq!(
         a.parse_multitouch("error opening QEMU Virtio MultiTouch ABS_MT_SLOT"),
         None
@@ -296,44 +252,6 @@ fn every_generation_has_an_exact_command_table() {
         command(a.display_density_query_command(), &["wm", "density"]);
         assert_eq!(a.display_size_command(0, 1080), None);
         assert_eq!(a.display_density_command(71), None);
-        let attempts = a.device_id_attempts();
-        assert_eq!(attempts.len(), 2);
-        assert_eq!(
-            attempts[0].command,
-            ShellCommand::new([
-                "content",
-                "query",
-                "--uri",
-                "content://com.google.android.gsf.gservices",
-                "--projection",
-                "android_id",
-                "--where",
-                "\"name='android_id'\""
-            ])
-            .as_root()
-        );
-        assert_eq!(attempts[0].push, None);
-        assert_eq!(attempts[1].command, ShellCommand::new(["sh", "-c", "'sqlite3 /data/data/com.google.android.gsf/databases/gservices.db < /data/local/tmp/ome-gsf.sql'"]).as_root());
-        assert_eq!(
-            attempts[1].push,
-            Some(PushFile {
-                remote_path: "/data/local/tmp/ome-gsf.sql".into(),
-                contents: b"select name,value from main where name='android_id';\n".to_vec()
-            })
-        );
-        command(a.google_accounts_command(), &["dumpsys", "account"]);
-        command(
-            a.add_google_account_command(),
-            &[
-                "am",
-                "start",
-                "-a",
-                "android.settings.ADD_ACCOUNT_SETTINGS",
-                "--esa",
-                "account_types",
-                "com.google",
-            ],
-        );
         command(
             a.root_state_command(),
             &[
@@ -376,15 +294,10 @@ fn successful_probe_fills_all_fields_and_observes_order() {
             ProbeItem::ALL.map(|item| (item, ProbeState::Available))
         );
         assert_eq!(
-            result.device_id,
-            DeviceId::from_decimal("1311768467463790320")
-        );
-        assert_eq!(
             result.native_bridge.as_deref(),
             Some("libndk_translation.so")
         );
         assert_eq!(result.media_volume, Some(7));
-        assert_eq!(result.google_accounts, Some(1));
         assert_eq!(result.foreground.as_deref(), Some("com.example.game"));
         assert_eq!(result.root_enabled, Some(true));
         assert_eq!(
@@ -396,15 +309,13 @@ fn successful_probe_fills_all_fields_and_observes_order() {
             })
         );
         assert_eq!(result.packages.len(), 2);
-        assert_eq!(runner.roots.get(), 1);
-        assert!(runner.pushes.borrow().is_empty());
+        assert_eq!(runner.roots.get(), 0);
         let expected = [
             a.boot_completed_command(),
             a.packages_command(),
             a.display_size_query_command(),
             a.display_density_query_command(),
             a.media_volume_get_command(),
-            Some(a.device_id_attempts()[0].command.clone()),
             a.screenshot_command(CapabilityProbe::SCREENSHOT_PROBE_PATH),
             Some(ShellCommand::new([
                 "rm",
@@ -415,7 +326,6 @@ fn successful_probe_fills_all_fields_and_observes_order() {
             a.input_devices_command(),
             a.native_bridge_command(),
             a.root_state_command(),
-            a.google_accounts_command(),
         ];
         assert_eq!(
             *runner.calls.borrow(),
@@ -440,63 +350,8 @@ fn dead_runner_leaves_every_supported_item_unknown() {
             .iter()
             .all(|(_, state)| *state == ProbeState::Unknown)
     );
-    assert_eq!(runner.roots.get(), 1);
-    assert!(result.device_id.is_none());
+    assert_eq!(runner.roots.get(), 0);
     assert!(result.packages.is_empty());
-}
-
-#[test]
-fn denied_content_falls_back_to_pushed_sql_with_one_root_request() {
-    let mut runner = FakeRunner::success(&ModernAdapter);
-    runner.output(
-        ModernAdapter.device_id_attempts()[0].command.clone(),
-        &fixture("permission-denied.txt"),
-        1,
-    );
-    let result = CapabilityProbe.run(&runner, &ModernAdapter);
-    assert_eq!(state(&result, ProbeItem::DeviceId), ProbeState::Available);
-    assert_eq!(
-        result.device_id,
-        DeviceId::from_decimal("1311768467463790320")
-    );
-    assert_eq!(runner.roots.get(), 1);
-    assert_eq!(
-        *runner.pushes.borrow(),
-        vec![
-            ModernAdapter.device_id_attempts()[1]
-                .push
-                .clone()
-                .expect("sql")
-        ]
-    );
-}
-
-#[test]
-fn root_refusal_skips_privileged_attempts_but_not_other_items() {
-    let runner = FakeRunner {
-        refuse_root: true,
-        ..FakeRunner::success(&ModernAdapter)
-    };
-    let result = CapabilityProbe.run(&runner, &ModernAdapter);
-    for (item, state) in result.items {
-        assert_eq!(
-            state,
-            if item == ProbeItem::DeviceId {
-                ProbeState::Unavailable
-            } else {
-                ProbeState::Available
-            }
-        );
-    }
-    assert_eq!(runner.roots.get(), 1);
-    assert!(runner.pushes.borrow().is_empty());
-    assert!(
-        !runner
-            .calls
-            .borrow()
-            .iter()
-            .any(|args| *args == ModernAdapter.device_id_attempts()[0].command.args)
-    );
 }
 
 #[test]
@@ -572,32 +427,9 @@ fn legacy_missing_volume_command_is_unavailable() {
     assert_eq!(state(&result, ProbeItem::AppList), ProbeState::Available);
 }
 
-#[test]
-fn failed_sql_push_is_unknown_and_never_runs_sql() {
-    let mut runner = FakeRunner {
-        refuse_push: true,
-        ..FakeRunner::success(&ModernAdapter)
-    };
-    runner.output(
-        ModernAdapter.device_id_attempts()[0].command.clone(),
-        &fixture("permission-denied.txt"),
-        1,
-    );
-    let result = CapabilityProbe.run(&runner, &ModernAdapter);
-    assert_eq!(state(&result, ProbeItem::DeviceId), ProbeState::Unknown);
-    assert!(
-        !runner
-            .calls
-            .borrow()
-            .iter()
-            .any(|args| *args == ModernAdapter.device_id_attempts()[1].command.args)
-    );
-}
-
 // Test-only dialect to exercise trait contracts absent from the bundled adapters.
 #[derive(Debug)]
 struct ProbeDialect {
-    attempts: Vec<Attempt>,
     screenshot: bool,
 }
 impl FamilyAdapter for ProbeDialect {
@@ -661,18 +493,6 @@ impl FamilyAdapter for ProbeDialect {
     fn parse_display(&self, size_output: &str, density_output: &str) -> Option<DisplayInfo> {
         ModernAdapter.parse_display(size_output, density_output)
     }
-    fn parse_device_id(&self, output: &str) -> Option<DeviceId> {
-        ModernAdapter.parse_device_id(output)
-    }
-    fn google_accounts_command(&self) -> Option<ShellCommand> {
-        ModernAdapter.google_accounts_command()
-    }
-    fn parse_google_accounts(&self, output: &str) -> Option<u32> {
-        ModernAdapter.parse_google_accounts(output)
-    }
-    fn add_google_account_command(&self) -> Option<ShellCommand> {
-        ModernAdapter.add_google_account_command()
-    }
     fn root_state_command(&self) -> Option<ShellCommand> {
         ModernAdapter.root_state_command()
     }
@@ -685,9 +505,6 @@ impl FamilyAdapter for ProbeDialect {
     fn parse_multitouch(&self, output: &str) -> Option<bool> {
         ModernAdapter.parse_multitouch(output)
     }
-    fn device_id_attempts(&self) -> Vec<Attempt> {
-        self.attempts.clone()
-    }
     fn screenshot_command(&self, path: &str) -> Option<ShellCommand> {
         if self.screenshot {
             ModernAdapter.screenshot_command(path)
@@ -698,37 +515,10 @@ impl FamilyAdapter for ProbeDialect {
 }
 
 #[test]
-fn root_failure_does_not_prevent_later_unprivileged_attempts() {
-    let fallback = Attempt {
-        push: None,
-        command: ShellCommand::new(["unprivileged-gsf"]),
-    };
-    let mut attempts = ModernAdapter.device_id_attempts();
-    attempts.push(fallback.clone());
-    let a = ProbeDialect {
-        attempts,
-        screenshot: true,
-    };
-    let mut runner = FakeRunner {
-        refuse_root: true,
-        ..FakeRunner::success(&ModernAdapter)
-    };
-    runner.output(fallback.command, &fixture("gsf-content.txt"), 0);
-    let result = CapabilityProbe.run(&runner, &a);
-    assert_eq!(state(&result, ProbeItem::DeviceId), ProbeState::Available);
-    assert_eq!(runner.roots.get(), 1);
-    assert!(runner.pushes.borrow().is_empty());
-}
-
-#[test]
-fn no_privileged_attempts_never_request_root_and_missing_capture_still_cleans_up() {
-    let a = ProbeDialect {
-        attempts: Vec::new(),
-        screenshot: false,
-    };
+fn missing_capture_does_not_request_root_and_still_cleans_up() {
+    let a = ProbeDialect { screenshot: false };
     let runner = FakeRunner::success(&ModernAdapter);
     let result = CapabilityProbe.run(&runner, &a);
-    assert_eq!(state(&result, ProbeItem::DeviceId), ProbeState::Unavailable);
     assert_eq!(
         state(&result, ProbeItem::Screenshot),
         ProbeState::Unavailable

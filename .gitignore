@@ -53,6 +53,7 @@ guest/ime/out/
 Thumbs.db
 Desktop.ini
 .DS_Store
+__pycache__/
 
 # --- Claude Code local settings ---
 .claude/settings.local.json

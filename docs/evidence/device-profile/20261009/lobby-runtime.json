@@ -1,0 +1,17 @@
+{
+  "sys.boot_completed": "1",
+  "ro.product.model": "SM-S948B",
+  "ro.build.fingerprint": "samsung/m3qxxx/m3q:16/BP4A.251205.006/S948BXXS2AZE3_OWO2AZE3:user/release-keys",
+  "ro.opengles.version": "196610",
+  "debug.ffmpeg-codec2.rank": "4294967295",
+  "installed_package": [
+    "versionCode=10655 minSdk=26 targetSdk=36",
+    "versionName=10655",
+    "lastUpdateTime=2026-10-08 22:02:21",
+    "installerPackageName=com.android.vending"
+  ],
+  "foreground": [
+    "mFocusedApp=ActivityRecord{55323c5 u0 com.epidgames.trickcalrevive/com.google.firebase.MessagingUnityPlayerActivity} t80}"
+  ],
+  "ui_observation": "Google sign-in selected through Windows Computer Use; level 129 lobby visible. Final attendance popup dismissed by 180ms Android touchscreen input after same-coordinate mouse clicks failed."
+}

@@ -16,10 +16,7 @@
 //! Later releases are assumed to retain these commands; the probe checks the actual image.
 
 use super::parsers;
-use super::{
-    Attempt, DeviceId, DisplayInfo, FamilyAdapter, GuestFamily, PackageEntry, PushFile,
-    ShellCommand,
-};
+use super::{DisplayInfo, FamilyAdapter, GuestFamily, PackageEntry, ShellCommand};
 
 /// Quotes one argument for adb's remote shell, not for the host process API.
 pub(super) fn shell_word(value: &str) -> String {
@@ -32,31 +29,6 @@ pub(super) fn shell_word(value: &str) -> String {
     } else {
         format!("'{}'", value.replace('\'', "'\\''"))
     }
-}
-
-fn device_id_attempts() -> Vec<Attempt> {
-    vec![
-        Attempt {
-            push: None,
-            // Documented content CLI syntax; GSF's private provider schema is assumed.
-            // The enclosing double quotes preserve the SQL single quotes in the remote shell.
-            command: ShellCommand::new([
-                "content", "query", "--uri", "content://com.google.android.gsf.gservices",
-                "--projection", "android_id", "--where", "\"name='android_id'\"",
-            ]).as_root(),
-        },
-        Attempt {
-            // Verified on Bliss 16.9.7: docs/evidence/M0/google-account.md.
-            push: Some(PushFile {
-                remote_path: "/data/local/tmp/ome-gsf.sql".into(),
-                contents: b"select name,value from main where name='android_id';\n".to_vec(),
-            }),
-            command: ShellCommand::new([
-                "sh", "-c",
-                "'sqlite3 /data/data/com.google.android.gsf/databases/gservices.db < /data/local/tmp/ome-gsf.sql'",
-            ]).as_root(),
-        },
-    ]
 }
 
 macro_rules! adapter {
@@ -114,18 +86,6 @@ macro_rules! adapter {
             fn display_size_query_command(&self) -> Option<ShellCommand> { Some(ShellCommand::new(["wm", "size"])) }
             fn display_density_query_command(&self) -> Option<ShellCommand> { Some(ShellCommand::new(["wm", "density"])) }
             fn parse_display(&self, size: &str, density: &str) -> Option<DisplayInfo> { parsers::display(size, density) }
-            fn device_id_attempts(&self) -> Vec<Attempt> { device_id_attempts() }
-            fn parse_device_id(&self, output: &str) -> Option<DeviceId> { parsers::device_id(output) }
-            fn google_accounts_command(&self) -> Option<ShellCommand> {
-                // Verified: docs/evidence/M0/google-account-added.txt. Documented:
-                // AccountManagerService.java (13), dumpUser(). Never return account names.
-                Some(ShellCommand::new(["dumpsys", "account"]))
-            }
-            fn parse_google_accounts(&self, output: &str) -> Option<u32> { parsers::google_accounts(output) }
-            fn add_google_account_command(&self) -> Option<ShellCommand> {
-                // Verified: docs/evidence/M0/google-account.md, 2026-09-26.
-                Some(ShellCommand::new(["am", "start", "-a", "android.settings.ADD_ACCOUNT_SETTINGS", "--esa", "account_types", "com.google"]))
-            }
             fn root_state_command(&self) -> Option<ShellCommand> {
                 // Assumed su CLI (implementation-dependent). Do not mistake adbd uid=0 for app
                 // root. Verified absence on Bliss: docs/DECISION-root-adb.md section 3.

@@ -200,7 +200,7 @@ manifests/images/         게스트 이미지 프로필 JSON (3.15절). 산출�
   `AppPackage::open(path)`는 APK, XAPK, APKS를 열어 base와 split 목록을 만든다.
 - 뒤에 숨는 것: adb 명령줄 전부(`adb -s 127.0.0.1:5555 ...`), 인용 규칙, 출력 파싱, XAPK zip
   풀기, `install-multiple` 순서, 첫 부팅 뒤 미디어 볼륨 15 설정(KNOWN_LIMITATIONS).
-- 세대 의존성: 안드로이드 세대에 따라 달라지는 명령(미디어 볼륨, 기기 ID, 전경 앱, 앱 목록
+- 세대 의존성: 안드로이드 세대에 따라 달라지는 명령(미디어 볼륨, 전경 앱, 앱 목록
   출력 형식)은 이 크레이트가 직접 알지 않고 `ome-guest-image`의 `FamilyAdapter`에서 받는다.
   `AdbSession`은 세션(어디에 붙는가)이고 어댑터는 방언(무슨 말을 하는가)이다.
 - 이음새: `CommandRunner` 트레이트(실제 프로세스, 테스트 녹음).
@@ -229,7 +229,7 @@ manifests/images/         게스트 이미지 프로필 JSON (3.15절). 산출�
 
 - 인터페이스: `WizardState`, `Step`, `advance(state, outcome) -> WizardState`(순수), 저장과
   복원.
-- 뒤에 숨는 것: 여덟 단계의 순서와 건너뛰기 규칙(R8 등록은 건너뛸 수 있고, R9 동의는
+- 뒤에 숨는 것: 설치 단계의 순서와 건너뛰기 규칙(R9 동의는
   건너뛸 수 없으나 `tcg`로는 진행할 수 없다), 재부팅 뒤 이어 가기.
 - 테스트 표면: 전이표.
 
@@ -287,9 +287,9 @@ Pie(API 28)는 ADR-0008로 2026-09-28에 뺐다), 그 뒤로 새 안드로이드
   (`manifests/images/*.json`), `GuestFamily::for_api_level(api)`, `adapter_for(api) -> Box<dyn
   FamilyAdapter>`. 어댑터는 명령과 파서만 갖는다(`*_command() -> Option<ShellCommand>`, `None`이면 그
   세대에 방법이 없다는 뜻이고, `parse_*`는 출력에서 값을 꺼낸다). 명령을 실제로 돌리는 것은
-  `ShellRunner`(`shell`, `root`, `push`)이며 런타임이 adb 세션으로 구현하고 테스트는 녹음 출력으로
+  `ShellRunner`(`shell`, `root`)이며 런타임이 adb 세션으로 구현하고 테스트는 녹음 출력으로
   구현한다. `CapabilityProbe::run(&runner, &adapter) -> ProbeOutcome`은 첫 부팅 뒤 한 번 돌아
-  항목별 `Available | Unavailable | Unknown`과 읽은 값(기기 ID, 미디어 볼륨, Google 계정 수, 전경 앱,
+  항목별 `Available | Unavailable | Unknown`과 읽은 값(미디어 볼륨, 전경 앱,
   루트 상태, 화면, 앱 목록)을 돌려주고, 런타임이 `<home>/vm/<id>/guest.json`에 저장한다.
   `CompatEntry::load(package)`.
 - 이미지 프로필의 필드: `id`, `display_name`(사용자 말로, 예: "안드로이드 13"), `android_version`,
@@ -302,7 +302,7 @@ Pie(API 28)는 ADR-0008로 2026-09-28에 뺐다), 그 뒤로 새 안드로이드
   `grub_entry_hint`와 `install_guide`는 대화형 설치기 시절의 필드라 2026-10-01에 뺐다.
 - 세대 어댑터가 소유하는 방언: 앱 목록(`pm list packages -3 --show-versioncode`의 유무),
   앱 라벨 읽기, 미디어 볼륨(`cmd media_session volume`, 없으면 `service call audio` 대체),
-  기기 ID(GSF `content query`, 권한이 막히면 안내 문장으로 대체), 전경 앱(`dumpsys activity
+  전경 앱(`dumpsys activity
   activities`의 `topResumedActivity` 또는 `mResumedActivity`), 부팅 완료 표지, 네이티브 브리지
   속성(`ro.dalvik.vm.native.bridge`의 값), 화면 크기와 밀도 명령. 세대는 `Legacy`(28~29),
   `Modern`(30~34), `Current`(35~)로 시작하고 조사 결과에 따라 나눈다. 모르는 API 레벨은
@@ -542,7 +542,7 @@ GuestSummary { name, image_id, android_version, disk_size_gib: u32, last_started
                capabilities: CapabilityReport }
 CapabilityReport { probed_at: Option<String>, items: Vec<CapabilityItem> }
 CapabilityItem { id: CapabilityId, state: Available | Unavailable | Unknown }
-CapabilityId = bootMarker | appList | displaySize | mediaVolume | deviceId | screenshot |
+CapabilityId = bootMarker | appList | displaySize | mediaVolume | screenshot |
                foregroundApp | multitouch | nativeBridge | root
 ```
 
@@ -557,11 +557,9 @@ CapabilityId = bootMarker | appList | displaySize | mediaVolume | deviceId | scr
   `guest_delete { name }`(디스크까지), `guest_reinstall { name }`(디스크를 지우고 같은 이미지로
   설치 절차를 다시 시작. 설정의 `다시 설치`).
 - `GuestView`에 더해지는 필드: `image_id: Option<String>`, `android_version: Option<String>`,
-  `api_level: Option<u32>`, `capabilities: CapabilityReport`, `device_id: Option<String>`(GSF
-  안드로이드 ID, 부팅 뒤 읽었을 때), `adb_address: Option<String>`(예 `127.0.0.1:5555`),
+  `api_level: Option<u32>`, `capabilities: CapabilityReport`,
   `root_enabled: Option<bool>`(조사 전이면 None).
 - 명령 `guest_root_set { enabled }`: 세대 어댑터가 정한 방법으로 앱 루트 권한을 켜고 끈다.
-  `open_registration_page`는 남고, 실행 시 `device_id`를 클립보드에 복사한 뒤 기본 브라우저를 연다.
 
 ### 8.3 입력
 
@@ -677,7 +675,7 @@ CloseAction = StopGuest | MinimizeToTray      // 기본값 StopGuest (사용자 
 - `open_shared_folder`: PC의 고정 공유 폴더를 만든 뒤 연다.
 - `shared_push`: 공유 폴더의 파일을 adb로 가상 머신의 `/sdcard/OME/`에 보낸다. 윈도우 QEMU에는
   9p와 virtiofs가 없으므로 실시간 마운트가 아닌 PC에서 가상 머신으로의 한 방향 복사다.
-- `copy_to_clipboard { item }`: `item`은 열거형 `deviceId | adbAddress`. 웹뷰는 자유 문자열을 보내지
+- `copy_to_clipboard { item }`: `item`은 열거형 `adbAddress`. 웹뷰는 자유 문자열을 보내지
   않고 Rust가 스냅숏의 값을 복사한다. 설정 고급 절과 Google 계정 절의 `복사`.
 - `display_presets()`의 `needs_reboot`는 현재 방향과 카드의 방향이 다를 때만 참이다(지금은 셋 다 참).
 - `input_profile_save`로 새 프로필(없던 id)을 저장하면 그 프로필이 `active_id`가 된다. 이름 바꾸기나
@@ -701,7 +699,7 @@ CloseAction = StopGuest | MinimizeToTray      // 기본값 StopGuest (사용자 
 
 ### 8.10 계약 열 번째 판: 글 입력 (2026-10-05, ADR-0013)
 
-- `CONTRACT_VERSION`은 10이다.
+- `CONTRACT_VERSION`은 11이다. 비인증 등록 명령과 필드를 제거한 판이다.
 - `AppSnapshot.text_input`은 `TextInputView { state, input_type, package }`다. 상태는
   `unavailable`, `idle`, `active`이며 와이어 필드 이름은 camelCase다.
 - 명령은 `text_compose { text }`, `text_commit { text }`, `text_key { key }`다. `key`는
@@ -714,3 +712,7 @@ CloseAction = StopGuest | MinimizeToTray      // 기본값 StopGuest (사용자 
   내보낸다. 따라서 `focus`와 `blur`도 별도 이벤트 없이 50 ms 안에 스냅숏으로 웹뷰에 간다.
   세 글 명령은 조합 이벤트 순서를 지키도록 입장 대기열을 거치지 않고 런타임 잠금을 잠깐 얻어
   소켓 쓰기만 한 뒤 `void`를 돌려준다.
+
+2026-10-09: 비인증 기기 등록 지원을 제거했다. Google 계정 로그인은 게스트 앱에서 진행한다.
+`guest.json` 스키마 2는 GSF ID·등록 시각·계정 수를 저장하지 않으며, 스키마 1의 해당 필드를
+읽을 때만 건너뛴다. 디스크·부팅 설정·나머지 기능 조사 결과는 유지한다.

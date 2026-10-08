@@ -65,45 +65,6 @@ impl ShellCommand {
     }
 }
 
-/// A file written into the guest before a command runs (for example a pushed SQL script).
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct PushFile {
-    /// Absolute guest path.
-    pub remote_path: String,
-    /// File contents.
-    pub contents: Vec<u8>,
-}
-
-/// One way to obtain a value; attempts are tried in order until a parser accepts the output.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Attempt {
-    /// File pushed before `command`, if the dialect needs one.
-    pub push: Option<PushFile>,
-    /// The command whose output is parsed.
-    pub command: ShellCommand,
-}
-
-/// Google Services Framework Android ID in both textual forms.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct DeviceId {
-    /// Decimal form as stored by the framework.
-    pub decimal: String,
-    /// Lowercase hexadecimal form without prefix, the form the registration page asks for.
-    pub hex: String,
-}
-
-impl DeviceId {
-    /// Builds both forms from the decimal value; rejects anything that is not a `u64`.
-    #[must_use]
-    pub fn from_decimal(decimal: &str) -> Option<Self> {
-        let value: u64 = decimal.trim().parse().ok()?;
-        Some(Self {
-            decimal: value.to_string(),
-            hex: format!("{value:x}"),
-        })
-    }
-}
-
 /// One installed third-party package.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct PackageEntry {
@@ -178,21 +139,6 @@ pub trait FamilyAdapter: Send + Sync + fmt::Debug {
     /// Parses size and density output into one record.
     fn parse_display(&self, size_output: &str, density_output: &str) -> Option<DisplayInfo>;
 
-    /// Ordered ways to read the Google Services Framework Android ID.
-    ///
-    /// An empty list means the generation offers none. The runtime tries each attempt in order
-    /// and stops at the first output that [`FamilyAdapter::parse_device_id`] accepts.
-    fn device_id_attempts(&self) -> Vec<Attempt>;
-    /// Parses the device ID from any attempt's output.
-    fn parse_device_id(&self, output: &str) -> Option<DeviceId>;
-
-    /// Counts signed-in Google accounts.
-    fn google_accounts_command(&self) -> Option<ShellCommand>;
-    /// Parses the Google account count.
-    fn parse_google_accounts(&self, output: &str) -> Option<u32>;
-    /// Opens the system add-account screen for Google accounts inside the guest.
-    fn add_google_account_command(&self) -> Option<ShellCommand>;
-
     /// Reads whether apps may obtain root.
     fn root_state_command(&self) -> Option<ShellCommand>;
     /// Parses the root state.
@@ -232,8 +178,6 @@ pub trait ShellRunner {
     fn shell(&self, command: &ShellCommand) -> Result<ShellOutput, RunnerError>;
     /// Restarts adbd as root; returns `Ok(())` only when root is now available.
     fn root(&self) -> Result<(), RunnerError>;
-    /// Writes a file into the guest.
-    fn push(&self, file: &PushFile) -> Result<(), RunnerError>;
 }
 
 /// Failure to run a command at all (adb missing, connection lost, timeout).
@@ -255,8 +199,6 @@ pub enum ProbeItem {
     DisplaySize,
     /// Media volume control.
     MediaVolume,
-    /// Device identifier lookup.
-    DeviceId,
     /// Screenshot capture.
     Screenshot,
     /// Foreground application lookup.
@@ -271,12 +213,11 @@ pub enum ProbeItem {
 
 impl ProbeItem {
     /// Every item in contract order.
-    pub const ALL: [Self; 10] = [
+    pub const ALL: [Self; 9] = [
         Self::BootMarker,
         Self::AppList,
         Self::DisplaySize,
         Self::MediaVolume,
-        Self::DeviceId,
         Self::Screenshot,
         Self::ForegroundApp,
         Self::Multitouch,
@@ -301,14 +242,10 @@ pub enum ProbeState {
 pub struct ProbeOutcome {
     /// State of every item, in [`ProbeItem::ALL`] order.
     pub items: Vec<(ProbeItem, ProbeState)>,
-    /// Device ID when read.
-    pub device_id: Option<DeviceId>,
     /// Native bridge library when configured.
     pub native_bridge: Option<String>,
     /// Media volume index when read.
     pub media_volume: Option<u32>,
-    /// Signed-in Google account count when read.
-    pub google_accounts: Option<u32>,
     /// Foreground package when read.
     pub foreground: Option<String>,
     /// Root state when read.
@@ -344,18 +281,9 @@ mod tests {
     }
 
     #[test]
-    fn device_id_hex_matches_the_m0_evidence() {
-        let id = DeviceId::from_decimal(" 1311768467463790320\n").expect("decimal id");
-        assert_eq!(id.decimal, "1311768467463790320");
-        assert_eq!(id.hex, "123456789abcdef0");
-        assert!(DeviceId::from_decimal("android_id|x").is_none());
-    }
-
-    #[test]
-    fn adapter_for_picks_the_family_and_supplies_attempts() {
+    fn adapter_for_picks_the_family() {
         let adapter = adapter_for(33);
         assert_eq!(adapter.family(), GuestFamily::Modern);
-        assert_eq!(adapter.device_id_attempts().len(), 2);
-        assert_eq!(ProbeItem::ALL.len(), 10);
+        assert_eq!(ProbeItem::ALL.len(), 9);
     }
 }

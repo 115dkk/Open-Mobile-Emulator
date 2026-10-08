@@ -1,0 +1,27 @@
+{
+  "executableSha256": "b8e604db3d5abe4fd924749127e7abd1f8ba586c890bb2bcd96471e046f90179",
+  "contractVersion": 11,
+  "guestMetadataVersion": 2,
+  "guestImage": "bliss-16.9.7-android-13",
+  "boot": {
+    "method": "direct",
+    "src": "android-2024-10-11",
+    "migratedFromDisk": true,
+    "directBootVerified": true
+  },
+  "packageCount": 9,
+  "retiredRegistrationFieldsAbsent": true,
+  "nativeSettingsObservedWhileRunning": [
+    "운영체제",
+    "설치된 운영체제",
+    "입력",
+    "고급",
+    "저장 위치",
+    "업데이트",
+    "진단",
+    "정보"
+  ],
+  "nativeRegistrationSectionAbsent": true,
+  "backupExe": "ome.exe.before-registration-removal-20261009",
+  "backupMetadata": "guest.json.before-registration-removal-20261009"
+}

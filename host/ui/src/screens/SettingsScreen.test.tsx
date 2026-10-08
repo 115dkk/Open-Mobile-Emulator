@@ -39,10 +39,10 @@ describe('settings screen (S6): layout', () => {
     ]);
   });
 
-  it('adds Google 계정 after 설치된 운영체제 while running', () => {
+  it('keeps the same settings sections while running', () => {
     show(variant('settings-running'));
     expect(screen.getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent)).toEqual([
-      '운영체제', '설치된 운영체제', 'Google 계정', '입력', '고급', '저장 위치', '업데이트', '진단', '정보',
+      '운영체제', '설치된 운영체제', '입력', '고급', '저장 위치', '업데이트', '진단', '정보',
     ]);
   });
 
@@ -109,7 +109,7 @@ describe('settings screen (S6): 설치된 운영체제', () => {
     expect(Array.from(systems.querySelectorAll('.ome-setting-label'), (label) => label.textContent)).toEqual([
       'android-13', 'android-15', '시작할 운영체제', '운영체제 이미지',
     ]);
-    expect(within(systems).getByText('안드로이드 13 · 64 GB · 마지막 실행 2026-09-26 19:58 · 확인된 기능 8개')).toBeInTheDocument();
+    expect(within(systems).getByText('안드로이드 13 · 64 GB · 마지막 실행 2026-09-26 19:58 · 확인된 기능 7개')).toBeInTheDocument();
     expect(within(systems).getByText('안드로이드 15 · 32 GB')).toBeInTheDocument();
     expect(within(systems).getByText('새 운영체제 이미지는 앱 업데이트로 추가됩니다.')).toBeInTheDocument();
   });
@@ -161,103 +161,12 @@ describe('settings screen (S6): 설치된 운영체제', () => {
   });
 });
 
-describe('settings screen (S6): Google 계정', () => {
-  const lead = '이 운영체제는 Google 인증 기기가 아닙니다. Google 계정으로 로그인하려면 기기 ID를 Google에 한 번 등록해야 합니다.';
-  const r8 = '등록해도 Play 스토어와 인앱 결제는 보장되지 않습니다.';
-  const fallback = '운영체제의 설정 → 계정에서 추가하십시오.';
-
-  /** Accessible names of the section's buttons, in order. */
-  function buttons(google: HTMLElement): (string | null)[] {
-    return within(google).queryAllByRole('button').map((button) => button.getAttribute('aria-label') ?? button.textContent);
-  }
-
-  function lamps(google: HTMLElement): string[] {
-    return Array.from(google.querySelectorAll('.ome-status-dot'), (dot) => dot.className);
-  }
-
-  /** The lead first and the R8 sentence last, whatever the state. */
-  function expectFrame(google: HTMLElement) {
-    const rows = google.querySelector('.ome-settings-rows');
-    expect(rows?.firstElementChild).toHaveTextContent(lead);
-    expect(rows?.lastElementChild?.textContent).toBe(r8);
-  }
-
-  it('is absent while the system is not running', () => {
-    show(variant('settings-stopped'));
-    expect(screen.queryByRole('region', { name: 'Google 계정' })).toBeNull();
-    cleanup();
-    const running = variant('settings-google-id');
-    show({ ...running, guest: { ...running.guest, state: 'starting' } });
-    expect(screen.queryByRole('region', { name: 'Google 계정' })).toBeNull();
-  });
-
-  it('reads the device ID first: grey lamp and no buttons', () => {
-    show(variant('settings-google-reading'));
-    const google = section('Google 계정');
-    expectFrame(google);
-    expect(within(google).getByText(
-      '기기 ID를 읽는 중입니다. 운영체제가 Google 서버와 첫 교신을 마치면 나타납니다.',
-    )).toBeInTheDocument();
-    expect(lamps(google)).toEqual(['ome-status-dot ome-status-dot-muted']);
-    expect(buttons(google)).toEqual([]);
-  });
-
-  it('shows the device ID with copy, the registration page and help before registration', async () => {
-    const actions = show(variant('settings-google-id'));
-    const google = section('Google 계정');
-    expectFrame(google);
-    expect(within(google).getByText('3f8a1c2e9b7d4051')).toHaveClass('ome-mono');
-    expect(lamps(google)).toEqual([]);
-    expect(buttons(google)).toEqual(['복사', '등록 페이지 열기', '도움말']);
-    await userEvent.click(within(google).getByRole('button', { name: '복사' }));
-    expect(actions.copyToClipboard).toHaveBeenCalledWith('deviceId');
-    await userEvent.click(within(google).getByRole('button', { name: '등록 페이지 열기' }));
-    expect(actions.openRegistrationPage).toHaveBeenCalledOnce();
-    await userEvent.click(within(google).getByRole('button', { name: '도움말' }));
-    expect(actions.openHelp).toHaveBeenCalledWith('googleAccount');
-  });
-
-  it('waits after the registration page was opened: amber lamp, the time, add account and reopen', async () => {
-    const actions = show(variant('settings-google-registered'));
-    const google = section('Google 계정');
-    expectFrame(google);
-    expect(within(google).getByText('등록한 뒤 약 10분이 지나면 계정을 추가할 수 있습니다.')).toBeInTheDocument();
-    expect(within(google).getByText('20:14에 열었습니다')).toBeInTheDocument();
-    expect(lamps(google)).toEqual(['ome-status-dot ome-status-dot-warning']);
-    expect(buttons(google)).toEqual(['계정 추가 화면 열기', '등록 페이지 다시 열기']);
-    await userEvent.click(within(google).getByRole('button', { name: '계정 추가 화면 열기' }));
-    expect(actions.googleAccountAddOpen).toHaveBeenCalledOnce();
-    await userEvent.click(within(google).getByRole('button', { name: '등록 페이지 다시 열기' }));
-    expect(actions.openRegistrationPage).toHaveBeenCalledOnce();
-  });
-
-  it('counts the signed-in accounts: green lamp and only add account', async () => {
-    const actions = show(variant('settings-google-account'));
-    const google = section('Google 계정');
-    expectFrame(google);
-    expect(within(google).getByText('Google 계정 1개가 로그인되어 있습니다.')).toBeInTheDocument();
-    expect(within(google).queryByText('20:14에 열었습니다')).toBeNull();
-    expect(lamps(google)).toEqual(['ome-status-dot ome-status-dot-success']);
-    expect(buttons(google)).toEqual(['계정 추가 화면 열기']);
-    await userEvent.click(within(google).getByRole('button', { name: '계정 추가 화면 열기' }));
-    expect(actions.googleAccountAddOpen).toHaveBeenCalledOnce();
-  });
-
-  it('puts the one-line fallback in place of add account where the system cannot open that screen', () => {
-    for (const id of ['settings-google-registered', 'settings-google-account']) {
-      const snapshot = variant(id);
-      show({ ...snapshot, guest: { ...snapshot.guest, addAccountSupported: false } });
-      const google = section('Google 계정');
-      expectFrame(google);
-      expect(within(google).getByText(fallback)).toBeInTheDocument();
-      expect(within(google).queryByRole('button', { name: '계정 추가 화면 열기' })).toBeNull();
-      cleanup();
-    }
-  });
-
-  it('has no fallback line while the add-account screen can open', () => {
-    show(variant('settings-google-account'));
-    expect(within(section('Google 계정')).queryByText(fallback)).toBeNull();
+describe('settings screen (S6): retired registration flow', () => {
+  it('does not expose registration or account-ID ceremony on a running guest', () => {
+    show(variant('settings-running'));
+    expect(screen.queryByText('Google 계정')).toBeNull();
+    expect(screen.queryByRole('button', { name: /등록 페이지/ })).toBeNull();
+    expect(screen.queryByText('기기 ID')).toBeNull();
   });
 });
 

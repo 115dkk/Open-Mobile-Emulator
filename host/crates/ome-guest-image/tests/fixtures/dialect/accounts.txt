@@ -1,6 +1,0 @@
-# SPDX-License-Identifier: GPL-2.0-or-later
-# Copyright (C) 2026 Open Mobile Emulator contributors
-# Recorded: docs/evidence/M0/google-account-added.txt
-User UserInfo{0:Owner:c13}:
-Accounts: 1
-Account {name=<redacted>, type=com.google}

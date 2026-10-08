@@ -8,17 +8,16 @@ import { useEffect, useEffectEvent, useId, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { ScreenActions, ScreenProps } from '../actions';
 import type {
-  AppSnapshot, CloseAction, GuestSummary, GuestView, NoticeLevel, SettingsInput, SettingsView, UpdateView,
+  AppSnapshot, CloseAction, GuestSummary, NoticeLevel, SettingsInput, SettingsView, UpdateView,
 } from '../contracts';
 import {
-  Button, Chip, Dialog, Icon, IconButton, IssueNotice, ProgressBar, ScreenHeader, Segmented, Select, SettingRow, Slider,
-  StatusDot, Toggle,
+  Button, Dialog, Icon, IconButton, IssueNotice, ProgressBar, ScreenHeader, Segmented, Select, SettingRow, Slider,
+  Toggle,
 } from '../components';
 import type { IconName } from '../components';
 import { formatBytes, formatGib, formatPercent, formatTimestamp } from '../format';
 import { keyLabel } from '../input-profile';
-import { clockTime, googleAccountState, userFacingCapabilities } from '../presentation';
-import type { StatusTone } from '../presentation';
+import { userFacingCapabilities } from '../presentation';
 import { ImageCards } from './ImageCards';
 
 const RESTART = '다시 시작해야 적용됩니다.';
@@ -254,102 +253,6 @@ function SystemsSection({ snapshot, actions }: SectionProps) {
         }}
         onCancel={close}
       />
-    </Section>
-  );
-}
-
-// ---- Google 계정: while running, in one of four states (M2-SCREENS.md 6) ----
-
-/** The setting row without a label: a lamp beside a sentence on the left, controls on the right. */
-function LampRow({ tone, sentence, help, children }: {
-  readonly tone: StatusTone;
-  readonly sentence: string;
-  readonly help?: ReactNode;
-  readonly children?: ReactNode;
-}) {
-  return (
-    <div className="ome-setting">
-      <div className="ome-setting-row">
-        <div className="ome-settings-status">
-          <span className="ome-settings-lamp"><StatusDot tone={tone} /></span>
-          <div className="ome-setting-text">
-            <p>{sentence}</p>
-            {help !== undefined && <p className="ome-setting-help">{help}</p>}
-          </div>
-        </div>
-        {children !== undefined && <div className="ome-setting-control">{children}</div>}
-      </div>
-    </div>
-  );
-}
-
-const ADD_ACCOUNT_FALLBACK = '운영체제의 설정 → 계정에서 추가하십시오.';
-
-/** `계정 추가 화면 열기` where the system can open it; otherwise the fallback line takes its place. */
-function addAccount(guest: GuestView, actions: ScreenActions): { readonly help?: string; readonly control?: ReactNode } {
-  if (!guest.addAccountSupported) return { help: ADD_ACCOUNT_FALLBACK };
-  return { control: <Button icon="plus" onClick={actions.googleAccountAddOpen}>계정 추가 화면 열기</Button> };
-}
-
-function GoogleState({ guest, actions }: { readonly guest: GuestView; readonly actions: ScreenActions }) {
-  switch (googleAccountState(guest)) {
-    case 'reading':
-      return <LampRow tone="muted" sentence="기기 ID를 읽는 중입니다. 운영체제가 Google 서버와 첫 교신을 마치면 나타납니다." />;
-    case 'id':
-      return (
-        <SettingRow
-          label="기기 ID"
-          help={<Chip><span className="ome-mono ome-settings-value">{guest.deviceId}</span></Chip>}
-        >
-          <IconButton icon="copy" label="복사" onClick={() => actions.copyToClipboard('deviceId')} />
-          <Button icon="external-link" onClick={actions.openRegistrationPage}>등록 페이지 열기</Button>
-          <Button variant="ghost" icon="external-link" onClick={() => actions.openHelp('googleAccount')}>도움말</Button>
-        </SettingRow>
-      );
-    case 'registered': {
-      // Two buttons do not fit one control column: each goes beside the line it answers.
-      const add = addAccount(guest, actions);
-      return (<>
-        <LampRow tone="warning" sentence="등록한 뒤 약 10분이 지나면 계정을 추가할 수 있습니다." help={add.help}>
-          {add.control}
-        </LampRow>
-        <div className="ome-setting">
-          <div className="ome-setting-row">
-            <div className="ome-setting-text">
-              <p>{`${clockTime(guest.registrationOpenedAt ?? '')}에 열었습니다`}</p>
-            </div>
-            <div className="ome-setting-control">
-              <Button variant="ghost" icon="external-link" onClick={actions.openRegistrationPage}>등록 페이지 다시 열기</Button>
-            </div>
-          </div>
-        </div>
-      </>);
-    }
-    case 'account': {
-      const add = addAccount(guest, actions);
-      return (
-        <LampRow
-          tone="success"
-          sentence={`Google 계정 ${String(guest.googleAccounts ?? 0)}개가 로그인되어 있습니다.`}
-          help={add.help}
-        >
-          {add.control}
-        </LampRow>
-      );
-    }
-  }
-}
-
-function GoogleSection({ snapshot, actions }: SectionProps) {
-  const { guest } = snapshot;
-  if (guest.state !== 'running') return null;
-  return (
-    <Section title="Google 계정">
-      <p className="ome-settings-lead">
-        이 운영체제는 Google 인증 기기가 아닙니다. Google 계정으로 로그인하려면 기기 ID를 Google에 한 번 등록해야 합니다.
-      </p>
-      <GoogleState guest={guest} actions={actions} />
-      <p className="ome-settings-note">등록해도 Play 스토어와 인앱 결제는 보장되지 않습니다.</p>
     </Section>
   );
 }
@@ -643,7 +546,6 @@ export function SettingsScreen({ snapshot, actions }: ScreenProps) {
         {snapshot.issue !== null && <IssueNotice issue={snapshot.issue} />}
         <SystemSection {...props} />
         <SystemsSection {...props} />
-        <GoogleSection {...props} />
         <InputSection {...props} />
         <AdvancedSection {...props} />
         <StorageSection {...props} />

@@ -7,7 +7,7 @@ use std::fs::{self, File, OpenOptions};
 use std::io::{self, Read, Write};
 use std::path::{Component, Path, PathBuf};
 
-use ome_guest_image::{DeviceId, ProbeItem, ProbeOutcome, ProbeState};
+use ome_guest_image::{ProbeItem, ProbeOutcome, ProbeState};
 use ome_wizard::WizardState;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -15,7 +15,7 @@ use thiserror::Error;
 use crate::home_state;
 
 /// Current `guest.json` schema version.
-pub const GUEST_SCHEMA_VERSION: u32 = 1;
+pub const GUEST_SCHEMA_VERSION: u32 = 2;
 /// Maximum accepted metadata size.
 pub const MAX_GUEST_BYTES: usize = 256 * 1024;
 const ADOPTED_IMAGE_ID: &str = "bliss-16.9.7-android-13";
@@ -41,10 +41,6 @@ pub struct GuestRecord {
     pub last_started_at: Option<String>,
     /// Stored first-boot capability result and values.
     pub capabilities: StoredCapabilities,
-    /// GSF Android ID in both accepted forms.
-    pub device_id: Option<StoredDeviceId>,
-    /// Last time the registration page was opened for this operating system.
-    pub registration_opened_at: Option<String>,
     /// Whether applications may request root, or unknown before probing.
     pub root_enabled: Option<bool>,
     /// How the installed guest boots; absent for guests the interactive installer made.
@@ -77,7 +73,6 @@ impl GuestRecord {
                 .collect(),
             native_bridge: outcome.native_bridge.clone(),
             media_volume: outcome.media_volume,
-            google_accounts: outcome.google_accounts,
             foreground_package: outcome.foreground.clone(),
             display: outcome.display.map(|display| StoredDisplay {
                 width: display.width,
@@ -93,7 +88,6 @@ impl GuestRecord {
                 })
                 .collect(),
         };
-        self.device_id = outcome.device_id.as_ref().map(StoredDeviceId::from);
         self.root_enabled = outcome.root_enabled;
     }
 }
@@ -158,8 +152,6 @@ pub struct StoredCapabilities {
     pub native_bridge: Option<String>,
     /// Media stream volume index.
     pub media_volume: Option<u32>,
-    /// Signed-in Google account count.
-    pub google_accounts: Option<u32>,
     /// Foreground package at probe time.
     pub foreground_package: Option<String>,
     /// Display dimensions and density.
@@ -186,7 +178,6 @@ pub enum StoredProbeItem {
     AppList,
     DisplaySize,
     MediaVolume,
-    DeviceId,
     Screenshot,
     ForegroundApp,
     Multitouch,
@@ -202,7 +193,6 @@ impl From<ProbeItem> for StoredProbeItem {
             ProbeItem::AppList => Self::AppList,
             ProbeItem::DisplaySize => Self::DisplaySize,
             ProbeItem::MediaVolume => Self::MediaVolume,
-            ProbeItem::DeviceId => Self::DeviceId,
             ProbeItem::Screenshot => Self::Screenshot,
             ProbeItem::ForegroundApp => Self::ForegroundApp,
             ProbeItem::Multitouch => Self::Multitouch,
@@ -227,23 +217,6 @@ impl From<ProbeState> for StoredProbeState {
             ProbeState::Available => Self::Available,
             ProbeState::Unavailable => Self::Unavailable,
             ProbeState::Unknown => Self::Unknown,
-        }
-    }
-}
-
-/// Persisted GSF Android ID.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct StoredDeviceId {
-    pub decimal: String,
-    pub hex: String,
-}
-
-impl From<&DeviceId> for StoredDeviceId {
-    fn from(value: &DeviceId) -> Self {
-        Self {
-            decimal: value.decimal.clone(),
-            hex: value.hex.clone(),
         }
     }
 }
@@ -277,8 +250,6 @@ struct GuestDocument {
     created_at: Option<String>,
     last_started_at: Option<String>,
     capabilities: StoredCapabilities,
-    device_id: Option<StoredDeviceId>,
-    registration_opened_at: Option<String>,
     root_enabled: Option<bool>,
     /// Absent in guest documents written before ADR-0010.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -307,8 +278,6 @@ impl From<&GuestRecord> for GuestDocument {
             created_at: record.created_at.clone(),
             last_started_at: record.last_started_at.clone(),
             capabilities: record.capabilities.clone(),
-            device_id: record.device_id.clone(),
-            registration_opened_at: record.registration_opened_at.clone(),
             root_enabled: record.root_enabled,
             boot: record.boot.clone(),
             direct_boot_migration_attempted: record.direct_boot_migration_attempted,
@@ -328,8 +297,6 @@ impl From<GuestDocument> for GuestRecord {
             created_at: document.created_at,
             last_started_at: document.last_started_at,
             capabilities: document.capabilities,
-            device_id: document.device_id,
-            registration_opened_at: document.registration_opened_at,
             root_enabled: document.root_enabled,
             boot: document.boot,
             direct_boot_migration_attempted: document.direct_boot_migration_attempted,
@@ -390,8 +357,6 @@ impl GuestStore {
                     created_at: None,
                     last_started_at: None,
                     capabilities: StoredCapabilities::default(),
-                    device_id: None,
-                    registration_opened_at: None,
                     root_enabled: None,
                     boot: None,
                     direct_boot_migration_attempted: false,
@@ -487,7 +452,32 @@ fn load_document(path: &Path) -> Result<GuestRecord, GuestStoreError> {
     if bytes.len() > MAX_GUEST_BYTES {
         return Err(GuestStoreError::TooLarge);
     }
-    let document: GuestDocument = serde_json::from_slice(&bytes).map_err(GuestStoreError::Json)?;
+    let mut value: serde_json::Value =
+        serde_json::from_slice(&bytes).map_err(GuestStoreError::Json)?;
+    // Retire registration metadata in memory while preserving existing disks and all
+    // remaining settings. Version 2 no longer probes or serializes account identifiers.
+    if value.get("version").and_then(serde_json::Value::as_u64) == Some(1)
+        && let Some(document) = value.as_object_mut()
+    {
+        document.remove("deviceId");
+        document.remove("registrationOpenedAt");
+        document.insert("version".to_owned(), GUEST_SCHEMA_VERSION.into());
+        if let Some(capabilities) = document
+            .get_mut("capabilities")
+            .and_then(serde_json::Value::as_object_mut)
+        {
+            capabilities.remove("googleAccounts");
+            if let Some(items) = capabilities
+                .get_mut("items")
+                .and_then(serde_json::Value::as_array_mut)
+            {
+                items.retain(|item| {
+                    item.get("id").and_then(serde_json::Value::as_str) != Some("deviceId")
+                });
+            }
+        }
+    }
+    let document: GuestDocument = serde_json::from_value(value).map_err(GuestStoreError::Json)?;
     if document.version != GUEST_SCHEMA_VERSION {
         return Err(GuestStoreError::UnsupportedVersion);
     }
@@ -561,7 +551,7 @@ mod tests {
         let document: serde_json::Value =
             serde_json::from_slice(&fs::read(guest.join("guest.json")).expect("metadata bytes"))
                 .expect("metadata JSON");
-        assert_eq!(document["version"], 1);
+        assert_eq!(document["version"], GUEST_SCHEMA_VERSION);
         assert_eq!(document["id"], "default");
         assert!(document.get("guest").is_none());
         assert_eq!(store.load_all().expect("reload"), [record]);
@@ -589,6 +579,47 @@ mod tests {
         let record = GuestStore::new(root).load_all().expect("load").remove(0);
         assert_eq!(record.boot, None);
         assert_eq!(record.install, None);
+    }
+
+    #[test]
+    fn retiring_registration_preserves_existing_guest_and_disk() {
+        let directory = tempfile::tempdir().expect("temp directory");
+        let guest = directory.path().join("vm/default");
+        fs::create_dir_all(&guest).expect("guest directory");
+        fs::write(guest.join("disk.qcow2"), b"existing-disk").expect("disk");
+        let store = GuestStore::new(directory.path().join("vm"));
+        let mut expected = store.load_all().expect("adopt").remove(0);
+        expected.capabilities.media_volume = Some(12);
+        expected.boot = Some(StoredBoot {
+            method: StoredBootMethod::Direct,
+            src: "android-existing".to_owned(),
+            migrated_from_disk: true,
+            direct_boot_verified: true,
+        });
+        store.save(&expected).expect("save");
+        let path = guest.join("guest.json");
+        let mut old: serde_json::Value =
+            serde_json::from_slice(&fs::read(&path).expect("read")).expect("JSON");
+        old["version"] = 1.into();
+        old["deviceId"] = serde_json::json!({"decimal":"1234567890","hex":"499602d2"});
+        old["registrationOpenedAt"] = "2026-09-27T12:00:00+09:00".into();
+        old["capabilities"]["googleAccounts"] = 1.into();
+        old["capabilities"]["items"] = serde_json::json!([{"id":"deviceId","state":"available"}]);
+        fs::write(&path, serde_json::to_vec(&old).expect("serialize")).expect("legacy metadata");
+
+        let loaded = store.load_all().expect("migrate").remove(0);
+        assert_eq!(loaded, expected);
+        assert_eq!(
+            fs::read(guest.join("disk.qcow2")).expect("disk"),
+            b"existing-disk"
+        );
+        store.save(&loaded).expect("persist current schema");
+        let current: serde_json::Value =
+            serde_json::from_slice(&fs::read(path).expect("read")).expect("JSON");
+        assert_eq!(current["version"], GUEST_SCHEMA_VERSION);
+        assert!(current.get("deviceId").is_none());
+        assert!(current.get("registrationOpenedAt").is_none());
+        assert!(current["capabilities"].get("googleAccounts").is_none());
     }
 
     #[test]

@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Open Mobile Emulator contributors
 // Read-only presentation contracts mirroring ome-runtime contract.rs field for field.
 
-export const CONTRACT_VERSION = 10;
+export const CONTRACT_VERSION = 11;
 
 export type AppPhase = 'wizard' | 'main';
 export type BlockerKind = 'virtualizationOff' | 'qemuMissing' | 'hypervisorPlatformOff';
@@ -62,7 +62,7 @@ export type ImageTranslator = 'houdini' | 'ndkTranslation' | 'digitalis' | 'none
 export type ImageStatus = 'verified' | 'candidate' | 'deprecated';
 export type Capability = 'available' | 'unavailable' | 'unknown';
 export type CapabilityId =
-  | 'bootMarker' | 'appList' | 'displaySize' | 'mediaVolume' | 'deviceId' | 'screenshot'
+  | 'bootMarker' | 'appList' | 'displaySize' | 'mediaVolume' | 'screenshot'
   | 'foregroundApp' | 'multitouch' | 'nativeBridge' | 'root' | 'textInput';
 export interface CapabilityItem { readonly id: CapabilityId; readonly state: Capability }
 export interface CapabilityReport { readonly probedAt: string | null; readonly items: readonly CapabilityItem[] }
@@ -114,11 +114,6 @@ export interface GuestView {
   readonly androidVersion: string | null;
   readonly apiLevel: number | null;
   readonly capabilities: CapabilityReport;
-  readonly deviceId: string | null;
-  readonly deviceIdDecimal: string | null;
-  readonly googleAccounts: number | null;
-  readonly registrationOpenedAt: string | null;
-  readonly addAccountSupported: boolean;
   readonly pid: number | null;
   readonly adbAddress: string | null;
   readonly rootEnabled: boolean | null;
@@ -270,11 +265,11 @@ export interface AppSnapshot {
 
 /** Help destinations opened by trusted native code. */
 export type HelpTopic =
-  | 'virtualizationBios' | 'hypervisorPlatform' | 'googleAccount' | 'adbSecurity'
+  | 'virtualizationBios' | 'hypervisorPlatform' | 'adbSecurity'
   | 'qemuSource' | 'thirdPartyNotices' | 'releaseNotes';
 
 /** Snapshot-owned values that native code may copy. */
-export type ClipboardItem = 'deviceId' | 'adbAddress';
+export type ClipboardItem = 'adbAddress';
 
 /** Event names emitted by the shell. */
 export const EVENT_SNAPSHOT = 'snapshot';
@@ -340,8 +335,6 @@ export interface ControllerBridge {
   openSharedFolder(): Promise<AppSnapshot>;
   sharedPush(): Promise<AppSnapshot>;
   copyToClipboard(item: ClipboardItem): Promise<AppSnapshot>;
-  openRegistrationPage(): Promise<AppSnapshot>;
-  googleAccountAddOpen(): Promise<AppSnapshot>;
   guestWindowToFront(): Promise<AppSnapshot>;
   /** Subscribe to snapshot pushes. */
   watchSnapshot(notify: (snapshot: AppSnapshot) => void): Promise<() => Promise<void>>;

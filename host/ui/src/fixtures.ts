@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Copyright (C) 2026 Open Mobile Emulator contributors
 import type {
-  AppIssue, AppItem, AppSnapshot, BlockerKind, ControllerBridge, GuestImageSummary, GuestSummary, GuestView, HostRow, InstallProgress,
+  AppIssue, AppItem, AppSnapshot, BlockerKind, ControllerBridge, GuestImageSummary, GuestSummary, HostRow, InstallProgress,
   TransferProgress,
 } from './contracts';
 import type { OverlaySeed } from './overlay/model';
 
 export const sampleSnapshot: AppSnapshot = {
-  contractVersion: 10, productVersion: '0.1.0', phase: 'wizard', blocker: null,
+  contractVersion: 11, productVersion: '0.1.0', phase: 'wizard', blocker: null,
   host: { rows: [], ready: false, inspectedAt: null },
   wizard: {
     step: 'hostCheck', canContinue: false, canSkip: false, download: null,
@@ -18,8 +18,7 @@ export const sampleSnapshot: AppSnapshot = {
     state: 'stopped', bootCompleted: false, adbConnected: false, hosting: 'none',
     resolution: null, lastExit: null, fps: null, startedAt: null, imageId: null,
     androidVersion: null, apiLevel: null, capabilities: { probedAt: null, items: [] },
-    deviceId: null, deviceIdDecimal: null, googleAccounts: null, registrationOpenedAt: null,
-    addAccountSupported: false, pid: null, adbAddress: '127.0.0.1:5555', rootEnabled: null, mediaVolume: null,
+    pid: null, adbAddress: '127.0.0.1:5555', rootEnabled: null, mediaVolume: null,
   },
   apps: { available: false, items: [], install: null },
   input: {
@@ -110,8 +109,6 @@ export function fixtureBridge(
     openSharedFolder: apply,
     sharedPush: apply,
     copyToClipboard: apply,
-    openRegistrationPage: apply,
-    googleAccountAddOpen: apply,
     guestWindowToFront: apply,
     watchSnapshot: () => Promise.resolve(() => Promise.resolve()),
     watchProgress: () => Promise.resolve(() => Promise.resolve()),
@@ -293,7 +290,7 @@ export const wizardGallery: readonly GalleryVariant[] = [
           items: [
             { id: 'bootMarker', state: 'available' }, { id: 'appList', state: 'available' },
             { id: 'displaySize', state: 'available' }, { id: 'mediaVolume', state: 'available' },
-            { id: 'deviceId', state: 'available' }, { id: 'screenshot', state: 'available' },
+            { id: 'screenshot', state: 'available' },
             { id: 'foregroundApp', state: 'available' }, { id: 'multitouch', state: 'unavailable' },
             { id: 'nativeBridge', state: 'available' }, { id: 'root', state: 'unknown' },
           ],
@@ -359,7 +356,7 @@ const stageProbe: AppSnapshot['guest']['capabilities'] = {
   items: [
     { id: 'bootMarker', state: 'available' }, { id: 'appList', state: 'available' },
     { id: 'displaySize', state: 'available' }, { id: 'mediaVolume', state: 'available' },
-    { id: 'deviceId', state: 'available' }, { id: 'screenshot', state: 'available' },
+    { id: 'screenshot', state: 'available' },
     { id: 'foregroundApp', state: 'available' }, { id: 'multitouch', state: 'unavailable' },
     { id: 'nativeBridge', state: 'available' }, { id: 'root', state: 'unknown' },
   ],
@@ -381,7 +378,7 @@ function stageAt(guest: GuestPatch, patch: StagePatch = {}): AppSnapshot {
 
 const runningGuest: GuestPatch = {
   state: 'running', hosting: 'embedded', bootCompleted: true, adbConnected: true, fps: 58,
-  startedAt: '2026-09-27T09:10:00', capabilities: stageProbe, deviceId: '3f2a9c41d07b5e68', rootEnabled: false,
+  startedAt: '2026-09-27T09:10:00', capabilities: stageProbe, rootEnabled: false,
   mediaVolume: 9,
 };
 
@@ -528,7 +525,7 @@ const probedCapabilities: AppSnapshot['guest']['capabilities'] = {
   items: [
     { id: 'bootMarker', state: 'available' }, { id: 'appList', state: 'available' },
     { id: 'displaySize', state: 'available' }, { id: 'mediaVolume', state: 'available' },
-    { id: 'deviceId', state: 'available' }, { id: 'screenshot', state: 'available' },
+    { id: 'screenshot', state: 'available' },
     { id: 'foregroundApp', state: 'available' }, { id: 'multitouch', state: 'unavailable' },
     { id: 'nativeBridge', state: 'available' }, { id: 'root', state: 'available' },
   ],
@@ -577,8 +574,7 @@ export const railRunningSnapshot: AppSnapshot = {
   ...railBase,
   guest: {
     ...railBase.guest, state: 'running', bootCompleted: true, adbConnected: true, hosting: 'embedded',
-    startedAt: '2026-09-26T19:58:04', lastExit: null, deviceId: '3f8a1c2e9b7d4051',
-  },
+    startedAt: '2026-09-26T19:58:04', lastExit: null, },
   apps: { available: true, items: sampleApps, install: null },
   input: { ...railBase.input, foregroundPackage: 'com.example.sample.b' },
 };
@@ -619,30 +615,9 @@ export const displayGallery: readonly GalleryVariant[] = [
   },
 ];
 
-/** The running system with its device ID read and the account screen reachable (M2-SCREENS.md 6). */
-const googleGuest: GuestView = {
-  ...railRunningSnapshot.guest, deviceIdDecimal: '4578502957678280785', addAccountSupported: true,
-};
-
 export const settingsGallery: readonly GalleryVariant[] = [
   { id: 'settings-stopped', label: 'S6 설정: 꺼짐', snapshot: railStoppedSnapshot },
   { id: 'settings-running', label: 'S6 설정: 실행 중', snapshot: railRunningSnapshot },
-  {
-    id: 'settings-google-reading', label: 'S6 설정: Google 계정, 기기 ID 읽는 중',
-    snapshot: { ...railRunningSnapshot, guest: { ...railRunningSnapshot.guest, deviceId: null, deviceIdDecimal: null, googleAccounts: null } },
-  },
-  {
-    id: 'settings-google-id', label: 'S6 설정: Google 계정, 등록 전',
-    snapshot: { ...railRunningSnapshot, guest: { ...googleGuest, googleAccounts: 0 } },
-  },
-  {
-    id: 'settings-google-registered', label: 'S6 설정: Google 계정, 등록 페이지를 연 뒤',
-    snapshot: { ...railRunningSnapshot, guest: { ...googleGuest, googleAccounts: 0, registrationOpenedAt: '2026-09-27T20:14:00' } },
-  },
-  {
-    id: 'settings-google-account', label: 'S6 설정: Google 계정, 로그인됨',
-    snapshot: { ...railRunningSnapshot, guest: { ...googleGuest, googleAccounts: 1, registrationOpenedAt: '2026-09-27T20:14:00' } },
-  },
   {
     id: 'settings-network', label: 'S6 설정: 다른 PC 연결 허용, 새 버전',
     snapshot: {

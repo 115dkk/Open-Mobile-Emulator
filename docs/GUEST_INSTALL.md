@@ -101,12 +101,11 @@ The original research notes follow.
    concerns Bliss 14.10 ethernet debugging, not a confirmed Bliss 16 solution;
    the fetched excerpt did not include working resolution steps.
 
-## Account limitations
+## Google Play and sign-in
 
-The guest is not Google-certified. Play sign-in and purchases are not guaranteed.
-Follow the project's separate manual registration procedure (`docs/GOOGLE_ACCOUNT.md`,
-validated on 2026-09-26: account added, Play Games and Play Store worked). No automatic
-account registration or certification bypass belongs here.
+Open Play Store inside the guest and sign in there. The host does not collect
+account credentials. See `docs/DEVICE_PROFILE.md` and the dated store/game
+verification under `docs/evidence/device-profile/` for tested compatibility.
 
 [usb]: https://docs.blissos.org/installation/install-from-bootable-usb/
 [qemu]: https://docs.blissos.org/installation/install-in-a-virtual-machine/install-in-qemu/

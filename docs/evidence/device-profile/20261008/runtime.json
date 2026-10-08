@@ -1,0 +1,24 @@
+{
+  "sys.boot_completed": "1",
+  "ro.product.model": "SM-S948B",
+  "ro.build.fingerprint": "samsung/m3qxxx/m3q:16/BP4A.251205.006/S948BXXS2AZE3_OWO2AZE3:user/release-keys",
+  "ro.product.device": "Standard PC (Q35 + ICH9, 2009)",
+  "ro.product.vendor.device": "x86_64",
+  "ro.build.version.sdk": "33",
+  "ro.product.cpu.abilist": "x86_64,arm64-v8a,x86,armeabi-v7a,armeabi",
+  "ro.hardware.egl": "mesa",
+  "ro.opengles.version": "196610",
+  "trickcal_installer": "package:com.epidgames.trickcalrevive  installer=com.android.vending",
+  "trickcal_package": [
+    "versionCode=10655 minSdk=26 targetSdk=36",
+    "versionName=10655",
+    "lastUpdateTime=2026-10-08 22:02:21",
+    "installerPackageName=com.android.vending"
+  ],
+  "gles_feature": [
+    "feature:reqGlEsVersion=0x30002"
+  ],
+  "renderer": [
+    "GLES: Mesa, virgl (NVIDIA GeForce RTX 2080 SUPER/PCIe/SSE2), OpenGL ES 3.2 Mesa 24.0.8"
+  ]
+}

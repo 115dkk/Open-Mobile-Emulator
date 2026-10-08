@@ -32,12 +32,11 @@ const GUEST_ID: &str = "default";
 const BOOT_DEADLINE: Duration = Duration::from_secs(180);
 const STOP_OBSERVATION_DEADLINE: Duration = Duration::from_secs(40);
 const PROCESS_EXIT_DEADLINE: Duration = Duration::from_secs(5);
-const CAPABILITY_IDS: [CapabilityId; 11] = [
+const CAPABILITY_IDS: [CapabilityId; 10] = [
     CapabilityId::BootMarker,
     CapabilityId::AppList,
     CapabilityId::DisplaySize,
     CapabilityId::MediaVolume,
-    CapabilityId::DeviceId,
     CapabilityId::Screenshot,
     CapabilityId::ForegroundApp,
     CapabilityId::Multitouch,
@@ -588,26 +587,6 @@ fn record_probe(
         snapshot.guest.adb_connected,
     );
     measurements.record(
-        &format!("run{run}.device_id"),
-        snapshot.guest.device_id.as_deref().unwrap_or("unknown"),
-    );
-    measurements.record(
-        &format!("run{run}.device_id_decimal"),
-        snapshot
-            .guest
-            .device_id_decimal
-            .as_deref()
-            .unwrap_or("unknown"),
-    );
-    measurements.record(
-        &format!("run{run}.device_id_present"),
-        snapshot.guest.device_id.is_some() && snapshot.guest.device_id_decimal.is_some(),
-    );
-    measurements.record(
-        &format!("run{run}.google_accounts"),
-        optional(snapshot.guest.google_accounts),
-    );
-    measurements.record(
         &format!("run{run}.media_volume"),
         optional(snapshot.guest.media_volume),
     );
@@ -677,12 +656,6 @@ fn capability_value(
             .and_then(|value| value.get("display"))
             .map_or_else(|| "unknown".to_owned(), compact_json),
         CapabilityId::MediaVolume => optional(snapshot.guest.media_volume),
-        CapabilityId::DeviceId => snapshot
-            .guest
-            .device_id
-            .as_deref()
-            .unwrap_or("unknown")
-            .to_owned(),
         CapabilityId::Screenshot => "temporary guest screencap probe".to_owned(),
         CapabilityId::ForegroundApp => capabilities
             .and_then(|value| value.get("foregroundPackage"))
@@ -957,7 +930,6 @@ fn capability_key(value: CapabilityId) -> &'static str {
         CapabilityId::AppList => "appList",
         CapabilityId::DisplaySize => "displaySize",
         CapabilityId::MediaVolume => "mediaVolume",
-        CapabilityId::DeviceId => "deviceId",
         CapabilityId::Screenshot => "screenshot",
         CapabilityId::ForegroundApp => "foregroundApp",
         CapabilityId::Multitouch => "multitouch",

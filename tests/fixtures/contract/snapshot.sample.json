@@ -1,5 +1,5 @@
 {
-  "contractVersion": 10,
+  "contractVersion": 11,
   "productVersion": "0.1.0",
   "phase": "main",
   "blocker": {
@@ -80,10 +80,6 @@
               "state": "available"
             },
             {
-              "id": "deviceId",
-              "state": "available"
-            },
-            {
               "id": "screenshot",
               "state": "available"
             },
@@ -152,10 +148,6 @@
           "state": "available"
         },
         {
-          "id": "deviceId",
-          "state": "available"
-        },
-        {
           "id": "screenshot",
           "state": "available"
         },
@@ -181,11 +173,6 @@
         }
       ]
     },
-    "deviceId": "499602d2",
-    "deviceIdDecimal": "1234567890",
-    "googleAccounts": 1,
-    "registrationOpenedAt": "2026-09-27T12:00:00+09:00",
-    "addAccountSupported": true,
     "pid": 4242,
     "adbAddress": "127.0.0.1:5555",
     "rootEnabled": false,

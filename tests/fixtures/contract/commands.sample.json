@@ -329,13 +329,7 @@
   },
   {
     "kind": "copyToClipboard",
-    "item": "deviceId"
-  },
-  {
-    "kind": "openRegistrationPage"
-  },
-  {
-    "kind": "googleAccountAddOpen"
+    "item": "adbAddress"
   },
   {
     "kind": "guestWindowToFront"

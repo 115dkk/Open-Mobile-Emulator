@@ -1,10 +1,12 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
-# D8: the guest presents itself as a plain x86_64 tablet and nothing more.
-# These values are the ONLY device-identity properties this project ever sets
-# (R7). M0 and M1 run with Bliss OS defaults; this file is applied by the guest
-# overlay from P3 onward. No other ro.* value is touched.
-ro.product.model=OME Tablet
-ro.product.brand=OME
-ro.product.manufacturer=OME
-ro.product.device=ome_x86_64
-ro.product.name=ome_x86_64
+# Galaxy S26 Ultra SM-S948B compatibility identity (user decision 2026-10-08).
+# Source: https://github.com/appsfolder/livebridge/issues/112 (2026-06-08 diagnostic).
+# Reported by a device owner; not an independently verified firmware extraction.
+# The fingerprint describes the donor, not the guest's OS version or signing keys.
+# Google Play certification and downloads require separate live validation.
+ro.product.model=SM-S948B
+ro.product.brand=samsung
+ro.product.manufacturer=samsung
+ro.product.device=m3q
+ro.product.name=m3qxxx
+ro.build.fingerprint=samsung/m3qxxx/m3q:16/BP4A.251205.006/S948BXXS2AZE3_OWO2AZE3:user/release-keys

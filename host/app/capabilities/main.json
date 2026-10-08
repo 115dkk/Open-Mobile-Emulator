@@ -70,8 +70,6 @@
     "allow-open-shared-folder",
     "allow-shared-push",
     "allow-copy-to-clipboard",
-    "allow-open-registration-page",
-    "allow-google-account-add-open",
     "allow-guest-window-to-front"
   ]
 }

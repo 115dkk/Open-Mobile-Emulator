@@ -82,9 +82,6 @@ describe('native bridge', () => {
       [() => controllerBridge.openInstallFolder(), 'open_install_folder', undefined],
       [() => controllerBridge.openSharedFolder(), 'open_shared_folder', undefined],
       [() => controllerBridge.sharedPush(), 'shared_push', undefined],
-      [() => controllerBridge.copyToClipboard('deviceId'), 'copy_to_clipboard', { item: 'deviceId' }],
-      [() => controllerBridge.openRegistrationPage(), 'open_registration_page', undefined],
-      [() => controllerBridge.googleAccountAddOpen(), 'google_account_add_open', undefined],
       [() => controllerBridge.guestWindowToFront(), 'guest_window_to_front', undefined],
     ];
     for (const [operation, command, args] of cases) {

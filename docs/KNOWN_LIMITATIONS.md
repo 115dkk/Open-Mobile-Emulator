@@ -50,18 +50,9 @@ only when a release fixes them.
   Running games is outside that scope (`docs/adr/0006-guest-image-distribution.md`).
   Self-built guest images are released without Google files (R3); the first
   one is the Android 15 profile below.
-- 0.1.2 did not offer the Android 15 profile. Its first image
-  (`guest-android-15-20261002`, since deleted) carried device disguise that
-  BlissOS adds to its tree: init rewrote `ro.build.type`, `ro.debuggable`,
-  `ro.build.tags`, the verified-boot state and similar properties to a locked
-  retail device's values at every boot, the fingerprint said `release-keys`,
-  and framework hooks gave apps Pixel or other phones' device values, claimed
-  Pixel features, reported Aurora Store installs as Play Store installs, blocked
-  key attestation for DroidGuard and could hide developer status. The product
-  must not ship that (CLAUDE.md D8, R7, R8). `guest/build/patches/` restores
-  upstream AOSP at every one of those places, and since 0.1.3 the profile
-  installs the image `guest-android-15-20261003` built with them
-  (`docs/evidence/P3/dod-a15-20261003.md` sections 6 and 7).
+- Since 2026-10-08, published retail identity profiles are permitted for Google Play
+  compatibility. The Galaxy S26 Ultra candidate is described in `docs/DEVICE_PROFILE.md`.
+  Existing release images and installed guests keep their previous identity until updated.
 - The Android 15 profile (`ome-android-15`, image release
   `guest-android-15-20261003`) is a candidate, shown as 검증 전. It is this
   project's own blob-free build of the BlissOS 18 tree (ADR-0012,
@@ -110,26 +101,21 @@ only when a release fixes them.
   profile (ADR-0008).
 - GPU acceleration is OpenGL only, through virglrenderer. Games that require
   Vulkan are unsupported until the gfxstream path exists (P1).
-- The guest is a Google-uncertified device. Play Store and in-app purchases are
-  not guaranteed even after the uncertified-device registration described in
-  `docs/GOOGLE_ACCOUNT.md`. On 2026-09-26 the registration worked on the
-  development host: the account was added, Google Play Games signed in, and the
-  Play Store opened; purchases remain untested.
-- Registration does not make the guest certified. On 2026-10-05 the registered
-  guest still showed "Play Protect certification: Device is not certified", and
-  the Play Store page of Trickcal Revive said "This app isn't compatible with
-  your device anymore" although the guest offers `arm64-v8a`, GLES 3.2 and
-  touch. Clearing the Play Store's data did not change it. A developer can
-  exclude uncertified devices in the Play Console, so games that do so cannot be
-  installed or updated from the Play Store in this product. Commercial emulators
-  pass this check by presenting the fingerprint of a certified device; this
-  product does not (D8, R7). Such games are installed and updated from APK,
-  XAPK or APKS files through the Apps screen, which keeps the game's data.
+- On 2026-10-08 the Android 13 guest updated Trickcal through Google Play from
+  10644 to 10655. The renderer supported GLES 3.2 and ASTC, but the guest advertised
+  GLES 3.0. Adding `FORCE_GLES=3.2` and refreshing only Play Store cache removed
+  the incompatibility warning. Play Protect certification still reported uncertified;
+  the earlier claim that certification necessarily blocked this game's download was
+  incorrect (`docs/evidence/device-profile/20261008/play-store.md`).
+- On 2026-10-09 the installed OME reached Trickcal's lobby after its 356.3 MB game
+  data update and Google sign-in. The existing Google account was used. A new
+  account's first sign-in, payments and other games remain separate test cases.
+  Registration assistance was removed from the product by user decision.
 - Enabling the Windows Hypervisor Platform runs Windows on top of Hyper-V. Games
   with kernel anti-cheat on the same PC may refuse to start while it is on. The
   product never changes this setting by itself (R9).
-- Games that detect and block emulators are out of scope. No evasion is
-  implemented (R7).
+- Game compatibility is verified per title. A changed device identity does not
+  establish compatibility with a game or its integrity checks (R7).
 - A guest-initiated reboot does not work under WHPX with QEMU 11.1.0: QEMU logs
   `failed to get xsave state` for every vCPU and then `WHPX: Unexpected VP exit
   code 4`, and the VM stays paused with QMP unreachable. Seen with `-cpu max` and

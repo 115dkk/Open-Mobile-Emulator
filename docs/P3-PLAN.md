@@ -83,7 +83,7 @@ CLAUDE.md와 ADR-0006이 2026-09-25~28에 적은 전제 가운데 넷이 사실�
    스냅샷으로 모든 프로젝트를 커밋에 고정), `make-notice-guest.sh`(`NOTICE-guest.md` 기계 생성과 금지 패턴 검사),
    `make-kernel-source.sh`(커널은 GPL-2.0이므로 R4와 같은 소스 묶음을 릴리스에 올린다).
 2. `guest/overlay/`: 도우미 설치 스크립트(`99-ome-install`과 `sgdisk`)를 initrd에 넣는 오버레이, 기기 프로필
-   (`manifests/device-profile.prop`, D8), 필요하면 `init.rc` 조각. AOSP 파생 파일은 Apache-2.0 변경 표시를 지킨다(R5).
+   (`manifests/device-profile.prop`, D8의 2026-10-08 결정), 필요하면 `init.rc` 조각. AOSP 파생 파일은 Apache-2.0 변경 표시를 지킨다(R5).
 3. 이미지 릴리스: `ome-android-15-x86_64-<날짜>-<커밋>.iso`, `.sha256`, `SHA256SUMS`, `NOTICE-guest.md`, `ome.xml`
    스냅샷, 커널 소스 묶음. 전부 출처 증명. 워크플로 이름은 `guest-image-release.yml`(QEMU 릴리스와 같은 모양,
    사전 릴리스 `guest-android-15-<접미사>`). `manifests/artifacts.json`에 `fetched_by: installer` 항목(URL은 OME 릴리스,

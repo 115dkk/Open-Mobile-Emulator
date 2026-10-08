@@ -3,6 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { CONTRACT_VERSION } from './contracts';
 import type {
   AppIssue, AppSnapshot, AppsView, Binding, BindingAction, CapabilityItem, CapabilityReport,
   CustomDisplay, DisplayPreset, DisplayView, GuestImageSummary, GuestSummary, GuestView,
@@ -49,7 +50,7 @@ const install = object<InstallProgress>({
 });
 const capability = enumeration('available', 'unavailable', 'unknown');
 const capabilityItem = object<CapabilityItem>({
-  id: enumeration('bootMarker', 'appList', 'displaySize', 'mediaVolume', 'deviceId', 'screenshot', 'foregroundApp', 'multitouch', 'nativeBridge', 'root', 'textInput'),
+  id: enumeration('bootMarker', 'appList', 'displaySize', 'mediaVolume', 'screenshot', 'foregroundApp', 'multitouch', 'nativeBridge', 'root', 'textInput'),
   state: capability,
 });
 const capabilityReport = object<CapabilityReport>({ probedAt: nullable(string), items: array(capabilityItem) });
@@ -119,7 +120,7 @@ const guestSummary = object<GuestSummary>({
   lastStartedAt: nullable(string), capabilities: capabilityReport,
 });
 const snapshot = object<AppSnapshot>({
-  contractVersion: (value, path) => { if (value !== 10) fail(path, 'contract version 10'); },
+  contractVersion: (value, path) => { if (value !== CONTRACT_VERSION) fail(path, `contract version ${String(CONTRACT_VERSION)}`); },
   productVersion: string, phase: enumeration('wizard', 'main'),
   blocker: nullable(object({ kind: enumeration('virtualizationOff', 'qemuMissing', 'hypervisorPlatformOff') })),
   host: object<HostReport>({
@@ -145,9 +146,8 @@ const snapshot = object<AppSnapshot>({
     resolution: nullable(size), fps: nullable(number), startedAt: nullable(string),
     lastExit: nullable(object<LastExit>({ kind: enumeration('userStop', 'guestReset', 'bootTimeout', 'crash', 'startFailed'), at: string, logPath: nullable(string) })),
     imageId: nullable(string), androidVersion: nullable(string), apiLevel: nullable(number),
-    capabilities: capabilityReport, deviceId: nullable(string), adbAddress: nullable(string), rootEnabled: nullable(boolean),
-    mediaVolume: nullable(number), deviceIdDecimal: nullable(string), googleAccounts: nullable(number),
-    registrationOpenedAt: nullable(string), addAccountSupported: boolean, pid: nullable(number),
+    capabilities: capabilityReport, adbAddress: nullable(string), rootEnabled: nullable(boolean),
+    mediaVolume: nullable(number), pid: nullable(number),
   }),
   apps: object<AppsView>({
     available: boolean, install: nullable(install),
@@ -190,7 +190,7 @@ function fixture(name: string): unknown {
 
 const commandShapes: Record<string, Record<string, Check>> = {
   hostCheckRefresh: {}, wizardContinue: {}, wizardSkip: {}, wizardDefer: {},
-  openHelp: { topic: enumeration('virtualizationBios', 'hypervisorPlatform', 'googleAccount', 'adbSecurity', 'qemuSource', 'thirdPartyNotices', 'releaseNotes') },
+  openHelp: { topic: enumeration('virtualizationBios', 'hypervisorPlatform', 'adbSecurity', 'qemuSource', 'thirdPartyNotices', 'releaseNotes') },
   appQuit: {}, whpxEnable: {}, artifactDownloadStart: {}, artifactDownloadCancel: {}, guestImageSelect: { id: string },
   guestCreate: { imageId: string, sizeGib: number }, guestSelect: { id: string },
   guestDelete: { id: string }, guestReinstall: { name: string }, guestInstallCancel: {}, guestStart: {}, guestStop: {},
@@ -209,7 +209,7 @@ const commandShapes: Record<string, Record<string, Check>> = {
   settingsSave: { settings: object<SettingsInput>(settingsInput) }, updateCheck: {}, updateInstall: {},
   diagnosticsExport: {}, openLogsFolder: {}, openScreenshotsFolder: {}, openHomeFolder: {}, openInstallFolder: {},
   openSharedFolder: {}, sharedPush: {},
-  copyToClipboard: { item: enumeration('deviceId', 'adbAddress') }, openRegistrationPage: {}, googleAccountAddOpen: {}, guestWindowToFront: {},
+  copyToClipboard: { item: enumeration('adbAddress') }, guestWindowToFront: {},
 };
 
 describe('Rust/TypeScript contract fixtures', () => {

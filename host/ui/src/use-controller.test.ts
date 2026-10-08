@@ -52,12 +52,12 @@ describe('presentation controller', () => {
     await waitFor(() => { expect(result.current.snapshot).not.toBeNull(); });
     await act(() => result.current.actions.guestCreate('sample-android-13', 64));
     await act(() => result.current.actions.stageRectChanged({ x: 1, y: 2, width: 3, height: 4, scaleFactor: 1.5 }));
-    await act(() => result.current.actions.openHelp('googleAccount'));
+    await act(() => result.current.actions.openHelp('adbSecurity'));
     await act(() => result.current.actions.guestVolumeSet(8));
     await act(() => result.current.actions.copyToClipboard('adbAddress'));
     expect(guestCreate).toHaveBeenCalledWith('sample-android-13', 64);
     expect(stageRectChanged).toHaveBeenCalledWith({ x: 1, y: 2, width: 3, height: 4, scaleFactor: 1.5 });
-    expect(openHelp).toHaveBeenCalledWith('googleAccount');
+    expect(openHelp).toHaveBeenCalledWith('adbSecurity');
     expect(guestVolumeSet).toHaveBeenCalledWith(8);
     expect(copyToClipboard).toHaveBeenCalledWith('adbAddress');
   });

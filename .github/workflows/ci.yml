@@ -13,6 +13,19 @@ permissions:
   contents: read
 
 jobs:
+  device-profile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate guest identity and migration invariants
+        run: |
+          python3 guest/build/device_profile.py manifests/device-profile.prop
+          python3 guest/build/test_device_profile.py
+          bash -n guest/build/build-image.sh
+
   checks:
     runs-on: windows-latest
     steps:

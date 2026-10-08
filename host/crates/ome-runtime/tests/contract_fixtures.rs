@@ -46,6 +46,21 @@ fn tagged_variant_fields_are_camel_case() {
     );
 }
 
+#[test]
+fn retired_registration_commands_are_rejected() {
+    for command in [
+        r#"{"kind":"openRegistrationPage"}"#,
+        r#"{"kind":"googleAccountAddOpen"}"#,
+        r#"{"kind":"copyToClipboard","item":"deviceId"}"#,
+        r#"{"kind":"openHelp","topic":"googleAccount"}"#,
+    ] {
+        assert!(
+            serde_json::from_str::<Command>(command).is_err(),
+            "{command}"
+        );
+    }
+}
+
 fn point(x: f64, y: f64) -> LogicalPoint {
     LogicalPoint { x, y }
 }
@@ -142,10 +157,6 @@ fn capabilities() -> CapabilityReport {
             },
             CapabilityItem {
                 id: CapabilityId::MediaVolume,
-                state: Capability::Available,
-            },
-            CapabilityItem {
-                id: CapabilityId::DeviceId,
                 state: Capability::Available,
             },
             CapabilityItem {
@@ -258,11 +269,6 @@ fn representative_snapshot() -> AppSnapshot {
             android_version: Some("13".to_owned()),
             api_level: Some(33),
             capabilities: capabilities(),
-            device_id: Some("499602d2".to_owned()),
-            device_id_decimal: Some("1234567890".to_owned()),
-            google_accounts: Some(1),
-            registration_opened_at: Some("2026-09-27T12:00:00+09:00".to_owned()),
-            add_account_supported: true,
             pid: Some(4242),
             adb_address: Some("127.0.0.1:5555".to_owned()),
             root_enabled: Some(false),
@@ -491,10 +497,8 @@ fn every_command() -> Vec<Command> {
         Command::OpenSharedFolder,
         Command::SharedPush,
         Command::CopyToClipboard {
-            item: ClipboardItem::DeviceId,
+            item: ClipboardItem::AdbAddress,
         },
-        Command::OpenRegistrationPage,
-        Command::GoogleAccountAddOpen,
         Command::GuestWindowToFront,
     ]
 }

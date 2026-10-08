@@ -1,0 +1,25 @@
+diff --git a/init/property_service.cpp b/init/property_service.cpp
+--- a/init/property_service.cpp
++++ b/init/property_service.cpp
+@@ -1311,6 +1311,20 @@ void PropertyLoadBootDefaults() {
+     // Update with vendor-specific property runtime overrides
+     vendor_load_properties();
+-
++
++    // Open Mobile Emulator: expose the published compatibility model/fingerprint.
++    // Android-x86 uses product/partition identities for native driver selection;
++    // keep those, SDK/ABI, boot state, patch level and adb security unchanged.
++    std::map<std::string, std::string> ome_identity;
++    load_properties_from_file("/system/etc/ome-device-profile.prop", nullptr, &ome_identity);
++    for (const char* key : {"ro.product.model", "ro.build.fingerprint"}) {
++        auto it = ome_identity.find(key);
++        if (it == ome_identity.end()) continue;
++        std::string error;
++        if (PropertySetNoSocket(key, it->second, &error) != PROP_SUCCESS) {
++            LOG(ERROR) << "OME identity: " << key << ": " << error;
++        }
++    }
++
+     property_initialize_ro_product_props();
+     property_initialize_build_id();
+     property_derive_build_fingerprint();

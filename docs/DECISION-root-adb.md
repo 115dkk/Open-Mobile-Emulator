@@ -20,7 +20,7 @@
   https://github.com/Bliss-Bass/KernelSU/blob/v1.0.1/kernel/ksud.c).
 - `adb root`와 앱 루트는 별개다. `adb root`는 userdebug 빌드의 `service.adb.root`로 adbd를
   루트로 다시 띄우는 것이고(https://github.com/mirror/platform_packages_modules_adb/blob/main/docs/dev/root.md),
-  이 프로젝트의 Bliss 16.9.7은 userdebug라 M0에서 이미 동작을 확인했다(`docs/GOOGLE_ACCOUNT.md`).
+  이 프로젝트의 Bliss 16.9.7은 userdebug라 M0에서 이미 동작을 확인했다(`docs/evidence/M0/google-account.md`).
 - 2024-09-11 빌드에서 KernelSU 권한을 줘도 앱이 `su`를 못 쓴다는 사용자 보고가 있다
   (https://github.com/BlissRoms-x86/support/issues/99). 이 프로젝트가 쓰는 2024-10-11 빌드에서의
   동작은 확인 못 했다. 2024년 6월 Bliss 글은 KernelSU 0.9.3 이상에서 설치 시스템이 "미설치"로

@@ -295,8 +295,6 @@ pub fn run() {
             commands::open_shared_folder,
             commands::shared_push,
             commands::copy_to_clipboard,
-            commands::open_registration_page,
-            commands::google_account_add_open,
             commands::guest_window_to_front,
         ])
         .run(tauri::generate_context!())

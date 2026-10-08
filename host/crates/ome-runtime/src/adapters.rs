@@ -3,10 +3,8 @@
 //! Runtime adapters over the raw adb session.
 #![forbid(unsafe_code)]
 
-use std::io::Write;
-
 use ome_adb::AdbSession;
-use ome_guest_image::{PushFile, RunnerError, ShellCommand, ShellOutput, ShellRunner};
+use ome_guest_image::{RunnerError, ShellCommand, ShellOutput, ShellRunner};
 use ome_supervisor::PowerOffHook;
 
 /// Graceful Android shutdown used by the guest-process supervisor.
@@ -52,23 +50,6 @@ impl ShellRunner for AdbShellRunner<'_> {
 
     fn root(&self) -> Result<(), RunnerError> {
         self.0.root().map_err(runner_error)
-    }
-
-    fn push(&self, file: &PushFile) -> Result<(), RunnerError> {
-        let mut local = tempfile::NamedTempFile::new().map_err(|error| RunnerError {
-            reason: error.to_string(),
-        })?;
-        local
-            .write_all(&file.contents)
-            .map_err(|error| RunnerError {
-                reason: error.to_string(),
-            })?;
-        local.flush().map_err(|error| RunnerError {
-            reason: error.to_string(),
-        })?;
-        self.0
-            .push(local.path(), &file.remote_path)
-            .map_err(runner_error)
     }
 }
 

@@ -62,8 +62,6 @@ fn main() {
         "open_shared_folder",
         "shared_push",
         "copy_to_clipboard",
-        "open_registration_page",
-        "google_account_add_open",
         "guest_window_to_front",
     ]);
     tauri_build::try_build(tauri_build::Attributes::new().app_manifest(manifest))

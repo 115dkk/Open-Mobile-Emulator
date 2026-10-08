@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Copyright (C) 2026 Open Mobile Emulator contributors
 
-use super::{DeviceId, DisplayInfo, PackageEntry};
+use super::{DisplayInfo, PackageEntry};
 
 pub(super) fn native_bridge(output: &str) -> Option<String> {
     let name = output.trim();
@@ -105,63 +105,6 @@ pub(super) fn display(size: &str, density: &str) -> Option<DisplayInfo> {
             .ok()?,
     };
     (info.width > 0 && info.height > 0 && info.density_dpi > 0).then_some(info)
-}
-
-pub(super) fn device_id(output: &str) -> Option<DeviceId> {
-    if output.contains("Permission Denial") {
-        return None;
-    }
-    output.lines().find_map(|line| {
-        let line = line.trim();
-        let value = if let Some(value) = line.strip_prefix("android_id|") {
-            value.trim()
-        } else {
-            let row = line.strip_prefix("Row: ")?;
-            let (index, row) = row.split_once(' ')?;
-            index.parse::<u32>().ok()?;
-            row.split(", ")
-                .find_map(|field| field.strip_prefix("android_id="))?
-                .trim()
-        };
-        if value.is_empty() || !value.bytes().all(|c| c.is_ascii_digit()) {
-            return None;
-        }
-        DeviceId::from_decimal(value)
-    })
-}
-
-pub(super) fn google_accounts(output: &str) -> Option<u32> {
-    // Count only actual account entries, not account names repeated in history/session dumps.
-    let mut remaining = None;
-    let mut count = 0_u32;
-    let mut saw_header = false;
-    for line in output.lines().map(str::trim) {
-        if let Some(total) = line.strip_prefix("Accounts:") {
-            if remaining.is_some_and(|left| left != 0) {
-                return None;
-            }
-            remaining = Some(total.trim().parse::<u32>().ok()?);
-            saw_header = true;
-            continue;
-        }
-        if let Some(left) = remaining.as_mut().filter(|left| **left > 0)
-            && let Some(entry) = line
-                .strip_prefix("Account {")
-                .and_then(|s| s.strip_suffix('}'))
-        {
-            *left -= 1;
-            if entry
-                .rsplit_once(", type=")
-                .is_some_and(|(_, kind)| kind == "com.google")
-            {
-                count = count.checked_add(1)?;
-            }
-        }
-    }
-    if remaining.is_some_and(|left| left != 0) {
-        return None;
-    }
-    saw_header.then_some(count)
 }
 
 pub(super) fn root_state(output: &str) -> Option<bool> {

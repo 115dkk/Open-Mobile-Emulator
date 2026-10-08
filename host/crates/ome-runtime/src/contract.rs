@@ -14,7 +14,7 @@ pub use ome_input::{
 };
 
 /// Current Rust-to-webview contract version.
-pub const CONTRACT_VERSION: u32 = 10;
+pub const CONTRACT_VERSION: u32 = 11;
 
 /// The one read-only projection the webview renders.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -382,8 +382,6 @@ pub enum CapabilityId {
     DisplaySize,
     /// Media volume control.
     MediaVolume,
-    /// Device identifier lookup.
-    DeviceId,
     /// Screenshot capture.
     Screenshot,
     /// Foreground application lookup.
@@ -438,16 +436,6 @@ pub struct GuestView {
     pub api_level: Option<u32>,
     /// Active operating-system capability report.
     pub capabilities: CapabilityReport,
-    /// GSF Android ID in lowercase hexadecimal when available.
-    pub device_id: Option<String>,
-    /// GSF Android ID in decimal when available.
-    pub device_id_decimal: Option<String>,
-    /// Number of signed-in Google accounts, or unknown before probing.
-    pub google_accounts: Option<u32>,
-    /// Local RFC 3339 time when registration was last opened for this operating system.
-    pub registration_opened_at: Option<String>,
-    /// Whether this operating-system generation can open Google account setup.
-    pub add_account_supported: bool,
     /// Active virtual-machine process identifier.
     pub pid: Option<u32>,
     /// Address offered to adb clients.
@@ -918,8 +906,6 @@ pub enum HelpTopic {
     VirtualizationBios,
     /// Windows Hypervisor Platform setup help.
     HypervisorPlatform,
-    /// Google account registration help.
-    GoogleAccount,
     /// Adb access security help.
     AdbSecurity,
     /// Matching QEMU source-offer download.
@@ -934,8 +920,6 @@ pub enum HelpTopic {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum ClipboardItem {
-    /// GSF Android ID from the active operating system.
-    DeviceId,
     /// Adb address from the active virtual machine.
     AdbAddress,
 }
@@ -1152,10 +1136,6 @@ pub enum Command {
         /// Value selected by the webview.
         item: ClipboardItem,
     },
-    /// Copy the device ID and open Google's registration page.
-    OpenRegistrationPage,
-    /// Open Google account setup inside the running operating system.
-    GoogleAccountAddOpen,
     /// Bring the separate operating-system window forward.
     GuestWindowToFront,
 }
@@ -1220,8 +1200,6 @@ impl Command {
             Self::OpenSharedFolder => "open_shared_folder",
             Self::SharedPush => "shared_push",
             Self::CopyToClipboard { .. } => "copy_to_clipboard",
-            Self::OpenRegistrationPage => "open_registration_page",
-            Self::GoogleAccountAddOpen => "google_account_add_open",
             Self::GuestWindowToFront => "guest_window_to_front",
         }
     }
@@ -1287,8 +1265,6 @@ pub const TAURI_COMMANDS: &[&str] = &[
     "open_shared_folder",
     "shared_push",
     "copy_to_clipboard",
-    "open_registration_page",
-    "google_account_add_open",
     "guest_window_to_front",
 ];
 

@@ -83,10 +83,8 @@ impl CapabilityProbe {
         };
         let mut outcome = ProbeOutcome {
             items: Vec::with_capacity(ProbeItem::ALL.len()),
-            device_id: None,
             native_bridge: None,
             media_volume: None,
-            google_accounts: None,
             foreground: None,
             root_enabled: None,
             display: None,
@@ -151,35 +149,6 @@ impl CapabilityProbe {
                     &mut outcome.media_volume,
                     |_| false,
                 ),
-                ProbeItem::DeviceId => {
-                    let mut state = ProbeState::Unavailable;
-                    for attempt in adapter.device_id_attempts() {
-                        if let Err(failed) = run.prepare(&attempt.command) {
-                            if failed == ProbeState::Unknown {
-                                state = failed;
-                            }
-                            continue;
-                        }
-                        if let Some(file) = &attempt.push
-                            && runner.push(file).is_err()
-                        {
-                            state = ProbeState::Unknown;
-                            continue;
-                        }
-                        match run.shell(Some(attempt.command)) {
-                            Ok(output) => {
-                                if let Some(id) = adapter.parse_device_id(&output.stdout) {
-                                    outcome.device_id = Some(id);
-                                    state = ProbeState::Available;
-                                    break;
-                                }
-                            }
-                            Err(ProbeState::Unknown) => state = ProbeState::Unknown,
-                            Err(_) => {}
-                        }
-                    }
-                    state
-                }
                 ProbeItem::Screenshot => {
                     let state =
                         match run.shell(adapter.screenshot_command(Self::SCREENSHOT_PROBE_PATH)) {
@@ -250,14 +219,6 @@ impl CapabilityProbe {
             };
             outcome.items.push((item, state));
         }
-        // The public contract has no GoogleAccounts ProbeItem, but carries the learned count.
-        let _ = read(
-            &mut run,
-            adapter.google_accounts_command(),
-            |s| adapter.parse_google_accounts(s),
-            &mut outcome.google_accounts,
-            |_| false,
-        );
         outcome
     }
 }
