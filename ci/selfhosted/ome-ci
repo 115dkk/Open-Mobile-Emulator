@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+#
+# Control of the phone CI in Termux (ci/selfhosted/README.md). setup-phone.sh links it as
+# ~/.local/bin/ome-ci.
+#
+#   ome-ci start              wake lock, then the bridge and both runners in the tmux session ome-ci
+#   ome-ci stop               stop the runners and the bridge; a running stage keeps going
+#   ome-ci status             services, the current or last stage, phone storage and memory
+#   ome-ci log                follow the log of the current or last stage
+#   ome-ci stop-stage         stop the running stage
+#   ome-ci run STAGE [REF]    dispatch the workflow on GitHub; REF picks the build scripts (main)
+set -uo pipefail
+OME_CI_BIN=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
+# shellcheck source=lib.sh
+source "$OME_CI_BIN/lib.sh"
+SESSION=ome-ci
+
+# One service in a restart loop, inside its tmux window. A runner that loses the network exits
+# or reconnects by itself; either way the loop brings it back.
+service() {
+    local name=$1 log=$OME_CI_HOME/logs/$1.log rc
+    while true; do
+        say "starting $name" >> "$log"
+        case "$name" in
+            bridge) bash "$OME_CI_BIN/bridge.sh" serve >> "$log" 2>&1 ;;
+            runner-main|runner-ctl)
+                proot-distro login "$OME_CI_RUNNER_CONTAINER" -- "/opt/actions-runner/${name#runner-}/run.sh" >> "$log" 2>&1
+                ;;
+            *) echo "unknown service $name" >&2; return 2 ;;
+        esac
+        rc=$?
+        say "$name exited with $rc; starting again in 15 s" >> "$log"
+        sleep 15
+    done
+}
+
+stage_running() { [ -s "$SPOOL/current" ]; }
+
+cmd_start() {
+    mkdir -p "$OME_CI_HOME/logs"
+    termux-wake-lock 2>/dev/null || echo "termux-wake-lock failed; keep Termux in the foreground" >&2
+    if tmux has-session -t "$SESSION" 2>/dev/null; then
+        echo "already running (tmux session $SESSION)"
+        return 0
+    fi
+    tmux new-session -d -s "$SESSION" -n bridge "bash '$OME_CI_BIN/ome-ci' _service bridge"
+    tmux new-window -d -t "$SESSION" -n runner-main "bash '$OME_CI_BIN/ome-ci' _service runner-main"
+    tmux new-window -d -t "$SESSION" -n runner-ctl "bash '$OME_CI_BIN/ome-ci' _service runner-ctl"
+    echo "started; 'tmux attach -t $SESSION' shows the windows, logs are in $OME_CI_HOME/logs"
+}
+
+cmd_stop() {
+    tmux kill-session -t "$SESSION" 2>/dev/null || true
+    proot-distro kill "$OME_CI_RUNNER_CONTAINER" >/dev/null 2>&1 || true
+    if stage_running; then
+        echo "services stopped; the stage $(cat "$SPOOL/current") keeps running (ome-ci stop-stage ends it)"
+    else
+        termux-wake-unlock 2>/dev/null || true
+        echo "services stopped"
+    fi
+}
+
+cmd_status() {
+    if tmux has-session -t "$SESSION" 2>/dev/null; then
+        echo "services: running ($(tmux list-windows -t "$SESSION" -F '#W' | paste -sd ' ' -))"
+    else
+        echo "services: stopped (ome-ci start)"
+    fi
+    bash "$OME_CI_BIN/bridge.sh" status
+}
+
+cmd_log() {
+    local t
+    t=$(cat "$SPOOL/current" 2>/dev/null)
+    [ -n "$t" ] || t=$(find "$SPOOL/tasks" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' 2>/dev/null | sort | tail -n 1)
+    [ -n "$t" ] || { echo "no stage has run yet"; return 1; }
+    echo "== $t"
+    tail -n 50 -F "$SPOOL/tasks/$t/log"
+}
+
+cmd_run() {
+    local stage=${1:-} ref=${2:-main} workflow
+    [ -n "$stage" ] || { echo "usage: ome-ci run STAGE [REF]" >&2; return 2; }
+    valid_ref "$ref" || { echo "not a branch, tag or commit name: $ref" >&2; return 2; }
+    workflow=$(basename "$OME_CI_WORKFLOW")
+    retry 3 gh workflow run "$workflow" -R "$OME_CI_REPO" --ref "$OME_CI_BRANCH" -f stage="$stage" -f ref="$ref" || return 1
+    sleep 5
+    gh run list -R "$OME_CI_REPO" -w "$workflow" -L 1 --json url,status --jq '.[0] | .url + "  (" + .status + ")"'
+}
+
+case "${1:-}" in
+    start) cmd_start ;;
+    stop) cmd_stop ;;
+    status) cmd_status ;;
+    log) cmd_log ;;
+    stop-stage) bash "$OME_CI_BIN/bridge.sh" stop ;;
+    run) shift; cmd_run "$@" ;;
+    _service) service "$2" ;;
+    *) sed -n '8,13p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
+esac

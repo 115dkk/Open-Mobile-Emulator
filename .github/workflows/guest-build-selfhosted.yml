@@ -1,0 +1,51 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 Open Mobile Emulator contributors
+#
+# P3 guest image build on the maintainer's phone (docs/P3-PLAN.md 5.1, user decision 2026-11-15;
+# ci/selfhosted/README.md). This file exists only on the branch selfhosted/guest-build and runs
+# only when its owner dispatches it:
+#
+#   gh workflow run guest-build-selfhosted.yml -R 115dkk/Open-Mobile-Emulator \
+#       --ref selfhosted/guest-build -f stage=build        (or: ome-ci run build, in Termux)
+#
+# The runners' job-started hook (ci/selfhosted/job-started.sh) refuses every job that is not this
+# workflow, dispatched by 115dkk, from this branch. The stage itself runs in Termux on the phone
+# and outlives the job: when the job hits its time limit or is cancelled, dispatching the same
+# stage again follows the running one.
+name: Guest build on the phone
+
+on:
+  # Registration only: GitHub dispatches a workflow outside the default branch only after it has
+  # run once. The job below skips push runs, and the next commit removes this trigger.
+  push:
+    branches: [selfhosted/guest-build]
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: 'status and stop answer at once; the others run for hours to weeks'
+        type: choice
+        options: [status, build, sync, init, aaropa, collect, all, host-setup, stop]
+        default: status
+        required: true
+      ref:
+        description: 'Branch, tag or commit of the build scripts (guest/build)'
+        type: string
+        default: main
+        required: true
+
+permissions: {}
+
+jobs:
+  stage:
+    name: ${{ inputs.stage }}
+    if: github.event_name == 'workflow_dispatch'
+    # Control stages have their own runner, so they answer while a build holds the main one.
+    runs-on: ${{ (inputs.stage == 'status' || inputs.stage == 'stop') && 'ome-guest-build-ctl' || 'ome-guest-build' }}
+    # Just under the 5-day limit of a self-hosted job; the stage keeps going after it.
+    timeout-minutes: 7140
+    steps:
+      - name: ${{ inputs.stage }} (scripts from ${{ inputs.ref }})
+        env:
+          STAGE: ${{ inputs.stage }}
+          REF: ${{ inputs.ref }}
+        run: bash "$OME_CI_HOME/bin/request.sh"
