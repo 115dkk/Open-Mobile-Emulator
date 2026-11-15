@@ -28,6 +28,39 @@ development PC the VM gets 48 GB and 16 GB swap through `%USERPROFILE%\.wslconfi
 (`[wsl2] memory=48GB`, `swap=16GB`, applied by `wsl --shutdown`) and the build runs with
 `OME_JOBS=12`.
 
+## Low memory (`OME_MEM_BUDGET_GB`)
+
+`OME_MEM_BUDGET_GB=8` makes the build stages (`build`, `modules`, `digitalis-iso`) take longer in
+exchange for fewer things in memory at once. The target is a host with 8 GB for the build. What
+it changes:
+
+| Setting | Effect |
+|---|---|
+| `make -j` | `OME_BUILD_JOBS` if set, otherwise one job per 4 GB of budget (2 for 8 GB). `OME_SYNC_JOBS` keeps the sync at its own count |
+| `NINJA_HIGHMEM_NUM_JOBS=1` | one job at a time in soong's high-memory pool (metalava) |
+| `patches/lowmem/build/soong/0001-*.patch` | `soong_build` collects garbage when its heap has grown by a quarter instead of doubling (`debug.SetGCPercent(25)`; it runs with an empty environment, so `GOGC` cannot reach it). javac, kotlinc, D8 and R8 run with the serial collector. Heap limits are unchanged |
+| `patches/lowmem/device/generic/common/0001-*.patch` | the kernel rule's own `make` gets 2 jobs instead of one per CPU (`/sys/devices/system/cpu/present`), which ninja's `-j` does not cover |
+| `patches/lowmem/glodroid/aospext/0001-*.patch` | the meson builds (Mesa and friends) run their own `ninja` with 2 jobs instead of one per CPU plus two |
+
+None of these changes what is built: they change scheduling and garbage collection. They do
+change command lines, so the first build after switching the mode reruns the affected steps. The
+patches stay in the tree once applied, like the ones under `patches/`.
+
+The budget caps how many actions run at once. It does not shrink a single large process:
+`soong_build`'s analysis, kati and ninja loading the build graph each peak on their own, so the
+host needs swap for those moments (`prepare_memory_budget` prints RAM and swap and warns below
+the 24 GB the Bliss README asks for). The soong patch was checked against the pinned soong commit
+with `git apply --check` and `gofmt`; the memory figures of a full low-memory build are not
+measured yet.
+
+Network stages retry instead of failing on a short outage: `OME_SYNC_ATTEMPTS` (default 5) whole
+syncs, `OME_NET_ATTEMPTS` (default 5) for `repo init` and each installer-environment download,
+which resumes from a `.part` file.
+
+The build also runs on an Android phone under x86_64 emulation (proot + qemu-user, about 20 to 35
+times slower than native) from a self-hosted runner. That CI lives only on the branch
+`selfhosted/guest-build`, which documents the phone setup in `ci/selfhosted/README.md`.
+
 ## On the development PC (WSL 2)
 
 ```powershell

@@ -18,6 +18,10 @@ source "$HERE/pins.env"
 
 BUILD_USER=${OME_BUILD_USER:-ome}
 export DEBIAN_FRONTEND=noninteractive
+# A short network outage should cost a wait, not the setup: apt, curl, pip, rustup and cargo all
+# retry (the phone build host loses Wi-Fi for seconds at a time).
+CURL_RETRY='--retry 10 --retry-all-errors --retry-delay 10'
+export RUSTUP_MAX_RETRIES=10 CARGO_NET_RETRY=10
 
 if [ "$(id -u)" -ne 0 ]; then
     echo "run as root" >&2
@@ -25,6 +29,7 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 echo "==> packages"
+printf 'Acquire::Retries "10";\n' > /etc/apt/apt.conf.d/80-ome-retries
 dpkg --add-architecture i386
 apt-get update
 apt-get install -y --no-install-recommends \
@@ -45,7 +50,7 @@ rm -rf /var/lib/apt/lists/*
 # pins.env, lands in /usr/local/bin ahead of /usr/bin.
 echo "==> meson $MESON_PIP_VERSION from PyPI"
 apt-get remove -y meson >/dev/null 2>&1 || true
-pip3 install --no-cache-dir "meson==$MESON_PIP_VERSION" >/dev/null
+pip3 install --retries 10 --no-cache-dir "meson==$MESON_PIP_VERSION" >/dev/null
 echo "meson $(meson --version) at $(command -v meson)"
 
 echo "==> locale"
@@ -55,7 +60,8 @@ update-locale LANG=en_US.UTF-8
 
 echo "==> repo launcher"
 install -d /usr/local/bin
-curl -fsSL "$REPO_LAUNCHER_URL" -o /usr/local/bin/repo
+# shellcheck disable=SC2086 # CURL_RETRY is a list of options
+curl -fsSL $CURL_RETRY "$REPO_LAUNCHER_URL" -o /usr/local/bin/repo
 chmod 755 /usr/local/bin/repo
 echo "repo launcher sha256: $(sha256sum /usr/local/bin/repo | cut -d' ' -f1)"
 
@@ -68,14 +74,14 @@ chmod 440 "/etc/sudoers.d/90-$BUILD_USER"
 git lfs install --system --skip-repo >/dev/null
 
 echo "==> rust toolchain for $BUILD_USER (the README asks for rustup, not distro Rust)"
-sudo -u "$BUILD_USER" -H bash -c 'if [ ! -x "$HOME/.cargo/bin/rustc" ]; then curl -fsSL https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain stable >/dev/null; fi; "$HOME/.cargo/bin/rustc" --version'
+sudo -u "$BUILD_USER" -H env CURL_RETRY="$CURL_RETRY" RUSTUP_MAX_RETRIES="$RUSTUP_MAX_RETRIES" bash -c 'if [ ! -x "$HOME/.cargo/bin/rustc" ]; then curl -fsSL $CURL_RETRY https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain stable >/dev/null; fi; "$HOME/.cargo/bin/rustc" --version'
 
 # The README's follow-up to rustup: the Android targets and three cargo programs. Mesa's
 # configure step needs the x86_64-linux-android and i686-linux-android targets (NVK is in the
 # vulkan driver list, so Mesa adds Rust) and bindgen/cbindgen; the first build host lacked all of
 # them (2026-10-02). Versions are pinned in pins.env; bindgen-cli 0.69.1 is the README's own pin.
 echo "==> rust targets and cargo programs for $BUILD_USER"
-sudo -u "$BUILD_USER" -H env CARGO_NDK_VERSION="$CARGO_NDK_VERSION" BINDGEN_CLI_VERSION="$BINDGEN_CLI_VERSION" CBINDGEN_VERSION="$CBINDGEN_VERSION" bash -c '
+sudo -u "$BUILD_USER" -H env RUSTUP_MAX_RETRIES="$RUSTUP_MAX_RETRIES" CARGO_NET_RETRY="$CARGO_NET_RETRY" CARGO_NDK_VERSION="$CARGO_NDK_VERSION" BINDGEN_CLI_VERSION="$BINDGEN_CLI_VERSION" CBINDGEN_VERSION="$CBINDGEN_VERSION" bash -c '
     export PATH="$HOME/.cargo/bin:$PATH"
     rustup target add x86_64-linux-android i686-linux-android >/dev/null
     for spec in "cargo-ndk $CARGO_NDK_VERSION" "bindgen-cli $BINDGEN_CLI_VERSION" "cbindgen $CBINDGEN_VERSION"; do

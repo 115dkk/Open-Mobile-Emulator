@@ -1,0 +1,55 @@
+diff --git a/cmd/soong_build/main.go b/cmd/soong_build/main.go
+index 577c6cc..e2034fb 100644
+--- a/cmd/soong_build/main.go
++++ b/cmd/soong_build/main.go
+@@ -21,6 +21,7 @@ import (
+ 	"fmt"
+ 	"os"
+ 	"path/filepath"
++	"runtime/debug"
+ 	"strings"
+ 	"time"
+ 
+@@ -344,6 +345,11 @@ func parseAvailableEnv() map[string]string {
+ func main() {
+ 	flag.Parse()
+ 
++	// Open Mobile Emulator low-memory build (guest/build, OME_MEM_BUDGET_GB): collect garbage
++	// when the heap has grown by a quarter instead of doubling, so the analysis peak stays near
++	// the live heap. soong_build runs with an empty environment, so GOGC cannot reach it.
++	debug.SetGCPercent(25)
++
+ 	soongStartTime := time.Now()
+ 
+ 	shared.ReexecWithDelveMaybe(delveListen, delvePath)
+diff --git a/java/config/config.go b/java/config/config.go
+index 4c1c723..caf82b9 100644
+--- a/java/config/config.go
++++ b/java/config/config.go
+@@ -81,7 +81,9 @@ func init() {
+ 	pctx.Import("github.com/google/blueprint/bootstrap")
+ 
+ 	pctx.StaticVariable("JavacHeapSize", "4096M")
+-	pctx.StaticVariable("JavacHeapFlags", "-J-Xmx${JavacHeapSize}")
++	// Open Mobile Emulator low-memory build: the serial collector has the smallest footprint of
++	// the JDK's collectors. The heap limits stay as they are.
++	pctx.StaticVariable("JavacHeapFlags", "-J-Xmx${JavacHeapSize} -J-XX:+UseSerialGC")
+ 
+ 	// ErrorProne can use significantly more memory than javac alone, give it a higher heap
+ 	// size (b/221480398).
+@@ -92,6 +94,7 @@ func init() {
+ 	// Note that the `-JXX` prefix syntax is specific to the R8/D8 invocation wrappers.
+ 	pctx.StaticVariable("D8Flags", strings.Join(append([]string{
+ 		"-JXmx4096M",
++		"-JXX:+UseSerialGC",
+ 		"-JXX:+TieredCompilation",
+ 		"-JXX:TieredStopAtLevel=1",
+ 		"-JDcom.android.tools.r8.emitRecordAnnotationsInDex",
+@@ -99,6 +102,7 @@ func init() {
+ 	}, dexerJavaVmFlagsList...), " "))
+ 	pctx.StaticVariable("R8Flags", strings.Join(append([]string{
+ 		"-JXmx4096M",
++		"-JXX:+UseSerialGC",
+ 		"-JDcom.android.tools.r8.emitRecordAnnotationsInDex",
+ 		"-JDcom.android.tools.r8.emitPermittedSubclassesAnnotationsInDex",
+ 	}, dexerJavaVmFlagsList...), " "))
