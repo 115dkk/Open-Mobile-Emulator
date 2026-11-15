@@ -40,8 +40,10 @@ AOSP의 호스트 prebuilts(clang, go, jdk, build-tools)도 `linux-x86`뿐이다
 | `java`로 5천만 번 반복 | 4.1초 |
 | soong의 javac·D8·R8 JVM 플래그에 `-XX:+UseSerialGC`를 더한 실행 | 받아들인다(`-XX:+PrintCommandLineFlags`에 `+UseSerialGC`) |
 | Python 3.10(Ubuntu) | 정상 |
+| 같은 24 MB git 팩에 `git index-pack`(sync의 팩 풀기) | Termux 네이티브 0.66초, 컨테이너 5.76초 |
 
-네이티브 대비 대략 20~35배 느리다. hello 하나를 컴파일하는 데 걸린 시간으로 어림한 값이며 빌드 전체를 잰 값은 아니다.
+컴파일은 네이티브 대비 대략 20~35배 느리다. hello 하나를 컴파일하는 데 걸린 시간으로 어림한 값이며 빌드 전체를 잰 값은 아니다.
+git의 팩 풀기는 약 9배 느리다.
 
 ## 4. 에뮬레이션에서 깨진 것과 우회
 
