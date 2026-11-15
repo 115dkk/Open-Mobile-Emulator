@@ -1,0 +1,22 @@
+diff --git a/tools/makefile_meson.mk b/tools/makefile_meson.mk
+index aced3dc..195701a 100644
+--- a/tools/makefile_meson.mk
++++ b/tools/makefile_meson.mk
+@@ -23,7 +23,7 @@ build: $(BUILD_TARGET)
+ $(BUILD_TARGET): $(CONFIGURE_TARGET)
+ 	@echo Building...
+ 	@mkdir -p $(OUT_BUILD_DIR)
+-	@ninja -C $(OUT_BUILD_DIR) &> $@.tmp || (cat $@.tmp && exit 1)
++	@ninja -j2 -C $(OUT_BUILD_DIR) &> $@.tmp || (cat $@.tmp && exit 1)
+ 	@mv $@.tmp $@ -f
+ 
+ install: ## Install the project (will execute copy, patch, configure and build prior to install)
+@@ -31,7 +31,7 @@ install: $(INSTALL_TARGET)
+ $(INSTALL_TARGET): $(BUILD_TARGET)
+ 	@echo Installing...
+ 	@mkdir -p $(OUT_INSTALL_DIR)
+-	@DESTDIR=$(OUT_INSTALL_DIR) ninja -C $(OUT_BUILD_DIR) install &> $@.tmp || (cat $@.tmp && exit 1)
++	@DESTDIR=$(OUT_INSTALL_DIR) ninja -j2 -C $(OUT_BUILD_DIR) install &> $@.tmp || (cat $@.tmp && exit 1)
+ 	@mv $@.tmp $@ -f
+ 
+ gen_aospless: ## Generate tree for building without AOSP or NDK

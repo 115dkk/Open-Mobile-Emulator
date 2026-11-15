@@ -18,8 +18,17 @@
 #   build-image.sh all        init sync snapshot aaropa build collect
 #
 # Environment: OME_REPO_ROOT (this repository; default: two levels above this script),
-# OME_BUILD_ROOT (the Android tree; default $HOME/bliss), OME_JOBS (default 6), OME_KEEP_GOING
+# OME_BUILD_ROOT (the Android tree; default $HOME/bliss), OME_JOBS (default 6; the default for
+# both of the next two), OME_SYNC_JOBS (repo sync), OME_BUILD_JOBS (make), OME_KEEP_GOING
 # (set to 1 to keep building past failures and list them all at the end).
+#
+# OME_MEM_BUDGET_GB (for example 8) trades time for memory in the build stages: make gets
+# OME_BUILD_JOBS or else one job per 4 GB of budget, the high-memory pool gets one job, and the
+# patches under patches/lowmem/ go into the tree (README "Low memory"). They change scheduling and
+# garbage collection only, not what is built.
+#
+# Network stages retry instead of failing on a short outage: OME_SYNC_ATTEMPTS (default 5) whole
+# repo syncs, OME_NET_ATTEMPTS (default 5) for repo init and each installer-environment download.
 set -euo pipefail
 
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
@@ -27,6 +36,19 @@ OME_REPO_ROOT=${OME_REPO_ROOT:-$(cd "$HERE/../.." && pwd)}
 OME_BUILD_ROOT=${OME_BUILD_ROOT:-$HOME/bliss}
 # GitHub answers HTTP 429 to a 16-way sync; 6 jobs with retries stayed under its limit on 2026-10-01.
 OME_JOBS=${OME_JOBS:-6}
+OME_SYNC_JOBS=${OME_SYNC_JOBS:-$OME_JOBS}
+OME_MEM_BUDGET_GB=${OME_MEM_BUDGET_GB:-}
+if [ -n "$OME_MEM_BUDGET_GB" ]; then
+    if ! [[ "$OME_MEM_BUDGET_GB" =~ ^[0-9]+$ ]] || [ "$OME_MEM_BUDGET_GB" -lt 4 ]; then
+        echo "OME_MEM_BUDGET_GB must be a whole number of gigabytes, 4 or more: $OME_MEM_BUDGET_GB" >&2
+        exit 2
+    fi
+    OME_BUILD_JOBS=${OME_BUILD_JOBS:-$((OME_MEM_BUDGET_GB / 4))}
+else
+    OME_BUILD_JOBS=${OME_BUILD_JOBS:-$OME_JOBS}
+fi
+OME_SYNC_ATTEMPTS=${OME_SYNC_ATTEMPTS:-5}
+OME_NET_ATTEMPTS=${OME_NET_ATTEMPTS:-5}
 # Digitalis remains opt-in; experimental ISO collection is separate from baseline.
 OME_TRANSLATOR=${OME_TRANSLATOR:-none}
 case "$OME_TRANSLATOR" in
@@ -42,6 +64,21 @@ LOG_DIR="$OME_BUILD_ROOT/ome-logs"
 mkdir -p "$OME_BUILD_ROOT" "$LOG_DIR"
 
 say() { printf '==> %s  (%s)\n' "$*" "$(date +%H:%M:%S)"; }
+
+# retry <attempts> <command...>: a short network outage should cost a wait, not the stage.
+retry() {
+    local attempts=$1 i=1
+    shift
+    until "$@"; do
+        if [ "$i" -ge "$attempts" ]; then
+            echo "giving up after $attempts attempts: $*" >&2
+            return 1
+        fi
+        say "attempt $i of $attempts failed, retrying in $((i * 30)) s: $*"
+        sleep $((i * 30))
+        i=$((i + 1))
+    done
+}
 
 refuse_blob_flags() {
     for flag in $OME_BLOB_FLAGS; do
@@ -60,12 +97,12 @@ do_init() {
     [ "${OME_REPO_DEPTH:-0}" -gt 0 ] && depth=(--depth="$OME_REPO_DEPTH")
     if [ -f "$SNAPSHOT" ]; then
         say "using the commit snapshot $SNAPSHOT"
-        repo init -u "$BLISS_MANIFEST_URL" -b "$BLISS_MANIFEST_BRANCH" --git-lfs "${depth[@]}" --no-repo-verify </dev/null
+        retry "$OME_NET_ATTEMPTS" repo init -u "$BLISS_MANIFEST_URL" -b "$BLISS_MANIFEST_BRANCH" --git-lfs "${depth[@]}" --no-repo-verify </dev/null
         cp "$SNAPSHOT" .repo/manifests/ome.xml
-        repo init -m ome.xml </dev/null
+        retry "$OME_NET_ATTEMPTS" repo init -m ome.xml </dev/null
     else
         say "no snapshot yet: pinning the manifest repository to $BLISS_MANIFEST_COMMIT"
-        repo init -u "$BLISS_MANIFEST_URL" -b "$BLISS_MANIFEST_BRANCH" --git-lfs "${depth[@]}" --no-repo-verify </dev/null
+        retry "$OME_NET_ATTEMPTS" repo init -u "$BLISS_MANIFEST_URL" -b "$BLISS_MANIFEST_BRANCH" --git-lfs "${depth[@]}" --no-repo-verify </dev/null
         git -C .repo/manifests fetch --quiet origin "$BLISS_MANIFEST_COMMIT" || true
         git -C .repo/manifests checkout --quiet "$BLISS_MANIFEST_COMMIT" -- . 2>/dev/null || \
             echo "note: could not check the manifest repository out at $BLISS_MANIFEST_COMMIT; the branch tip will be used and recorded by snapshot"
@@ -74,23 +111,33 @@ do_init() {
 }
 
 do_sync() {
-    say "sync (-j$OME_JOBS)"
     cd "$OME_BUILD_ROOT"
+    local attempt
+    for attempt in $(seq 1 "$OME_SYNC_ATTEMPTS"); do
+        say "sync (-j$OME_SYNC_JOBS), attempt $attempt of $OME_SYNC_ATTEMPTS"
+        if sync_once; then
+            say "source tree: $(du -sh --exclude=out "$OME_BUILD_ROOT" 2>/dev/null | cut -f1)"
+            return 0
+        fi
+        # A later attempt fetches only what the earlier one missed.
+        [ "$attempt" -lt "$OME_SYNC_ATTEMPTS" ] && { say "sync incomplete, next attempt in $((attempt * 60)) s"; sleep $((attempt * 60)); }
+    done
+    echo "sync incomplete after $OME_SYNC_ATTEMPTS attempts; run the sync stage again" >&2
+    return 1
+}
+
+sync_once() {
     local log="$LOG_DIR/sync-$(date +%Y%m%d-%H%M%S).log"
     # repo sync has returned 0 after "Unable to fully sync the tree" (HTTP 429), so completeness is
     # checked afterwards instead of trusting the exit code.
-    repo sync -c --force-sync --no-tags --no-clone-bundle -j"$OME_JOBS" --retry-fetches=3 --optimized-fetch --prune 2>&1 | tee "$log" || true
+    repo sync -c --force-sync --no-tags --no-clone-bundle -j"$OME_SYNC_JOBS" --retry-fetches=3 --optimized-fetch --prune 2>&1 | tee "$log" || true
     local missing=0 total=0
     while IFS= read -r path; do
         total=$((total + 1))
         [ -e "$path/.git" ] || { missing=$((missing + 1)); echo "missing: $path"; }
     done < <(repo list -p)
     say "projects: $total, missing: $missing, errors in log: $(grep -c '^error:' "$log" || true)"
-    if [ "$missing" -ne 0 ] || grep -q 'Unable to fully sync' "$log"; then
-        echo "sync incomplete; run the sync stage again" >&2
-        return 1
-    fi
-    say "source tree: $(du -sh --exclude=out "$OME_BUILD_ROOT" 2>/dev/null | cut -f1)"
+    [ "$missing" -eq 0 ] && ! grep -q 'Unable to fully sync' "$log"
 }
 
 do_snapshot() {
@@ -111,7 +158,11 @@ do_aaropa() {
     mkdir -p "$cache"
     for f in $AAROPA_ROOTFS_FILES; do
         if [ ! -s "$cache/$f" ]; then
-            curl -fL --retry 3 -o "$cache/$f" "https://github.com/BlissOS/aaropa_rootfs/releases/download/$AAROPA_ROOTFS_RELEASE/$f"
+            # The file only takes its name once complete; an interrupted download resumes from
+            # the .part file on the next attempt instead of starting over.
+            retry "$OME_NET_ATTEMPTS" curl -fL -C - --retry 5 --retry-all-errors --retry-delay 15 \
+                -o "$cache/$f.part" "https://github.com/BlissOS/aaropa_rootfs/releases/download/$AAROPA_ROOTFS_RELEASE/$f"
+            mv "$cache/$f.part" "$cache/$f"
         fi
     done
     if [ -s "$AAROPA_SUMS" ]; then
@@ -178,11 +229,29 @@ apply_ome_patches() {
         fi
     done < <(find "$patch_root" -name '*.patch' -print | {
         if [ "$patch_root" = "$HERE/patches" ]; then
-            grep -v -F "$HERE/patches/digitalis/"
+            grep -v -F -e "$HERE/patches/digitalis/" -e "$HERE/patches/lowmem/"
         else
             cat
         fi
     } | sort)
+}
+
+# OME_MEM_BUDGET_GB: fewer things in memory at once, at the cost of time. ninja's -j comes from
+# OME_BUILD_JOBS. The high-memory pool (metalava) gets one job. patches/lowmem/ covers what -j
+# does not reach: the kernel rule's own make, the meson builds' own ninja, soong_build's garbage
+# collector and the JVMs' collector. Single processes (soong_build, kati, ninja loading the graph)
+# still peak above a small budget, so the host needs swap for those moments.
+prepare_memory_budget() {
+    [ -n "$OME_MEM_BUDGET_GB" ] || return 0
+    export NINJA_HIGHMEM_NUM_JOBS=1
+    apply_ome_patches "$HERE/patches/lowmem"
+    local mem_kb swap_kb
+    mem_kb=$(awk '/^MemTotal:/ {print $2}' /proc/meminfo)
+    swap_kb=$(awk '/^SwapTotal:/ {print $2}' /proc/meminfo)
+    say "memory budget ${OME_MEM_BUDGET_GB} GB: make -j$OME_BUILD_JOBS, highmem pool 1; host RAM $((mem_kb / 1048576)) GB, swap $((swap_kb / 1048576)) GB"
+    if [ $(((mem_kb + swap_kb) / 1048576)) -lt 24 ]; then
+        say "warning: RAM and swap together are under the 24 GB the Bliss README asks for; the single-process peaks may not fit"
+    fi
 }
 
 # The kernel rule (device/generic/common/build/tasks/kernel.mk) runs copy-firmware.sh into
@@ -219,6 +288,7 @@ do_modules() {
         echo "install manifest/ome-digitalis.xml and sync the pinned translator first" >&2; exit 2;
     }
     apply_ome_patches "$HERE/patches/digitalis"
+    prepare_memory_budget
     cd "$OME_BUILD_ROOT"
     write_vendor_extra
     export OME_TRANSLATOR BLISS_BUILD_VARIANT LC_ALL=C.UTF-8
@@ -235,9 +305,9 @@ do_modules() {
             modules=$(get_build_var BERBERIS_PRODUCT_PACKAGES_ARM64_TO_X86_64) || exit 2
             [ -n "$modules" ] || { echo "empty Digitalis product package list" >&2; exit 2; }
             echo "Digitalis product modules: $modules"
-            m -j"$OME_JOBS" $modules
+            m -j"$OME_BUILD_JOBS" $modules
         else
-            m -j"$OME_JOBS" libberberis_arm64
+            m -j"$OME_BUILD_JOBS" libberberis_arm64
         fi
         exit $?
     ) 2>&1 | tee "$log"
@@ -256,6 +326,7 @@ do_digitalis_iso() {
     [ ! -e "$dist" ] || { echo "refusing to overwrite experimental dist: $dist" >&2; exit 2; }
     apply_ome_patches
     apply_ome_patches "$HERE/patches/digitalis"
+    prepare_memory_budget
     write_vendor_extra
     # The pinned installer inputs already exist; verify rather than run latest-download hooks.
     (cd ome-cache/aaropa-"$AAROPA_ROOTFS_RELEASE" && sha256sum -c "$AAROPA_SUMS")
@@ -270,7 +341,7 @@ do_digitalis_iso() {
         local upstream_name
         upstream_name=$(get_build_var BLISS_BUILD_ZIP) || exit 2
         printf '%s\n' "$upstream_name" > "$LOG_DIR/digitalis-upstream-iso-name.txt"
-        make -j"$OME_JOBS" iso_img
+        make -j"$OME_BUILD_JOBS" iso_img
         exit $?
     ) 2>&1 | tee "$log"
     # Soong's make wrapper does not forward a BLISS_BUILD_ZIP command-line override.
@@ -306,10 +377,11 @@ do_installclean() {
 do_build() {
     refuse_experimental_image
     refuse_blob_flags
-    say "build $BLISS_LUNCH variant=$BLISS_BUILD_VARIANT -j$OME_JOBS"
+    say "build $BLISS_LUNCH variant=$BLISS_BUILD_VARIANT -j$OME_BUILD_JOBS"
     cd "$OME_BUILD_ROOT"
     write_vendor_extra
     apply_ome_patches
+    prepare_memory_budget
     reset_kernel_firmware
     export BLISS_BUILD_VARIANT
     export PATH="$HOME/.cargo/bin:$PATH"
@@ -322,8 +394,9 @@ do_build() {
         # shellcheck disable=SC1091
         source build/envsetup.sh
         lunch "$BLISS_LUNCH" || { echo "lunch $BLISS_LUNCH failed" >&2; exit 2; }
+        echo "OME build settings: make -j$OME_BUILD_JOBS, highmem pool ${NINJA_HIGHMEM_NUM_JOBS:-soong default}, memory budget ${OME_MEM_BUDGET_GB:-none} GB"
         # OME_KEEP_GOING=1 passes -k so one failing target does not hide the others (diagnosis runs).
-        make -j"$OME_JOBS" ${OME_KEEP_GOING:+-k} iso_img
+        make -j"$OME_BUILD_JOBS" ${OME_KEEP_GOING:+-k} iso_img
         exit $?
     ) 2>&1 | tee "$log"
     say "build log: $log"

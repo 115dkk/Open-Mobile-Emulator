@@ -1,0 +1,15 @@
+diff --git a/build/tasks/kernel.mk b/build/tasks/kernel.mk
+index 5899964..88f10cd 100644
+--- a/build/tasks/kernel.mk
++++ b/build/tasks/kernel.mk
+@@ -54,7 +54,9 @@ KBUILD_OUTPUT := $(TARGET_OUT_INTERMEDIATES)/kernel
+ ifeq ($(HOST_OS),darwin)
+ KBUILD_JOBS := $(shell /usr/sbin/sysctl -n hw.ncpu)
+ else
+-KBUILD_JOBS := $(shell echo $$((1-(`cat /sys/devices/system/cpu/present`))))
++# Open Mobile Emulator low-memory build: this rule runs its own make, which ninja's -j does not
++# cover, so it gets two jobs instead of one per CPU.
++KBUILD_JOBS := 2
+ endif
+ 
+ mk_kernel := + $(hide) prebuilts/build-tools/$(HOST_PREBUILT_TAG)/bin/make -j$(KBUILD_JOBS) -l$$(($(KBUILD_JOBS)+2)) \
