@@ -23,7 +23,10 @@ current() { cat "$SPOOL/current" 2>/dev/null || true; }
 alive() {
     local pid
     pid=$(cat "$SPOOL/tasks/$1/pid" 2>/dev/null) || return 1
-    [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null
+    [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null || return 1
+    # After a reboot the old pid can belong to another of our processes; only this stage's own
+    # run-task.sh counts, so a dead stage is reaped and stop never signals a stranger.
+    tr '\0' ' ' < "/proc/$pid/cmdline" 2>/dev/null | grep -q -F "run-task.sh $SPOOL/tasks/$1"
 }
 
 finish() {  # task, exit code, note for the log

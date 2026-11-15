@@ -38,14 +38,15 @@ container_rootfs() { printf '%s/var/lib/proot-distro/containers/%s/rootfs' "$PRE
 
 # ensure_src <ref>: the build scripts at <ref> in $SRC. Only guest/build and manifests are checked
 # out (build-image.sh reads manifests/device-profile.prop); a blobless clone fetches their files
-# during checkout, so the checkout retries like the fetch.
+# during checkout, so the checkout retries like the fetch. --force because the snapshot stage
+# rewrites guest/build/manifest/ome.xml in this checkout, and the committed copy is the one to keep.
 ensure_src() {
     if [ ! -d "$SRC/.git" ]; then
         retry 5 git clone -q --filter=blob:none --no-checkout "https://github.com/$OME_CI_REPO.git" "$SRC" || return 1
         git -C "$SRC" sparse-checkout set --no-cone /guest/build/ /manifests/ || return 1
     fi
     retry 10 git -C "$SRC" fetch -q --no-tags origin "$1" || return 1
-    retry 5 git -C "$SRC" checkout -q --detach FETCH_HEAD
+    retry 5 git -C "$SRC" checkout -q --force --detach FETCH_HEAD
 }
 
 # proot-distro hands Termux's Android variables to the container. pip's platformdirs takes
