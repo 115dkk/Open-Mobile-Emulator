@@ -15,10 +15,8 @@
 name: Guest build on the phone
 
 on:
-  # Registration only: GitHub dispatches a workflow outside the default branch only after it has
-  # run once. The job below skips push runs, and the next commit removes this trigger.
-  push:
-    branches: [selfhosted/guest-build]
+  # Manual runs only. GitHub dispatches a workflow outside the default branch only after it has
+  # run once, so the first commit of this file had a push trigger whose run skipped the job.
   workflow_dispatch:
     inputs:
       stage:
