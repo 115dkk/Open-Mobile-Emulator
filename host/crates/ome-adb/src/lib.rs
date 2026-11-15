@@ -1054,7 +1054,12 @@ impl AppPackage {
         let mut seen = std::collections::BTreeSet::new();
         for index in 0..archive.len() {
             let entry = archive.by_index(index).map_err(PackageError::Zip)?;
-            if !entry.is_file() || !entry.name().to_ascii_lowercase().ends_with(".apk") {
+            // zip 9 reports a name it cannot decode as an error; such an entry is not one of the
+            // package's APKs, so it is skipped like any other non-APK entry.
+            let is_apk = entry
+                .name()
+                .is_ok_and(|name| name.to_ascii_lowercase().ends_with(".apk"));
+            if !entry.is_file() || !is_apk {
                 continue;
             }
             let enclosed = entry
