@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2026 Open Mobile Emulator contributors
 #
-# Control of the phone CI in Termux (ci/selfhosted/README.md). setup-phone.sh links it as
-# ~/.local/bin/ome-ci.
+# Control of the phone CI in Termux (ci/selfhosted/README.md). setup-phone.sh puts a wrapper for
+# it at ~/.local/bin/ome-ci.
 #
 #   ome-ci start              wake lock, then the bridge and both runners in the tmux session ome-ci
 #   ome-ci stop               stop the runners and the bridge; a running stage keeps going
@@ -26,7 +26,9 @@ service() {
         case "$name" in
             bridge) bash "$OME_CI_BIN/bridge.sh" serve >> "$log" 2>&1 ;;
             runner-main|runner-ctl)
-                proot-distro login "$OME_CI_RUNNER_CONTAINER" -- "/opt/actions-runner/${name#runner-}/run.sh" >> "$log" 2>&1
+                # root inside proot is a fake root, and run.sh refuses root without this.
+                proot-distro login "$OME_CI_RUNNER_CONTAINER" --env RUNNER_ALLOW_RUNASROOT=1 -- \
+                    "/opt/actions-runner/${name#runner-}/run.sh" >> "$log" 2>&1
                 ;;
             *) echo "unknown service $name" >&2; return 2 ;;
         esac

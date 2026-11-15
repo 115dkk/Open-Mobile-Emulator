@@ -23,7 +23,10 @@ install_scripts() {
     for f in $FILES; do
         install -m 755 "$HERE/$f" "$OME_CI_BIN/$f"
     done
-    ln -sf "$OME_CI_BIN/ome-ci" "$HOME/.local/bin/ome-ci"
+    # A wrapper, not a link: '#!/usr/bin/env' only resolves in Termux where termux-exec is loaded.
+    rm -f "$HOME/.local/bin/ome-ci"
+    printf '#!%s/bin/bash\nexec bash %q "$@"\n' "$PREFIX" "$OME_CI_BIN/ome-ci" > "$HOME/.local/bin/ome-ci"
+    chmod 755 "$HOME/.local/bin/ome-ci"
 }
 
 in_runner() { proot-distro login "$OME_CI_RUNNER_CONTAINER" -- bash -c "$1"; }
